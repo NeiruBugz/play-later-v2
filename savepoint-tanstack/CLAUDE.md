@@ -97,8 +97,17 @@ Per-layer guidance is in `src/<layer>/README.md`.
 
 Two layers only — no service classes, no `Result` wrappers, no domain mappers. Vocabulary used below ("loader-direct read," "feature server fn," "UX-hint query," "privacy invariant," "handler helper") is defined in [CONTEXT.md](./CONTEXT.md). Read that first.
 
-1. **`entities/<noun>/api/*.server.ts`** — plain async functions. Direct Prisma calls via the [`prisma`](./src/shared/lib/db.ts) singleton. Throw [`AppError`](./src/shared/lib/errors.ts) subclasses (`NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`) on failure. No DI, no classes. **Reference:** [`src/entities/profile/api/get-profile.server.ts`](./src/entities/profile/api/get-profile.server.ts).
-2. **`features/<intent>/api/*.server.ts`** — `createServerFn` wrappers from `@tanstack/react-start`: `.inputValidator(...).handler(async ({ data }) => …)`. Delegate to entity queries. Resolve `userId` via `requireUserId()` (handler helper) — never trust it from input, never call `getServerUserId` directly. **Reference:** [`src/features/auth-email-sign-in/api/get-email-sign-in-enabled.ts`](./src/features/auth-email-sign-in/api/get-email-sign-in-enabled.ts).
+### File naming: `.server.ts` is a bundler boundary, not a runtime tag
+
+The `.server` suffix is enforced by TanStack Start's `import-protection` Vite plugin: any file matching `**/*.server.*` is **forbidden** to be imported from a client module. The bundler refuses to ship it.
+
+- Use `*.server.ts` ONLY for genuinely server-only modules: DB clients, the Better Auth instance, `getServerUserId`, entity queries (read directly from Prisma; throw `AppError`s).
+- **Do NOT use `*.server.ts` for `createServerFn`-wrapped modules.** These files ARE meant to be client-importable — the plugin replaces the handler body with an RPC stub on the client build. Tagging them `.server.ts` defeats the construct and crashes the dev server with `[import-protection] Import denied in client environment`.
+
+Mental shortcut: "anything that runs on the server gets `.server.ts`" is wrong. `createServerFn` runs on the server but is **called from the client** through the bridge — its file must be client-importable.
+
+1. **`entities/<noun>/api/*.server.ts`** — plain async server-only queries. Direct Prisma calls via the [`prisma`](./src/shared/lib/db.ts) singleton. Throw [`AppError`](./src/shared/lib/errors.ts) subclasses (`NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`) on failure. No DI, no classes. **Reference:** [`src/entities/profile/api/get-profile.server.ts`](./src/entities/profile/api/get-profile.server.ts).
+2. **`features/<intent>/api/<name>.ts`** (NO `.server` suffix) — `createServerFn` wrappers from `@tanstack/react-start`: `.inputValidator(...).handler(async ({ data }) => …)`. Delegate to entity queries. Resolve `userId` via `requireUserId()` (handler helper) — never trust it from input, never call `getServerUserId` directly. **Reference:** [`src/features/auth-email-sign-in/api/get-email-sign-in-enabled.ts`](./src/features/auth-email-sign-in/api/get-email-sign-in-enabled.ts).
 
 Errors bubble up to the route `errorComponent` or the root error boundary at [`src/app/error-boundary/`](./src/app/error-boundary/) (mounted in `__root.tsx`), which branches on `AppError.code` for user-facing copy.
 
@@ -135,7 +144,7 @@ From [`tsconfig.json`](./tsconfig.json):
 | If you want to...                           | Look here                                                                                                                                                                                                                                   |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Add a route                                 | [`src/routes/`](./src/routes/) (TanStack file-based; `$param` for dynamic segments, `_authed/` for guarded group)                                                                                                                           |
-| Add a server fn (mutation, authed re-fetch) | `src/features/<name>/api/<fn-name>.server.ts`                                                                                                                                                                                               |
+| Add a server fn (mutation, authed re-fetch) | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix — see "File naming" above)                                                                                                                                                       |
 | Add an entity query (read)                  | `src/entities/<name>/api/<query-name>.server.ts`                                                                                                                                                                                            |
 | Add a composite UI block                    | `src/widgets/<name>/ui/...`                                                                                                                                                                                                                 |
 | Add a shared primitive                      | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                                                                                                                              |
@@ -157,6 +166,27 @@ From [`tsconfig.json`](./tsconfig.json):
 | Integration tests           | `pnpm --filter savepoint-tanstack test:integration`                 |
 | Generate Prisma client      | `pnpm --filter savepoint-tanstack prisma:generate`                  |
 | Format Prisma schema        | `pnpm --filter savepoint-tanstack prisma:format`                    |
+
+## Foot-guns we've hit (read before adding server fns / browser-direct AWS calls)
+
+These are silent-failure traps surfaced during slices 5B–6. Each fails at *runtime* under specific conditions and is invisible to typecheck / lint / unit tests. Manual verification at slice boundaries is the only structural defence — but knowing the pattern saves a debugging cycle.
+
+### Bundler-graph traps
+
+1. **`.server.ts` filename is a bundler-enforced client boundary.** See [File naming](#file-naming-serverts-is-a-bundler-boundary-not-a-runtime-tag). `createServerFn`-wrapped feature modules MUST drop the suffix; only genuinely server-only modules (DB client, auth instance, entity queries, `getServerUserId`) get it.
+2. **Loader-direct read of a `.server.ts` from a route module hangs the app on hover-preload.** The Vite plugin denies the import on the client build but TanStack's route extractor doesn't strip it from preload. See [CONTEXT.md → Loader-direct read → Known bundler caveat](./CONTEXT.md#loader-direct-read). Workaround: wrap the work in a `createServerFn` exported from a non-`.server.ts` file; the route imports the server fn value, which is client-safe.
+3. **Custom shims around `createServerFn` leak server modules into the client bundle.** Specifically: any export that retains a *module-level reference* to the handler function (e.g. `Object.assign(async opts => result ?? handler(opts), _serverFn)`) holds the handler graph open on the client side. The Start Vite plugin only strips the body of the literal `.handler(fn)` call; it does NOT chase secondary references. Symptom: `[Client] Warning: Error in route match: __root__/` wrapped in a `CatchBoundaryImpl`. Fix: never re-export the bare handler; if a test path needs to call the impl directly, split into `getX.server.ts` (plain async worker) + `getXFn.ts` (`createServerFn` thin wrapper) and import the worker from server-only test code.
+
+### Runtime / dev-environment traps
+
+4. **`globalThis` singleton caches survive Vite HMR.** Once `globalThis.s3Client` / `globalThis.prisma` is populated, editing the constructor (e.g. adding `requestChecksumCalculation`) won't take effect until you fully restart `pnpm dev`. The cache is intentional — it prevents connection-pool churn during HMR — but it makes config diffs invisible. Mitigation: when changing `s3.ts`, `db.ts`, or any other singleton constructor, restart the dev server explicitly; do not trust HMR.
+5. **AWS SDK v3 ≥ 3.729 auto-adds CRC32 checksum headers, breaking browser-direct presigned PUTs.** The SDK changed `requestChecksumCalculation` default from `WHEN_REQUIRED` to `WHEN_SUPPORTED`, which means presigned `PutObjectCommand` URLs now sign `x-amz-checksum-crc32` + `x-amz-sdk-checksum-algorithm` headers the browser cannot send. Symptom: PUT to S3/LocalStack returns `400 InvalidRequest` despite signature looking valid. Fix: pass `requestChecksumCalculation: "WHEN_REQUIRED"` to the `S3Client` constructor (already wired in [`src/shared/api/s3.ts`](./src/shared/api/s3.ts)). Same fix will be needed in `savepoint-app/` next time its SDK bumps.
+6. **Docker bind-mounts of missing files silently become empty directories on macOS.** `./.docker/localstack/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh:ro` silently created the host path as an empty directory when the script was missing — LocalStack started with no bucket, no CORS, no public-read policy. Mitigation: keep init scripts committed and executable; on a fresh `docker compose up`, verify the bucket actually exists (`docker exec savepoint-localstack awslocal s3 ls`).
+7. **S3 / LocalStack browser-direct uploads need explicit CORS + public-read.** S3 has no origin allow-list by default and no public read by default. Avatar uploads succeed but the rendered `<img src={publicUrl}>` returns 403 unless: (a) bucket CORS allows `GET / PUT / HEAD` from the dev origin (`localhost:6060` AND `localhost:6061` for the parallel-run window), and (b) a bucket policy grants `s3:GetObject` on the avatar prefix. Both are encoded in [`./.docker/localstack/init-s3.sh`](.docker/localstack/init-s3.sh). For prod, the same shape needs to land in Terraform under `infra/`.
+
+### Test-infrastructure trap
+
+8. **`createServerFn` returns `undefined` when invoked programmatically in vitest.** The Start Vite plugin AST-rewrites `.handler(fn)` into `.handler(generatedExtractedFn, fn)`, and the framework's client base middleware reads from the generated extracted-fn shape; without the plugin loaded in the test harness, the framework drops the handler's return value. Symptom: integration tests assert on a server-fn return and get `undefined`. Two acceptable mitigations: (a) the worker/server-fn split from foot-gun #3, where the test imports the plain worker directly; (b) future: add the Start Vite plugin to [`vitest.config.ts`](./vitest.config.ts) so `createServerFn` works end-to-end in tests. Tests that assert only on side effects (DB writes, mock call counts) are unaffected.
 
 ## Known gaps / pending decisions
 

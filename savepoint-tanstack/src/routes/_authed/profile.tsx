@@ -19,7 +19,7 @@ function ProfilePage() {
           <Link to="/settings/profile">Edit profile</Link>
         </Button>
       </div>
-      <ProfileOverview profile={profile} stats={stats} />
+      <ProfileOverview profile={profile} stats={stats} isOwnProfile />
     </main>
   );
 }

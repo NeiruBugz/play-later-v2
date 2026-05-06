@@ -246,7 +246,7 @@ importers:
         version: 4.1.0
       aws-sdk-client-mock-vitest:
         specifier: 7.0.1
-        version: 7.0.1(@smithy/types@4.14.0)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@6.0.3))(vite@8.0.10(@types/node@24.10.1)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))
+        version: 7.0.1(@smithy/types@4.14.1)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@6.0.3))(vite@8.0.10(@types/node@24.10.1)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
@@ -340,6 +340,12 @@ importers:
 
   savepoint-tanstack:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.1024.0
+        version: 3.1024.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: 3.1024.0
+        version: 3.1024.0
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.68.0(react@19.2.0))
@@ -657,6 +663,10 @@ packages:
     resolution: {integrity: sha512-6Q8B1dcx6BBqUTY1Mc/eROKA0FImEEY5VPSd6AGPEUf0ErjExz4snVqa9kNJSoVDV1rKaNf3qrWojgcKW+SdDg==}
     engines: {node: '>=20.0.0'}
 
+  '@aws-sdk/s3-request-presigner@3.1024.0':
+    resolution: {integrity: sha512-KNoGsXnTfBxPqrtV2Owd4mrLnhTHRsOz6Hdaz+As5czGMQuPchoRvG1BJzn2NFRGLt/HSJAXVn+G6IhtRIDe+Q==}
+    engines: {node: '>=20.0.0'}
+
   '@aws-sdk/signature-v4-multi-region@3.996.16':
     resolution: {integrity: sha512-EMdXYB4r/k5RWq86fugjRhid5JA+Z6MpS7n4sij4u5/C+STrkvuf9aFu41rJA9MjUzxCLzv8U2XL8cH2GSRYpQ==}
     engines: {node: '>=20.0.0'}
@@ -669,12 +679,20 @@ packages:
     resolution: {integrity: sha512-reXRwoJ6CfChoqAsBszUYajAF8Z2LRE+CRcKocvFSMpIiLOtYU3aJ9trmn6VVPAzbbY5LXF+FfmUslbXk1SYFg==}
     engines: {node: '>=20.0.0'}
 
+  '@aws-sdk/types@3.973.8':
+    resolution: {integrity: sha512-gjlAdtHMbtR9X5iIhVUvbVcy55KnznpC6bkDUWW9z915bi0ckdUr5cjf16Kp6xq0bP5HBD2xzgbL9F9Quv5vUw==}
+    engines: {node: '>=20.0.0'}
+
   '@aws-sdk/util-arn-parser@3.972.3':
     resolution: {integrity: sha512-HzSD8PMFrvgi2Kserxuff5VitNq2sgf3w9qxmskKDiDTThWfVteJxuCS9JXiPIPtmCrp+7N9asfIaVhBFORllA==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/util-endpoints@3.996.6':
     resolution: {integrity: sha512-2nUQ+2ih7CShuKHpGSIYvvAIOHy52dOZguYG36zptBukhw6iFwcvGfG0tes0oZFWQqEWvgZe9HLWaNlvXGdOrg==}
+    engines: {node: '>=20.0.0'}
+
+  '@aws-sdk/util-format-url@3.972.10':
+    resolution: {integrity: sha512-DEKiHNJVtNxdyTeQspzY+15Po/kHm6sF0Cs4HV9Q2+lplB63+DrvdeiSoOSdWEWAoO2RcY1veoXVDz2tWxWCgQ==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/util-locate-window@3.893.0':
@@ -2723,6 +2741,10 @@ packages:
     resolution: {integrity: sha512-tG4aOYFCZdPMjbgfhnIQ322H//ojujldp1SrHPHpBSb3NqgUp3dwiUGRJzie87hS1DYwWGqDuPaowoDF+rYCbQ==}
     engines: {node: '>=18.0.0'}
 
+  '@smithy/querystring-builder@4.2.14':
+    resolution: {integrity: sha512-XYA5Z0IqTeF+5XDdh4BBmSA0HvbgVZIyv4cmOoUheDNR57K1HgBp9ukUMx3Cr3XpDHHpLBnexPE3LAtDsZkj2A==}
+    engines: {node: '>=18.0.0'}
+
   '@smithy/querystring-parser@4.2.13':
     resolution: {integrity: sha512-hqW3Q4P+CDzUyQ87GrboGMeD7XYNMOF+CuTwu936UQRB/zeYn3jys8C3w+wMkDfY7CyyyVwZQ5cNFoG0x1pYmA==}
     engines: {node: '>=18.0.0'}
@@ -2745,6 +2767,10 @@ packages:
 
   '@smithy/types@4.14.0':
     resolution: {integrity: sha512-OWgntFLW88kx2qvf/c/67Vno1yuXm/f9M7QFAtVkkO29IJXGBIg0ycEaBTH0kvCtwmvZxRujrgP5a86RvsXJAQ==}
+    engines: {node: '>=18.0.0'}
+
+  '@smithy/types@4.14.1':
+    resolution: {integrity: sha512-59b5HtSVrVR/eYNei3BUj3DCPKD/G7EtDDe7OEJE7i7FtQFugYo6MxbotS8mVJkLNVf8gYaAlEBwwtJ9HzhWSg==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/url-parser@4.2.13':
@@ -7541,6 +7567,17 @@ snapshots:
       '@smithy/types': 4.14.0
       tslib: 2.8.1
 
+  '@aws-sdk/s3-request-presigner@3.1024.0':
+    dependencies:
+      '@aws-sdk/signature-v4-multi-region': 3.996.16
+      '@aws-sdk/types': 3.973.7
+      '@aws-sdk/util-format-url': 3.972.10
+      '@smithy/middleware-endpoint': 4.4.29
+      '@smithy/protocol-http': 5.3.13
+      '@smithy/smithy-client': 4.12.9
+      '@smithy/types': 4.14.0
+      tslib: 2.8.1
+
   '@aws-sdk/signature-v4-multi-region@3.996.16':
     dependencies:
       '@aws-sdk/middleware-sdk-s3': 3.972.28
@@ -7567,6 +7604,11 @@ snapshots:
       '@smithy/types': 4.14.0
       tslib: 2.8.1
 
+  '@aws-sdk/types@3.973.8':
+    dependencies:
+      '@smithy/types': 4.14.1
+      tslib: 2.8.1
+
   '@aws-sdk/util-arn-parser@3.972.3':
     dependencies:
       tslib: 2.8.1
@@ -7577,6 +7619,13 @@ snapshots:
       '@smithy/types': 4.14.0
       '@smithy/url-parser': 4.2.13
       '@smithy/util-endpoints': 3.3.4
+      tslib: 2.8.1
+
+  '@aws-sdk/util-format-url@3.972.10':
+    dependencies:
+      '@aws-sdk/types': 3.973.8
+      '@smithy/querystring-builder': 4.2.14
+      '@smithy/types': 4.14.1
       tslib: 2.8.1
 
   '@aws-sdk/util-locate-window@3.893.0':
@@ -9761,6 +9810,12 @@ snapshots:
       '@smithy/util-uri-escape': 4.2.2
       tslib: 2.8.1
 
+  '@smithy/querystring-builder@4.2.14':
+    dependencies:
+      '@smithy/types': 4.14.1
+      '@smithy/util-uri-escape': 4.2.2
+      tslib: 2.8.1
+
   '@smithy/querystring-parser@4.2.13':
     dependencies:
       '@smithy/types': 4.14.0
@@ -9797,6 +9852,10 @@ snapshots:
       tslib: 2.8.1
 
   '@smithy/types@4.14.0':
+    dependencies:
+      tslib: 2.8.1
+
+  '@smithy/types@4.14.1':
     dependencies:
       tslib: 2.8.1
 
@@ -11405,9 +11464,9 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-sdk-client-mock-vitest@7.0.1(@smithy/types@4.14.0)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@6.0.3))(vite@8.0.10(@types/node@24.10.1)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))):
+  aws-sdk-client-mock-vitest@7.0.1(@smithy/types@4.14.1)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@6.0.3))(vite@8.0.10(@types/node@24.10.1)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))):
     dependencies:
-      '@smithy/types': 4.14.0
+      '@smithy/types': 4.14.1
       '@vitest/expect': 4.1.2
       aws-sdk-client-mock: 4.1.0
       vitest: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@6.0.3))(vite@8.0.10(@types/node@24.10.1)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))

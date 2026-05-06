@@ -7,7 +7,6 @@ export function LandingHero() {
   return (
     <div className="space-y-10">
       {/* Top bar */}
-      
 
       {/* Hero block */}
       <div className="space-y-6">

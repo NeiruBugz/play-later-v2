@@ -91,15 +91,17 @@ describe("index route", () => {
     });
 
     it("renders the brand link to /", () => {
-      expect(
-        screen.getByRole("link", { name: "SavePoint" })
-      ).toHaveAttribute("href", "/");
+      expect(screen.getByRole("link", { name: "SavePoint" })).toHaveAttribute(
+        "href",
+        "/"
+      );
     });
 
     it("renders the Sign in link to /login", () => {
-      expect(
-        screen.getByRole("link", { name: "Sign in" })
-      ).toHaveAttribute("href", "/login");
+      expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(
+        "href",
+        "/login"
+      );
     });
   });
 });

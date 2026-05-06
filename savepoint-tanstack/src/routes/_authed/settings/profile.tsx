@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { getProfileSettingsFn } from "@/features/edit-profile/api/get-profile-settings";
 import { ProfileSettingsForm } from "@/features/edit-profile/ui/profile-settings-form";
+import { AvatarUpload } from "@/features/upload-avatar";
 
 export const Route = createFileRoute("/_authed/settings/profile")({
   loader: () => getProfileSettingsFn(),
@@ -21,6 +22,14 @@ function SettingsProfilePage() {
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back to profile
       </Link>
+
+      <section className="mb-8" aria-labelledby="profile-picture-heading">
+        <h2 id="profile-picture-heading" className="mb-3 text-base font-medium">
+          Profile picture
+        </h2>
+        <AvatarUpload />
+      </section>
+
       <ProfileSettingsForm profile={profile} />
     </main>
   );

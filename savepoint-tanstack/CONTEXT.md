@@ -46,6 +46,8 @@ export const Route = createFileRoute("/_authed/profile")({
 
 Until the extractor learns to strip loader-only imports (or until we drop hover preload), a route whose loader needs server-only modules must wrap that work in a `createServerFn` exported from a non-`.server.ts` file (mirroring `getProfileSettingsFn`). The route file then imports only the server-fn value, which is client-safe. This server fn is loader-only and would, by the strict rule, not exist; the bundler reality is the only justification for it. Mark such fns with a brief comment referencing this caveat. The rule itself remains correct as the target architecture — only the canonical shape's literal `import { x } from "./x.server"` line is currently the foot-gun.
 
+See [CLAUDE.md → File naming: `.server.ts` is a bundler boundary, not a runtime tag](./CLAUDE.md#file-naming-serverts-is-a-bundler-boundary-not-a-runtime-tag) for the broader rule: `createServerFn`-wrapped modules must NOT use the `.server.ts` suffix; only genuinely server-only modules (DB clients, BA instance, entity queries) do.
+
 ### Feature server fn
 
 ---

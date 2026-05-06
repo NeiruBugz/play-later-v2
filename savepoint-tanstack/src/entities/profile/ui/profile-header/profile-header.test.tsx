@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import type { Profile } from "@/entities/profile/model/types";
 
@@ -17,6 +17,7 @@ const elements = {
   getDisplayName: (name: string) => screen.getByRole("heading", { name }),
   getUsernameText: (username: string) => screen.getByText(`@${username}`),
   getAvatarImage: (name: string) => screen.getByRole("img", { name }),
+  queryAvatarOverlay: () => screen.queryByTestId("avatar-overlay-slot"),
 };
 
 describe("ProfileHeader", () => {
@@ -35,6 +36,31 @@ describe("ProfileHeader", () => {
 
     it("renders the avatar image with the user name as alt text", () => {
       elements.getAvatarImage("Stub User");
+    });
+  });
+
+  describe("given an avatarOverlay slot is provided", () => {
+    beforeEach(() => {
+      render(
+        <ProfileHeader
+          profile={stubProfile}
+          avatarOverlay={<div data-testid="avatar-overlay-slot">overlay</div>}
+        />
+      );
+    });
+
+    it("renders the overlay slot near the avatar", () => {
+      expect(elements.queryAvatarOverlay()).not.toBeNull();
+    });
+  });
+
+  describe("given no avatarOverlay slot is provided", () => {
+    beforeEach(() => {
+      render(<ProfileHeader profile={stubProfile} />);
+    });
+
+    it("does not render the overlay slot", () => {
+      expect(elements.queryAvatarOverlay()).toBeNull();
     });
   });
 });

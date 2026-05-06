@@ -9,8 +9,8 @@ Providers, root router wiring, global styles, and the root error boundary.
 
 ## Segments
 
-| Segment              | Purpose                                          |
-| -------------------- | ------------------------------------------------ |
-| `providers/`         | React context providers, theme wiring            |
-| `styles/`            | Global CSS, font imports                         |
-| `error-boundary/`    | Root error boundary branching on `AppError.code` |
+| Segment           | Purpose                                          |
+| ----------------- | ------------------------------------------------ |
+| `providers/`      | React context providers, theme wiring            |
+| `styles/`         | Global CSS, font imports                         |
+| `error-boundary/` | Root error boundary branching on `AppError.code` |
