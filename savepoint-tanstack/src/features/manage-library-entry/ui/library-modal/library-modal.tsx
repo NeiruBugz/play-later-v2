@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
+import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
@@ -28,16 +29,15 @@ import { updateLibraryItemFn } from "../../api/update-library-item-fn";
 // FSD note: this is a feature/ui component that calls feature/api server fns
 // directly (no useServerFn) — mirrors the AddGameModal precedent.
 
-const STATUS_OPTIONS: ReadonlyArray<{
-  value: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
-  label: string;
-}> = [
-  { value: "WISHLIST", label: "Wishlist" },
-  { value: "SHELF", label: "Shelf" },
-  { value: "UP_NEXT", label: "Up Next" },
-  { value: "PLAYING", label: "Playing" },
-  { value: "PLAYED", label: "Played" },
-];
+// Display order is preserved here; labels are sourced from the entity model
+// (LIBRARY_STATUS_LABELS) so this stays in lockstep with the canonical taxonomy.
+const STATUS_VALUES = [
+  "WISHLIST",
+  "SHELF",
+  "UP_NEXT",
+  "PLAYING",
+  "PLAYED",
+] as const satisfies ReadonlyArray<keyof typeof LIBRARY_STATUS_LABELS>;
 
 const PLATFORM_OPTIONS: ReadonlyArray<string> = [
   "PC",
@@ -57,7 +57,7 @@ type LibraryModalProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
+type StatusValue = (typeof STATUS_VALUES)[number];
 
 function dateToInputValue(date: Date | null): string {
   if (date === null) return "";
@@ -173,9 +173,9 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
+                {STATUS_VALUES.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {LIBRARY_STATUS_LABELS[value]}
                   </SelectItem>
                 ))}
               </SelectContent>
