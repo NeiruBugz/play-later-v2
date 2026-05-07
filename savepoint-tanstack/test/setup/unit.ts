@@ -16,6 +16,10 @@ if (typeof Element !== "undefined" && !Element.prototype.hasPointerCapture) {
   Element.prototype.releasePointerCapture = () => {};
 }
 
+if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 vi.mock("@/shared/lib/db", () => ({
   prisma: {
     $transaction: vi.fn(),
