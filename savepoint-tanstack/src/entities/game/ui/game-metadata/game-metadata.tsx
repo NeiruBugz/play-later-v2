@@ -15,12 +15,16 @@ export function GameMetadata({
       {releaseDate ? (
         <time
           dateTime={releaseDate.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-caption text-muted-foreground"
         >
           {releaseDate.toLocaleDateString()}
         </time>
       ) : null}
-      {summary ? <p className="text-base leading-relaxed">{summary}</p> : null}
+      {summary ? (
+        <p className="text-body text-foreground/85 max-w-[720px] leading-relaxed">
+          {summary}
+        </p>
+      ) : null}
     </div>
   );
 }

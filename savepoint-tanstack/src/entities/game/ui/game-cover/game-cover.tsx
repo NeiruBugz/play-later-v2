@@ -14,7 +14,10 @@ export function GameCover({ src, alt, className }: GameCoverProps) {
         src={src}
         alt={alt}
         loading="lazy"
-        className={cn("aspect-[3/4] w-full rounded-md object-cover", className)}
+        className={cn(
+          "aspect-[3/4] w-full overflow-hidden rounded-lg object-cover shadow-paper-md",
+          className
+        )}
       />
     );
   }
@@ -23,7 +26,10 @@ export function GameCover({ src, alt, className }: GameCoverProps) {
     <div
       role="img"
       aria-label={alt}
-      className={cn("bg-muted aspect-[3/4] w-full rounded-md", className)}
+      className={cn(
+        "bg-muted shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg",
+        className
+      )}
     />
   );
 }
