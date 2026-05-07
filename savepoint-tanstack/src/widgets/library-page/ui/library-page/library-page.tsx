@@ -30,7 +30,7 @@ export function LibraryPage(props: LibraryPageProps) {
     <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
       <header className="gap-md flex items-baseline justify-between">
         <div className="gap-md flex items-baseline">
-          <h1 className="text-h1">Library</h1>
+          <h1 className="heading-lg y2k-chrome-text">Library</h1>
           <p className="text-muted-foreground text-sm" aria-live="polite">
             {total} {total === 1 ? "game" : "games"}
           </p>
@@ -70,7 +70,7 @@ export function LibraryPage(props: LibraryPageProps) {
       ) : (
         <ul
           aria-label="Library items"
-          className="gap-md grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
+          className="gap-md grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"
         >
           {items.map((item) => (
             <li key={item.id}>
