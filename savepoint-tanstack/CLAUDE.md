@@ -475,3 +475,10 @@ Scope: 14A's "GREEN (other in-scope hand-rolled surfaces)" subtask. Worklist dri
 **Canonical behavior:** Layered `y2k:` / `jewel:` themed bloom + scale on hover/focus.
 **Tanstack behavior:** Plain `transition-shadow`.
 **Rationale:** Tanstack's tokens audit (`audits/14A-tokens.md`) established that `y2k:` / `jewel:` Tailwind variants are not translated — they're canonical-only theme decoration. Adopting them would require porting the variant config, which is explicitly out of scope. This finding is documented for completeness, not as a gap to close.
+
+### LibraryCardRating display strip on LibraryItemCard (gap-matrix row 10 — F4)
+
+**Status:** Deferred to 18A.
+**Canonical behavior:** `LibraryItemCard` body renders a read-only star strip (powered by canonical's rating component) showing `item.rating` inline below the title.
+**Tanstack behavior:** Card has no rating control — neither interactive nor read-only. Rating editing works via `LibraryModal` (gap-matrix row 17, confirmed). The inline card display is missing.
+**Rationale:** Caught post-verification (finding F4 in `audits/14A-verification.md`). `RatingInput` primitive is already ported in 14A; the surface implementation is one prop wiring (`<RatingInput readOnly value={item.rating} size="sm" />`) plus a card-body slot. Deferred rather than implemented in 14A to keep the verification verdict clean and the slice scope honest. 18A delta audit must NOT treat row 10 as no-op.
