@@ -1,1 +1,5 @@
-export { LibraryModal, ManageFromGameDetailButton } from "./ui";
+export {
+  LibraryCardMenu,
+  LibraryModal,
+  ManageFromGameDetailButton,
+} from "./ui";

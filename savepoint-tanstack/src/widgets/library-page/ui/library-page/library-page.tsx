@@ -4,7 +4,7 @@ import { LibraryItemCard } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddGameTrigger } from "@/features/add-game";
 import { LibraryFilters, MobileFilterBar } from "@/features/filter-library";
-import { LibraryModal } from "@/features/manage-library-entry";
+import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
 
 import type { LibraryPageProps } from "./library-page.type";
 
@@ -77,6 +77,12 @@ export function LibraryPage(props: LibraryPageProps) {
               <LibraryItemCard
                 item={item}
                 onClick={() => setSelectedEntry(item)}
+                menu={
+                  <LibraryCardMenu
+                    item={item}
+                    onEdit={() => setSelectedEntry(item)}
+                  />
+                }
               />
             </li>
           ))}

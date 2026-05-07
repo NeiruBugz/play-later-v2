@@ -7,7 +7,7 @@ import { LibraryStatusBadge } from "../library-status-badge";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { buildCoverImageUrl } from "./library-item-card.utility";
 
-export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
+export function LibraryItemCard({ item, onClick, menu }: LibraryItemCardProps) {
   const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_cover_big");
 
   const isInteractive = typeof onClick === "function";
@@ -33,19 +33,24 @@ export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
           "focus-visible:ring-ring cursor-pointer transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:outline-none"
       )}
     >
-      {coverUrl ? (
-        <img
-          src={coverUrl}
-          alt={item.game.title}
-          loading="lazy"
-          className="aspect-[3/4] w-full rounded-md object-cover"
-        />
-      ) : (
-        <div
-          aria-hidden="true"
-          className="bg-muted aspect-[3/4] w-full rounded-md"
-        />
-      )}
+      <div className="relative">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={item.game.title}
+            loading="lazy"
+            className="aspect-[3/4] w-full rounded-md object-cover"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="bg-muted aspect-[3/4] w-full rounded-md"
+          />
+        )}
+        {menu ? (
+          <div className="absolute top-2 right-2 z-20">{menu}</div>
+        ) : null}
+      </div>
       <div className="gap-2xs flex flex-col">
         <h3 className="line-clamp-2 text-sm leading-tight font-medium">
           {item.game.title}
