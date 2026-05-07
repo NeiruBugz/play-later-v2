@@ -1,6 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Await, createFileRoute, Link } from "@tanstack/react-router";
+import { Component, Suspense, type ReactNode } from "react";
 
-import { getGameDetailPageDataFn } from "@/features/game-detail/api";
+import {
+  getGameDetailPageDataFn,
+  type DeferredRelatedGames,
+  type DeferredTimesToBeat,
+  type RelatedCollectionSection,
+} from "@/features/game-detail/api";
+import {
+  TimesToBeatSection,
+  TimesToBeatSkeleton,
+} from "@/features/game-detail/ui";
+import {
+  RelatedGamesInfiniteList,
+  RelatedGamesSkeleton,
+} from "@/features/browse-related-games";
 import { AppError } from "@/shared/lib/errors";
 import { GameDetail } from "@/widgets/game-detail";
 
@@ -12,9 +26,140 @@ export const Route = createFileRoute("/games/$slug")({
 });
 
 function GameDetailRoute() {
-  const { data, viewerUserId } = Route.useLoaderData();
+  const { data, viewerUserId, deferredRelatedGames, deferredTimesToBeat } =
+    Route.useLoaderData();
 
-  return <GameDetail data={data} viewerUserId={viewerUserId} />;
+  return (
+    <GameDetail
+      data={data}
+      viewerUserId={viewerUserId}
+      timesToBeatSlot={
+        <SectionErrorBoundary
+          fallback={
+            <SectionErrorMessage
+              headingId="times-to-beat-heading"
+              heading="Times to beat"
+              message="Couldn't load times to beat"
+            />
+          }
+        >
+          <Suspense fallback={<TimesToBeatSkeleton />}>
+            <Await promise={deferredTimesToBeat}>
+              {(timesToBeat: Awaited<DeferredTimesToBeat>) =>
+                timesToBeat === null ? null : (
+                  <TimesToBeatSection timesToBeat={timesToBeat} />
+                )
+              }
+            </Await>
+          </Suspense>
+        </SectionErrorBoundary>
+      }
+      relatedGamesSlot={
+        <SectionErrorBoundary
+          fallback={
+            <SectionErrorMessage
+              headingId="related-games-heading"
+              heading="Related games"
+              message="Couldn't load related games"
+            />
+          }
+        >
+          <Suspense fallback={<RelatedGamesSkeleton />}>
+            <Await promise={deferredRelatedGames}>
+              {(sections: Awaited<DeferredRelatedGames>) =>
+                sections.length === 0 ? null : (
+                  <RelatedGamesSections sections={sections} />
+                )
+              }
+            </Await>
+          </Suspense>
+        </SectionErrorBoundary>
+      }
+    />
+  );
+}
+
+function RelatedGamesSections({
+  sections,
+}: {
+  sections: RelatedCollectionSection[];
+}) {
+  return (
+    <section
+      aria-labelledby="related-games-heading"
+      className="gap-md flex flex-col"
+    >
+      <h2 id="related-games-heading" className="text-h3">
+        Related games
+      </h2>
+      <div className="gap-lg flex flex-col">
+        {sections.map((section) => (
+          <div
+            key={section.collectionId}
+            className="gap-md flex flex-col"
+          >
+            <h3 className="text-h4">{section.collectionName}</h3>
+            <RelatedGamesInfiniteList
+              collectionId={section.collectionId}
+              pageSize={section.pageSize}
+              firstPage={section.firstPage}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Per-section inline error message — keeps the section header in the page
+ * flow so the layout doesn't reflow on a phase-2 failure (decision 4 of the
+ * Slice 14 phase-2 rework).
+ */
+function SectionErrorMessage({
+  headingId,
+  heading,
+  message,
+}: {
+  headingId: string;
+  heading: string;
+  message: string;
+}) {
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="gap-md flex flex-col"
+    >
+      <h2 id={headingId} className="text-h3">
+        {heading}
+      </h2>
+      <div role="alert" className="text-destructive text-sm">
+        {message}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Minimal class-based error boundary for per-section Suspense boundaries.
+ * React still does not ship a built-in `<ErrorBoundary>`; this is the
+ * standard 8-line implementation. Rejected promises bubble out of `<Await>`
+ * and land here, while the surrounding page stays interactive.
+ */
+class SectionErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  override state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  override render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
 }
 
 function GameDetailErrorBoundary({ error }: { error: Error }) {

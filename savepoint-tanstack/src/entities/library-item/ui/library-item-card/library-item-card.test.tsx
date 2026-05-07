@@ -1,9 +1,39 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "../../model/types";
 import { LibraryItemCard } from "./library-item-card";
 import { buildCoverImageUrl } from "./library-item-card.utility";
+
+// LibraryItemCard renders a TanStack <Link> for the details navigation;
+// the link requires a RouterProvider context. Mock it as a plain <a> here
+// (mirrors the precedent in widgets/landing-hero/ui/landing-hero/landing-hero.test.tsx).
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({
+    to,
+    href,
+    params,
+    children,
+    ...rest
+  }: {
+    to?: string;
+    href?: string;
+    params?: Record<string, string>;
+    children: React.ReactNode;
+  } & Record<string, unknown>) => {
+    let resolvedHref = to ?? href ?? "";
+    if (params && to) {
+      for (const [key, value] of Object.entries(params)) {
+        resolvedHref = resolvedHref.replace(`$${key}`, value);
+      }
+    }
+    return (
+      <a href={resolvedHref} {...rest}>
+        {children}
+      </a>
+    );
+  },
+}));
 
 const buildItem = (
   overrides: Partial<LibraryItemWithGame> & {

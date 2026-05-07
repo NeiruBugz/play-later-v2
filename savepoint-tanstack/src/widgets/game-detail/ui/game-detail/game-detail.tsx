@@ -14,14 +14,16 @@ import type { GameDetailProps } from "./game-detail.type";
  * (add-to-library / manage-in-library) for signed-in viewers; journal teaser
  * at the bottom for authenticated viewers only.
  *
- * CTA states (Slice 13 / Task 6):
- *   - Anonymous (`viewerUserId === null`): no CTA.
- *   - Signed-in, no entry: <AddFromGameDetailButton/>.
- *   - Signed-in, with entry: <ManageFromGameDetailButton/>.
- *
- * `relatedGames` is threaded through but not rendered here — Slice 14.
+ * Phase-2 sections (related games, times-to-beat) are passed as ReactNode
+ * slots from the route. The route owns the `<Suspense>` + `<Await>` + error
+ * boundary plumbing — keeps the widget pure and unit-testable.
  */
-export function GameDetail({ data, viewerUserId }: GameDetailProps) {
+export function GameDetail({
+  data,
+  viewerUserId,
+  relatedGamesSlot,
+  timesToBeatSlot,
+}: GameDetailProps) {
   const { game, libraryEntry, journalTeaser } = data;
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
@@ -73,6 +75,7 @@ export function GameDetail({ data, viewerUserId }: GameDetailProps) {
               <ManageFromGameDetailButton entry={entryWithGame} />
             )
           ) : null}
+          {timesToBeatSlot ?? null}
         </div>
       </section>
 
@@ -87,6 +90,8 @@ export function GameDetail({ data, viewerUserId }: GameDetailProps) {
           <JournalTeaser entries={journalTeaser} />
         </section>
       ) : null}
+
+      {relatedGamesSlot ?? null}
     </main>
   );
 }

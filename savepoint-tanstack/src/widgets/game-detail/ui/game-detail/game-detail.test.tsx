@@ -16,15 +16,11 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 // Server fns invoked by the CTAs. Mocked so a render pass never crosses the
-// server boundary; click behavior in the dedicated CTA tests is covered by
-// their own files.
+// server boundary.
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
 }));
 
-// AddGameModal (transitively re-exported from @/features/add-game) loads
-// searchGamesFn at module init, which pulls in IGDB → shared/lib logger.
-// Mock the module so the widget render never crosses the IGDB graph.
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
 }));
@@ -85,10 +81,12 @@ const elements = {
     screen.queryByRole("button", { name: "Manage Hollow Knight in library" }),
   getTitle: () =>
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
+  queryRelatedGamesSlot: () => screen.queryByTestId("related-games-slot"),
+  queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
 };
 
 describe("GameDetail", () => {
-  describe("given an anonymous viewer", () => {
+  describe("given an anonymous viewer with no slots", () => {
     beforeEach(() => {
       render(<GameDetail data={buildData(null)} viewerUserId={null} />);
     });
@@ -103,6 +101,14 @@ describe("GameDetail", () => {
 
     it("does not render the Manage in library CTA", () => {
       expect(elements.queryManageCta()).toBeNull();
+    });
+
+    it("omits the related-games slot when no slot prop is passed", () => {
+      expect(elements.queryRelatedGamesSlot()).toBeNull();
+    });
+
+    it("omits the times-to-beat slot when no slot prop is passed", () => {
+      expect(elements.queryTimesToBeatSlot()).toBeNull();
     });
   });
 
@@ -136,6 +142,27 @@ describe("GameDetail", () => {
 
     it("does not render the Add to library CTA", () => {
       expect(elements.queryAddCta()).toBeNull();
+    });
+  });
+
+  describe("given both phase-2 slots are passed", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null)}
+          viewerUserId={null}
+          relatedGamesSlot={<div data-testid="related-games-slot" />}
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
+    });
+
+    it("renders the related-games slot as-is", () => {
+      expect(elements.queryRelatedGamesSlot()).not.toBeNull();
+    });
+
+    it("renders the times-to-beat slot as-is", () => {
+      expect(elements.queryTimesToBeatSlot()).not.toBeNull();
     });
   });
 });

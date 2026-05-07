@@ -1,13 +1,12 @@
 /**
- * Game-detail orchestrator (Slice 13).
+ * Game-detail orchestrator (Slice 13, refined in Slice 14 phase-2 rework).
  *
- * Resolves an IGDB slug → cached `Game` row, plus optional viewer-scoped
- * `LibraryItem` and recent `JournalEntry` teaser. `relatedGames` is best-effort
- * and currently returns `[]` — see CLAUDE.md "Intentional divergences (Slice 13)".
+ * Phase 1 (this file): DB-only read of the cached `Game` row, plus optional
+ * viewer-scoped `LibraryItem` and recent `JournalEntry` teaser. NO IGDB-derived
+ * "live" data — collections and times-to-beat moved to deferred phase-2 entity
+ * queries (see `get-game-collections.server.ts`, `get-times-to-beat.server.ts`).
  *
- * Throws `NotFoundError` when IGDB returns no match for the slug.
- *
- * No DI, no classes, no Result wrapper — per C2 DAL conventions.
+ * Throws `NotFoundError` when IGDB returns no match for the slug on cache miss.
  */
 import { getGameBySlug } from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db";
@@ -68,7 +67,9 @@ export async function getGameDetails(params: {
     ]);
   }
 
-  // 3. Related games — deferred (see CLAUDE.md "Intentional divergences (Slice 13)").
+  // 3. `relatedGames: Game[]` retained for backward compatibility and is empty.
+  //    Live related-games surface is the deferred phase-2 stream — see
+  //    `getGameCollectionsByIgdbId` + `getRelatedGames`.
   const relatedGames: Game[] = [];
 
   return { game, relatedGames, libraryEntry, journalTeaser };

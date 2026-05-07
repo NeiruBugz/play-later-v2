@@ -11,8 +11,6 @@ export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
   const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_cover_big");
   const statusLabel = getStatusLabel(item.status);
 
-  const detailsLink = `/games/${item.game.slug}`;
-
   const isInteractive = typeof onClick === "function";
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
