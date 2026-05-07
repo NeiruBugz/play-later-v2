@@ -1,67 +1,28 @@
 /**
- * Single-source-of-truth for status metadata shared by the desktop sidebar
- * (`library-filters`) and the mobile filter sheet (`mobile-filter-bar`).
+ * Filter-specific status decoration. The entity layer
+ * (`@/entities/library-item`) owns the canonical status metadata
+ * (label / icon / badge variant); this module composes on top with the
+ * filter-button active/inactive styles and the sort options used by
+ * `library-filters` + `mobile-filter-bar`.
  *
- * Mirrors canonical's `LIBRARY_STATUS_CONFIG` shape (label, icon, badgeVariant)
- * but typed against the tanstack search-param `LibraryStatus` union rather than
- * the Prisma enum.
- *
- * FSD: lives at `features/filter-library/lib/` because both surfaces inside the
- * same feature consume it. Lift to `entities/library-item/` only if a third
- * caller appears outside this feature.
+ * FSD: feature → entity is allowed; the inverse is not. If a non-filter
+ * surface needs `STATUS_ENTRIES`, it imports from `@/entities/library-item`,
+ * not from here.
  */
 
 import {
-  Archive,
-  Bookmark,
-  CheckCircle,
-  Gamepad2,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
+  getStatusEntry,
+  STATUS_ENTRIES,
+  type StatusBadgeVariant,
+  type StatusEntry,
+} from "@/entities/library-item";
 
-import type {
-  LibrarySortBy,
-  LibrarySortOrder,
-  LibraryStatus,
-} from "./types";
+import type { LibrarySortBy, LibrarySortOrder } from "./types";
 
-export type StatusBadgeVariant =
-  | "wishlist"
-  | "shelf"
-  | "upNext"
-  | "playing"
-  | "played";
-
-export type StatusEntry = {
-  value: LibraryStatus;
-  label: string;
-  badgeVariant: StatusBadgeVariant;
-  icon: LucideIcon;
-};
-
-export const STATUS_ENTRIES: ReadonlyArray<StatusEntry> = [
-  { value: "UP_NEXT", label: "Up Next", badgeVariant: "upNext", icon: Star },
-  {
-    value: "PLAYING",
-    label: "Playing",
-    badgeVariant: "playing",
-    icon: Gamepad2,
-  },
-  { value: "SHELF", label: "Shelf", badgeVariant: "shelf", icon: Archive },
-  {
-    value: "PLAYED",
-    label: "Played",
-    badgeVariant: "played",
-    icon: CheckCircle,
-  },
-  {
-    value: "WISHLIST",
-    label: "Wishlist",
-    badgeVariant: "wishlist",
-    icon: Bookmark,
-  },
-];
+// Re-export the entity-owned status surface so existing
+// `@/features/filter-library` callers don't need to be rewritten.
+export { STATUS_ENTRIES, getStatusEntry };
+export type { StatusBadgeVariant, StatusEntry };
 
 export const STATUS_FILTER_STYLES: Record<
   StatusBadgeVariant,

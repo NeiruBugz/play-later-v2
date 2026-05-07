@@ -1,4 +1,11 @@
-export { LIBRARY_STATUS_LABELS, getStatusLabel } from "./status";
+export {
+  LIBRARY_STATUS_LABELS,
+  STATUS_ENTRIES,
+  getStatusEntry,
+  getStatusLabel,
+  getUpNextLabel,
+} from "./status";
+export type { StatusBadgeVariant, StatusEntry } from "./status";
 export type {
   GetLibraryFilters,
   GetLibraryResult,

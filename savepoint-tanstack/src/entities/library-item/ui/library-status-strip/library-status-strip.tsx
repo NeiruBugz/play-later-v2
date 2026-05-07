@@ -1,13 +1,11 @@
-import { getStatusLabel } from "../../model";
+import { LibraryStatusBadge } from "../library-status-badge";
 import type { LibraryStatusStripProps } from "./library-status-strip.type";
 
 /**
  * Read-only summary of a viewer's library entry: status pill + optional
- * rating + optional platform. Reuses `getStatusLabel` for consistent labeling
- * with `LibraryItemCard`. No actions — the canonical pill+segmented dual
- * surface (`library-status-dropdown-pill` + `library-status-segmented`) is
- * deliberately collapsed to a single read-only strip; mutation surfaces
- * arrive via `manage-library-entry` modal in CTA wiring.
+ * rating + optional platform. The status pill is `LibraryStatusBadge` (entity
+ * primitive) for consistency with `LibraryItemCard`. No actions — mutation
+ * surfaces live in the `manage-library-entry` modal.
  */
 export function LibraryStatusStrip({
   status,
@@ -16,12 +14,7 @@ export function LibraryStatusStrip({
 }: LibraryStatusStripProps) {
   return (
     <div className="gap-sm flex flex-wrap items-center">
-      <span
-        data-status={status}
-        className="bg-muted text-muted-foreground rounded-full px-3 py-1 text-xs tracking-wide uppercase"
-      >
-        {getStatusLabel(status)}
-      </span>
+      <LibraryStatusBadge status={status} />
       {rating !== null ? (
         <span className="text-sm font-medium">{rating}/10</span>
       ) : null}

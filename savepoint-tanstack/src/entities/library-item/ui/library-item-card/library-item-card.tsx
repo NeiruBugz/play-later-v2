@@ -1,15 +1,14 @@
+import { Link } from "@tanstack/react-router";
 import type { KeyboardEvent } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-import { getStatusLabel } from "../../model";
+import { LibraryStatusBadge } from "../library-status-badge";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { buildCoverImageUrl } from "./library-item-card.utility";
-import { Link } from "@tanstack/react-router";
 
 export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
   const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_cover_big");
-  const statusLabel = getStatusLabel(item.status);
 
   const isInteractive = typeof onClick === "function";
 
@@ -51,9 +50,10 @@ export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
         <h3 className="line-clamp-2 text-sm leading-tight font-medium">
           {item.game.title}
         </h3>
-        <span className="text-muted-foreground text-xs tracking-wide uppercase">
-          {statusLabel}
-        </span>
+        <LibraryStatusBadge
+          status={item.status}
+          hasBeenPlayed={item.hasBeenPlayed}
+        />
       </div>
       <div>
         <Link to="/games/$slug" params={{ slug: item.game.slug }}>
