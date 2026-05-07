@@ -148,7 +148,7 @@ const elements = {
   // Form fields
   getStatusCombobox: () => screen.getByRole("combobox", { name: "Status" }),
   getPlatformCombobox: () => screen.getByRole("combobox", { name: "Platform" }),
-  getRatingInput: () => screen.getByRole("spinbutton", { name: "Rating" }),
+  getRatingInput: () => screen.getByRole("slider", { name: "Rating" }),
   getStartedInput: () => screen.getByRole("textbox", { name: "Started" }),
   getCompletedInput: () => screen.getByRole("textbox", { name: "Completed" }),
 

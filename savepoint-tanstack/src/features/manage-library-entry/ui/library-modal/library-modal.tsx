@@ -13,6 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { RatingInput } from "@/shared/ui/rating-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
@@ -39,9 +47,6 @@ const PLATFORM_OPTIONS: ReadonlyArray<string> = [
   "Xbox One",
   "Nintendo Switch",
 ];
-
-const selectClasses =
-  "h-10 rounded-lg border border-border bg-card px-md text-sm text-foreground shadow-paper-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 const inputClasses =
   "h-10 rounded-lg border border-border bg-card px-md text-sm text-foreground shadow-paper-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
@@ -155,55 +160,65 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="gap-md flex flex-col">
-          <label className="gap-xs flex flex-col text-sm">
-            <span>Status</span>
-            <select
-              aria-label="Status"
-              className={cn(selectClasses)}
+          <div className="gap-xs flex flex-col text-sm">
+            <span id="library-modal-status-label">Status</span>
+            <Select
               value={status}
-              onChange={(event) => setStatus(event.target.value as StatusValue)}
+              onValueChange={(next) => setStatus(next as StatusValue)}
             >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              <SelectTrigger
+                aria-label="Status"
+                aria-labelledby="library-modal-status-label"
+              >
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <label className="gap-xs flex flex-col text-sm">
-            <span>Platform</span>
-            <select
-              aria-label="Platform"
-              className={cn(selectClasses)}
-              value={platform}
-              onChange={(event) => setPlatform(event.target.value)}
+          <div className="gap-xs flex flex-col text-sm">
+            <span id="library-modal-platform-label">Platform</span>
+            <Select
+              value={platform === "" ? "__none__" : platform}
+              onValueChange={(next) =>
+                setPlatform(next === "__none__" ? "" : next)
+              }
             >
-              <option value="">No platform</option>
-              {PLATFORM_OPTIONS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-              {platform !== "" && !PLATFORM_OPTIONS.includes(platform) ? (
-                <option value={platform}>{platform}</option>
-              ) : null}
-            </select>
-          </label>
+              <SelectTrigger
+                aria-label="Platform"
+                aria-labelledby="library-modal-platform-label"
+              >
+                <SelectValue placeholder="Select platform" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">No platform</SelectItem>
+                {PLATFORM_OPTIONS.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+                {platform !== "" && !PLATFORM_OPTIONS.includes(platform) ? (
+                  <SelectItem value={platform}>{platform}</SelectItem>
+                ) : null}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <label className="gap-xs flex flex-col text-sm">
-            <span>Rating</span>
-            <input
-              type="number"
+          <div className="gap-xs flex flex-col text-sm">
+            <span id="library-modal-rating-label">Rating</span>
+            <RatingInput
               aria-label="Rating"
-              className={cn(inputClasses)}
-              min={1}
-              max={10}
-              step={1}
-              value={rating}
-              onChange={(event) => setRating(event.target.value)}
+              readOnly={false}
+              value={rating === "" ? null : Number.parseInt(rating, 10)}
+              onChange={(next) => setRating(next === null ? "" : String(next))}
             />
-          </label>
+          </div>
 
           <label className="gap-xs flex flex-col text-sm">
             <span>Started</span>
