@@ -454,3 +454,24 @@ Scope: 14A's "GREEN (other in-scope hand-rolled surfaces)" subtask. Worklist dri
 **Canonical behavior:** Inline "Add entry" CTA opens a journal compose dialog.
 **Tanstack behavior:** Read-only entries list only.
 **Rationale:** Journal compose/edit is owned by S15/S16. The read-only teaser is correct for 14A — typography is aligned (text-sm + text-xs hierarchy mirrors canonical).
+
+### LibraryStatusBadge placement on LibraryItemCard (14A diff sweep finding F1)
+
+**Status:** Visual divergence (intentional — coupling cost too high).
+**Canonical behavior:** Badge overlays the cover image with glass/blur styling.
+**Tanstack behavior:** Badge renders below the cover, inline with title/metadata.
+**Rationale:** Overlay-on-cover requires absolute-positioning the badge inside the cover container, which couples the entity's display concern to the card's layout structure. The current below-cover placement is consistent with the entity's `menu?: ReactNode` slot pattern (display concerns inside the card body). Overlay can land in 18A if the visual diff is judged worth the layout coupling.
+
+### Sidebar avatar fallback (14A diff sweep finding F2)
+
+**Status:** Visual divergence (cosmetic).
+**Canonical behavior:** `<User>` lucide icon centered in a themed circle.
+**Tanstack behavior:** Static `/default-avatar.png` image asset.
+**Rationale:** Functionally equivalent — both render a placeholder when no avatar URL exists. Lucide-icon path is one line of code; can be aligned in any subsequent slice without scope justification.
+
+### LibraryItemCard hover/focus theme bloom (14A diff sweep finding F3)
+
+**Status:** Waived (consistent with global no-theme-variant stance).
+**Canonical behavior:** Layered `y2k:` / `jewel:` themed bloom + scale on hover/focus.
+**Tanstack behavior:** Plain `transition-shadow`.
+**Rationale:** Tanstack's tokens audit (`audits/14A-tokens.md`) established that `y2k:` / `jewel:` Tailwind variants are not translated — they're canonical-only theme decoration. Adopting them would require porting the variant config, which is explicitly out of scope. This finding is documented for completeness, not as a gap to close.
