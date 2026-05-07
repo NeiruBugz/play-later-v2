@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { buildCoverImageUrl } from "@/entities/library-item/ui/library-item-card/library-item-card.utility";
 
 import { getRelatedGamesFn, type RelatedGame } from "../../api";
-
 import type {
   RelatedGamesInfiniteListProps,
   RelatedGamesPage,

@@ -180,7 +180,11 @@ function makeIgdbGame(index: number, overrides: { game_type?: number } = {}) {
 const ALLOWED_GAMES = Array.from({ length: 10 }, (_, i) => makeIgdbGame(i));
 const DISALLOWED_GAME_BUNDLE = makeIgdbGame(10, { game_type: 3 });
 const DISALLOWED_GAME_EPISODE = makeIgdbGame(11, { game_type: 5 });
-const ALL_IGDB_GAMES = [...ALLOWED_GAMES, DISALLOWED_GAME_BUNDLE, DISALLOWED_GAME_EPISODE];
+const ALL_IGDB_GAMES = [
+  ...ALLOWED_GAMES,
+  DISALLOWED_GAME_BUNDLE,
+  DISALLOWED_GAME_EPISODE,
+];
 
 const FAKE_TOKEN_RESPONSE = {
   access_token: "tok",
@@ -336,9 +340,21 @@ describe("getRelatedGames", () => {
 
     it("hasMore is false on the last page and true on all prior pages", async () => {
       // 10 games, pageSize 4 → pages 1 (4), 2 (4), 3 (2)
-      const p1 = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 4 });
-      const p2 = await getRelatedGames({ collectionId: COLLECTION_ID, page: 2, pageSize: 4 });
-      const p3 = await getRelatedGames({ collectionId: COLLECTION_ID, page: 3, pageSize: 4 });
+      const p1 = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 4,
+      });
+      const p2 = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 2,
+        pageSize: 4,
+      });
+      const p3 = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 3,
+        pageSize: 4,
+      });
 
       expect(p1.hasMore).toBe(true);
       expect(p2.hasMore).toBe(true);
@@ -362,14 +378,20 @@ describe("getRelatedGames", () => {
     });
 
     it("uses page 1 when page is omitted", async () => {
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, pageSize: 5 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        pageSize: 5,
+      });
 
       expect(result.page).toBe(1);
       expect(result.games).toHaveLength(5);
     });
 
     it("uses pageSize 20 when pageSize is omitted", async () => {
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+      });
 
       expect(result.pageSize).toBe(20);
     });
@@ -392,7 +414,11 @@ describe("getRelatedGames", () => {
 
     it("total does NOT include raw count — disallowed game_type games reduce total", async () => {
       // Raw fixture has 12 games, but 2 have disallowed types → total must be 10, not 12
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 20 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 20,
+      });
 
       expect(result.total).toBe(TOTAL_ALLOWED);
       expect(result.total).not.toBe(TOTAL_RAW);
@@ -405,9 +431,16 @@ describe("getRelatedGames", () => {
 
   describe("game type filtering", () => {
     it("excludes games with disallowed game_type from returned games", async () => {
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 20 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 20,
+      });
 
-      const disallowedIgdbIds = [DISALLOWED_GAME_BUNDLE.id, DISALLOWED_GAME_EPISODE.id];
+      const disallowedIgdbIds = [
+        DISALLOWED_GAME_BUNDLE.id,
+        DISALLOWED_GAME_EPISODE.id,
+      ];
       for (const id of disallowedIgdbIds) {
         expect(result.games.some((g) => g.igdbId === id)).toBe(false);
       }
@@ -415,27 +448,48 @@ describe("getRelatedGames", () => {
 
     it("excludes games with disallowed game_type from the total count", async () => {
       // With all 12 raw games in the fixture, only 10 pass the filter
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 20 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 20,
+      });
 
       expect(result.total).toBe(TOTAL_ALLOWED);
-      expect(result.games.every((g) => g.igdbId !== DISALLOWED_GAME_BUNDLE.id)).toBe(true);
+      expect(
+        result.games.every((g) => g.igdbId !== DISALLOWED_GAME_BUNDLE.id)
+      ).toBe(true);
     });
 
     it("treats game_type === undefined as allowed (MAIN_GAME = 0 fallback)", async () => {
       // Override fixture: game without game_type field at all
       const gamesWithMissingType = [
-        { id: 99001, name: "No Type Game", slug: "no-type-game", cover: { image_id: "c1" } },
+        {
+          id: 99001,
+          name: "No Type Game",
+          slug: "no-type-game",
+          cover: { image_id: "c1" },
+        },
         // explicitly no game_type key
       ];
 
       vi.stubGlobal(
         "fetch",
         makeFetchMock({
-          igdbBody: [{ id: COLLECTION_ID, name: "Test Collection", games: gamesWithMissingType }],
+          igdbBody: [
+            {
+              id: COLLECTION_ID,
+              name: "Test Collection",
+              games: gamesWithMissingType,
+            },
+          ],
         })
       );
 
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 5,
+      });
 
       // Game without game_type should be included (treated as MAIN_GAME)
       expect(result.games).toHaveLength(1);
@@ -452,11 +506,21 @@ describe("getRelatedGames", () => {
       vi.stubGlobal(
         "fetch",
         makeFetchMock({
-          igdbBody: [{ id: COLLECTION_ID, name: "Test Collection", games: allDisallowed }],
+          igdbBody: [
+            {
+              id: COLLECTION_ID,
+              name: "Test Collection",
+              games: allDisallowed,
+            },
+          ],
         })
       );
 
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 5,
+      });
 
       expect(result.games).toHaveLength(0);
       expect(result.total).toBe(0);
@@ -484,8 +548,16 @@ describe("getRelatedGames", () => {
 
   describe("ordering", () => {
     it("returns games in IGDB delivery order (stable across page boundaries)", async () => {
-      const page1 = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 });
-      const page2 = await getRelatedGames({ collectionId: COLLECTION_ID, page: 2, pageSize: 5 });
+      const page1 = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 5,
+      });
+      const page2 = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 2,
+        pageSize: 5,
+      });
 
       // First page: games 0..4 (allowed only)
       expect(page1.games[0]?.igdbId).toBe(ALLOWED_GAMES[0]!.id);
@@ -527,24 +599,37 @@ describe("getRelatedGames", () => {
         expect(typeof game.slug).toBe("string");
         expect(typeof game.title).toBe("string");
         // coverImageId is string | null
-        expect(game.coverImageId === null || typeof game.coverImageId === "string").toBe(true);
+        expect(
+          game.coverImageId === null || typeof game.coverImageId === "string"
+        ).toBe(true);
       }
     });
 
     it("coverImageId is null when IGDB game has no cover", async () => {
       const gamesNoCover = [
-        { id: 88001, name: "No Cover Game", slug: "no-cover-game", game_type: 0 },
+        {
+          id: 88001,
+          name: "No Cover Game",
+          slug: "no-cover-game",
+          game_type: 0,
+        },
         // no cover field
       ];
 
       vi.stubGlobal(
         "fetch",
         makeFetchMock({
-          igdbBody: [{ id: COLLECTION_ID, name: "Test Collection", games: gamesNoCover }],
+          igdbBody: [
+            { id: COLLECTION_ID, name: "Test Collection", games: gamesNoCover },
+          ],
         })
       );
 
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 5,
+      });
 
       expect(result.games).toHaveLength(1);
       expect(result.games[0]?.coverImageId).toBeNull();
@@ -560,7 +645,11 @@ describe("getRelatedGames", () => {
       const before = await db.prisma.game.count();
       expect(before).toBe(0);
 
-      await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 });
+      await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 5,
+      });
 
       const after = await db.prisma.game.count();
       expect(after).toBe(0);
@@ -610,12 +699,20 @@ describe("getRelatedGames", () => {
 
     it("accepts pageSize of exactly 50 (boundary: allowed)", async () => {
       // Should not throw — 10 allowed games < 50, so all returned
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 50 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 50,
+      });
       expect(result.games).toHaveLength(TOTAL_ALLOWED);
     });
 
     it("accepts page 1 (boundary: allowed)", async () => {
-      const result = await getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 });
+      const result = await getRelatedGames({
+        collectionId: COLLECTION_ID,
+        page: 1,
+        pageSize: 5,
+      });
       expect(result.page).toBe(1);
     });
   });

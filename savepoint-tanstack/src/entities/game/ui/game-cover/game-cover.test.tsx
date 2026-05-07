@@ -5,8 +5,7 @@ import { GameCover } from "./game-cover";
 
 const elements = {
   queryImg: (alt: string) => screen.queryByAltText(alt),
-  getImgPlaceholder: (alt: string) =>
-    screen.getByRole("img", { name: alt }),
+  getImgPlaceholder: (alt: string) => screen.getByRole("img", { name: alt }),
 };
 
 describe("GameCover", () => {

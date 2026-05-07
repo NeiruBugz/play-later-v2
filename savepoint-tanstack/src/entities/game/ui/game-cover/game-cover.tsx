@@ -14,10 +14,7 @@ export function GameCover({ src, alt, className }: GameCoverProps) {
         src={src}
         alt={alt}
         loading="lazy"
-        className={cn(
-          "aspect-[3/4] w-full rounded-md object-cover",
-          className
-        )}
+        className={cn("aspect-[3/4] w-full rounded-md object-cover", className)}
       />
     );
   }

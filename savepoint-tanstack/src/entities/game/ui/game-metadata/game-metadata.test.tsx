@@ -43,9 +43,7 @@ describe("GameMetadata", () => {
 
   describe("given a title with no release date", () => {
     beforeEach(() => {
-      render(
-        <GameMetadata title="Hollow Knight" releaseDate={null} />
-      );
+      render(<GameMetadata title="Hollow Knight" releaseDate={null} />);
     });
 
     it("renders the title as an h1 heading", () => {
@@ -81,11 +79,7 @@ describe("GameMetadata", () => {
   describe("given summary is null", () => {
     beforeEach(() => {
       render(
-        <GameMetadata
-          title="Hollow Knight"
-          releaseDate={null}
-          summary={null}
-        />
+        <GameMetadata title="Hollow Knight" releaseDate={null} summary={null} />
       );
     });
 

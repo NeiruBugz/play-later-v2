@@ -17,7 +17,6 @@ import type {
   JournalEntry,
   LibraryItem,
 } from "../../../../shared/lib/prisma/client.ts";
-
 import { upsertGameFromIgdbPayload } from "./upsert-game.server";
 
 const JOURNAL_TEASER_LIMIT = 3;

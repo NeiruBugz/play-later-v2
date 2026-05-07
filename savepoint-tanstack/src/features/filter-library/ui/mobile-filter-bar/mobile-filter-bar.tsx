@@ -216,10 +216,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               Platform
             </p>
             <Select value={platformValue} onValueChange={onPlatformChange}>
-              <SelectTrigger
-                aria-label="Platform"
-                className="h-9 w-full"
-              >
+              <SelectTrigger aria-label="Platform" className="h-9 w-full">
                 <SelectValue placeholder="All platforms" />
               </SelectTrigger>
               <SelectContent>

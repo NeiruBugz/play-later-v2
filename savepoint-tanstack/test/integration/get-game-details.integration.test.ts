@@ -248,7 +248,9 @@ describe("getGameDetails", () => {
           updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         },
       });
-      const game = await db.prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+      const game = await db.prisma.game.findUnique({
+        where: { slug: GAME_SLUG },
+      });
       await db.prisma.libraryItem.create({
         data: {
           userId: "ggd-user-bob",
@@ -287,7 +289,9 @@ describe("getGameDetails", () => {
           updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         },
       });
-      const game = await db.prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+      const game = await db.prisma.game.findUnique({
+        where: { slug: GAME_SLUG },
+      });
       // Create 4 entries — teaser should return at most 3, ordered desc by createdAt.
       for (let i = 1; i <= 4; i++) {
         await db.prisma.journalEntry.create({
@@ -343,7 +347,9 @@ describe("getGameDetails", () => {
           updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         },
       });
-      const game = await db.prisma.game.findUnique({ where: { slug: GAME_SLUG } });
+      const game = await db.prisma.game.findUnique({
+        where: { slug: GAME_SLUG },
+      });
 
       // userA has a library entry and a journal entry.
       await db.prisma.libraryItem.create({

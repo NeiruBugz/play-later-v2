@@ -56,8 +56,15 @@ export function AppSidebar({ user }: AppSidebarProps) {
           className="flex items-center gap-2 rounded-md px-1 py-1"
           aria-label="SavePoint"
         >
-          <img src="/logo.svg" alt="" aria-hidden="true" className="h-7 w-7" />
-          <span className="text-lg font-bold tracking-tight">SavePoint</span>
+          <img
+            src="/logo.svg"
+            alt=""
+            aria-hidden="true"
+            className="y2k-logo-glow jewel-logo-glow h-8 w-8 shrink-0"
+          />
+          <span className="text-h3 y2k-chrome-text y2k:tracking-wider jewel-display jewel:tracking-[0.14em]">
+            SavePoint
+          </span>
         </Link>
 
         <button

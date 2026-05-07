@@ -2,6 +2,10 @@ import { Await, createFileRoute, Link } from "@tanstack/react-router";
 import { Component, Suspense, type ReactNode } from "react";
 
 import {
+  RelatedGamesInfiniteList,
+  RelatedGamesSkeleton,
+} from "@/features/browse-related-games";
+import {
   getGameDetailPageDataFn,
   type DeferredRelatedGames,
   type DeferredTimesToBeat,
@@ -11,10 +15,6 @@ import {
   TimesToBeatSection,
   TimesToBeatSkeleton,
 } from "@/features/game-detail/ui";
-import {
-  RelatedGamesInfiniteList,
-  RelatedGamesSkeleton,
-} from "@/features/browse-related-games";
 import { AppError } from "@/shared/lib/errors";
 import { GameDetail } from "@/widgets/game-detail";
 
@@ -94,10 +94,7 @@ function RelatedGamesSections({
       </h2>
       <div className="gap-lg flex flex-col">
         {sections.map((section) => (
-          <div
-            key={section.collectionId}
-            className="gap-md flex flex-col"
-          >
+          <div key={section.collectionId} className="gap-md flex flex-col">
             <h3 className="text-h4">{section.collectionName}</h3>
             <RelatedGamesInfiniteList
               collectionId={section.collectionId}
@@ -126,10 +123,7 @@ function SectionErrorMessage({
   message: string;
 }) {
   return (
-    <section
-      aria-labelledby={headingId}
-      className="gap-md flex flex-col"
-    >
+    <section aria-labelledby={headingId} className="gap-md flex flex-col">
       <h2 id={headingId} className="text-h3">
         {heading}
       </h2>

@@ -93,7 +93,9 @@ vi.mock("@/features/browse-related-games/api/get-related-games", () => ({
 // IntersectionObserver mock
 // ---------------------------------------------------------------------------
 
-type IntersectionCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
+type IntersectionCallback = (
+  entries: Partial<IntersectionObserverEntry>[]
+) => void;
 
 let capturedCallback: IntersectionCallback | null = null;
 
@@ -129,8 +131,18 @@ function makeGame(index: number): RelatedGame {
 const COLLECTION_ID = 42;
 const PAGE_SIZE = 4;
 
-const PAGE_1_GAMES: RelatedGame[] = [makeGame(0), makeGame(1), makeGame(2), makeGame(3)];
-const PAGE_2_GAMES: RelatedGame[] = [makeGame(4), makeGame(5), makeGame(6), makeGame(7)];
+const PAGE_1_GAMES: RelatedGame[] = [
+  makeGame(0),
+  makeGame(1),
+  makeGame(2),
+  makeGame(3),
+];
+const PAGE_2_GAMES: RelatedGame[] = [
+  makeGame(4),
+  makeGame(5),
+  makeGame(6),
+  makeGame(7),
+];
 
 const FIRST_PAGE_WITH_MORE = {
   games: PAGE_1_GAMES,
@@ -161,8 +173,10 @@ const PAGE_2_RESPONSE = {
 // ---------------------------------------------------------------------------
 
 const elements = {
-  getGameByName: (name: string) => screen.getByRole("img", { name: `Cover for ${name}` }),
-  queryGameByName: (name: string) => screen.queryByRole("img", { name: `Cover for ${name}` }),
+  getGameByName: (name: string) =>
+    screen.getByRole("img", { name: `Cover for ${name}` }),
+  queryGameByName: (name: string) =>
+    screen.queryByRole("img", { name: `Cover for ${name}` }),
   getSentinel: () => screen.getByTestId("related-games-sentinel"),
   querySentinel: () => screen.queryByTestId("related-games-sentinel"),
   getErrorAlert: () => screen.getByRole("alert"),

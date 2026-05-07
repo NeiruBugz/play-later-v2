@@ -5,7 +5,6 @@ import type {
   Game,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client";
-
 import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 

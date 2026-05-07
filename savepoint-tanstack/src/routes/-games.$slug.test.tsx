@@ -34,11 +34,9 @@ vi.mock("@/widgets/game-detail", () => ({
 }));
 
 vi.mock("@/features/browse-related-games", () => ({
-  RelatedGamesInfiniteList: ({
-    collectionId,
-  }: {
-    collectionId: number;
-  }) => <div data-testid={`infinite-list-${collectionId}`} />,
+  RelatedGamesInfiniteList: ({ collectionId }: { collectionId: number }) => (
+    <div data-testid={`infinite-list-${collectionId}`} />
+  ),
   RelatedGamesSkeleton: () => <div data-testid="related-games-skeleton" />,
 }));
 
@@ -106,14 +104,11 @@ const elements = {
     screen.queryByTestId("related-games-skeleton"),
   queryTimesToBeatSkeleton: () =>
     screen.queryByTestId("times-to-beat-skeleton"),
-  queryTimesToBeatSection: () =>
-    screen.queryByTestId("times-to-beat-section"),
+  queryTimesToBeatSection: () => screen.queryByTestId("times-to-beat-section"),
   queryInfiniteList: (collectionId: number) =>
     screen.queryByTestId(`infinite-list-${collectionId}`),
-  getRelatedGamesAlert: () =>
-    screen.getByText("Couldn't load related games"),
-  getTimesToBeatAlert: () =>
-    screen.getByText("Couldn't load times to beat"),
+  getRelatedGamesAlert: () => screen.getByText("Couldn't load related games"),
+  getTimesToBeatAlert: () => screen.getByText("Couldn't load times to beat"),
 };
 
 describe("/games/$slug route", () => {
@@ -121,8 +116,9 @@ describe("/games/$slug route", () => {
     const view = buildView({ viewerUserId: "user-123" });
 
     beforeEach(() => {
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       render(<Component />);
     });
@@ -141,8 +137,9 @@ describe("/games/$slug route", () => {
     const view = buildView({ viewerUserId: null });
 
     beforeEach(() => {
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       render(<Component />);
     });
@@ -159,8 +156,9 @@ describe("/games/$slug route", () => {
           /* never resolves */
         }),
       });
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       render(<Component />);
 
@@ -173,8 +171,9 @@ describe("/games/$slug route", () => {
           /* never resolves */
         }),
       });
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       render(<Component />);
 
@@ -188,8 +187,9 @@ describe("/games/$slug route", () => {
           completionist: 72000,
         }),
       });
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       render(<Component />);
 
@@ -215,8 +215,9 @@ describe("/games/$slug route", () => {
           },
         ]),
       });
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       render(<Component />);
 
@@ -229,8 +230,9 @@ describe("/games/$slug route", () => {
       const view = buildView({
         deferredRelatedGames: Promise.reject(new Error("upstream boom")),
       });
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       // Suppress React's expected error log for the rejected promise.
       const consoleErrorSpy = vi
@@ -249,8 +251,9 @@ describe("/games/$slug route", () => {
       const view = buildView({
         deferredTimesToBeat: Promise.reject(new Error("upstream boom")),
       });
-      (Route as unknown as { useLoaderData: () => GameDetailPageView }).useLoaderData =
-        () => view;
+      (
+        Route as unknown as { useLoaderData: () => GameDetailPageView }
+      ).useLoaderData = () => view;
       const Component = Route.options.component as ComponentType;
       const consoleErrorSpy = vi
         .spyOn(console, "error")
@@ -270,9 +273,7 @@ describe("/games/$slug route", () => {
       const ErrorComponent = Route.options.errorComponent as ComponentType<{
         error: Error;
       }>;
-      render(
-        <ErrorComponent error={new NotFoundError("Game not found")} />
-      );
+      render(<ErrorComponent error={new NotFoundError("Game not found")} />);
     });
 
     it("renders the friendly 404 surface", () => {
@@ -303,9 +304,8 @@ describe("/games/$slug route", () => {
 
   describe("loader wiring", () => {
     it("calls getGameDetailPageDataFn with the slug from params", async () => {
-      const { getGameDetailPageDataFn } = await import(
-        "@/features/game-detail/api"
-      );
+      const { getGameDetailPageDataFn } =
+        await import("@/features/game-detail/api");
       vi.mocked(getGameDetailPageDataFn).mockResolvedValue(buildView());
 
       const loader = Route.options.loader as (args: {

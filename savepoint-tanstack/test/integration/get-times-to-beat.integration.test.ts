@@ -121,7 +121,11 @@ describe("getTimesToBeat", () => {
   it("throws UpstreamError on transport / non-2xx", async () => {
     vi.stubGlobal(
       "fetch",
-      makeFetchMock({ igdbBody: { error: "boom" }, igdbOk: false, igdbStatus: 500 })
+      makeFetchMock({
+        igdbBody: { error: "boom" },
+        igdbOk: false,
+        igdbStatus: 500,
+      })
     );
 
     await expect(getTimesToBeat({ igdbId: IGDB_ID })).rejects.toThrow(

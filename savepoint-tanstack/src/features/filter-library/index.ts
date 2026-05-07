@@ -1,7 +1,4 @@
-export {
-  LibraryFilters,
-  MobileFilterBar,
-} from "./ui";
+export { LibraryFilters, MobileFilterBar } from "./ui";
 export type {
   LibraryFiltersProps,
   LibraryStatus,

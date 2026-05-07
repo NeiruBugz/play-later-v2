@@ -115,10 +115,7 @@ describe("getGameCollectionsByIgdbId", () => {
   });
 
   it("returns an empty array when the item has no `collections` field", async () => {
-    vi.stubGlobal(
-      "fetch",
-      makeFetchMock({ igdbBody: [{ id: IGDB_ID }] })
-    );
+    vi.stubGlobal("fetch", makeFetchMock({ igdbBody: [{ id: IGDB_ID }] }));
 
     const refs = await getGameCollectionsByIgdbId({ igdbId: IGDB_ID });
     expect(refs).toEqual([]);
@@ -127,7 +124,11 @@ describe("getGameCollectionsByIgdbId", () => {
   it("throws UpstreamError on transport / non-2xx", async () => {
     vi.stubGlobal(
       "fetch",
-      makeFetchMock({ igdbBody: { error: "boom" }, igdbOk: false, igdbStatus: 500 })
+      makeFetchMock({
+        igdbBody: { error: "boom" },
+        igdbOk: false,
+        igdbStatus: 500,
+      })
     );
 
     await expect(

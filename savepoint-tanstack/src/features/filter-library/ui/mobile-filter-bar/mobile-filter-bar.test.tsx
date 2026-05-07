@@ -43,8 +43,7 @@ const elements = {
     screen.getByRole("button", { name: `Filter by ${label}` }),
   getStatusClearButton: (label: string) =>
     screen.getByRole("button", { name: `Clear ${label} filter` }),
-  getPlatformTrigger: () =>
-    screen.getByRole("combobox", { name: "Platform" }),
+  getPlatformTrigger: () => screen.getByRole("combobox", { name: "Platform" }),
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
   getOption: (name: string) =>
     screen.getByRole("option", { name, hidden: true }),

@@ -43,8 +43,7 @@ const elements = {
   getAllStatusesButton: () =>
     screen.getByRole("button", { name: "Show all statuses" }),
   // Platform Radix Select
-  getPlatformTrigger: () =>
-    screen.getByRole("combobox", { name: "Platform" }),
+  getPlatformTrigger: () => screen.getByRole("combobox", { name: "Platform" }),
   // Sort Radix Select
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
   // Listbox option (any open Select)

@@ -10,8 +10,10 @@ import {
   type TimesToBeat,
 } from "@/entities/game/api";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
-import { getRelatedGames } from "@/features/browse-related-games/api/get-related-games.worker";
-import type { GetRelatedGamesResult } from "@/features/browse-related-games/api/get-related-games.worker";
+import {
+  getRelatedGames,
+  type GetRelatedGamesResult,
+} from "@/features/browse-related-games/api/get-related-games.worker";
 import { createLogger } from "@/shared/lib";
 
 const logger = createLogger({ service: "get-game-detail-page-data" });
@@ -130,8 +132,9 @@ export const getGameDetailPageDataFn = createServerFn({ method: "GET" })
     // Phase 2 — kick off both promises WITHOUT awaiting. They will be
     // serialized to the client by TanStack Start's deferred-promise plumbing
     // and resumed under <Await/> + <Suspense/> in the route component.
-    const deferredRelatedGames: DeferredRelatedGames =
-      loadRelatedGamesSections(details.game.igdbId);
+    const deferredRelatedGames: DeferredRelatedGames = loadRelatedGamesSections(
+      details.game.igdbId
+    );
 
     const deferredTimesToBeat: DeferredTimesToBeat = getTimesToBeat({
       igdbId: details.game.igdbId,
