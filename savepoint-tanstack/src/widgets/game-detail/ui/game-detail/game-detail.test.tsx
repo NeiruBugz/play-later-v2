@@ -12,6 +12,11 @@ import type { GameDetailData } from "./game-detail.type";
 // level so the widget renders without a router context.
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn() }),
+  Link: ({ to, children, ...rest }: any) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
 }));
 
 // Server fns invoked by the CTAs. Mocked so a render pass never crosses the

@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 import { GameCover, GameMetadata } from "@/entities/game";
 import { JournalTeaser } from "@/entities/journal-entry";
 import { LibraryStatusStrip } from "@/entities/library-item";
@@ -5,6 +7,7 @@ import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildCoverImageUrl } from "@/entities/library-item/ui/library-item-card/library-item-card.utility";
 import { AddFromGameDetailButton } from "@/features/add-game";
 import { ManageFromGameDetailButton } from "@/features/manage-library-entry";
+import { cn } from "@/shared/lib/utils";
 
 import type { GameDetailProps } from "./game-detail.type";
 
@@ -46,13 +49,57 @@ export function GameDetail({
           },
         };
 
+  const releaseYear = game.releaseDate
+    ? game.releaseDate.getUTCFullYear().toString()
+    : null;
+
+  const tabs: Array<{ label: string; href: string; visible: boolean }> = [
+    { label: "Overview", href: "#overview", visible: true },
+    { label: "Journal", href: "#journal", visible: viewerUserId !== null },
+    {
+      label: "Related",
+      href: "#related",
+      visible: relatedGamesSlot !== null && relatedGamesSlot !== undefined,
+    },
+    {
+      label: "Times to beat",
+      href: "#times-to-beat",
+      visible: timesToBeatSlot !== null && timesToBeatSlot !== undefined,
+    },
+  ];
+  const visibleTabs = tabs.filter((t) => t.visible);
+
   return (
-    <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
-      <section className="gap-xl flex flex-col md:flex-row">
+    <main className="container mx-auto flex flex-col px-4 py-6">
+      <nav
+        className="text-caption text-muted-foreground mb-md flex items-center gap-1.5"
+        aria-label="Breadcrumb"
+      >
+        <Link to="/library" className="hover:text-foreground transition-colors">
+          Library
+        </Link>
+        <span className="opacity-50">/</span>
+        <span className="text-foreground max-w-[280px] truncate font-medium">
+          {game.title}
+        </span>
+      </nav>
+
+      <section
+        id="overview"
+        className="gap-xl mb-xl flex flex-col md:flex-row"
+      >
         <div className="w-full max-w-xs shrink-0">
           <GameCover src={coverUrl} alt={game.title} />
         </div>
         <div className="gap-lg flex flex-1 flex-col">
+          {releaseYear ? (
+            <p
+              className="text-caption text-muted-foreground tracking-widest uppercase"
+              aria-label="Release year"
+            >
+              {releaseYear}
+            </p>
+          ) : null}
           <GameMetadata
             title={game.title}
             releaseDate={game.releaseDate}
@@ -75,14 +122,42 @@ export function GameDetail({
               <ManageFromGameDetailButton entry={entryWithGame} />
             )
           ) : null}
-          {timesToBeatSlot ?? null}
         </div>
       </section>
 
+      {visibleTabs.length > 1 ? (
+        <nav
+          aria-label="Game detail sections"
+          className="border-border mb-lg border-b"
+        >
+          <ul className="flex gap-1 overflow-x-auto">
+            {visibleTabs.map((tab, i) => (
+              <li key={tab.label}>
+                <a
+                  href={tab.href}
+                  className={cn(
+                    "text-body inline-flex shrink-0 items-center gap-1.5 px-3.5 pb-3 pt-3 font-medium transition-colors",
+                    "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
+                    i === 0
+                      ? "border-primary text-foreground -mb-px border-b-2 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {tab.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
+
+      {timesToBeatSlot ? <section id="times-to-beat">{timesToBeatSlot}</section> : null}
+
       {viewerUserId ? (
         <section
+          id="journal"
           aria-labelledby="journal-teaser-heading"
-          className="gap-md flex flex-col"
+          className="gap-md mt-lg flex flex-col"
         >
           <h2 id="journal-teaser-heading" className="text-h3">
             Journal
@@ -91,7 +166,11 @@ export function GameDetail({
         </section>
       ) : null}
 
-      {relatedGamesSlot ?? null}
+      {relatedGamesSlot ? (
+        <section id="related" className="mt-lg">
+          {relatedGamesSlot}
+        </section>
+      ) : null}
     </main>
   );
 }
