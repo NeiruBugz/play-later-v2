@@ -47,47 +47,54 @@ export function LibraryPage(props: LibraryPageProps) {
         sortOrder={sortOrder}
       />
 
-      <LibraryFilters
-        status={status}
-        platform={platform}
-        minRating={minRating}
-        unratedOnly={unratedOnly}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-      />
+      {/* Mirrors canonical's left-rail layout: filter sidebar (xl+ only) */}
+      {/* renders to the left of the grid; below xl the sidebar is hidden */}
+      {/* and the mobile filter bar above is the only filter affordance.   */}
+      <div className="flex gap-6">
+        <LibraryFilters
+          status={status}
+          platform={platform}
+          minRating={minRating}
+          unratedOnly={unratedOnly}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
 
-      {items.length === 0 ? (
-        <section
-          aria-label="Empty library"
-          className="border-border bg-card p-xl shadow-paper-sm rounded-lg border border-dashed text-center"
-        >
-          <h2 className="text-h3 mb-sm">No games yet</h2>
-          <p className="text-muted-foreground text-sm">
-            Your library is empty. Import from Steam or add games manually to
-            get started.
-          </p>
-        </section>
-      ) : (
-        <ul
-          aria-label="Library items"
-          className="gap-md grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"
-        >
-          {items.map((item) => (
-            <li key={item.id}>
-              <LibraryItemCard
-                item={item}
-                onClick={() => setSelectedEntry(item)}
-                menu={
-                  <LibraryCardMenu
+        <div className="min-w-0 flex-1">
+          {items.length === 0 ? (
+            <section
+              aria-label="Empty library"
+              className="border-border bg-card p-xl shadow-paper-sm rounded-lg border border-dashed text-center"
+            >
+              <h2 className="text-h3 mb-sm">No games yet</h2>
+              <p className="text-muted-foreground text-sm">
+                Your library is empty. Import from Steam or add games manually
+                to get started.
+              </p>
+            </section>
+          ) : (
+            <ul
+              aria-label="Library items"
+              className="gap-md grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"
+            >
+              {items.map((item) => (
+                <li key={item.id}>
+                  <LibraryItemCard
                     item={item}
-                    onEdit={() => setSelectedEntry(item)}
+                    onClick={() => setSelectedEntry(item)}
+                    menu={
+                      <LibraryCardMenu
+                        item={item}
+                        onEdit={() => setSelectedEntry(item)}
+                      />
+                    }
                   />
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
 
       {selectedEntry !== null ? (
         <LibraryModal
