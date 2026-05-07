@@ -48,7 +48,7 @@ describe("DropdownMenu", () => {
     });
 
     it("renders the trigger with aria-expanded=false", () => {
-      expect(elements.getTrigger().getAttribute("aria-expanded")).toBe("false");
+      expect(elements.getTrigger()).toHaveAttribute("aria-expanded", "false");
     });
 
     it("does not render the menu", () => {
@@ -63,7 +63,7 @@ describe("DropdownMenu", () => {
     });
 
     it("sets aria-expanded=true on the trigger", () => {
-      expect(elements.getTrigger().getAttribute("aria-expanded")).toBe("true");
+      expect(elements.getTrigger()).toHaveAttribute("aria-expanded", "true");
     });
 
     it("renders all menu items", () => {

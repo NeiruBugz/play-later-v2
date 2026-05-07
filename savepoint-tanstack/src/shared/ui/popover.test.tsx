@@ -35,7 +35,7 @@ describe("Popover", () => {
     });
 
     it("sets aria-expanded=false on the trigger", () => {
-      expect(elements.getTrigger().getAttribute("aria-expanded")).toBe("false");
+      expect(elements.getTrigger()).toHaveAttribute("aria-expanded", "false");
     });
   });
 
@@ -50,7 +50,7 @@ describe("Popover", () => {
     });
 
     it("sets aria-expanded=true on the trigger", () => {
-      expect(elements.getTrigger().getAttribute("aria-expanded")).toBe("true");
+      expect(elements.getTrigger()).toHaveAttribute("aria-expanded", "true");
     });
 
     it("closes when Escape is pressed", async () => {

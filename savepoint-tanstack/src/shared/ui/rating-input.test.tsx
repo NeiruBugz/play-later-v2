@@ -41,7 +41,8 @@ describe("RatingInput", () => {
     });
 
     it("computes a 'X out of 5 stars' aria-label", () => {
-      expect(elements.getReadOnly().getAttribute("aria-label")).toBe(
+      expect(elements.getReadOnly()).toHaveAttribute(
+        "aria-label",
         "3 out of 5 stars"
       );
     });
@@ -53,9 +54,7 @@ describe("RatingInput", () => {
     });
 
     it("renders 'No rating' aria-label", () => {
-      expect(elements.getReadOnly().getAttribute("aria-label")).toBe(
-        "No rating"
-      );
+      expect(elements.getReadOnly()).toHaveAttribute("aria-label", "No rating");
     });
   });
 
