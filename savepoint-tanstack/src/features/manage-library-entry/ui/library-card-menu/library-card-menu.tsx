@@ -66,7 +66,9 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
       await router.invalidate();
     } catch (cause) {
       const message =
-        cause instanceof Error ? cause.message : "Failed to remove from library";
+        cause instanceof Error
+          ? cause.message
+          : "Failed to remove from library";
       toast.error(message);
     } finally {
       setIsPending(false);
@@ -112,10 +114,7 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
             <DropdownMenuSubTrigger onClick={stopProp}>
               Change Status
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent
-              onClick={stopProp}
-              onMouseDown={stopProp}
-            >
+            <DropdownMenuSubContent onClick={stopProp} onMouseDown={stopProp}>
               {STATUS_ENTRIES.map((entry) => {
                 const Icon = entry.icon;
                 const isCurrent = entry.value === item.status;

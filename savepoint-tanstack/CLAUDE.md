@@ -351,90 +351,105 @@ The canonical `savepoint-app/features/game-detail/ui/` ships ~12 components for 
 Scope: 14A's "GREEN (other in-scope hand-rolled surfaces)" subtask. Worklist driven by [`context/spec/021-migrate-to-tanstack-start/audits/14A-ui-gap-matrix.md`](../context/spec/021-migrate-to-tanstack-start/audits/14A-ui-gap-matrix.md). Each row below is a gap-matrix entry whose action was "waive" (or whose port was partial), with the rationale captured for the cutover review. Ported rows are not listed — they're closed in commit history.
 
 ### SidebarSearchTrigger (gap-matrix row 2)
+
 **Status:** Deferred to 18A (S17 command palette).
 **Canonical behavior:** A `SidebarMenuButton` opens the global command palette via `useCommandPaletteContext().open()`; ⌘K binding lives there.
 **Tanstack behavior:** Plain `<button>` with a `⌘K` kbd affordance — no palette feature wired.
 **Rationale:** The command palette is owned by S17. Wiring this trigger before the palette ships is premature; the audit explicitly defers this row.
 
 ### SidebarNavLinks / shadcn `Sidebar` primitive (gap-matrix row 3)
+
 **Status:** Waived (slice 14A).
 **Canonical behavior:** Full shadcn `Sidebar` provider + `SidebarMenuButton` with collapsible-icon mode and tooltip-on-collapse.
 **Tanstack behavior:** Hand-rolled `<aside>` + TanStack `<Link activeProps>`.
 **Rationale:** shadcn `Sidebar` is a >500-line primitive with cookie-backed collapse state, provider context, and a Radix sub-tree, with no other consumer in the tanstack tree. Persistent full-width sidebar is correct for the current layout. Revisit if a collapsed-icon mode becomes a requirement.
 
 ### AddGameTrigger quick-add Popover (gap-matrix row 13)
+
 **Status:** Waived (slice 14A).
 **Canonical behavior:** Two add-game surfaces — full `Dialog`-based form AND a `Popover`-based "quick add" anchored on library-card hover.
 **Tanstack behavior:** Single `Dialog` path via `AddGameTrigger`.
 **Rationale:** The Popover quick-add is a progressive-enhancement convenience, not a primary flow. Library cards do not yet host a hover quick-add anchor in tanstack. Revisit if hover-state CTAs are added.
 
 ### AddGameModal — shadcn `Form` (gap-matrix row 14)
+
 **Status:** Waived (slice 14A).
 **Canonical behavior:** shadcn `Form` (FormItem + FormControl + FormMessage) wraps the search input.
 **Tanstack behavior:** Plain `<form>` + `<label>` + `Input`.
 **Rationale:** The add-game search form is single-field; shadcn `Form` adds no observable value. Porting `Form` would block on Radix-form's react-hook-form integration without a corresponding UX gain.
 
 ### LibraryModal Platform combobox-with-search (gap-matrix row 16)
+
 **Status:** Partially ported — Select adopted; Popover+Command search-to-filter waived.
 **Canonical behavior:** `PlatformCombobox` uses `Popover` + `Command` for search-to-filter over a long platform list.
 **Tanstack behavior:** Radix `Select` with the same fixed 6-platform list.
 **Rationale:** Tanstack ships only 6 hard-coded platforms. Search-to-filter adds no value at that cardinality; the keyboard-nav and visual-parity benefits of Radix `Select` close the major UX gap from the previous native `<select>`. Revisit when the platform list is fetched dynamically (canonical's full list ~100+).
 
 ### LibraryModal desktop/mobile split (gap-matrix row 18)
+
 **Status:** Waived (slice 11; reaffirmed in 14A).
 **Canonical behavior:** Separate `DesktopLayout` / `MobileLayout` form components.
 **Tanstack behavior:** Single responsive `Dialog` form.
 **Rationale:** Documented in the slice-11 divergence above — collapsing simplifies code without user-visible harm.
 
 ### LibraryModal entry metadata thumbnail (gap-matrix row 19)
+
 **Status:** Waived (slice 11; reaffirmed in 14A).
 **Canonical behavior:** Cover thumbnail + title rendered in the modal header via `LibraryEntryMetadata`.
 **Tanstack behavior:** `DialogTitle` text only.
 **Rationale:** Game title in `DialogTitle` satisfies the accessible name requirement. Cover adds visual richness but not functional parity. Revisit if design review deems the cover load-bearing for context.
 
 ### GameDetailHero ⋯ DropdownMenu button (sub-row of gap-matrix row 21)
+
 **Status:** Waived (slice 14A).
 **Canonical behavior:** Inline `DropdownMenu` with a single "Edit library entry" item next to the status cluster.
 **Tanstack behavior:** No ⋯ button.
 **Rationale:** The only canonical menu item duplicates `ManageFromGameDetailButton`, which is already rendered prominently in the hero for users with library entries. Adding the ⋯ button would create two near-identical affordances. Revisit if additional per-entry actions land that don't fit on the manage modal.
 
 ### GameDetailHero banner + studio/genre eyebrow (sub-row of gap-matrix row 21)
+
 **Status:** Deferred to 18A.
 **Canonical behavior:** Cover-blurred banner with a two-layer gradient overlay; eyebrow renders year · studio · top-2 genres.
 **Tanstack behavior:** No banner; eyebrow renders release year only.
 **Rationale:** Banner needs a screenshot/artwork URL on the `Game` model — schema bleed outside 14A scope. Studio + genre rendering needs `getGameDetails` to select `companies` and `genres` relations. Both are entity-query extensions that warrant a dedicated 18A row.
 
 ### RelatedGamesSection — Tabs + ScrollArea (gap-matrix row 25)
+
 **Status:** Deferred to 18A (per slice 14 phase-2 streaming divergence).
 **Canonical behavior:** `Tabs` switches between collections; `ScrollArea` for the inner list.
 **Tanstack behavior:** Stacked `<h3>` sections per collection; native `overflow-y-auto`.
 **Rationale:** Radix `Tabs` is not yet ported; stacked sections are the documented interim shape.
 
 ### RelatedGameCard — full GameCard widget port (sub-row of gap-matrix row 26)
+
 **Status:** Partially ported — Tooltip adopted; full `GameCard` compound widget waived.
 **Canonical behavior:** Compound `Card` with header/footer/meta + genre `Badge`s.
 **Tanstack behavior:** Inline `<li>` with cover, tooltip-wrapped title, no genre chips, no compound card chrome.
 **Rationale:** Genre chips need genre data on `RelatedGame` (currently absent — collections payload doesn't carry genres). The compound card adds chrome without functional parity. Revisit when genre data lands.
 
 ### RelatedGamesSkeleton — shadcn `Skeleton` (gap-matrix row 27)
+
 **Status:** Waived (slice 14A).
 **Canonical behavior:** Uses shadcn `Skeleton` primitive.
 **Tanstack behavior:** Hand-rolled `animate-pulse` divs.
 **Rationale:** shadcn `Skeleton` is a thin wrapper around `bg-muted animate-pulse`. Functionally equivalent. Port if a third caller lands; standalone, the primitive overhead isn't justified.
 
 ### TimesToBeatSection (gap-matrix row 24)
+
 **Status:** Waived (slice 14A; matches the slice-14 phase-2 divergence above).
 **Canonical behavior:** Bar charts, completion strip, community-average widget.
 **Tanstack behavior:** Minimal `<dl>` with main story / completionist hours.
 **Rationale:** Spec calls out full visual port as 18A. Minimal `<dl>` is the documented interim.
 
 ### ProfilePage tabs + social actions (gap-matrix row 30)
+
 **Status:** Waived (intentional architectural pivot).
 **Canonical behavior:** Tabbed profile (Overview / Library / Activity) + DropdownMenu follow menu, follower counts.
 **Tanstack behavior:** Flat `<ProfileOverview/>`.
 **Rationale:** Tabs and social are S18 (settings/social) territory. The avatar + stats + edit-profile CTA portions are already ported.
 
 ### JournalTeaser — interactive "Add entry" CTA (gap-matrix row 29)
+
 **Status:** Deferred to 18A (S15/S16 journal feature).
 **Canonical behavior:** Inline "Add entry" CTA opens a journal compose dialog.
 **Tanstack behavior:** Read-only entries list only.

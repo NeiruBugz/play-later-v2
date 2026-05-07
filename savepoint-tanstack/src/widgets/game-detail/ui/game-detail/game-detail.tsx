@@ -84,10 +84,7 @@ export function GameDetail({
         </span>
       </nav>
 
-      <section
-        id="overview"
-        className="gap-xl mb-xl flex flex-col md:flex-row"
-      >
+      <section id="overview" className="gap-xl mb-xl flex flex-col md:flex-row">
         <div className="w-full max-w-xs shrink-0">
           <GameCover src={coverUrl} alt={game.title} />
         </div>
@@ -136,7 +133,7 @@ export function GameDetail({
                 <a
                   href={tab.href}
                   className={cn(
-                    "text-body inline-flex shrink-0 items-center gap-1.5 px-3.5 pb-3 pt-3 font-medium transition-colors",
+                    "text-body inline-flex shrink-0 items-center gap-1.5 px-3.5 pt-3 pb-3 font-medium transition-colors",
                     "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
                     i === 0
                       ? "border-primary text-foreground -mb-px border-b-2 font-semibold"
@@ -151,7 +148,9 @@ export function GameDetail({
         </nav>
       ) : null}
 
-      {timesToBeatSlot ? <section id="times-to-beat">{timesToBeatSlot}</section> : null}
+      {timesToBeatSlot ? (
+        <section id="times-to-beat">{timesToBeatSlot}</section>
+      ) : null}
 
       {viewerUserId ? (
         <section
