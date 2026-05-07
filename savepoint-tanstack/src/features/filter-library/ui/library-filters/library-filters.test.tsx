@@ -5,16 +5,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LibraryFilters } from "./library-filters";
 
 // --- Router mock -----------------------------------------------------------
-// TanStack Router typed `search` is surfaced via `useNavigate` (navigate with
-// `search` updater). We mock the whole module so no router context is needed
-// and assertions can inspect what navigation payload was produced.
+// `useNavigate` is the only TanStack Router surface this component reaches for.
+// Mocking the whole module sidesteps router-context wiring and lets the
+// assertions inspect what navigation payload was produced.
 
 const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
-  // Link is not exercised by these tests; include a no-op stub so any accidental
-  // import in the component under test doesn't blow up.
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
@@ -31,30 +29,36 @@ const defaultProps = {
 };
 
 // ---------------------------------------------------------------------------
-// Element vocabulary
+// Element vocabulary — Radix-aware (Select renders an internal `combobox`-role
+// trigger; options are `option`-role inside a portaled listbox).
 // ---------------------------------------------------------------------------
 
 const elements = {
-  // Status filter controls
+  // Status section
   getStatusButton: (label: string) =>
     screen.getByRole("button", { name: label }),
   queryStatusButton: (label: string) =>
     screen.queryByRole("button", { name: label }),
-  getAllStatusButtons: () => screen.getAllByRole("button"),
-  // Platform filter
-  getPlatformSelect: () => screen.getByRole("combobox", { name: "Platform" }),
-  // Rating filter
-  getMinRatingSelect: () =>
-    screen.getByRole("combobox", { name: "Min rating" }),
-  // Sort controls
-  getSortBySelect: () => screen.getByRole("combobox", { name: "Sort by" }),
-  getSortOrderSelect: () =>
-    screen.getByRole("combobox", { name: "Sort order" }),
-  // Clear button
+  // "All" pill
+  getAllStatusesButton: () =>
+    screen.getByRole("button", { name: "Show all statuses" }),
+  // Platform Radix Select
+  getPlatformTrigger: () =>
+    screen.getByRole("combobox", { name: "Platform" }),
+  // Sort Radix Select
+  getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
+  // Listbox option (any open Select)
+  getOption: (name: string) =>
+    screen.getByRole("option", { name, hidden: true }),
+  // Clear-all CTA
   getClearFiltersButton: () =>
     screen.getByRole("button", { name: "Clear all filters" }),
   queryClearFiltersButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
+  // Section labels
+  queryStatusHeading: () => screen.queryByText("Status"),
+  queryPlatformHeading: () => screen.queryByText("Platform"),
+  querySortHeading: () => screen.queryByText("Sort"),
 };
 
 // ---------------------------------------------------------------------------
@@ -64,14 +68,14 @@ const elements = {
 const actions = {
   selectStatus: (label: string) =>
     userEvent.click(elements.getStatusButton(label)),
-  selectPlatform: (value: string) =>
-    userEvent.selectOptions(elements.getPlatformSelect(), value),
-  selectMinRating: (value: string) =>
-    userEvent.selectOptions(elements.getMinRatingSelect(), value),
-  selectSortBy: (value: string) =>
-    userEvent.selectOptions(elements.getSortBySelect(), value),
-  selectSortOrder: (value: string) =>
-    userEvent.selectOptions(elements.getSortOrderSelect(), value),
+  clickAll: () => userEvent.click(elements.getAllStatusesButton()),
+  openPlatformSelect: async () =>
+    userEvent.click(elements.getPlatformTrigger()),
+  pickPlatformOption: async (name: string) =>
+    userEvent.click(elements.getOption(name)),
+  openSortSelect: async () => userEvent.click(elements.getSortTrigger()),
+  pickSortOption: async (name: string) =>
+    userEvent.click(elements.getOption(name)),
   clearFilters: () => userEvent.click(elements.getClearFiltersButton()),
 };
 
@@ -84,11 +88,27 @@ describe("LibraryFilters", () => {
     mockNavigate.mockReset();
   });
 
-  // ---- Rendering -----------------------------------------------------------
+  // ---- Section headers -----------------------------------------------------
 
-  describe("given the component is rendered with no active filters", () => {
+  describe("given the component is rendered", () => {
     beforeEach(() => {
       render(<LibraryFilters {...defaultProps} />);
+    });
+
+    it("renders the Status section heading", () => {
+      expect(elements.queryStatusHeading()).not.toBeNull();
+    });
+
+    it("renders the Platform section heading", () => {
+      expect(elements.queryPlatformHeading()).not.toBeNull();
+    });
+
+    it("renders the Sort section heading", () => {
+      expect(elements.querySortHeading()).not.toBeNull();
+    });
+
+    it("renders the All-statuses pill", () => {
+      expect(elements.getAllStatusesButton()).toBeDefined();
     });
 
     it("renders a status filter control for Playing", () => {
@@ -111,20 +131,12 @@ describe("LibraryFilters", () => {
       expect(elements.queryStatusButton("Filter by Wishlist")).not.toBeNull();
     });
 
-    it("renders the platform filter", () => {
-      expect(elements.getPlatformSelect()).toBeDefined();
+    it("renders the platform Radix Select trigger", () => {
+      expect(elements.getPlatformTrigger()).toBeDefined();
     });
 
-    it("renders the min rating filter", () => {
-      expect(elements.getMinRatingSelect()).toBeDefined();
-    });
-
-    it("renders the sort-by control", () => {
-      expect(elements.getSortBySelect()).toBeDefined();
-    });
-
-    it("renders the sort-order control", () => {
-      expect(elements.getSortOrderSelect()).toBeDefined();
+    it("renders the sort Radix Select trigger", () => {
+      expect(elements.getSortTrigger()).toBeDefined();
     });
 
     it("does not render the clear-all button when no filters are active", () => {
@@ -139,6 +151,62 @@ describe("LibraryFilters", () => {
 
     it("renders the clear-all button when a status filter is active", () => {
       expect(elements.getClearFiltersButton()).toBeDefined();
+    });
+
+    it("marks the active status button as pressed", () => {
+      expect(elements.getStatusButton("Filter by Playing")).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    });
+
+    it("does NOT mark the All pill as pressed when a status is active", () => {
+      expect(elements.getAllStatusesButton()).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      );
+    });
+  });
+
+  describe("given no status filter is active", () => {
+    beforeEach(() => {
+      render(<LibraryFilters {...defaultProps} />);
+    });
+
+    it("marks the All pill as pressed", () => {
+      expect(elements.getAllStatusesButton()).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    });
+  });
+
+  // ---- Status counts (count badges) ---------------------------------------
+
+  describe("given counts are supplied", () => {
+    beforeEach(() => {
+      render(
+        <LibraryFilters
+          {...defaultProps}
+          counts={{ PLAYING: 3, PLAYED: 2, UP_NEXT: 1, SHELF: 0, WISHLIST: 5 }}
+        />
+      );
+    });
+
+    it("renders the total count badge on the All pill", () => {
+      // 3 + 2 + 1 + 0 + 5 = 11
+      const allBtn = elements.getAllStatusesButton();
+      expect(allBtn.textContent).toContain("11");
+    });
+
+    it("renders the per-status count next to Playing", () => {
+      const playingBtn = elements.getStatusButton("Filter by Playing");
+      expect(playingBtn.textContent).toContain("3");
+    });
+
+    it("renders zero counts (does not omit the cell)", () => {
+      const shelfBtn = elements.getStatusButton("Filter by Shelf");
+      expect(shelfBtn.textContent).toContain("0");
     });
   });
 
@@ -158,7 +226,7 @@ describe("LibraryFilters", () => {
       );
     });
 
-    it("does not include an undefined sortBy in the navigation payload", () => {
+    it("preserves a string sortBy in the navigation payload", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ sortBy: expect.any(String) }),
@@ -188,7 +256,7 @@ describe("LibraryFilters", () => {
       await actions.selectStatus("Filter by Playing");
     });
 
-    it("calls navigate with search.status undefined (deselect / clear)", () => {
+    it("calls navigate with search.status undefined (toggle-deselect)", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ status: undefined }),
@@ -197,15 +265,31 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Platform filter interactions ----------------------------------------
-
-  describe("given the user selects a platform", () => {
+  describe("given the user clicks the All pill", () => {
     beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} />);
-      await actions.selectPlatform("PC");
+      render(<LibraryFilters {...defaultProps} status="PLAYING" />);
+      await actions.clickAll();
     });
 
-    it("calls navigate with search.platform set to the selected value", () => {
+    it("calls navigate with search.status undefined", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ status: undefined }),
+        })
+      );
+    });
+  });
+
+  // ---- Platform Radix Select interactions ---------------------------------
+
+  describe("given the user opens the platform select and picks PC", () => {
+    beforeEach(async () => {
+      render(<LibraryFilters {...defaultProps} />);
+      await actions.openPlatformSelect();
+      await actions.pickPlatformOption("PC");
+    });
+
+    it("calls navigate with search.platform set to PC", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ platform: "PC" }),
@@ -217,7 +301,8 @@ describe("LibraryFilters", () => {
   describe("given the user resets the platform filter to all", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} platform="PC" />);
-      await actions.selectPlatform("All platforms");
+      await actions.openPlatformSelect();
+      await actions.pickPlatformOption("All platforms");
     });
 
     it("calls navigate with search.platform undefined", () => {
@@ -229,44 +314,13 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Min rating filter interactions --------------------------------------
+  // ---- Sort Radix Select interactions -------------------------------------
 
-  describe("given the user selects a minimum rating", () => {
+  describe("given the user changes the sort to Title A–Z", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} />);
-      await actions.selectMinRating("7");
-    });
-
-    it("calls navigate with search.minRating set to 7", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ minRating: 7 }),
-        })
-      );
-    });
-  });
-
-  describe("given a minRating is active and the user resets it", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} minRating={7} />);
-      await actions.selectMinRating("Any rating");
-    });
-
-    it("calls navigate with search.minRating undefined", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ minRating: undefined }),
-        })
-      );
-    });
-  });
-
-  // ---- Sort controls -------------------------------------------------------
-
-  describe("given the user changes the sort-by field", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} />);
-      await actions.selectSortBy("title");
+      await actions.openSortSelect();
+      await actions.pickSortOption("Title A–Z");
     });
 
     it("calls navigate with search.sortBy set to title", () => {
@@ -277,21 +331,6 @@ describe("LibraryFilters", () => {
       );
     });
 
-    it("preserves the current sortOrder in the navigation payload", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortOrder: "desc" }),
-        })
-      );
-    });
-  });
-
-  describe("given the user changes the sort-order", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} />);
-      await actions.selectSortOrder("asc");
-    });
-
     it("calls navigate with search.sortOrder set to asc", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -299,28 +338,29 @@ describe("LibraryFilters", () => {
         })
       );
     });
-
-    it("preserves the current sortBy in the navigation payload", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortBy: "updatedAt" }),
-        })
-      );
-    });
   });
 
-  describe("given the user changes sort-by to createdAt", () => {
+  describe("given the user changes the sort to Recently Added", () => {
     beforeEach(async () => {
       render(
         <LibraryFilters {...defaultProps} sortBy="title" sortOrder="asc" />
       );
-      await actions.selectSortBy("createdAt");
+      await actions.openSortSelect();
+      await actions.pickSortOption("Recently Added");
     });
 
     it("calls navigate with search.sortBy set to createdAt", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ sortBy: "createdAt" }),
+        })
+      );
+    });
+
+    it("calls navigate with search.sortOrder set to desc", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ sortOrder: "desc" }),
         })
       );
     });

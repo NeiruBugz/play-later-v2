@@ -4,4 +4,5 @@ export type {
   LibraryStatus,
   LibrarySortBy,
   LibrarySortOrder,
+  LibraryStatusCounts,
 } from "./ui";
