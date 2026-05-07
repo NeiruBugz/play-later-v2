@@ -46,9 +46,12 @@ const elements = {
     screen.getByRole("button", { name: "Open command palette" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
   getUserMenuTrigger: () =>
-    screen.getByRole("button", { name: /Ada/i, hidden: false }),
-  getSignOutItem: () => screen.getByRole("menuitem", { name: "Sign out" }),
-  querySignOutItem: () => screen.queryByRole("menuitem", { name: "Sign out" }),
+    screen.getByRole("button", { name: "Open user menu" }),
+  getSignOutItem: () => screen.getByRole("menuitem", { name: /Sign out/ }),
+  getProfileSettingsItem: () =>
+    screen.getByRole("menuitem", { name: /Profile settings/ }),
+  querySignOutItem: () => screen.queryByRole("menuitem", { name: /Sign out/ }),
+  queryAccountItem: () => screen.queryByRole("menuitem", { name: /Account/ }),
 };
 
 const actions = {
@@ -56,7 +59,6 @@ const actions = {
     await userEvent.click(elements.getUserMenuTrigger());
   },
   clickSignOut: async () => {
-    await actions.openUserMenu();
     await userEvent.click(elements.getSignOutItem());
   },
 };
@@ -181,9 +183,27 @@ describe("AppSidebar", () => {
       elements.getSignOutItem();
     });
 
+    it("reveals the Profile settings menu item linking to /settings/profile", () => {
+      // DropdownMenuItem with asChild renders the Link as the menuitem; the
+      // mocked Link forwards `to` as `href` on the underlying <a>.
+      expect(elements.getProfileSettingsItem()).toHaveAttribute(
+        "href",
+        "/settings/profile"
+      );
+    });
+
+    it("omits the Account entry until S18 ships /settings/account", () => {
+      expect(elements.queryAccountItem()).toBeNull();
+    });
+
     it("calls authClient.signOut when Sign out is clicked", async () => {
-      await userEvent.click(elements.getSignOutItem());
+      await actions.clickSignOut();
       expect(vi.mocked(authClient.signOut)).toHaveBeenCalled();
+    });
+
+    it("closes the menu when Escape is pressed", async () => {
+      await userEvent.keyboard("{Escape}");
+      expect(elements.querySignOutItem()).toBeNull();
     });
   });
 });

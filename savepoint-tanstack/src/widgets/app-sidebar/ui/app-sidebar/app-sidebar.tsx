@@ -1,9 +1,15 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { BookOpen, Library, Settings, User } from "lucide-react";
-import { useState } from "react";
+import { BookOpen, Library, LogOut, Settings, User } from "lucide-react";
 
 import { ThemeToggle } from "@/features/toggle-theme";
 import { authClient } from "@/shared/api/auth-client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 
 export type AppSidebarUser = {
   id: string;
@@ -24,7 +30,6 @@ const NAV_ITEMS = [
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const displayName = user.name ?? user.id;
 
@@ -36,7 +41,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
         },
       },
     });
-    setMenuOpen(false);
   };
 
   return (
@@ -90,13 +94,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
       <div className="mt-2 space-y-2 border-t px-3 pt-3 pb-4">
         <ThemeToggle />
 
-        <div className="relative">
-          <button
+        <DropdownMenu>
+          <DropdownMenuTrigger
             type="button"
-            className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
+            aria-label="Open user menu"
+            className="hover:bg-accent data-[state=open]:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm"
           >
             <img
               src={user.image ?? "/default-avatar.png"}
@@ -104,26 +106,25 @@ export function AppSidebar({ user }: AppSidebarProps) {
               className="h-7 w-7 rounded-full object-cover"
             />
             <span className="truncate">{displayName}</span>
-          </button>
-
-          {menuOpen && (
-            <ul
-              role="menu"
-              className="bg-popover border-border absolute bottom-full left-0 mb-1 min-w-[10rem] rounded-md border p-1 shadow-md"
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-56">
+            <DropdownMenuItem asChild>
+              <Link to="/settings/profile">
+                <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
+                Profile settings
+              </Link>
+            </DropdownMenuItem>
+            {/* TODO(slice 18): re-enable "Account" entry when /settings/account route exists */}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={handleSignOut}
+              className="text-destructive focus:text-destructive"
             >
-              <li>
-                <button
-                  role="menuitem"
-                  type="button"
-                  className="hover:bg-accent text-destructive w-full rounded px-3 py-1.5 text-left text-sm"
-                  onClick={handleSignOut}
-                >
-                  Sign out
-                </button>
-              </li>
-            </ul>
-          )}
-        </div>
+              <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );
