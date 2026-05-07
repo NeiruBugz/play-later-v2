@@ -15,6 +15,7 @@ export type LibraryPageProps = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
   minRating: number | undefined;
+  unratedOnly?: boolean | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
 };

@@ -1,13 +1,17 @@
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Archive,
-  Bookmark,
-  CheckCircle,
-  Gamepad2,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
 
+import {
+  DEFAULT_PLATFORMS,
+  getSortValue,
+  SORT_OPTIONS,
+  SORT_VALUE_MAP,
+  STATUS_ENTRIES,
+  STATUS_FILTER_STYLES,
+  type LibrarySortBy,
+  type LibrarySortOrder,
+  type LibraryStatus,
+  type LibraryStatusCounts,
+} from "@/features/filter-library/lib";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -20,20 +24,16 @@ import {
 } from "@/shared/ui/select";
 
 // ---------------------------------------------------------------------------
-// Public types
+// Re-export filter types from feature lib so existing callers keep importing
+// `LibraryStatus`, `LibrarySortBy`, etc. from this module.
 // ---------------------------------------------------------------------------
 
-export type LibraryStatus =
-  | "PLAYING"
-  | "PLAYED"
-  | "UP_NEXT"
-  | "SHELF"
-  | "WISHLIST";
-
-export type LibrarySortBy = "updatedAt" | "createdAt" | "title";
-export type LibrarySortOrder = "asc" | "desc";
-
-export type LibraryStatusCounts = Partial<Record<LibraryStatus, number>>;
+export type {
+  LibraryStatus,
+  LibrarySortBy,
+  LibrarySortOrder,
+  LibraryStatusCounts,
+};
 
 export type LibraryFiltersProps = {
   status: LibraryStatus | undefined;
@@ -52,126 +52,14 @@ export type LibraryFiltersProps = {
    * undefined (matches savepoint-app's `PLATFORM_OPTIONS`).
    */
   platforms?: ReadonlyArray<string>;
+  /**
+   * Pass-through for the mobile filter bar's unrated-only toggle. Sidebar
+   * does not render this control (deferred to S18A "More" disclosure parity)
+   * but must preserve the value across navigations so picking a status here
+   * does not clobber an active mobile-side toggle.
+   */
+  unratedOnly?: boolean;
 };
-
-// ---------------------------------------------------------------------------
-// Status config — local to this slice. Mirrors canonical's LIBRARY_STATUS_CONFIG
-// shape (label, icon, badgeVariant) but typed against the tanstack search-param
-// `LibraryStatus` union rather than the Prisma enum.
-// ---------------------------------------------------------------------------
-
-type StatusBadgeVariant = "wishlist" | "shelf" | "upNext" | "playing" | "played";
-
-type StatusEntry = {
-  value: LibraryStatus;
-  label: string;
-  badgeVariant: StatusBadgeVariant;
-  icon: LucideIcon;
-};
-
-const STATUS_ENTRIES: ReadonlyArray<StatusEntry> = [
-  { value: "UP_NEXT", label: "Up Next", badgeVariant: "upNext", icon: Star },
-  { value: "PLAYING", label: "Playing", badgeVariant: "playing", icon: Gamepad2 },
-  { value: "SHELF", label: "Shelf", badgeVariant: "shelf", icon: Archive },
-  { value: "PLAYED", label: "Played", badgeVariant: "played", icon: CheckCircle },
-  {
-    value: "WISHLIST",
-    label: "Wishlist",
-    badgeVariant: "wishlist",
-    icon: Bookmark,
-  },
-];
-
-const STATUS_FILTER_STYLES: Record<
-  StatusBadgeVariant,
-  { active: string; inactive: string }
-> = {
-  playing: {
-    active:
-      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-playing)]/30 text-[var(--status-playing)] hover:bg-[var(--status-playing)]/10",
-  },
-  played: {
-    active:
-      "bg-[var(--status-played)] text-[var(--status-played-foreground)] hover:bg-[var(--status-played)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-played)]/30 text-[var(--status-played)] hover:bg-[var(--status-played)]/10",
-  },
-  shelf: {
-    active:
-      "bg-[var(--status-shelf)] text-[var(--status-shelf-foreground)] hover:bg-[var(--status-shelf)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-shelf)]/30 text-[var(--status-shelf)] hover:bg-[var(--status-shelf)]/10",
-  },
-  upNext: {
-    active:
-      "bg-[var(--status-upNext)] text-[var(--status-upNext-foreground)] hover:bg-[var(--status-upNext)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-upNext)]/30 text-[var(--status-upNext)] hover:bg-[var(--status-upNext)]/10",
-  },
-  wishlist: {
-    active:
-      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-wishlist)]/30 text-[var(--status-wishlist)] hover:bg-[var(--status-wishlist)]/10",
-  },
-};
-
-// ---------------------------------------------------------------------------
-// Sort config — single combined `Select` (matches canonical). Tanstack's loader
-// schema accepts only sortBy ∈ {updatedAt, createdAt, title}, so the option set
-// is narrower than canonical's. Documented as a divergence in the slice notes.
-// ---------------------------------------------------------------------------
-
-type SortOption = {
-  value: string;
-  label: string;
-  sortBy: LibrarySortBy;
-  sortOrder: LibrarySortOrder;
-};
-
-const SORT_OPTIONS: ReadonlyArray<SortOption> = [
-  {
-    value: "updatedAt-desc",
-    label: "Recently Updated",
-    sortBy: "updatedAt",
-    sortOrder: "desc",
-  },
-  {
-    value: "createdAt-desc",
-    label: "Recently Added",
-    sortBy: "createdAt",
-    sortOrder: "desc",
-  },
-  {
-    value: "title-asc",
-    label: "Title A–Z",
-    sortBy: "title",
-    sortOrder: "asc",
-  },
-  {
-    value: "title-desc",
-    label: "Title Z–A",
-    sortBy: "title",
-    sortOrder: "desc",
-  },
-];
-
-const DEFAULT_PLATFORMS: ReadonlyArray<string> = [
-  "PC",
-  "PlayStation 5",
-  "PlayStation 4",
-  "Xbox Series X|S",
-  "Xbox One",
-  "Nintendo Switch",
-];
-
-const SORT_VALUE_MAP = new Map(SORT_OPTIONS.map((opt) => [opt.value, opt]));
-
-function getSortValue(sortBy: LibrarySortBy, sortOrder: LibrarySortOrder): string {
-  return `${sortBy}-${sortOrder}`;
-}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -186,6 +74,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     sortOrder,
     counts,
     platforms = DEFAULT_PLATFORMS,
+    unratedOnly,
   } = props;
   const navigate = useNavigate();
 
@@ -199,7 +88,10 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     : undefined;
 
   const hasClearableFilters =
-    status !== undefined || platform !== undefined || minRating !== undefined;
+    status !== undefined ||
+    platform !== undefined ||
+    minRating !== undefined ||
+    unratedOnly === true;
 
   const updateSearch = (
     patch: Partial<{
@@ -208,6 +100,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
       minRating: number | undefined;
       sortBy: LibrarySortBy;
       sortOrder: LibrarySortOrder;
+      unratedOnly: boolean | undefined;
     }>
   ) => {
     navigate({
@@ -218,6 +111,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
         minRating,
         sortBy,
         sortOrder,
+        unratedOnly,
         ...patch,
       },
     });
@@ -244,6 +138,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
       status: undefined,
       platform: undefined,
       minRating: undefined,
+      unratedOnly: undefined,
       sortBy: "updatedAt",
       sortOrder: "desc",
     });

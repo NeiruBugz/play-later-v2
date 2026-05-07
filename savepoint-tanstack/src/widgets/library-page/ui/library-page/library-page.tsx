@@ -3,14 +3,22 @@ import { useState } from "react";
 import { LibraryItemCard } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddGameTrigger } from "@/features/add-game";
-import { LibraryFilters } from "@/features/filter-library";
+import { LibraryFilters, MobileFilterBar } from "@/features/filter-library";
 import { LibraryModal } from "@/features/manage-library-entry";
 
 import type { LibraryPageProps } from "./library-page.type";
 
 export function LibraryPage(props: LibraryPageProps) {
-  const { items, total, status, platform, minRating, sortBy, sortOrder } =
-    props;
+  const {
+    items,
+    total,
+    status,
+    platform,
+    minRating,
+    unratedOnly,
+    sortBy,
+    sortOrder,
+  } = props;
 
   // Host owns modal state (canonical pattern). One modal mounted at the
   // page level; each card receives an onClick that selects its entry.
@@ -30,10 +38,20 @@ export function LibraryPage(props: LibraryPageProps) {
         <AddGameTrigger />
       </header>
 
+      <MobileFilterBar
+        status={status}
+        platform={platform}
+        minRating={minRating}
+        unratedOnly={unratedOnly}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+
       <LibraryFilters
         status={status}
         platform={platform}
         minRating={minRating}
+        unratedOnly={unratedOnly}
         sortBy={sortBy}
         sortOrder={sortOrder}
       />

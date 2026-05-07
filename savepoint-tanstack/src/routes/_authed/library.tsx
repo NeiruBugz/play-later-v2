@@ -10,6 +10,10 @@ const searchSchema = z.object({
     .optional(),
   platform: z.string().min(1).optional(),
   minRating: z.number().int().min(1).max(10).optional(),
+  // `unratedOnly` is consumed by `MobileFilterBar` (and round-tripped by the
+  // sidebar) but not yet honored by `getLibraryPageDataFn` — backend filtering
+  // arrives in a later slice. Documented divergence in slice 14A.
+  unratedOnly: z.boolean().optional(),
   sortBy: z.enum(["updatedAt", "createdAt", "title"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
@@ -38,6 +42,7 @@ function LibraryRoute() {
       status={search.status}
       platform={search.platform}
       minRating={search.minRating}
+      unratedOnly={search.unratedOnly}
       sortBy={search.sortBy ?? "updatedAt"}
       sortOrder={search.sortOrder ?? "desc"}
     />

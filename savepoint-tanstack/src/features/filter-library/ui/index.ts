@@ -6,3 +6,5 @@ export type {
   LibrarySortOrder,
   LibraryStatusCounts,
 } from "./library-filters";
+export { MobileFilterBar } from "./mobile-filter-bar";
+export type { MobileFilterBarProps } from "./mobile-filter-bar";
