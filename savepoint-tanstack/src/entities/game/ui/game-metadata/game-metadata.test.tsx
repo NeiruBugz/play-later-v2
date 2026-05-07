@@ -30,7 +30,12 @@ describe("GameMetadata", () => {
     });
 
     it("renders the release date as a localized string", () => {
-      const dateString = releaseDate.toLocaleDateString();
+      // Mirrors the inlined canonical `formatAbsoluteDate` ("Mon DD, YYYY")
+      const dateString = new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(releaseDate);
       expect(elements.queryDateText(dateString)).not.toBeNull();
     });
 
