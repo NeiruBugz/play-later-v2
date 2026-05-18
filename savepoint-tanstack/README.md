@@ -1,191 +1,72 @@
-Welcome to your new TanStack Start app!
+# savepoint-tanstack
 
-# Getting Started
+> **Under construction.** This app is the side-by-side TanStack Start v1 rewrite of [`../savepoint-app/`](../savepoint-app/), built per [spec 021](../context/spec/021-migrate-to-tanstack-start/). Until cutover at Slice 20, `savepoint-app/` is the canonical, deployed app — do **not** modify it from work in this directory unless explicitly aligned via the spec.
 
-To run this application:
+## Quick links
+
+- **Architecture, FSD layer map, DAL conventions, foot-guns** → [`./CLAUDE.md`](./CLAUDE.md) — start here. This README is intentionally thin; CLAUDE.md is the source of truth.
+- **Why this app exists, slice-by-slice plan, methodology** → [`../context/spec/021-migrate-to-tanstack-start/`](../context/spec/021-migrate-to-tanstack-start/).
+- **Root project context** → [`../README.md`](../README.md), [`../CLAUDE.md`](../CLAUDE.md).
+
+## What's different from `savepoint-app/`
+
+| Concern | `savepoint-app/` | `savepoint-tanstack/` |
+| --- | --- | --- |
+| Framework | Next.js 16 (App Router) | TanStack Start v1 + TanStack Router (file-based) |
+| Data access | Handler → Service → Repository (DAL) | C2 pattern: thin entity queries + feature `createServerFn`s, throw `AppError` |
+| Auth | Better Auth (Next.js handlers) | Better Auth (catch-all Web Request handler) |
+| Server-side framework | RSC + Server Actions | `createServerFn` (TanStack RPC bridge) |
+| Test runner | Vitest (3-project: unit/integration/components) | Vitest (3-project: unit/integration/components) + boundary-rule regression test |
+| FSD enforcement | ESLint boundaries | `eslint-plugin-boundaries` (same shape) |
+| Database, IGDB, S3, Cognito | shared via `../infra/` and externally managed services | **identical** — both apps point at the same instances during the migration |
+| Dev port | `:6060` | `:6060` (swap-and-compare against same Postgres on `:6432`) |
+
+Side-by-side parity at the same port means verification happens by stopping one app and starting the other; pixel-diff style side-by-side is deferred to the S20 cutover.
+
+## Getting started
+
+This package is part of the root pnpm workspace. From the repo root:
 
 ```bash
-pnpm install
-pnpm dev
+pnpm install                                    # installs both apps
+docker compose up -d                            # Postgres (:6432) + LocalStack S3 (:4568)
+pnpm --filter savepoint prisma migrate dev      # canonical schema migrations
+                                                # tanstack schema is a CI-diff-checked mirror
+pnpm --filter savepoint-tanstack dev            # starts the rewrite on :6060
 ```
 
-# Building For Production
+Stop the canonical app before starting this one — both bind to `:6060`.
 
-To build this application for production:
+## Common commands
 
-```bash
-pnpm build
-```
+| Task | Command |
+| --- | --- |
+| Dev server | `pnpm --filter savepoint-tanstack dev` |
+| Typecheck | `pnpm --filter savepoint-tanstack typecheck` |
+| Lint (incl. FSD boundary rule) | `pnpm --filter savepoint-tanstack lint` |
+| Format check | `pnpm --filter savepoint-tanstack format:check` |
+| Unit tests | `pnpm --filter savepoint-tanstack test:unit` |
+| Integration tests | `pnpm --filter savepoint-tanstack test:integration` |
+| Generate Prisma client | `pnpm --filter savepoint-tanstack prisma:generate` |
+| Format Prisma schema | `pnpm --filter savepoint-tanstack prisma:format` |
 
-## Testing
+CI runs an additional Prisma schema-drift check against `../savepoint-app/prisma/schema.prisma`. If you change the schema here without also re-copying from the canonical app, CI fails.
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+## Notes for contributors
 
-```bash
-pnpm test
-```
+- All env reads go through `@env` (typed via `@t3-oss/env-core`). **Never** `process.env.*` outside [`env.ts`](./env.ts) — see [foot-gun #9 in `CLAUDE.md`](./CLAUDE.md#env-boundary-trap).
+- `*.server.ts` is a bundler-enforced "no client imports" tag, **not** a runtime marker. `createServerFn`-wrapped feature modules must NOT use the suffix — see [foot-gun #1](./CLAUDE.md#bundler-graph-traps).
+- Component / file conventions (one component per folder + barrel; element/action test vocabulary; describe-given-when-then nesting) are documented in [`CLAUDE.md`](./CLAUDE.md) and enforced by review, not lint.
+- TDD policy is binding: every slice is RED → GREEN → REFACTOR, with failing tests authored before implementation. Canary harness tests in [`test/canary/`](./test/canary/) and [`test/eslint/`](./test/eslint/) are load-bearing — do not delete.
 
-## Styling
+## Where things are
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "My App" },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-});
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from "@tanstack/react-start";
-
-const getServerTime = createServerFn({
-  method: "GET",
-}).handler(async () => {
-  return new Date().toISOString();
-});
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState("");
-
-  useEffect(() => {
-    getServerTime().then(setTime);
-  }, []);
-
-  return <div>Server time: {time}</div>;
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { json } from "@tanstack/react-start";
-
-export const Route = createFileRoute("/api/hello")({
-  server: {
-    handlers: {
-      GET: () => json({ message: "Hello, World!" }),
-    },
-  },
-});
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/people")({
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json();
-  },
-  component: PeopleComponent,
-});
-
-function PeopleComponent() {
-  const data = Route.useLoaderData();
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+| You want to | Look here |
+| --- | --- |
+| Add a route | [`src/routes/`](./src/routes/) (file-based) |
+| Add a server fn | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix) |
+| Add an entity query | `src/entities/<noun>/api/<query-name>.server.ts` |
+| Add a composite UI block | `src/widgets/<name>/ui/...` |
+| Add a shared primitive | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/) |
+| Add an env var | [`env.ts`](./env.ts) (Zod schema first, then `import { env } from "@env"`) |
+| Schema change | **Don't migrate here.** Migrate in `../savepoint-app/`, then re-copy `prisma/schema.prisma` + migrations. CI diff-checks divergence. |
