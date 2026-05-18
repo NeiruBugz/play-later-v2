@@ -10,40 +10,70 @@ function formatEntryDate(date: Date): string {
 
 /**
  * Read-only teaser of a viewer's recent journal entries for a game.
- * Compose / edit flow is Slice 16.
+ *
+ * Entity layer: display-only. The optional `onAddEntryClick` callback lets a
+ * composing widget surface an inline "Add entry" affordance without the
+ * entity importing the compose feature.
  */
-export function JournalTeaser({ entries }: JournalTeaserProps) {
+export function JournalTeaser({
+  entries,
+  onAddEntryClick,
+}: JournalTeaserProps) {
+  const renderAddEntry = typeof onAddEntryClick === "function";
+
   if (entries.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">No journal entries yet.</p>
+      <div className="gap-md flex flex-col items-start">
+        <p className="text-muted-foreground text-sm">No journal entries yet.</p>
+        {renderAddEntry ? (
+          <button
+            type="button"
+            onClick={onAddEntryClick}
+            className="text-primary hover:text-primary/80 focus-visible:ring-ring text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          >
+            Add entry
+          </button>
+        ) : null}
+      </div>
     );
   }
 
   return (
-    <ul className="gap-md flex flex-col" aria-label="Recent journal entries">
-      {entries.map((entry) => {
-        const title = entry.title?.trim() || "Untitled entry";
-        const snippet = entry.content?.trim() ?? "";
-        return (
-          <li
-            key={entry.id}
-            className="border-border gap-2xs flex flex-col border-l-2 pl-3"
-          >
-            <time
-              dateTime={new Date(entry.createdAt).toISOString()}
-              className="text-muted-foreground text-xs font-mono"
+    <div className="gap-md flex flex-col">
+      {renderAddEntry ? (
+        <button
+          type="button"
+          onClick={onAddEntryClick}
+          className="text-primary hover:text-primary/80 focus-visible:ring-ring self-start text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+        >
+          Add entry
+        </button>
+      ) : null}
+      <ul className="gap-md flex flex-col" aria-label="Recent journal entries">
+        {entries.map((entry) => {
+          const title = entry.title?.trim() || "Untitled entry";
+          const snippet = entry.content?.trim() ?? "";
+          return (
+            <li
+              key={entry.id}
+              className="border-border gap-2xs flex flex-col border-l-2 pl-3"
             >
-              {formatEntryDate(entry.createdAt)}
-            </time>
-            <p className="text-sm font-semibold leading-snug">{title}</p>
-            {snippet ? (
-              <p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">
-                {snippet}
-              </p>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+              <time
+                dateTime={new Date(entry.createdAt).toISOString()}
+                className="text-muted-foreground font-mono text-xs"
+              >
+                {formatEntryDate(entry.createdAt)}
+              </time>
+              <p className="text-sm leading-snug font-semibold">{title}</p>
+              {snippet ? (
+                <p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">
+                  {snippet}
+                </p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

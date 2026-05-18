@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { GameCover, GameMetadata } from "@/entities/game";
 import { JournalTeaser } from "@/entities/journal-entry";
 import { LibraryStatusStrip } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddFromGameDetailButton } from "@/features/add-game";
+import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
 import { ManageFromGameDetailButton } from "@/features/manage-library-entry";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
@@ -28,6 +30,7 @@ export function GameDetail({
   timesToBeatSlot,
 }: GameDetailProps) {
   const { game, libraryEntry, journalTeaser } = data;
+  const [composeOpen, setComposeOpen] = useState(false);
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
   // The widget receives `libraryEntry` as a bare LibraryItem (no `game`
@@ -161,8 +164,19 @@ export function GameDetail({
           <h2 id="journal-teaser-heading" className="text-h3">
             Journal
           </h2>
-          <JournalTeaser entries={journalTeaser} />
+          <JournalTeaser
+            entries={journalTeaser}
+            onAddEntryClick={() => setComposeOpen(true)}
+          />
         </section>
+      ) : null}
+
+      {viewerUserId ? (
+        <ComposeJournalEntryDialog
+          open={composeOpen}
+          onOpenChange={setComposeOpen}
+          defaultGameId={game.id}
+        />
       ) : null}
 
       {relatedGamesSlot ? (

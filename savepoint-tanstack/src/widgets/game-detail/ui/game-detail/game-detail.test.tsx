@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
 
 import type {
   Game,
@@ -35,6 +38,10 @@ vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
 
 vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
+}));
+
+vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
+  createJournalEntryFn: vi.fn(),
 }));
 
 const buildGame = (): Game => ({
@@ -146,6 +153,40 @@ describe("GameDetail", () => {
 
     it("does not render the Add to library CTA", () => {
       expect(elements.queryAddCta()).toBeNull();
+    });
+  });
+
+  describe("given a signed-in viewer clicks the Add entry teaser CTA", () => {
+    beforeEach(async () => {
+      vi.mocked(createJournalEntryFn).mockResolvedValue(undefined as never);
+      render(<GameDetail data={buildData(null)} viewerUserId="user-1" />);
+      await userEvent.click(screen.getByRole("button", { name: "Add entry" }));
+      await userEvent.type(
+        screen.getByRole("textbox", { name: "Content" }),
+        "Quick note from game detail"
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    });
+
+    it("calls createJournalEntryFn with the game id pre-selected", () => {
+      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            gameId: "game-1",
+            content: "Quick note from game detail",
+          }),
+        })
+      );
+    });
+  });
+
+  describe("given an anonymous viewer", () => {
+    beforeEach(() => {
+      render(<GameDetail data={buildData(null)} viewerUserId={null} />);
+    });
+
+    it("does not render the Add entry teaser CTA", () => {
+      expect(screen.queryByRole("button", { name: "Add entry" })).toBeNull();
     });
   });
 
