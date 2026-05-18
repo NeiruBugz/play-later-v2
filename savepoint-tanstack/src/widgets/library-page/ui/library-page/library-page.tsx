@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import { LibraryItemCard } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddGameTrigger } from "@/features/add-game";
 import { LibraryFilters, MobileFilterBar } from "@/features/filter-library";
 import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
+import { LibraryItemCard } from "@/widgets/library-item-card";
 
 import type { LibraryPageProps } from "./library-page.type";
 
@@ -75,13 +75,12 @@ export function LibraryPage(props: LibraryPageProps) {
           ) : (
             <ul
               aria-label="Library items"
-              className="gap-md grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"
+              className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
             >
               {items.map((item) => (
                 <li key={item.id}>
                   <LibraryItemCard
                     item={item}
-                    onClick={() => setSelectedEntry(item)}
                     menu={
                       <LibraryCardMenu
                         item={item}

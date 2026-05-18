@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { buildCoverImageUrl } from "@/entities/library-item/ui/library-item-card/library-item-card.utility";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/shared/ui/tooltip";
+import { GameCard } from "@/widgets/game-card";
 
 import { getRelatedGamesFn, type RelatedGame } from "../../api";
 import type {
@@ -40,8 +34,6 @@ export function RelatedGamesInfiniteList({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
-  // Track latest values inside the IO callback without re-creating the
-  // observer on each state update.
   const latestPageRef = useRef<RelatedGamesPage>(firstPage);
   const errorRef = useRef<string | null>(null);
 
@@ -94,9 +86,6 @@ export function RelatedGamesInfiniteList({
         void fetchNextPage();
       },
       {
-        // Scope intersection to the inner scroll container so the page-level
-        // scroll doesn't keep auto-loading; prefetch slightly before the user
-        // hits the bottom for a smoother feel.
         root: scrollContainerRef.current,
         rootMargin: "120px",
       }
@@ -107,60 +96,41 @@ export function RelatedGamesInfiniteList({
   }, [showSentinel, fetchNextPage]);
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <div className="flex flex-col gap-4">
-        <div
-          ref={scrollContainerRef}
-          className="max-h-[480px] overflow-y-auto pr-2"
-        >
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {games.map((game) => {
-              const coverUrl = buildCoverImageUrl(game.coverImageId);
-              return (
-                <li key={game.igdbId} className="flex flex-col gap-2">
-                  {coverUrl ? (
-                    <img
-                      src={coverUrl}
-                      alt={`Cover for ${game.title}`}
-                      className="aspect-[3/4] w-full rounded object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div
-                      role="img"
-                      aria-label={`Cover for ${game.title}`}
-                      className="bg-muted aspect-[3/4] w-full rounded"
-                    />
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="line-clamp-2 cursor-default text-sm">
-                        {game.title}
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>{game.title}</TooltipContent>
-                  </Tooltip>
-                </li>
-              );
-            })}
-          </ul>
+    <div className="flex flex-col gap-4">
+      <div
+        ref={scrollContainerRef}
+        className="max-h-[480px] overflow-y-auto pr-2"
+      >
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {games.map((game) => (
+            <li key={game.igdbId}>
+              <GameCard
+                game={{
+                  slug: game.slug,
+                  title: game.title,
+                  coverImageId: game.coverImageId,
+                }}
+                density="minimal"
+              />
+            </li>
+          ))}
+        </ul>
 
-          {showSentinel ? (
-            <div
-              ref={sentinelRef}
-              data-testid="related-games-sentinel"
-              aria-hidden="true"
-              className="h-px w-full"
-            />
-          ) : null}
-        </div>
-
-        {error !== null ? (
-          <div role="alert" className="text-destructive text-sm">
-            {error}
-          </div>
+        {showSentinel ? (
+          <div
+            ref={sentinelRef}
+            data-testid="related-games-sentinel"
+            aria-hidden="true"
+            className="h-px w-full"
+          />
         ) : null}
       </div>
-    </TooltipProvider>
+
+      {error !== null ? (
+        <div role="alert" className="text-destructive text-sm">
+          {error}
+        </div>
+      ) : null}
+    </div>
   );
 }

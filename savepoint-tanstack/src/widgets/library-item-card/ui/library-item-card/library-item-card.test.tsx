@@ -1,13 +1,15 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { LibraryItemWithGame } from "../../model/types";
-import { LibraryItemCard } from "./library-item-card";
-import { buildCoverImageUrl } from "./library-item-card.utility";
+import type { LibraryItemWithGame } from "@/entities/library-item/model";
 
-// LibraryItemCard renders a TanStack <Link> for the details navigation;
-// the link requires a RouterProvider context. Mock it as a plain <a> here
-// (mirrors the precedent in widgets/landing-hero/ui/landing-hero/landing-hero.test.tsx).
+import { LibraryItemCard } from "./library-item-card";
+
+// LibraryItemCard renders GameCard, which wraps the card in a TanStack
+// <Link>. The link requires a RouterProvider context — mock it as a plain
+// <a> (matches the precedent in library-grid / related-games-infinite-list
+// / game-card).
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,
@@ -19,7 +21,7 @@ vi.mock("@tanstack/react-router", () => ({
     to?: string;
     href?: string;
     params?: Record<string, string>;
-    children: React.ReactNode;
+    children: ReactNode;
   } & Record<string, unknown>) => {
     let resolvedHref = to ?? href ?? "";
     if (params && to) {
@@ -39,6 +41,7 @@ const buildItem = (
   overrides: Partial<LibraryItemWithGame> & {
     gameTitle?: string;
     coverImage?: string | null;
+    gameSlug?: string;
   } = {}
 ): LibraryItemWithGame => ({
   id: 1,
@@ -59,17 +62,23 @@ const buildItem = (
     id: "game-1",
     igdbId: 1,
     title: overrides.gameTitle ?? "Hollow Knight",
-    slug: "hollow-knight",
+    slug: overrides.gameSlug ?? "hollow-knight",
     coverImage: overrides.coverImage ?? null,
     releaseDate: null,
   },
 });
 
 const elements = {
-  getTitleHeading: (title: string) =>
-    screen.getByRole("heading", { name: title, level: 3 }),
-  queryCoverImage: (alt: string) => screen.queryByAltText(alt),
+  getCardLink: (title: string) =>
+    screen.getByRole("link", { name: `View ${title}` }),
+  queryCardLink: (title: string) =>
+    screen.queryByRole("link", { name: `View ${title}` }),
+  queryCoverImage: (title: string) =>
+    screen.queryByAltText(`Cover for ${title}`),
+  queryCoverPlaceholder: (title: string) =>
+    screen.queryByRole("img", { name: `Cover for ${title}` }),
   getStatusText: (label: string) => screen.getByText(label),
+  queryMenuButton: () => screen.queryByRole("button", { name: "menu-trigger" }),
 };
 
 describe("LibraryItemCard", () => {
@@ -78,12 +87,19 @@ describe("LibraryItemCard", () => {
       render(<LibraryItemCard item={buildItem({ coverImage: null })} />);
     });
 
-    it("renders the game title", () => {
-      expect(elements.getTitleHeading("Hollow Knight")).toBeDefined();
+    it("renders the cover placeholder with the title", () => {
+      expect(elements.queryCoverPlaceholder("Hollow Knight")).not.toBeNull();
     });
 
     it("does not render an <img>", () => {
       expect(elements.queryCoverImage("Hollow Knight")).toBeNull();
+    });
+
+    it("wraps the card in a link to /games/$slug", () => {
+      expect(elements.getCardLink("Hollow Knight")).toHaveAttribute(
+        "href",
+        "/games/hollow-knight"
+      );
     });
   });
 
@@ -92,7 +108,7 @@ describe("LibraryItemCard", () => {
       render(<LibraryItemCard item={buildItem({ coverImage: "co9wzc" })} />);
     });
 
-    it("builds a full IGDB URL at t_cover_big", () => {
+    it("builds a full IGDB URL at t_cover_big with the 'Cover for' alt prefix", () => {
       const img = elements.queryCoverImage("Hollow Knight");
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toBe(
@@ -129,54 +145,43 @@ describe("LibraryItemCard", () => {
       ["UP_NEXT", "Up Next"],
       ["SHELF", "Shelf"],
       ["WISHLIST", "Wishlist"],
-    ] as const)("renders %s as the human label %s", (status, label) => {
-      render(<LibraryItemCard item={buildItem({ status })} />);
-      expect(elements.getStatusText(label)).toBeDefined();
+    ] as const)(
+      "renders %s as the human label %s (overlaid on the cover)",
+      (status, label) => {
+        render(<LibraryItemCard item={buildItem({ status })} />);
+        expect(elements.getStatusText(label)).toBeDefined();
+      }
+    );
+  });
+
+  describe("given a menu slot", () => {
+    beforeEach(() => {
+      render(
+        <LibraryItemCard
+          item={buildItem()}
+          menu={
+            <button type="button" aria-label="menu-trigger">
+              menu
+            </button>
+          }
+        />
+      );
     });
-  });
-});
 
-describe("buildCoverImageUrl", () => {
-  it("returns null when input is null", () => {
-    expect(buildCoverImageUrl(null)).toBeNull();
-  });
+    it("renders the menu inside the card", () => {
+      expect(elements.queryMenuButton()).not.toBeNull();
+    });
 
-  it("returns null when input is undefined", () => {
-    expect(buildCoverImageUrl(undefined)).toBeNull();
-  });
-
-  it("builds a full IGDB URL from a bare imageId at t_cover_big by default", () => {
-    expect(buildCoverImageUrl("co9wzc")).toBe(
-      "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg"
-    );
-  });
-
-  it("honors the size argument when building from a bare imageId", () => {
-    expect(buildCoverImageUrl("co9wzc", "t_cover_big_2x")).toBe(
-      "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9wzc.jpg"
-    );
-  });
-
-  it("upgrades an IGDB t_thumb URL to t_cover_big by default", () => {
-    expect(
-      buildCoverImageUrl(
-        "https://images.igdb.com/igdb/image/upload/t_thumb/co1.jpg"
-      )
-    ).toBe("https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg");
-  });
-
-  it("honors the size argument when upgrading a URL", () => {
-    expect(
-      buildCoverImageUrl(
-        "https://images.igdb.com/igdb/image/upload/t_thumb/co1.jpg",
-        "t_cover_big_2x"
-      )
-    ).toBe("https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1.jpg");
-  });
-
-  it("passes through non-IGDB URLs unchanged", () => {
-    expect(buildCoverImageUrl("https://cdn.example.com/foo.jpg")).toBe(
-      "https://cdn.example.com/foo.jpg"
-    );
+    it("renders the menu as a SIBLING of the card link, not a descendant", () => {
+      // Structural invariant — the menu must not live inside the <a>.
+      // If the menu were a descendant of the link, the user's "menu click
+      // triggers navigation" bug would still be reachable through Radix
+      // Slot patterns / focus restoration / nested-interactive ambiguities.
+      // Rendering as a sibling makes the bubble path physically impossible.
+      const link = elements.getCardLink("Hollow Knight");
+      const menuButton = elements.queryMenuButton();
+      expect(menuButton).not.toBeNull();
+      expect(link.contains(menuButton)).toBe(false);
+    });
   });
 });

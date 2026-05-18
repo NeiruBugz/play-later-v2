@@ -89,6 +89,36 @@ vi.mock("@/features/browse-related-games/api/get-related-games", () => ({
   getRelatedGamesFn: (...args: unknown[]) => mockGetRelatedGamesFn(...args),
 }));
 
+// GameCard wraps each entry in a TanStack <Link>, which requires a
+// RouterProvider context. Mock it as a plain <a> here (mirrors the
+// precedent in entities/library-item/ui/library-item-card/library-item-card.test.tsx).
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({
+    to,
+    href,
+    params,
+    children,
+    ...rest
+  }: {
+    to?: string;
+    href?: string;
+    params?: Record<string, string>;
+    children: React.ReactNode;
+  } & Record<string, unknown>) => {
+    let resolvedHref = to ?? href ?? "";
+    if (params && to) {
+      for (const [key, value] of Object.entries(params)) {
+        resolvedHref = resolvedHref.replace(`$${key}`, value);
+      }
+    }
+    return (
+      <a href={resolvedHref} {...rest}>
+        {children}
+      </a>
+    );
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // IntersectionObserver mock
 // ---------------------------------------------------------------------------

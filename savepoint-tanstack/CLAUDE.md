@@ -177,6 +177,10 @@ These are silent-failure traps surfaced during slices 5B–6. Each fails at _run
 2. **Loader-direct read of a `.server.ts` from a route module hangs the app on hover-preload.** The Vite plugin denies the import on the client build but TanStack's route extractor doesn't strip it from preload. See [CONTEXT.md → Loader-direct read → Known bundler caveat](./CONTEXT.md#loader-direct-read). Workaround: wrap the work in a `createServerFn` exported from a non-`.server.ts` file; the route imports the server fn value, which is client-safe.
 3. **Custom shims around `createServerFn` leak server modules into the client bundle.** Specifically: any export that retains a _module-level reference_ to the handler function (e.g. `Object.assign(async opts => result ?? handler(opts), _serverFn)`) holds the handler graph open on the client side. The Start Vite plugin only strips the body of the literal `.handler(fn)` call; it does NOT chase secondary references. Symptom: `[Client] Warning: Error in route match: __root__/` wrapped in a `CatchBoundaryImpl`. Fix: never re-export the bare handler; if a test path needs to call the impl directly, split into `getX.server.ts` (plain async worker) + `getXFn.ts` (`createServerFn` thin wrapper) and import the worker from server-only test code.
 
+### Env-boundary trap
+
+9. **Module-level `env.<server-only-var>` reads in client-importable files crash the browser.** `createServerFn`-wrapped modules (foot-gun #1) live at non-`.server.ts` paths and ARE shipped to the client (with the handler body stubbed). Any module-level work — `const log = createLogger({...})`, `const x = env.FOO` — survives the AST rewrite and runs on both sides. If that work reads an env var declared under `server:` in [`env.ts`](./env.ts), t3-env's `onInvalidAccess` throws `❌ Attempted to access a server-side environment variable on the client` in the browser. Rules of thumb: (a) classify env vars correctly — secrets and server-only credentials go in `server:`; values legitimately needed on both runtimes (`NODE_ENV`, `LOG_LEVEL`) go in `shared:`; client-exposed values go in `client:` with the `VITE_` prefix; (b) prefer keeping client-importable modules free of module-level env reads where possible — push the read inside `.handler(...)` so the plugin strips it. Repro: the original `NODE_ENV` being declared under `server:` caused `logger.ts` (imported by IGDB clients + several feature server fns) to crash at hydration on routes that triggered those imports.
+
 ### Runtime / dev-environment traps
 
 4. **`globalThis` singleton caches survive Vite HMR.** Once `globalThis.s3Client` / `globalThis.prisma` is populated, editing the constructor (e.g. adding `requestChecksumCalculation`) won't take effect until you fully restart `pnpm dev`. The cache is intentional — it prevents connection-pool churn during HMR — but it makes config diffs invisible. Mitigation: when changing `s3.ts`, `db.ts`, or any other singleton constructor, restart the dev server explicitly; do not trust HMR.
@@ -265,6 +269,31 @@ Scope: slices 0–6. Both apps now bind to `:6060` — verification is **swap-an
 | 6 — Sign-out         | ⚠️ menu items missing (account routes not yet ported) | No           |
 
 No findings block Slice 7. Items marked ❌ are intentional architectural / scope pivots, not regressions.
+
+## Intentional divergences (LibraryItemCard widget move + GameCard composition — post-Slice 14A)
+
+`LibraryItemCard` was relocated from `entities/library-item/ui/library-item-card/` to `widgets/library-item-card/` and rewritten to compose on top of `widgets/game-card`. The entity-layer placement (slice 13 decision) predated the existence of any compound card widget; once `GameCard` landed, keeping `LibraryItemCard` in the entity layer would have made the FSD rule (`entities` may not import `widgets`) block the consolidation we wanted.
+
+- **Layer move.** `entities/library-item/ui/library-item-card/` deleted. New home: `widgets/library-item-card/`. Two entity-barrel re-exports removed from `entities/library-item/ui/index.ts`. Single consumer (`widgets/library-page/`) updated to import from `@/widgets/library-item-card`.
+- **Composition shape.** A `<div className="relative">` wraps a `<GameCard asLink density="standard" badges={<LibraryStatusBadge/>}>` and (optionally) an absolutely-positioned `<div className="absolute top-2 right-2 z-10">{menu}</div>` as **siblings**. Status badge is absolute top-left inside the cover via GameCard's `badges` slot (closes 14A F1). The action menu is NOT routed through GameCard's `overlay` slot — see next point.
+- **Click semantics change.** Card-body click navigates to `/games/$slug` via the wrapping `<Link>` (was: opened the `LibraryModal`). The modal-edit flow is now exclusively reached through `LibraryCardMenu`'s "Edit Library Details" item. `onClick` prop removed from `LibraryItemCardProps`. "See details" footer link removed (the entire card is the affordance).
+- **Menu rendered as a sibling of the link, NOT through `GameCard.overlay`.** An earlier attempt put the menu in the `overlay` slot (inside GameCard, therefore inside its `<Link>`) and wrapped it in a `preventDefault` + `stopPropagation` swallow div. That treated the symptom — the menu was still a descendant of an `<a>`, which is HTML5-invalid (interactive-inside-interactive) and reachable via Radix Slot patterns / focus-restoration / native default-action re-firing. The current sibling layout puts the menu's DOM physically outside the `<a>` subtree, so the click bubble path cannot cross the link. Portaled `DropdownMenuContent` items remain outside the link too (Radix portals to `document.body`). The "View Journal Entries" item is an intentional `<Link>` navigation. Test pins the structural invariant: `expect(link.contains(menuButton)).toBe(false)`.
+- **Test contract change.** Library-page tests no longer pin "click card opens modal" — that behavior is gone. Cards are asserted as `role="link"` with name `View {title}` and `href="/games/$slug"`. Modal-open integration is owned by `LibraryCardMenu`'s own test.
+- **Cover alt text.** Now `"Cover for {title}"` (inherited from `GameCard`); was bare `title`. Aligns library card with the alt-text convention used in related-games and game-card.
+
+## Intentional divergences (GameCard port — post-Slice 14A)
+
+`widgets/game-card/` is a CVA-driven compound widget ported from canonical's `savepoint-app/widgets/game-card/`. Public surface: `GameCard`, `GameCardSkeleton`, `gameCardVariants`, `GameCardData`, `GameCardProps`, `GameCardSkeletonProps`. Currently consumed by `features/browse-related-games/ui/related-games-infinite-list/`; additional consumers (search results, dashboard, journal cards) land with their respective slices.
+
+- **CVA variant axes declared but not all populated.** The `gameCardVariants` config carries the full `layout` (`vertical` / `vertical-compact` / `horizontal`), `density` (`minimal` / `standard` / `detailed`), and `size` (`sm` / `md` / `lg`) axes from canonical so type signatures stay forward-compatible. **Compound entries are populated only for currently-consumed combinations** (`vertical/minimal` gap, `vertical/{standard,detailed}` gap). Canonical's `horizontal` padding ramp (`p-md` / `p-lg` / `p-xl`) and the `aspectRatio × size` cover sizing matrix are deferred — additive when a horizontal or sized consumer (steam-import card, library card horizontal variant) lands.
+- **Single data shape, not canonical's discriminated union.** Canonical exposes `BaseGameData | SearchGameData | LibraryGameData` with a runtime `isSearchGame` discriminator. Tanstack collapses to one `GameCardData` (`{ slug, title, coverImageId?, releaseYear?, platforms? }`) — the `density="detailed"` consumer renders meta when fields are present, otherwise it's omitted. Re-introduce the discriminator only when a second consumer has incompatible field semantics.
+- **Sub-components inlined, not split.** Canonical splits into eight files (`game-card-cover.tsx`, `game-card-header.tsx`, `game-card-content.tsx`, `game-card-meta.tsx`, `game-card-footer.tsx`, `game-card-skeleton.tsx`, `genre-badges.tsx`, plus the orchestrator). Tanstack inlines cover / header / content / meta / footer into `game-card.tsx`; only `GameCardSkeleton` is a sibling folder (different lifecycle, no cover data). Lift to per-component folders if a sub-component gains an independent consumer.
+- **`asLink` uses TanStack `Link to="/games/$slug" params={{ slug }}`.** No `next/link`. Anonymous viewers click through fine — the route is public.
+- **Cover alt text matches `related-games-infinite-list` precedent: `"Cover for {title}"`.** Both `<img alt>` and `role="img" aria-label` (no-cover placeholder) use the same string. Diverges from `entities/library-item/ui/library-item-card/library-item-card.tsx` which uses bare `alt={title}` — fold under one convention in a follow-up.
+- **Skeleton uses hand-rolled `animate-pulse`.** Tracks gap-matrix row 27 (shadcn `Skeleton` not ported); port the primitive when a third caller appears.
+- **Genre badges intentionally NOT ported.** Canonical's `GenreBadges` requires genre data on the card's input; no current tanstack consumer carries genres on its game shape. Re-evaluate when collections / search payloads expose genres.
+
+Token sweep: all referenced Tailwind utilities (`gap-md/lg/xl`, `p-md`, `px-xs`, `py-2xs`, `body-md/sm`, `text-secondary-foreground`, `bg-secondary`, `bg-muted`, `aspect-[3/4]`, `duration-normal`) resolve cleanly per `context/spec/021-migrate-to-tanstack-start/audits/14A-tokens.md` ("zero tokens needed translation").
 
 ## Intentional divergences (Slice 14 — phase-2 streaming)
 
@@ -422,10 +451,10 @@ Scope: 14A's "GREEN (other in-scope hand-rolled surfaces)" subtask. Worklist dri
 
 ### RelatedGameCard — full GameCard widget port (sub-row of gap-matrix row 26)
 
-**Status:** Partially ported — Tooltip adopted; full `GameCard` compound widget waived.
+**Status:** Ported (minimal CVA variants). See _Intentional divergences (GameCard port)_ below.
 **Canonical behavior:** Compound `Card` with header/footer/meta + genre `Badge`s.
-**Tanstack behavior:** Inline `<li>` with cover, tooltip-wrapped title, no genre chips, no compound card chrome.
-**Rationale:** Genre chips need genre data on `RelatedGame` (currently absent — collections payload doesn't carry genres). The compound card adds chrome without functional parity. Revisit when genre data lands.
+**Tanstack behavior:** `<GameCard density="minimal">` from `widgets/game-card`. Genre chips still waived (no genre data on `RelatedGame`).
+**Rationale:** `widgets/game-card/` now exposes a CVA-driven compound widget. `RelatedGamesInfiniteList` consumes it via the `minimal` density (cover + clamped title, no meta, no footer slot). Genre data extension stays out of scope until the collections payload carries it.
 
 ### RelatedGamesSkeleton — shadcn `Skeleton` (gap-matrix row 27)
 
@@ -457,10 +486,9 @@ Scope: 14A's "GREEN (other in-scope hand-rolled surfaces)" subtask. Worklist dri
 
 ### LibraryStatusBadge placement on LibraryItemCard (14A diff sweep finding F1)
 
-**Status:** Visual divergence (intentional — coupling cost too high).
+**Status:** Closed (post-GameCard port). Badge now overlays the cover top-left via `GameCard.badges` slot, canonical-aligned.
 **Canonical behavior:** Badge overlays the cover image with glass/blur styling.
-**Tanstack behavior:** Badge renders below the cover, inline with title/metadata.
-**Rationale:** Overlay-on-cover requires absolute-positioning the badge inside the cover container, which couples the entity's display concern to the card's layout structure. The current below-cover placement is consistent with the entity's `menu?: ReactNode` slot pattern (display concerns inside the card body). Overlay can land in 18A if the visual diff is judged worth the layout coupling.
+**Tanstack behavior:** Badge renders absolute-positioned top-left of the cover via `<LibraryItemCard>`'s composition on `<GameCard badges={<LibraryStatusBadge .../>}>`. Closed when `LibraryItemCard` moved from `entities/library-item/ui/` to `widgets/library-item-card/` so it could legally import `GameCard` (widgets > entities in FSD). See _Intentional divergences (LibraryItemCard widget move + GameCard composition)_ below.
 
 ### Sidebar avatar fallback (14A diff sweep finding F2)
 
