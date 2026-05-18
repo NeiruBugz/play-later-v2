@@ -146,6 +146,34 @@ jobs:
       - name: Run tests
         run: pnpm --filter savepoint test:utilities
 
+  terraform-fmt:
+    name: Terraform Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect terraform changes
+        id: tf-changed
+        run: |
+          # Only run on PRs that actually touch infra/. Skips fmt for the
+          # ~95% of PRs that don't go near IaC, while keeping the gate hard
+          # on the ones that do.
+          if git diff --name-only origin/main...HEAD -- infra/ | grep -q .; then
+            echo "infra-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "infra-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Terraform
+        if: steps.tf-changed.outputs.infra-changed == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Run terraform fmt -check
+        if: steps.tf-changed.outputs.infra-changed == 'true'
+        run: terraform fmt -check -recursive infra/
+
   audit:
     name: Supply Chain Audit (pnpm audit)
     runs-on: ubuntu-latest

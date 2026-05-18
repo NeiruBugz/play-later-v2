@@ -54,8 +54,8 @@ CI runs an additional Prisma schema-drift check against `../savepoint-app/prisma
 
 ## Notes for contributors
 
-- All env reads go through `@env` (typed via `@t3-oss/env-core`). **Never** `process.env.*` outside [`env.ts`](./env.ts) — see [foot-gun #9 in `CLAUDE.md`](./CLAUDE.md#env-boundary-trap).
-- `*.server.ts` is a bundler-enforced "no client imports" tag, **not** a runtime marker. `createServerFn`-wrapped feature modules must NOT use the suffix — see [foot-gun #1](./CLAUDE.md#bundler-graph-traps).
+- All env reads go through `@env` (typed via `@t3-oss/env-core`). **Never** `process.env.*` outside [`env.ts`](./env.ts) — see [foot-gun #9](./FOOT-GUNS.md#env-boundary-trap).
+- `*.server.ts` is a bundler-enforced "no client imports" tag, **not** a runtime marker. `createServerFn`-wrapped feature modules must NOT use the suffix — see [foot-gun #1](./FOOT-GUNS.md#bundler-graph-traps).
 - Component / file conventions (one component per folder + barrel; element/action test vocabulary; describe-given-when-then nesting) are documented in [`CLAUDE.md`](./CLAUDE.md) and enforced by review, not lint.
 - TDD policy is binding: every slice is RED → GREEN → REFACTOR, with failing tests authored before implementation. Canary harness tests in [`test/canary/`](./test/canary/) and [`test/eslint/`](./test/eslint/) are load-bearing — do not delete.
 
