@@ -1,15 +1,6 @@
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { getServerUserId } from "@/entities/session/api/get-session.server";
-import { setAvatarUrlFn } from "@/features/upload-avatar/api/set-avatar-url";
+import { setAvatarUrlWorker } from "@/features/upload-avatar/api/set-avatar-url.worker";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 import {
@@ -17,11 +8,10 @@ import {
   type IsolatedDatabase,
 } from "../setup/isolated-db.ts";
 
-vi.mock("@/entities/session/api/get-session.server", () => ({
-  getServerUserId: vi.fn(),
-}));
-
-const mockGetServerUserId = vi.mocked(getServerUserId);
+// Integration tests call the worker directly with an explicit userId, rather
+// than going through `setAvatarUrlFn` (which requires the TanStack Start
+// server runtime under @tanstack/react-start@>=1.168). See
+// savepoint-tanstack/CLAUDE.md foot-gun #8.
 
 let db: IsolatedDatabase;
 
@@ -34,11 +24,10 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  vi.resetAllMocks();
   await db.prisma.user.deleteMany();
 });
 
-describe("setAvatarUrlFn", () => {
+describe("setAvatarUrlWorker", () => {
   describe("given an authenticated user and a valid public URL", () => {
     const userId = "set-avatar-url-user-001";
     const avatarUrl =
@@ -60,9 +49,7 @@ describe("setAvatarUrlFn", () => {
         },
       });
 
-      mockGetServerUserId.mockResolvedValue(userId);
-
-      await setAvatarUrlFn({ data: { url: avatarUrl } });
+      await setAvatarUrlWorker(userId, { url: avatarUrl });
     });
 
     it("persists the URL to the user image field", async () => {
@@ -75,15 +62,11 @@ describe("setAvatarUrlFn", () => {
   });
 
   describe("given an unauthenticated request", () => {
-    beforeEach(() => {
-      mockGetServerUserId.mockResolvedValue(undefined);
-    });
-
     it("rejects with UnauthorizedError", async () => {
       await expect(
-        setAvatarUrlFn({
-          data: { url: "https://s3.example.com/avatars/any.png" },
-        })
+        setAvatarUrlWorker(undefined, {
+          url: "https://s3.example.com/avatars/any.png",
+        }),
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
   });

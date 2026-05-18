@@ -1,16 +1,7 @@
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
-import { getServerUserId } from "@/entities/session/api/get-session.server";
-import { updateProfileFn } from "@/features/edit-profile/api/update-profile";
+import { updateProfileWorker } from "@/features/edit-profile/api/update-profile.worker";
 import { ConflictError, UnauthorizedError } from "@/shared/lib/errors";
 
 import {
@@ -18,11 +9,10 @@ import {
   type IsolatedDatabase,
 } from "../setup/isolated-db.ts";
 
-vi.mock("@/entities/session/api/get-session.server", () => ({
-  getServerUserId: vi.fn(),
-}));
-
-const mockGetServerUserId = vi.mocked(getServerUserId);
+// Integration tests call the worker directly with an explicit userId, rather
+// than going through `updateProfileFn` (which requires the TanStack Start
+// server runtime under @tanstack/react-start@>=1.168). See
+// savepoint-tanstack/CLAUDE.md foot-gun #8.
 
 let db: IsolatedDatabase;
 
@@ -35,11 +25,10 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  vi.resetAllMocks();
   await db.prisma.user.deleteMany();
 });
 
-describe("updateProfileFn", () => {
+describe("updateProfileWorker", () => {
   describe("given an authenticated user with a valid update payload", () => {
     const userId = "update-profile-user-001";
 
@@ -59,13 +48,9 @@ describe("updateProfileFn", () => {
         },
       });
 
-      mockGetServerUserId.mockResolvedValue(userId);
-
-      await updateProfileFn({
-        data: {
-          username: "newuser",
-          isPublicProfile: true,
-        },
+      await updateProfileWorker(userId, {
+        username: "newuser",
+        isPublicProfile: true,
       });
     });
 
@@ -97,19 +82,17 @@ describe("updateProfileFn", () => {
           updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         },
       });
-
-      mockGetServerUserId.mockResolvedValue(userId);
     });
 
     it("rejects with ZodError when username is too short", async () => {
       await expect(
-        updateProfileFn({ data: { username: "ab" } })
+        updateProfileWorker(userId, { username: "ab" }),
       ).rejects.toBeInstanceOf(ZodError);
     });
 
     it("rejects with ZodError when username is empty", async () => {
       await expect(
-        updateProfileFn({ data: { username: "" } })
+        updateProfileWorker(userId, { username: "" }),
       ).rejects.toBeInstanceOf(ZodError);
     });
   });
@@ -147,25 +130,19 @@ describe("updateProfileFn", () => {
           },
         ],
       });
-
-      mockGetServerUserId.mockResolvedValue(userAId);
     });
 
     it("rejects with ConflictError", async () => {
       await expect(
-        updateProfileFn({ data: { username: "userbname" } })
+        updateProfileWorker(userAId, { username: "userbname" }),
       ).rejects.toBeInstanceOf(ConflictError);
     });
   });
 
   describe("given an unauthenticated request", () => {
-    beforeEach(() => {
-      mockGetServerUserId.mockResolvedValue(undefined);
-    });
-
     it("rejects with UnauthorizedError", async () => {
       await expect(
-        updateProfileFn({ data: { username: "anyusername" } })
+        updateProfileWorker(undefined, { username: "anyusername" }),
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
   });
