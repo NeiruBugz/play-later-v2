@@ -86,13 +86,13 @@ describe("updateProfileWorker", () => {
 
     it("rejects with ZodError when username is too short", async () => {
       await expect(
-        updateProfileWorker(userId, { username: "ab" }),
+        updateProfileWorker(userId, { username: "ab" })
       ).rejects.toBeInstanceOf(ZodError);
     });
 
     it("rejects with ZodError when username is empty", async () => {
       await expect(
-        updateProfileWorker(userId, { username: "" }),
+        updateProfileWorker(userId, { username: "" })
       ).rejects.toBeInstanceOf(ZodError);
     });
   });
@@ -134,7 +134,7 @@ describe("updateProfileWorker", () => {
 
     it("rejects with ConflictError", async () => {
       await expect(
-        updateProfileWorker(userAId, { username: "userbname" }),
+        updateProfileWorker(userAId, { username: "userbname" })
       ).rejects.toBeInstanceOf(ConflictError);
     });
   });
@@ -142,7 +142,7 @@ describe("updateProfileWorker", () => {
   describe("given an unauthenticated request", () => {
     it("rejects with UnauthorizedError", async () => {
       await expect(
-        updateProfileWorker(undefined, { username: "anyusername" }),
+        updateProfileWorker(undefined, { username: "anyusername" })
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
   });

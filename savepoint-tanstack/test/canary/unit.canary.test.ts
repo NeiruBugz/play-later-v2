@@ -12,7 +12,7 @@ it("harness sentinel: Vite import.meta.env is present in jsdom project", () => {
 });
 
 it("harness sentinel: Prisma mock for @/lib/db is reachable via vi.mocked factory", async () => {
-  const { prisma } = await import("@/shared/lib/db");
+  const { prisma } = await import("@/shared/lib/db.server");
   expect(vi.isMockFunction(prisma.user.findUnique)).toBe(true);
   expect(vi.isMockFunction(prisma.game.findMany)).toBe(true);
   expect(vi.isMockFunction(prisma.libraryItem.count)).toBe(true);

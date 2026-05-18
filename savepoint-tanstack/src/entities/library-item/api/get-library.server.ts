@@ -1,4 +1,4 @@
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 
 import type { Prisma } from "../../../../shared/lib/prisma/client.ts";
 import type { GetLibraryFilters, GetLibraryResult } from "../model/types";

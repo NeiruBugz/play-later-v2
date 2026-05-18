@@ -1,4 +1,4 @@
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
 import { Prisma } from "../../../../shared/lib/prisma/client.ts";

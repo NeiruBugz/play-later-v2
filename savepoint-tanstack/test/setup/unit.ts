@@ -20,7 +20,7 @@ if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
 
-vi.mock("@/shared/lib/db", () => ({
+vi.mock("@/shared/lib/db.server", () => ({
   prisma: {
     $transaction: vi.fn(),
     user: {

@@ -34,7 +34,7 @@ export const UPDATE_PROFILE_INPUT = z.object({
  */
 export async function updateProfileWorker(
   userId: string | undefined,
-  data: unknown,
+  data: unknown
 ): Promise<Profile> {
   if (!userId) {
     throw new UnauthorizedError("Sign in required");

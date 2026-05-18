@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 export const SET_AVATAR_URL_INPUT = z.object({
@@ -22,7 +22,7 @@ export const SET_AVATAR_URL_INPUT = z.object({
  */
 export async function setAvatarUrlWorker(
   userId: string | undefined,
-  data: unknown,
+  data: unknown
 ): Promise<{ ok: true }> {
   if (!userId) {
     throw new UnauthorizedError("Sign in required");

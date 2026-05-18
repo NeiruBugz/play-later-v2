@@ -27,7 +27,7 @@
  *      `PrismaClientKnownRequestError` with `code === "P2025"`. We re-throw
  *      that as `NotFoundError`. No other Prisma error codes are caught.
  */
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
 
 import {

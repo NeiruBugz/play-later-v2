@@ -1,4 +1,4 @@
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import type { Profile } from "../model/types";

@@ -13,7 +13,7 @@
  * (see savepoint-tanstack/CLAUDE.md → "DAL conventions").
  */
 import { getGameByIgdbId, type SearchResponseItem } from "@/shared/api/igdb";
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import type { Game } from "../../../../shared/lib/prisma/client.ts";

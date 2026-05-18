@@ -1,4 +1,4 @@
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 
 /**
  * UX-hint query: live availability check for the username field.

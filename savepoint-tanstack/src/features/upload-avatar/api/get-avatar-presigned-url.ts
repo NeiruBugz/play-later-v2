@@ -30,7 +30,7 @@ import {
   AVATAR_MIME_ALLOW_LIST,
   AVATAR_PATH_PREFIX,
   s3Client,
-} from "@/shared/api/s3";
+} from "@/shared/api/s3.server";
 import { ValidationError } from "@/shared/lib/errors";
 import { createLogger } from "@/shared/lib/logger";
 

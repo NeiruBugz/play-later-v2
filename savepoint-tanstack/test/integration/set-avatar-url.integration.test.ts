@@ -66,7 +66,7 @@ describe("setAvatarUrlWorker", () => {
       await expect(
         setAvatarUrlWorker(undefined, {
           url: "https://s3.example.com/avatars/any.png",
-        }),
+        })
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
   });

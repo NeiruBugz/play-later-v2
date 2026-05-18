@@ -24,7 +24,7 @@
  *      `onDelete: SetNull` in the Prisma schema. No application logic is
  *      needed to nullify journal entries; the DB handles it.
  */
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
 
 import { Prisma } from "../../../../shared/lib/prisma/client.ts";

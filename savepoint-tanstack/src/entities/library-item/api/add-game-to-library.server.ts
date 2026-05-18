@@ -24,7 +24,7 @@
  * duplication is ~6 lines and keeps the entity layer flat.
  */
 import { getGameByIgdbId } from "@/shared/api/igdb";
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import type {

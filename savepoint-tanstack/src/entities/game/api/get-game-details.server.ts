@@ -9,7 +9,7 @@
  * Throws `NotFoundError` when IGDB returns no match for the slug on cache miss.
  */
 import { getGameBySlug } from "@/shared/api/igdb";
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import type {

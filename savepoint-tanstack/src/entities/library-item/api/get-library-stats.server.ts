@@ -1,5 +1,5 @@
 import { RECENT_GAMES_LIMIT } from "@/shared/lib/constants";
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib/db.server";
 
 import type { LibraryStats, RecentGame } from "../model/types";
 
