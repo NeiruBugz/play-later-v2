@@ -146,6 +146,33 @@ jobs:
       - name: Run tests
         run: pnpm --filter savepoint test:utilities
 
+  audit:
+    name: Supply Chain Audit (pnpm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      # Fail the PR on any HIGH or CRITICAL advisory in the production
+      # dependency tree. Dev-only advisories (eslint plugins, build tooling)
+      # don't ship to users and would create review noise — Dependabot still
+      # surfaces them out-of-band on a weekly cadence.
+      - name: Run pnpm audit (production deps, high+critical)
+        run: pnpm audit --prod --audit-level=high
+
   migration-validation:
     name: Validate Database Migrations
     runs-on: ubuntu-latest

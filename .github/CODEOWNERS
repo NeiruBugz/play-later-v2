@@ -1,0 +1,21 @@
+# Default owner for everything in the repo.
+# GitHub uses the last matching pattern; more specific patterns override the default.
+* @NeiruBugz
+
+# Lockfile and root dependency manifests — supply-chain-critical, require explicit review.
+/pnpm-lock.yaml @NeiruBugz
+/package.json @NeiruBugz
+/pnpm-workspace.yaml @NeiruBugz
+/DEPENDENCY_DECISIONS.md @NeiruBugz
+
+# CI, governance, and AI tooling — changes here affect every contributor.
+/.github/ @NeiruBugz
+/CLAUDE.md @NeiruBugz
+/.claude/ @NeiruBugz
+
+# Infrastructure-as-code.
+/infra/ @NeiruBugz
+
+# Prisma schemas (parity-enforced across both apps via pr-checks-tanstack.yml).
+/savepoint-app/prisma/schema.prisma @NeiruBugz
+/savepoint-tanstack/prisma/schema.prisma @NeiruBugz

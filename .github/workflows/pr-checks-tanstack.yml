@@ -52,3 +52,27 @@ jobs:
 
       - name: Unit tests
         run: pnpm --filter savepoint-tanstack test:unit
+
+  audit:
+    name: Supply Chain Audit (pnpm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fail the PR on any HIGH or CRITICAL advisory in the production
+      # dependency tree. This is the same guard as pr-checks.yml; running it
+      # under both workflows means tanstack-only PRs (which skip pr-checks.yml
+      # via path-filters) still pass through supply-chain review.
+      - name: Run pnpm audit (production deps, high+critical)
+        run: pnpm audit --prod --audit-level=high
