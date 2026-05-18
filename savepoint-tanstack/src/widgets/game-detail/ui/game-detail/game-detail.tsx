@@ -4,9 +4,9 @@ import { GameCover, GameMetadata } from "@/entities/game";
 import { JournalTeaser } from "@/entities/journal-entry";
 import { LibraryStatusStrip } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
-import { buildCoverImageUrl } from "@/entities/library-item/ui/library-item-card/library-item-card.utility";
 import { AddFromGameDetailButton } from "@/features/add-game";
 import { ManageFromGameDetailButton } from "@/features/manage-library-entry";
+import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
 
 import type { GameDetailProps } from "./game-detail.type";

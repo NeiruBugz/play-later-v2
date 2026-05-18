@@ -39,10 +39,6 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: z.string().optional(),
     IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),
     IGDB_CLIENT_SECRET: z.string({ message: "IGDB_CLIENT_SECRET is required" }),
-    LOG_LEVEL: z
-      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
-      .optional(),
-    NODE_ENV: z.enum(["development", "test", "production"]),
     AUTH_ENABLE_CREDENTIALS: z.enum(["true", "false"]).optional(),
     DATABASE_LOGGING: z.enum(["true", "false"]).optional(),
     POSTGRES_DATABASE: z.string({ message: "POSTGRES_DATABASE is required" }),
@@ -77,6 +73,12 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   },
   client: {},
+  shared: {
+    NODE_ENV: z.enum(["development", "test", "production"]),
+    LOG_LEVEL: z
+      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+      .optional(),
+  },
   runtimeEnv: {
     AUTH_COGNITO_ID: process.env.AUTH_COGNITO_ID,
     AUTH_COGNITO_SECRET: process.env.AUTH_COGNITO_SECRET,
