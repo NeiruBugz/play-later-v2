@@ -36,6 +36,7 @@ vi.mock("@/features/toggle-theme", () => ({
 const stubUser = {
   id: "u1",
   name: "Ada",
+  username: "ada",
   image: "https://example.com/a.png",
 };
 

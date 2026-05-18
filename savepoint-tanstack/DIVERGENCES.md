@@ -359,3 +359,82 @@ CTAs that open the compose / detail / edit / delete dialogs were wired into the 
 - **`widgets/journal-timeline` adds an optional `onEntrySelect` prop.** Threaded straight through to each `<JournalEntryCard onSelect=...>`. The widget itself does not change behavior when the prop is omitted — Slice-15 callers (none currently) keep working untouched.
 - **No new "view journal entry" feature created.** The detail dialog is intentionally a widget, not a feature: it carries no server-fn invocation, only `onEdit` / `onDelete` callbacks. Promoting it to a feature would add a layer without changing behavior. Revisit only if the detail dialog grows mutation surfaces of its own.
 - **Tests added (component-level, per slice DoD).** `journal-timeline-page.test.tsx` (5 tests covering: trigger renders, compose dialog opens, card click → detail dialog with Edit + Delete, Edit routes to edit dialog, Delete routes to delete dialog and fires `deleteJournalEntryFn` with the right id). `journal-entry-detail.test.tsx` (6 tests covering: content render, title render, Edit / Delete buttons render, `onEdit` / `onDelete` callback wiring). `journal-entry-card.test.tsx` (3 tests covering: optional `onSelect` semantics — present vs. absent). `journal-teaser.test.tsx` (4 tests covering: optional `onAddEntryClick` semantics — present vs. absent, empty + populated lists). `game-detail.test.tsx` extended with 2 scenarios (signed-in clicks Add entry → `createJournalEntryFn` called with `gameId: game.id`; anonymous viewers don't see the CTA). Total unit-test count: 295 → 499 (Slice-15/16 dialog GREEN steps contributed the bulk; CTA-wiring step adds the +20 tests across the five files above).
+
+## Slice 18A — Visual-parity Phase 1 (Profile)
+
+Phase 1 of the visual-parity push lifted `/profile` to the canonical
+redirect model and restyled the `widgets/profile-overview` widget. Source:
+`context/audits/2026-05-18/visual-parity.md` (Profile section) and
+phase-handoff guidance. Future phases (2 = game-detail, 3 = library,
+4 = mobile) build on this.
+
+- **`/profile` is now a server-side redirect to `/u/$username`.** Mirrors
+  canonical (`savepoint-app/app/(protected)/profile/page.tsx` redirects via
+  the same model). Implemented in `beforeLoad` of `_authed/profile.tsx`:
+  calls `getProfilePageDataFn()` to resolve the signed-in user's username,
+  then `throw redirect({ to: "/u/$username", params, search })`. Search
+  params are preserved so `/profile?edit=true` survives the bounce. If the
+  signed-in user has no username yet (newly-onboarded account), the
+  redirect goes to `/settings/profile` so they can finish setup. The
+  previous own-profile UI on `_authed/profile.tsx` (avatar upload +
+  ProfileOverview render) was removed — that surface now lives at
+  `/u/$username` for the owner with `isOwnProfile=true`.
+- **`/u/$username` (public profile route) gained owner-aware affordances.**
+  Loader fetches `getPublicProfilePageDataFn` AND `getCurrentUserFn` in
+  parallel; the resulting `viewerId` is compared to `profile.id` to derive
+  `isOwnProfile`, which is forwarded to `ProfileOverview`. The route is
+  intentionally NOT under `_authed/` — `/u/$username` must remain reachable
+  to anonymous viewers (privacy enforcement lives inside `getPublicProfile`
+  per the privacy-invariant rule).
+- **`widgets/profile-overview` restyled for canonical parity.** New
+  internal sub-tree under `widgets/profile-overview/lib/`:
+  - `derive-banner-gradient.ts` — port of canonical's
+    `savepoint-app/features/profile/lib/derive-banner-gradient.ts`.
+    Co-located with the widget because it is the only consumer; lift to
+    `entities/user/lib/` if a second consumer appears. Co-located unit test
+    covers determinism, distinctness, and shape.
+  - `format-relative-time.ts` — minimal `Intl.RelativeTimeFormat` wrapper
+    used by the new "Recently Played" overlay. Avoids pulling `date-fns`
+    for a single consumer (consistent with Slice 15's intentional
+    no-date-fns stance). Falls back to absolute short-date past 60 days.
+    Visual changes:
+  - Gradient hero banner (120px tall, `deriveBannerGradient(username)`)
+    with avatar (140px) overlapping the bottom-left.
+  - Identity block: large serif display name, `@username`, stubbed
+    `0 Followers · 1 Following` row (real counts deferred — see follow-up).
+  - Top-right `Edit Profile` button (capital P, Link to `/settings/profile`),
+    visible only when `isOwnProfile=true`.
+  - Radix Tabs (`Overview` / `Library` / `Activity`). Overview is the
+    default. `Library` and `Activity` ship empty-state placeholders
+    (`profile-library-empty` / `profile-activity-empty` testids) with
+    inline `TODO(slice-18):` markers — Slice 18 data wiring will replace
+    them.
+  - Stat cards: 4 cards with lucide icons (`BookOpen` / `Gamepad2` /
+    `Trophy` / `Notebook`) above the number. Replaces the icon-less
+    `entities/profile/ui/profile-stats-bar` rendering used in
+    `OverviewTab`. The entity component is untouched in case other surfaces
+    rely on it; if no other surfaces emerge, fold it into the widget in a
+    follow-up.
+  - Recently Played: smaller covers with title + relative-time overlaid on
+    a gradient mask at the bottom, replacing the existing `LibraryGrid`
+    layout for this section. Cards `<Link>` to `/games/$slug` per item.
+- **Stubbed follower / following counts (`0` / `0`).** Real social
+  counts depend on Slice 18 (social entity / queries). Tagged inline with
+  `TODO(slice-18-social):` so they're discoverable when Slice 18 lands. Do
+  not treat the stub as a Phase 2 finding.
+- **Tests added.** `profile-overview.test.tsx` extended from 3 to 9 tests
+  (Edit Profile visibility owner-vs-viewer, hero gradient style, tab
+  state transitions covering Overview / Library / Activity, stat-card
+  count). New route tests: `routes/-_authed-profile.test.tsx` (3 tests —
+  username redirect, search-param preservation, no-username branch) and
+  `routes/-u.$username.test.tsx` (5 tests — anonymous viewer, owner viewer,
+  NotFoundError → notFound surface, component owner branch, component
+  anonymous branch). Plus 4 helper-fn tests under
+  `widgets/profile-overview/lib/`. Net: +18 unit tests in this phase.
+- **Out of scope (handed off downstream).**
+  - Status pill switcher / inline rating widget on game-detail — Phase 2.
+  - Mobile responsive shell — Phase 4.
+  - Replacing the stubbed social counts — Slice 18 (real follower data
+    layer).
+  - Replacing the empty-state Library / Activity tabs with real lists —
+    Slice 18 (sub-route data layers).

@@ -14,6 +14,7 @@ import {
 export type AppSidebarUser = {
   id: string;
   name: string | null;
+  username: string | null;
   image: string | null;
 };
 
@@ -31,7 +32,11 @@ const NAV_ITEMS = [
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
 
-  const displayName = user.name ?? user.id;
+  // Never display the email. Legacy accounts seed `name=email`, so we filter
+  // any `@`-shaped name and prefer the user-chosen username. Final fallback
+  // is the generic "Account" label — the raw user id is never user-visible.
+  const safeName = user.name && !user.name.includes("@") ? user.name : null;
+  const displayName = safeName ?? user.username ?? "Account";
 
   const handleSignOut = () => {
     void authClient.signOut({

@@ -5,10 +5,13 @@ export type ProfileOverviewProps = {
   profile: Profile;
   stats: LibraryStats;
   /**
-   * When true, render the "Change avatar" upload overlay on the profile
-   * header. Decided at the route layer (own-profile route passes `true`;
-   * the public `/u/$username` route omits / passes `false`). Kept as a
-   * primitive prop so the widget stays props-driven (FSD: widgets must
+   * When true, render the owner-only affordances on the profile:
+   *   - "Change avatar" overlay on the avatar
+   *   - "Edit Profile" button in the hero (linking to /settings/profile)
+   *
+   * Decided at the route layer (own-profile redirect target passes `true`
+   * when the viewer matches the profile owner; otherwise `false`). Kept as
+   * a primitive prop so the widget stays props-driven (FSD: widgets must
    * not infer routing/auth context themselves).
    */
   isOwnProfile?: boolean;

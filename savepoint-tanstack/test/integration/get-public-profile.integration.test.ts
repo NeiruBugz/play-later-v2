@@ -53,11 +53,12 @@ describe("getPublicProfile (privacy invariant)", () => {
 
   describe("given a user exists with isPublicProfile=false", () => {
     const username = "private-user";
+    const ownerId = "private-user-id-001";
 
     beforeEach(async () => {
       await db.prisma.user.create({
         data: {
-          id: "private-user-id-001",
+          id: ownerId,
           email: "private-user@example.com",
           name: "Private User",
           emailVerified: true,
@@ -71,10 +72,23 @@ describe("getPublicProfile (privacy invariant)", () => {
       });
     });
 
-    it("throws NotFoundError (callers cannot distinguish from missing)", async () => {
+    it("throws NotFoundError for an anonymous viewer", async () => {
       await expect(getPublicProfile(username)).rejects.toBeInstanceOf(
         NotFoundError
       );
+    });
+
+    it("throws NotFoundError for a non-owner viewer", async () => {
+      await expect(
+        getPublicProfile(username, "some-other-user-id")
+      ).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    it("returns the profile when the viewer is the owner", async () => {
+      const profile = await getPublicProfile(username, ownerId);
+
+      expect(profile.username).toBe(username);
+      expect(profile.isPublicProfile).toBe(false);
     });
   });
 

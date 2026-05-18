@@ -51,7 +51,7 @@ describe("index route", () => {
   describe("given the user is authenticated", () => {
     beforeEach(() => {
       vi.mocked(getCurrentUserFn).mockResolvedValue({
-        user: { id: "u1", name: "Ada", image: null },
+        user: { id: "u1", name: "Ada", username: "ada", image: null },
       });
     });
 

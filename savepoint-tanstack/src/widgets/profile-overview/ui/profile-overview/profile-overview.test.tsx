@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { LibraryStats } from "@/entities/library-item/api/get-library-stats.server";
@@ -6,14 +7,25 @@ import type { Profile } from "@/entities/profile/model/types";
 
 import { ProfileOverview } from "./profile-overview";
 
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({
+    children,
+    to,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    to: string;
+  } & React.HTMLAttributes<HTMLAnchorElement>) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock("@/features/upload-avatar", () => ({
   AvatarUpload: ({ label }: { label?: string }) => (
     <div data-testid="avatar-upload-mock">{label ?? "Upload avatar"}</div>
   ),
-}));
-
-vi.mock("@/entities/profile/ui/overview-tab", () => ({
-  OverviewTab: () => <div data-testid="overview-tab-mock" />,
 }));
 
 const stubProfile: Profile = {
@@ -26,14 +38,42 @@ const stubProfile: Profile = {
 
 const stubStats: LibraryStats = {
   statusCounts: {
-    BACKLOG: 0,
+    BACKLOG: 1,
     IN_PROGRESS: 0,
-    COMPLETED: 0,
+    COMPLETED: 2,
     ABANDONED: 0,
     FULL_COMPLETION: 0,
+    PLAYING: 1,
   } as never,
-  recentGames: [],
+  recentGames: [
+    {
+      gameId: "game-1",
+      title: "Balatro",
+      coverImage: "/covers/balatro.jpg",
+      lastPlayed: new Date("2026-05-07T12:00:00.000Z"),
+    },
+  ],
+  journalCount: 3,
 } as unknown as LibraryStats;
+
+const elements = {
+  getEditProfileLink: () => screen.getByRole("link", { name: "Edit Profile" }),
+  queryEditProfileLink: () =>
+    screen.queryByRole("link", { name: "Edit Profile" }),
+  getOverviewTab: () => screen.getByRole("tab", { name: "Overview" }),
+  getLibraryTab: () => screen.getByRole("tab", { name: "Library" }),
+  getActivityTab: () => screen.getByRole("tab", { name: "Activity" }),
+  queryRecentlyPlayed: () => screen.queryByTestId("overview-recently-played"),
+  queryLibraryEmpty: () => screen.queryByTestId("profile-library-empty"),
+  queryActivityEmpty: () => screen.queryByTestId("profile-activity-empty"),
+  getHeroBanner: () => screen.getByTestId("profile-hero-banner"),
+  getStatsBar: () => screen.getByTestId("profile-stats-bar"),
+};
+
+const actions = {
+  clickLibraryTab: () => userEvent.click(elements.getLibraryTab()),
+  clickActivityTab: () => userEvent.click(elements.getActivityTab()),
+};
 
 describe("ProfileOverview", () => {
   describe("given isOwnProfile is true", () => {
@@ -43,9 +83,19 @@ describe("ProfileOverview", () => {
       );
       expect(screen.getByText("Change avatar")).toBeDefined();
     });
+
+    it("renders the Edit Profile button linking to /settings/profile", () => {
+      render(
+        <ProfileOverview profile={stubProfile} stats={stubStats} isOwnProfile />
+      );
+      expect(elements.getEditProfileLink()).toHaveAttribute(
+        "href",
+        "/settings/profile"
+      );
+    });
   });
 
-  describe("given isOwnProfile is false", () => {
+  describe("given isOwnProfile is false (public viewer)", () => {
     it("does not render the change-avatar overlay trigger", () => {
       render(
         <ProfileOverview
@@ -56,12 +106,50 @@ describe("ProfileOverview", () => {
       );
       expect(screen.queryByText("Change avatar")).toBeNull();
     });
+
+    it("does not render the Edit Profile button", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      expect(elements.queryEditProfileLink()).toBeNull();
+    });
   });
 
-  describe("given isOwnProfile is omitted", () => {
-    it("does not render the change-avatar overlay trigger", () => {
+  describe("given any viewer (default tab)", () => {
+    it("defaults to the Overview tab showing Recently Played", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      expect(screen.queryByText("Change avatar")).toBeNull();
+      expect(elements.queryRecentlyPlayed()).not.toBeNull();
+    });
+
+    it("renders the hero banner with a gradient background", () => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+      const style = elements.getHeroBanner().getAttribute("style") ?? "";
+      expect(style).toContain("linear-gradient");
+    });
+
+    it("renders four stat cards on the overview tab", () => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+      expect(screen.getAllByTestId("profile-stats-bar-item").length).toBe(4);
+    });
+  });
+
+  describe("given the Library tab is selected", () => {
+    it("renders the library empty-state placeholder", async () => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+      await actions.clickLibraryTab();
+      expect(elements.queryLibraryEmpty()).not.toBeNull();
+    });
+  });
+
+  describe("given the Activity tab is selected", () => {
+    it("renders the activity empty-state placeholder", async () => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+      await actions.clickActivityTab();
+      expect(elements.queryActivityEmpty()).not.toBeNull();
     });
   });
 });

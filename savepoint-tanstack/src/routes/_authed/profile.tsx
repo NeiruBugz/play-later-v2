@@ -1,25 +1,34 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { getProfilePageDataFn } from "@/features/profile-overview/api";
-import { Button } from "@/shared/ui/button";
-import { ProfileOverview } from "@/widgets/profile-overview";
 
+/**
+ * `/profile` is the canonical-app shortcut to the signed-in user's public
+ * profile. Per the visual-parity audit
+ * (`context/audits/2026-05-18/visual-parity.md` — Profile / Routing) we
+ * mirror the canonical model: server-redirect to `/u/$username` so that
+ * the same surface is rendered whether a viewer hits `/profile` or arrives
+ * via a public link.
+ *
+ * Query params are preserved so deep-links like `/profile?edit=true`
+ * survive the bounce.
+ */
 export const Route = createFileRoute("/_authed/profile")({
-  loader: () => getProfilePageDataFn(),
-  component: ProfilePage,
+  beforeLoad: async ({ search }) => {
+    const { profile } = await getProfilePageDataFn();
+    const username = profile.username;
+
+    if (!username) {
+      // Profile has no username yet — route to settings to finish setup.
+      throw redirect({ to: "/settings/profile" });
+    }
+
+    throw redirect({
+      to: "/u/$username",
+      params: { username },
+      search,
+    });
+  },
+  // beforeLoad always throws — the component is never rendered.
+  component: () => null,
 });
-
-function ProfilePage() {
-  const { profile, stats } = Route.useLoaderData();
-
-  return (
-    <main className="container mx-auto px-4 py-6">
-      <div className="mb-6 flex items-center justify-end">
-        <Button asChild variant="outline">
-          <Link to="/settings/profile">Edit profile</Link>
-        </Button>
-      </div>
-      <ProfileOverview profile={profile} stats={stats} isOwnProfile />
-    </main>
-  );
-}

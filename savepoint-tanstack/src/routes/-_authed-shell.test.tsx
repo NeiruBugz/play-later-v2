@@ -102,7 +102,7 @@ describe("__root route shell", () => {
   describe("given user is authenticated", () => {
     beforeEach(() => {
       useLoaderDataMock.mockReturnValue({
-        user: { id: "u1", name: "Ada", image: null },
+        user: { id: "u1", name: "Ada", username: "ada", image: null },
       });
       render(<RootShell />);
     });
