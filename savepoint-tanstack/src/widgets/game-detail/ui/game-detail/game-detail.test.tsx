@@ -1,8 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
 
 import type {
   Game,
@@ -11,8 +8,6 @@ import type {
 import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
-// CTAs use @tanstack/react-router (useRouter().invalidate) — mock at module
-// level so the widget renders without a router context.
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn() }),
   Link: ({ to, children, ...rest }: any) => (
@@ -22,14 +17,8 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-// Server fns invoked by the CTAs. Mocked so a render pass never crosses the
-// server boundary.
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
-}));
-
-vi.mock("@/features/add-game/api/search-games-fn", () => ({
-  searchGamesFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
@@ -86,13 +75,24 @@ const buildData = (libraryEntry: LibraryItem | null): GameDetailData => ({
 });
 
 const elements = {
-  queryAddCta: () =>
-    screen.queryByRole("button", { name: "Add Hollow Knight to library" }),
-  queryManageCta: () =>
-    screen.queryByRole("button", { name: "Manage Hollow Knight in library" }),
   getTitle: () =>
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
-  queryRelatedGamesSlot: () => screen.queryByTestId("related-games-slot"),
+  queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
+  queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
+  queryStatusPill: (label: string) =>
+    screen.queryByRole("radio", { name: label }),
+  queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
+  queryRatingSlider: () => screen.queryByRole("slider"),
+  queryMoreMenuTrigger: () =>
+    screen.queryByRole("button", { name: "More library actions" }),
+  getOverviewTab: () => screen.getByRole("tab", { name: "Overview" }),
+  queryJournalTab: () => screen.queryByRole("tab", { name: /^Journal/ }),
+  queryPlaytimeTab: () => screen.queryByRole("tab", { name: "Playtime" }),
+  querySummary: () => screen.queryByLabelText("Game summary"),
+  queryGameDetailLabel: () => screen.queryByText("// GAME.DETAIL"),
+  queryGenresLabel: () => screen.queryByText("// GENRES"),
+  queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
+  queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
 };
 
@@ -106,20 +106,40 @@ describe("GameDetail", () => {
       expect(elements.getTitle()).toBeDefined();
     });
 
-    it("does not render the Add to library CTA", () => {
-      expect(elements.queryAddCta()).toBeNull();
+    it("renders the Library breadcrumb segment", () => {
+      expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
     });
 
-    it("does not render the Manage in library CTA", () => {
-      expect(elements.queryManageCta()).toBeNull();
+    it("renders the Games mid-segment in the breadcrumb", () => {
+      expect(elements.queryBreadcrumbGames()).not.toBeNull();
     });
 
-    it("omits the related-games slot when no slot prop is passed", () => {
-      expect(elements.queryRelatedGamesSlot()).toBeNull();
+    it("does not render the inline status switcher", () => {
+      expect(elements.queryStatusSwitcher()).toBeNull();
     });
 
-    it("omits the times-to-beat slot when no slot prop is passed", () => {
-      expect(elements.queryTimesToBeatSlot()).toBeNull();
+    it("does not render the Journal tab for anonymous viewers", () => {
+      expect(elements.queryJournalTab()).toBeNull();
+    });
+
+    it("renders the Overview tab", () => {
+      expect(elements.getOverviewTab()).toBeDefined();
+    });
+
+    it("renders the IGDB summary paragraph", () => {
+      expect(elements.querySummary()).not.toBeNull();
+    });
+
+    it("renders the terminal-style GAME.DETAIL label", () => {
+      expect(elements.queryGameDetailLabel()).not.toBeNull();
+    });
+
+    it("renders the terminal-style GENRES label", () => {
+      expect(elements.queryGenresLabel()).not.toBeNull();
+    });
+
+    it("renders the terminal-style PLATFORMS label", () => {
+      expect(elements.queryPlatformsLabel()).not.toBeNull();
     });
   });
 
@@ -128,12 +148,43 @@ describe("GameDetail", () => {
       render(<GameDetail data={buildData(null)} viewerUserId="user-1" />);
     });
 
-    it("renders the Add to library CTA", () => {
-      expect(elements.queryAddCta()).not.toBeNull();
+    it("renders the inline status switcher", () => {
+      expect(elements.queryStatusSwitcher()).not.toBeNull();
     });
 
-    it("does not render the Manage in library CTA", () => {
-      expect(elements.queryManageCta()).toBeNull();
+    it("renders all 5 status pills", () => {
+      for (const label of [
+        "Up Next",
+        "Playing",
+        "Shelf",
+        "Played",
+        "Wishlist",
+      ]) {
+        expect(elements.queryStatusPill(label)).not.toBeNull();
+      }
+    });
+
+    it("does not render the rating slider when there is no entry", () => {
+      expect(elements.queryRatingSlider()).toBeNull();
+    });
+
+    it("does not render the overflow menu trigger when there is no entry", () => {
+      expect(elements.queryMoreMenuTrigger()).toBeNull();
+    });
+
+    it("marks no status pill as active", () => {
+      for (const label of [
+        "Up Next",
+        "Playing",
+        "Shelf",
+        "Played",
+        "Wishlist",
+      ]) {
+        expect(elements.queryStatusPill(label)).toHaveAttribute(
+          "aria-checked",
+          "false"
+        );
+      }
     });
   });
 
@@ -147,46 +198,30 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the Manage in library CTA", () => {
-      expect(elements.queryManageCta()).not.toBeNull();
-    });
-
-    it("does not render the Add to library CTA", () => {
-      expect(elements.queryAddCta()).toBeNull();
-    });
-  });
-
-  describe("given a signed-in viewer clicks the Add entry teaser CTA", () => {
-    beforeEach(async () => {
-      vi.mocked(createJournalEntryFn).mockResolvedValue(undefined as never);
-      render(<GameDetail data={buildData(null)} viewerUserId="user-1" />);
-      await userEvent.click(screen.getByRole("button", { name: "Add entry" }));
-      await userEvent.type(
-        screen.getByRole("textbox", { name: "Content" }),
-        "Quick note from game detail"
-      );
-      await userEvent.click(screen.getByRole("button", { name: "Save" }));
-    });
-
-    it("calls createJournalEntryFn with the game id pre-selected", () => {
-      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            gameId: "game-1",
-            content: "Quick note from game detail",
-          }),
-        })
+    it("marks the Playing pill as active", () => {
+      expect(elements.queryStatusPill("Playing")).toHaveAttribute(
+        "aria-checked",
+        "true"
       );
     });
-  });
 
-  describe("given an anonymous viewer", () => {
-    beforeEach(() => {
-      render(<GameDetail data={buildData(null)} viewerUserId={null} />);
+    it("does NOT mark the Shelf pill as active", () => {
+      expect(elements.queryStatusPill("Shelf")).toHaveAttribute(
+        "aria-checked",
+        "false"
+      );
     });
 
-    it("does not render the Add entry teaser CTA", () => {
-      expect(screen.queryByRole("button", { name: "Add entry" })).toBeNull();
+    it("renders the rating slider", () => {
+      expect(elements.queryRatingSlider()).not.toBeNull();
+    });
+
+    it("renders the overflow menu trigger", () => {
+      expect(elements.queryMoreMenuTrigger()).not.toBeNull();
+    });
+
+    it("renders the Journal tab", () => {
+      expect(elements.queryJournalTab()).not.toBeNull();
     });
   });
 
@@ -202,12 +237,13 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the related-games slot as-is", () => {
-      expect(elements.queryRelatedGamesSlot()).not.toBeNull();
+    it("renders the related-games slot inside the Overview tab", () => {
+      // Overview is the default-active tab so its content is in the DOM.
+      expect(elements.queryRelatedSlot()).not.toBeNull();
     });
 
-    it("renders the times-to-beat slot as-is", () => {
-      expect(elements.queryTimesToBeatSlot()).not.toBeNull();
+    it("renders the Playtime tab when times-to-beat slot is supplied", () => {
+      expect(elements.queryPlaytimeTab()).not.toBeNull();
     });
   });
 });

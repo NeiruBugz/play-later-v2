@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
 

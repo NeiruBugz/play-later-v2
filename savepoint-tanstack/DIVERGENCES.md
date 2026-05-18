@@ -438,3 +438,130 @@ phase-handoff guidance. Future phases (2 = game-detail, 3 = library,
     layer).
   - Replacing the empty-state Library / Activity tabs with real lists —
     Slice 18 (sub-route data layers).
+
+## Slice 18A — Visual-parity Phase 2 (Game Detail)
+
+Implements the `/games/$slug` parity findings from
+`context/audits/2026-05-18/visual-parity.md` § "Game Detail". Phase scope:
+breadcrumb + hero + inline status switcher + tab realignment + Overview body
+restyle. Mobile shell stays Phase 4; library deltas stay Phase 3.
+
+### Status-taxonomy mapping (recorded for posterity)
+
+Both apps share the same Prisma enum `LibraryItemStatus` with exactly five
+values, and both apps already render the same labels. No remapping needed
+for Phase 2.
+
+| Prisma enum value | Pill label (both apps) |
+| ----------------- | ---------------------- |
+| `UP_NEXT`         | Up Next                |
+| `PLAYING`         | Playing                |
+| `SHELF`           | Shelf                  |
+| `PLAYED`          | Played                 |
+| `WISHLIST`        | Wishlist               |
+
+The label resolver was already in place at
+`entities/library-item/model/status.ts` (`STATUS_ENTRIES`,
+`LIBRARY_STATUS_LABELS`, `getStatusLabel`). The Phase 2 brief flagged an
+expected enum mismatch (`BACKLOG / IN_PROGRESS / COMPLETED / ABANDONED /
+FULL_COMPLETION`) that does not exist in either schema today — likely a
+reference to a long-deprecated taxonomy. No new file created.
+
+### Full replacement of the `Manage in library` button
+
+The old `ManageFromGameDetailButton` rendering is **gone** from the
+game-detail hero; the new `widgets/game-detail/ui/library-status-switcher/`
+fully replaces it (per Phase 2 user-confirmed decision). The
+`ManageFromGameDetailButton` feature component itself is preserved in
+`features/manage-library-entry/` because it has its own colocated test and
+public-API export, and could conceivably be reused elsewhere; we removed
+only its consumer in the game-detail widget. Tracking deletion as a
+follow-up if no other consumer materializes by Slice 18B.
+
+### Widget composes two features (intentional)
+
+`LibraryStatusSwitcher` lives under `widgets/game-detail/ui/` (not under
+any feature) because it composes server fns from BOTH
+`features/add-game/api/add-game-to-library-fn` and
+`features/manage-library-entry/api/{update,delete}-library-item-fn`. FSD
+forbids feature-to-feature imports; widgets are the rightful layer for
+multi-feature composition. This is a structural choice, not a divergence
+from canonical (canonical Next.js doesn't have the same FSD layer at
+`widgets/`, so the canonical equivalent lives in
+`features/game-detail/ui/library-status-segmented`).
+
+### Tab strip — Tabs primitive
+
+Switched from a plain `<nav>` + `<ul>` "tabs" markup to the ported
+`@/shared/ui/tabs` (Radix `@radix-ui/react-tabs`). The previous markup was
+visual-only (anchor links to `#hash` anchors — no `role="tab"`, no keyboard
+roving tabindex). Tabs are now real ARIA tabs with content-swapping. Three
+tabs visible: `Overview` (always), `Journal {count}` (signed-in viewers),
+`Playtime` (when times-to-beat slot is supplied). "Related games" content
+folds into Overview (canonical pattern); "Times to beat" content moves
+under Playtime.
+
+### Data gaps — held until DAL extension
+
+Tanstack's `Game` entity stores only `title / description / coverImage /
+releaseDate`. Canonical's hero renders `<year> · <developer> · <genres>`
+plus full-bleed `screenshots[0]` plus genre + platform chip rows on the
+Overview body. None of `developer / studio`, `genres`, `platforms`, or
+`screenshots` is currently:
+
+1. Requested from IGDB (`SearchResponseItemSchema` does not include
+   `involved_companies`, `genres`, `screenshots`; `platforms` is requested
+   but never persisted),
+2. Persisted on the Prisma `Game` row,
+3. Populated by `upsertGameFromIgdbPayload`.
+
+Phase 2 renders the visual scaffolding so the gap is obvious:
+
+- Hero background falls back to a brand-tinted CSS gradient (matches
+  canonical's `bannerUrl === null` branch byte-for-byte).
+- Eyebrow row renders only `<year>` (uppercased). When developer / genres
+  data lands, append to `eyebrowParts` in
+  `widgets/game-detail/ui/game-detail/game-detail.tsx`.
+- `// GAME.DETAIL` block renders only the `Release year` row.
+- `// GENRES` and `// PLATFORMS` rows render an em-dash placeholder.
+
+Closing the gap requires (in this order):
+
+1. Extend `SearchResponseItemSchema` in `shared/api/igdb/schemas.ts` to
+   include `screenshots`, `genres`, `involved_companies`. Update the IGDB
+   body fields list.
+2. Extend `prisma/schema.prisma`: `Game` gets `screenshots String[]`,
+   `developer String?`; existing `genres`/`platforms` relation tables
+   need populating.
+3. Update `upsertGameFromIgdbPayload` to write all four fields.
+4. Wire the new fields into `getGameDetails` and the widget.
+
+Out of scope for visual-parity Slice 18A — would need its own spec slice.
+Tagged inline in the widget with `// Pending:` comments.
+
+### Removed duplicated platform tag
+
+The previous tanstack hero rendered both a `PLAYING` status badge AND a
+`Nintendo Switch 2` platform tag (via `LibraryStatusStrip`). Canonical
+surfaces platform deeper inside the LibraryModal, not in the hero. The
+`LibraryStatusStrip` rendering in the hero is dropped; platform context
+lives in the "Edit details…" modal (overflow menu).
+
+### Tests
+
+- `game-detail.test.tsx` rewritten: 7 → 19 tests covering breadcrumb
+  structure (Library / Games / title), inline status switcher visibility
+  by viewer state, all 5 pills, default-active pill matching entry status,
+  overflow menu trigger visibility, terminal-style labels in Overview,
+  IGDB summary paragraph, tab visibility for journal & playtime.
+- New `library-status-switcher.test.tsx`: 11 tests covering pill rendering,
+  active state, add-flow (no entry → `addGameToLibraryFn` with chosen
+  status), update-flow (existing entry → `updateLibraryItemFn`), optimistic
+  pill flip, delete via overflow menu (`deleteLibraryItemFn`).
+
+### Out of scope (handed off downstream)
+
+- Hero screenshot background, developer/genres/platforms data — requires
+  DAL extension (Slice 18B candidate).
+- Mobile responsive shell — Phase 4.
+- Optional decorative right-aligned title watermark — skipped, low value.
