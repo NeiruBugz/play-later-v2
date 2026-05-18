@@ -116,10 +116,11 @@ import {
   vi,
 } from "vitest";
 
-// RED import — this module does not exist until the GREEN step (task 2 of Slice 14).
-// The import path targets the plain async worker, which delegates from the
-// createServerFn wrapper. Module-not-found IS the expected failure mode.
-import { getRelatedGames } from "@/features/browse-related-games/api/get-related-games.worker";
+// Entity query (lifted from features/browse-related-games on 2026-05-18 per the
+// audit's HIGH-severity cross-feature-import finding). Tests import the entity
+// directly per foot-gun #8 (createServerFn returns undefined when invoked
+// programmatically in vitest without the Vite plugin loaded).
+import { getRelatedGames } from "@/entities/game/api";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 import { NotFoundError, ValidationError } from "@/shared/lib/errors";
 

@@ -1,17 +1,18 @@
 /**
- * `createServerFn` wrapper around the plain async worker
- * `./get-related-games.worker.ts`. NO `.server.ts` suffix — this file is
- * client-importable per CLAUDE.md foot-gun #1 (the Vite plugin replaces the
- * handler body with an RPC stub on the client build).
+ * `createServerFn` wrapper around the entity query
+ * `@/entities/game/api/get-related-games.server.ts`. NO `.server.ts` suffix on
+ * THIS file — this file is client-importable per CLAUDE.md foot-gun #1 (the
+ * Vite plugin replaces the handler body with an RPC stub on the client build).
  *
- * Worker/server-fn split is the test-harness mitigation for foot-gun #8
+ * Worker/entity-query split is the test-harness mitigation for foot-gun #8
  * (createServerFn returns `undefined` when invoked programmatically in vitest
- * without the Vite plugin loaded).
+ * without the Vite plugin loaded). The entity query is server-only (`.server.ts`)
+ * and tests import it directly.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { getRelatedGames } from "./get-related-games.worker";
+import { getRelatedGames } from "@/entities/game/api";
 
 const inputSchema = z.object({
   collectionId: z.number().int().positive(),

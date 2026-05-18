@@ -3,4 +3,4 @@ export type {
   GetRelatedGamesParams,
   GetRelatedGamesResult,
   RelatedGame,
-} from "./get-related-games.worker";
+} from "@/entities/game/api";

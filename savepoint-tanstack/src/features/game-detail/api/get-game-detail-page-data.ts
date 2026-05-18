@@ -5,15 +5,13 @@ import { z } from "zod";
 import {
   getGameCollectionsByIgdbId,
   getGameDetails,
+  getRelatedGames,
   getTimesToBeat,
   type GameDetails,
+  type GetRelatedGamesResult,
   type TimesToBeat,
 } from "@/entities/game/api";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
-import {
-  getRelatedGames,
-  type GetRelatedGamesResult,
-} from "@/features/browse-related-games/api/get-related-games.worker";
 import { createLogger } from "@/shared/lib";
 
 const logger = createLogger({ service: "get-game-detail-page-data" });

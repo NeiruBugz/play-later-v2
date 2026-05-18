@@ -1,5 +1,5 @@
 /**
- * Plain async worker for the browse-related-games feature.
+ * Entity query: paginated games from an IGDB collection.
  *
  * Read-through IGDB `/collections` query with application-side pagination and
  * `ALLOWED_GAME_CATEGORIES` filtering. Does NOT upsert into the local Game
@@ -10,9 +10,13 @@
  * `savepoint-app/data-access-layer/services/igdb/igdb-service.ts getCollectionGamesById`
  * filter semantics (allow when `game_type === undefined || ALLOWED.includes(...)`).
  *
- * The `createServerFn` wrapper at `./get-related-games.ts` delegates here.
- * Tests import this worker directly per CLAUDE.md foot-gun #8 (createServerFn
- * returns `undefined` when invoked programmatically in vitest).
+ * Lives at the entity layer (originally in `features/browse-related-games/` —
+ * moved 2026-05-18 per the audit's HIGH-severity finding on cross-feature
+ * imports). Consumed by:
+ *   - `features/browse-related-games/api/get-related-games.ts` — `createServerFn` wrapper
+ *   - `features/game-detail/api/get-game-detail-page-data.ts` — loader-side pre-fetch
+ *
+ * Per `.claude/rules/entities.md`, entity queries end in `.server.ts`.
  */
 import { z } from "zod";
 
@@ -27,7 +31,7 @@ import {
   ValidationError,
 } from "@/shared/lib/errors";
 
-const logger = createLogger({ service: "browse-related-games-worker" });
+const logger = createLogger({ service: "game-related-games" });
 
 export interface RelatedGame {
   igdbId: number;
