@@ -10,16 +10,16 @@
 
 ## What's different from `savepoint-app/`
 
-| Concern | `savepoint-app/` | `savepoint-tanstack/` |
-| --- | --- | --- |
-| Framework | Next.js 16 (App Router) | TanStack Start v1 + TanStack Router (file-based) |
-| Data access | Handler → Service → Repository (DAL) | C2 pattern: thin entity queries + feature `createServerFn`s, throw `AppError` |
-| Auth | Better Auth (Next.js handlers) | Better Auth (catch-all Web Request handler) |
-| Server-side framework | RSC + Server Actions | `createServerFn` (TanStack RPC bridge) |
-| Test runner | Vitest (3-project: unit/integration/components) | Vitest (3-project: unit/integration/components) + boundary-rule regression test |
-| FSD enforcement | ESLint boundaries | `eslint-plugin-boundaries` (same shape) |
-| Database, IGDB, S3, Cognito | shared via `../infra/` and externally managed services | **identical** — both apps point at the same instances during the migration |
-| Dev port | `:6060` | `:6060` (swap-and-compare against same Postgres on `:6432`) |
+| Concern                     | `savepoint-app/`                                       | `savepoint-tanstack/`                                                           |
+| --------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Framework                   | Next.js 16 (App Router)                                | TanStack Start v1 + TanStack Router (file-based)                                |
+| Data access                 | Handler → Service → Repository (DAL)                   | C2 pattern: thin entity queries + feature `createServerFn`s, throw `AppError`   |
+| Auth                        | Better Auth (Next.js handlers)                         | Better Auth (catch-all Web Request handler)                                     |
+| Server-side framework       | RSC + Server Actions                                   | `createServerFn` (TanStack RPC bridge)                                          |
+| Test runner                 | Vitest (3-project: unit/integration/components)        | Vitest (3-project: unit/integration/components) + boundary-rule regression test |
+| FSD enforcement             | ESLint boundaries                                      | `eslint-plugin-boundaries` (same shape)                                         |
+| Database, IGDB, S3, Cognito | shared via `../infra/` and externally managed services | **identical** — both apps point at the same instances during the migration      |
+| Dev port                    | `:6060`                                                | `:6060` (swap-and-compare against same Postgres on `:6432`)                     |
 
 Side-by-side parity at the same port means verification happens by stopping one app and starting the other; pixel-diff style side-by-side is deferred to the S20 cutover.
 
@@ -39,16 +39,16 @@ Stop the canonical app before starting this one — both bind to `:6060`.
 
 ## Common commands
 
-| Task | Command |
-| --- | --- |
-| Dev server | `pnpm --filter savepoint-tanstack dev` |
-| Typecheck | `pnpm --filter savepoint-tanstack typecheck` |
-| Lint (incl. FSD boundary rule) | `pnpm --filter savepoint-tanstack lint` |
-| Format check | `pnpm --filter savepoint-tanstack format:check` |
-| Unit tests | `pnpm --filter savepoint-tanstack test:unit` |
-| Integration tests | `pnpm --filter savepoint-tanstack test:integration` |
-| Generate Prisma client | `pnpm --filter savepoint-tanstack prisma:generate` |
-| Format Prisma schema | `pnpm --filter savepoint-tanstack prisma:format` |
+| Task                           | Command                                             |
+| ------------------------------ | --------------------------------------------------- |
+| Dev server                     | `pnpm --filter savepoint-tanstack dev`              |
+| Typecheck                      | `pnpm --filter savepoint-tanstack typecheck`        |
+| Lint (incl. FSD boundary rule) | `pnpm --filter savepoint-tanstack lint`             |
+| Format check                   | `pnpm --filter savepoint-tanstack format:check`     |
+| Unit tests                     | `pnpm --filter savepoint-tanstack test:unit`        |
+| Integration tests              | `pnpm --filter savepoint-tanstack test:integration` |
+| Generate Prisma client         | `pnpm --filter savepoint-tanstack prisma:generate`  |
+| Format Prisma schema           | `pnpm --filter savepoint-tanstack prisma:format`    |
 
 CI runs an additional Prisma schema-drift check against `../savepoint-app/prisma/schema.prisma`. If you change the schema here without also re-copying from the canonical app, CI fails.
 
@@ -61,12 +61,12 @@ CI runs an additional Prisma schema-drift check against `../savepoint-app/prisma
 
 ## Where things are
 
-| You want to | Look here |
-| --- | --- |
-| Add a route | [`src/routes/`](./src/routes/) (file-based) |
-| Add a server fn | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix) |
-| Add an entity query | `src/entities/<noun>/api/<query-name>.server.ts` |
-| Add a composite UI block | `src/widgets/<name>/ui/...` |
-| Add a shared primitive | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/) |
-| Add an env var | [`env.ts`](./env.ts) (Zod schema first, then `import { env } from "@env"`) |
-| Schema change | **Don't migrate here.** Migrate in `../savepoint-app/`, then re-copy `prisma/schema.prisma` + migrations. CI diff-checks divergence. |
+| You want to              | Look here                                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Add a route              | [`src/routes/`](./src/routes/) (file-based)                                                                                          |
+| Add a server fn          | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix)                                                                         |
+| Add an entity query      | `src/entities/<noun>/api/<query-name>.server.ts`                                                                                     |
+| Add a composite UI block | `src/widgets/<name>/ui/...`                                                                                                          |
+| Add a shared primitive   | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                       |
+| Add an env var           | [`env.ts`](./env.ts) (Zod schema first, then `import { env } from "@env"`)                                                           |
+| Schema change            | **Don't migrate here.** Migrate in `../savepoint-app/`, then re-copy `prisma/schema.prisma` + migrations. CI diff-checks divergence. |

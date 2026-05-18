@@ -167,7 +167,6 @@ From [`tsconfig.json`](./tsconfig.json):
 | Generate Prisma client      | `pnpm --filter savepoint-tanstack prisma:generate`                  |
 | Format Prisma schema        | `pnpm --filter savepoint-tanstack prisma:format`                    |
 
-
 ## Foot-guns reference
 
 Silent-failure runtime traps surfaced during the migration — bundler-graph traps, the env-boundary trap, runtime/dev-environment traps, and the test-infrastructure trap — are catalogued in [`FOOT-GUNS.md`](./FOOT-GUNS.md). Read that file **before** adding server fns, browser-direct AWS calls, or touching `env.ts` / singleton constructors. The supply-chain incident response playbook (CVE-2026-45321 and its successors) lives there too.
@@ -175,3 +174,9 @@ Silent-failure runtime traps surfaced during the migration — bundler-graph tra
 ## Divergence log
 
 Slice-by-slice "what we did differently from the canonical app and why" — including the Logger (S7) port note, the Vertical-1 verification matrix, and every "Intentional divergences (Slice N)" / "Known gaps (Slice 14A)" entry — is in [`DIVERGENCES.md`](./DIVERGENCES.md). Append new slice divergences there, not here.
+
+## Per-layer rules
+
+Binding agent rules for each FSD layer plus three cross-cutting concerns (server fns, testing, errors) live at [`../.claude/rules/tanstack/`](../.claude/rules/tanstack/README.md) (repo-root, with subdirectories per sub-project). Each rule file carries a `paths:` frontmatter entry, so Claude Code **auto-loads** the relevant file when reading files matching the glob — e.g. `widgets.md` loads when Claude reads anything under `src/widgets/`.
+
+The rule files are prescriptive — they pin the conventions documented in this file and in `src/<layer>/README.md` to enforceable, scoped rules. See [`INDEX.md`](../.claude/rules/tanstack/README.md) for the full map and the [Claude Code memory docs](https://code.claude.com/docs/en/memory#path-specific-rules) for how path-scoped auto-loading works.

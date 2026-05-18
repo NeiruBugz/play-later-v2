@@ -4,19 +4,29 @@ SavePoint is a gaming backlog management app for gamers who want to track their 
 
 ## Architecture
 
-Monorepo with two layers:
+Monorepo with three top-level modules:
 
-| Layer | Tech | Purpose |
+| Module | Tech | Purpose |
 |---|---|---|
-| `savepoint-app/` | Next.js 15 (App Router), TypeScript, Prisma, Vitest | Web frontend + backend API |
-| `infra/` | Terraform >= 1.5, AWS provider ~> 5.0 | Infrastructure as Code (Cognito, S3, ECR, SQS, Secrets Manager) |
+| `savepoint-app/` | Next.js 16 (App Router), TypeScript, Prisma, Vitest | Canonical, deployed app |
+| `savepoint-tanstack/` | TanStack Start v1, file-based router, Prisma, Vitest | Side-by-side rewrite under spec 021 (cutover at Slice 20) |
+| `infra/` | Terraform >= 1.5, AWS provider ~> 5.0 | Infrastructure as Code (currently Cognito + S3) |
 
-**Package manager**: pnpm 10 (workspace with `savepoint-app/` as the sole JS package).
+**Package manager**: pnpm 10 (workspace with both apps as JS packages).
 
-For layer-specific architecture details, see each layer's own `CLAUDE.md`:
+For module-level details, see each module's own `CLAUDE.md`:
 - `savepoint-app/app/CLAUDE.md` — App Router conventions, import rules, caching
 - `savepoint-app/data-access-layer/CLAUDE.md` — DAL architecture (handlers, services, repository, domain)
+- `savepoint-tanstack/CLAUDE.md` — TanStack Start conventions, FSD layer map, foot-guns, divergence log
 - `infra/CLAUDE.md` — Module inventory, env structure, state management
+
+## Rule files (agent-only)
+
+Binding agent rules live at [`.claude/rules/`](./.claude/rules/) and are **auto-loaded by Claude Code** per the [path-specific rules feature](https://code.claude.com/docs/en/memory#path-specific-rules). Per-sub-project rules go in subdirectories (`tanstack/`, future: `app/`, `infra/`); each rule file carries a `paths:` frontmatter entry so it only enters context when Claude reads matching files.
+
+Today: [`.claude/rules/tanstack/README.md`](./.claude/rules/tanstack/README.md). Same shape lands in `savepoint-app/` and `infra/` when their own audits run.
+
+Per-layer `README.md` files describe layers for humans; rule files prescribe behavior for agents.
 
 ## Where to look first
 
