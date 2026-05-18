@@ -54,6 +54,10 @@ vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
 }));
 
+vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
+  createJournalEntryFn: vi.fn(),
+}));
+
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;
@@ -98,11 +102,16 @@ const elements = {
     screen.getByRole("heading", { name: "Library", level: 1 }),
   queryPlayingFilterButton: () =>
     screen.queryByRole("button", { name: "Filter by Playing" }),
+  getPlayingFilterButton: () =>
+    screen.getByRole("button", { name: "Filter by Playing" }),
+  getAllFilterButton: () =>
+    screen.getByRole("button", { name: "Show all statuses" }),
   queryGameTitleHeading: (title: string) =>
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
   queryLibraryList: () => screen.queryByRole("list", { name: "Library items" }),
   queryAddGameTrigger: () => screen.queryByRole("button", { name: "Add game" }),
+  getAddGameTrigger: () => screen.getByRole("button", { name: "Add game" }),
   getCardLink: (title: string) =>
     screen.getByRole("link", { name: `View ${title}` }),
   queryCardLink: (title: string) =>
@@ -110,6 +119,11 @@ const elements = {
   queryMenuTrigger: (title: string) =>
     screen.queryByRole("button", { name: `Actions for ${title}` }),
   queryDialog: () => screen.queryByRole("dialog"),
+  queryFilterInput: () =>
+    screen.queryByRole("searchbox", { name: "Filter library by title" }),
+  getFilterInput: () =>
+    screen.getByRole("searchbox", { name: "Filter library by title" }),
+  queryCountChip: () => screen.queryByText("3 games"),
 };
 
 describe("LibraryPage", () => {
@@ -190,6 +204,60 @@ describe("LibraryPage", () => {
 
     it("does not render the dialog at rest (modal-open is delegated to the action menu)", () => {
       expect(elements.queryDialog()).toBeNull();
+    });
+  });
+
+  describe("Phase 3 visual-parity push", () => {
+    describe("given a library with two PLAYING items and one SHELF item", () => {
+      beforeEach(() => {
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+          { ...buildItem({ id: 3, gameTitle: "Tunic" }), status: "SHELF" },
+        ] as LibraryItemWithGame[];
+        render(<LibraryPage items={items} total={3} {...defaultViewProps} />);
+      });
+
+      it("renders the filter-by-title input above the grid", () => {
+        expect(elements.queryFilterInput()).not.toBeNull();
+      });
+
+      it("does not render the `3 games` count chip in the header", () => {
+        expect(elements.queryCountChip()).toBeNull();
+      });
+
+      it("mounts the AddGameTrigger as a FAB (still queryable by aria-label)", () => {
+        const trigger = elements.getAddGameTrigger();
+        expect(trigger.className).toMatch(/rounded-full/);
+        expect(trigger.className).toMatch(/fixed/);
+      });
+
+      it("passes per-status counts through to LibraryFilters (rail renders count next to Playing)", () => {
+        const playing = elements.getPlayingFilterButton();
+        expect(playing.textContent).toContain("2");
+      });
+
+      it("renders the totalCount next to the All button", () => {
+        const all = elements.getAllFilterButton();
+        expect(all.textContent).toContain("3");
+      });
+    });
+
+    describe("given the user types a substring into the filter input", () => {
+      beforeEach(async () => {
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+        ];
+        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+        const userEvent = (await import("@testing-library/user-event")).default;
+        await userEvent.type(elements.getFilterInput(), "hollow");
+      });
+
+      it("only renders the matching card", () => {
+        expect(elements.queryGameTitleHeading("Hollow Knight")).not.toBeNull();
+        expect(elements.queryGameTitleHeading("Celeste")).toBeNull();
+      });
     });
   });
 });

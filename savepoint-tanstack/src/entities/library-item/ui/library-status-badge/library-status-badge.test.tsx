@@ -54,16 +54,19 @@ describe("LibraryStatusBadge", () => {
     });
   });
 
-  describe("status-themed className", () => {
-    it("applies the matching status CSS-var background token", () => {
+  describe("status-themed leading dot", () => {
+    it("renders a colored dot using the matching status CSS-var token", () => {
+      render(<LibraryStatusBadge status="PLAYING" />);
+      const dot = screen.getByTestId("library-status-badge-dot");
+      expect(dot.className).toMatch(/bg-\[var\(--status-playing\)\]/);
+      expect(dot).toHaveAttribute("data-status-variant", "playing");
+    });
+
+    it("wraps the pill in the canonical glassy black background", () => {
       render(<LibraryStatusBadge status="PLAYING" />);
       const badge = elements.getBadge();
-      // The variant resolves to `bg-[var(--status-playing)]` per the shared
-      // Badge primitive's variant table.
-      expect(badge.className).toMatch(/bg-\[var\(--status-playing\)\]/);
-      expect(badge.className).toMatch(
-        /text-\[var\(--status-playing-foreground\)\]/
-      );
+      expect(badge.className).toMatch(/bg-black\/55/);
+      expect(badge.className).toMatch(/rounded-full/);
     });
   });
 

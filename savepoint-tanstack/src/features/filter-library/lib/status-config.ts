@@ -24,40 +24,32 @@ import type { LibrarySortBy, LibrarySortOrder } from "./types";
 export { STATUS_ENTRIES, getStatusEntry };
 export type { StatusBadgeVariant, StatusEntry };
 
+/**
+ * Two-tone filter styling — Slice 18A visual-parity push (Phase 3).
+ *
+ * The previous palette gave each status its own saturated brand color
+ * across both states, which diverged from canonical's quieter, single-
+ * accent rail. We collapse to:
+ *  - idle: muted foreground, transparent background, no border accent
+ *  - active: primary token (brand red on light, theme-aware in dark)
+ *
+ * The 5 per-status entries are kept (vs. a single shared shape) so a
+ * future spec can re-introduce dot-glyphs or per-status decoration
+ * without rewriting the consumer call sites.
+ */
+const IDLE = "border-transparent text-muted-foreground hover:bg-muted/50";
+const ACTIVE =
+  "bg-primary text-primary-foreground border-transparent hover:bg-primary/90";
+
 export const STATUS_FILTER_STYLES: Record<
   StatusBadgeVariant,
   { active: string; inactive: string }
 > = {
-  playing: {
-    active:
-      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-playing)]/30 text-[var(--status-playing)] hover:bg-[var(--status-playing)]/10",
-  },
-  played: {
-    active:
-      "bg-[var(--status-played)] text-[var(--status-played-foreground)] hover:bg-[var(--status-played)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-played)]/30 text-[var(--status-played)] hover:bg-[var(--status-played)]/10",
-  },
-  shelf: {
-    active:
-      "bg-[var(--status-shelf)] text-[var(--status-shelf-foreground)] hover:bg-[var(--status-shelf)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-shelf)]/30 text-[var(--status-shelf)] hover:bg-[var(--status-shelf)]/10",
-  },
-  upNext: {
-    active:
-      "bg-[var(--status-upNext)] text-[var(--status-upNext-foreground)] hover:bg-[var(--status-upNext)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-upNext)]/30 text-[var(--status-upNext)] hover:bg-[var(--status-upNext)]/10",
-  },
-  wishlist: {
-    active:
-      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-wishlist)]/30 text-[var(--status-wishlist)] hover:bg-[var(--status-wishlist)]/10",
-  },
+  playing: { active: ACTIVE, inactive: IDLE },
+  played: { active: ACTIVE, inactive: IDLE },
+  shelf: { active: ACTIVE, inactive: IDLE },
+  upNext: { active: ACTIVE, inactive: IDLE },
+  wishlist: { active: ACTIVE, inactive: IDLE },
 };
 
 // ---------------------------------------------------------------------------

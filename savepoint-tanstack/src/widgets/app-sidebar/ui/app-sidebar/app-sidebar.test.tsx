@@ -115,6 +115,13 @@ describe("AppSidebar", () => {
       expect(screen.getByText("Ada")).toBeDefined();
     });
 
+    it("renders an initial-avatar fallback (Phase 3 visual-parity push)", () => {
+      // The Radix Avatar primitive renders the fallback span once the
+      // image fails to load; in the test environment no <img> resolves,
+      // so the fallback is mounted immediately.
+      expect(screen.getByLabelText("Ada")).toBeDefined();
+    });
+
     it("does not show the sign-out item before the menu is opened", () => {
       expect(elements.querySignOutItem()).toBeNull();
     });

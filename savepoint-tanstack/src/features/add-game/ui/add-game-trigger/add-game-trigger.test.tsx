@@ -64,4 +64,21 @@ describe("AddGameTrigger", () => {
       expect(elements.querySearchInput()).not.toBeNull();
     });
   });
+
+  describe('given variant="fab"', () => {
+    beforeEach(() => {
+      render(<AddGameTrigger variant="fab" />);
+    });
+
+    it("renders a circular floating action button with the same aria-label", () => {
+      const fab = elements.getTriggerButton();
+      expect(fab.className).toMatch(/fixed/);
+      expect(fab.className).toMatch(/rounded-full/);
+    });
+
+    it("still opens the dialog on click", async () => {
+      await actions.clickTrigger();
+      expect(elements.queryDialog()).not.toBeNull();
+    });
+  });
 });

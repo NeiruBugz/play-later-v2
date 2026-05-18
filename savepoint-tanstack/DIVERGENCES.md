@@ -565,3 +565,93 @@ lives in the "Edit details…" modal (overflow menu).
   DAL extension (Slice 18B candidate).
 - Mobile responsive shell — Phase 4.
 - Optional decorative right-aligned title watermark — skipped, low value.
+
+## Slice 18A — Visual-parity Phase 3 (Library)
+
+Phase 3 of the visual-parity push restyled `/library` to canonical at
+desktop 1440×900. Mobile sweep stays Phase 4. Audit reference:
+`context/audits/2026-05-18/visual-parity.md` § Library.
+
+### Card body (`widgets/library-item-card/`)
+
+- Restored the canonical meta footer beneath the cover: platform badge
+  (when set), status-driven contextual date string, read-only 5-star
+  rating widget, contextual primary CTA. Pulled status→CTA mapping and
+  the `getContextualDate` helper into a local `library-item-card.utility.ts`
+  — same shapes as canonical (`savepoint-app/features/library/lib/library-card-cta-payload.ts`
+  and `library-card-metadata.tsx`) but kept widget-local; no shared/lib
+  bleed.
+- CTA siblings the cover `<Link>` (not a descendant). Same structural
+  invariant as `LibraryCardMenu` — bubble path to the navigation link is
+  physically impossible regardless of Radix event composition.
+- `PLAYING` CTA opens `ComposeJournalEntryDialog` (already-ported feature)
+  with `defaultGameId` pre-selected; other statuses dispatch
+  `updateLibraryItemFn` and call `router.invalidate()` on success.
+
+### Entity-layer status badge (`entities/library-item/ui/library-status-badge/`)
+
+- Switched from the shared `Badge` primitive's status-colored uppercase
+  tag to canonical's glassy black rounded pill with a colored leading dot
+  (token-driven via `--status-<variant>`). The Badge variant table still
+  carries the legacy status variants — left in place; no other consumer
+  uses them today but no need to delete in this slice.
+
+### Status filter palette (`features/filter-library/`)
+
+- Collapsed the per-status active/inactive `STATUS_FILTER_STYLES` palette
+  to a single two-tone shape: idle = `text-muted-foreground` transparent,
+  active = `bg-primary text-primary-foreground`. Matches canonical's
+  quieter rail. Per-status records kept (5 entries pointing to the same
+  shared shape) so a future spec can re-introduce per-status decoration
+  without rewriting consumers.
+
+### Page chrome (`widgets/library-page/`)
+
+- Dropped the inline `3 games` count chip from the header. `total` prop
+  is kept on `LibraryPageProps` (unused locally — declared `void` to
+  preserve the type contract); the count surface migrates to the rail.
+- Added a client-side filter-by-title `<Input>` above the grid, with a
+  `/` keyboard hint that focuses the input from anywhere outside another
+  text field. Filtering is purely client-side over the loader-supplied
+  `items` array — no server roundtrip.
+- Compute per-status counts client-side from `items` (a `getStatusCounts`
+  server fn was not ported; canonical's rail does compute server-side).
+  Counts are passed through to `LibraryFilters.counts` and `LibraryFilters`
+  renders the right-aligned count for every row including All.
+- Replaced the top-right `Add game` button with a bottom-right floating
+  action button — implemented as `variant="fab"` on `AddGameTrigger`
+  (Pencil icon, `rounded-full` `size-14`, `aria-label="Add game"`).
+  Single feature carries both variants; library is the only consumer.
+
+### App-shell footer (`widgets/app-sidebar/`)
+
+- Avatar slot in the user-menu trigger now uses `<Avatar>` +
+  `<AvatarFallback>` from `shared/ui/avatar` (Radix primitive). First
+  character of the safe display name renders as the initial-avatar; the
+  stock `/default-avatar.png` reference is gone. Image still renders via
+  `<AvatarImage>` when `user.image` is set.
+
+### Tests
+
+- `library-item-card.test.tsx`: +8 tests (meta-footer, contextual date,
+  rating widget role, CTA labels for all 5 statuses, status-pill shape).
+- `library-page.test.tsx`: +5 tests (filter input present, count chip
+  absent, FAB classes, per-status count rendering, client-side title
+  filter behavior).
+- `library-status-badge.test.tsx`: revised the status-themed CSS-var
+  assertion to target the new leading-dot element rather than the
+  wrapper background.
+- `app-sidebar.test.tsx`: +1 test for the initial-avatar fallback.
+- `add-game-trigger.test.tsx`: +1 `given variant="fab"` block (circular
+  shape + still opens the dialog).
+- Pre-existing parse error in `routes/_authed/dashboard.tsx` (literal
+  double-quotes inside JSX text) fixed in-scope per feedback policy.
+
+### Out of scope (handed off downstream)
+
+- Mobile responsive shell — Phase 4.
+- Server-computed status counts — counts are derived from the loaded
+  page; if pagination lands the totals will drift and a `getStatusCounts`
+  entity query becomes mandatory.
+- Hide / align the bottom-left `Auto` chip — present only in dev
+  surfaces, deferred.

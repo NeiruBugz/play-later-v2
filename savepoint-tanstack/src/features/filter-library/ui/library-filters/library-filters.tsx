@@ -13,7 +13,6 @@ import {
   type LibraryStatusCounts,
 } from "@/features/filter-library/lib";
 import { cn } from "@/shared/lib/utils";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import {
   Select,
@@ -161,18 +160,21 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           <li>
             <Button
               type="button"
-              variant={currentStatus === "__all__" ? "secondary" : "ghost"}
+              variant="ghost"
               size="sm"
               onClick={onStatusAll}
               aria-label="Show all statuses"
               aria-pressed={currentStatus === "__all__"}
-              className="w-full justify-between"
+              className={cn(
+                "w-full justify-between border transition-all",
+                currentStatus === "__all__"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 border-transparent"
+                  : "text-muted-foreground hover:bg-muted/50 border-transparent"
+              )}
             >
               <span className="flex items-center gap-2">All</span>
               {totalCount !== undefined ? (
-                <Badge variant="outline" className="text-xs tabular-nums">
-                  {totalCount}
-                </Badge>
+                <span className="text-xs tabular-nums">{totalCount}</span>
               ) : null}
             </Button>
           </li>

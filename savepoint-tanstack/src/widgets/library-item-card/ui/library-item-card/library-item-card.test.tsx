@@ -9,8 +9,10 @@ import { LibraryItemCard } from "./library-item-card";
 // LibraryItemCard renders GameCard, which wraps the card in a TanStack
 // <Link>. The link requires a RouterProvider context — mock it as a plain
 // <a> (matches the precedent in library-grid / related-games-infinite-list
-// / game-card).
+// / game-card). Also mock the CTA's server fn so we don't reach the Start
+// runtime, and the journal-compose dialog body so the test stays focused.
 vi.mock("@tanstack/react-router", () => ({
+  useRouter: () => ({ invalidate: vi.fn() }),
   Link: ({
     to,
     href,
@@ -35,6 +37,14 @@ vi.mock("@tanstack/react-router", () => ({
       </a>
     );
   },
+}));
+
+vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
+  updateLibraryItemFn: vi.fn().mockResolvedValue({}),
+}));
+
+vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
+  createJournalEntryFn: vi.fn(),
 }));
 
 const buildItem = (
@@ -152,6 +162,107 @@ describe("LibraryItemCard", () => {
         expect(elements.getStatusText(label)).toBeDefined();
       }
     );
+  });
+
+  describe("meta footer + CTA (Phase 3 visual-parity push)", () => {
+    describe("given a PLAYING item with a platform and a started date", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            item={buildItem({
+              status: "PLAYING",
+              platform: "PlayStation 5",
+              startedAt: new Date("2025-01-02T00:00:00Z"),
+            })}
+          />
+        );
+      });
+
+      it("renders the platform badge", () => {
+        expect(screen.getByText("PlayStation 5")).toBeDefined();
+      });
+
+      it("renders a status-driven contextual date string", () => {
+        // Started-prefix appears whenever startedAt is present and the
+        // status is PLAYING or UP_NEXT — exact relative-time string is
+        // locale-dependent; we just assert the prefix.
+        expect(
+          screen.getByTestId("library-item-card-metadata").textContent
+        ).toMatch(/Started/);
+      });
+
+      it("renders the read-only 5-star rating widget", () => {
+        // RatingInput in readOnly mode exposes role="img" — query it via
+        // RTL rather than reaching into the DOM with querySelector.
+        expect(
+          screen.getByRole("img", {
+            name: "No rating for Hollow Knight",
+          })
+        ).toBeDefined();
+      });
+
+      it('renders the "Log Session" CTA for status PLAYING', () => {
+        expect(
+          screen.getByRole("button", { name: "Log Session" })
+        ).toBeDefined();
+      });
+    });
+
+    describe("given a SHELF item", () => {
+      beforeEach(() => {
+        render(<LibraryItemCard item={buildItem({ status: "SHELF" })} />);
+      });
+
+      it('renders the "Queue It" CTA', () => {
+        expect(screen.getByRole("button", { name: "Queue It" })).toBeDefined();
+      });
+    });
+
+    describe("given an UP_NEXT item", () => {
+      beforeEach(() => {
+        render(<LibraryItemCard item={buildItem({ status: "UP_NEXT" })} />);
+      });
+
+      it('renders the "Start Playing" CTA', () => {
+        expect(
+          screen.getByRole("button", { name: "Start Playing" })
+        ).toBeDefined();
+      });
+    });
+
+    describe("given a PLAYED item", () => {
+      beforeEach(() => {
+        render(<LibraryItemCard item={buildItem({ status: "PLAYED" })} />);
+      });
+
+      it('renders the "Replay" CTA', () => {
+        expect(screen.getByRole("button", { name: "Replay" })).toBeDefined();
+      });
+    });
+
+    describe("given a WISHLIST item", () => {
+      beforeEach(() => {
+        render(<LibraryItemCard item={buildItem({ status: "WISHLIST" })} />);
+      });
+
+      it('renders the "Add to Shelf" CTA', () => {
+        expect(
+          screen.getByRole("button", { name: "Add to Shelf" })
+        ).toBeDefined();
+      });
+    });
+
+    describe("status pill shape (canonical pill + leading dot)", () => {
+      beforeEach(() => {
+        render(<LibraryItemCard item={buildItem({ status: "PLAYING" })} />);
+      });
+
+      it("renders a glassy rounded pill with a colored leading dot", () => {
+        const dot = screen.getByTestId("library-status-badge-dot");
+        expect(dot).toBeDefined();
+        expect(dot).toHaveAttribute("data-status-variant", "playing");
+      });
+    });
   });
 
   describe("given a menu slot", () => {

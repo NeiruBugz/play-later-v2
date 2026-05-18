@@ -19,6 +19,7 @@ import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedJournalRouteImport } from './routes/_authed/journal'
+import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
 
@@ -71,6 +72,11 @@ const AuthedJournalRoute = AuthedJournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/dashboard': typeof AuthedDashboardRoute
   '/journal': typeof AuthedJournalRoute
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/dashboard': typeof AuthedDashboardRoute
   '/journal': typeof AuthedJournalRoute
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/journal': typeof AuthedJournalRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/profile': typeof AuthedProfileRoute
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/login'
+    | '/dashboard'
     | '/journal'
     | '/library'
     | '/profile'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/login'
+    | '/dashboard'
     | '/journal'
     | '/library'
     | '/profile'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/about'
     | '/login'
+    | '/_authed/dashboard'
     | '/_authed/journal'
     | '/_authed/library'
     | '/_authed/profile'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedJournalRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/dashboard': {
+      id: '/_authed/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -267,6 +286,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedJournalRoute: typeof AuthedJournalRoute
   AuthedLibraryRoute: typeof AuthedLibraryRoute
   AuthedProfileRoute: typeof AuthedProfileRoute
@@ -274,6 +294,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedJournalRoute: AuthedJournalRoute,
   AuthedLibraryRoute: AuthedLibraryRoute,
   AuthedProfileRoute: AuthedProfileRoute,

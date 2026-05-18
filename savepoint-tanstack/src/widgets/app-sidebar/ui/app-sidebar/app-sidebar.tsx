@@ -3,6 +3,7 @@ import { BookOpen, Library, LogOut, Settings, User } from "lucide-react";
 
 import { ThemeToggle } from "@/features/toggle-theme";
 import { authClient } from "@/shared/api/auth-client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
   // is the generic "Account" label — the raw user id is never user-visible.
   const safeName = user.name && !user.name.includes("@") ? user.name : null;
   const displayName = safeName ?? user.username ?? "Account";
+  // Initial-avatar fallback. Canonical renders the first character of the
+  // display name, not the stock cartoon image — see audit
+  // `context/audits/2026-05-18/visual-parity.md` § Library global chrome.
+  const firstChar = (displayName.trim().charAt(0) || "?").toUpperCase();
 
   const handleSignOut = () => {
     void authClient.signOut({
@@ -112,11 +117,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
             aria-label="Open user menu"
             className="hover:bg-accent data-[state=open]:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm"
           >
-            <img
-              src={user.image ?? "/default-avatar.png"}
-              alt={displayName}
-              className="h-7 w-7 rounded-full object-cover"
-            />
+            <Avatar className="h-7 w-7">
+              {user.image ? (
+                <AvatarImage src={user.image} alt={displayName} />
+              ) : null}
+              <AvatarFallback
+                aria-label={displayName}
+                className="text-xs font-medium"
+              >
+                {firstChar}
+              </AvatarFallback>
+            </Avatar>
             <span className="truncate">{displayName}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-56">
