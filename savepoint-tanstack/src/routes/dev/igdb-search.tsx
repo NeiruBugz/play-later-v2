@@ -1,5 +1,9 @@
 // Temporary dev route — spec 021 Slice 8 verification. Remove at cutover.
-import { createFileRoute } from "@tanstack/react-router";
+//
+// Gated by `env.NODE_ENV !== "production"` per `.claude/rules/tanstack/routes.md`
+// ("/dev/* routes MUST gate on env"). Production builds redirect to `/`.
+import { env } from "@env";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 import { searchGamesFn } from "@/features/search-games/api/search-games";
@@ -10,6 +14,11 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
 export const Route = createFileRoute("/dev/igdb-search")({
+  beforeLoad: () => {
+    if (env.NODE_ENV === "production") {
+      throw redirect({ to: "/" });
+    }
+  },
   component: DevIgdbSearch,
 });
 
