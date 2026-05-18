@@ -119,10 +119,9 @@ export function GameDetail({
 
         <section
           id="hero"
-          className="gap-xl mb-xl grid items-end"
-          style={{ gridTemplateColumns: "minmax(140px, 200px) 1fr" }}
+          className="gap-xl mb-xl grid grid-cols-1 items-end md:[grid-template-columns:minmax(140px,200px)_1fr]"
         >
-          <div className="w-full">
+          <div className="w-32 md:w-full">
             <GameCover src={coverUrl} alt={`Cover for ${game.title}`} />
           </div>
           <div className="gap-md flex min-w-0 flex-col pb-1.5">
@@ -145,7 +144,7 @@ export function GameDetail({
               </p>
             ) : null}
 
-            <h1 className="text-h1 tracking-tight">{game.title}</h1>
+            <h1 className="text-h1 tracking-tight break-words">{game.title}</h1>
 
             {viewerUserId !== null ? (
               <LibraryStatusSwitcher

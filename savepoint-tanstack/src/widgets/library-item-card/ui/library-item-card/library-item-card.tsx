@@ -14,15 +14,19 @@ import { getContextualDate } from "./library-item-card.utility";
  *  - meta footer below the cover: platform badge, contextual date,
  *    read-only 5-star rating, status-driven primary CTA
  *
- * Meta-footer was restored in Phase 3 of the Slice 18A visual-parity push
- * — see `context/audits/2026-05-18/visual-parity.md` § Library.
+ * Mobile (`< md`): root is `flex-row` with the cover as a fixed-width left
+ * column and a `flex-col` meta column on the right. Desktop (`md+`): root
+ * is `flex-col`; the meta wrapper uses `display: contents` so its children
+ * flow as direct flex children of the root (preserving the original
+ * stacked layout without restructuring the DOM).
+ *
+ * Meta-footer restored in Phase 3, horizontal-row mobile variant added in
+ * Phase 4 of the Slice 18A visual-parity push — see
+ * `context/audits/2026-05-18/visual-parity.md` § Library.
  *
  * Click semantics:
  * - GameCard body is a TanStack `<Link>` to `/games/$slug`.
- * - Action-menu + CTA + rating are rendered as **siblings** of the link,
- *   not descendants. Clicks on these surfaces physically cannot bubble
- *   through the link, regardless of Radix event composition / asChild
- *   Slot patterns / nested-interactive ambiguities.
+ * - Action-menu + CTA + rating are rendered as **siblings** of the link.
  */
 export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
   const contextualDate = getContextualDate({
@@ -35,8 +39,11 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
     typeof item.platform === "string" && item.platform.trim().length > 0;
 
   return (
-    <div className="relative flex flex-col">
-      <div className="relative">
+    <div
+      className="relative flex flex-row gap-3 md:flex-col md:gap-0"
+      data-testid="library-item-card-root"
+    >
+      <div className="relative w-20 shrink-0 md:w-auto">
         <GameCard
           game={{
             slug: item.game.slug,
@@ -59,54 +66,50 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
         ) : null}
       </div>
 
-      {/* Meta-footer: platform + date + rating + CTA. Lives OUTSIDE the
-          GameCard link wrapper (GameCard renders its own internal anchor)
-          so the interactive controls don't trigger navigation. */}
-      <div
-        className="text-muted-foreground mt-1 flex h-4 items-center truncate text-[11px] leading-none"
-        data-testid="library-item-card-metadata"
-      >
-        {hasPlatform ? (
-          <Badge
-            variant="secondary"
-            className="h-4 px-1.5 py-0 text-[10px] leading-none font-medium"
-          >
-            {item.platform}
-          </Badge>
-        ) : null}
-        {hasPlatform && contextualDate ? (
-          <span aria-hidden className="mx-1.5">
-            •
-          </span>
-        ) : null}
-        {contextualDate ? (
-          <span className="truncate">{contextualDate}</span>
-        ) : null}
-      </div>
+      <div className="flex min-w-0 flex-1 flex-col md:contents">
+        <div
+          className="text-muted-foreground mt-0 flex h-4 items-center truncate text-[11px] leading-none md:mt-1"
+          data-testid="library-item-card-metadata"
+        >
+          {hasPlatform ? (
+            <Badge
+              variant="secondary"
+              className="h-4 px-1.5 py-0 text-[10px] leading-none font-medium"
+            >
+              {item.platform}
+            </Badge>
+          ) : null}
+          {hasPlatform && contextualDate ? (
+            <span aria-hidden className="mx-1.5">
+              •
+            </span>
+          ) : null}
+          {contextualDate ? (
+            <span className="truncate">{contextualDate}</span>
+          ) : null}
+        </div>
 
-      <div
-        className="mt-0.5 h-4"
-        data-testid="library-item-card-rating"
-        onClickCapture={(event) => {
-          // Defensive: rating widget here is display-only, but the wrapper
-          // sits next to the cover Link — stop any stray click before it
-          // can navigate.
-          event.stopPropagation();
-        }}
-      >
-        <RatingInput
-          value={item.rating}
-          size="sm"
-          readOnly
-          aria-label={
-            item.rating === null
-              ? `No rating for ${item.game.title}`
-              : `Rating: ${item.rating / 2} out of 5 stars`
-          }
-        />
-      </div>
+        <div
+          className="mt-0.5 h-4"
+          data-testid="library-item-card-rating"
+          onClickCapture={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <RatingInput
+            value={item.rating}
+            size="sm"
+            readOnly
+            aria-label={
+              item.rating === null
+                ? `No rating for ${item.game.title}`
+                : `Rating: ${item.rating / 2} out of 5 stars`
+            }
+          />
+        </div>
 
-      <LibraryItemCardCta item={item} />
+        <LibraryItemCardCta item={item} />
+      </div>
     </div>
   );
 }

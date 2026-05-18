@@ -10,6 +10,8 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ErrorBoundary } from "@/app";
 import { getCurrentUserFn } from "@/entities/session/api";
 import { Toaster } from "@/shared/ui/sonner";
+import { AppBottomNav } from "@/widgets/app-bottom-nav";
+import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
 import { AppShell } from "@/widgets/app-shell";
 import { AppSidebar } from "@/widgets/app-sidebar";
 
@@ -62,7 +64,11 @@ export function RootShell() {
 
   return (
     <>
-      <AppShell sidebar={user ? <AppSidebar user={user} /> : undefined}>
+      <AppShell
+        sidebar={user ? <AppSidebar user={user} /> : undefined}
+        mobileTopbar={user ? <AppMobileTopbar /> : undefined}
+        mobileBottomNav={user ? <AppBottomNav /> : undefined}
+      >
         <Outlet />
       </AppShell>
       <Toaster />

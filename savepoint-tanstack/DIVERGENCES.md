@@ -655,3 +655,57 @@ desktop 1440×900. Mobile sweep stays Phase 4. Audit reference:
   entity query becomes mandatory.
 - Hide / align the bottom-left `Auto` chip — present only in dev
   surfaces, deferred.
+
+## Slice 18A — Visual parity, Phase 4 (mobile responsive sweep, 375x812)
+
+Phase 0+1+2+3 closed desktop parity (1440x900). Phase 4 lands the mobile
+chrome and per-widget responsive rules so all four authed routes render
+correctly at 375x812.
+
+### New widgets
+
+- `widgets/app-mobile-topbar/` — sticky top bar (`md:hidden`): logo +
+  search icon + theme toggle. The search button is wired to the same
+  command-palette stub as the desktop sidebar.
+- `widgets/app-bottom-nav/` — sticky bottom tab nav (`md:hidden`): three
+  destinations (Library / Journal / Profile) with lucide icons and
+  `activeProps`-driven highlight.
+
+### Modified widgets / features
+
+- `widgets/app-shell` — gained `mobileTopbar` + `mobileBottomNav` slot
+  props (composed by `__root.tsx`). Main column gets `pb-16 md:pb-0` so
+  the fixed bottom nav doesn't occlude page content.
+- `widgets/app-sidebar` — `hidden md:flex` + `sticky top-0` (was always
+  visible at all breakpoints).
+- `widgets/library-page` — filter input is `w-full md:max-w-xl`.
+- `widgets/library-item-card` — root is `flex-row` at mobile,
+  `md:flex-col` at desktop; cover is `w-20` at mobile, native width at
+  desktop; meta wrapper uses `md:contents` so meta children remain
+  direct flex-children of the root at desktop without DOM restructuring.
+- `widgets/game-detail` — hero grid is `grid-cols-1` at mobile,
+  `md:[grid-template-columns:minmax(140px,200px)_1fr]` at desktop.
+  Cover constrained to `w-32` at mobile. Title gains `break-words` for
+  long-title safety at 375px.
+- `widgets/profile-overview` — banner is `h-20 sm:h-[120px]` (was fixed
+  120px). Avatar is `h-20 w-20 sm:h-[140px] sm:w-[140px]` (was always
+  ≥112px). Sub-tabs list gains `overflow-x-auto` for narrow viewports.
+- `features/add-game/add-game-trigger` — FAB position is
+  `bottom-20 right-4 md:bottom-6 md:right-6` so it clears the new
+  mobile bottom nav.
+
+### Tests added
+
+- `app-mobile-topbar.test.tsx` (new) — 4 tests: brand link, search
+  trigger, theme toggle, `md:hidden` invariant.
+- `app-bottom-nav.test.tsx` (new) — 6 tests: link count, each href,
+  `md:hidden`, active-page highlight.
+- `library-item-card.test.tsx` +1 test: `flex-row` at mobile +
+  `md:flex-col` at desktop.
+
+### Carried forward (unresolved)
+
+- `MobileFilterBar` visibility breakpoint is still `xl:hidden`, not
+  `md:hidden`. Intentional — keeps the mobile filter sheet available
+  on tablets too. The sidebar fully takes over at `xl+`. If a follow-up
+  decides to surface the filter sidebar at `md+` we tighten this.

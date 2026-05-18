@@ -1,3 +1,5 @@
+export { AppBottomNav } from "./app-bottom-nav";
+export { AppMobileTopbar } from "./app-mobile-topbar";
 export { AppShell } from "./app-shell";
 export type { AppShellProps } from "./app-shell";
 export { AppSidebar } from "./app-sidebar";

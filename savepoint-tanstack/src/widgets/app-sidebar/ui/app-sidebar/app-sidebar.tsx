@@ -57,7 +57,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
     <aside
       data-testid="app-sidebar"
       aria-label="Primary navigation"
-      className="bg-background flex h-screen w-64 shrink-0 flex-col border-r"
+      className="bg-background sticky top-0 hidden h-screen w-64 shrink-0 flex-col self-start border-r md:flex"
     >
       {/* Top: brand + search trigger */}
       <div className="space-y-3 px-4 pt-4">

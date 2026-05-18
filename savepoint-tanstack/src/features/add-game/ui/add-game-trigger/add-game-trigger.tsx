@@ -38,7 +38,7 @@ export function AddGameTrigger({ variant = "button" }: AddGameTriggerProps) {
             type="button"
             aria-label="Add game"
             className={cn(
-              "shadow-paper fixed right-6 bottom-6 z-40 h-14 w-14 rounded-full p-0",
+              "shadow-paper fixed right-4 bottom-20 z-40 h-14 w-14 rounded-full p-0 md:right-6 md:bottom-6",
               "[&_svg]:size-5"
             )}
           >

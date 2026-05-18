@@ -295,4 +295,16 @@ describe("LibraryItemCard", () => {
       expect(link.contains(menuButton)).toBe(false);
     });
   });
+
+  describe("mobile responsive variant (Phase 4)", () => {
+    beforeEach(() => {
+      render(<LibraryItemCard item={buildItem()} />);
+    });
+
+    it("uses flex-row at mobile and flex-col at md+", () => {
+      const root = screen.getByTestId("library-item-card-root");
+      expect(root.className).toMatch(/\bflex-row\b/);
+      expect(root.className).toMatch(/\bmd:flex-col\b/);
+    });
+  });
 });

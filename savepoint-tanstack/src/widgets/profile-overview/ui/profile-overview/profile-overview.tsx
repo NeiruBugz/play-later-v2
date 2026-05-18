@@ -60,7 +60,7 @@ export function ProfileOverview({
         <div
           data-testid="profile-hero-banner"
           aria-hidden="true"
-          className="relative h-[120px] w-full rounded-lg"
+          className="relative h-20 w-full rounded-lg sm:h-[120px]"
           style={{ background: deriveBannerGradient(usernameSlug) }}
         />
         <div className="relative px-4 sm:px-6">
@@ -72,7 +72,7 @@ export function ProfileOverview({
                   alt={displayName}
                   width={140}
                   height={140}
-                  className="ring-background h-[112px] w-[112px] rounded-lg object-cover ring-4 sm:h-[140px] sm:w-[140px]"
+                  className="ring-background h-20 w-20 rounded-lg object-cover ring-4 sm:h-[140px] sm:w-[140px]"
                 />
                 {isOwnProfile ? (
                   <div className="absolute inset-x-0 bottom-0 rounded-b-lg bg-black/60 px-2 py-1 text-center text-xs text-white">
@@ -120,7 +120,7 @@ export function ProfileOverview({
 
       {/* Sub-tabs */}
       <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="overflow-x-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="library">Library</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
