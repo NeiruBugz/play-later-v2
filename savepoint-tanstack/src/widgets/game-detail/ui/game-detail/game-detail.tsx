@@ -124,6 +124,7 @@ export function GameDetail({
 
             {viewerUserId !== null ? (
               <LibraryStatusSwitcher
+                key={game.igdbId}
                 igdbId={game.igdbId}
                 gameTitle={game.title}
                 entry={libraryEntry}

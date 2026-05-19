@@ -35,7 +35,7 @@ vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
 
-const buildGame = (): Game => ({
+const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
   igdbId: 1234,
   hltbId: null,
@@ -51,6 +51,7 @@ const buildGame = (): Game => ({
   steamAppId: null,
   slug: "hollow-knight",
   franchiseId: null,
+  ...overrides,
 });
 
 const buildIgdbDetails = (
@@ -81,9 +82,10 @@ const buildLibraryEntry = (): LibraryItem => ({
 
 const buildData = (
   libraryEntry: LibraryItem | null,
-  igdbOverrides: Partial<GameDetailsResponseItem> = {}
+  igdbOverrides: Partial<GameDetailsResponseItem> = {},
+  gameOverrides: Partial<Game> = {}
 ): GameDetailData => ({
-  game: buildGame(),
+  game: buildGame(gameOverrides),
   igdbDetails: buildIgdbDetails(igdbOverrides),
   relatedGames: [],
   libraryEntry,
@@ -329,6 +331,35 @@ describe("GameDetail", () => {
     it("renders the em-dash placeholder for both genres and platforms", () => {
       expect(elements.queryGenresList()?.textContent).toBe("—");
       expect(elements.queryPlatformsList()?.textContent).toBe("—");
+    });
+  });
+
+  describe("given the user navigates between two games on the same route", () => {
+    beforeEach(() => {
+      const { rerender } = render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+        />
+      );
+      rerender(
+        <GameDetail
+          data={buildData(
+            null,
+            { id: 5678, name: "Celeste", slug: "celeste" },
+            { id: "game-2", igdbId: 5678, title: "Celeste", slug: "celeste" }
+          )}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("does not preserve the previous game's library status across navigation", () => {
+      expect(elements.queryStatusPill("Playing")).toHaveAttribute(
+        "aria-checked",
+        "false"
+      );
+      expect(elements.queryRatingSlider()).toBeNull();
     });
   });
 });
