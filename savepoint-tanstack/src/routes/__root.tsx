@@ -1,4 +1,5 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createRootRoute,
   HeadContent,
@@ -6,8 +7,10 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useState } from "react";
 
 import { ErrorBoundary } from "@/app";
+import "@/app/dev-console-error-expander";
 import { getCurrentUserFn } from "@/entities/session/api";
 import { CommandPalette } from "@/features/command-palette";
 import { Toaster } from "@/shared/ui/sonner";
@@ -62,9 +65,21 @@ export const Route = createRootRoute({
 
 export function RootShell() {
   const { user } = Route.useLoaderData();
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60_000,
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      })
+  );
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <AppShell
         sidebar={user ? <AppSidebar user={user} /> : undefined}
         mobileTopbar={user ? <AppMobileTopbar /> : undefined}
@@ -85,7 +100,7 @@ export function RootShell() {
           },
         ]}
       />
-    </>
+    </QueryClientProvider>
   );
 }
 
