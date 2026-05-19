@@ -119,6 +119,7 @@ const elements = {
   getSentinel: () => screen.getByTestId("related-games-sentinel"),
   querySentinel: () => screen.queryByTestId("related-games-sentinel"),
   getErrorAlert: () => screen.getByRole("alert"),
+  queryLoadingStatus: () => screen.queryByText("Loading more games"),
 };
 
 const actions = {
@@ -249,6 +250,40 @@ describe("RelatedGamesInfiniteList", () => {
     it("does not duplicate games on rapid double-scroll", () => {
       const imgs = screen.getAllByRole("img");
       expect(imgs).toHaveLength(PAGE_1_GAMES.length + PAGE_2_GAMES.length);
+    });
+  });
+
+  describe("given a next-page fetch is in flight", () => {
+    let resolvePage2: ((value: typeof PAGE_2_RESPONSE) => void) | null = null;
+
+    beforeEach(async () => {
+      resolvePage2 = null;
+      const deferred = new Promise<typeof PAGE_2_RESPONSE>((resolve) => {
+        resolvePage2 = resolve;
+      });
+      mockGetRelatedGamesFn.mockReturnValue(deferred);
+
+      render(
+        <RelatedGamesInfiniteList
+          collectionId={COLLECTION_ID}
+          pageSize={PAGE_SIZE}
+          firstPage={FIRST_PAGE_WITH_MORE}
+        />
+      );
+
+      actions.triggerSentinelIntersection();
+      // Let microtasks settle so the isFetching state commits.
+      await act(async () => {});
+    });
+
+    it("shows the loading indicator while fetching and hides it after the page resolves", async () => {
+      expect(elements.queryLoadingStatus()).not.toBeNull();
+
+      await act(async () => {
+        resolvePage2!(PAGE_2_RESPONSE);
+      });
+
+      expect(elements.queryLoadingStatus()).toBeNull();
     });
   });
 

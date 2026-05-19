@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { GameCard } from "@/widgets/game-card";
@@ -8,20 +9,6 @@ import type {
   RelatedGamesPage,
 } from "./related-games-infinite-list.type";
 
-/**
- * Variant B (hybrid client-append) infinite-scroll list.
- *
- * SSR delivers `firstPage`; pages 2+ are fetched directly via `getRelatedGamesFn`
- * and appended to local state. No URL sync — page index is UI-only state, not a
- * shareable deep-link (multi-collection makes a single `?page=N` ambiguous, and
- * loader revalidation on URL change would re-fire all phase-2 IGDB chains).
- *
- * - Sentinel rendered only when `hasMore` is true.
- * - IntersectionObserver triggers next-page fetch (scoped to the inner scroll
- *   container so the page-level scroll doesn't auto-load).
- * - In-flight guard via ref dedupes rapid intersections.
- * - On rejection: inline `role="alert"` rendered; sentinel removed; no further fetches.
- */
 export function RelatedGamesInfiniteList({
   collectionId,
   pageSize,
@@ -30,6 +17,7 @@ export function RelatedGamesInfiniteList({
   const [games, setGames] = useState<RelatedGame[]>(firstPage.games);
   const [latestPage, setLatestPage] = useState<RelatedGamesPage>(firstPage);
   const [error, setError] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -53,6 +41,7 @@ export function RelatedGamesInfiniteList({
     if (!latestPageRef.current.hasMore) return;
 
     isFetchingRef.current = true;
+    setIsFetching(true);
     const nextPage = latestPageRef.current.page + 1;
 
     try {
@@ -70,6 +59,7 @@ export function RelatedGamesInfiniteList({
       errorRef.current = message;
     } finally {
       isFetchingRef.current = false;
+      setIsFetching(false);
     }
   }, [collectionId, pageSize]);
 
@@ -123,6 +113,20 @@ export function RelatedGamesInfiniteList({
             aria-hidden="true"
             className="h-px w-full"
           />
+        ) : null}
+
+        {isFetching ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="text-muted-foreground gap-sm py-md flex items-center justify-center text-sm"
+          >
+            <Loader2
+              aria-hidden="true"
+              className="h-4 w-4 animate-spin"
+            />
+            <span>Loading more games</span>
+          </div>
         ) : null}
       </div>
 

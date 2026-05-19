@@ -1,14 +1,15 @@
-import { Await, createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Component, Suspense, type ReactNode } from "react";
 
 import {
-  RelatedGamesInfiniteList,
   RelatedGamesSkeleton,
+  RelatedGamesTabs,
 } from "@/features/browse-related-games";
 import {
   getGameDetailPageDataFn,
-  type DeferredRelatedGames,
-  type DeferredTimesToBeat,
+  getRelatedGamesForGameFn,
+  getTimesToBeatForGameFn,
   type RelatedCollectionSection,
 } from "@/features/game-detail/api";
 import {
@@ -26,8 +27,8 @@ export const Route = createFileRoute("/games/$slug")({
 });
 
 function GameDetailRoute() {
-  const { data, viewerUserId, deferredRelatedGames, deferredTimesToBeat } =
-    Route.useLoaderData();
+  const { data, viewerUserId } = Route.useLoaderData();
+  const igdbId = data.game.igdbId;
 
   return (
     <GameDetail
@@ -44,13 +45,7 @@ function GameDetailRoute() {
           }
         >
           <Suspense fallback={<TimesToBeatSkeleton />}>
-            <Await promise={deferredTimesToBeat}>
-              {(timesToBeat: Awaited<DeferredTimesToBeat>) =>
-                timesToBeat === null ? null : (
-                  <TimesToBeatSection timesToBeat={timesToBeat} />
-                )
-              }
-            </Await>
+            <TimesToBeatSlot igdbId={igdbId} />
           </Suspense>
         </SectionErrorBoundary>
       }
@@ -65,18 +60,30 @@ function GameDetailRoute() {
           }
         >
           <Suspense fallback={<RelatedGamesSkeleton />}>
-            <Await promise={deferredRelatedGames}>
-              {(sections: Awaited<DeferredRelatedGames>) =>
-                sections.length === 0 ? null : (
-                  <RelatedGamesSections sections={sections} />
-                )
-              }
-            </Await>
+            <RelatedGamesSlot igdbId={igdbId} />
           </Suspense>
         </SectionErrorBoundary>
       }
     />
   );
+}
+
+function TimesToBeatSlot({ igdbId }: { igdbId: number }) {
+  const { data: timesToBeat } = useSuspenseQuery({
+    queryKey: ["times-to-beat", igdbId],
+    queryFn: () => getTimesToBeatForGameFn({ data: { igdbId } }),
+  });
+  if (timesToBeat === null) return null;
+  return <TimesToBeatSection timesToBeat={timesToBeat} />;
+}
+
+function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
+  const { data: sections } = useSuspenseQuery({
+    queryKey: ["related-games", igdbId],
+    queryFn: () => getRelatedGamesForGameFn({ data: { igdbId } }),
+  });
+  if (sections.length === 0) return null;
+  return <RelatedGamesSections sections={sections} />;
 }
 
 function RelatedGamesSections({
@@ -92,18 +99,7 @@ function RelatedGamesSections({
       <h2 id="related-games-heading" className="text-h3">
         Related games
       </h2>
-      <div className="gap-lg flex flex-col">
-        {sections.map((section) => (
-          <div key={section.collectionId} className="gap-md flex flex-col">
-            <h3 className="text-h4">{section.collectionName}</h3>
-            <RelatedGamesInfiniteList
-              collectionId={section.collectionId}
-              pageSize={section.pageSize}
-              firstPage={section.firstPage}
-            />
-          </div>
-        ))}
-      </div>
+      <RelatedGamesTabs sections={sections} />
     </section>
   );
 }
@@ -129,12 +125,6 @@ function SectionErrorMessage({
   );
 }
 
-/**
- * Minimal class-based error boundary for per-section Suspense boundaries.
- * React still does not ship a built-in `<ErrorBoundary>`; this is the
- * standard 8-line implementation. Rejected promises bubble out of `<Await>`
- * and land here, while the surrounding page stays interactive.
- */
 class SectionErrorBoundary extends Component<
   { children: ReactNode; fallback: ReactNode },
   { hasError: boolean }

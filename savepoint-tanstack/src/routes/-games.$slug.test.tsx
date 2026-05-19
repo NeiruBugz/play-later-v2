@@ -1,5 +1,6 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GameDetailPageView } from "@/features/game-detail/api";
@@ -9,6 +10,8 @@ import { Route } from "./games.$slug";
 
 vi.mock("@/features/game-detail/api", () => ({
   getGameDetailPageDataFn: vi.fn(),
+  getRelatedGamesForGameFn: vi.fn(),
+  getTimesToBeatForGameFn: vi.fn(),
 }));
 
 vi.mock("@/widgets/game-detail", () => ({
@@ -34,8 +37,19 @@ vi.mock("@/widgets/game-detail", () => ({
 }));
 
 vi.mock("@/features/browse-related-games", () => ({
-  RelatedGamesInfiniteList: ({ collectionId }: { collectionId: number }) => (
-    <div data-testid={`infinite-list-${collectionId}`} />
+  RelatedGamesTabs: ({
+    sections,
+  }: {
+    sections: ReadonlyArray<{ collectionId: number }>;
+  }) => (
+    <div data-testid="related-games-tabs">
+      {sections.map((section) => (
+        <div
+          key={section.collectionId}
+          data-testid={`infinite-list-${section.collectionId}`}
+        />
+      ))}
+    </div>
   ),
   RelatedGamesSkeleton: () => <div data-testid="related-games-skeleton" />,
 }));
@@ -89,8 +103,6 @@ const buildView = (
     journalTeaser: [],
   },
   viewerUserId: null,
-  deferredRelatedGames: Promise.resolve([]),
-  deferredTimesToBeat: Promise.resolve(null),
   ...overrides,
 });
 
@@ -116,16 +128,40 @@ const elements = {
   getTimesToBeatAlert: () => screen.getByText("Couldn't load times to beat"),
 };
 
+async function arrangeSlotFns({
+  relatedGames,
+  timesToBeat,
+}: {
+  relatedGames: Promise<unknown>;
+  timesToBeat: Promise<unknown>;
+}) {
+  const api = await import("@/features/game-detail/api");
+  vi.mocked(api.getRelatedGamesForGameFn).mockReturnValue(relatedGames as any);
+  vi.mocked(api.getTimesToBeatForGameFn).mockReturnValue(timesToBeat as any);
+}
+
+function renderRoute(view: GameDetailPageView) {
+  (
+    Route as unknown as { useLoaderData: () => GameDetailPageView }
+  ).useLoaderData = () => view;
+  const Component = Route.options.component as ComponentType;
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 } },
+  });
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  render(<Component />, { wrapper: Wrapper });
+}
+
 describe("/games/$slug route", () => {
   describe("given the loader resolves with signed-in viewer data", () => {
-    const view = buildView({ viewerUserId: "user-123" });
-
-    beforeEach(() => {
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      render(<Component />);
+    beforeEach(async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.resolve([]),
+        timesToBeat: Promise.resolve(null),
+      });
+      renderRoute(buildView({ viewerUserId: "user-123" }));
     });
 
     it("renders the game detail widget with the loaded data", () => {
@@ -139,14 +175,12 @@ describe("/games/$slug route", () => {
   });
 
   describe("given the loader resolves with anonymous viewer data", () => {
-    const view = buildView({ viewerUserId: null });
-
-    beforeEach(() => {
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      render(<Component />);
+    beforeEach(async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.resolve([]),
+        timesToBeat: Promise.resolve(null),
+      });
+      renderRoute(buildView({ viewerUserId: null }));
     });
 
     it("forwards null viewerUserId so the widget hides the journal teaser", () => {
@@ -154,58 +188,45 @@ describe("/games/$slug route", () => {
     });
   });
 
-  describe("phase-2 streaming sections", () => {
-    it("renders the related-games skeleton while the deferred promise is pending", () => {
-      const view = buildView({
-        deferredRelatedGames: new Promise(() => {
-          /* never resolves */
-        }),
+  describe("slot suspense + error states", () => {
+    it("renders the related-games skeleton while the slot fetch is pending", async () => {
+      await arrangeSlotFns({
+        relatedGames: new Promise(() => undefined),
+        timesToBeat: Promise.resolve(null),
       });
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      render(<Component />);
+      renderRoute(buildView());
 
       expect(elements.queryRelatedGamesSkeleton()).not.toBeNull();
     });
 
-    it("renders the times-to-beat skeleton while the deferred promise is pending", () => {
-      const view = buildView({
-        deferredTimesToBeat: new Promise(() => {
-          /* never resolves */
-        }),
+    it("renders the times-to-beat skeleton while the slot fetch is pending", async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.resolve([]),
+        timesToBeat: new Promise(() => undefined),
       });
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      render(<Component />);
+      renderRoute(buildView());
 
       expect(elements.queryTimesToBeatSkeleton()).not.toBeNull();
     });
 
-    it("renders the resolved times-to-beat section after the deferred promise resolves", async () => {
-      const view = buildView({
-        deferredTimesToBeat: Promise.resolve({
+    it("renders the resolved times-to-beat section once the slot fetch settles", async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.resolve([]),
+        timesToBeat: Promise.resolve({
           mainStory: 36000,
           completionist: 72000,
         }),
       });
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      render(<Component />);
+      renderRoute(buildView());
 
       await waitFor(() => {
         expect(elements.queryTimesToBeatSection()).not.toBeNull();
       });
     });
 
-    it("renders the resolved related-games infinite list after the deferred promise resolves", async () => {
-      const view = buildView({
-        deferredRelatedGames: Promise.resolve([
+    it("renders the resolved related-games infinite list once the slot fetch settles", async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.resolve([
           {
             collectionId: 99,
             collectionName: "Test Collection",
@@ -219,31 +240,24 @@ describe("/games/$slug route", () => {
             },
           },
         ]),
+        timesToBeat: Promise.resolve(null),
       });
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      render(<Component />);
+      renderRoute(buildView());
 
       await waitFor(() => {
         expect(elements.queryInfiniteList(99)).not.toBeNull();
       });
     });
 
-    it("renders an inline error alert when the related-games promise rejects", async () => {
-      const view = buildView({
-        deferredRelatedGames: Promise.reject(new Error("upstream boom")),
+    it("renders an inline error alert when the related-games slot fetch rejects", async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.reject(new Error("upstream boom")),
+        timesToBeat: Promise.resolve(null),
       });
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
-      // Suppress React's expected error log for the rejected promise.
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => undefined);
-      render(<Component />);
+      renderRoute(buildView());
 
       await waitFor(() => {
         expect(elements.getRelatedGamesAlert()).toBeDefined();
@@ -252,18 +266,15 @@ describe("/games/$slug route", () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it("renders an inline error alert when the times-to-beat promise rejects", async () => {
-      const view = buildView({
-        deferredTimesToBeat: Promise.reject(new Error("upstream boom")),
+    it("renders an inline error alert when the times-to-beat slot fetch rejects", async () => {
+      await arrangeSlotFns({
+        relatedGames: Promise.resolve([]),
+        timesToBeat: Promise.reject(new Error("upstream boom")),
       });
-      (
-        Route as unknown as { useLoaderData: () => GameDetailPageView }
-      ).useLoaderData = () => view;
-      const Component = Route.options.component as ComponentType;
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => undefined);
-      render(<Component />);
+      renderRoute(buildView());
 
       await waitFor(() => {
         expect(elements.getTimesToBeatAlert()).toBeDefined();
