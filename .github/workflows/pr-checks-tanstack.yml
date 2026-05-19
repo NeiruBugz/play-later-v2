@@ -76,3 +76,22 @@ jobs:
       # via path-filters) still pass through supply-chain review.
       - name: Run pnpm audit (production deps, high+critical)
         run: pnpm audit --prod --audit-level=high
+
+  freshness:
+    name: Dependency Freshness (7-day quarantine)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need merge-base with target branch so the script can diff package.json files
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Blocks PRs that add or upgrade a dep to a version published <7 days ago.
+      # Implements SCS-04 (2026-05-18 audit) without introducing a Renovate dependency.
+      - name: Check dependency publish-age vs 7-day quarantine
+        run: node scripts/check-package-freshness.mjs --base origin/${{ github.base_ref }} --head HEAD --days 7

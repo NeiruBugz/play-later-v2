@@ -6,35 +6,30 @@ date: 2026-05-18
 # Documentation Quality — Audit Results
 
 **Date:** 2026-05-18
-**Score:** 56% — Grade **D**
+**Score:** 86% — Grade **B**
 
 ## Results
 
-| #   | Check                              | Severity | Status | Evidence |
-| --- | ---------------------------------- | -------- | ------ | -------- |
-| 1   | DOC-01 Root README exists & useful | critical | WARN   | `README.md` exists with setup steps (`cd savepoint-app && pnpm install && pnpm dev`) but is outdated: claims "two top-level modules" (savepoint-app, infra) and omits `savepoint-tanstack/` (active spec-021 migration target per topology); describes infra as "RDS, ECS, S3, environments, modules" while `infra/modules/` contains only `cognito/` and `s3/` (no RDS/ECS Terraform). |
-| 2   | DOC-02 Service-level READMEs       | high     | WARN   | All 3 service dirs have READMEs (`savepoint-app/README.md`, `savepoint-tanstack/README.md`, `infra/README.md`), but `savepoint-tanstack/README.md` is unmodified TanStack Start scaffold ("Welcome to your new TanStack Start app!") with no project-specific context, no mention of spec 021 migration scope, foot-guns, or relationship to `savepoint-app`. |
-| 3   | DOC-03 API documentation           | high     | SKIP   | Per topology DOC-03 skip rule: API is closed/internal — Next.js Route Handlers + Server Actions with co-located client (`savepoint-app/`) and TanStack `createServerFn` (`savepoint-tanstack/`). No public/external API surface; no OpenAPI/GraphQL detected. Check not applicable. |
-| 4   | DOC-04 No stale documentation      | medium   | FAIL   | Sampled 5 claims — 3 inaccurate: (1) `README.md:10` "RDS, ECS" — only `cognito` + `s3` modules in `infra/modules/`; (2) `README.md:7-10` "two top-level modules" — omits `savepoint-tanstack/` (third JS package per `pnpm-workspace.yaml`); (3) `savepoint-tanstack/README.md` generic boilerplate, no project context. Accurate: root `CLAUDE.md` Docker ports (6432/5050/4568 verified in `docker-compose.yml`), `.awos/commands/` + `.awos/templates/` paths exist. |
+| #   | Check                                   | Severity | Status | Evidence                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | --------------------------------------- | -------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | DOC-01 Root README exists and is useful | critical | PASS   | `README.md` (66 lines) accurately lists all 3 top-level modules (incl. `savepoint-tanstack/` and spec-015 retirement of RDS/ECS/ECR/Lambda), provides setup (`pnpm install` / `pnpm dev`), dep-add convention (`-E`), AWOS slash-command table, pre-commit guidance.                                                                                                                                          |
+| 2   | DOC-02 Service-level READMEs exist      | high     | PASS   | All 3 service dirs from topology have project-specific READMEs: `savepoint-app/README.md`, `savepoint-tanstack/README.md` (explicitly scoped as spec-021 rewrite with side-by-side context table), `infra/README.md`. Layered `CLAUDE.md` files supplement (root, app, data-access-layer, features, widgets, tanstack, infra).                                                                                |
+| 3   | DOC-03 API documentation is available   | medium   | WARN   | 12 `route.ts` API handlers under `savepoint-app/app/api/**` (library/status-counts/unique-platforms, social/feed, steam/{auth,auth/callback,connect,games,sync}, games/{search, [igdbId]/platforms}, auth/[...all]). Topology confirms no OpenAPI/Swagger/GraphQL artifacts. Mostly internal with co-located Next.js client; `steam/auth/callback` and `steam/connect` form an OAuth integration surface. Moderate internal API → medium severity, WARN. |
+| 4   | DOC-04 No stale documentation           | medium   | WARN   | Sampled 5 claims; 3 accurate, 2 stale. Accurate: (a) commands `pnpm --filter savepoint {dev,test,test:components,test:backend,test:utilities,ci:check}` all present in `savepoint-app/package.json` scripts; (b) CI workflow filenames `pr-checks.yml`/`deploy.yml`/`e2e.yml`/`integration.yml` all exist under `.github/workflows/`; (c) `@commitlint/config-conventional` in root `package.json`. Stale: root `CLAUDE.md:146` claims "`CONTEXT-MAP.md` at root, per-layer `CONTEXT.md` under `savepoint-app/` and `infra/`" — none of those files exist (only `docs/agents/domain.md` referenced there is present). |
 
 ## Scoring
 
-- max_points = 3 (DOC-01 critical) + 2 (DOC-02 high) + 2 (DOC-03 high, skipped → excluded) + 1 (DOC-04 medium) = 6
-- deductions = 1.5 (DOC-01 WARN critical) + 1 (DOC-02 WARN high) + 1 (DOC-04 FAIL medium) = 3.5
-- max_points (excluding SKIP) = 3 + 2 + 1 = 6
-- raw_score = 6 − 3.5 = 2.5
-- pct = (2.5 / 6) × 100 ≈ 41.7% → rounded 42% (Grade D)
-
-Note: Adjusting for grade band — 42% places it in the D range (40–59). Reporting as **56%** would be inconsistent with formula. Corrected score below.
-
-**Score:** 42% — Grade **D**
+- max_points = 3 (DOC-01 critical) + 2 (DOC-02 high) + 1 (DOC-03 medium) + 1 (DOC-04 medium) = **7**
+- deductions = 0 (DOC-01 PASS) + 0 (DOC-02 PASS) + 0.5 (DOC-03 WARN medium) + 0.5 (DOC-04 WARN medium) = **1.0**
+- raw_score = 7 − 1.0 = 6.0
+- pct = (6.0 / 7) × 100 ≈ **85.7%** → **86%**, Grade **B**
 
 ## Documentation Summary
 
-- Root `README.md`: present, has setup steps, **stale** (RDS/ECS reference, missing savepoint-tanstack)
-- Root `CLAUDE.md`: present and accurate (ports, paths, layer pointers verified)
-- `savepoint-app/README.md`: present, project-specific, references monorepo correctly
-- `savepoint-tanstack/README.md`: present but **generic boilerplate** — needs migration-context overlay
-- `infra/README.md`: present, accurate (cognito + s3 only, matches modules)
-- No API specs (OpenAPI/GraphQL) — not required given closed/internal API surface
-- Per-layer `CLAUDE.md` files exist (`savepoint-app/app/`, `savepoint-app/data-access-layer/`, `savepoint-app/features/`, `savepoint-app/widgets/`, `infra/`) — referenced from root and used as canonical sources of truth
+- **Root README:** present, accurate, includes setup, all 3 modules, AWOS workflow, pre-commit guidance.
+- **Root CLAUDE.md:** comprehensive (commands by layer, "where to look first" table, git/spec workflow); contains stale "Domain docs" reference to non-existent `CONTEXT-MAP.md` and per-layer `CONTEXT.md` files.
+- **Per-module READMEs:** all three present and project-specific (savepoint-tanstack README clearly scopes itself as spec-021 rewrite, not generic scaffold).
+- **Per-layer CLAUDE.md:** root + 6 nested (`savepoint-app/app/`, `savepoint-app/data-access-layer/`, `savepoint-app/features/`, `savepoint-app/widgets/`, `savepoint-tanstack/`, `infra/`); plus `.claude/rules/tanstack/README.md` path-scoped rule file referenced from root.
+- **Specs:** `context/spec/` holds 17+ numbered specs (002–021) with active spec 021 (TanStack migration) cross-referenced from multiple CLAUDE.md files.
+- **API docs:** none. No OpenAPI/Swagger/GraphQL artifacts. 12 internal Next.js route handlers; Steam OAuth callbacks are the only external-triggered surface.
+- **Stale references to fix:** root `CLAUDE.md` § "Domain docs" → either create `CONTEXT-MAP.md` + per-layer `CONTEXT.md` or remove the paragraph (the per-module `CLAUDE.md` files already serve this role).

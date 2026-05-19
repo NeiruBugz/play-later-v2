@@ -68,7 +68,7 @@
 
 - [x] **Slice 11: Configure Dependabot**
   - [x] Create `.github/dependabot.yml` with weekly configs for: savepoint-app (npm), lambdas-py (pip), infra (terraform). **[Agent: general-purpose]**
-  - [ ] Verify: Merge to main and confirm Dependabot creates PRs within 1 week. **[Agent: general-purpose]**
+  - [x] Verify: Merge to main and confirm Dependabot creates PRs within 1 week. **[Agent: general-purpose]**
 
 ## Post-Completion
 

@@ -1,8 +1,3 @@
----
-dimension: project-topology
-date: 2026-05-18
----
-
 # Project Topology — Audit Results
 
 **Date:** 2026-05-18
@@ -10,25 +5,26 @@ date: 2026-05-18
 
 ## Results
 
-| #   | Check                                | Severity | Status | Evidence |
-| --- | ------------------------------------ | -------- | ------ | -------- |
-| 1   | TOPO-01 Repository structure type    | medium   | PASS   | Monorepo: pnpm workspace (`pnpm-workspace.yaml`) with 2 JS packages (`savepoint-app/package.json`, `savepoint-tanstack/package.json`) plus independent Terraform root (`infra/envs/{dev,prod}/`). |
-| 2   | TOPO-02 Application layer inventory  | medium   | PASS   | 4 layers detected: Next.js 15 web app (`savepoint-app/`), TanStack Start web app (`savepoint-tanstack/`, WIP per spec 021), Terraform IaC (`infra/`), local dev stack (`docker-compose.yml`). |
-| 3   | TOPO-03 Database and storage         | medium   | PASS   | PostgreSQL 16 via Prisma (`savepoint-app/prisma/schema.prisma`, `savepoint-tanstack/prisma/`, migrations dirs); S3 object storage via `@aws-sdk/client-s3` (`savepoint-app/shared/lib/storage/`, `savepoint-tanstack/src/shared/api/s3.ts`) with LocalStack S3 in `docker-compose.yml`; pgAdmin admin UI. |
-| 4   | TOPO-04 Infrastructure layer         | medium   | PASS   | Terraform (`infra/envs/{dev,prod}/*.tf`, `infra/modules/{cognito,s3}/`) — 14 `.tf` files; Docker Compose at repo root (`docker-compose.yml`, `.docker/`). |
-| 5   | TOPO-05 Language inventory           | medium   | PASS   | TypeScript .ts: 985, .tsx: 556; JavaScript .jsx: 29, .mjs: 9; HCL/Terraform .tf: 14; Prisma .prisma: 2. No Python/Go/Rust source. |
-| 6   | TOPO-06 Inter-layer communication    | medium   | PASS   | REST via Next.js Route Handlers (`savepoint-app/app/api/**/route.ts`) + Server Actions (`features/*/server-actions/`); TanStack Start uses `createServerFn` server functions; AWS SDK clients (S3, Cognito) bridge app↔infra. No OpenAPI/gRPC/GraphQL/message-queue runtime usage detected. |
+| #   | Check                              | Severity | Status | Evidence                                                                                                                                  |
+| --- | ---------------------------------- | -------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Repository structure type          | medium   | PASS   | pnpm monorepo (`pnpm-workspace.yaml` with `savepoint-app`, `savepoint-tanstack`); third independent root `infra/` (Terraform).            |
+| 2   | Application layer inventory        | medium   | PASS   | 3 layers: Next.js 16 app, TanStack Start v1 app, Terraform IaC (see Topology Summary).                                                    |
+| 3   | Database and storage detection     | medium   | PASS   | Prisma schemas in both apps (`savepoint-app/prisma/schema.prisma`, `savepoint-tanstack/prisma/schema.prisma`); `docker-compose.yml` runs Postgres 16, pgAdmin 4, LocalStack S3. |
+| 4   | Infrastructure layer detection     | medium   | PASS   | 14 `*.tf` files under `infra/envs/{dev,prod}` and `infra/modules/{cognito,s3}`; root `docker-compose.yml`; no Dockerfile/K8s/Helm.        |
+| 5   | Language inventory                 | medium   | PASS   | TypeScript dominant: 942 `.ts`, 555 `.tsx`; plus 29 `.jsx`, 9 `.mjs`, 14 `.tf` (HCL). No other languages detected.                        |
+| 6   | Inter-layer communication patterns | medium   | PASS   | No GraphQL/gRPC/OpenAPI specs; comms are intra-app via Next.js server actions / TanStack `createServerFn`; apps share Postgres via Prisma; AWS Cognito + S3 are out-of-process integrations. |
 
 ## Topology Summary
 
-- **Structure:** monorepo
+- **Structure:** monorepo (pnpm workspace + Terraform root)
 - **Layers:**
-  - web-frontend+backend: Next.js 15 (App Router) at `savepoint-app/` (primary language: TypeScript)
-  - web-frontend+backend (WIP migration target, spec 021): TanStack Start + Vite at `savepoint-tanstack/` (primary language: TypeScript)
-  - infrastructure-as-code: Terraform >= 1.5 (AWS provider ~> 5.0) at `infra/` (primary language: HCL)
-  - local-dev-stack: Docker Compose (postgres:16.6, dpage/pgadmin4:9.9, localstack:3.8.1) at repo root `docker-compose.yml`
-- **Storage:** relational with PostgreSQL 16 + Prisma ORM (two schemas under `savepoint-app/prisma/` and `savepoint-tanstack/prisma/`); object storage with AWS S3 (LocalStack locally) via `@aws-sdk/client-s3`
-- **Infrastructure:** Terraform (modules: cognito, s3; envs: dev, prod), Docker Compose
-- **Languages:** TypeScript (1541 files: 985 .ts + 556 .tsx), JavaScript (38 files: 29 .jsx + 9 .mjs), HCL/Terraform (14 .tf), Prisma schema (2 .prisma)
-- **Communication:** REST via Next.js Route Handlers + Server Actions (`savepoint-app`); TanStack `createServerFn` server functions (`savepoint-tanstack`); AWS SDK (S3, Cognito) for cloud services. No OpenAPI/gRPC/GraphQL/MQ.
-- **Service directories:** savepoint-app, savepoint-tanstack, infra
+  - frontend+backend (full-stack): Next.js 16 App Router at `savepoint-app/` (primary language: TypeScript)
+  - frontend+backend (full-stack): TanStack Start v1 (Vite) at `savepoint-tanstack/` (primary language: TypeScript) — side-by-side rewrite under spec 021
+  - infrastructure-as-code: Terraform (AWS provider) at `infra/` with envs `dev`, `prod` and modules `cognito`, `s3` (primary language: HCL)
+  - data-access-layer (shared inside `savepoint-app`): handlers/services/repositories/domain at `savepoint-app/data-access-layer/` (TypeScript)
+  - e2e tests: Playwright at `savepoint-app/e2e/` (TypeScript)
+- **Storage:** relational PostgreSQL 16 via Prisma ORM (both apps); object storage via AWS S3 (LocalStack in dev, real S3 in deployed envs)
+- **Infrastructure:** Terraform (>= 1.5, AWS provider ~> 5.0); Docker Compose for local dev (Postgres, pgAdmin, LocalStack); no Kubernetes/Helm/CDK/serverless detected
+- **Languages:** TypeScript 1497 files (.ts 942, .tsx 555), JSX 29, MJS 9, HCL 14
+- **Communication:** intra-app (Next.js server actions, TanStack `createServerFn` / file-based routes); apps share Postgres via Prisma; AWS Cognito for auth, AWS S3 for assets; no GraphQL, gRPC, OpenAPI specs, or message queues detected
+- **Service directories:** `savepoint-app/`, `savepoint-tanstack/`, `infra/`

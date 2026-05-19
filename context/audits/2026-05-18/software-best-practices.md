@@ -6,27 +6,27 @@ date: 2026-05-18
 # Software Best Practices — Audit Results
 
 **Date:** 2026-05-18
-**Score:** 90% — Grade **A**
+**Score:** 100% — Grade **A**
 
 ## Results
 
-| #   | Check                                       | Severity | Status | Evidence |
-| --- | ------------------------------------------- | -------- | ------ | -------- |
-| 1   | SBP-01 Linting is configured and enforced   | high     | WARN   | ESLint configured for both JS packages (`savepoint-app/eslint.config.mjs`, `savepoint-tanstack/eslint.config.mjs`) with `lint` scripts (`--max-warnings 0`); no Terraform/HCL linter (no `tflint`, no `terraform fmt -check` in CI). |
-| 2   | SBP-02 Formatting is automated              | medium   | PASS   | Prettier configs in both packages (`prettier.config.mjs`), `.prettierignore` at root, `format`/`format:check` scripts present, and `format-check` job runs on every PR in `.github/workflows/pr-checks.yml`. |
-| 3   | SBP-03 Type safety is enforced              | high     | PASS   | `strict: true` + `strictNullChecks: true` in both `savepoint-app/tsconfig.json` and `savepoint-tanstack/tsconfig.json`; tanstack also sets `noImplicitOverride: true`. CI typecheck job (`pnpm --filter savepoint typecheck`). |
-| 4   | SBP-05 CI/CD pipeline exists                | high     | PASS   | `.github/workflows/` contains 5 workflows: `pr-checks.yml` (format, lint, typecheck, components/backend/utilities tests, migration validation), `pr-checks-tanstack.yml`, `e2e.yml`, `integration.yml`, `deploy.yml`. |
-| 5   | SBP-06 Error handling patterns are consistent | high   | PASS   | 5 sampled catches all log/translate/rethrow: `igdb-service.ts:86` logs+rethrows via pino, `user-repository.ts:43` and `imported-game-repository.ts:238` translate Prisma `P2025` → `NotFoundError`, `import-game-to-library.ts:64` structured-logs, `igdb-manual-search.tsx:86` sets UI error state. DAL design (`data-access-layer/CLAUDE.md`) mandates typed-throw model with edge handlers via `mapErrorToHandlerResult`; no empty catch blocks observed. |
-| 6   | SBP-07 Dependencies are managed             | medium   | PASS   | `pnpm-lock.yaml` (553 KB) at repo root; `.github/dependabot.yml` configures weekly updates for `npm` (`/savepoint-app`) and `terraform` (`/infra`). Root `package.json` pins exact pnpm overrides for security. Note: no Dependabot entry for `/savepoint-tanstack`. |
+| #   | Check                                         | Severity | Status | Evidence |
+| --- | --------------------------------------------- | -------- | ------ | -------- |
+| 1   | SBP-01 Linting is configured and enforced     | high     | PASS   | ESLint flat config in both JS packages (`savepoint-app/eslint.config.mjs`, `savepoint-tanstack/eslint.config.mjs`) with `lint: "eslint . --max-warnings 0"`; enforced in `.github/workflows/pr-checks.yml` and `pr-checks-tanstack.yml`. HCL covered by `terraform fmt -check -recursive infra/` step in `pr-checks.yml`. |
+| 2   | SBP-02 Formatting is automated                | medium   | PASS   | Prettier configs in both packages (`prettier.config.mjs`); `format` / `format:check` scripts; `lint-staged` configured in `savepoint-app/package.json`; `format-check` job runs every PR in `pr-checks.yml`. |
+| 3   | SBP-03 Type safety is enforced                | high     | PASS   | `strict: true` + `strictNullChecks: true` in both `savepoint-app/tsconfig.json` and `savepoint-tanstack/tsconfig.json`; tanstack adds `noImplicitOverride: true`. CI `typecheck` jobs gate PRs. |
+| 4   | SBP-05 CI/CD pipeline exists                  | high     | PASS   | 5 workflows under `.github/workflows/`: `pr-checks.yml` (format, lint, typecheck, components/backend/utilities tests, migration validation, terraform fmt), `pr-checks-tanstack.yml`, `e2e.yml`, `integration.yml`, `deploy.yml`. |
+| 5   | SBP-06 Error handling patterns are consistent | high     | PASS   | Sampled 5 catch blocks: `features/dashboard/ui/up-next.tsx:56` log+rethrow; `data-access-layer/services/igdb/igdb-service.ts:86,153,180,232` log + typed `mapIgdbTransportError`; `features/steam-import/use-cases/import-game-to-library.ts:64,135,217` log + classified retryable errors; `features/auth/server-actions/sign-in.ts:41` typed `APIError` branch + log; `savepoint-tanstack/.../delete-library-item.server.ts:54` typed Prisma `P2025` branch. All use pino logger; no empty catches; DAL design (`data-access-layer/CLAUDE.md`) mandates typed-throw + single-edge log via `mapErrorToHandlerResult`. |
+| 6   | SBP-07 Dependencies are managed               | medium   | PASS   | `pnpm-lock.yaml` (root, pnpm 10 workspace); `.github/dependabot.yml` covers npm (`/`, `/savepoint-app`, `/savepoint-tanstack`), terraform (`/infra`), and github-actions — all weekly. Root `pnpm.overrides` pin transitive deps for security. |
 
 ## Dimension Summary
 
-- **Tooling stack:** ESLint + Prettier + TypeScript strict + commitlint conventional + Vitest, all wired into GitHub Actions PR checks.
-- **Strengths:** Uniform strict TS across both web apps, comprehensive CI matrix (format/lint/type/3 test suites/migrations), well-documented typed-throw DAL error model with single-edge logging policy, Dependabot enabled for npm + terraform.
-- **Gaps:** (a) No HCL/Terraform linter or `terraform fmt -check` in CI (only npm side is linted); (b) Husky directory absent at repo root — formatting/lint depend entirely on CI rather than local pre-commit hooks; (c) Dependabot omits `savepoint-tanstack/` package.
+- **Tooling stack:** ESLint + Prettier + TypeScript strict + commitlint conventional + Vitest + Playwright + `terraform fmt`, all wired into GitHub Actions PR checks.
+- **Strengths:** Uniform strict TS across both web apps; comprehensive CI matrix (format/lint/type/3 test suites/migrations/terraform fmt); typed-throw DAL error model with single-edge logging policy; Dependabot enabled for all five ecosystems (root npm, both app npm, terraform, github-actions); centralized pnpm overrides.
+- **Gaps:** No `.husky/` directory at repo root — pre-commit enforcement relies on CI only (lint-staged is wired in `savepoint-app` but no installed hook script). Minor; not check-blocking since CI gates are mandatory PR checks.
 
 ## Scoring
 
 - Max points: 10 (high=2 ×4 + medium=1 ×2)
-- Deductions: SBP-01 WARN (high) = 1.0
-- Raw: 9.0 / 10 = **90%** → Grade **A**
+- Deductions: none
+- Raw: 10.0 / 10 = **100%** → Grade **A**

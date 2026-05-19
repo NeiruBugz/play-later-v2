@@ -1,36 +1,31 @@
----
-dimension: code-architecture
-date: 2026-05-18
----
-
 # Code Architecture — Audit Results
 
 **Date:** 2026-05-18
-**Score:** 100% — Grade **A**
+**Score:** 89% — Grade **B**
 
 ## Results
 
 | #   | Check                                              | Severity | Status | Evidence |
 | --- | -------------------------------------------------- | -------- | ------ | -------- |
-| 1   | ARCH-01 Declared or recognizable architectural pattern | high   | PASS   | FSD explicitly declared in `savepoint-app/features/CLAUDE.md` (refs spec 007 FSD compliance), `savepoint-tanstack/CLAUDE.md` ("FSD reaffirmation for the DAL", "FSD layer map"), and `context/product/architecture.md`. Directory structure matches FSD: both apps expose `app/`, `widgets/`, `features/`, `shared/` (+ `entities/` in tanstack). DAL inside `savepoint-app/data-access-layer/` follows handler→service→repository→domain. |
-| 2   | ARCH-02 Module boundaries are respected            | high     | PASS   | No FSD layer violations found in sampled imports: `rg "from '@/features" savepoint-app/shared/` → 0 hits; `rg "from '@/widgets" savepoint-app/shared/` → 0 hits; entities → features in tanstack → 0 hits. Library-repository.ts imports only from `@/shared/*`, `@prisma/client`, and sibling repository (allowed). tanstack enforces boundaries via `eslint-plugin-boundaries` per `savepoint-tanstack/CLAUDE.md`. |
-| 3   | ARCH-03 Single Responsibility Principle in modules | medium   | PASS   | Top-level modules have focused, descriptive names (`auth`, `library`, `game-detail`, `journal`, `steam-import`, `social`, etc.). `shared/lib/` subdirs are small and purpose-named: `igdb/` (7), `errors/` (8), `platform/` (8), `storage/` (4), `steam/` (3), `prisma/` (5 user files), no `helpers/`, `common/`, `misc/`, `utils/` god dirs. DAL split into `handlers/`, `services/`, `repository/`, `domain/`. |
-| 4   | ARCH-04 Separation of concerns across layers       | high     | PASS   | DAL enforces handler (HTTP+Zod) → service (business) → repository (Prisma) → domain (DTO) split (see `savepoint-app/data-access-layer/CLAUDE.md`). Sampled `library-repository.ts` contains only Prisma queries + error mapping. Sampled UI files (`imported-games-list.tsx`, `sidebar.tsx`) contain only presentation + local state; no inline SQL/fetch. Features expose `server-actions/`, `use-cases/`, `ui/`, `hooks/`, `schemas.ts` as separate slices. |
-| 5   | ARCH-05 Consistent file and directory naming      | medium   | PASS   | Consistent kebab-case for source files across `features/`, `widgets/`, `shared/`, `entities/` (e.g., `journal-entry-form.tsx`, `library-card-cta.tsx`, `imported-games-list.tsx`). Test files colocated with `.test.tsx` / `.unit.test.ts` / `.integration.test.ts` suffixes. Directory names kebab-case (`game-detail`, `steam-import`, `manage-library-entry`). |
-| 6   | ARCH-06 Reasonable file sizes                      | medium   | PASS   | Excluding Prisma-generated code (`shared/lib/prisma/{models,internal}/`) and `routeTree.gen.*`: ~1160 source TS/TSX files total (savepoint-app 800 + savepoint-tanstack 360). Files >500 lines: ~32 (~2.8%, well under 5% PASS threshold); >1000 lines: 4, all test files. Largest non-test source files: `library-repository.ts` (841), `sidebar.tsx` (770, shadcn-generated), `imported-games-list.tsx` (683), `commonInputTypes.ts` (644, prisma-adjacent generated). No file exceeds 1000 lines outside tests. |
+| 1   | Declared or recognizable architectural pattern     | high     | PASS   | FSD explicitly declared in `savepoint-app/features/CLAUDE.md`, `savepoint-tanstack/CLAUDE.md`; both apps expose canonical `app/features/widgets/entities/shared` layers; `savepoint-app/data-access-layer/` (handlers/services/repository/domain) is documented 4-layer DAL in its own `CLAUDE.md`. |
+| 2   | Module boundaries are respected                    | high     | WARN   | Lower layers mostly clean (no `shared/`→`features/`, no `entities/`→`widgets/`). Found 3 DAL→features schema/lib imports that bypass the layered direction: `data-access-layer/services/profile/profile-service.ts` → `@/features/profile/lib`, `data-access-layer/handlers/igdb/igdb-handler.ts` → `@/features/game-search`, plus widgets→features cross-imports (auth-migration-banner, sidebar, mobile-topbar) which are documented as authorized exceptions in `features/CLAUDE.md`. Tanstack app: zero upward imports detected from `shared/` or `entities/`. |
+| 3   | Single Responsibility Principle in modules         | medium   | PASS   | FSD segments are consistently scoped (`ui/`, `hooks/`, `lib/`, `server-actions/`, `use-cases/`); 14 features in `savepoint-app/features/`, 15 in `savepoint-tanstack/src/features/`, each with a focused domain name. No catch-all `utils/`/`helpers/`/`misc/` god dirs. `shared/lib/` is segmented (`prisma/`, `igdb/`, `steam/`, `storage/`, `errors/`, `server-action/`). |
+| 4   | Separation of concerns across layers               | high     | PASS   | `rg "new PrismaClient\|from '@prisma'"` over `features/` and `widgets/` in both apps returns 0 hits in non-test source (only `set-avatar-url.worker.ts` imports `db.server`, which is a server worker by design). UI never touches Prisma directly; mutations go through `createServerAction` / `createServerFn` factories. |
+| 5   | Consistent file and directory naming conventions   | medium   | PASS   | 0 PascalCase `.tsx` filenames across feature/widget dirs in both apps — uniform kebab-case files and directories. Tests colocated with `.test.tsx`/`.unit.test.ts`/`.integration.test.ts` suffix conventions documented in `features/CLAUDE.md`. |
+| 6   | Reasonable file sizes                              | medium   | PASS   | 26 of 1037 hand-written source files (2.51%) exceed 500 lines, well under the 5% PASS threshold. Largest hand-written file: `data-access-layer/repository/library/library-repository.ts` at 841 lines. No source file >2000 lines. Massive Prisma model files in `shared/lib/prisma/` (up to 3299 lines in `user.ts`) are excluded as generated (`!!! This is code generated by Prisma. Do not edit directly. !!!`). |
 
-## Dimension Summary
+## Scoring
 
-- **Architecture:** Feature-Sliced Design (declared + enforced) applied uniformly to both web app layers (`savepoint-app` Next.js 15 and `savepoint-tanstack` TanStack Start). Backend logic inside `savepoint-app/data-access-layer/` adds a handler→service→repository→domain stack inside the `shared`/DAL boundary.
-- **Boundary enforcement:** Manual conventions in `savepoint-app` (CLAUDE.md + spec 007), automated via `eslint-plugin-boundaries` in `savepoint-tanstack`.
-- **Notable strengths:** No god modules, no cross-feature pollution, clean DAL/UI separation, consistent kebab-case naming, colocated tests, well-scoped `shared/lib/*` subdirs.
-- **Watch items (no failing checks):**
-  - `data-access-layer/repository/library/library-repository.ts` at 841 lines is the largest hand-written source file — candidate for decomposition by entity boundary (library item vs library aggregation queries) if it continues to grow.
-  - Several test files exceed 1000 lines (`journal-repository.integration.test.ts` 1344, `imported-games.handler.integration.test.ts` 1145); not flagged by ARCH-06 thresholds, but worth splitting per-scenario in future maintenance passes.
-  - Two app layers (`savepoint-app` + `savepoint-tanstack`) implement the same domain in parallel during spec 021 migration; once migration completes, retire `savepoint-app/` to remove duplication.
+- Max points: 2 + 2 + 1 + 2 + 1 + 1 = **9**
+- Deductions: ARCH-02 WARN (high) = 1 pt
+- Raw: 8 / 9 = **88.89%** → Grade **B**
 
-## Score Calculation
+## Architecture Summary (for downstream dimensions)
 
-- Max points: high(2)+high(2)+medium(1)+high(2)+medium(1)+medium(1) = **9.0**
-- Deductions: 0 (6 PASS)
-- Raw: 9.0 / 9.0 → **100% — Grade A**
+- **Declared patterns:** Feature-Sliced Design (both apps) + 4-layer DAL (handlers → services → repository → domain) in `savepoint-app/`.
+- **Layer rules:** documented in `savepoint-app/features/CLAUDE.md` (cross-feature allowlist), `savepoint-app/data-access-layer/CLAUDE.md`, `savepoint-tanstack/CLAUDE.md`, and per-layer `.claude/rules/tanstack/*`.
+- **Public API discipline:** features expose barrel `index.ts`; cross-feature imports restricted to documented allowlist.
+- **Known boundary leaks:** 3 DAL→features schema/lib imports (profile, igdb, social activity-feed types) — minor reverse direction; candidates for lifting validators/types into `shared/` or DAL-owned schemas.
+- **Generated code isolation:** Prisma client output to `shared/lib/prisma/` (carries `@ts-nocheck` and generator banner); should be excluded from any code-quality / size checks.
+- **File size health:** 2.51% over 500 lines; no hand-written file >2000 lines.
+- **Naming:** uniform kebab-case files, PascalCase components, `use-` hooks, `-action` server actions.
