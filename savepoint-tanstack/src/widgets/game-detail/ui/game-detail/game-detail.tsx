@@ -12,28 +12,26 @@ import { LibraryStatusSwitcher } from "../library-status-switcher";
 import type { GameDetailProps } from "./game-detail.type";
 
 /**
- * Game-detail page composition (Phase 2 of Slice 18A visual parity).
+ * Game-detail page composition.
  *
  * Layout — matching canonical `/games/<slug>`:
  *   - Breadcrumb: `Library / Games / <Title>`
- *   - Hero with full-bleed background, cover + metadata, inline 5-pill status
- *     switcher (replaces former "Manage in library" button for signed-in viewers)
+ *   - Hero with full-bleed background, cover + eyebrow metadata
+ *     (`<year> · <developer> · <genres>`), inline 5-pill status switcher
+ *     (replaces former "Manage in library" button for signed-in viewers)
  *   - Tabs strip: Overview / Journal {count} / Playtime (3 tabs; Related games
  *     content is folded into Overview)
- *   - Overview body: IGDB summary paragraph + terminal-style `// GAME.DETAIL`
- *     label block + related-games carousel (slot)
+ *   - Overview body: IGDB summary paragraph + terminal-style label block
+ *     (`// GAME.DETAIL`, `// GENRES`, `// PLATFORMS`) + related-games carousel
+ *     (slot)
  *   - Playtime tab: times-to-beat slot
  *
- * Phase-2 sections (related games, times-to-beat) are passed as ReactNode slots
- * from the route — the route owns the `<Suspense>` + `<Await>` + error boundary
- * plumbing.
- *
- * Data gaps (logged in DIVERGENCES.md Slice 18A Phase 2): tanstack's `Game`
- * entity does NOT yet store screenshots, genres, platforms, or developer/studio.
- * Hero background, eyebrow metadata (developer + genres), and Overview chip
- * rows render gracefully as empty when these are absent. Closing the gap
- * requires extending the IGDB body fields list + Prisma schema — out of scope
- * for the visual-parity slice.
+ * Data sources: the THIN `game` prop (Prisma row) supplies title/slug/cover/
+ * releaseDate; everything else (summary, genres, platforms, developer,
+ * screenshots, rating) comes from the LIVE `igdbDetails` prop. This mirrors
+ * canonical's dual-track shape in
+ * `savepoint-app/features/game-detail/ui/game-detail-hero.tsx` etc. Screenshots
+ * + aggregated rating consumed similarly when surfaced by the design.
  */
 export function GameDetail({
   data,
@@ -41,7 +39,7 @@ export function GameDetail({
   relatedGamesSlot,
   timesToBeatSlot,
 }: GameDetailProps) {
-  const { game, libraryEntry, journalTeaser } = data;
+  const { game, igdbDetails, libraryEntry, journalTeaser } = data;
   const [composeOpen, setComposeOpen] = useState(false);
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
@@ -49,10 +47,22 @@ export function GameDetail({
     ? game.releaseDate.getUTCFullYear().toString()
     : null;
 
-  // Eyebrow metadata row (`<year> · <developer> · <genres>`). Developer +
-  // genres are NOT yet on the tanstack Game entity (see comment block above);
-  // for now we only render the year. Eyebrow is hidden when no parts exist.
-  const eyebrowParts: string[] = [releaseYear]
+  // Derived display data from the LIVE IGDB payload (never from Prisma).
+  const summary = igdbDetails.summary ?? null;
+  const genres = igdbDetails.genres?.map((g) => g.name) ?? [];
+  const platforms = igdbDetails.platforms?.map((p) => p.name) ?? [];
+  const developer =
+    igdbDetails.involved_companies?.find((c) => c.developer)?.company.name ??
+    null;
+
+  // Eyebrow metadata row (`<year> · <developer> · <genres>`). Mirrors
+  // canonical's row shape; empty parts collapse so the row degrades gracefully
+  // when IGDB omits fields.
+  const eyebrowParts: string[] = [
+    releaseYear,
+    developer,
+    genres.length > 0 ? genres.slice(0, 2).join(", ") : null,
+  ]
     .filter((p): p is string => Boolean(p))
     .map((p) => p.toUpperCase());
 
@@ -182,8 +192,10 @@ export function GameDetail({
 
           <TabsContent value="overview" className="gap-xl flex flex-col">
             <OverviewBody
-              summary={game.description}
+              summary={summary}
               releaseYear={releaseYear}
+              genres={genres}
+              platforms={platforms}
               relatedGamesSlot={relatedGamesSlot}
             />
           </TabsContent>
@@ -224,18 +236,20 @@ export function GameDetail({
  * `// PLATFORMS`) — canonical's signature look. Renders as left-aligned
  * font-mono uppercase tokens with content stacked to the right.
  *
- * Genres + Platforms data is not yet on the tanstack Game entity (see widget
- * file header). When the data lands, populate the `genres` and `platforms`
- * arrays here. Today we render the label rows with a placeholder dash so the
- * scaffolding is visible and the gap is obvious.
+ * Genres and platforms are joined by " · "; empty arrays fall back to `—`
+ * so the row scaffolding remains visible.
  */
 function OverviewBody({
   summary,
   releaseYear,
+  genres,
+  platforms,
   relatedGamesSlot,
 }: {
   summary: string | null;
   releaseYear: string | null;
+  genres: string[];
+  platforms: string[];
   relatedGamesSlot: GameDetailProps["relatedGamesSlot"];
 }) {
   return (
@@ -259,15 +273,19 @@ function OverviewBody({
         </dl>
 
         <TerminalLabel>{`// GENRES`}</TerminalLabel>
-        <p className="text-muted-foreground text-sm">
-          {/* Pending: genres need to be threaded through IGDB body fields +
-              persisted on Game. Logged in DIVERGENCES.md Slice 18A Phase 2. */}
-          —
+        <p
+          aria-label="Genres"
+          className="text-muted-foreground text-sm"
+        >
+          {genres.length > 0 ? genres.join(" · ") : "—"}
         </p>
 
         <TerminalLabel>{`// PLATFORMS`}</TerminalLabel>
-        <p className="text-muted-foreground text-sm">
-          {/* Same data gap as Genres. */}—
+        <p
+          aria-label="Platforms"
+          className="text-muted-foreground text-sm"
+        >
+          {platforms.length > 0 ? platforms.join(" · ") : "—"}
         </p>
       </div>
 

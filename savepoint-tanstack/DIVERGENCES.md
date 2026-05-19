@@ -501,43 +501,45 @@ tabs visible: `Overview` (always), `Journal {count}` (signed-in viewers),
 folds into Overview (canonical pattern); "Times to beat" content moves
 under Playtime.
 
-### Data gaps — held until DAL extension
+### Data gaps — closed by Slice 17B (canonical dual-track shape)
 
-Tanstack's `Game` entity stores only `title / description / coverImage /
-releaseDate`. Canonical's hero renders `<year> · <developer> · <genres>`
-plus full-bleed `screenshots[0]` plus genre + platform chip rows on the
-Overview body. None of `developer / studio`, `genres`, `platforms`, or
-`screenshots` is currently:
+**Closed:** `description` (summary), `genres`, `platforms`, `developer`,
+`aggregated_rating`, and `screenshots` are now ALL available to the
+widget — not by persisting them, but by mirroring canonical's dual-track
+pattern (`savepoint-app/features/game-detail/use-cases/get-game-details.ts`):
 
-1. Requested from IGDB (`SearchResponseItemSchema` does not include
-   `involved_companies`, `genres`, `screenshots`; `platforms` is requested
-   but never persisted),
-2. Persisted on the Prisma `Game` row,
-3. Populated by `upsertGameFromIgdbPayload`.
+1. **Live IGDB payload to widget.** The orchestrator
+   `entities/game/api/get-game-details.server.ts` returns
+   `{ game, igdbDetails, libraryEntry, journalTeaser, relatedGames }`.
+   `igdbDetails: GameDetailsResponseItem` carries the rich live payload
+   (summary, genres, platforms, screenshots, themes, involved_companies,
+   aggregated_rating, franchise). The widget reads display data from
+   `igdbDetails` on every render.
+2. **Thin Game row for cross-feature anchoring.** The Prisma `Game` row
+   stays as it was (title/slug/cover/releaseDate). `upsertThinGameFromIgdbDetailsPayload`
+   only writes those four fields. Description, genres, platforms,
+   screenshots, etc. are NEVER persisted from the detail page.
+3. **Caching at the route loader.** Canonical uses Next 16's `"use cache"`
+   on the use-case wrapper; the tanstack equivalent is the TanStack Start
+   route loader cache + the `cache()` wrapper at the route level. The
+   entity does NOT cache — every `getGameDetails` call hits IGDB.
 
-Phase 2 renders the visual scaffolding so the gap is obvious:
+**Surfaces now live (no longer placeholders):**
 
-- Hero background falls back to a brand-tinted CSS gradient (matches
-  canonical's `bannerUrl === null` branch byte-for-byte).
-- Eyebrow row renders only `<year>` (uppercased). When developer / genres
-  data lands, append to `eyebrowParts` in
-  `widgets/game-detail/ui/game-detail/game-detail.tsx`.
-- `// GAME.DETAIL` block renders only the `Release year` row.
-- `// GENRES` and `// PLATFORMS` rows render an em-dash placeholder.
+- Eyebrow row renders `<year> · <developer> · <genre1, genre2>` —
+  uppercased, dot-separated, mirroring canonical.
+- `// GENRES` and `// PLATFORMS` rows render `" · "`-joined name lists
+  (em-dash fallback when IGDB returns no data).
+- Summary `<p>` renders when `igdbDetails.summary` is set.
 
-Closing the gap requires (in this order):
+**Still gapped (visual-only):**
 
-1. Extend `SearchResponseItemSchema` in `shared/api/igdb/schemas.ts` to
-   include `screenshots`, `genres`, `involved_companies`. Update the IGDB
-   body fields list.
-2. Extend `prisma/schema.prisma`: `Game` gets `screenshots String[]`,
-   `developer String?`; existing `genres`/`platforms` relation tables
-   need populating.
-3. Update `upsertGameFromIgdbPayload` to write all four fields.
-4. Wire the new fields into `getGameDetails` and the widget.
+- Hero background image. `igdbDetails.screenshots[0]?.image_id` is now
+  available; the widget just doesn't render it as a `<img>` yet. Drop-in
+  whenever the design surfaces the banner.
+- Aggregated rating badge. `igdbDetails.aggregated_rating` available.
 
-Out of scope for visual-parity Slice 18A — would need its own spec slice.
-Tagged inline in the widget with `// Pending:` comments.
+Neither needs DAL work — both are widget renders blocked only on design.
 
 ### Removed duplicated platform tag
 

@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { GameDetailsResponseItem } from "@/shared/api/igdb";
+
 import type {
   Game,
   LibraryItem,
@@ -38,7 +40,7 @@ const buildGame = (): Game => ({
   igdbId: 1234,
   hltbId: null,
   title: "Hollow Knight",
-  description: "A challenging metroidvania.",
+  description: null,
   coverImage: null,
   releaseDate: new Date("2017-02-24T00:00:00Z"),
   mainStory: null,
@@ -49,6 +51,16 @@ const buildGame = (): Game => ({
   steamAppId: null,
   slug: "hollow-knight",
   franchiseId: null,
+});
+
+const buildIgdbDetails = (
+  overrides: Partial<GameDetailsResponseItem> = {}
+): GameDetailsResponseItem => ({
+  id: 1234,
+  name: "Hollow Knight",
+  slug: "hollow-knight",
+  summary: "A challenging metroidvania.",
+  ...overrides,
 });
 
 const buildLibraryEntry = (): LibraryItem => ({
@@ -67,8 +79,12 @@ const buildLibraryEntry = (): LibraryItem => ({
   rating: null,
 });
 
-const buildData = (libraryEntry: LibraryItem | null): GameDetailData => ({
+const buildData = (
+  libraryEntry: LibraryItem | null,
+  igdbOverrides: Partial<GameDetailsResponseItem> = {}
+): GameDetailData => ({
   game: buildGame(),
+  igdbDetails: buildIgdbDetails(igdbOverrides),
   relatedGames: [],
   libraryEntry,
   journalTeaser: [],
@@ -94,6 +110,12 @@ const elements = {
   queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
+  // Slice 17B — IGDB enrichment surfaces. Genres + Platforms render as a
+  // " · "-joined string inside a <dd>-style row next to the GENRES/PLATFORMS
+  // terminal labels. Empty arrays render as the literal placeholder "—".
+  getSummaryText: () => screen.getByLabelText("Game summary"),
+  queryGenresList: () => screen.queryByLabelText("Genres"),
+  queryPlatformsList: () => screen.queryByLabelText("Platforms"),
 };
 
 describe("GameDetail", () => {
@@ -244,6 +266,143 @@ describe("GameDetail", () => {
 
     it("renders the Playtime tab when times-to-beat slot is supplied", () => {
       expect(elements.queryPlaytimeTab()).not.toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Slice 17B — game-detail IGDB enrichment (live-fetch dual-track shape).
+  // Rich fields (summary, genres, platforms, developer) flow through the
+  // `igdbDetails` prop on every render; NOT persisted to Prisma.
+  // -------------------------------------------------------------------------
+
+  describe("given igdbDetails with a populated summary", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, { summary: "Custom summary copy for this game." })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders the summary text inside the Game-summary paragraph", () => {
+      expect(elements.getSummaryText().textContent).toBe(
+        "Custom summary copy for this game."
+      );
+    });
+  });
+
+  describe("given igdbDetails with no summary", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, { summary: undefined })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("does NOT render the summary paragraph", () => {
+      expect(elements.querySummary()).toBeNull();
+    });
+  });
+
+  describe("given igdbDetails with two genres", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, {
+            genres: [
+              { id: 12, name: "Role-playing (RPG)" },
+              { id: 31, name: "Adventure" },
+            ],
+          })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders the genres joined by ' · ' next to the GENRES label", () => {
+      expect(elements.queryGenresList()?.textContent).toBe(
+        "Role-playing (RPG) · Adventure"
+      );
+    });
+  });
+
+  describe("given igdbDetails with three platforms", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, {
+            platforms: [
+              { id: 6, name: "PC" },
+              { id: 167, name: "PlayStation 5" },
+              { id: 169, name: "Xbox Series X" },
+            ],
+          })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders the platforms joined by ' · ' next to the PLATFORMS label", () => {
+      expect(elements.queryPlatformsList()?.textContent).toBe(
+        "PC · PlayStation 5 · Xbox Series X"
+      );
+    });
+  });
+
+  describe("given igdbDetails with an involved developer company", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, {
+            involved_companies: [
+              {
+                developer: true,
+                publisher: false,
+                company: { id: 1, name: "Team Cherry" },
+              },
+              {
+                developer: false,
+                publisher: true,
+                company: { id: 2, name: "Skybound Games" },
+              },
+            ],
+          })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("includes the developer name in the eyebrow row", () => {
+      // Eyebrow has aria-label="Release metadata"; developer is uppercased.
+      const eyebrow = screen.getByLabelText("Release metadata");
+      expect(eyebrow.textContent).toContain("TEAM CHERRY");
+    });
+
+    it("does NOT include the publisher name in the eyebrow row", () => {
+      const eyebrow = screen.getByLabelText("Release metadata");
+      expect(eyebrow.textContent).not.toContain("SKYBOUND");
+    });
+  });
+
+  describe("given igdbDetails with no genres and no platforms", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, { genres: [], platforms: [] })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders the em-dash placeholder for genres", () => {
+      expect(elements.queryGenresList()?.textContent).toBe("—");
+    });
+
+    it("renders the em-dash placeholder for platforms", () => {
+      expect(elements.queryPlatformsList()?.textContent).toBe("—");
     });
   });
 });

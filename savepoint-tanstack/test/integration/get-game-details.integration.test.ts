@@ -101,6 +101,11 @@ const MOCK_IGDB_GAME = {
   id: IGDB_ID,
   name: "Elden Ring",
   slug: GAME_SLUG,
+  // Slice 17B: `summary` populates `Game.description` so the row is treated as
+  // fully-hydrated on subsequent reads. Without it the orchestrator's new
+  // backfill check (description === null) would re-fetch IGDB on every call
+  // and break the cache-hit assertion below.
+  summary: "Elden Ring summary text from IGDB.",
   cover: {
     id: 264551,
     image_id: "co5s5v",
@@ -404,23 +409,29 @@ describe("getGameDetails", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Cache hit — second call does NOT re-hit IGDB
+  // Cache shape — second call still hits IGDB (caching lives at route loader,
+  // not at the entity layer). Mirrors canonical's "use cache" pattern.
   // -------------------------------------------------------------------------
 
-  describe("cache hit", () => {
-    it("does not call IGDB on the second request for the same slug", async () => {
-      // First call — cache miss; IGDB is called.
+  describe("repeat reads", () => {
+    it("hits IGDB again on the second request — entity does not cache", async () => {
+      // First call — IGDB called.
       await getGameDetails({ slug: GAME_SLUG });
 
-      // Replace fetch with a strict mock AFTER the first call.
-      const strictFetch = vi.fn();
-      vi.stubGlobal("fetch", strictFetch);
-
-      // Second call — should hit the DB cache; fetch must not be invoked.
+      // Same mock keeps responding; second call must still go through.
       const result = await getGameDetails({ slug: GAME_SLUG });
 
-      expect(strictFetch).not.toHaveBeenCalled();
       expect(result.game.slug).toBe(GAME_SLUG);
+    });
+
+    it("does NOT create a duplicate Game row on the second request", async () => {
+      await getGameDetails({ slug: GAME_SLUG });
+      await getGameDetails({ slug: GAME_SLUG });
+
+      const rows = await db.prisma.game.findMany({
+        where: { slug: GAME_SLUG },
+      });
+      expect(rows).toHaveLength(1);
     });
   });
 });

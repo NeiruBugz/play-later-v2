@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import type { GameDetailsResponseItem } from "@/shared/api/igdb";
+
 import type {
   Game,
   JournalEntry,
@@ -7,7 +9,14 @@ import type {
 } from "../../../../../shared/lib/prisma/client.ts";
 
 export type GameDetailData = {
+  /** Thin cached Game row — anchor for cross-feature reads. */
   game: Game;
+  /**
+   * Live IGDB payload — source of truth for summary, genres, platforms,
+   * screenshots, involved companies, themes, aggregated rating. NOT
+   * persisted. The widget reads display data from here.
+   */
+  igdbDetails: GameDetailsResponseItem;
   relatedGames: Game[];
   libraryEntry: LibraryItem | null;
   journalTeaser: JournalEntry[];

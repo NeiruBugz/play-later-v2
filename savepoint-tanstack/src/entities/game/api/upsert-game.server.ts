@@ -9,10 +9,21 @@
  *   4. IGDB transport / non-2xx / malformed response → `UpstreamError`
  *      (already thrown by `getGameByIgdbId`).
  *
+ * The Game row is intentionally THIN — title, slug, releaseDate, cover only.
+ * Rich detail fields (summary, genres, platforms, screenshots, companies,
+ * rating, themes, franchise) are NEVER persisted from the detail page. They
+ * are served live from IGDB by `shared/api/igdb/get-game-details-by-slug.ts`
+ * and consumed directly by the widget — mirroring canonical's dual-track
+ * pattern in `savepoint-app/features/game-detail/use-cases/get-game-details.ts`.
+ *
  * No DI, no classes, no Result wrapper — per C2 DAL conventions
  * (see savepoint-tanstack/CLAUDE.md → "DAL conventions").
  */
-import { getGameByIgdbId, type SearchResponseItem } from "@/shared/api/igdb";
+import {
+  getGameByIgdbId,
+  type GameDetailsResponseItem,
+  type SearchResponseItem,
+} from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -25,13 +36,49 @@ function buildCoverUrl(imageId: string): string {
 }
 
 /**
- * Cache-first upsert keyed on a pre-fetched IGDB payload. Used when the caller
- * already resolved the IGDB game (e.g. via slug) and we want to avoid a second
- * IGDB round-trip. Cache hit by `igdbId` returns existing row; cache miss
- * inserts a new Game from the payload.
+ * Cache-first upsert keyed on a pre-fetched IGDB search payload. Used by the
+ * search / quick-add path. Cache hit by `igdbId` returns existing row; cache
+ * miss inserts a new Game from the payload.
  */
 export async function upsertGameFromIgdbPayload(
   payload: SearchResponseItem
+): Promise<Game> {
+  const existing = await prisma.game.findUnique({
+    where: { igdbId: payload.id },
+  });
+  if (existing) {
+    return existing;
+  }
+
+  const releaseDate =
+    typeof payload.first_release_date === "number"
+      ? new Date(payload.first_release_date * 1000)
+      : null;
+
+  const coverImage = payload.cover?.image_id
+    ? buildCoverUrl(payload.cover.image_id)
+    : null;
+
+  return prisma.game.create({
+    data: {
+      igdbId: payload.id,
+      title: payload.name,
+      slug: payload.slug,
+      releaseDate,
+      coverImage,
+    },
+  });
+}
+
+/**
+ * Cache-first thin upsert from a rich IGDB detail payload. Only writes the
+ * minimum needed for cross-feature lookups (LibraryItem → Game.id, etc.) —
+ * mirrors `upsertGameFromIgdbPayload` shape but adapts the rich detail
+ * payload's field layout. The rich fields stay on the IGDB payload and are
+ * NOT persisted.
+ */
+export async function upsertThinGameFromIgdbDetailsPayload(
+  payload: GameDetailsResponseItem
 ): Promise<Game> {
   const existing = await prisma.game.findUnique({
     where: { igdbId: payload.id },

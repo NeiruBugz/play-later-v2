@@ -1,14 +1,26 @@
 /**
- * Game-detail orchestrator (Slice 13, refined in Slice 14 phase-2 rework).
+ * Game-detail orchestrator — canonical-aligned dual-track shape.
  *
- * Phase 1 (this file): DB-only read of the cached `Game` row, plus optional
- * viewer-scoped `LibraryItem` and recent `JournalEntry` teaser. NO IGDB-derived
- * "live" data — collections and times-to-beat moved to deferred phase-2 entity
- * queries (see `get-game-collections.server.ts`, `get-times-to-beat.server.ts`).
+ * Returns both:
+ *   - `game`: thin cached `Game` row from Postgres (for cross-feature lookups
+ *     like `libraryItem.gameId`). Title/slug/cover/releaseDate only.
+ *   - `igdbDetails`: live rich IGDB payload (summary, genres, platforms,
+ *     screenshots, companies, themes, rating, franchise). NOT persisted.
  *
- * Throws `NotFoundError` when IGDB returns no match for the slug on cache miss.
+ * The widget reads display data from `igdbDetails`; the Game row exists only
+ * to anchor cross-feature reads. This mirrors
+ * `savepoint-app/features/game-detail/use-cases/get-game-details.ts`.
+ *
+ * Throws `NotFoundError` when IGDB returns no match for the slug.
+ *
+ * Caching: deliberately NOT cached here. TanStack Start's route loader cache
+ * + the React `cache()` wrapper at the route level handle revalidation. The
+ * canonical app uses Next 16's `"use cache"` directive for the same purpose.
  */
-import { getGameBySlug } from "@/shared/api/igdb";
+import {
+  getGameDetailsFromIgdb,
+  type GameDetailsResponseItem,
+} from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -17,12 +29,13 @@ import type {
   JournalEntry,
   LibraryItem,
 } from "../../../../shared/lib/prisma/client.ts";
-import { upsertGameFromIgdbPayload } from "./upsert-game.server";
+import { upsertThinGameFromIgdbDetailsPayload } from "./upsert-game.server";
 
 const JOURNAL_TEASER_LIMIT = 3;
 
 export interface GameDetails {
   game: Game;
+  igdbDetails: GameDetailsResponseItem;
   relatedGames: Game[];
   libraryEntry: LibraryItem | null;
   journalTeaser: JournalEntry[];
@@ -34,21 +47,19 @@ export async function getGameDetails(params: {
 }): Promise<GameDetails> {
   const { slug, userId } = params;
 
-  // 1. Resolve via local cache first to avoid an IGDB round-trip on cache hit.
-  const cached = await prisma.game.findUnique({ where: { slug } });
-
-  let game: Game;
-  if (cached) {
-    game = cached;
-  } else {
-    const remote = await getGameBySlug(slug);
-    if (!remote) {
-      throw new NotFoundError("Game not found", { slug });
-    }
-    game = await upsertGameFromIgdbPayload(remote);
+  // 1. Live IGDB fetch — source of truth for all rich detail fields. The
+  //    widget reads summary / genres / platforms / screenshots / etc.
+  //    directly from this payload, never from the cached Game row.
+  const igdbDetails = await getGameDetailsFromIgdb(slug);
+  if (!igdbDetails) {
+    throw new NotFoundError("Game not found", { slug });
   }
 
-  // 2. Viewer-scoped reads — privacy invariant: only the requesting user's rows.
+  // 2. Thin Game-row upsert — caches just enough to give cross-feature reads
+  //    (libraryItem.gameId, journalEntry.gameId) something to anchor on.
+  const game = await upsertThinGameFromIgdbDetailsPayload(igdbDetails);
+
+  // 3. Viewer-scoped reads — privacy invariant: only the requesting user's rows.
   let libraryEntry: LibraryItem | null = null;
   let journalTeaser: JournalEntry[] = [];
 
@@ -66,10 +77,10 @@ export async function getGameDetails(params: {
     ]);
   }
 
-  // 3. `relatedGames: Game[]` retained for backward compatibility and is empty.
+  // 4. `relatedGames: Game[]` retained for backward compatibility and is empty.
   //    Live related-games surface is the deferred phase-2 stream — see
   //    `getGameCollectionsByIgdbId` + `getRelatedGames`.
   const relatedGames: Game[] = [];
 
-  return { game, relatedGames, libraryEntry, journalTeaser };
+  return { game, igdbDetails, relatedGames, libraryEntry, journalTeaser };
 }

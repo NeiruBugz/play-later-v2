@@ -79,6 +79,11 @@ const buildView = (
       releaseDate: null,
       description: null,
     } as unknown as GameDetailPageView["data"]["game"],
+    igdbDetails: {
+      id: 1234,
+      name: "Celeste",
+      slug: "celeste",
+    },
     relatedGames: [],
     libraryEntry: null,
     journalTeaser: [],
