@@ -58,6 +58,9 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
+  // CommandPalette (mounted in RootShell when authed) calls useNavigate
+  // for the "New journal entry" quick action.
+  useNavigate: () => vi.fn(),
   HeadContent: () => null,
   Scripts: () => null,
 }));

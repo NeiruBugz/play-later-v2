@@ -67,6 +67,21 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
+  // Tests that assert `<Link>` rendering by walking from the rendered text
+  // up to its closest ancestor anchor are an idiomatic pattern when the
+  // router is mocked to plain `<a>` (precedent: `command-palette.test.tsx`,
+  // `library-card-menu.test.tsx`). `.closest()` is the cleanest assertion
+  // shape — `no-node-access` is intentionally relaxed for these files.
+  {
+    files: [
+      "src/features/command-palette/ui/command-palette/command-palette.test.tsx",
+      "src/features/command-palette/ui/game-result-item/game-result-item.test.tsx",
+      "src/features/command-palette/ui/palette-navigation-group/palette-navigation-group.test.tsx",
+    ],
+    rules: {
+      "testing-library/no-node-access": "off",
+    },
+  },
   // FSD layer boundary enforcement — applies only to src/**
   {
     files: ["src/**/*.ts", "src/**/*.tsx"],

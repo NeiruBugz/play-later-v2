@@ -9,6 +9,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { ErrorBoundary } from "@/app";
 import { getCurrentUserFn } from "@/entities/session/api";
+import { CommandPalette } from "@/features/command-palette";
 import { Toaster } from "@/shared/ui/sonner";
 import { AppBottomNav } from "@/widgets/app-bottom-nav";
 import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
@@ -71,6 +72,7 @@ export function RootShell() {
       >
         <Outlet />
       </AppShell>
+      {user ? <CommandPalette /> : null}
       <Toaster />
       <TanStackDevtools
         config={{

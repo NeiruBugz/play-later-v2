@@ -98,7 +98,7 @@ export function LibraryPage(props: LibraryPageProps) {
       </header>
 
       {/* Filter-by-title input with `/` keyboard hint. Client-side only. */}
-      <div className="relative w-full md:max-w-xl">
+      <div className="relative w-full">
         <Input
           ref={filterInputRef}
           type="search"

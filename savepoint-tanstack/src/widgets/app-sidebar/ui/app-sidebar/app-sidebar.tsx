@@ -1,6 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { BookOpen, Library, LogOut, Settings, User } from "lucide-react";
 
+import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
 import { authClient } from "@/shared/api/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
@@ -80,6 +81,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         <button
           type="button"
           aria-label="Open command palette"
+          onClick={openCommandPalette}
           className="border-border text-muted-foreground flex w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm"
         >
           <span>Search</span>

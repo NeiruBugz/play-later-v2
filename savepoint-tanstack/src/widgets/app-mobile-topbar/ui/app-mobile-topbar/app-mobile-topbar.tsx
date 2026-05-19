@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 
+import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
 
 /**
@@ -39,6 +40,7 @@ export function AppMobileTopbar() {
         <button
           type="button"
           aria-label="Open command palette"
+          onClick={openCommandPalette}
           className="hover:bg-accent inline-flex h-9 w-9 items-center justify-center rounded-md"
         >
           <Search aria-hidden="true" className="h-4 w-4" />

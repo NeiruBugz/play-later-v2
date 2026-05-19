@@ -1,6 +1,18 @@
 import "@testing-library/jest-dom";
 
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+
+// Activate the fake-timer pool configured in vitest.config.ts
+// (`toFake: ["setTimeout", "clearTimeout"]` with `shouldAdvanceTime: true`).
+// The config supplies defaults; `vi.useFakeTimers()` is what actually swaps
+// the timer functions on globalThis. Without this call, tests that drive
+// debounce logic via `vi.advanceTimersByTime(...)` fail with "the timers
+// APIs are not mocked". `shouldAdvanceTime: true` keeps unrelated tests
+// behaving like real-time (timers still fire automatically), so this is a
+// no-op for tests that don't touch timers manually.
+beforeEach(() => {
+  vi.useFakeTimers();
+});
 
 if (typeof globalThis.ResizeObserver === "undefined") {
   globalThis.ResizeObserver = class ResizeObserver {
@@ -78,4 +90,5 @@ vi.mock("@/shared/lib/db.server", () => ({
 afterEach(() => {
   vi.clearAllMocks();
   vi.resetAllMocks();
+  vi.useRealTimers();
 });

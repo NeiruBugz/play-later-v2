@@ -709,3 +709,100 @@ correctly at 375x812.
   `md:hidden`. Intentional — keeps the mobile filter sheet available
   on tablets too. The sidebar fully takes over at `xl+`. If a follow-up
   decides to surface the filter sidebar at `md+` we tighten this.
+
+## Slice 17 — Command palette
+
+The tanstack `features/command-palette` ports the canonical palette
+(`savepoint-app/features/command-palette/`). A follow-on parity pass
+(post-Slice 17, ahead of Slice 18A) closed the navigation/quick-actions/
+game-result-item gaps and migrated the palette onto the shadcn `cmdk`
+primitives. The remaining gaps are feature dependencies, not surface
+gaps in the ported component:
+
+1. **No quick-add flow.** Canonical's `useQuickAddFromPalette` calls
+   `addToLibraryAction` with an optimistic undo toast. The tanstack
+   port doesn't yet have an `add-to-library` server fn or the toast
+   integration, so Games-group rows always navigate to `/games/$slug`
+   via `<Link>`. Wire when `manage-library-entry` is ported.
+
+2. **No recent-games empty state.** Canonical loads recent library
+   games on open via `getRecentGamesAction`. Tanstack lacks the
+   equivalent entity query (no `distinctByGame` on `library-item`). The
+   empty palette shows "Start typing to search for games...". Wire when
+   the entity adds a recent-by-last-touched query.
+
+3. **No mobile-sheet variant.** Canonical's `command-palette.tsx`
+   selects between `DesktopCommandPalette` and `MobileCommandPalette`
+   by viewport. Tanstack renders the desktop `Dialog` shape at every
+   breakpoint. The Spec 021 Slice 18A visual-parity sweep owns the
+   mobile bottom-sheet variant.
+
+### Parity pass — what landed
+
+- **`shared/ui/command.tsx`** — full shadcn `cmdk` wrapper set
+  (`Command`, `CommandInput`, `CommandList`, `CommandGroup`,
+  `CommandItem`, `CommandEmpty`, `CommandSeparator`, `CommandDialog`,
+  `CommandShortcut`). `cmdk` pinned at `1.1.1` to match canonical.
+- **`ui/game-result-item/`** — cover (`buildCoverImageUrl(id,
+  "t_cover_small")`) + name + release year, wrapped in
+  `<Link to="/games/$slug">`. Canonical's `showAddHint`/`+ Add to Up
+  Next` badge is omitted until quick-add lands.
+- **`ui/palette-navigation-group/`** — 5 jump targets. Settings points
+  at `/settings/profile` because tanstack has no `/settings` index
+  route registered today; swap when the settings shell lands.
+- **`ui/palette-quick-actions-group/`** — "Add game to library" (calls
+  `onFocusSearch` to refocus the palette input) + "New journal entry"
+  (navigates to `/journal`; canonical goes to `/journal/new` which
+  tanstack doesn't have — minor divergence).
+- **`ui/command-palette/`** — refactored to compose the primitives
+  with `shouldFilter={false}` (server-side filtering preserved). The
+  combobox accessible name comes from `<Command label="Search games">`
+  via cmdk's `aria-labelledby` wiring (cmdk always emits
+  `aria-labelledby` on its input, so a plain `aria-label` on the input
+  would be overridden).
+
+### Wiring
+
+- Mounted once in `__root.tsx` `RootShell` (only when `user` is
+  resolved), so the palette is available across both authed and any
+  future public chrome.
+- `useCommandPalette` hook owns the open state, the global ⌘K / Ctrl+K
+  listener (matching canonical's `metaKey || ctrlKey` + `preventDefault`
+  + toggle), and a custom-event channel
+  (`savepoint:command-palette:open`) that the desktop sidebar and
+  mobile topbar search-trigger buttons fire via `openCommandPalette()`.
+  Event-channel chosen over context provider so widgets don't depend on
+  a feature's runtime — keeps the FSD direction clean.
+- Debounce is imperative (timer in `useRef`, fetch fires directly
+  inside the timer callback) rather than `useDebouncedValue` →
+  effect-driven. Reason: the test contract asserts `searchGamesFn`
+  called synchronously after `vi.advanceTimersByTime(300)`. Going
+  through React state would require the assertion to `await` a render
+  cycle; the imperative shape keeps the test deterministic without
+  affecting production behaviour.
+- The unit test setup at `test/setup/unit.ts` now calls
+  `vi.useFakeTimers()` in `beforeEach` (with `vi.useRealTimers()` in
+  `afterEach`) so the `fakeTimers` config in `vitest.config.ts` is
+  actually active. `shouldAdvanceTime: true` keeps unrelated tests
+  behaving like real-time. Previously the config was inert because no
+  test entry-point called `useFakeTimers()`.
+
+### Tests added
+
+- `command-palette.test.tsx` (Slice 17 RED file) — 8 tests passing:
+  initial-closed state, ⌘K opens, Ctrl+K opens, debounce window
+  blocks during keystrokes, exactly-one call after 300ms, call shape,
+  result row href contains slug, full `/games/$slug` path. The test
+  contract survived the parity-pass refactor unchanged — no test edit
+  required. Accessible-name discovery in the refactored composition
+  works via `<Command label="Search games">`.
+
+### Tests added (parity pass)
+
+- `game-result-item.test.tsx` — anchor href, cover URL/size, release
+  year render, no-cover branch.
+- `palette-navigation-group.test.tsx` — all five items, substring
+  filter, no-match returns `null`.
+- `palette-quick-actions-group.test.tsx` — both items render,
+  focus-search and new-journal-entry callbacks fire, substring filter,
+  no-match returns `null`.
