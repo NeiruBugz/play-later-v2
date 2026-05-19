@@ -5,11 +5,6 @@ import { Button } from "@/shared/ui/button";
 
 import { LibraryModal } from "../library-modal";
 
-// FSD note: feature/ui component composing the LibraryModal sibling. Trigger
-// owns its own modal-open boolean and conditionally mounts the modal —
-// mirrors the slice 11 host-owned-state pattern from <LibraryPage/>.
-// Slice 13 / Task 6 — manage CTA on the game-detail page.
-
 type ManageFromGameDetailButtonProps = {
   entry: LibraryItemWithGame;
 };

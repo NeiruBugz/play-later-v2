@@ -1,17 +1,5 @@
-/**
- * Card-local helpers — status-driven contextual date string + primary-CTA
- * payload. Mirrors the canonical shapes at
- * `savepoint-app/features/library/ui/library-card-metadata.tsx` and
- * `library/lib/library-card-cta-payload.ts` so the visual surface matches
- * the audit reference. Reusing them across the widget is the whole reason
- * they live in a `.utility.ts` rather than the component body.
- */
-
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 
-// Local alias avoids dragging a deep prisma-client import into a widget
-// (would also dirty the FSD layer story). The entity model already
-// re-exports the shape we care about via `LibraryItemWithGame.status`.
 type LibraryItemStatus = LibraryItemWithGame["status"];
 
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -24,12 +12,6 @@ function toDate(value: Date | string | null | undefined): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-/**
- * Short relative-date formatter (`"yesterday"`, `"11 days ago"`,
- * `"May 4, 2026"` past 60 days). Uses `Intl.RelativeTimeFormat` — same
- * approach as `widgets/profile-overview/lib/format-relative-time.ts`;
- * `date-fns` is intentionally not a tanstack dependency.
- */
 export function formatRelativeDate(date: Date, now: Date = new Date()): string {
   const diffDays = Math.round(
     (now.getTime() - date.getTime()) / MILLISECONDS_PER_DAY
@@ -56,12 +38,6 @@ export type ContextualDateInput = {
   updatedAt?: Date | string | null;
 };
 
-/**
- * Pick the "right" date string for a status:
- *  - PLAYING / UP_NEXT → started or added
- *  - PLAYED            → finished (updatedAt) or added
- *  - SHELF / WISHLIST  → added
- */
 export function getContextualDate(input: ContextualDateInput): string | null {
   const { status, startedAt, createdAt, updatedAt } = input;
   const created = toDate(createdAt);
@@ -82,13 +58,6 @@ export function getContextualDate(input: ContextualDateInput): string | null {
   return null;
 }
 
-/**
- * Contextual primary-CTA payload — matches the canonical mapping at
- * `savepoint-app/features/library/lib/library-card-cta-payload.ts`.
- *
- * - PLAYING → "Log Session" → opens a journal-compose dialog
- * - All others → updates the library status
- */
 export type CardCtaAction =
   | { kind: "logSession" }
   | {

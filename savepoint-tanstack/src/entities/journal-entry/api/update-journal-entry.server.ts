@@ -1,35 +1,3 @@
-/**
- * updateJournalEntry — partial-update mutation for a single JournalEntry.
- *
- * Behavior locked by integration test:
- * `test/integration/update-journal-entry.integration.test.ts`.
- *
- *   1. Two-step existence-then-ownership check (mirrors `updateLibraryItem`):
- *        a. `findUnique({ where: { id: entryId } })` → if null, throw
- *           `NotFoundError`.
- *        b. If `entry.userId !== userId`, throw `UnauthorizedError`.
- *        c. Otherwise, proceed with the update.
- *      NotFoundError is always thrown BEFORE UnauthorizedError — a missing
- *      entry yields NotFoundError regardless of which userId is supplied.
- *
- *   2. Direct passthrough — only keys explicitly present in `input` are
- *      forwarded to Prisma. `gameId: undefined` leaves the existing FK
- *      untouched; `gameId: null` clears the association. Empty `{}` is
- *      accepted and runs `update({ data: {} })` — Prisma's `@updatedAt`
- *      still bumps the timestamp, which the contract permits.
- *
- *   3. P2003 translation — if `gameId` references a non-existent Game,
- *      Prisma raises `PrismaClientKnownRequestError` with `code === "P2003"`.
- *      We narrow on `error.meta?.field_name` / `constraint` and re-throw as
- *      `NotFoundError`. Same single-seam rule as `createJournalEntry`.
- *
- *   4. P2025 translation — if a concurrent delete races between the
- *      existence check and the update, Prisma raises P2025. We re-throw as
- *      `NotFoundError`.
- *
- *   5. Returns `JournalTimelineEntry` — same shape as `getJournalTimeline`
- *      so callers can render the result without a second fetch.
- */
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
 
@@ -81,8 +49,7 @@ export async function updateJournalEntry(
         throw new NotFoundError("Journal entry not found", { entryId });
       }
       if (error.code === "P2003") {
-        // See `createJournalEntry` for the meta-probe rationale. Prisma 7's
-        // driver-adapter shape puts the constraint name deeper in `meta`.
+        // Same Prisma 7 meta-probe as createJournalEntry — see that file.
         const probe = JSON.stringify(error.meta ?? {}).toLowerCase();
 
         if (probe.includes("game")) {

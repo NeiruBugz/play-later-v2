@@ -1,57 +1,11 @@
-/**
- * RED component test for AddGameModal (Slice 10 — add-game feature).
- *
- * This file is intentionally failing at module resolution:
- * `./add-game-modal` does not exist yet — the component is implemented in
- * the GREEN step (tasks.md line 216). Do NOT implement the component here.
- *
- * Contracts locked by this test:
- *
- * Component export:
- *   `AddGameModal` — named export from `./add-game-modal`
- *
- * Props:
- *   onAdded: () => void  — called once after addGameToLibraryFn resolves
- *
- * Search behavior:
- *   - Renders a text input with accessible name "Search games"
- *   - User types ≥ 3 chars and submits the form (submit-on-enter or button click)
- *   - Calls searchGamesFn({ data: { name: <query> } })
- *   - Shows each result as a button with the game's name accessible label
- *   - Shows "No results found" when searchGamesFn resolves with zero games
- *   - Shows "Searching..." while searchGamesFn is pending
- *   - Does NOT call searchGamesFn until the form is submitted (submit-on-form, not debounce)
- *
- * Select behavior:
- *   - Clicking a result marks it selected (visual; no assertion beyond
- *     the "Add to library" button becoming enabled and the add call using its igdbId)
- *
- * Add behavior:
- *   - Renders a button with accessible name "Add to library"
- *   - Clicking it calls addGameToLibraryFn({ data: { igdbId: <selected igdbId> } })
- *     — no status or platform sent (server fn applies its own defaults)
- *   - After resolution, calls onAdded() exactly once
- *
- * Mock strategy:
- *   Both server fns are direct module mocks via vi.mock so no router / server
- *   context is needed. They are called as plain async functions with
- *   `{ data: ... }` argument shape (TanStack Start convention).
- */
-
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
-// Import after mocks are declared.
 import { searchGamesFn } from "../../api/search-games-fn";
-// RED import — this module does not exist until the GREEN step.
 import { AddGameModal } from "./add-game-modal";
-
-// --- Server fn mocks ---------------------------------------------------------
-// Both server fns are mocked at the module level so the component under test
-// never crosses the network or server boundary.
 
 vi.mock("../../api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
@@ -61,7 +15,6 @@ vi.mock("../../api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
 }));
 
-// --- Toast mock (mirrors avatar-upload / edit-profile precedent) ------------
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -69,16 +22,11 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// --- Router mock (mirrors avatar-upload precedent) --------------------------
 const mockRouterInvalidate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: mockRouterInvalidate }),
 }));
-
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
 
 const GAME_A = {
   id: 1942,
@@ -104,10 +52,6 @@ const STUB_LIBRARY_ITEM = {
   gameId: "game-1",
   userId: "user-1",
 } as unknown as Awaited<ReturnType<typeof addGameToLibraryFn>>;
-
-// ---------------------------------------------------------------------------
-// Shared helpers
-// ---------------------------------------------------------------------------
 
 const onAdded = vi.fn();
 

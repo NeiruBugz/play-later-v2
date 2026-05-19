@@ -11,28 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { LibraryStatusSwitcher } from "../library-status-switcher";
 import type { GameDetailProps } from "./game-detail.type";
 
-/**
- * Game-detail page composition.
- *
- * Layout — matching canonical `/games/<slug>`:
- *   - Breadcrumb: `Library / Games / <Title>`
- *   - Hero with full-bleed background, cover + eyebrow metadata
- *     (`<year> · <developer> · <genres>`), inline 5-pill status switcher
- *     (replaces former "Manage in library" button for signed-in viewers)
- *   - Tabs strip: Overview / Journal {count} / Playtime (3 tabs; Related games
- *     content is folded into Overview)
- *   - Overview body: IGDB summary paragraph + terminal-style label block
- *     (`// GAME.DETAIL`, `// GENRES`, `// PLATFORMS`) + related-games carousel
- *     (slot)
- *   - Playtime tab: times-to-beat slot
- *
- * Data sources: the THIN `game` prop (Prisma row) supplies title/slug/cover/
- * releaseDate; everything else (summary, genres, platforms, developer,
- * screenshots, rating) comes from the LIVE `igdbDetails` prop. This mirrors
- * canonical's dual-track shape in
- * `savepoint-app/features/game-detail/ui/game-detail-hero.tsx` etc. Screenshots
- * + aggregated rating consumed similarly when surfaced by the design.
- */
 export function GameDetail({
   data,
   viewerUserId,
@@ -47,7 +25,6 @@ export function GameDetail({
     ? game.releaseDate.getUTCFullYear().toString()
     : null;
 
-  // Derived display data from the LIVE IGDB payload (never from Prisma).
   const summary = igdbDetails.summary ?? null;
   const genres = igdbDetails.genres?.map((g) => g.name) ?? [];
   const platforms = igdbDetails.platforms?.map((p) => p.name) ?? [];
@@ -55,9 +32,6 @@ export function GameDetail({
     igdbDetails.involved_companies?.find((c) => c.developer)?.company.name ??
     null;
 
-  // Eyebrow metadata row (`<year> · <developer> · <genres>`). Mirrors
-  // canonical's row shape; empty parts collapse so the row degrades gracefully
-  // when IGDB omits fields.
   const eyebrowParts: string[] = [
     releaseYear,
     developer,
@@ -66,11 +40,6 @@ export function GameDetail({
     .filter((p): p is string => Boolean(p))
     .map((p) => p.toUpperCase());
 
-  // Tab visibility — Overview is always present; Journal only for signed-in
-  // viewers; Playtime only when the times-to-beat slot is supplied. Related
-  // games fold into Overview (canonical pattern) and therefore do not get
-  // their own tab. The Journal count badge mirrors canonical UX even when the
-  // teaser is empty.
   const journalCount = journalTeaser.length;
   const showJournalTab = viewerUserId !== null;
   const showPlaytimeTab =
@@ -78,9 +47,6 @@ export function GameDetail({
 
   return (
     <main className="relative flex flex-col">
-      {/* Hero background — full-bleed gradient (screenshots data not yet in
-          the tanstack DAL; falls back to a brand-tinted gradient identical
-          in shape to canonical's `bannerUrl === null` branch). */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-56 overflow-hidden md:h-72"
@@ -231,14 +197,6 @@ export function GameDetail({
   );
 }
 
-/**
- * Terminal-style metadata labels (`// GAME.DETAIL`, `// GENRES`,
- * `// PLATFORMS`) — canonical's signature look. Renders as left-aligned
- * font-mono uppercase tokens with content stacked to the right.
- *
- * Genres and platforms are joined by " · "; empty arrays fall back to `—`
- * so the row scaffolding remains visible.
- */
 function OverviewBody({
   summary,
   releaseYear,

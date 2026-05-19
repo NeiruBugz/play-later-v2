@@ -108,11 +108,6 @@ function RelatedGamesSections({
   );
 }
 
-/**
- * Per-section inline error message — keeps the section header in the page
- * flow so the layout doesn't reflow on a phase-2 failure (decision 4 of the
- * Slice 14 phase-2 rework).
- */
 function SectionErrorMessage({
   headingId,
   heading,

@@ -14,6 +14,7 @@ import { z } from "zod";
 import { createLogger } from "@/shared/lib";
 import { UpstreamError } from "@/shared/lib/errors";
 
+import { igdbContextFromThrown } from "./errors";
 import { igdbFetch } from "./fetch";
 import { buildGameSearchQuery, buildSearchFilterConditions } from "./queries";
 import { SearchResponseItemSchema, type SearchResponseItem } from "./schemas";
@@ -45,13 +46,16 @@ export async function searchGames(
   try {
     response = await igdbFetch("/games", query);
   } catch (cause) {
+    const igdbContext = igdbContextFromThrown(cause);
     logger.error(
-      { error: cause, searchQuery: params.name },
+      { err: cause, searchQuery: params.name, ...igdbContext },
       "IGDB search transport failure"
     );
     throw new UpstreamError("IGDB search failed", {
       cause: cause instanceof Error ? cause.message : String(cause),
       searchQuery: params.name,
+      query,
+      ...igdbContext,
     });
   }
 

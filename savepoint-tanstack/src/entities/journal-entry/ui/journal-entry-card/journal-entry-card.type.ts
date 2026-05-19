@@ -1,8 +1,3 @@
-/**
- * Display-only view of one journal entry. Mirrors the Slice 15 timeline
- * contract — the wider Prisma payload (`model/types.ts`) carries more
- * fields, surfaced when CRUD lands (Slice 16).
- */
 export type JournalEntryCardEntry = {
   id: string;
   kind: "QUICK" | "REFLECTION";

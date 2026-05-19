@@ -55,31 +55,11 @@ const ZERO_COUNTS: DashboardStatusCounts = {
   PLAYED: 0,
 };
 
-/**
- * Aggregator behind `getDashboardPageDataFn`. Owns its own auth gate so
- * integration tests can drive the unauthorized branch without the Start
- * runtime (foot-gun #8 — worker split).
- *
- * Parallel reads: status counts (single groupBy), three filtered library reads
- * for continue-playing / up-next / recently-added, and the session row for the
- * username. The `quickLogGames` slice piggy-backs on the PLAYING result — no
- * extra round trip.
- *
- * Divergences from canonical (`savepoint-app/.../dashboard/page.tsx`):
- * - No `checkSetupStatus` redirect yet (tanstack lacks setup-profile flow).
- * - `quickLogGames` ordering uses library `updatedAt` only; canonical also
- *   joins on `JournalEntry.startedAt` for true "latest activity". When the
- *   journal-join read exists at entity level, swap in here without changing
- *   the worker's signature.
- */
 export async function getDashboardPageDataWorker(
   userId: string | undefined
 ): Promise<DashboardPageData> {
   if (!userId) throw new UnauthorizedError("Sign in required");
 
-  // Profile is the source of truth for the display name/username. Wrap in a
-  // local try so a missing/private-profile edge can't blow up the dashboard;
-  // greeting falls back to "there" in that case.
   const [stats, playing, upNext, recent, profile] = await Promise.all([
     getLibraryStats(userId),
     getLibrary(userId, {
@@ -118,9 +98,7 @@ export async function getDashboardPageDataWorker(
       coverImage: item.game.coverImage,
     }));
 
-  // Email-safe greeting target. Legacy accounts seed `name = email`; we
-  // filter that and prefer the user-chosen username before falling back
-  // to a generic "there" so the hero copy reads cleanly.
+  // Legacy accounts seed `name = email`; filter those out before using it.
   const safeName =
     profile?.name && !profile.name.includes("@") ? profile.name : null;
   const username = safeName ?? profile?.username ?? "there";

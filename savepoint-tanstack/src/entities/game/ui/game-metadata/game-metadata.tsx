@@ -1,19 +1,11 @@
 import type { GameMetadataProps } from "./game-metadata.type";
 
-// Mirrors canonical's `formatAbsoluteDate` from `savepoint-app/shared/lib/date.ts`
-// so the rendered string is byte-identical to the canonical app
-// ("Mon DD, YYYY" — e.g. "May 7, 2026"). Inlined here rather than added to
-// `shared/lib/` because no other tanstack surface formats dates yet.
 const ABSOLUTE_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
   month: "short",
   day: "numeric",
 });
 
-/**
- * Display-only game metadata block: title (h1), optional release date,
- * optional summary. Pure presentation — no library state, no actions.
- */
 export function GameMetadata({
   title,
   releaseDate,

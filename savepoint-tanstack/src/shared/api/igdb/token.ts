@@ -10,6 +10,11 @@
  * `@/shared/lib/constants` and do not introduce a `getTimeStamp` helper. The
  * unit test suite at `./token.unit.test.ts` controls time via `vi.spyOn(Date, "now")`
  * and pins this contract.
+ *
+ * Error tracing: on a failed refresh we read the Twitch JSON body once
+ * (`{ status, message }`) and attach it to the thrown error so prod logs
+ * carry the actual reason ("invalid client", "missing client_id", …) rather
+ * than just the HTTP status text.
  */
 import { env } from "@env";
 
@@ -31,8 +36,26 @@ interface TwitchTokenResponse {
   token_type: string;
 }
 
+interface TwitchErrorBody {
+  status?: number;
+  message?: string;
+}
+
 let cached: CachedToken | null = null;
 let inFlight: Promise<string> | null = null;
+
+async function readTwitchError(
+  res: Response
+): Promise<{ message?: string; bodySnippet?: string }> {
+  const raw = await res.text().catch(() => "");
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as TwitchErrorBody;
+    return { message: parsed.message, bodySnippet: raw };
+  } catch {
+    return { bodySnippet: raw };
+  }
+}
 
 async function refresh(): Promise<string> {
   const params = new URLSearchParams({
@@ -45,11 +68,21 @@ async function refresh(): Promise<string> {
   const res = await fetch(tokenUrl, { method: "POST" });
 
   if (!res.ok) {
+    const { message, bodySnippet } = await readTwitchError(res);
     logger.error(
-      { status: res.status, statusText: res.statusText },
+      {
+        status: res.status,
+        statusText: res.statusText,
+        twitchMessage: message,
+        bodySnippet,
+      },
       "Failed to fetch Twitch access token"
     );
-    throw new Error(`Failed to obtain Twitch access token: ${res.statusText}`);
+    throw new Error(
+      `Failed to obtain Twitch access token: ${res.status} ${
+        message ?? res.statusText ?? ""
+      }`.trim()
+    );
   }
 
   const data = (await res.json()) as TwitchTokenResponse;
@@ -57,7 +90,7 @@ async function refresh(): Promise<string> {
     Date.now() + data.expires_in * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS;
 
   cached = { token: data.access_token, expiresAt };
-  logger.debug("Twitch access token refreshed");
+  logger.debug({ expiresAt }, "Twitch access token refreshed");
 
   return data.access_token;
 }
@@ -78,7 +111,7 @@ export async function getAccessToken(): Promise<string> {
   try {
     return await inFlight;
   } catch (thrown) {
-    logger.error({ error: thrown }, "Error obtaining Twitch access token");
+    logger.error({ err: thrown }, "Error obtaining Twitch access token");
     throw thrown instanceof Error
       ? thrown
       : new Error(`Failed to obtain Twitch access token: ${String(thrown)}`);

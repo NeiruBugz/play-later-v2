@@ -1,15 +1,3 @@
-/**
- * Deterministically derive an OKLCH linear-gradient string from a seed
- * (typically the user's username). Each user gets a stable, distinct hero
- * banner without storing a per-user color.
- *
- * Ported from the canonical app's
- * `savepoint-app/features/profile/lib/derive-banner-gradient.ts` (Phase 0 of
- * the visual-parity push — see context/audits/2026-05-18/visual-parity.md).
- * Co-located with `widgets/profile-overview/` because it's only consumed by
- * that widget; if a second consumer appears, lift to
- * `entities/user/lib/`.
- */
 function hashString(input: string): number {
   let hash = 0;
   for (let i = 0; i < input.length; i++) {

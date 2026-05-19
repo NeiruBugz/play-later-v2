@@ -7,27 +7,6 @@ import { LibraryItemCardCta } from "./library-item-card-cta";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { getContextualDate } from "./library-item-card.utility";
 
-/**
- * Library list card. Composes `GameCard` (cover + clamped title) with:
- *  - status pill overlaid top-left of the cover
- *  - optional action-menu slot top-right
- *  - meta footer below the cover: platform badge, contextual date,
- *    read-only 5-star rating, status-driven primary CTA
- *
- * Mobile (`< md`): root is `flex-row` with the cover as a fixed-width left
- * column and a `flex-col` meta column on the right. Desktop (`md+`): root
- * is `flex-col`; the meta wrapper uses `display: contents` so its children
- * flow as direct flex children of the root (preserving the original
- * stacked layout without restructuring the DOM).
- *
- * Meta-footer restored in Phase 3, horizontal-row mobile variant added in
- * Phase 4 of the Slice 18A visual-parity push — see
- * `context/audits/2026-05-18/visual-parity.md` § Library.
- *
- * Click semantics:
- * - GameCard body is a TanStack `<Link>` to `/games/$slug`.
- * - Action-menu + CTA + rating are rendered as **siblings** of the link.
- */
 export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
   const contextualDate = getContextualDate({
     status: item.status,

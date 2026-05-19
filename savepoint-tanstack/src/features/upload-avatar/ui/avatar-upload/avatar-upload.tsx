@@ -10,18 +10,6 @@ import { setAvatarUrlFn } from "../../api/set-avatar-url";
 // bundle / jsdom test if imported from a UI component.
 const ACCEPT_ATTR = "image/jpeg,image/png,image/gif,image/webp";
 
-/**
- * AvatarUpload — happy-path port of `savepoint-app/features/profile/ui/avatar-upload.tsx`.
- *
- * Imperative flow on file pick:
- *   1. getAvatarPresignedUrlFn → { uploadUrl, publicUrl }
- *   2. PUT file → uploadUrl (S3)
- *   3. setAvatarUrlFn(publicUrl)
- *   4. router.invalidate() to re-run loaders that read User.image
- *
- * Toasts and route placement land in tasks 160 & 161; this slice owns
- * only the component contract validated by the co-located RED test.
- */
 export type AvatarUploadProps = {
   /**
    * Visible/SR label for the trigger. Defaults to "Upload avatar" so existing

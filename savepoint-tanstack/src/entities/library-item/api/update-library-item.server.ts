@@ -1,32 +1,3 @@
-/**
- * updateLibraryItem — partial-update mutation for a single LibraryItem.
- *
- * Behavior locked by integration test:
- * `test/integration/update-library-item.integration.test.ts`.
- *
- *   1. Two-step existence-then-ownership check (deliberately diverges from
- *      canonical savepoint-app, which collapses both into a single
- *      `findFirst({ where: { id, userId } })` + NotFoundError):
- *        a. `findUnique({ where: { id: itemId } })` → if null, throw
- *           `NotFoundError`.
- *        b. If `item.userId !== userId`, throw `UnauthorizedError`.
- *        c. Otherwise, proceed with the update.
- *      Rationale: distinguishing "missing" from "forbidden" lets the feature
- *      layer pick correct user-facing copy. The entity layer is already
- *      reachable only via authenticated server fns (`requireUserId()`), so
- *      revealing existence to authed callers is acceptable.
- *
- *   2. Direct passthrough — only keys explicitly present in `input` are
- *      forwarded to Prisma. `undefined` does NOT clear a field; explicit
- *      `null` DOES (for nullable columns). Empty `{}` is accepted and runs
- *      a no-op `update({ data: {} })` — Prisma's `@updatedAt` still bumps
- *      the timestamp, which the contract permits.
- *
- *   3. P2025 translation — if a concurrent delete races between the
- *      existence check and the update call, Prisma raises
- *      `PrismaClientKnownRequestError` with `code === "P2025"`. We re-throw
- *      that as `NotFoundError`. No other Prisma error codes are caught.
- */
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
 

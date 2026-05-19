@@ -8,23 +8,6 @@ import { DashboardStatsCard } from "../dashboard-stats-card";
 
 import type { DashboardPageProps } from "./dashboard-page.type";
 
-/**
- * Dashboard page composition. Mirrors canonical's two-mode shape:
- *
- *   1. Quick-log hero (always — top of the page)
- *   2. Getting-started checklist (TODO: pending `onboarding` feature port)
- *   3. EITHER the empty-library hero
- *      OR the 2-column main grid (stats + activity / continue + up-next)
- *      plus the Recently Added strip below
- *
- * Slots not yet ported:
- *   - `GettingStartedChecklist` (onboarding feature — Slice B)
- *   - `EmptyLibraryHero` (onboarding feature — Slice B)
- *   - `ActivityFeed` (social feature — Slice C)
- *
- * Until those features land, the corresponding sections render minimal
- * inline empty-state copy so the layout still makes sense in production.
- */
 export function DashboardPage({ data }: DashboardPageProps) {
   const total =
     data.statusCounts.WISHLIST +

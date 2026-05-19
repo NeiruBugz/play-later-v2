@@ -1,18 +1,3 @@
-/**
- * Low-level S3 client + avatar storage constants.
- *
- * Mirrors `savepoint-app/shared/lib/storage/s3-client.ts` (env wiring,
- * LocalStack `forcePathStyle`) but exposes the singleton via `globalThis`
- * to match the Prisma singleton pattern in `src/shared/lib/db.ts` — so HMR
- * in dev and module re-evaluation in tests don't leak multiple clients.
- *
- * Constants are intentionally exported here (and only here) so callers in
- * `features/upload-avatar/` import a single source of truth for the bucket,
- * prefix, MIME allow-list, and size cap.
- *
- * Note: per spec 021 §2.7 the avatar size cap is raised to 10 MB
- * (canonical `savepoint-app` uses 4 MB — intentional divergence).
- */
 import { S3Client } from "@aws-sdk/client-s3";
 import { env } from "@env";
 
@@ -64,5 +49,5 @@ export const AVATAR_MIME_ALLOW_LIST: readonly string[] = [
   "image/webp",
 ] as const;
 
-// Spec 021 §2.7 — raised from canonical's 4 MB.
+// 10 MB — intentionally higher than canonical's 4 MB (DIVERGENCES.md §S021/2.7).
 export const AVATAR_MAX_BYTES: number = 10 * 1024 * 1024;

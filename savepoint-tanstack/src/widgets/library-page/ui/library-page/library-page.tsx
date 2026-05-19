@@ -125,9 +125,6 @@ export function LibraryPage(props: LibraryPageProps) {
         sortOrder={sortOrder}
       />
 
-      {/* Mirrors canonical's left-rail layout: filter sidebar (xl+ only) */}
-      {/* renders to the left of the grid; below xl the sidebar is hidden */}
-      {/* and the mobile filter bar above is the only filter affordance.   */}
       <div className="flex gap-6">
         <LibraryFilters
           status={status}

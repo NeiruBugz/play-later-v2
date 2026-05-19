@@ -1,14 +1,3 @@
-/**
- * Phase-2 entity query: fetch IGDB community times-to-beat by IGDB id.
- *
- * Slice 14 phase-2 rework — times-to-beat is always re-fetched fresh, never
- * persisted on the Game row. Returns raw seconds; UI converts to hours.
- *
- * Behavior:
- *   - Empty IGDB result → `null` (game has no community time-to-beat data).
- *   - Both `normally` and `completely` undefined on the first item → `null`.
- *   - Transport / non-2xx / malformed → `UpstreamError`.
- */
 import { z } from "zod";
 
 import { igdbFetch } from "@/shared/api/igdb/fetch";

@@ -15,14 +15,6 @@ import {
 import { AddGameModal } from "../add-game-modal";
 
 export type AddGameTriggerProps = {
-  /**
-   * `"button"` (default) — inline rectangular button with the text label.
-   * `"fab"` — bottom-right floating action button, circular with a pencil
-   * icon; the text label is preserved as `aria-label` for screen readers.
-   * Slice 18A visual-parity push (Phase 3) introduced the FAB variant
-   * to match canonical's `/library` layout — see
-   * `context/audits/2026-05-18/visual-parity.md`.
-   */
   variant?: "button" | "fab";
 };
 

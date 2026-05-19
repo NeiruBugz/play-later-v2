@@ -10,14 +10,6 @@ export interface AppShellProps {
   children: ReactNode;
 }
 
-/**
- * App shell layout primitive. Accepts the sidebar + mobile chrome as slot
- * props (route composes which slots are present; this widget only positions
- * them). Below `md` the main column gets bottom padding so the fixed bottom
- * nav doesn't occlude page content.
- *
- * Phase 4 of the Slice 18A visual-parity push added the mobile slots.
- */
 export function AppShell({
   sidebar,
   mobileTopbar,

@@ -4,15 +4,6 @@ import { Search } from "lucide-react";
 import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
 
-/**
- * Mobile top app bar — sticky brand + search trigger + theme toggle. Visible
- * only below the `md` breakpoint; the desktop sidebar covers the same surface
- * at `md+`. Search trigger is wired to the same (non-functional, Slice 17)
- * command palette stub as `AppSidebar`.
- *
- * Introduced in Phase 4 of the Slice 18A visual-parity push — see
- * `context/audits/2026-05-18/visual-parity.md` § Mobile shell.
- */
 export function AppMobileTopbar() {
   return (
     <header

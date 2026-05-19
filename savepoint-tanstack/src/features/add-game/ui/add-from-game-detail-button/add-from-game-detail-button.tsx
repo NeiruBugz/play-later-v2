@@ -6,14 +6,6 @@ import { Button } from "@/shared/ui/button";
 
 import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
 
-// FSD note: feature/ui component that calls a feature/api server fn directly,
-// mirroring the AddGameModal precedent. Slice 13 / Task 6 — game-detail CTA.
-//
-// Option B (per task spec): single-shot mutation. The detail page already
-// knows the exact IGDB id, so a search step would be redundant. Click →
-// addGameToLibraryFn → toast → router.invalidate(); on next render the parent
-// widget swaps this button for the "Manage in library" CTA.
-
 type AddFromGameDetailButtonProps = {
   igdbId: number;
   gameTitle: string;

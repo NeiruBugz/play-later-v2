@@ -1,18 +1,3 @@
-/**
- * Phase-2 entity query: fetch a game's IGDB collection refs by IGDB id.
- *
- * Slice 14 phase-2 rework — collections are no longer kept on
- * `getGameDetails`'s payload. The deferred related-games phase calls this
- * worker to refresh collection refs on every page view; cache-hit and
- * cache-miss are now symmetric (both pay one IGDB call here).
- *
- * Behavior:
- *   - Empty IGDB result OR no `collections` field on the returned item → `[]`.
- *   - Transport / non-2xx / malformed → `UpstreamError`.
- *
- * No DB writes. No `AppError` for the "no collections" case — empty array is
- * a legal "this game has no related-games surface" signal.
- */
 import { z } from "zod";
 
 import { igdbFetch } from "@/shared/api/igdb/fetch";

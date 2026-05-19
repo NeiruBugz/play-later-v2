@@ -1,7 +1,3 @@
-/**
- * IGDB allowed game-type categories. Mirrors
- * `savepoint-app/shared/constants/game.ts` ALLOWED_GAME_CATEGORIES exactly.
- */
 export enum GameCategory {
   MAIN_GAME = 0,
   DLC_ADDON = 1,

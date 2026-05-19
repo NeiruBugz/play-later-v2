@@ -1,23 +1,3 @@
-/**
- * Entity query: paginated games from an IGDB collection.
- *
- * Read-through IGDB `/collections` query with application-side pagination and
- * `ALLOWED_GAME_CATEGORIES` filtering. Does NOT upsert into the local Game
- * table — pagination over a collection is a browsing operation; upsert happens
- * in the add-game flow when the user picks a specific game.
- *
- * Mirrors the canonical
- * `savepoint-app/data-access-layer/services/igdb/igdb-service.ts getCollectionGamesById`
- * filter semantics (allow when `game_type === undefined || ALLOWED.includes(...)`).
- *
- * Lives at the entity layer (originally in `features/browse-related-games/` —
- * moved 2026-05-18 per the audit's HIGH-severity finding on cross-feature
- * imports). Consumed by:
- *   - `features/browse-related-games/api/get-related-games.ts` — `createServerFn` wrapper
- *   - `features/game-detail/api/get-game-detail-page-data.ts` — loader-side pre-fetch
- *
- * Per `.claude/rules/entities.md`, entity queries end in `.server.ts`.
- */
 import { z } from "zod";
 
 import { ALLOWED_GAME_CATEGORIES } from "@/shared/api/igdb/constants";
@@ -67,8 +47,6 @@ const ALLOWED_TYPES: ReadonlySet<number> = new Set<number>(
 export async function getRelatedGames(
   params: GetRelatedGamesParams
 ): Promise<GetRelatedGamesResult> {
-  // Re-validate inputs ("validate twice" — handler may be called programmatically
-  // by tests / loaders, bypassing the createServerFn inputValidator).
   const parsed = ParamsSchema.safeParse(params);
   if (!parsed.success) {
     throw new ValidationError("Invalid getRelatedGames params", {
@@ -111,8 +89,7 @@ export async function getRelatedGames(
 
   const collection = validated.data[0]!;
 
-  // Filter by ALLOWED_GAME_CATEGORIES BEFORE computing total or slicing.
-  // game_type === undefined is treated as MAIN_GAME (allowed) per canonical.
+  // game_type === undefined is treated as MAIN_GAME (allowed).
   const filtered = collection.games.filter(
     (game) => game.game_type === undefined || ALLOWED_TYPES.has(game.game_type)
   );

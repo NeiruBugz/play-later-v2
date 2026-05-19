@@ -8,13 +8,6 @@ function formatHours(seconds: number | null): string {
   return `${(Math.round(hours * 10) / 10).toFixed(1)} h`;
 }
 
-/**
- * Minimal times-to-beat section (Slice 14 phase-2 rework).
- *
- * Two labeled rows: "Main story", "Completionist". No bar charts, no
- * completion strip, no community-average widget — full visual port lives
- * in Slice 18A.
- */
 export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
   return (
     <section

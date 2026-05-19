@@ -1,7 +1,3 @@
-/**
- * Apex DSL query builder for IGDB's REST endpoints. Ported verbatim from
- * `savepoint-app/data-access-layer/services/igdb/query-builder.ts`.
- */
 export class QueryBuilder {
   private query: string = "";
 

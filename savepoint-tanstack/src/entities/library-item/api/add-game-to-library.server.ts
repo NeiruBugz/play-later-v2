@@ -1,28 +1,5 @@
-/**
- * addGameToLibrary — quick-add entry point for the library write layer.
- *
- * Behavior (locked by integration test in
- * `test/integration/add-game-to-library.integration.test.ts`):
- *
- *   1. Game-cache-aware. If a Game row exists for `input.igdbId`, reuse it.
- *      Otherwise, fetch from IGDB via the shared transport and create the
- *      Game row before linking.
- *   2. Application-layer idempotency on `(userId, igdbId)`. The schema has
- *      no `@@unique([userId, gameId])` constraint, so we query first and
- *      return the existing LibraryItem if one is present — no duplicate
- *      row, no `ConflictError`.
- *   3. Schema defaults govern unspecified fields:
- *        - `status` defaults to `SHELF` (Prisma `@default(SHELF)`)
- *        - `acquisitionType` defaults to `DIGITAL` (`@default(DIGITAL)`)
- *      We pass these only when supplied so the DB layer remains the
- *      single source of truth for defaults.
- *   4. `platform` is nullable; absence persists as `null`.
- *
- * Note on FSD: this entity inlines the IGDB cache-or-fetch composition
- * rather than calling `upsertGameFromIgdb` from the `game` entity, since
- * `eslint-plugin-boundaries` forbids entity-to-entity imports. The
- * duplication is ~6 lines and keeps the entity layer flat.
- */
+// The IGDB cache-or-fetch is inlined here rather than calling upsertGameFromIgdb
+// from entities/game because eslint-plugin-boundaries forbids entity-to-entity imports.
 import { getGameByIgdbId } from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
@@ -48,8 +25,6 @@ export async function addGameToLibrary(
   userId: string,
   input: AddGameToLibraryInput
 ): Promise<LibraryItem> {
-  // Idempotency: if this user already has a LibraryItem for this igdbId,
-  // return it. Enforced at the application layer (no DB unique constraint).
   const existingItem = await prisma.libraryItem.findFirst({
     where: { userId, game: { igdbId: input.igdbId } },
   });
@@ -57,7 +32,6 @@ export async function addGameToLibrary(
     return existingItem;
   }
 
-  // Resolve the Game row, populating from IGDB on cache miss.
   let game = await prisma.game.findUnique({
     where: { igdbId: input.igdbId },
   });

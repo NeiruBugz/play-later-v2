@@ -1,75 +1,3 @@
-/**
- * RED component test for RelatedGamesInfiniteList (Slice 14).
- *
- * This file is intentionally failing: the component module
- * `@/features/browse-related-games/ui/related-games-infinite-list` does not
- * exist until the GREEN step. The import below produces a module-not-found
- * error — that is the canonical RED state. Do not implement the component here.
- *
- * =============================================================================
- * CONTRACT
- *
- * Component:
- *   src/features/browse-related-games/ui/related-games-infinite-list/related-games-infinite-list.tsx
- *   Named export: RelatedGamesInfiniteList
- *
- * Props shape (Variant B — hybrid client-append, chosen over pure router-driven):
- *
- *   interface RelatedGamesInfiniteListProps {
- *     collectionId: number;
- *     pageSize: number;
- *     firstPage: {
- *       games: RelatedGame[];   // { igdbId, slug, title, coverImageId }
- *       total: number;
- *       page: number;
- *       pageSize: number;
- *       hasMore: boolean;
- *     };
- *   }
- *
- * WHY VARIANT B (hybrid client-append) over pure router-driven (Variant A):
- *   Pure Variant A (router.navigate → loader re-runs → new firstPage prop) cannot
- *   accumulate pages without resetting the rendered list on each navigation event,
- *   because every loader re-run replaces `firstPage` wholesale. The user would see
- *   "page 1 → page 2 (loses page 1 games)" — not infinite-scroll semantics.
- *   Variant B keeps local state of appended games; subsequent pages are fetched by
- *   calling `getRelatedGamesFn({ data: { collectionId, page, pageSize } })` directly
- *   (via `useServerFn` or plain call after mock, no TanStack Query introduced — honors
- *   the "no TanStack Query" task constraint). No URL sync — page index is UI-only
- *   state, not a shareable deep-link (multi-collection makes a single `?page=N`
- *   ambiguous; loader revalidation on URL change would re-fire all phase-2 IGDB
- *   chains).
- *   SSR delivers `firstPage`; all subsequent pages come from the server fn directly.
- *
- * Sentinel:
- *   A `<div data-testid="related-games-sentinel" aria-hidden="true" />` rendered
- *   below the last game row when `hasMore` is true. An IntersectionObserver watches
- *   it; when `isIntersecting` becomes true the component loads the next page.
- *
- * IntersectionObserver mock:
- *   `globalThis.IntersectionObserver` is replaced before render with a class that:
- *   - captures the callback passed to the constructor
- *   - exposes the callback via `capturedCallback` so the test can fire entries
- *     synchronously (no real viewport involvement)
- *   - observe/unobserve/disconnect are no-ops
- *   The test fires `capturedCallback([{ isIntersecting: true, target: sentinel }])`
- *   to simulate the sentinel entering the viewport.
- *
- * Server fn mock (foot-gun #8 from CLAUDE.md):
- *   `@/features/browse-related-games/api/get-related-games` is vi.mock'd so
- *   `getRelatedGamesFn` is a `vi.fn()` that resolves to a controllable page shape.
- *   The component imports and calls this fn directly; the mock intercepts it.
- *   The integration test uses the plain worker directly (foot-gun #8 mitigation).
- *
- * NOT tested here:
- *   - Pixel-level layout or grid column count
- *   - GameCard internals (covered by entities/game/ui tests)
- *   - Server fn correctness (covered by get-related-games.integration.test.ts)
- *   - Exact cover image URL format (covered by library-item-card utility tests)
- *   - TanStack Router loader wiring (covered by route test in src/routes/)
- * =============================================================================
- */
-
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -77,21 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Module-not-found IS the expected failure mode.
 import { RelatedGamesInfiniteList } from "@/features/browse-related-games/ui/related-games-infinite-list";
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
-// Foot-gun #8: mock the server fn wrapper so it never crosses the real
-// createServerFn boundary in vitest (which returns undefined without the
-// Vite plugin). The component calls this fn for pages 2+.
+// Foot-gun #8: mock the server fn wrapper (createServerFn returns undefined without the Vite plugin).
 const mockGetRelatedGamesFn = vi.fn();
 vi.mock("@/features/browse-related-games/api/get-related-games", () => ({
   getRelatedGamesFn: (...args: unknown[]) => mockGetRelatedGamesFn(...args),
 }));
 
-// GameCard wraps each entry in a TanStack <Link>, which requires a
-// RouterProvider context. Mock it as a plain <a> here (mirrors the
-// precedent in entities/library-item/ui/library-item-card/library-item-card.test.tsx).
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,
@@ -119,10 +38,8 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
-// ---------------------------------------------------------------------------
-// IntersectionObserver mock
-// ---------------------------------------------------------------------------
-
+// IntersectionObserver mock: captures the callback so tests can fire entries
+// synchronously via capturedCallback([{ isIntersecting: true }]) — no real viewport.
 type IntersectionCallback = (
   entries: Partial<IntersectionObserverEntry>[]
 ) => void;
@@ -137,10 +54,6 @@ class MockIntersectionObserver {
   unobserve() {}
   disconnect() {}
 }
-
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
 
 type RelatedGame = {
   igdbId: number;
@@ -198,10 +111,6 @@ const PAGE_2_RESPONSE = {
   hasMore: false,
 };
 
-// ---------------------------------------------------------------------------
-// Element & action vocabulary
-// ---------------------------------------------------------------------------
-
 const elements = {
   getGameByName: (name: string) =>
     screen.getByRole("img", { name: `Cover for ${name}` }),
@@ -226,10 +135,6 @@ const actions = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Suite
-// ---------------------------------------------------------------------------
-
 describe("RelatedGamesInfiniteList", () => {
   beforeEach(() => {
     capturedCallback = null;
@@ -241,10 +146,6 @@ describe("RelatedGamesInfiniteList", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
-
-  // -------------------------------------------------------------------------
-  // Initial render from SSR firstPage prop
-  // -------------------------------------------------------------------------
 
   describe("given firstPage has games and hasMore is true", () => {
     beforeEach(() => {
@@ -278,10 +179,6 @@ describe("RelatedGamesInfiniteList", () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // Sentinel non-intersecting — no fetch
-  // -------------------------------------------------------------------------
-
   describe("given the sentinel is not intersecting (below viewport)", () => {
     beforeEach(() => {
       render(
@@ -298,10 +195,6 @@ describe("RelatedGamesInfiniteList", () => {
       expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
     });
   });
-
-  // -------------------------------------------------------------------------
-  // Sentinel intersection triggers page-2 fetch
-  // -------------------------------------------------------------------------
 
   describe("given the sentinel intersects (user scrolls to bottom)", () => {
     beforeEach(async () => {
@@ -354,10 +247,6 @@ describe("RelatedGamesInfiniteList", () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // hasMore false — no sentinel, no further fetch
-  // -------------------------------------------------------------------------
-
   describe("given firstPage.hasMore is false", () => {
     beforeEach(() => {
       render(
@@ -380,10 +269,6 @@ describe("RelatedGamesInfiniteList", () => {
       expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
     });
   });
-
-  // -------------------------------------------------------------------------
-  // Stops fetching after final page (hasMore: false from page-2 response)
-  // -------------------------------------------------------------------------
 
   describe("given the final page has been fetched (hasMore: false after page 2)", () => {
     beforeEach(async () => {
@@ -413,10 +298,6 @@ describe("RelatedGamesInfiniteList", () => {
       expect(mockGetRelatedGamesFn.mock.calls.length).toBe(callsBefore);
     });
   });
-
-  // -------------------------------------------------------------------------
-  // No double-fetch while a request is in-flight
-  // -------------------------------------------------------------------------
 
   describe("given two sentinel intersections fire before the first resolves", () => {
     beforeEach(() => {
@@ -449,10 +330,6 @@ describe("RelatedGamesInfiniteList", () => {
       expect(mockGetRelatedGamesFn).toHaveBeenCalledTimes(1);
     });
   });
-
-  // -------------------------------------------------------------------------
-  // Inline error surface when next-page fetch rejects
-  // -------------------------------------------------------------------------
 
   describe("given the next-page fetch rejects with an error", () => {
     const ERROR_MESSAGE = "IGDB upstream error";

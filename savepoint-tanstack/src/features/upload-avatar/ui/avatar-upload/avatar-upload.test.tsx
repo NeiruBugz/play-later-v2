@@ -7,8 +7,6 @@ import { getAvatarPresignedUrlFn } from "../../api/get-avatar-presigned-url";
 import { setAvatarUrlFn } from "../../api/set-avatar-url";
 import { AvatarUpload } from "./avatar-upload";
 
-// --- Server fn mocks ---
-
 vi.mock("../../api/get-avatar-presigned-url", () => ({
   getAvatarPresignedUrlFn: vi.fn(),
 }));
@@ -17,8 +15,6 @@ vi.mock("../../api/set-avatar-url", () => ({
   setAvatarUrlFn: vi.fn(),
 }));
 
-// --- Toast mock (mirrors edit-profile precedent) ---
-
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -26,20 +22,14 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// --- Router mock (mirrors app-sidebar.test.tsx precedent) ---
-
 const mockRouterInvalidate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: mockRouterInvalidate }),
 }));
 
-// --- Stub constants ---
-
 const STUB_UPLOAD_URL = "https://s3.example.com/upload/stub-key";
 const STUB_PUBLIC_URL = "https://cdn.example.com/avatars/stub-key.jpg";
-
-// --- Helpers ---
 
 const createMockFile = (
   name: string,
@@ -51,14 +41,10 @@ const createMockFile = (
   return new File([blob], name, { type });
 };
 
-// --- Element vocabulary ---
-
 const elements = {
   getFileInput: () =>
     screen.getByLabelText("Upload avatar") as HTMLInputElement,
 };
-
-// --- Test suite ---
 
 describe("AvatarUpload", () => {
   afterEach(() => {

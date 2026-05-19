@@ -16,6 +16,7 @@ import { z } from "zod";
 import { createLogger } from "@/shared/lib";
 import { UpstreamError } from "@/shared/lib/errors";
 
+import { igdbContextFromThrown } from "./errors";
 import { igdbFetch } from "./fetch";
 import { SearchResponseItemSchema, type SearchResponseItem } from "./schemas";
 
@@ -38,13 +39,16 @@ export async function getGameByIgdbId(
   try {
     response = await igdbFetch("/games", query);
   } catch (cause) {
+    const igdbContext = igdbContextFromThrown(cause);
     logger.error(
-      { error: cause, igdbId },
+      { err: cause, igdbId, ...igdbContext },
       "IGDB get-game-by-id transport failure"
     );
     throw new UpstreamError("IGDB get-game-by-id failed", {
       cause: cause instanceof Error ? cause.message : String(cause),
       igdbId,
+      query,
+      ...igdbContext,
     });
   }
 

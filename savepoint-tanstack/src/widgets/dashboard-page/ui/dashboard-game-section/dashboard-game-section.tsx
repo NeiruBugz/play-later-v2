@@ -14,13 +14,6 @@ const HERO_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4";
 const DEFAULT_GRID =
   "grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7";
 
-/**
- * Reusable dashboard section: header + "View All" link + responsive card grid
- * (or an empty state with a Browse Games CTA). Mirrors canonical
- * `features/dashboard/ui/dashboard-game-section.tsx` shape; tanstack uses
- * tanstack-router `<Link>` and the `LibraryItemCard` widget instead of the
- * Next.js `Link` + `LibraryCard`.
- */
 export function DashboardGameSection({
   title,
   items,

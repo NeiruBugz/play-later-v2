@@ -8,22 +8,6 @@ import { Button } from "@/shared/ui/button";
 
 import type { DashboardQuickLogHeroProps } from "./dashboard-quick-log-hero.type";
 
-/**
- * Reflection-first dashboard hero. Mirrors canonical's two-state shape:
- *  - With PLAYING games: 1-3 mini cards each with a primary "Log Session"
- *    button that opens `ComposeJournalEntryDialog` preselected to that game,
- *    plus a subdued "Reflect" link.
- *  - Empty state: prompt + CTA to find a game on the shelf.
- *
- * Canonical opens `JournalQuickEntrySheet`; tanstack reuses
- * `ComposeJournalEntryDialog` (slice-16 feature) since the Sheet variant
- * isn't ported. The UX is equivalent: "click the game's Log button → form
- * preselected to that game opens."
- *
- * The dialog instance is reset between selections by keying on the active
- * `igdbId` (matches the canonical pattern of remounting the form on each
- * game switch so transient state — draft text, ratings — doesn't leak).
- */
 export function DashboardQuickLogHero({
   username,
   playingGames,

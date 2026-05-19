@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// RED: this import will fail to resolve until the component is implemented (Slice 15 GREEN step)
 import { JournalTimeline, type JournalTimelineEntry } from "./journal-timeline";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -11,10 +10,6 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
-
-// ---------------------------------------------------------------------------
-// Test-data factory
-// ---------------------------------------------------------------------------
 
 function makeEntry(
   overrides?: Partial<JournalTimelineEntry>
@@ -37,10 +32,6 @@ function makeEntry(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Element vocabulary
-// ---------------------------------------------------------------------------
-
 const elements = {
   queryEmptyState: () => screen.queryByText("Nothing logged yet"),
   getEmptyState: () => screen.getByText("Nothing logged yet"),
@@ -51,10 +42,6 @@ const elements = {
   getAllEntries: () => screen.getAllByRole("article"),
   queryAllEntries: () => screen.queryAllByRole("article"),
 };
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("JournalTimeline", () => {
   describe("given entries: []", () => {

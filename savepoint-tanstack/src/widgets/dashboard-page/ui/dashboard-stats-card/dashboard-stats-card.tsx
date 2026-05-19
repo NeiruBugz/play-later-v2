@@ -5,13 +5,6 @@ import { STATUS_ENTRIES } from "@/entities/library-item/model/status";
 
 import type { DashboardStatsCardProps } from "./dashboard-stats-card.type";
 
-/**
- * Library stats card. Mirrors canonical's `// LIBRARY` terminal label plus
- * the horizontal status-distribution bar and the per-status dot legend.
- * Tanstack drops the y2k/jewel theme variants (those are wired up via theme
- * variants in canonical CSS) — the card renders as the flat, default
- * shape and gets themed later when those tokens land here.
- */
 export function DashboardStatsCard({
   statusCounts,
   total,

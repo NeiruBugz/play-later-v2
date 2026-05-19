@@ -1,17 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, Library, User } from "lucide-react";
 
-/**
- * Mobile bottom tab nav — three primary destinations. Visible only below
- * the `md` breakpoint; desktop uses the left sidebar.
- *
- * Mirrors canonical's bottom-nav order and label set (Library / Journal /
- * Profile). The library page's FAB is offset to `bottom-20 md:bottom-6` so
- * it doesn't collide with this bar.
- *
- * Introduced in Phase 4 of the Slice 18A visual-parity push — see
- * `context/audits/2026-05-18/visual-parity.md` § Mobile shell.
- */
 const NAV_ITEMS = [
   { label: "Library", to: "/library", icon: Library },
   { label: "Journal", to: "/journal", icon: BookOpen },

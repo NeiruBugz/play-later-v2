@@ -110,9 +110,6 @@ const elements = {
   queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
-  // Slice 17B — IGDB enrichment surfaces. Genres + Platforms render as a
-  // " · "-joined string inside a <dd>-style row next to the GENRES/PLATFORMS
-  // terminal labels. Empty arrays render as the literal placeholder "—".
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
@@ -268,12 +265,6 @@ describe("GameDetail", () => {
       expect(elements.queryPlaytimeTab()).not.toBeNull();
     });
   });
-
-  // -------------------------------------------------------------------------
-  // Slice 17B — game-detail IGDB enrichment (live-fetch dual-track shape).
-  // Rich fields (summary, genres, platforms, developer) flow through the
-  // `igdbDetails` prop on every render; NOT persisted to Prisma.
-  // -------------------------------------------------------------------------
 
   describe("given igdbDetails with a populated summary", () => {
     beforeEach(() => {

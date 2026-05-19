@@ -1,29 +1,9 @@
-/**
- * IGDB rich-detail worker for the game-detail page.
- *
- * Canonical-aligned dual-track shape: this worker returns the LIVE IGDB
- * payload that the game-detail widget consumes directly — summary, genres,
- * platforms, screenshots, involved companies, themes, aggregated rating.
- * NOTHING from this payload is persisted to the Game row; the orchestrator
- * keeps a thin cached row (title/slug/cover/releaseDate) for cross-feature
- * lookups, and the widget reads the rich shape from this worker's return
- * value on every render.
- *
- * Mirrors `buildGameDetailsBySlugQuery` from
- * `savepoint-app/data-access-layer/services/igdb/queries.ts` and the subset
- * of `FullGameInfoResponseSchema` that the tanstack detail page actually
- * renders today. Drop fields not yet consumed (game_modes, game_engines,
- * player_perspectives, external_games, websites, similar_games, collections)
- * so the wire payload stays small — easy to extend later.
- *
- * Empty IGDB result → `null` (caller throws `NotFoundError`). Transport /
- * malformed → `UpstreamError`.
- */
 import { z } from "zod";
 
 import { createLogger } from "@/shared/lib";
 import { UpstreamError } from "@/shared/lib/errors";
 
+import { igdbContextFromThrown } from "./errors";
 import { igdbFetch } from "./fetch";
 
 const logger = createLogger({ service: "igdb-get-game-details-by-slug" });
@@ -100,13 +80,16 @@ export async function getGameDetailsFromIgdb(
   try {
     response = await igdbFetch("/games", query);
   } catch (cause) {
+    const igdbContext = igdbContextFromThrown(cause);
     logger.error(
-      { error: cause, slug },
+      { err: cause, slug, ...igdbContext },
       "IGDB get-game-details-by-slug transport failure"
     );
     throw new UpstreamError("IGDB get-game-details-by-slug failed", {
       cause: cause instanceof Error ? cause.message : String(cause),
       slug,
+      query,
+      ...igdbContext,
     });
   }
 

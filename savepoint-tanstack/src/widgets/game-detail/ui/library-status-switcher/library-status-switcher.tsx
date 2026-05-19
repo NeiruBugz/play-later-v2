@@ -24,17 +24,6 @@ import type {
 } from "../../../../../shared/lib/prisma/client.ts";
 import type { LibraryStatusSwitcherProps } from "./library-status-switcher.type";
 
-/**
- * Phase 2 of Slice 18A visual parity: inline 5-pill status row + rating + overflow
- * menu. Fully replaces the previous `Manage in library` button. When `entry` is
- * null, clicking a pill calls `addGameToLibraryFn` with that status; otherwise
- * calls `updateLibraryItemFn`. The overflow menu surfaces "Edit details…" (opens
- * the existing LibraryModal) and "Remove from library".
- *
- * Optimistic update: tracks `optimisticStatus` / `optimisticRating` locally so
- * the active pill flips immediately on click. Server fn is awaited; on failure
- * the optimistic state is reverted and a toast is shown.
- */
 export function LibraryStatusSwitcher({
   igdbId,
   gameTitle,
@@ -63,7 +52,6 @@ export function LibraryStatusSwitcher({
         setOptimisticEntry(created);
         toast.success(`Added to library as ${labelFor(status)}`);
       } else {
-        // optimistic flip
         setOptimisticEntry({ ...previous, status });
         const updated = await updateLibraryItemFn({
           data: { itemId: previous.id, status },
