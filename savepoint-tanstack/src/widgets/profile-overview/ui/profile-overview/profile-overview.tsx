@@ -8,6 +8,7 @@ import { BookOpen, Gamepad2, Notebook, Trophy } from "lucide-react";
 // but the widget stays props-driven via `isOwnProfile`.
 import { AvatarUpload } from "@/features/upload-avatar";
 import { Button } from "@/shared/ui/button";
+import { EmptyState } from "@/shared/ui/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 
 import { deriveBannerGradient } from "../../lib/derive-banner-gradient";
@@ -198,36 +199,28 @@ export function ProfileOverview({
           {/* TODO(slice-18): wire to entities/library-item once profile
               public-library view is scoped. Empty state ships now for
               visual parity. */}
-          <div
-            className="border-border bg-card/40 rounded-lg border border-dashed p-12 text-center"
+          <EmptyState
             data-testid="profile-library-empty"
-          >
-            <p className="heading-md mb-1">Library view coming soon</p>
-            <p className="text-muted-foreground text-sm">
-              Browse this profile's full library from the dedicated page.
-            </p>
-            <div className="mt-4">
-              <Button asChild variant="outline" size="sm">
-                <Link to="/library">Open library</Link>
-              </Button>
-            </div>
-          </div>
+            title="Library view coming soon"
+            description="Browse this profile's full library from the dedicated page."
+            action={{
+              label: "Open library",
+              to: "/library",
+              variant: "outline",
+              size: "sm",
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="activity">
           {/* TODO(slice-18): replace with real activity feed once the
               activity entity / query lands. Empty state ships now for
               visual parity. */}
-          <div
-            className="border-border bg-card/40 rounded-lg border border-dashed p-12 text-center"
+          <EmptyState
             data-testid="profile-activity-empty"
-          >
-            <p className="heading-md mb-1">No activity yet</p>
-            <p className="text-muted-foreground text-sm">
-              Activity will appear here once journal entries and library changes
-              are tracked publicly.
-            </p>
-          </div>
+            title="No activity yet"
+            description="Activity will appear here once journal entries and library changes are tracked publicly."
+          />
         </TabsContent>
       </Tabs>
     </div>

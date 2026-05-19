@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
+import { EmptyState } from "@/shared/ui/empty-state";
 import { cn } from "@/shared/lib/utils";
 // Widget-to-widget import: dashboard-page extends library-item-card's display
 // shape (the section IS a grid of those cards). Documented in DIVERGENCES.md
@@ -58,27 +59,18 @@ export function DashboardGameSection({
           ))}
         </div>
       ) : (
-        <EmptyState message={emptyMessage} viewAll={viewAll} />
+        <EmptyState
+          title={emptyMessage}
+          spacing="compact"
+          action={{
+            label: "Browse Games",
+            to: "/library",
+            search: viewAll as Record<string, unknown>,
+            variant: "outline",
+            size: "sm",
+          }}
+        />
       )}
     </section>
-  );
-}
-
-function EmptyState({
-  message,
-  viewAll,
-}: {
-  message: string;
-  viewAll: DashboardGameSectionProps["viewAll"];
-}) {
-  return (
-    <div className="border-border bg-muted/30 rounded-lg border border-dashed p-8 text-center">
-      <p className="text-muted-foreground mb-4 text-sm">{message}</p>
-      <Button variant="outline" size="sm" asChild>
-        <Link to="/library" search={viewAll}>
-          Browse Games
-        </Link>
-      </Button>
-    </div>
   );
 }

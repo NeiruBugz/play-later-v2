@@ -1,6 +1,4 @@
-import { Link } from "@tanstack/react-router";
-
-import { Button } from "@/shared/ui/button";
+import { EmptyState } from "@/shared/ui/empty-state";
 
 import { DashboardGameSection } from "../dashboard-game-section";
 import { DashboardQuickLogHero } from "../dashboard-quick-log-hero";
@@ -89,19 +87,11 @@ export function DashboardPage({ data }: DashboardPageProps) {
  */
 function EmptyLibraryFallback() {
   return (
-    <section className="border-border bg-card/40 mt-2 rounded-lg border border-dashed p-12 text-center">
-      <h2 className="text-xl font-semibold tracking-tight">
-        Your library is empty
-      </h2>
-      <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-        Add a game to start tracking what you&apos;re playing, what&apos;s up
-        next, and what you&apos;d like to revisit.
-      </p>
-      <div className="mt-4">
-        <Button asChild>
-          <Link to="/library">Browse Library</Link>
-        </Button>
-      </div>
-    </section>
+    <EmptyState
+      className="mt-2"
+      title="Your library is empty"
+      description="Add a game to start tracking what you're playing, what's up next, and what you'd like to revisit."
+      action={{ label: "Browse Library", to: "/library" }}
+    />
   );
 }

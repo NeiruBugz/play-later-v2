@@ -8,6 +8,7 @@ import {
   type LibraryStatusCounts,
 } from "@/features/filter-library";
 import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
+import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
 import { LibraryItemCard } from "@/widgets/library-item-card";
 
@@ -138,17 +139,15 @@ export function LibraryPage(props: LibraryPageProps) {
 
         <div className="min-w-0 flex-1">
           {filteredItems.length === 0 ? (
-            <section
+            <EmptyState
               aria-label="Empty library"
-              className="border-border bg-card p-xl shadow-paper-sm rounded-lg border border-dashed text-center"
-            >
-              <h2 className="text-h3 mb-sm">No games yet</h2>
-              <p className="text-muted-foreground text-sm">
-                {items.length === 0
+              title="No games yet"
+              description={
+                items.length === 0
                   ? "Your library is empty. Import from Steam or add games manually to get started."
-                  : "No games match this filter."}
-              </p>
-            </section>
+                  : "No games match this filter."
+              }
+            />
           ) : (
             <ul
               aria-label="Library items"

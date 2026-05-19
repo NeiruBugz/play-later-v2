@@ -1,4 +1,5 @@
 import { JournalEntryCard } from "@/entities/journal-entry/ui/journal-entry-card";
+import { EmptyState } from "@/shared/ui/empty-state";
 
 import type {
   JournalTimelineEntry,
@@ -20,15 +21,10 @@ export function JournalTimeline({
 }: JournalTimelineProps) {
   if (entries.length === 0) {
     return (
-      <div className="bg-card border-border/10 space-y-xl flex min-h-[280px] flex-col items-center justify-center rounded-lg border px-6 py-12 text-center">
-        <div className="space-y-sm max-w-md">
-          <h2 className="text-lg font-semibold">Nothing logged yet</h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Log tonight&apos;s session — a playtime count or a quick thought is
-            enough. Reflections can come later.
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        title="Nothing logged yet"
+        description="Log tonight's session — a playtime count or a quick thought is enough. Reflections can come later."
+      />
     );
   }
 

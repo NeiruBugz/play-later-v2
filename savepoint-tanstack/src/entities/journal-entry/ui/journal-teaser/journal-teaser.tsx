@@ -1,3 +1,5 @@
+import { EmptyState } from "@/shared/ui/empty-state";
+
 import type { JournalTeaserProps } from "./journal-teaser.type";
 
 function formatEntryDate(date: Date): string {
@@ -23,18 +25,15 @@ export function JournalTeaser({
 
   if (entries.length === 0) {
     return (
-      <div className="gap-md flex flex-col items-start">
-        <p className="text-muted-foreground text-sm">No journal entries yet.</p>
-        {renderAddEntry ? (
-          <button
-            type="button"
-            onClick={onAddEntryClick}
-            className="text-primary hover:text-primary/80 focus-visible:ring-ring text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-          >
-            Add entry
-          </button>
-        ) : null}
-      </div>
+      <EmptyState
+        spacing="compact"
+        title="No journal entries yet."
+        action={
+          renderAddEntry
+            ? { label: "Add entry", onClick: onAddEntryClick, variant: "link" }
+            : undefined
+        }
+      />
     );
   }
 

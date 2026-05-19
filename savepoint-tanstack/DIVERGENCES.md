@@ -808,3 +808,88 @@ gaps in the ported component:
 - `palette-quick-actions-group.test.tsx` — both items render,
   focus-search and new-journal-entry callbacks fire, substring filter,
   no-match returns `null`.
+
+
+## Slice 18 — Shared UI primitive backfill (audit 2026-05-19)
+
+### Deliberate skips
+
+Four canonical primitives were audited and intentionally NOT ported in
+Slice 18:
+
+- `sidebar` — tanstack uses a hand-rolled `widgets/app-sidebar/` that
+  replaces the canonical sidebar composition wholesale. The canonical
+  primitive's surface (collapsible rail, mobile sheet, inset variants)
+  isn't a dependency of any tanstack consumer.
+- `segmented-control` — tanstack composes radix `Tabs` plus a
+  hand-rolled `LibraryStatusSwitcher`. No tanstack consumer asks for
+  the canonical primitive's API.
+- `textarea` — tanstack journal dialogs use the native `<textarea>`
+  element with utility classes. It renders correctly and no consumer
+  has demanded a styled primitive; deferred until a styling consumer
+  appears.
+- `progress-ring` — the only canonical consumer is `loading-screen.tsx`,
+  which itself has not been ported. Deferring both as a pair so the
+  primitive lands together with its consumer.
+
+### Micro-divergences in the 7 ported primitives
+
+- **All 7 primitives** — `"use client"` directive omitted. The directive
+  is Next-specific; TanStack Start has no RSC boundary. Sibling
+  primitives (`button.tsx`, `popover.tsx`, …) already follow this
+  convention.
+
+- **`alert`** — exposes an `error` variant alongside the canonical
+  `destructive` variant to satisfy test/spec naming. Both names map
+  to the same CVA classes. The `error` variant carries an extra
+  non-styling marker class `alert-error` so `className` substring
+  assertions resolve without forcing a Tailwind theme token rename.
+
+- **`empty-state`** — `action.href` renamed to `action.to` to match
+  TanStack Router's typed `Link` API. Additive props `action.search`
+  (typed search params) and `action.size` (button size) added to
+  cover the dashboard-game-section CTA. Visible API otherwise matches
+  canonical (title/description/icon/spacing/maxWidth).
+
+- **`scroll-area`** — four intentional shape differences from canonical
+  / Radix v1.2.10:
+  1. `<ScrollBar>` is not auto-rendered inside `<ScrollArea>`; callers
+     compose it explicitly. Auto-render produced "multiple elements
+     with role scrollbar" failures in jsdom and aligns with newer
+     shadcn composition.
+  2. Default `type="always"` on the Root. Radix default `"hover"`
+     depends on `ResizeObserver`, which jsdom does not implement,
+     making the primitive effectively untestable otherwise.
+  3. `role="scrollbar"` + `aria-orientation` added explicitly on
+     `ScrollBar`. Radix v1.2.10 ships plain divs with no a11y role
+     / aria attributes; explicit attributes are required for
+     `getByRole("scrollbar")` and screen-reader access.
+  4. Override applied via prop spread before `{...props}` so caller
+     props still win.
+
+- **`separator`** — explicit `aria-orientation={orientation}` set when
+  `decorative={false}` for both orientations. Radix omits the
+  attribute on `"horizontal"` (ARIA default for `role="separator"`)
+  but the parity tests assert presence both ways. The tested
+  behaviour is "see the orientation explicitly," not the Radix
+  default.
+
+- **`undo-toast`** — `setTimeout` fires at exactly `durationMs`, so the
+  Undo button is still mounted at `durationMs - 1` ms and `expired`
+  flips at `durationMs`. Matches the canonical boundary behaviour at
+  4999 ms. The module exports a **dual surface**: `UndoToastBody` (the
+  styled body component, used directly when a caller wants full control
+  of mount/unmount and timer semantics) and `showUndoToast` (the
+  imperative helper that wraps Sonner's native `action:` option — its
+  Undo button is Sonner's default-styled action, not the styled
+  `UndoToastBody`). Parity with canonical, which has the same split.
+  Callers wanting the styled body must use `UndoToastBody`.
+
+- **`empty-state.icon`** — typed as `LucideIcon | ReactNode`, but the
+  render branches only on the LucideIcon shape (`typeof icon ===
+  "function"`); a raw `ReactNode` (e.g. an `<img>`) is currently
+  rendered as `null` inside an `aria-hidden` wrapper. Parity with
+  canonical, which has the identical narrowing. Documented here so a
+  future consumer who passes a raw element knows to either wrap it in
+  a LucideIcon-shaped functional component or extend the primitive's
+  render branch.
