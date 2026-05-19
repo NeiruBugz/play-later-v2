@@ -62,7 +62,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       {/* Top: brand + search trigger */}
       <div className="space-y-3 px-4 pt-4">
         <Link
-          to="/"
+          to="/dashboard"
           className="flex items-center gap-2 rounded-md px-1 py-1"
           aria-label="SavePoint"
         >

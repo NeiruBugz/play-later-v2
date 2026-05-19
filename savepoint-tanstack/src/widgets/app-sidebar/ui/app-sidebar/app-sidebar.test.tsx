@@ -71,8 +71,8 @@ describe("AppSidebar", () => {
       render(<AppSidebar user={stubUser} />);
     });
 
-    it("renders a brand link pointing to /", () => {
-      expect(elements.getBrandLink()).toHaveAttribute("href", "/");
+    it("renders a brand link pointing to /dashboard", () => {
+      expect(elements.getBrandLink()).toHaveAttribute("href", "/dashboard");
     });
 
     it("renders the search trigger button", () => {
