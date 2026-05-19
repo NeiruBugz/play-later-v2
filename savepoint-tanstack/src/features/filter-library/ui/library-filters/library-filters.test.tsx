@@ -87,54 +87,30 @@ describe("LibraryFilters", () => {
     mockNavigate.mockReset();
   });
 
-  // ---- Section headers -----------------------------------------------------
+  // ---- Initial render ------------------------------------------------------
 
   describe("given the component is rendered", () => {
     beforeEach(() => {
       render(<LibraryFilters {...defaultProps} />);
     });
 
-    it("renders the Status section heading", () => {
+    it("renders Status, Platform and Sort section headings", () => {
       expect(elements.queryStatusHeading()).not.toBeNull();
-    });
-
-    it("renders the Platform section heading", () => {
       expect(elements.queryPlatformHeading()).not.toBeNull();
-    });
-
-    it("renders the Sort section heading", () => {
       expect(elements.querySortHeading()).not.toBeNull();
     });
 
-    it("renders the All-statuses pill", () => {
+    it("renders all five status filter buttons and the All pill", () => {
       expect(elements.getAllStatusesButton()).toBeDefined();
-    });
-
-    it("renders a status filter control for Playing", () => {
       expect(elements.queryStatusButton("Filter by Playing")).not.toBeNull();
-    });
-
-    it("renders a status filter control for Played", () => {
       expect(elements.queryStatusButton("Filter by Played")).not.toBeNull();
-    });
-
-    it("renders a status filter control for Up Next", () => {
       expect(elements.queryStatusButton("Filter by Up Next")).not.toBeNull();
-    });
-
-    it("renders a status filter control for Shelf", () => {
       expect(elements.queryStatusButton("Filter by Shelf")).not.toBeNull();
-    });
-
-    it("renders a status filter control for Wishlist", () => {
       expect(elements.queryStatusButton("Filter by Wishlist")).not.toBeNull();
     });
 
-    it("renders the platform Radix Select trigger", () => {
+    it("renders the Platform and Sort select triggers", () => {
       expect(elements.getPlatformTrigger()).toBeDefined();
-    });
-
-    it("renders the sort Radix Select trigger", () => {
       expect(elements.getSortTrigger()).toBeDefined();
     });
 
@@ -143,23 +119,19 @@ describe("LibraryFilters", () => {
     });
   });
 
+  // ---- Active-status state -------------------------------------------------
+
   describe("given a status filter is active", () => {
     beforeEach(() => {
       render(<LibraryFilters {...defaultProps} status="PLAYING" />);
     });
 
-    it("renders the clear-all button when a status filter is active", () => {
+    it("shows the clear-all button and marks the active button pressed / All unpressed", () => {
       expect(elements.getClearFiltersButton()).toBeDefined();
-    });
-
-    it("marks the active status button as pressed", () => {
       expect(elements.getStatusButton("Filter by Playing")).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-    });
-
-    it("does NOT mark the All pill as pressed when a status is active", () => {
       expect(elements.getAllStatusesButton()).toHaveAttribute(
         "aria-pressed",
         "false"
@@ -180,7 +152,7 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Status counts (count badges) ---------------------------------------
+  // ---- Status count badges -------------------------------------------------
 
   describe("given counts are supplied", () => {
     beforeEach(() => {
@@ -192,20 +164,15 @@ describe("LibraryFilters", () => {
       );
     });
 
-    it("renders the total count badge on the All pill", () => {
+    it("renders total count on the All pill and per-status counts on each button including zero", () => {
       // 3 + 2 + 1 + 0 + 5 = 11
-      const allBtn = elements.getAllStatusesButton();
-      expect(allBtn.textContent).toContain("11");
-    });
-
-    it("renders the per-status count next to Playing", () => {
-      const playingBtn = elements.getStatusButton("Filter by Playing");
-      expect(playingBtn.textContent).toContain("3");
-    });
-
-    it("renders zero counts (does not omit the cell)", () => {
-      const shelfBtn = elements.getStatusButton("Filter by Shelf");
-      expect(shelfBtn.textContent).toContain("0");
+      expect(elements.getAllStatusesButton().textContent).toContain("11");
+      expect(
+        elements.getStatusButton("Filter by Playing").textContent
+      ).toContain("3");
+      expect(elements.getStatusButton("Filter by Shelf").textContent).toContain(
+        "0"
+      );
     });
   });
 
@@ -221,14 +188,6 @@ describe("LibraryFilters", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ status: "PLAYING" }),
-        })
-      );
-    });
-
-    it("preserves a string sortBy in the navigation payload", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortBy: expect.any(String) }),
         })
       );
     });
@@ -322,18 +281,10 @@ describe("LibraryFilters", () => {
       await actions.pickSortOption("Title A–Z");
     });
 
-    it("calls navigate with search.sortBy set to title", () => {
+    it("calls navigate with sortBy=title and sortOrder=asc", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ sortBy: "title" }),
-        })
-      );
-    });
-
-    it("calls navigate with search.sortOrder set to asc", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortOrder: "asc" }),
+          search: expect.objectContaining({ sortBy: "title", sortOrder: "asc" }),
         })
       );
     });
@@ -348,18 +299,13 @@ describe("LibraryFilters", () => {
       await actions.pickSortOption("Recently Added");
     });
 
-    it("calls navigate with search.sortBy set to createdAt", () => {
+    it("calls navigate with sortBy=createdAt and sortOrder=desc", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ sortBy: "createdAt" }),
-        })
-      );
-    });
-
-    it("calls navigate with search.sortOrder set to desc", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortOrder: "desc" }),
+          search: expect.objectContaining({
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          }),
         })
       );
     });
@@ -381,30 +327,16 @@ describe("LibraryFilters", () => {
       await actions.clearFilters();
     });
 
-    it("calls navigate with status, platform, and minRating all undefined", () => {
+    it("calls navigate clearing all filters and resetting sort to default", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({
             status: undefined,
             platform: undefined,
             minRating: undefined,
+            sortBy: "updatedAt",
+            sortOrder: "desc",
           }),
-        })
-      );
-    });
-
-    it("resets sortBy to the default (updatedAt) on clear", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortBy: "updatedAt" }),
-        })
-      );
-    });
-
-    it("resets sortOrder to the default (desc) on clear", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ sortOrder: "desc" }),
         })
       );
     });

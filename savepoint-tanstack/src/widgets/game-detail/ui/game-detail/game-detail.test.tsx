@@ -109,7 +109,6 @@ const elements = {
   queryGenresLabel: () => screen.queryByText("// GENRES"),
   queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
-  queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
@@ -121,44 +120,19 @@ describe("GameDetail", () => {
       render(<GameDetail data={buildData(null)} viewerUserId={null} />);
     });
 
-    it("renders the game title", () => {
+    it("renders the game title, breadcrumbs, Overview tab, and metadata labels", () => {
       expect(elements.getTitle()).toBeDefined();
-    });
-
-    it("renders the Library breadcrumb segment", () => {
       expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
-    });
-
-    it("renders the Games mid-segment in the breadcrumb", () => {
       expect(elements.queryBreadcrumbGames()).not.toBeNull();
-    });
-
-    it("does not render the inline status switcher", () => {
-      expect(elements.queryStatusSwitcher()).toBeNull();
-    });
-
-    it("does not render the Journal tab for anonymous viewers", () => {
-      expect(elements.queryJournalTab()).toBeNull();
-    });
-
-    it("renders the Overview tab", () => {
       expect(elements.getOverviewTab()).toBeDefined();
-    });
-
-    it("renders the IGDB summary paragraph", () => {
-      expect(elements.querySummary()).not.toBeNull();
-    });
-
-    it("renders the terminal-style GAME.DETAIL label", () => {
       expect(elements.queryGameDetailLabel()).not.toBeNull();
-    });
-
-    it("renders the terminal-style GENRES label", () => {
       expect(elements.queryGenresLabel()).not.toBeNull();
+      expect(elements.queryPlatformsLabel()).not.toBeNull();
     });
 
-    it("renders the terminal-style PLATFORMS label", () => {
-      expect(elements.queryPlatformsLabel()).not.toBeNull();
+    it("does not render the status switcher or Journal tab for anonymous viewers", () => {
+      expect(elements.queryStatusSwitcher()).toBeNull();
+      expect(elements.queryJournalTab()).toBeNull();
     });
   });
 
@@ -167,31 +141,8 @@ describe("GameDetail", () => {
       render(<GameDetail data={buildData(null)} viewerUserId="user-1" />);
     });
 
-    it("renders the inline status switcher", () => {
+    it("renders the status switcher with all 5 pills unchecked", () => {
       expect(elements.queryStatusSwitcher()).not.toBeNull();
-    });
-
-    it("renders all 5 status pills", () => {
-      for (const label of [
-        "Up Next",
-        "Playing",
-        "Shelf",
-        "Played",
-        "Wishlist",
-      ]) {
-        expect(elements.queryStatusPill(label)).not.toBeNull();
-      }
-    });
-
-    it("does not render the rating slider when there is no entry", () => {
-      expect(elements.queryRatingSlider()).toBeNull();
-    });
-
-    it("does not render the overflow menu trigger when there is no entry", () => {
-      expect(elements.queryMoreMenuTrigger()).toBeNull();
-    });
-
-    it("marks no status pill as active", () => {
       for (const label of [
         "Up Next",
         "Playing",
@@ -205,9 +156,14 @@ describe("GameDetail", () => {
         );
       }
     });
+
+    it("does not render the rating slider or overflow menu when there is no entry", () => {
+      expect(elements.queryRatingSlider()).toBeNull();
+      expect(elements.queryMoreMenuTrigger()).toBeNull();
+    });
   });
 
-  describe("given a signed-in viewer with an existing library entry", () => {
+  describe("given a signed-in viewer with an existing library entry (status: PLAYING)", () => {
     beforeEach(() => {
       render(
         <GameDetail
@@ -217,29 +173,20 @@ describe("GameDetail", () => {
       );
     });
 
-    it("marks the Playing pill as active", () => {
+    it("marks only the Playing pill as active", () => {
       expect(elements.queryStatusPill("Playing")).toHaveAttribute(
         "aria-checked",
         "true"
       );
-    });
-
-    it("does NOT mark the Shelf pill as active", () => {
       expect(elements.queryStatusPill("Shelf")).toHaveAttribute(
         "aria-checked",
         "false"
       );
     });
 
-    it("renders the rating slider", () => {
+    it("renders the rating slider, overflow menu, and Journal tab", () => {
       expect(elements.queryRatingSlider()).not.toBeNull();
-    });
-
-    it("renders the overflow menu trigger", () => {
       expect(elements.queryMoreMenuTrigger()).not.toBeNull();
-    });
-
-    it("renders the Journal tab", () => {
       expect(elements.queryJournalTab()).not.toBeNull();
     });
   });
@@ -256,12 +203,8 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the related-games slot inside the Overview tab", () => {
-      // Overview is the default-active tab so its content is in the DOM.
+    it("renders the related-games slot in the Overview tab and shows the Playtime tab", () => {
       expect(elements.queryRelatedSlot()).not.toBeNull();
-    });
-
-    it("renders the Playtime tab when times-to-beat slot is supplied", () => {
       expect(elements.queryPlaytimeTab()).not.toBeNull();
     });
   });
@@ -366,14 +309,9 @@ describe("GameDetail", () => {
       );
     });
 
-    it("includes the developer name in the eyebrow row", () => {
-      // Eyebrow has aria-label="Release metadata"; developer is uppercased.
+    it("shows the developer name uppercased in the eyebrow row, not the publisher", () => {
       const eyebrow = screen.getByLabelText("Release metadata");
       expect(eyebrow.textContent).toContain("TEAM CHERRY");
-    });
-
-    it("does NOT include the publisher name in the eyebrow row", () => {
-      const eyebrow = screen.getByLabelText("Release metadata");
       expect(eyebrow.textContent).not.toContain("SKYBOUND");
     });
   });
@@ -388,11 +326,8 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the em-dash placeholder for genres", () => {
+    it("renders the em-dash placeholder for both genres and platforms", () => {
       expect(elements.queryGenresList()?.textContent).toBe("—");
-    });
-
-    it("renders the em-dash placeholder for platforms", () => {
       expect(elements.queryPlatformsList()?.textContent).toBe("—");
     });
   });

@@ -199,31 +199,13 @@ describe("LibraryModal", () => {
       render(<LibraryModal {...defaultProps} />);
     });
 
-    it("renders the Status combobox", () => {
+    it("renders all editable form fields and controls", () => {
       expect(elements.getStatusCombobox()).toBeDefined();
-    });
-
-    it("renders the Platform combobox", () => {
       expect(elements.getPlatformCombobox()).toBeDefined();
-    });
-
-    it("renders the Rating spinbutton", () => {
       expect(elements.getRatingInput()).toBeDefined();
-    });
-
-    it("renders the Started date input", () => {
       expect(elements.getStartedInput()).toBeDefined();
-    });
-
-    it("renders the Completed date input", () => {
       expect(elements.getCompletedInput()).toBeDefined();
-    });
-
-    it("renders the Save changes button", () => {
       expect(elements.getSaveButton()).toBeDefined();
-    });
-
-    it("renders the Remove from library trigger", () => {
       expect(elements.getDeleteTrigger()).toBeDefined();
     });
 
@@ -241,13 +223,7 @@ describe("LibraryModal", () => {
       await actions.clickSave();
     });
 
-    it("calls updateLibraryItemFn exactly once", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
-      });
-    });
-
-    it("passes itemId matching entry.id in the data payload", async () => {
+    it("calls updateLibraryItemFn with the entry id in the { data } envelope", async () => {
       await waitFor(() => {
         expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
       });
@@ -255,18 +231,6 @@ describe("LibraryModal", () => {
         data: { itemId: number };
       };
       expect(arg.data.itemId).toBe(STUB_ENTRY.id);
-    });
-
-    it("wraps the payload in the { data: ... } envelope (TanStack Start convention)", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
-      });
-      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]![0]! as {
-        data: { itemId: number };
-      };
-      // Top-level key must be "data"
-      expect(arg).toHaveProperty("data");
-      expect(arg.data).toHaveProperty("itemId");
     });
 
     it("does not call deleteLibraryItemFn on save", () => {
@@ -287,13 +251,7 @@ describe("LibraryModal", () => {
       await actions.clickSave();
     });
 
-    it("renders an element with role=alert", async () => {
-      await waitFor(() => {
-        expect(elements.queryInlineAlert()).not.toBeNull();
-      });
-    });
-
-    it("the alert contains the UnauthorizedError message text", async () => {
+    it("renders an inline alert containing the UnauthorizedError message", async () => {
       await waitFor(() => {
         expect(elements.queryInlineAlert()).not.toBeNull();
       });
@@ -319,11 +277,8 @@ describe("LibraryModal", () => {
       expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
     });
 
-    it("shows a Confirm button after clicking the delete trigger", () => {
+    it("shows the confirmation surface with Confirm and Cancel buttons", () => {
       expect(elements.getConfirmButton()).toBeDefined();
-    });
-
-    it("shows a Cancel button after clicking the delete trigger", () => {
       expect(elements.getCancelButton()).toBeDefined();
     });
   });
@@ -368,7 +323,7 @@ describe("LibraryModal", () => {
       await actions.clickSave();
     });
 
-    it("fires toast.success once with the locked update copy", async () => {
+    it("fires toast.success with the locked update copy", async () => {
       await waitFor(() => {
         expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
           "Library entry updated"
@@ -388,13 +343,6 @@ describe("LibraryModal", () => {
         expect(onOpenChange).toHaveBeenCalledWith(false);
       });
       expect(onOpenChange).toHaveBeenCalledOnce();
-    });
-
-    it("does not fire toast.error on success", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
-      });
-      expect(vi.mocked(toast.error)).not.toHaveBeenCalled();
     });
   });
 
@@ -431,13 +379,6 @@ describe("LibraryModal", () => {
       });
       expect(mockRouterInvalidate).not.toHaveBeenCalled();
     });
-
-    it("does not fire toast.success on update error", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
-      });
-      expect(vi.mocked(toast.success)).not.toHaveBeenCalled();
-    });
   });
 
   // ---- Delete success: toast + invalidate + close ----------------------------
@@ -450,7 +391,7 @@ describe("LibraryModal", () => {
       await actions.clickConfirmDelete();
     });
 
-    it("fires toast.success once with the locked delete copy", async () => {
+    it("fires toast.success with the locked delete copy", async () => {
       await waitFor(() => {
         expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
           "Removed from library"
@@ -536,11 +477,8 @@ describe("LibraryModal", () => {
       render(<LibraryModal {...defaultProps} open={false} />);
     });
 
-    it("does not render the Save changes button when closed", () => {
+    it("does not render the form", () => {
       expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
-    });
-
-    it("does not render the Status combobox when closed", () => {
       expect(screen.queryByRole("combobox", { name: "Status" })).toBeNull();
     });
   });

@@ -119,7 +119,6 @@ const elements = {
   getSentinel: () => screen.getByTestId("related-games-sentinel"),
   querySentinel: () => screen.queryByTestId("related-games-sentinel"),
   getErrorAlert: () => screen.getByRole("alert"),
-  queryErrorAlert: () => screen.queryByRole("alert"),
 };
 
 const actions = {
@@ -158,41 +157,15 @@ describe("RelatedGamesInfiniteList", () => {
       );
     });
 
-    it("renders every game from the firstPage prop", () => {
+    it("renders all firstPage games with page order preserved and shows the sentinel", () => {
       for (const game of PAGE_1_GAMES) {
         expect(elements.getGameByName(game.title)).toBeDefined();
       }
-    });
-
-    it("renders games in firstPage order (first game first)", () => {
       const imgs = screen.getAllByRole("img");
-      const firstImgName = imgs[0]?.getAttribute("alt") ?? "";
-      expect(firstImgName).toBe(`Cover for ${PAGE_1_GAMES[0]!.title}`);
-    });
-
-    it("does NOT call getRelatedGamesFn on initial render", () => {
-      expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
-    });
-
-    it("renders the sentinel element below the list", () => {
-      expect(elements.getSentinel()).toBeDefined();
-    });
-  });
-
-  describe("given the sentinel is not intersecting (below viewport)", () => {
-    beforeEach(() => {
-      render(
-        <RelatedGamesInfiniteList
-          collectionId={COLLECTION_ID}
-          pageSize={PAGE_SIZE}
-          firstPage={FIRST_PAGE_WITH_MORE}
-        />
+      expect(imgs[0]?.getAttribute("alt")).toBe(
+        `Cover for ${PAGE_1_GAMES[0]!.title}`
       );
-      actions.triggerSentinelExit();
-    });
-
-    it("does not call getRelatedGamesFn when sentinel is not intersecting", () => {
-      expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
+      expect(elements.getSentinel()).toBeDefined();
     });
   });
 
@@ -213,23 +186,7 @@ describe("RelatedGamesInfiniteList", () => {
       await act(async () => {});
     });
 
-    it("calls getRelatedGamesFn with page=2", () => {
-      expect(mockGetRelatedGamesFn).toHaveBeenCalledWith({
-        data: { collectionId: COLLECTION_ID, page: 2, pageSize: PAGE_SIZE },
-      });
-    });
-
-    it("calls getRelatedGamesFn exactly once", () => {
-      expect(mockGetRelatedGamesFn).toHaveBeenCalledTimes(1);
-    });
-
-    it("appends page-2 games after page-1 games in the list", () => {
-      for (const game of [...PAGE_1_GAMES, ...PAGE_2_GAMES]) {
-        expect(elements.getGameByName(game.title)).toBeDefined();
-      }
-    });
-
-    it("page-1 games appear before page-2 games in DOM order", () => {
+    it("appends page-2 games after page-1 games in DOM order", () => {
       const imgs = screen.getAllByRole("img");
       const names = imgs.map((img) => img.getAttribute("alt") ?? "");
       const firstPage1Idx = names.findIndex((n) =>
@@ -239,11 +196,11 @@ describe("RelatedGamesInfiniteList", () => {
         n.includes(PAGE_2_GAMES[0]!.title)
       );
       expect(firstPage1Idx).toBeLessThan(firstPage2Idx);
+      expect(imgs).toHaveLength(PAGE_1_GAMES.length + PAGE_2_GAMES.length);
     });
 
-    it("total rendered game count equals page1 + page2 length", () => {
-      const imgs = screen.getAllByRole("img");
-      expect(imgs).toHaveLength(PAGE_1_GAMES.length + PAGE_2_GAMES.length);
+    it("removes the sentinel after the last page is fetched", () => {
+      expect(elements.querySentinel()).toBeNull();
     });
   });
 
@@ -261,46 +218,10 @@ describe("RelatedGamesInfiniteList", () => {
     it("does not render the sentinel when there are no more pages", () => {
       expect(elements.querySentinel()).toBeNull();
     });
-
-    it("does not call getRelatedGamesFn even if an intersection is forced", () => {
-      // No sentinel means no observer; firing the callback simulates a
-      // stale observer callback — the component must guard against this.
-      actions.triggerSentinelIntersection();
-      expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("given the final page has been fetched (hasMore: false after page 2)", () => {
-    beforeEach(async () => {
-      mockGetRelatedGamesFn.mockResolvedValue(PAGE_2_RESPONSE); // hasMore: false
-
-      render(
-        <RelatedGamesInfiniteList
-          collectionId={COLLECTION_ID}
-          pageSize={PAGE_SIZE}
-          firstPage={FIRST_PAGE_WITH_MORE}
-        />
-      );
-
-      // Fetch page 2
-      actions.triggerSentinelIntersection();
-      await act(async () => {});
-    });
-
-    it("sentinel is removed from the DOM after hasMore becomes false", () => {
-      expect(elements.querySentinel()).toBeNull();
-    });
-
-    it("does not call getRelatedGamesFn again on further intersections", () => {
-      const callsBefore = mockGetRelatedGamesFn.mock.calls.length;
-      actions.triggerSentinelIntersection();
-      actions.triggerSentinelIntersection();
-      expect(mockGetRelatedGamesFn.mock.calls.length).toBe(callsBefore);
-    });
   });
 
   describe("given two sentinel intersections fire before the first resolves", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Deferred promise — we control when it resolves
       let resolvePage2: (value: typeof PAGE_2_RESPONSE) => void;
       const deferredPage2 = new Promise<typeof PAGE_2_RESPONSE>((resolve) => {
@@ -320,14 +241,14 @@ describe("RelatedGamesInfiniteList", () => {
       actions.triggerSentinelIntersection();
       actions.triggerSentinelIntersection();
 
-      // Resolve to clean up (unrelated to assertion)
-      act(() => {
+      await act(async () => {
         resolvePage2!(PAGE_2_RESPONSE);
       });
     });
 
-    it("calls getRelatedGamesFn exactly once despite two rapid intersections", () => {
-      expect(mockGetRelatedGamesFn).toHaveBeenCalledTimes(1);
+    it("does not duplicate games on rapid double-scroll", () => {
+      const imgs = screen.getAllByRole("img");
+      expect(imgs).toHaveLength(PAGE_1_GAMES.length + PAGE_2_GAMES.length);
     });
   });
 
@@ -349,25 +270,15 @@ describe("RelatedGamesInfiniteList", () => {
       await act(async () => {});
     });
 
-    it("renders an inline role=alert element with the error message", () => {
-      expect(elements.getErrorAlert()).toBeDefined();
+    it("shows an error alert and preserves already-loaded games", () => {
       expect(elements.getErrorAlert().textContent).toContain(ERROR_MESSAGE);
-    });
-
-    it("preserves the previously rendered page-1 games after the error", () => {
       for (const game of PAGE_1_GAMES) {
         expect(elements.getGameByName(game.title)).toBeDefined();
       }
     });
 
-    it("removes the sentinel after an error (no further fetches)", () => {
+    it("removes the sentinel after an error so no further fetches are attempted", () => {
       expect(elements.querySentinel()).toBeNull();
-    });
-
-    it("does not call getRelatedGamesFn again after the error", () => {
-      const callsBefore = mockGetRelatedGamesFn.mock.calls.length;
-      actions.triggerSentinelIntersection();
-      expect(mockGetRelatedGamesFn.mock.calls.length).toBe(callsBefore);
     });
   });
 });

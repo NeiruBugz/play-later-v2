@@ -1,57 +1,24 @@
 /**
- * RED component tests for CommandPalette (Slice 17).
+ * Component tests for CommandPalette (Slice 17).
  *
- * This file is intentionally failing: the component module
- * `@/features/command-palette/ui/command-palette` does not exist until the
- * GREEN step. The import below produces a module-not-found / vite
- * import-analysis error — that IS the expected RED signal. Do not implement
- * the component here.
- *
- * =============================================================================
  * CONTRACT
+ * - ⌘K / Ctrl+K toggles open; closed state hides the search input.
+ * - Typing debounces 300 ms before calling searchGamesFn exactly once.
+ * - Search result rows render as <Link to="/games/$slug"> anchors.
  *
- * Component:
- *   src/features/command-palette/ui/command-palette/command-palette.tsx
- *   Named export: CommandPalette
- *
- * The component is self-contained: it mounts a global keyboard listener
- * (⌘K / Ctrl+K) that toggles its own open/closed state (mirroring the
- * canonical's `useCommandPalette` hook). When open it renders a search input;
- * when closed the input is absent from the DOM.
- *
- * When the user types a query the component debounces (300 ms, matching the
- * canonical `useDebouncedValue(query, 300)`) before calling `searchGamesFn`
- * from `@/features/search-games`. Results are rendered as clickable rows;
- * clicking a row navigates to `/games/$slug` via TanStack Router.
- *
- * Debounce window (canonical discovery):
- *   savepoint-app/features/command-palette/ui/desktop-command-palette.tsx:
- *     const debouncedQuery = useDebouncedValue(query, 300);
- *   → 300 ms.
- *
- * NOT tested here:
- *   - Desktop vs. mobile branching (viewport-agnostic test)
- *   - Quick-add and undo-toast flow (separate feature surface)
- *   - Navigation-group and quick-actions-group (palette sub-components)
- *   - Exact IGDB cover image URL format
- *   - Server fn correctness (covered by search-games integration tests)
- *
- * =============================================================================
+ * NOT tested: desktop/mobile branching, quick-add flow, navigation-group,
+ * quick-actions-group, IGDB cover format, server fn correctness.
  */
 
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// RED import — vite import-analysis fails here until the GREEN step creates
-// this module. That failure IS the required RED signal.
 import { CommandPalette } from "@/features/command-palette/ui/command-palette";
 
 // ---------------------------------------------------------------------------
-// Mock: @tanstack/react-router
-// Mirrors the precedent established in related-games-infinite-list.test.tsx
-// and compose-journal-entry-dialog.test.tsx. Link renders as a plain <a>;
-// useNavigate returns a vi.fn() so navigation assertions are possible.
+// Mock: @tanstack/react-router — Link resolves to a plain <a> with the
+// interpolated href so href assertions work without a RouterProvider.
 // ---------------------------------------------------------------------------
 
 const mockNavigate = vi.fn();
@@ -87,15 +54,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 // ---------------------------------------------------------------------------
 // Mock: @/features/search-games (foot-gun #8: never cross the real
-// createServerFn boundary in vitest). The mock exposes searchGamesFn as a
-// vi.fn() returning the SearchGamesResult shape.
-//
-// SearchGamesResult shape (from src/shared/api/igdb/search.ts):
-//   { games: SearchResponseItem[]; count: number }
-//
-// SearchResponseItem shape includes at minimum: id, name, slug, cover.
-// For the debounce and navigation tests, a minimal { id, name, slug } is
-// sufficient; the component must render with or without cover data.
+// createServerFn boundary in vitest).
 // ---------------------------------------------------------------------------
 
 const mockSearchGamesFn = vi.fn();
@@ -105,7 +64,7 @@ vi.mock("@/features/search-games", () => ({
 }));
 
 // ---------------------------------------------------------------------------
-// Element vocabulary — domain-named, RTL-implementation-agnostic
+// Element vocabulary
 // ---------------------------------------------------------------------------
 
 const elements = {
@@ -124,14 +83,8 @@ const elements = {
 // ---------------------------------------------------------------------------
 
 const actions = {
-  pressMetaK: () =>
-    userEvent.keyboard("{Meta>}k{/Meta}"),
-  pressCtrlK: () =>
-    userEvent.keyboard("{Control>}k{/Control}"),
-  typeQuery: (user: ReturnType<typeof userEvent.setup>, query: string) =>
-    user.type(elements.getSearchInput(), query),
-  clickResult: (name: string) =>
-    userEvent.click(elements.getResultByName(name)),
+  pressMetaK: () => userEvent.keyboard("{Meta>}k{/Meta}"),
+  pressCtrlK: () => userEvent.keyboard("{Control>}k{/Control}"),
 };
 
 // ---------------------------------------------------------------------------
@@ -143,10 +96,6 @@ describe("CommandPalette", () => {
     vi.clearAllMocks();
     mockSearchGamesFn.mockResolvedValue({ games: [], count: 0 });
   });
-
-  // =========================================================================
-  // 1. ⌘K binding opens the palette
-  // =========================================================================
 
   describe("given the palette is mounted and initially closed", () => {
     beforeEach(() => {
@@ -178,28 +127,16 @@ describe("CommandPalette", () => {
     });
   });
 
-  // =========================================================================
-  // 2. Debounce window enforced — searchGamesFn is NOT called on each
-  //    keystroke; it is called exactly once after the 300 ms debounce window.
-  //
-  //    The vitest unit project has fakeTimers pre-configured for setTimeout /
-  //    clearTimeout (see vitest.config.ts → fakeTimers). We use
-  //    userEvent.setup({ advanceTimers }) so userEvent cooperates with the
-  //    fake clock per the testing rule file's "escape hatch" note.
-  // =========================================================================
-
+  // userEvent.setup with fake-timer cooperation so userEvent cooperates with
+  // vitest's pre-configured fakeTimers (setTimeout / clearTimeout).
   describe("given the palette is open and the user types a query", () => {
-    // userEvent.setup with fake-timer cooperation (rule file escape hatch).
     const user = userEvent.setup({
       advanceTimers: (ms) => vi.advanceTimersByTime(ms),
     });
 
     beforeEach(async () => {
       render(<CommandPalette />);
-      // Open the palette via ⌘K
       await user.keyboard("{Meta>}k{/Meta}");
-      // Type the query one character at a time — each character fires a
-      // synthetic keydown/keypress/input/keyup sequence.
       await user.type(elements.getSearchInput(), "zelda");
     });
 
@@ -225,22 +162,6 @@ describe("CommandPalette", () => {
       });
     });
   });
-
-  // =========================================================================
-  // 3. Result click navigates via TanStack Router.
-  //
-  //    The palette renders result rows as elements that, when clicked, navigate
-  //    to `/games/$slug` using TanStack Router's Link or useNavigate.
-  //
-  //    The canonical (desktop-command-palette.tsx) calls router.push(`/games/${slug}`)
-  //    for recent games (navigate-to-detail path) and quickAdd for search hits.
-  //    In the tanstack port, the expected pattern is a Link to="/games/$slug"
-  //    with params={{ slug }} — matching how every other game row in the app
-  //    is wired (game-card.tsx, library-card-menu.tsx).
-  //
-  //    We assert the rendered anchor's href contains the slug — this is
-  //    equivalent to asserting `to="/games/$slug"` with the right params.
-  // =========================================================================
 
   describe("given the palette is open with a search result", () => {
     const user = userEvent.setup({
@@ -269,26 +190,16 @@ describe("CommandPalette", () => {
       });
 
       render(<CommandPalette />);
-
-      // Open palette
       await user.keyboard("{Meta>}k{/Meta}");
-
-      // Type query and advance past debounce
       await user.type(elements.getSearchInput(), "zelda");
       vi.advanceTimersByTime(300);
 
-      // Wait for the result to appear in the DOM
       await waitFor(() => {
         expect(elements.queryResultByName(GAME.name)).not.toBeNull();
       });
     });
 
-    it("renders the result row with an href pointing to the game-detail route", () => {
-      const anchor = elements.getResultByName(GAME.name).closest("a");
-      expect(anchor?.getAttribute("href")).toContain(GAME.slug);
-    });
-
-    it("the result row href is the full /games/$slug path", () => {
+    it("renders the result row with an href pointing to the full /games/$slug route", () => {
       const anchor = elements.getResultByName(GAME.name).closest("a");
       expect(anchor?.getAttribute("href")).toBe(`/games/${GAME.slug}`);
     });

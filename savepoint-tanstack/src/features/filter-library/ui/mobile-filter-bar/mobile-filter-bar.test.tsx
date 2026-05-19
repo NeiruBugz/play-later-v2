@@ -92,11 +92,8 @@ describe("MobileFilterBar", () => {
       render(<MobileFilterBar {...defaultProps} />);
     });
 
-    it("renders the Open filters trigger", () => {
+    it("renders the Open filters trigger without showing the dialog", () => {
       expect(elements.getOpenFiltersButton()).toBeDefined();
-    });
-
-    it("does not render the dialog by default", () => {
       expect(elements.queryDialog()).toBeNull();
     });
   });
@@ -111,32 +108,18 @@ describe("MobileFilterBar", () => {
       expect(await elements.findDialog()).toBeVisible();
     });
 
-    it("renders all five status filter buttons inside the sheet", async () => {
+    it("renders all filter controls inside the sheet", async () => {
       await elements.findDialog();
+      // Five status buttons
       expect(elements.getStatusFilterButton("Up Next")).toBeDefined();
       expect(elements.getStatusFilterButton("Playing")).toBeDefined();
       expect(elements.getStatusFilterButton("Shelf")).toBeDefined();
       expect(elements.getStatusFilterButton("Played")).toBeDefined();
       expect(elements.getStatusFilterButton("Wishlist")).toBeDefined();
-    });
-
-    it("renders the platform select trigger", async () => {
-      await elements.findDialog();
+      // Platform, sort, rating, unrated-only
       expect(elements.getPlatformTrigger()).toBeDefined();
-    });
-
-    it("renders the sort select trigger", async () => {
-      await elements.findDialog();
       expect(elements.getSortTrigger()).toBeDefined();
-    });
-
-    it("renders the minimum-rating slider", async () => {
-      await elements.findDialog();
       expect(elements.getMinRatingSlider()).toBeDefined();
-    });
-
-    it("renders the unrated-only switch", async () => {
-      await elements.findDialog();
       expect(elements.getUnratedSwitch()).toBeDefined();
     });
 
@@ -300,7 +283,7 @@ describe("MobileFilterBar", () => {
       await actions.clearAll();
     });
 
-    it("clears status, platform, minRating, unratedOnly", () => {
+    it("calls navigate clearing all filters and resetting sort to default", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({
@@ -308,15 +291,6 @@ describe("MobileFilterBar", () => {
             platform: undefined,
             minRating: undefined,
             unratedOnly: undefined,
-          }),
-        })
-      );
-    });
-
-    it("resets sort to the default (updatedAt-desc)", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({
             sortBy: "updatedAt",
             sortOrder: "desc",
           }),

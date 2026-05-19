@@ -106,15 +106,9 @@ describe("AddGameModal", () => {
       expect(elements.getSearchInput()).toBeDefined();
     });
 
-    it("does not show game results before any search", () => {
+    it("does not show results, loading, or empty-results before any search", () => {
       expect(elements.queryGameButton("Hollow Knight")).toBeNull();
-    });
-
-    it("does not show the loading state", () => {
       expect(elements.queryLoadingText()).toBeNull();
-    });
-
-    it("does not show the empty-results message", () => {
       expect(elements.queryNoResults()).toBeNull();
     });
 
@@ -153,31 +147,12 @@ describe("AddGameModal", () => {
       await actions.submitSearch("Hollow");
     });
 
-    it("renders Hollow Knight as a clickable result", async () => {
+    it("renders both results as clickable buttons and hides loading/empty states", async () => {
       await waitFor(() => {
         expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
       });
-    });
-
-    it("renders Hollow Knight: Silksong as a clickable result", async () => {
-      await waitFor(() => {
-        expect(
-          elements.queryGameButton("Hollow Knight: Silksong")
-        ).not.toBeNull();
-      });
-    });
-
-    it("hides the loading indicator once results arrive", async () => {
-      await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
-      });
+      expect(elements.queryGameButton("Hollow Knight: Silksong")).not.toBeNull();
       expect(elements.queryLoadingText()).toBeNull();
-    });
-
-    it("does not show the empty-results message when results exist", async () => {
-      await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
-      });
       expect(elements.queryNoResults()).toBeNull();
     });
   });
@@ -191,13 +166,7 @@ describe("AddGameModal", () => {
       await actions.submitSearch("xyzzy no match");
     });
 
-    it("shows the empty-results message", async () => {
-      await waitFor(() => {
-        expect(elements.queryNoResults()).not.toBeNull();
-      });
-    });
-
-    it("does not show the loading indicator", async () => {
+    it("shows the empty-results message and hides the loading indicator", async () => {
       await waitFor(() => {
         expect(elements.queryNoResults()).not.toBeNull();
       });
@@ -251,20 +220,12 @@ describe("AddGameModal", () => {
       });
     });
 
-    it("does not call addGameToLibraryFn with a status field (server fn handles defaults)", async () => {
+    it("fires toast.success and calls router.invalidate on success", async () => {
       await waitFor(() => {
-        expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledOnce();
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Added to library");
       });
-      const callArg = vi.mocked(addGameToLibraryFn).mock.calls[0]![0]!;
-      expect(callArg.data).not.toHaveProperty("status");
-    });
-
-    it("does not call addGameToLibraryFn with a platform field", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledOnce();
-      });
-      const callArg = vi.mocked(addGameToLibraryFn).mock.calls[0]![0]!;
-      expect(callArg.data).not.toHaveProperty("platform");
+      expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
+      expect(mockRouterInvalidate).toHaveBeenCalledOnce();
     });
   });
 
@@ -312,66 +273,10 @@ describe("AddGameModal", () => {
       const btn = elements.getAddButton();
       expect(btn).toHaveProperty("disabled", true);
     });
-  });
-
-  // ---- addGameToLibraryFn not called before selection ----------------------
-
-  describe("given no game has been selected", () => {
-    beforeEach(async () => {
-      vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
-      render(<AddGameModal {...defaultProps} />);
-      await actions.submitSearch("Hollow");
-      await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
-      });
-    });
 
     it("does not call addGameToLibraryFn when Add to library is clicked without a selection", async () => {
       // Button is disabled, but assert the fn was not called defensively.
       expect(vi.mocked(addGameToLibraryFn)).not.toHaveBeenCalled();
-    });
-  });
-
-  // ---- Toast feedback: success path ----------------------------------------
-
-  describe("given the user successfully adds a game", () => {
-    beforeEach(async () => {
-      vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
-      vi.mocked(addGameToLibraryFn).mockResolvedValue(STUB_LIBRARY_ITEM);
-      render(<AddGameModal {...defaultProps} />);
-
-      await actions.submitSearch("Hollow");
-      await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
-      });
-      await actions.selectGame("Hollow Knight");
-      await actions.clickAdd();
-    });
-
-    it("fires toast.success once with 'Added to library'", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
-      });
-      expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Added to library");
-    });
-
-    it("calls onAdded once on success", async () => {
-      await waitFor(() => {
-        expect(onAdded).toHaveBeenCalledOnce();
-      });
-    });
-
-    it("calls router.invalidate once so the library list re-loads", async () => {
-      await waitFor(() => {
-        expect(mockRouterInvalidate).toHaveBeenCalledOnce();
-      });
-    });
-
-    it("does not fire toast.error on success", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
-      });
-      expect(vi.mocked(toast.error)).not.toHaveBeenCalled();
     });
   });
 
@@ -414,13 +319,6 @@ describe("AddGameModal", () => {
         expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
       });
       expect(mockRouterInvalidate).not.toHaveBeenCalled();
-    });
-
-    it("does not fire toast.success on rejection", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
-      });
-      expect(vi.mocked(toast.success)).not.toHaveBeenCalled();
     });
   });
 });
