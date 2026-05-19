@@ -17,3 +17,8 @@ export type {
   LibrarySortOrder,
   LibraryStatusCounts,
 } from "./types";
+export { useLibraryFiltersState } from "./use-library-filters-state";
+export type {
+  LibraryFiltersStateInput,
+  LibraryFiltersState,
+} from "./use-library-filters-state";

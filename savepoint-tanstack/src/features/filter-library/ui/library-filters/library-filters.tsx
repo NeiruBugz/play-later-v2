@@ -1,32 +1,18 @@
-import { useNavigate } from "@tanstack/react-router";
-
 import {
   DEFAULT_PLATFORMS,
-  getSortValue,
-  SORT_OPTIONS,
-  SORT_VALUE_MAP,
-  STATUS_ENTRIES,
-  STATUS_FILTER_STYLES,
+  useLibraryFiltersState,
   type LibrarySortBy,
   type LibrarySortOrder,
   type LibraryStatus,
   type LibraryStatusCounts,
 } from "@/features/filter-library/lib";
-import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 
-// ---------------------------------------------------------------------------
-// Re-export filter types from feature lib so existing callers keep importing
-// `LibraryStatus`, `LibrarySortBy`, etc. from this module.
-// ---------------------------------------------------------------------------
+import { PlatformSelect } from "../platform-select";
+import { SortSelect } from "../sort-select";
+import { StatusList } from "../status-list";
 
+// Re-export types so existing callers that import from this module continue to compile.
 export type {
   LibraryStatus,
   LibrarySortBy,
@@ -60,10 +46,6 @@ export type LibraryFiltersProps = {
   unratedOnly?: boolean;
 };
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export function LibraryFilters(props: LibraryFiltersProps) {
   const {
     status,
@@ -75,9 +57,25 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     platforms = DEFAULT_PLATFORMS,
     unratedOnly,
   } = props;
-  const navigate = useNavigate();
 
-  const currentStatus: LibraryStatus | "__all__" = status ?? "__all__";
+  const {
+    currentStatus,
+    sortValue,
+    platformValue,
+    hasActiveFilters,
+    onStatusPick,
+    onStatusAll,
+    onPlatformChange,
+    onSortChange,
+    onClearAll,
+  } = useLibraryFiltersState({
+    status,
+    platform,
+    minRating,
+    unratedOnly,
+    sortBy,
+    sortOrder,
+  });
 
   const totalCount = counts
     ? Object.values(counts).reduce<number>(
@@ -86,181 +84,51 @@ export function LibraryFilters(props: LibraryFiltersProps) {
       )
     : undefined;
 
-  const hasClearableFilters =
-    status !== undefined ||
-    platform !== undefined ||
-    minRating !== undefined ||
-    unratedOnly === true;
-
-  const updateSearch = (
-    patch: Partial<{
-      status: LibraryStatus | undefined;
-      platform: string | undefined;
-      minRating: number | undefined;
-      sortBy: LibrarySortBy;
-      sortOrder: LibrarySortOrder;
-      unratedOnly: boolean | undefined;
-    }>
-  ) => {
-    navigate({
-      to: ".",
-      search: {
-        status,
-        platform,
-        minRating,
-        sortBy,
-        sortOrder,
-        unratedOnly,
-        ...patch,
-      },
-    });
-  };
-
-  const onStatusAll = () => updateSearch({ status: undefined });
-  const onStatusPick = (value: LibraryStatus) => {
-    // Toggle-deselect to preserve canonical "click active to clear" behavior.
-    updateSearch({ status: status === value ? undefined : value });
-  };
-
-  const onPlatformChange = (raw: string) => {
-    updateSearch({ platform: raw === "__all__" ? undefined : raw });
-  };
-
-  const onSortChange = (raw: string) => {
-    const opt = SORT_VALUE_MAP.get(raw);
-    if (!opt) return;
-    updateSearch({ sortBy: opt.sortBy, sortOrder: opt.sortOrder });
-  };
-
-  const onClearAll = () => {
-    updateSearch({
-      status: undefined,
-      platform: undefined,
-      minRating: undefined,
-      unratedOnly: undefined,
-      sortBy: "updatedAt",
-      sortOrder: "desc",
-    });
-  };
-
-  const sortValue = getSortValue(sortBy, sortOrder);
-  const platformValue = platform ?? "__all__";
-
   return (
     <aside
       className="hidden w-56 shrink-0 flex-col gap-6 pt-1 xl:flex"
       aria-label="Library filters"
     >
-      {/* Status section */}
       <section>
         <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
           Status
         </p>
-        <ul className="space-y-1" role="list">
-          <li>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onStatusAll}
-              aria-label="Show all statuses"
-              aria-pressed={currentStatus === "__all__"}
-              className={cn(
-                "w-full justify-between border transition-all",
-                currentStatus === "__all__"
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90 border-transparent"
-                  : "text-muted-foreground hover:bg-muted/50 border-transparent"
-              )}
-            >
-              <span className="flex items-center gap-2">All</span>
-              {totalCount !== undefined ? (
-                <span className="text-xs tabular-nums">{totalCount}</span>
-              ) : null}
-            </Button>
-          </li>
-          {STATUS_ENTRIES.map((entry) => {
-            const isActive = currentStatus === entry.value;
-            const count = counts?.[entry.value];
-            const styles = STATUS_FILTER_STYLES[entry.badgeVariant];
-            const Icon = entry.icon;
-            return (
-              <li key={entry.value}>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onStatusPick(entry.value)}
-                  aria-label={`Filter by ${entry.label}`}
-                  aria-pressed={isActive}
-                  className={cn(
-                    "w-full justify-between border transition-all",
-                    count === 0 && "opacity-50",
-                    isActive ? styles.active : styles.inactive
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                    {entry.label}
-                  </span>
-                  {count !== undefined ? (
-                    <span className="text-xs tabular-nums">{count}</span>
-                  ) : null}
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
+        <StatusList
+          currentStatus={currentStatus}
+          counts={counts}
+          onPick={onStatusPick}
+          variant="sidebar"
+          onAll={onStatusAll}
+          totalCount={totalCount}
+        />
       </section>
 
-      {/* Platform section */}
       <section>
         <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
           Platform
         </p>
-        <Select value={platformValue} onValueChange={onPlatformChange}>
-          <SelectTrigger aria-label="Platform" className="h-9 w-full">
-            <SelectValue placeholder="All platforms" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__all__">All platforms</SelectItem>
-            {platforms.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p}
-              </SelectItem>
-            ))}
-            {platform !== undefined && !platforms.includes(platform) ? (
-              <SelectItem value={platform}>{platform}</SelectItem>
-            ) : null}
-          </SelectContent>
-        </Select>
+        <PlatformSelect
+          value={platformValue}
+          platforms={platforms}
+          rawPlatform={platform}
+          onChange={onPlatformChange}
+        />
       </section>
 
-      {/* Sort section */}
       <section>
         <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
           Sort
         </p>
-        <Select value={sortValue} onValueChange={onSortChange}>
-          <SelectTrigger aria-label="Sort" className="h-9 w-full">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SortSelect value={sortValue} onChange={onSortChange} />
       </section>
 
-      {hasClearableFilters ? (
+      {hasActiveFilters ? (
         <Button
           type="button"
           variant="ghost"
           size="sm"
           aria-label="Clear all filters"
-          onClick={onClearAll}
+          onClick={() => onClearAll()}
           className="w-full"
         >
           Clear all filters

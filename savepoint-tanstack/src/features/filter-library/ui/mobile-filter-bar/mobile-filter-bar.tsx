@@ -1,26 +1,13 @@
-import { useNavigate } from "@tanstack/react-router";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
 import {
   DEFAULT_PLATFORMS,
-  getSortValue,
-  SORT_OPTIONS,
-  SORT_VALUE_MAP,
   STATUS_ENTRIES,
-  type LibraryStatus,
+  useLibraryFiltersState,
 } from "@/features/filter-library/lib";
-import { cn } from "@/shared/lib/utils";
+import type { LibraryStatus } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
-import { Label } from "@/shared/ui/label";
-import { RatingInput } from "@/shared/ui/rating-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -29,8 +16,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/sheet";
-import { Switch } from "@/shared/ui/switch";
 
+import { PlatformSelect } from "../platform-select";
+import { RatingControls } from "../rating-controls";
+import { SortSelect } from "../sort-select";
+import { StatusList } from "../status-list";
 import type { MobileFilterBarProps } from "./mobile-filter-bar.type";
 
 /**
@@ -55,82 +45,34 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
     counts,
     platforms = DEFAULT_PLATFORMS,
   } = props;
-  const navigate = useNavigate();
+
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const currentStatus: LibraryStatus | "__all__" = status ?? "__all__";
+  const {
+    currentStatus,
+    sortValue,
+    platformValue,
+    hasActiveFilters,
+    activeFilterCount,
+    onStatusPick,
+    onPlatformChange,
+    onSortChange,
+    onMinRatingChange,
+    onClearMinRating,
+    onUnratedOnlyChange,
+    onClearAll,
+  } = useLibraryFiltersState({
+    status,
+    platform,
+    minRating,
+    unratedOnly,
+    sortBy,
+    sortOrder,
+  });
 
-  const updateSearch = (
-    patch: Partial<{
-      status: LibraryStatus | undefined;
-      platform: string | undefined;
-      minRating: number | undefined;
-      unratedOnly: boolean | undefined;
-      sortBy: typeof sortBy;
-      sortOrder: typeof sortOrder;
-    }>
-  ) => {
-    navigate({
-      to: ".",
-      search: {
-        status,
-        platform,
-        minRating,
-        unratedOnly,
-        sortBy,
-        sortOrder,
-        ...patch,
-      },
-    });
-  };
-
-  const onStatusPick = (value: LibraryStatus) => {
-    // Toggle-deselect to mirror sidebar + canonical behavior.
-    updateSearch({ status: status === value ? undefined : value });
-  };
-
-  const onPlatformChange = (raw: string) => {
-    updateSearch({ platform: raw === "__all__" ? undefined : raw });
-  };
-
-  const onSortChange = (raw: string) => {
-    const opt = SORT_VALUE_MAP.get(raw);
-    if (!opt) return;
-    updateSearch({ sortBy: opt.sortBy, sortOrder: opt.sortOrder });
-  };
-
-  const onMinRatingChange = (next: number | null) => {
-    updateSearch({ minRating: next === null ? undefined : next });
-  };
-
-  const onClearMinRating = () => updateSearch({ minRating: undefined });
-
-  const onUnratedOnlyChange = (checked: boolean) => {
-    updateSearch({ unratedOnly: checked ? true : undefined });
-  };
-
-  const onClearAll = () => {
-    updateSearch({
-      status: undefined,
-      platform: undefined,
-      minRating: undefined,
-      unratedOnly: undefined,
-      sortBy: "updatedAt",
-      sortOrder: "desc",
-    });
-    setSheetOpen(false);
-  };
-
-  const sortValue = getSortValue(sortBy, sortOrder);
-  const platformValue = platform ?? "__all__";
-
-  const activeStatusEntry = STATUS_ENTRIES.find((e) => e.value === status);
-  const activeFilterCount =
-    (status !== undefined ? 1 : 0) +
-    (platform !== undefined ? 1 : 0) +
-    (minRating !== undefined ? 1 : 0) +
-    (unratedOnly === true ? 1 : 0);
-  const hasActiveFilters = activeFilterCount > 0;
+  const activeStatusEntry = STATUS_ENTRIES.find(
+    (e) => e.value === (status as LibraryStatus | undefined)
+  );
 
   return (
     <div className="mb-md xl:hidden" aria-label="Mobile library filters">
@@ -164,143 +106,51 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             </SheetDescription>
           </SheetHeader>
 
-          {/* Status section */}
           <section>
             <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
               Status
             </p>
-            <ul className="space-y-1" role="list">
-              {STATUS_ENTRIES.map((entry) => {
-                const isActive = currentStatus === entry.value;
-                const count = counts?.[entry.value];
-                const Icon = entry.icon;
-                return (
-                  <li key={entry.value}>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onStatusPick(entry.value)}
-                      aria-label={
-                        isActive
-                          ? `Clear ${entry.label} filter`
-                          : `Filter by ${entry.label}`
-                      }
-                      aria-pressed={isActive}
-                      className={cn(
-                        "w-full justify-between border",
-                        count === 0 && "opacity-50",
-                        isActive && "bg-secondary"
-                      )}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Icon
-                          className="h-3.5 w-3.5 shrink-0"
-                          aria-hidden="true"
-                        />
-                        {entry.label}
-                      </span>
-                      {count !== undefined ? (
-                        <span className="text-xs tabular-nums">{count}</span>
-                      ) : null}
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
+            <StatusList
+              currentStatus={currentStatus}
+              counts={counts}
+              onPick={onStatusPick}
+              variant="sheet"
+            />
           </section>
 
-          {/* Platform section */}
           <section>
             <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
               Platform
             </p>
-            <Select value={platformValue} onValueChange={onPlatformChange}>
-              <SelectTrigger aria-label="Platform" className="h-9 w-full">
-                <SelectValue placeholder="All platforms" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All platforms</SelectItem>
-                {platforms.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-                {platform !== undefined && !platforms.includes(platform) ? (
-                  <SelectItem value={platform}>{platform}</SelectItem>
-                ) : null}
-              </SelectContent>
-            </Select>
+            <PlatformSelect
+              value={platformValue}
+              platforms={platforms}
+              rawPlatform={platform}
+              onChange={onPlatformChange}
+            />
           </section>
 
-          {/* Sort section */}
           <section>
             <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
               Sort
             </p>
-            <Select value={sortValue} onValueChange={onSortChange}>
-              <SelectTrigger aria-label="Sort" className="h-9 w-full">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {SORT_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SortSelect value={sortValue} onChange={onSortChange} />
           </section>
 
-          {/* Rating section */}
-          <section className="space-y-sm">
-            <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-              Rating
-            </p>
-            <div className="gap-sm flex items-center">
-              <Label className="text-sm font-medium">Minimum rating</Label>
-              <RatingInput
-                value={minRating ?? null}
-                readOnly={false}
-                onChange={onMinRatingChange}
-                size="sm"
-                aria-label="Minimum rating filter"
-              />
-              {minRating !== undefined ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClearMinRating}
-                  className="h-7"
-                  aria-label="Clear minimum rating"
-                >
-                  <X className="h-3 w-3" aria-hidden="true" />
-                </Button>
-              ) : null}
-            </div>
-            <div className="gap-sm flex items-center">
-              <Switch
-                id="mobile-unrated-only"
-                checked={unratedOnly === true}
-                onCheckedChange={onUnratedOnlyChange}
-                aria-label="Show only unrated games"
-              />
-              <Label
-                htmlFor="mobile-unrated-only"
-                className="text-sm font-medium"
-              >
-                Unrated only
-              </Label>
-            </div>
-          </section>
+          <RatingControls
+            minRating={minRating}
+            unratedOnly={unratedOnly}
+            onMinRatingChange={onMinRatingChange}
+            onClearMinRating={onClearMinRating}
+            onUnratedOnlyChange={onUnratedOnlyChange}
+          />
 
           {hasActiveFilters ? (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={onClearAll}
+              onClick={() => onClearAll({ onAfterClear: () => setSheetOpen(false) })}
               aria-label="Clear all filters"
               className="w-full"
             >
