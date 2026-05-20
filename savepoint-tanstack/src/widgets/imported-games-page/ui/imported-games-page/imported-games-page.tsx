@@ -1,10 +1,9 @@
-import { useRouter } from "@tanstack/react-router";
-import { Gamepad2 } from "lucide-react";
+import { Link, useRouter } from "@tanstack/react-router";
+import { ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type { ImportedGame } from "@/entities/imported-game/model/types";
-import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
 // Import server fns from their individual module paths (not the feature
 // barrel) so component tests can mock each module without dragging the
 // rest of the feature's server chain into the jsdom env.
@@ -15,11 +14,10 @@ import {
   showSyncFailedToast,
   showSyncStartedToast,
 } from "@/features/steam-import/ui/error-cards/import-status-feedback";
-import { IgdbManualSearch } from "@/features/steam-import/ui/igdb-manual-search";
+import { ImportGameModal } from "@/features/steam-import/ui/import-game-modal";
 import { ImportedGameCard } from "@/features/steam-import/ui/imported-game-card";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
-import { Checkbox } from "@/shared/ui/checkbox";
 import { EmptyState } from "@/shared/ui/empty-state";
 
 import { ImportedGamesFilterBar } from "../imported-games-filter-bar";
@@ -46,6 +44,7 @@ import type { ImportedGamesPageProps } from "./imported-games-page.type";
 export function ImportedGamesPage({
   games,
   steamId,
+  pagination,
   includeIgnored = false,
   filters = {},
 }: ImportedGamesPageProps) {
@@ -62,9 +61,11 @@ export function ImportedGamesPage({
     (filters.lastPlayed && filters.lastPlayed !== "all") ||
     (filters.sortBy && filters.sortBy !== "added_desc");
   const router = useRouter();
-  const [selection, setSelection] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
-  const [searchTarget, setSearchTarget] = useState<ImportedGame | null>(null);
+  const [modalTarget, setModalTarget] = useState<{
+    game: ImportedGame;
+    startOnSearch: boolean;
+  } | null>(null);
 
   const sortedGames = useMemo(() => {
     // Order: MATCHED → PENDING/UNMATCHED → IGNORED (bottom).
@@ -78,88 +79,9 @@ export function ImportedGamesPage({
     });
   }, [games]);
 
-  const matchedIds = useMemo(
-    () =>
-      sortedGames
-        .filter((g) => g.igdbMatchStatus === "MATCHED")
-        .map((g) => g.id),
-    [sortedGames]
-  );
   const hasUnmatched = sortedGames.some(
     (g) => g.igdbMatchStatus === "PENDING" || g.igdbMatchStatus === "UNMATCHED"
   );
-
-  const allMatchedSelected =
-    matchedIds.length > 0 && matchedIds.every((id) => selection.has(id));
-
-  const handleSelectionChange = (id: string, selected: boolean) => {
-    setSelection((prev) => {
-      const next = new Set(prev);
-      if (selected) next.add(id);
-      else next.delete(id);
-      return next;
-    });
-  };
-
-  const handleSelectAllToggle = (checked: boolean) => {
-    setSelection(checked ? new Set(matchedIds) : new Set());
-  };
-
-  const handleAddOne = async (game: ImportedGame) => {
-    if (!game.storefrontGameId) return;
-    setPending(true);
-    try {
-      // Note: a MATCHED ImportedGame in canonical carries the igdbId on a
-      // joined Game row. The tanstack schema mirror does not (yet) join
-      // through, so we use the storefrontGameId as a placeholder until the
-      // entity-layer fetch is extended. Documented in DIVERGENCES.md.
-      const igdbId = Number(game.storefrontGameId);
-      if (!Number.isFinite(igdbId) || igdbId <= 0) {
-        throw new Error("Game is not yet linked to IGDB");
-      }
-      await addGameToLibraryFn({ data: { igdbId } });
-      toast.success("Added to library");
-      router.invalidate();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Could not add game";
-      toast.error(message);
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const handleBulkAdd = async () => {
-    const targets = sortedGames.filter(
-      (g) => selection.has(g.id) && g.igdbMatchStatus === "MATCHED"
-    );
-    if (targets.length === 0) return;
-    setPending(true);
-    let succeeded = 0;
-    try {
-      for (const g of targets) {
-        try {
-          const igdbId = Number(g.storefrontGameId ?? 0);
-          if (Number.isFinite(igdbId) && igdbId > 0) {
-            await addGameToLibraryFn({ data: { igdbId } });
-            succeeded += 1;
-          }
-        } catch {
-          // Continue on per-row failure to deliver partial success messaging.
-        }
-      }
-      if (succeeded === targets.length) {
-        toast.success(`Added ${succeeded} games to library`);
-      } else {
-        toast.error(
-          `Bulk add partially failed: ${succeeded}/${targets.length} succeeded`
-        );
-      }
-      setSelection(new Set());
-      router.invalidate();
-    } finally {
-      setPending(false);
-    }
-  };
 
   const handleDismiss = async (importedGameId: string) => {
     setPending(true);
@@ -255,35 +177,15 @@ export function ImportedGamesPage({
         </Alert>
       ) : null}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Checkbox
-            checked={allMatchedSelected}
-            onCheckedChange={(c) => handleSelectAllToggle(c === true)}
-            disabled={matchedIds.length === 0 || pending}
-            aria-label="Select all matched games"
-          />
-          <span className="text-muted-foreground text-sm">
-            {selection.size} selected
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            onClick={handleBulkAdd}
-            disabled={pending || selection.size === 0}
-          >
-            Add selected to library
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleSync}
-            disabled={pending}
-          >
-            {pending ? "Syncing…" : "Sync from Steam"}
-          </Button>
-        </div>
+      <div className="flex items-center justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleSync}
+          disabled={pending}
+        >
+          {pending ? "Syncing…" : "Sync from Steam"}
+        </Button>
       </div>
 
       <ul
@@ -296,18 +198,8 @@ export function ImportedGamesPage({
           <li key={game.id}>
             <ImportedGameCard
               game={game}
-              selected={selection.has(game.id)}
-              onSelectionChange={handleSelectionChange}
-              onAddToLibrary={
-                game.igdbMatchStatus === "MATCHED"
-                  ? () => handleAddOne(game)
-                  : undefined
-              }
-              onManualSearch={
-                game.igdbMatchStatus === "PENDING" ||
-                game.igdbMatchStatus === "UNMATCHED"
-                  ? () => setSearchTarget(game)
-                  : undefined
+              onAddToLibrary={() =>
+                setModalTarget({ game, startOnSearch: false })
               }
               onDismiss={
                 game.igdbMatchStatus !== "IGNORED"
@@ -320,12 +212,63 @@ export function ImportedGamesPage({
         ))}
       </ul>
 
-      {searchTarget ? (
-        <IgdbManualSearch
+      {pagination && pagination.totalPages > 1 ? (
+        <nav
+          className="flex items-center justify-between pt-2"
+          aria-label="Imported games pagination"
+        >
+          <span className="text-muted-foreground text-sm">
+            Page {pagination.page} of {pagination.totalPages} ·{" "}
+            {pagination.total} total
+          </span>
+          <div className="flex items-center gap-2">
+            {pagination.page > 1 ? (
+              <Link
+                to="/steam/games"
+                search={(prev) => ({ ...prev, page: pagination.page - 1 })}
+                className="inline-flex"
+                aria-label="Go to previous page"
+              >
+                <Button type="button" variant="outline" size="sm">
+                  <ChevronLeft className="mr-1 h-4 w-4" aria-hidden />
+                  Previous
+                </Button>
+              </Link>
+            ) : (
+              <Button type="button" variant="outline" size="sm" disabled>
+                <ChevronLeft className="mr-1 h-4 w-4" aria-hidden />
+                Previous
+              </Button>
+            )}
+            {pagination.page < pagination.totalPages ? (
+              <Link
+                to="/steam/games"
+                search={(prev) => ({ ...prev, page: pagination.page + 1 })}
+                className="inline-flex"
+                aria-label="Go to next page"
+              >
+                <Button type="button" variant="outline" size="sm">
+                  Next
+                  <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
+                </Button>
+              </Link>
+            ) : (
+              <Button type="button" variant="outline" size="sm" disabled>
+                Next
+                <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
+              </Button>
+            )}
+          </div>
+        </nav>
+      ) : null}
+
+      {modalTarget ? (
+        <ImportGameModal
           isOpen
-          importedGameId={searchTarget.id}
-          initialQuery={searchTarget.name}
-          onClose={() => setSearchTarget(null)}
+          game={modalTarget.game}
+          startOnSearch={modalTarget.startOnSearch}
+          onClose={() => setModalTarget(null)}
+          onImported={() => router.invalidate()}
         />
       ) : null}
     </div>

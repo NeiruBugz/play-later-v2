@@ -55,6 +55,17 @@ export type ImportedGamesSortBy =
 export type FindImportedGamesOptions = {
   /** Include rows with `igdbMatchStatus: IGNORED`. Defaults to `false`. */
   includeIgnored?: boolean;
+  /**
+   * Include rows that have already been added to library
+   * (`igdbMatchStatus: MATCHED`). Defaults to `false` — these rows live on
+   * the user's library page, so the imported-games surface defaults to
+   * "still to import" (PENDING + UNMATCHED).
+   */
+  includeMatched?: boolean;
+  /** 1-based page index. Defaults to `1`. */
+  page?: number;
+  /** Page size. Defaults to `25`. Hard-capped at `100`. */
+  limit?: number;
   /** Case-insensitive substring search against `name`. */
   search?: string;
   playtimeStatus?: ImportedPlaytimeStatus;
@@ -62,6 +73,14 @@ export type FindImportedGamesOptions = {
   platform?: ImportedPlatformFilter;
   lastPlayed?: ImportedLastPlayedFilter;
   sortBy?: ImportedGamesSortBy;
+};
+
+export type PaginatedImportedGames = {
+  games: ImportedGame[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };
 
 export type UpsertImportedGamesBatchResult = {

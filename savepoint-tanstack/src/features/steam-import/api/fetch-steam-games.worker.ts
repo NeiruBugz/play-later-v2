@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { findImportedGamesForUser } from "@/entities/imported-game/api";
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { PaginatedImportedGames } from "@/entities/imported-game/model/types";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 /**
@@ -19,6 +19,9 @@ import { UnauthorizedError } from "@/shared/lib/errors";
 export const FETCH_STEAM_GAMES_INPUT = z
   .object({
     includeIgnored: z.boolean().optional(),
+    includeMatched: z.boolean().optional(),
+    page: z.number().int().positive().optional(),
+    limit: z.number().int().positive().max(100).optional(),
     search: z.string().optional(),
     playtimeStatus: z.enum(["all", "played", "never_played"]).optional(),
     playtimeRange: z
@@ -47,13 +50,16 @@ export type FetchSteamGamesInput = z.infer<typeof FETCH_STEAM_GAMES_INPUT>;
 export async function fetchSteamGamesWorker(
   userId: string | undefined,
   options: FetchSteamGamesInput = undefined
-): Promise<ImportedGame[]> {
+): Promise<PaginatedImportedGames> {
   if (!userId) {
     throw new UnauthorizedError("Sign in required");
   }
   const parsed = FETCH_STEAM_GAMES_INPUT.parse(options);
   return findImportedGamesForUser(userId, {
     includeIgnored: parsed?.includeIgnored ?? false,
+    includeMatched: parsed?.includeMatched ?? false,
+    page: parsed?.page,
+    limit: parsed?.limit,
     search: parsed?.search,
     playtimeStatus: parsed?.playtimeStatus,
     playtimeRange: parsed?.playtimeRange,

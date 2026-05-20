@@ -1,9 +1,8 @@
-import { Plus, Search, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
-import { Checkbox } from "@/shared/ui/checkbox";
 
 import { calculateSmartStatus } from "../../lib/calculate-smart-status";
 import type { ImportedGameCardProps } from "./imported-game-card.type";
@@ -26,11 +25,8 @@ import { formatPlaytime, getSteamIconUrl } from "./imported-game-card.utility";
  */
 export function ImportedGameCard({
   game,
-  selected,
-  onSelectionChange,
   onAddToLibrary,
   onDismiss,
-  onManualSearch,
   isPending = false,
 }: ImportedGameCardProps) {
   const steamIconUrl = getSteamIconUrl(
@@ -41,21 +37,11 @@ export function ImportedGameCard({
     playtime: game.playtime,
     lastPlayedAt: game.lastPlayedAt,
   });
-  const isMatched = game.igdbMatchStatus === "MATCHED";
   const isIgnored = game.igdbMatchStatus === "IGNORED";
 
   return (
     <Card>
       <CardContent className="flex items-center gap-3 p-3">
-        <Checkbox
-          checked={selected}
-          onCheckedChange={(checked) =>
-            onSelectionChange(game.id, checked === true)
-          }
-          disabled={isPending || !isMatched}
-          aria-label={`Select ${game.name}`}
-        />
-
         {steamIconUrl ? (
           <img
             src={steamIconUrl}
@@ -91,7 +77,7 @@ export function ImportedGameCard({
         </div>
 
         <div className="flex shrink-0 gap-2">
-          {isMatched && onAddToLibrary ? (
+          {!isIgnored && onAddToLibrary ? (
             <Button
               type="button"
               variant="default"
@@ -102,20 +88,6 @@ export function ImportedGameCard({
               title="Add to library"
             >
               <Plus />
-            </Button>
-          ) : null}
-
-          {!isMatched && !isIgnored && onManualSearch ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={onManualSearch}
-              disabled={isPending}
-              aria-label={`Search IGDB for ${game.name}`}
-              title="Search IGDB"
-            >
-              <Search />
             </Button>
           ) : null}
 

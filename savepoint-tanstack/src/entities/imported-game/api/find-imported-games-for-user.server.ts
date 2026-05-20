@@ -1,7 +1,13 @@
 import { prisma } from "@/shared/lib/db.server";
 
 import type { Prisma } from "../../../../shared/lib/prisma/client.ts";
-import type { FindImportedGamesOptions, ImportedGame } from "../model/types";
+import type {
+  FindImportedGamesOptions,
+  PaginatedImportedGames,
+} from "../model/types";
+
+const DEFAULT_LIMIT = 25;
+const MAX_LIMIT = 100;
 
 /**
  * Read-side entity query.
@@ -30,9 +36,12 @@ import type { FindImportedGamesOptions, ImportedGame } from "../model/types";
 export async function findImportedGamesForUser(
   userId: string,
   options: FindImportedGamesOptions = {}
-): Promise<ImportedGame[]> {
+): Promise<PaginatedImportedGames> {
   const {
     includeIgnored = false,
+    includeMatched = false,
+    page = 1,
+    limit = DEFAULT_LIMIT,
     search,
     playtimeStatus = "all",
     playtimeRange = "all",
@@ -41,10 +50,18 @@ export async function findImportedGamesForUser(
     sortBy = "added_desc",
   } = options;
 
+  // Default surface = "still to import": PENDING + UNMATCHED.
+  // Toggles expand the set (canonical parity — `showAlreadyImported` flag).
+  const allowedStatuses: Array<
+    "PENDING" | "UNMATCHED" | "MATCHED" | "IGNORED"
+  > = ["PENDING", "UNMATCHED"];
+  if (includeMatched) allowedStatuses.push("MATCHED");
+  if (includeIgnored) allowedStatuses.push("IGNORED");
+
   const where: Prisma.ImportedGameWhereInput = {
     userId,
     deletedAt: null,
-    ...(includeIgnored ? {} : { igdbMatchStatus: { not: "IGNORED" as const } }),
+    igdbMatchStatus: { in: allowedStatuses },
   };
 
   if (search && search.trim().length > 0) {
@@ -136,5 +153,25 @@ export async function findImportedGamesForUser(
       break;
   }
 
-  return prisma.importedGame.findMany({ where, orderBy });
+  const safePage = Math.max(1, Math.floor(page));
+  const safeLimit = Math.min(MAX_LIMIT, Math.max(1, Math.floor(limit)));
+  const skip = (safePage - 1) * safeLimit;
+
+  const [games, total] = await Promise.all([
+    prisma.importedGame.findMany({
+      where,
+      orderBy,
+      skip,
+      take: safeLimit,
+    }),
+    prisma.importedGame.count({ where }),
+  ]);
+
+  return {
+    games,
+    total,
+    page: safePage,
+    limit: safeLimit,
+    totalPages: Math.max(1, Math.ceil(total / safeLimit)),
+  };
 }

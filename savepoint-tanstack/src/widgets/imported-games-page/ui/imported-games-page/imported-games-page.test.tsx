@@ -4,25 +4,15 @@ import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ImportedGame } from "@/entities/imported-game/model/types";
-// Wire mocks back in for assertion calls
-import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
 import { dismissImportedGameFn } from "@/features/steam-import";
 
 import { ImportedGamesPage } from "./imported-games-page";
 
 // --- Mocks ----------------------------------------------------------------
 
-// The widget imports the `addGameToLibraryFn` server fn module — its
-// transitive deps reach `entities/session/api/get-session.server.ts` which
-// the t3-env client guard refuses to load in a jsdom test. We mock the
-// server-fn module at its file path.
-vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
-  addGameToLibraryFn: vi.fn(),
-}));
-// Same reason for the steam-import server fns. We mock the underlying
-// modules so the rest of the barrel (UI components, toast helpers) loads
-// normally — the widget imports both client-side UI and the server fns
-// through the barrel.
+// Mock every server-fn module the widget transitively imports — their deps
+// reach `entities/session/api/get-session.server.ts` which the t3-env
+// client guard refuses to load in jsdom.
 vi.mock("@/features/steam-import/api/dismiss-imported-game", () => ({
   dismissImportedGameFn: vi.fn(),
 }));
@@ -31,6 +21,12 @@ vi.mock("@/features/steam-import/api/import-steam-library", () => ({
 }));
 vi.mock("@/features/steam-import/api/fetch-steam-games", () => ({
   fetchSteamGamesFn: vi.fn(),
+}));
+vi.mock("@/features/steam-import/api/import-game-to-library", () => ({
+  importGameToLibraryFn: vi.fn(),
+}));
+vi.mock("@/features/add-game/api/search-games-fn", () => ({
+  searchGamesFn: vi.fn(),
 }));
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -79,12 +75,6 @@ function makeGame(
   };
 }
 
-const matched = makeGame({
-  id: "g-match",
-  name: "Half-Life",
-  storefrontGameId: "70",
-  igdbMatchStatus: "MATCHED",
-});
 const unmatched = makeGame({
   id: "g-unmatch",
   name: "Custom Game",
@@ -110,14 +100,12 @@ const elements = {
     screen.queryByRole("button", { name: "Connect Steam" }),
   queryUnmatchedAlert: () =>
     screen.queryByText("Some games need a manual IGDB match"),
-  getSelectAll: () =>
-    screen.getByRole("checkbox", { name: "Select all matched games" }),
-  getBulkAddButton: () =>
-    screen.getByRole("button", { name: "Add selected to library" }),
-  getRowCheckbox: (name: string) =>
-    screen.getByRole("checkbox", { name: `Select ${name}` }),
   queryAddButton: (name: string) =>
     screen.queryByRole("button", { name: `Add ${name} to library` }),
+  querySearchIgdbButton: (name: string) =>
+    screen.queryByRole("button", { name: `Search IGDB for ${name}` }),
+  queryImportDialogTitle: () => screen.queryByText("Import to library"),
+  querySearchDialogTitle: () => screen.queryByText("Select correct game"),
   queryDismissButton: (name: string) =>
     screen.queryByRole("button", { name: `Dismiss ${name}` }),
   getSearchInput: () =>
@@ -156,7 +144,6 @@ function readLastNavigatePatch(): Record<string, unknown> {
 
 describe("ImportedGamesPage", () => {
   beforeEach(() => {
-    vi.mocked(addGameToLibraryFn).mockReset();
     vi.mocked(dismissImportedGameFn).mockReset();
     vi.mocked(toast.success).mockReset();
     vi.mocked(toast.error).mockReset();
@@ -196,11 +183,11 @@ describe("ImportedGamesPage", () => {
     });
   });
 
-  describe("given a mix of MATCHED, UNMATCHED, PENDING games", () => {
+  describe("given a mix of UNMATCHED + PENDING games (MATCHED rows excluded by the entity query)", () => {
     beforeEach(() => {
       render(
         <ImportedGamesPage
-          games={[unmatched, matched, pending]}
+          games={[unmatched, pending]}
           steamId="76561198012345678"
         />
       );
@@ -210,80 +197,43 @@ describe("ImportedGamesPage", () => {
       expect(elements.queryUnmatchedAlert()).not.toBeNull();
     });
 
-    it("renders the Add-to-library button only for MATCHED rows", () => {
-      expect(elements.queryAddButton("Half-Life")).not.toBeNull();
-      expect(elements.queryAddButton("Custom Game")).toBeNull();
-      expect(elements.queryAddButton("Pending Game")).toBeNull();
+    it("renders the Add-to-library button for every visible row", () => {
+      expect(elements.queryAddButton("Custom Game")).not.toBeNull();
+      expect(elements.queryAddButton("Pending Game")).not.toBeNull();
     });
 
     it("renders dismiss buttons for non-IGNORED rows", () => {
-      expect(elements.queryDismissButton("Half-Life")).not.toBeNull();
       expect(elements.queryDismissButton("Custom Game")).not.toBeNull();
       expect(elements.queryDismissButton("Pending Game")).not.toBeNull();
     });
   });
 
-  describe("given the bulk-select-all checkbox is toggled", () => {
+  describe("given the user clicks the per-row Add button on a PENDING row", () => {
     beforeEach(async () => {
       render(
-        <ImportedGamesPage
-          games={[unmatched, matched, pending]}
-          steamId="76561198012345678"
-        />
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
-      await userEvent.click(elements.getSelectAll());
+      await userEvent.click(elements.queryAddButton("Pending Game")!);
     });
 
-    it("selects only MATCHED rows (UNMATCHED checkboxes are disabled)", () => {
-      const matchedCheckbox = elements.getRowCheckbox("Half-Life");
-      expect(matchedCheckbox).toHaveAttribute("data-state", "checked");
-    });
-
-    it("shows the selection count", () => {
-      expect(screen.getByText("1 selected")).toBeTruthy();
+    it("opens the import modal on the status-picker view", () => {
+      expect(elements.queryImportDialogTitle()).not.toBeNull();
     });
   });
 
-  describe("given the user clicks 'Add selected to library' with one MATCHED row selected", () => {
-    beforeEach(async () => {
-      vi.mocked(addGameToLibraryFn).mockResolvedValue({} as never);
-      render(
-        <ImportedGamesPage games={[matched]} steamId="76561198012345678" />
-      );
-      await userEvent.click(elements.getRowCheckbox("Half-Life"));
-      await userEvent.click(elements.getBulkAddButton());
-    });
-
-    it("fires addGameToLibraryFn for the matched row", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledWith({
-          data: { igdbId: 70 },
-        });
-      });
-    });
-
-    it("fires toast.success with the count", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          "Added 1 games to library"
-        );
-      });
-    });
-  });
-
-  describe("given the user clicks dismiss on a MATCHED row", () => {
+  describe("given the user clicks dismiss on a PENDING row", () => {
     beforeEach(async () => {
       vi.mocked(dismissImportedGameFn).mockResolvedValue(undefined as never);
       render(
-        <ImportedGamesPage games={[matched]} steamId="76561198012345678" />
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
-      await userEvent.click(elements.queryDismissButton("Half-Life")!);
+      await userEvent.click(elements.queryDismissButton("Pending Game")!);
     });
 
     it("calls dismissImportedGameFn with the row id", async () => {
       await waitFor(() => {
         expect(vi.mocked(dismissImportedGameFn)).toHaveBeenCalledWith({
-          data: { importedGameId: "g-match" },
+          data: { importedGameId: "g-pending" },
         });
       });
     });
@@ -298,23 +248,11 @@ describe("ImportedGamesPage", () => {
     });
   });
 
-  describe("given no rows are selected", () => {
-    beforeEach(() => {
-      render(
-        <ImportedGamesPage games={[matched]} steamId="76561198012345678" />
-      );
-    });
-
-    it("disables the bulk-add button", () => {
-      expect(elements.getBulkAddButton()).toBeDisabled();
-    });
-  });
-
   // --- Filter / sort / search bar ----------------------------------------
   describe("given the filter bar is rendered with populated games", () => {
     beforeEach(() => {
       render(
-        <ImportedGamesPage games={[matched]} steamId="76561198012345678" />
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
     });
 
@@ -334,7 +272,7 @@ describe("ImportedGamesPage", () => {
   describe("given the user types a search query and presses Enter", () => {
     beforeEach(async () => {
       render(
-        <ImportedGamesPage games={[matched]} steamId="76561198012345678" />
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.type(elements.getSearchInput(), "halo{Enter}");
     });
@@ -348,7 +286,7 @@ describe("ImportedGamesPage", () => {
   describe("given the user toggles 'Show dismissed games'", () => {
     beforeEach(async () => {
       render(
-        <ImportedGamesPage games={[matched]} steamId="76561198012345678" />
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.getShowDismissedCheckbox());
     });
@@ -363,7 +301,7 @@ describe("ImportedGamesPage", () => {
     beforeEach(() => {
       render(
         <ImportedGamesPage
-          games={[matched]}
+          games={[pending]}
           steamId="76561198012345678"
           filters={{ q: "halo" }}
         />

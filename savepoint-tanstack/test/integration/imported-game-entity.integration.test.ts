@@ -124,19 +124,19 @@ describe("findImportedGamesForUser", () => {
     });
 
     it("returns only Alice's rows for Alice", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID);
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID);
       expect(rows).toHaveLength(2);
       expect(rows.every((r) => r.userId === ALICE_ID)).toBe(true);
     });
 
     it("returns only Bob's row for Bob", async () => {
-      const rows = await findImportedGamesForUser(BOB_ID);
+      const { games: rows } = await findImportedGamesForUser(BOB_ID);
       expect(rows).toHaveLength(1);
       expect(rows[0]?.userId).toBe(BOB_ID);
     });
 
     it("returns an empty array for a user with no rows", async () => {
-      const rows = await findImportedGamesForUser("nobody");
+      const { games: rows } = await findImportedGamesForUser("nobody");
       expect(rows).toEqual([]);
     });
   });
@@ -156,13 +156,13 @@ describe("findImportedGamesForUser", () => {
     });
 
     it("excludes IGNORED rows by default", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID);
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID);
       expect(rows).toHaveLength(1);
       expect(rows[0]?.igdbMatchStatus).toBe("PENDING");
     });
 
     it("includes IGNORED rows when includeIgnored: true", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         includeIgnored: true,
       });
       expect(rows).toHaveLength(2);
@@ -240,21 +240,21 @@ describe("findImportedGamesForUser", () => {
     });
 
     it("search filters by case-insensitive name substring", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         search: "marathon",
       });
       expect(rows.map((r) => r.name)).toEqual(["Delta Marathon"]);
     });
 
     it("playtimeStatus=never_played returns only zero-playtime rows", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         playtimeStatus: "never_played",
       });
       expect(rows.map((r) => r.name)).toEqual(["Alpha Untouched"]);
     });
 
     it("playtimeStatus=played excludes zero-playtime rows", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         playtimeStatus: "played",
       });
       expect(rows).toHaveLength(3);
@@ -262,35 +262,35 @@ describe("findImportedGamesForUser", () => {
     });
 
     it("playtimeRange=over_50h returns only the 100h row", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         playtimeRange: "over_50h",
       });
       expect(rows.map((r) => r.name)).toEqual(["Delta Marathon"]);
     });
 
     it("platform=mac returns only the mac-played row", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         platform: "mac",
       });
       expect(rows.map((r) => r.name)).toEqual(["Gamma Casual"]);
     });
 
     it("lastPlayed=30_days returns only the recently-played row", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         lastPlayed: "30_days",
       });
       expect(rows.map((r) => r.name)).toEqual(["Beta Quick"]);
     });
 
     it("lastPlayed=never returns only the never-played row", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         lastPlayed: "never",
       });
       expect(rows.map((r) => r.name)).toEqual(["Alpha Untouched"]);
     });
 
     it("sortBy=name_asc orders by name ascending", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         sortBy: "name_asc",
       });
       expect(rows.map((r) => r.name)).toEqual([
@@ -302,7 +302,7 @@ describe("findImportedGamesForUser", () => {
     });
 
     it("sortBy=playtime_desc orders highest playtime first", async () => {
-      const rows = await findImportedGamesForUser(ALICE_ID, {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
         sortBy: "playtime_desc",
       });
       expect(rows.map((r) => r.name)).toEqual([
@@ -311,6 +311,71 @@ describe("findImportedGamesForUser", () => {
         "Beta Quick",
         "Alpha Untouched",
       ]);
+    });
+  });
+
+  describe("given Alice has 1 PENDING + 1 MATCHED row", () => {
+    beforeEach(async () => {
+      await createRow({
+        userId: ALICE_ID,
+        storefrontGameId: "1",
+        igdbMatchStatus: "PENDING",
+      });
+      await createRow({
+        userId: ALICE_ID,
+        storefrontGameId: "2",
+        igdbMatchStatus: "MATCHED",
+      });
+    });
+
+    it("excludes MATCHED rows by default (they live on the library page)", async () => {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.igdbMatchStatus).toBe("PENDING");
+    });
+
+    it("includes MATCHED rows when includeMatched: true", async () => {
+      const { games: rows } = await findImportedGamesForUser(ALICE_ID, {
+        includeMatched: true,
+      });
+      expect(rows).toHaveLength(2);
+    });
+  });
+
+  describe("given Alice has 30 PENDING rows (pagination)", () => {
+    beforeEach(async () => {
+      for (let i = 0; i < 30; i++) {
+        await createRow({
+          userId: ALICE_ID,
+          storefrontGameId: `p-${i.toString().padStart(2, "0")}`,
+          name: `PendingGame${i.toString().padStart(2, "0")}`,
+          igdbMatchStatus: "PENDING",
+        });
+      }
+    });
+
+    it("returns page 1 with the default limit of 25", async () => {
+      const result = await findImportedGamesForUser(ALICE_ID);
+      expect(result.games).toHaveLength(25);
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(25);
+      expect(result.total).toBe(30);
+      expect(result.totalPages).toBe(2);
+    });
+
+    it("returns the remainder on page 2", async () => {
+      const result = await findImportedGamesForUser(ALICE_ID, { page: 2 });
+      expect(result.games).toHaveLength(5);
+      expect(result.page).toBe(2);
+    });
+
+    it("respects a custom page size", async () => {
+      const result = await findImportedGamesForUser(ALICE_ID, {
+        page: 1,
+        limit: 10,
+      });
+      expect(result.games).toHaveLength(10);
+      expect(result.totalPages).toBe(3);
     });
   });
 });

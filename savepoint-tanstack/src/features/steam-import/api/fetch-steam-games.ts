@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { PaginatedImportedGames } from "@/entities/imported-game/model/types";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 import {
@@ -18,7 +18,7 @@ import {
  */
 export const fetchSteamGamesFn = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => FETCH_STEAM_GAMES_INPUT.parse(data))
-  .handler(async ({ data }): Promise<ImportedGame[]> => {
+  .handler(async ({ data }): Promise<PaginatedImportedGames> => {
     const parsed = FETCH_STEAM_GAMES_INPUT.parse(data);
     const userId = await requireUserId();
     return fetchSteamGamesWorker(userId, parsed);

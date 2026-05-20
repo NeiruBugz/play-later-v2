@@ -57,8 +57,9 @@ const SORT_BY = z
   .optional();
 
 const searchSchema = z.object({
-  include: z.enum(["ignored"]).optional(),
+  include: z.enum(["ignored", "matched", "all"]).optional(),
   q: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
   playtimeStatus: PLAYTIME_STATUS,
   playtimeRange: PLAYTIME_RANGE,
   platform: PLATFORM,
@@ -69,7 +70,9 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/_authed/steam/games")({
   validateSearch: (input) => searchSchema.parse(input),
   loaderDeps: ({ search }) => ({
-    includeIgnored: search.include === "ignored",
+    includeIgnored: search.include === "ignored" || search.include === "all",
+    includeMatched: search.include === "matched" || search.include === "all",
+    page: search.page ?? 1,
     q: search.q,
     playtimeStatus: search.playtimeStatus,
     playtimeRange: search.playtimeRange,
@@ -78,11 +81,13 @@ export const Route = createFileRoute("/_authed/steam/games")({
     sortBy: search.sortBy,
   }),
   loader: async ({ deps }) => {
-    const [connection, games] = await Promise.all([
+    const [connection, pagedGames] = await Promise.all([
       getSteamConnectionFn(),
       fetchSteamGamesFn({
         data: {
           includeIgnored: deps.includeIgnored,
+          includeMatched: deps.includeMatched,
+          page: deps.page,
           search: deps.q,
           playtimeStatus: deps.playtimeStatus,
           playtimeRange: deps.playtimeRange,
@@ -94,8 +99,15 @@ export const Route = createFileRoute("/_authed/steam/games")({
     ]);
     return {
       steamId: connection.steamId,
-      games,
+      games: pagedGames.games,
+      pagination: {
+        page: pagedGames.page,
+        limit: pagedGames.limit,
+        total: pagedGames.total,
+        totalPages: pagedGames.totalPages,
+      },
       includeIgnored: deps.includeIgnored,
+      includeMatched: deps.includeMatched,
       filters: {
         q: deps.q,
         playtimeStatus: deps.playtimeStatus,
@@ -111,7 +123,14 @@ export const Route = createFileRoute("/_authed/steam/games")({
 });
 
 function SteamGamesRoute() {
-  const { steamId, games, includeIgnored, filters } = Route.useLoaderData();
+  const {
+    steamId,
+    games,
+    pagination,
+    includeIgnored,
+    includeMatched,
+    filters,
+  } = Route.useLoaderData();
 
   return (
     <main className="container mx-auto px-4 py-6">
@@ -119,7 +138,9 @@ function SteamGamesRoute() {
       <ImportedGamesPage
         games={games}
         steamId={steamId}
+        pagination={pagination}
         includeIgnored={includeIgnored}
+        includeMatched={includeMatched}
         filters={filters}
       />
     </main>

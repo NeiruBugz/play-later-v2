@@ -1201,11 +1201,21 @@ deferred). The corresponding `<ImportPathSelector/>` therefore has no
 referent in tanstack and is not ported. If a manual SteamID entry is
 ever needed, ship `ImportPathSelector` alongside the new surface.
 
-**`<IgdbManualSearch/>` is a stub.** Phase C did not ship an
+**`<IgdbManualSearch/>` is a stub.** ~~Phase C did not ship an
 entity-layer `linkImportedGameToIgdb.server.ts` write, so the manual-
 search dialog renders the input + accepts a query, but the "Select"
 button fires `console.warn` and closes without persisting. Known gap —
-tracked for a follow-up slice.
+tracked for a follow-up slice.~~
+**Closed in the IGDB-linking follow-up (this commit).** Replaced the
+stub with a real debounced picker (`searchGamesFn`) and added an
+`ImportGameModal` that combines status pick + manual-search fallback.
+The "Select" button now fires `importGameToLibraryFn` with `manualIgdbId`
+set. The combined action mirrors canonical's
+`features/steam-import/use-cases/import-game-to-library.ts` — auto-match
+via Steam App ID through IGDB's `external_games` join (new
+`shared/api/igdb/match-steam-game.ts`), fall through to manual search
+on no-match (`NeedsManualMatchError`, a `ValidationError` subclass
+discriminated by `err.name` so it survives RPC serialization).
 
 **Error-component branches on `err.name`, not `instanceof`.** TanStack
 Start serializes thrown errors across the server-fn RPC boundary; the
@@ -1216,22 +1226,19 @@ distinctive `name` string in their constructor, so the route branches
 on `err.name` — which survives serialization. Documented at
 `routes/_authed/steam/games.tsx`.
 
-**Bulk-add ships as a sequential per-row loop.** Locked decision 7 of
-the Phase D scope: there is no batched server fn. The widget iterates
-over selected MATCHED rows and fires `addGameToLibraryFn` for each. On
-partial failure, the toast reports `X/N succeeded`. Justified because
-the bulk surface is the natural seam to introduce batching later
-(single server fn touches the same entity write, no API change to
-consumers).
-
-**`storefrontGameId` is used as the IGDB id in bulk-add.** Canonical
-joins the imported-game row to a `Game` table to recover the matched
-`igdbId`. The tanstack mirror does NOT yet ship the joined read —
-`findImportedGamesForUser` returns the bare `ImportedGame` row. As a
-short-term measure the widget passes `Number(game.storefrontGameId)` to
-`addGameToLibraryFn`. This works only when the upstream IGDB id
-happens to equal the Steam appId (it usually does not). Tracked as a
-known gap to be unblocked when Phase E ships the joined fetch.
+**Bulk-add retired in the IGDB-linking follow-up.** Phase D shipped a
+bulk select-all + "Add selected to library" CTA that fired
+`addGameToLibraryFn(Number(storefrontGameId))` per MATCHED row — but
+`storefrontGameId` is the Steam App ID, not the IGDB id (those are
+different number-spaces), so the call was making a wrong IGDB lookup.
+The IGDB-linking follow-up resolves the right igdbId through the new
+`importGameToLibraryFn` (auto-match via `external_games` join, manual
+override via `manualIgdbId`). With per-row import going through the
+modal, the bulk surface had no correct behaviour to retain on
+non-MATCHED rows, so the select-all checkbox + "Add selected to
+library" button were removed. Re-adding a batched server fn is the
+correct next step (one transaction per N rows), tracked for a
+follow-up.
 
 **Dismissal has no confirmation prompt.** Per locked decision 11 — the
 operation is reversible via `?include=ignored` + Restore, so a modal
