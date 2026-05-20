@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { cn } from "@/shared/lib/utils";
-import { Card, CardContent } from "@/shared/ui/card";
+import { Card, CardContent, CardDescription } from "@/shared/ui/card";
 
 import type { JournalEntryCardProps } from "./journal-entry-card.type";
 
@@ -31,7 +31,9 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
   const body = (
     <CardContent className="p-lg gap-md flex flex-col">
       <header className="gap-xs flex flex-col">
-        <div className="flex items-center justify-between gap-2">
+        {/* CardDescription holds the entry meta sub-line (kind label + date),
+            matching canonical's typographic hierarchy: title + description. */}
+        <CardDescription className="flex items-center justify-between gap-2 !text-xs">
           <span className="text-caption text-primary/70 tracking-widest uppercase">
             {kindLabel}
           </span>
@@ -41,7 +43,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           >
             {formatEntryDate(entry.updatedAt)}
           </time>
-        </div>
+        </CardDescription>
         {title ? (
           <h3
             id={`journal-entry-${entry.id}-heading`}

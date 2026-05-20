@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, Gamepad2, Notebook, Trophy } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 // FSD: widgets may import features. ProfileOverview composes the upload
 // affordance and the "Edit Profile" navigation into the layout. The avatar
@@ -9,7 +10,7 @@ import { BookOpen, Gamepad2, Notebook, Trophy } from "lucide-react";
 import { AvatarUpload } from "@/features/upload-avatar";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import { deriveBannerGradient } from "../../lib/derive-banner-gradient";
 import { formatRelativeTime } from "../../lib/format-relative-time";
@@ -149,17 +150,13 @@ export function ProfileOverview({
         </div>
       </header>
 
-      {/* Sub-tabs */}
-      <Tabs defaultValue="overview">
-        <TabsList className="overflow-x-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="library">Library</TabsTrigger>
-          {!hideActivityTab ? (
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-          ) : null}
-        </TabsList>
-
-        <TabsContent value="overview">
+      {/* Sub-tabs — SegmentedControl driving conditional content per Slice 22
+          drift-fix (canonical uses SegmentedControl, not a Radix Tabs strip).
+          SegmentedControl is built on @radix-ui/react-tabs so triggers expose
+          role="tab" and the active panel reads as a Radix TabsContent. */}
+      <ProfileOverviewTabs
+        hideActivityTab={hideActivityTab}
+        overview={
           <div className="space-y-8">
             <div
               className="grid grid-cols-2 gap-3 sm:grid-cols-4"
@@ -225,12 +222,11 @@ export function ProfileOverview({
               </section>
             ) : null}
           </div>
-        </TabsContent>
-
-        <TabsContent value="library">
-          {/* TODO(slice-18): wire to entities/library-item once profile
-              public-library view is scoped. Empty state ships now for
-              visual parity. */}
+        }
+        library={
+          // TODO(slice-18): wire to entities/library-item once profile
+          // public-library view is scoped. Empty state ships now for
+          // visual parity.
           <EmptyState
             data-testid="profile-library-empty"
             title="Library view coming soon"
@@ -242,22 +238,67 @@ export function ProfileOverview({
               size: "sm",
             }}
           />
-        </TabsContent>
+        }
+        activity={
+          activitySlot !== undefined ? (
+            activitySlot
+          ) : (
+            <EmptyState
+              data-testid="profile-activity-empty"
+              title="No activity yet"
+              description="Activity will appear here once journal entries and library changes are tracked publicly."
+            />
+          )
+        }
+      />
+    </div>
+  );
+}
 
-        {!hideActivityTab ? (
-          <TabsContent value="activity">
-            {activitySlot !== undefined ? (
-              activitySlot
-            ) : (
-              <EmptyState
-                data-testid="profile-activity-empty"
-                title="No activity yet"
-                description="Activity will appear here once journal entries and library changes are tracked publicly."
-              />
-            )}
-          </TabsContent>
-        ) : null}
-      </Tabs>
+type ProfileTabValue = "overview" | "library" | "activity";
+
+interface ProfileOverviewTabsProps {
+  hideActivityTab: boolean;
+  overview: ReactNode;
+  library: ReactNode;
+  activity: ReactNode;
+}
+
+function ProfileOverviewTabs({
+  hideActivityTab,
+  overview,
+  library,
+  activity,
+}: ProfileOverviewTabsProps) {
+  const [value, setValue] = useState<ProfileTabValue>("overview");
+
+  const options: ReadonlyArray<{ value: ProfileTabValue; label: string }> =
+    hideActivityTab
+      ? [
+          { value: "overview", label: "Overview" },
+          { value: "library", label: "Library" },
+        ]
+      : [
+          { value: "overview", label: "Overview" },
+          { value: "library", label: "Library" },
+          { value: "activity", label: "Activity" },
+        ];
+
+  return (
+    <div className="space-y-6">
+      <SegmentedControl<ProfileTabValue>
+        value={value}
+        onValueChange={setValue}
+        options={options}
+        size="md"
+        scrollable
+        ariaLabel="Profile sections"
+      />
+      <div role="tabpanel">
+        {value === "overview" ? overview : null}
+        {value === "library" ? library : null}
+        {value === "activity" && !hideActivityTab ? activity : null}
+      </div>
     </div>
   );
 }

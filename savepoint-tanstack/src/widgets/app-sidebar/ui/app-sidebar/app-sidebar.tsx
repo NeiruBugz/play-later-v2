@@ -3,6 +3,7 @@ import {
   BookOpen,
   Library,
   LogOut,
+  Search,
   Settings,
   User,
   UserCog,
@@ -33,6 +34,7 @@ export interface AppSidebarProps {
 
 const NAV_ITEMS = [
   { label: "Library", to: "/library", icon: Library },
+  { label: "Search games", to: "/games/search", icon: Search },
   { label: "Journal", to: "/journal", icon: BookOpen },
   { label: "Profile", to: "/profile", icon: User },
   { label: "Settings", to: "/settings/profile", icon: Settings },

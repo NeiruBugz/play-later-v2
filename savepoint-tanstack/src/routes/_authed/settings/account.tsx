@@ -1,5 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { LogoutButton } from "@/features/auth-sign-out";
 import { SignOutCard } from "@/features/manage-account";
@@ -16,22 +15,16 @@ export const Route = createFileRoute("/_authed/settings/account")({
 function SettingsAccountPage() {
   const { steamId, connectUrl } = Route.useLoaderData();
 
+  // Chrome (header, back-link, settings-nav rail) is owned by the parent
+  // `_authed/settings.tsx` layout route. Child renders content only.
   return (
-    <main className="container mx-auto px-4 py-6">
-      <Link
-        to="/profile"
-        className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to profile
-      </Link>
-
+    <div>
       <h2 className="mb-6 text-2xl font-semibold">Account</h2>
 
       <div className="space-y-6">
         <SteamConnectCard steamId={steamId} connectUrl={connectUrl} />
         <SignOutCard action={<LogoutButton />} />
       </div>
-    </main>
+    </div>
   );
 }

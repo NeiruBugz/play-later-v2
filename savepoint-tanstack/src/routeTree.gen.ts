@@ -17,6 +17,7 @@ import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as SteamCallbackRouteImport } from './routes/steam.callback'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
+import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedJournalRouteImport } from './routes/_authed/journal'
@@ -27,6 +28,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedSteamGamesRouteImport } from './routes/_authed/steam/games'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
 import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
+import { Route as AuthedGamesSearchRouteImport } from './routes/_authed/games.search'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -66,6 +68,11 @@ const DevIgdbSearchRoute = DevIgdbSearchRouteImport.update({
   id: '/dev/igdb-search',
   path: '/dev/igdb-search',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedProfileRoute = AuthedProfileRouteImport.update({
   id: '/profile',
@@ -108,13 +115,18 @@ const AuthedSteamGamesRoute = AuthedSteamGamesRouteImport.update({
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
-  id: '/settings/profile',
-  path: '/settings/profile',
-  getParentRoute: () => AuthedRoute,
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthedSettingsRoute,
 } as any)
 const AuthedSettingsAccountRoute = AuthedSettingsAccountRouteImport.update({
-  id: '/settings/account',
-  path: '/settings/account',
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthedSettingsRoute,
+} as any)
+const AuthedGamesSearchRoute = AuthedGamesSearchRouteImport.update({
+  id: '/games/search',
+  path: '/games/search',
   getParentRoute: () => AuthedRoute,
 } as any)
 
@@ -126,10 +138,12 @@ export interface FileRoutesByFullPath {
   '/journal': typeof AuthedJournalRoute
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
+  '/settings': typeof AuthedSettingsRouteWithChildren
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
+  '/games/search': typeof AuthedGamesSearchRoute
   '/settings/account': typeof AuthedSettingsAccountRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/steam/games': typeof AuthedSteamGamesRoute
@@ -145,10 +159,12 @@ export interface FileRoutesByTo {
   '/journal': typeof AuthedJournalRoute
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
+  '/settings': typeof AuthedSettingsRouteWithChildren
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
+  '/games/search': typeof AuthedGamesSearchRoute
   '/settings/account': typeof AuthedSettingsAccountRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/steam/games': typeof AuthedSteamGamesRoute
@@ -166,10 +182,12 @@ export interface FileRoutesById {
   '/_authed/journal': typeof AuthedJournalRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/profile': typeof AuthedProfileRoute
+  '/_authed/settings': typeof AuthedSettingsRouteWithChildren
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
+  '/_authed/games/search': typeof AuthedGamesSearchRoute
   '/_authed/settings/account': typeof AuthedSettingsAccountRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
   '/_authed/steam/games': typeof AuthedSteamGamesRoute
@@ -187,10 +205,12 @@ export interface FileRouteTypes {
     | '/journal'
     | '/library'
     | '/profile'
+    | '/settings'
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/steam/callback'
     | '/u/$username'
+    | '/games/search'
     | '/settings/account'
     | '/settings/profile'
     | '/steam/games'
@@ -206,10 +226,12 @@ export interface FileRouteTypes {
     | '/journal'
     | '/library'
     | '/profile'
+    | '/settings'
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/steam/callback'
     | '/u/$username'
+    | '/games/search'
     | '/settings/account'
     | '/settings/profile'
     | '/steam/games'
@@ -226,10 +248,12 @@ export interface FileRouteTypes {
     | '/_authed/journal'
     | '/_authed/library'
     | '/_authed/profile'
+    | '/_authed/settings'
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/steam/callback'
     | '/u/$username'
+    | '/_authed/games/search'
     | '/_authed/settings/account'
     | '/_authed/settings/profile'
     | '/_authed/steam/games'
@@ -308,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevIgdbSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/settings': {
+      id: '/_authed/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthedSettingsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/profile': {
       id: '/_authed/profile'
       path: '/profile'
@@ -366,28 +397,49 @@ declare module '@tanstack/react-router' {
     }
     '/_authed/settings/profile': {
       id: '/_authed/settings/profile'
-      path: '/settings/profile'
+      path: '/profile'
       fullPath: '/settings/profile'
       preLoaderRoute: typeof AuthedSettingsProfileRouteImport
-      parentRoute: typeof AuthedRoute
+      parentRoute: typeof AuthedSettingsRoute
     }
     '/_authed/settings/account': {
       id: '/_authed/settings/account'
-      path: '/settings/account'
+      path: '/account'
       fullPath: '/settings/account'
       preLoaderRoute: typeof AuthedSettingsAccountRouteImport
+      parentRoute: typeof AuthedSettingsRoute
+    }
+    '/_authed/games/search': {
+      id: '/_authed/games/search'
+      path: '/games/search'
+      fullPath: '/games/search'
+      preLoaderRoute: typeof AuthedGamesSearchRouteImport
       parentRoute: typeof AuthedRoute
     }
   }
 }
+
+interface AuthedSettingsRouteChildren {
+  AuthedSettingsAccountRoute: typeof AuthedSettingsAccountRoute
+  AuthedSettingsProfileRoute: typeof AuthedSettingsProfileRoute
+}
+
+const AuthedSettingsRouteChildren: AuthedSettingsRouteChildren = {
+  AuthedSettingsAccountRoute: AuthedSettingsAccountRoute,
+  AuthedSettingsProfileRoute: AuthedSettingsProfileRoute,
+}
+
+const AuthedSettingsRouteWithChildren = AuthedSettingsRoute._addFileChildren(
+  AuthedSettingsRouteChildren,
+)
 
 interface AuthedRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedJournalRoute: typeof AuthedJournalRoute
   AuthedLibraryRoute: typeof AuthedLibraryRoute
   AuthedProfileRoute: typeof AuthedProfileRoute
-  AuthedSettingsAccountRoute: typeof AuthedSettingsAccountRoute
-  AuthedSettingsProfileRoute: typeof AuthedSettingsProfileRoute
+  AuthedSettingsRoute: typeof AuthedSettingsRouteWithChildren
+  AuthedGamesSearchRoute: typeof AuthedGamesSearchRoute
   AuthedSteamGamesRoute: typeof AuthedSteamGamesRoute
 }
 
@@ -396,8 +448,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedJournalRoute: AuthedJournalRoute,
   AuthedLibraryRoute: AuthedLibraryRoute,
   AuthedProfileRoute: AuthedProfileRoute,
-  AuthedSettingsAccountRoute: AuthedSettingsAccountRoute,
-  AuthedSettingsProfileRoute: AuthedSettingsProfileRoute,
+  AuthedSettingsRoute: AuthedSettingsRouteWithChildren,
+  AuthedGamesSearchRoute: AuthedGamesSearchRoute,
   AuthedSteamGamesRoute: AuthedSteamGamesRoute,
 }
 

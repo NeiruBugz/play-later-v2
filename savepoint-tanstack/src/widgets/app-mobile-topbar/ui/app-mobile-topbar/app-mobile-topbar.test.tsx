@@ -17,8 +17,7 @@ vi.mock("@/features/toggle-theme", () => ({
 
 const elements = {
   getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
-  getSearchTrigger: () =>
-    screen.getByRole("button", { name: "Open command palette" }),
+  getSearchLink: () => screen.getByRole("link", { name: "Search games" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
 };
 
@@ -32,8 +31,8 @@ describe("AppMobileTopbar", () => {
       expect(elements.getBrandLink()).toHaveAttribute("href", "/");
     });
 
-    it("renders the search trigger button", () => {
-      elements.getSearchTrigger();
+    it("renders a search link pointing to /games/search", () => {
+      expect(elements.getSearchLink()).toHaveAttribute("href", "/games/search");
     });
 
     it("renders the theme toggle", () => {

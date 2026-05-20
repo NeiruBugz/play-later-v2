@@ -1,7 +1,12 @@
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/shared/lib/utils";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/ui/collapsible";
 
 import type { OnboardingChecklistProps } from "./onboarding-checklist.type";
 
@@ -114,39 +119,74 @@ export function OnboardingChecklist({
     return null;
   }
 
+  const doneCount = steps.filter((s) => s.done).length;
+
+  // Collapsible-wrapped onboarding card matches canonical's expand/collapse
+  // UX — header (with progress summary) stays visible; the step list folds
+  // away. Default open so first-time users see all steps without an extra
+  // click; Radix keyboard semantics come for free.
   return (
-    <ul
-      aria-label="Onboarding checklist"
-      className="divide-border divide-y rounded-md border"
+    <Collapsible
+      defaultOpen
+      className="bg-card text-card-foreground rounded-md border"
     >
-      {steps.map((step) => (
-        <li
-          key={step.id}
-          className={cn(
-            "gap-md flex items-center px-4 py-3",
-            step.done && "opacity-60"
-          )}
+      <CollapsibleTrigger
+        className={cn(
+          "flex w-full items-center justify-between gap-2 px-4 py-3 text-left",
+          "hover:bg-muted/40 focus-visible:ring-ring rounded-md focus-visible:ring-2 focus-visible:outline-none",
+          "data-[state=open]:rounded-b-none"
+        )}
+        aria-label="Onboarding checklist"
+      >
+        <span className="flex flex-col gap-0.5">
+          <span className="text-sm font-semibold">Getting started</span>
+          <span className="text-muted-foreground text-xs">
+            {doneCount} of {steps.length} complete
+          </span>
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className="text-muted-foreground h-4 w-4 transition-transform data-[state=open]:rotate-180"
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <ul
+          aria-label="Onboarding checklist steps"
+          className="divide-border divide-y border-t"
         >
-          <span
-            aria-hidden={!step.done}
-            className={cn(
-              "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
-              step.done
-                ? "bg-primary text-primary-foreground"
-                : "border-border border"
-            )}
-          >
-            {step.done ? (
-              <Check role="img" aria-label="Done" className="h-3 w-3" />
-            ) : null}
-          </span>
-          <span
-            className={cn("body-sm font-medium", step.done && "line-through")}
-          >
-            {step.label}
-          </span>
-        </li>
-      ))}
-    </ul>
+          {steps.map((step) => (
+            <li
+              key={step.id}
+              className={cn(
+                "gap-md flex items-center px-4 py-3",
+                step.done && "opacity-60"
+              )}
+            >
+              <span
+                aria-hidden={!step.done}
+                className={cn(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
+                  step.done
+                    ? "bg-primary text-primary-foreground"
+                    : "border-border border"
+                )}
+              >
+                {step.done ? (
+                  <Check role="img" aria-label="Done" className="h-3 w-3" />
+                ) : null}
+              </span>
+              <span
+                className={cn(
+                  "body-sm font-medium",
+                  step.done && "line-through"
+                )}
+              >
+                {step.label}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

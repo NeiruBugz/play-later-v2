@@ -6,10 +6,18 @@ import { JournalTeaser } from "@/entities/journal-entry";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
+import { Badge } from "@/shared/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 
 import { LibraryStatusSwitcher } from "../library-status-switcher";
 import type { GameDetailProps } from "./game-detail.type";
+
+const IGDB_IMAGE_BASE = "https://images.igdb.com/igdb/image/upload";
+
+function buildScreenshotUrl(imageId: string | undefined): string | null {
+  if (!imageId) return null;
+  return `${IGDB_IMAGE_BASE}/t_1080p/${imageId}.jpg`;
+}
 
 export function GameDetail({
   data,
@@ -31,6 +39,9 @@ export function GameDetail({
   const developer =
     igdbDetails.involved_companies?.find((c) => c.developer)?.company.name ??
     null;
+  const screenshotBgUrl = buildScreenshotUrl(
+    igdbDetails.screenshots?.[0]?.image_id
+  );
 
   const eyebrowParts: string[] = [
     releaseYear,
@@ -42,22 +53,35 @@ export function GameDetail({
 
   const journalCount = journalTeaser.length;
   const showJournalTab = viewerUserId !== null;
-  const showPlaytimeTab =
+  const showRelatedTab =
+    relatedGamesSlot !== null && relatedGamesSlot !== undefined;
+  const showTimesToBeatTab =
     timesToBeatSlot !== null && timesToBeatSlot !== undefined;
 
   return (
     <main className="relative flex flex-col">
       <div
         aria-hidden="true"
+        data-testid="game-detail-hero-backdrop"
         className="pointer-events-none absolute inset-x-0 top-0 h-56 overflow-hidden md:h-72"
       >
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(135deg, color-mix(in oklch, var(--primary) 20%, transparent), transparent 60%)",
-          }}
-        />
+        {screenshotBgUrl ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url(${screenshotBgUrl})`,
+              filter: "saturate(0.85)",
+            }}
+          />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg, color-mix(in oklch, var(--primary) 20%, transparent), transparent 60%)",
+            }}
+          />
+        )}
         <div
           className="absolute inset-0"
           style={{
@@ -152,8 +176,11 @@ export function GameDetail({
                 </span>
               </TabsTrigger>
             ) : null}
-            {showPlaytimeTab ? (
-              <TabsTrigger value="playtime">Playtime</TabsTrigger>
+            {showRelatedTab ? (
+              <TabsTrigger value="related">Related</TabsTrigger>
+            ) : null}
+            {showTimesToBeatTab ? (
+              <TabsTrigger value="times-to-beat">Times to beat</TabsTrigger>
             ) : null}
           </TabsList>
 
@@ -163,7 +190,6 @@ export function GameDetail({
               releaseYear={releaseYear}
               genres={genres}
               platforms={platforms}
-              relatedGamesSlot={relatedGamesSlot}
             />
           </TabsContent>
 
@@ -179,8 +205,14 @@ export function GameDetail({
             </TabsContent>
           ) : null}
 
-          {showPlaytimeTab ? (
-            <TabsContent value="playtime" className="gap-md flex flex-col">
+          {showRelatedTab ? (
+            <TabsContent value="related" className="gap-md flex flex-col">
+              {relatedGamesSlot}
+            </TabsContent>
+          ) : null}
+
+          {showTimesToBeatTab ? (
+            <TabsContent value="times-to-beat" className="gap-md flex flex-col">
               {timesToBeatSlot}
             </TabsContent>
           ) : null}
@@ -203,13 +235,11 @@ function OverviewBody({
   releaseYear,
   genres,
   platforms,
-  relatedGamesSlot,
 }: {
   summary: string | null;
   releaseYear: string | null;
   genres: string[];
   platforms: string[];
-  relatedGamesSlot: GameDetailProps["relatedGamesSlot"];
 }) {
   return (
     <>
@@ -222,7 +252,7 @@ function OverviewBody({
         </p>
       ) : null}
 
-      <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr]">
+      <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
         <TerminalLabel>{`// GAME.DETAIL`}</TerminalLabel>
         <dl className="text-sm">
           <div className="flex gap-2">
@@ -232,21 +262,35 @@ function OverviewBody({
         </dl>
 
         <TerminalLabel>{`// GENRES`}</TerminalLabel>
-        <p aria-label="Genres" className="text-muted-foreground text-sm">
-          {genres.length > 0 ? genres.join(" · ") : "—"}
-        </p>
+        {genres.length > 0 ? (
+          <ul aria-label="Genres" className="flex flex-wrap gap-1.5 text-sm">
+            {genres.map((g) => (
+              <li key={g}>
+                <Badge variant="secondary">{g}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p aria-label="Genres" className="text-muted-foreground text-sm">
+            —
+          </p>
+        )}
 
         <TerminalLabel>{`// PLATFORMS`}</TerminalLabel>
-        <p aria-label="Platforms" className="text-muted-foreground text-sm">
-          {platforms.length > 0 ? platforms.join(" · ") : "—"}
-        </p>
+        {platforms.length > 0 ? (
+          <ul aria-label="Platforms" className="flex flex-wrap gap-1.5 text-sm">
+            {platforms.map((p) => (
+              <li key={p}>
+                <Badge variant="outline">{p}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p aria-label="Platforms" className="text-muted-foreground text-sm">
+            —
+          </p>
+        )}
       </div>
-
-      {relatedGamesSlot ? (
-        <section id="related" className="gap-md flex flex-col">
-          {relatedGamesSlot}
-        </section>
-      ) : null}
     </>
   );
 }

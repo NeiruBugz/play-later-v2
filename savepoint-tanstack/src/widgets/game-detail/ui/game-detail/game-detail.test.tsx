@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
@@ -105,12 +105,13 @@ const elements = {
     screen.queryByRole("button", { name: "More library actions" }),
   getOverviewTab: () => screen.getByRole("tab", { name: "Overview" }),
   queryJournalTab: () => screen.queryByRole("tab", { name: /^Journal/ }),
-  queryPlaytimeTab: () => screen.queryByRole("tab", { name: "Playtime" }),
+  queryTimesToBeatTab: () =>
+    screen.queryByRole("tab", { name: "Times to beat" }),
+  queryRelatedTab: () => screen.queryByRole("tab", { name: "Related" }),
   querySummary: () => screen.queryByLabelText("Game summary"),
   queryGameDetailLabel: () => screen.queryByText("// GAME.DETAIL"),
   queryGenresLabel: () => screen.queryByText("// GENRES"),
   queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
-  queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
@@ -205,9 +206,9 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the related-games slot in the Overview tab and shows the Playtime tab", () => {
-      expect(elements.queryRelatedSlot()).not.toBeNull();
-      expect(elements.queryPlaytimeTab()).not.toBeNull();
+    it("renders the Related tab and the Times to beat tab", () => {
+      expect(elements.queryRelatedTab()).not.toBeNull();
+      expect(elements.queryTimesToBeatTab()).not.toBeNull();
     });
   });
 
@@ -260,10 +261,13 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the genres joined by ' · ' next to the GENRES label", () => {
-      expect(elements.queryGenresList()?.textContent).toBe(
-        "Role-playing (RPG) · Adventure"
-      );
+    it("renders each genre as a chip next to the GENRES label", () => {
+      const list = elements.queryGenresList();
+      expect(list).not.toBeNull();
+      const items = within(list!).getAllByRole("listitem");
+      expect(items.length).toBe(2);
+      expect(items[0]?.textContent).toBe("Role-playing (RPG)");
+      expect(items[1]?.textContent).toBe("Adventure");
     });
   });
 
@@ -283,10 +287,14 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the platforms joined by ' · ' next to the PLATFORMS label", () => {
-      expect(elements.queryPlatformsList()?.textContent).toBe(
-        "PC · PlayStation 5 · Xbox Series X"
-      );
+    it("renders each platform as a chip next to the PLATFORMS label", () => {
+      const list = elements.queryPlatformsList();
+      expect(list).not.toBeNull();
+      const items = within(list!).getAllByRole("listitem");
+      expect(items.length).toBe(3);
+      expect(items[0]?.textContent).toBe("PC");
+      expect(items[1]?.textContent).toBe("PlayStation 5");
+      expect(items[2]?.textContent).toBe("Xbox Series X");
     });
   });
 
@@ -333,6 +341,43 @@ describe("GameDetail", () => {
     it("renders the em-dash placeholder for both genres and platforms", () => {
       expect(elements.queryGenresList()?.textContent).toBe("—");
       expect(elements.queryPlatformsList()?.textContent).toBe("—");
+    });
+  });
+
+  describe("given igdbDetails with screenshots", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, {
+            screenshots: [
+              { id: 1, image_id: "abc123" },
+              { id: 2, image_id: "def456" },
+            ],
+          })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders the first screenshot as a full-bleed hero backdrop", () => {
+      const backdrop = screen.getByTestId("game-detail-hero-backdrop");
+      expect(backdrop.innerHTML).toContain("abc123");
+    });
+  });
+
+  describe("given igdbDetails with no screenshots", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, { screenshots: undefined })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("does not render any screenshot URL in the hero backdrop", () => {
+      const backdrop = screen.getByTestId("game-detail-hero-backdrop");
+      expect(backdrop.innerHTML).not.toContain("images.igdb.com");
     });
   });
 
