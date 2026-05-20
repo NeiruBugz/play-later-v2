@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 7070 --turbopack",
-    "postinstall": "prisma generate",
+    "prisma:generate": "prisma generate",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",

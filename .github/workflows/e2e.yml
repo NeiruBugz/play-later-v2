@@ -59,6 +59,9 @@ jobs:
             POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
+
       - name: Install Playwright Browsers
         run: |
           npx playwright install --with-deps

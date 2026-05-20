@@ -25,6 +25,9 @@ jobs:
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
+
       - name: Check code formatting
         run: pnpm --filter savepoint format:check
 
@@ -48,6 +51,9 @@ jobs:
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
+
       - name: Run ESLint
         run: pnpm --filter savepoint lint
 
@@ -70,6 +76,9 @@ jobs:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
 
       - name: Generate Route typings
         run: pnpm --filter savepoint next typegen
@@ -97,6 +106,9 @@ jobs:
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
+
       - name: Run tests
         run: pnpm --filter savepoint test:components
 
@@ -120,6 +132,9 @@ jobs:
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
+
       - name: Run tests
         run: pnpm --filter savepoint test:backend
 
@@ -142,6 +157,9 @@ jobs:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
 
       - name: Run tests
         run: pnpm --filter savepoint test:utilities

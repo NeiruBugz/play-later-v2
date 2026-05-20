@@ -59,6 +59,9 @@ jobs:
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter savepoint prisma:generate
+
       - name: Initialize LocalStack S3 bucket
         env:
           AWS_ACCESS_KEY_ID: test

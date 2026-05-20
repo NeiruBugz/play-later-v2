@@ -31,6 +31,10 @@ jobs:
         working-directory: savepoint-app
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        working-directory: savepoint-app
+        run: pnpm prisma:generate
+
       - name: Run database migrations
         working-directory: savepoint-app
         run: pnpm prisma migrate deploy
