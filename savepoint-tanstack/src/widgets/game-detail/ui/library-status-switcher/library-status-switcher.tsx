@@ -1,6 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
 import { MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { STATUS_ENTRIES } from "@/entities/library-item/model";
@@ -8,7 +8,6 @@ import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-
 import { LibraryModal } from "@/features/manage-library-entry";
 import { deleteLibraryItemFn } from "@/features/manage-library-entry/api/delete-library-item-fn";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
-import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import type {
   LibraryItem,
@@ -108,40 +108,32 @@ export function LibraryStatusSwitcher({
     }
   };
 
+  const segmentedOptions = useMemo(
+    () =>
+      STATUS_ENTRIES.map((entry) => {
+        const Icon = entry.icon;
+        return {
+          value: entry.value,
+          label: entry.label,
+          icon: <Icon className="h-3.5 w-3.5" />,
+          disabled: pending,
+        };
+      }),
+    [pending]
+  );
+
   return (
     <div
       className="gap-sm flex flex-wrap items-center"
       data-testid="library-status-switcher"
     >
-      <div
-        role="radiogroup"
-        aria-label={`Library status for ${gameTitle}`}
-        className="flex flex-wrap items-center gap-1.5"
-      >
-        {STATUS_ENTRIES.map((entry) => {
-          const isActive = currentStatus === entry.value;
-          return (
-            <button
-              key={entry.value}
-              type="button"
-              role="radio"
-              aria-checked={isActive}
-              disabled={pending}
-              onClick={() => handleStatusClick(entry.value)}
-              className={cn(
-                "rounded-full px-3 py-1 text-sm font-medium transition-colors",
-                "focus-visible:ring-ring border focus-visible:ring-2 focus-visible:outline-none",
-                "disabled:cursor-not-allowed disabled:opacity-60",
-                isActive
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground bg-transparent"
-              )}
-            >
-              {entry.label}
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedControl<LibraryItemStatus>
+        value={currentStatus ?? ""}
+        onValueChange={handleStatusClick}
+        options={segmentedOptions}
+        ariaLabel={`Library status for ${gameTitle}`}
+        scrollable
+      />
 
       {itemId !== null ? (
         <RatingInput

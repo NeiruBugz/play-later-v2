@@ -98,7 +98,7 @@ const elements = {
   queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
   queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
   queryStatusPill: (label: string) =>
-    screen.queryByRole("radio", { name: label }),
+    screen.queryByRole("tab", { name: label }),
   queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
   queryRatingSlider: () => screen.queryByRole("slider"),
   queryMoreMenuTrigger: () =>
@@ -153,7 +153,7 @@ describe("GameDetail", () => {
         "Wishlist",
       ]) {
         expect(elements.queryStatusPill(label)).toHaveAttribute(
-          "aria-checked",
+          "aria-selected",
           "false"
         );
       }
@@ -177,11 +177,11 @@ describe("GameDetail", () => {
 
     it("marks only the Playing pill as active", () => {
       expect(elements.queryStatusPill("Playing")).toHaveAttribute(
-        "aria-checked",
+        "aria-selected",
         "true"
       );
       expect(elements.queryStatusPill("Shelf")).toHaveAttribute(
-        "aria-checked",
+        "aria-selected",
         "false"
       );
     });
@@ -358,7 +358,7 @@ describe("GameDetail", () => {
 
     it("does not preserve the previous game's library status across navigation", () => {
       expect(elements.queryStatusPill("Playing")).toHaveAttribute(
-        "aria-checked",
+        "aria-selected",
         "false"
       );
       expect(elements.queryRatingSlider()).toBeNull();

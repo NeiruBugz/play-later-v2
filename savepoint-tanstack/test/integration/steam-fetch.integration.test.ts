@@ -164,15 +164,13 @@ describe("fetchPlayerSummary", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: false,
-              status: 401,
-              statusText: "Unauthorized",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: false,
+            status: 401,
+            statusText: "Unauthorized",
+          })
+        )
       );
     });
 
@@ -187,15 +185,13 @@ describe("fetchPlayerSummary", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: false,
-              status: 429,
-              statusText: "Too Many",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: false,
+            status: 429,
+            statusText: "Too Many",
+          })
+        )
       );
     });
 
@@ -210,15 +206,13 @@ describe("fetchPlayerSummary", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: false,
-              status: 503,
-              statusText: "Unavailable",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: false,
+            status: 503,
+            statusText: "Unavailable",
+          })
+        )
       );
     });
 
@@ -345,15 +339,13 @@ describe("fetchOwnedGames", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: false,
-              status: 429,
-              statusText: "Too Many",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: false,
+            status: 429,
+            statusText: "Too Many",
+          })
+        )
       );
     });
 
@@ -387,15 +379,13 @@ describe("fetchOwnedGames", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: false,
-              status: 401,
-              statusText: "Unauthorized",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: false,
+            status: 401,
+            statusText: "Unauthorized",
+          })
+        )
       );
     });
 

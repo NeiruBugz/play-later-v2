@@ -3,7 +3,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { updateJournalEntryFn } from "@/features/edit-journal-entry/api/update-journal-entry-fn";
-import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -13,13 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { Textarea } from "@/shared/ui/textarea";
 
 import type { EditJournalEntryDialogProps } from "./edit-journal-entry-dialog.type";
 
 // FSD: feature/ui component invoking its own feature/api server fn directly.
-
-const textareaClasses =
-  "min-h-[140px] rounded-lg border border-border bg-card px-md py-sm text-sm text-foreground shadow-paper-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 export function EditJournalEntryDialog({
   open,
@@ -81,9 +78,9 @@ export function EditJournalEntryDialog({
         <form onSubmit={handleSubmit} className="gap-md flex flex-col">
           <label className="gap-xs flex flex-col text-sm">
             <span className="sr-only">Content</span>
-            <textarea
+            <Textarea
               aria-label="Content"
-              className={cn(textareaClasses)}
+              className="min-h-[140px]"
               value={content}
               onChange={(event) => setContent(event.target.value)}
             />

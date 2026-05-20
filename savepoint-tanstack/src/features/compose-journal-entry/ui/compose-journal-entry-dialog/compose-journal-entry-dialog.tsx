@@ -3,7 +3,6 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
-import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -13,14 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { Textarea } from "@/shared/ui/textarea";
 
 import type { ComposeJournalEntryDialogProps } from "./compose-journal-entry-dialog.type";
 
 // FSD: feature/ui component invoking its own feature/api server fn directly
 // (no useServerFn) — mirrors the LibraryModal precedent.
-
-const textareaClasses =
-  "min-h-[140px] rounded-lg border border-border bg-card px-md py-sm text-sm text-foreground shadow-paper-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 export function ComposeJournalEntryDialog({
   open,
@@ -79,9 +76,9 @@ export function ComposeJournalEntryDialog({
         <form onSubmit={handleSubmit} className="gap-md flex flex-col">
           <label className="gap-xs flex flex-col text-sm">
             <span className="sr-only">Content</span>
-            <textarea
+            <Textarea
               aria-label="Content"
-              className={cn(textareaClasses)}
+              className="min-h-[140px]"
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder="What happened in your session?"

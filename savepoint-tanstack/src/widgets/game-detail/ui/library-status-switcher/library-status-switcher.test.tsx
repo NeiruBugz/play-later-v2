@@ -43,7 +43,7 @@ const buildEntry = (overrides: Partial<LibraryItem> = {}): LibraryItem => ({
 });
 
 const elements = {
-  getPill: (label: string) => screen.getByRole("radio", { name: label }),
+  getPill: (label: string) => screen.getByRole("tab", { name: label }),
   getMoreTrigger: () =>
     screen.getByRole("button", { name: "More library actions" }),
 };
@@ -80,7 +80,7 @@ describe("LibraryStatusSwitcher", () => {
         "Wishlist",
       ]) {
         expect(elements.getPill(label)).toHaveAttribute(
-          "aria-checked",
+          "aria-selected",
           "false"
         );
       }
@@ -117,7 +117,7 @@ describe("LibraryStatusSwitcher", () => {
 
     it("marks the Playing pill as active", () => {
       expect(elements.getPill("Playing")).toHaveAttribute(
-        "aria-checked",
+        "aria-selected",
         "true"
       );
     });
@@ -145,7 +145,7 @@ describe("LibraryStatusSwitcher", () => {
 
       it("flips the active pill to Shelf optimistically", () => {
         expect(elements.getPill("Shelf")).toHaveAttribute(
-          "aria-checked",
+          "aria-selected",
           "true"
         );
       });

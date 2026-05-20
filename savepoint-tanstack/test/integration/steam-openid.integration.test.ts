@@ -58,14 +58,12 @@ describe("verifyOpenIdResponse", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: true,
-              body: "ns:http://...\nis_valid:true\n",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: true,
+            body: "ns:http://...\nis_valid:true\n",
+          })
+        )
       );
     });
 
@@ -105,14 +103,12 @@ describe("verifyOpenIdResponse", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            makeFetchResponse({
-              ok: true,
-              body: "ns:http://...\nis_valid:false\n",
-            })
-          )
+        vi.fn().mockResolvedValue(
+          makeFetchResponse({
+            ok: true,
+            body: "ns:http://...\nis_valid:false\n",
+          })
+        )
       );
     });
 
