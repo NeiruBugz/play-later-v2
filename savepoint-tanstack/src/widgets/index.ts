@@ -12,4 +12,8 @@ export {
 export { LandingHero } from "./landing-hero";
 export { LibraryPage } from "./library-page";
 export type { LibraryPageProps } from "./library-page";
+export { ProfileActivityTab } from "./profile-activity-tab";
+export type { ProfileActivityTabProps } from "./profile-activity-tab";
 export { ProfileOverview } from "./profile-overview";
+export { UserList } from "./user-list";
+export type { UserListProps, UserListVariant } from "./user-list";

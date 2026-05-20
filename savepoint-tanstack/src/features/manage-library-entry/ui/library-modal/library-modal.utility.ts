@@ -3,6 +3,11 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
+// ---------------------------------------------------------------------------
+// Status / Platform constants
+// ---------------------------------------------------------------------------
+
+import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
 
@@ -21,12 +26,6 @@ export function inputValueToDate(raw: string): Date | null {
   if (raw === "") return null;
   return new Date(raw);
 }
-
-// ---------------------------------------------------------------------------
-// Status / Platform constants
-// ---------------------------------------------------------------------------
-
-import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 
 export const STATUS_VALUES = [
   "WISHLIST",
@@ -59,15 +58,22 @@ type UseLibraryModalFormOptions = {
   onClose: () => void;
 };
 
-export function useLibraryModalForm({ entry, onClose }: UseLibraryModalFormOptions) {
+export function useLibraryModalForm({
+  entry,
+  onClose,
+}: UseLibraryModalFormOptions) {
   const router = useRouter();
 
-  const [status, setStatus] = useState<StatusValue>(entry.status as StatusValue);
+  const [status, setStatus] = useState<StatusValue>(
+    entry.status as StatusValue
+  );
   const [platform, setPlatform] = useState<string>(entry.platform ?? "");
   const [rating, setRating] = useState<string>(
     entry.rating === null ? "" : String(entry.rating)
   );
-  const [startedAt, setStartedAt] = useState<string>(dateToInputValue(entry.startedAt));
+  const [startedAt, setStartedAt] = useState<string>(
+    dateToInputValue(entry.startedAt)
+  );
   const [completedAt, setCompletedAt] = useState<string>(
     dateToInputValue(entry.completedAt)
   );

@@ -21,6 +21,11 @@ export function ProfileOverview({
   profile,
   stats,
   isOwnProfile = false,
+  followerCount,
+  followingCount,
+  headerActions,
+  activitySlot,
+  hideActivityTab = false,
 }: ProfileOverviewProps) {
   // Never expose an email-shaped `name` (legacy accounts seeded with email
   // as the display name leak the address otherwise). Prefer the user-chosen
@@ -90,25 +95,50 @@ export function ProfileOverview({
                     @{profile.username}
                   </p>
                 ) : null}
-                {/* TODO(slice-18-social): wire real follower / following
-                    counts once the social entity ships. Stubbed to 0 / 0
-                    for visual parity. */}
-                <p className="text-muted-foreground mt-1 text-sm">
-                  <span className="text-foreground font-medium tabular-nums">
-                    0
-                  </span>{" "}
-                  Followers{" "}
-                  <span aria-hidden="true" className="mx-1">
-                    ·
-                  </span>
-                  <span className="text-foreground font-medium tabular-nums">
-                    0
-                  </span>{" "}
-                  Following
-                </p>
+                {/* Follower / following counts. Slice 20: links to
+                    `/u/$username/followers` and `/u/$username/following`
+                    when a username is present; degrade to plain text
+                    otherwise. Counts are optional — when omitted, the row
+                    is hidden entirely (tests, mocks). */}
+                {profile.username &&
+                followerCount !== undefined &&
+                followingCount !== undefined ? (
+                  <p
+                    className="text-muted-foreground mt-1 text-sm"
+                    data-testid="profile-social-counts"
+                  >
+                    <Link
+                      to="/u/$username/followers"
+                      params={{ username: profile.username }}
+                      className="hover:text-foreground transition-colors"
+                    >
+                      <span className="text-foreground font-medium tabular-nums">
+                        {followerCount}
+                      </span>{" "}
+                      Followers
+                    </Link>
+                    <span aria-hidden="true" className="mx-1">
+                      ·
+                    </span>
+                    <Link
+                      to="/u/$username/following"
+                      params={{ username: profile.username }}
+                      className="hover:text-foreground transition-colors"
+                    >
+                      <span className="text-foreground font-medium tabular-nums">
+                        {followingCount}
+                      </span>{" "}
+                      Following
+                    </Link>
+                  </p>
+                ) : null}
               </div>
             </div>
-            {isOwnProfile ? (
+            {headerActions !== undefined ? (
+              <div className="shrink-0" data-testid="profile-header-actions">
+                {headerActions}
+              </div>
+            ) : isOwnProfile ? (
               <div className="shrink-0">
                 <Button asChild variant="outline">
                   <Link to="/settings/profile">Edit Profile</Link>
@@ -124,7 +154,9 @@ export function ProfileOverview({
         <TabsList className="overflow-x-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="library">Library</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
+          {!hideActivityTab ? (
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+          ) : null}
         </TabsList>
 
         <TabsContent value="overview">
@@ -212,16 +244,19 @@ export function ProfileOverview({
           />
         </TabsContent>
 
-        <TabsContent value="activity">
-          {/* TODO(slice-18): replace with real activity feed once the
-              activity entity / query lands. Empty state ships now for
-              visual parity. */}
-          <EmptyState
-            data-testid="profile-activity-empty"
-            title="No activity yet"
-            description="Activity will appear here once journal entries and library changes are tracked publicly."
-          />
-        </TabsContent>
+        {!hideActivityTab ? (
+          <TabsContent value="activity">
+            {activitySlot !== undefined ? (
+              activitySlot
+            ) : (
+              <EmptyState
+                data-testid="profile-activity-empty"
+                title="No activity yet"
+                description="Activity will appear here once journal entries and library changes are tracked publicly."
+              />
+            )}
+          </TabsContent>
+        ) : null}
       </Tabs>
     </div>
   );

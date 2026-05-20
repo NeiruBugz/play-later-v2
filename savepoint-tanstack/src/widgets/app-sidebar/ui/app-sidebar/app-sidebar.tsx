@@ -1,5 +1,12 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { BookOpen, Library, LogOut, Settings, User } from "lucide-react";
+import {
+  BookOpen,
+  Library,
+  LogOut,
+  Settings,
+  User,
+  UserCog,
+} from "lucide-react";
 
 import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
@@ -139,7 +146,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 Profile settings
               </Link>
             </DropdownMenuItem>
-            {/* TODO(slice 18): re-enable "Account" entry when /settings/account route exists */}
+            <DropdownMenuItem asChild>
+              <Link to="/settings/account">
+                <UserCog className="mr-2 h-4 w-4" aria-hidden="true" />
+                Account
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={handleSignOut}

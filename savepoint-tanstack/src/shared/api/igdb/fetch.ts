@@ -56,9 +56,7 @@ export async function igdbFetch(
 
   if (!res.ok) {
     const raw =
-      typeof res.text === "function"
-        ? await res.text().catch(() => "")
-        : "";
+      typeof res.text === "function" ? await res.text().catch(() => "") : "";
     const envelope = parseIgdbErrorBody(raw);
 
     const context: IgdbHttpErrorContext = {

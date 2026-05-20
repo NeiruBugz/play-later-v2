@@ -200,8 +200,11 @@ describe("AppSidebar", () => {
       );
     });
 
-    it("omits the Account entry until S18 ships /settings/account", () => {
-      expect(elements.queryAccountItem()).toBeNull();
+    it("reveals the Account menu item linking to /settings/account", () => {
+      expect(elements.queryAccountItem()).toHaveAttribute(
+        "href",
+        "/settings/account"
+      );
     });
 
     it("calls authClient.signOut when Sign out is clicked", async () => {

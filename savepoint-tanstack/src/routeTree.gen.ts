@@ -20,8 +20,11 @@ import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedJournalRouteImport } from './routes/_authed/journal'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as UUsernameFollowingRouteImport } from './routes/u.$username.following'
+import { Route as UUsernameFollowersRouteImport } from './routes/u.$username.followers'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
+import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -77,6 +80,16 @@ const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
+const UUsernameFollowingRoute = UUsernameFollowingRouteImport.update({
+  id: '/following',
+  path: '/following',
+  getParentRoute: () => UUsernameRoute,
+} as any)
+const UUsernameFollowersRoute = UUsernameFollowersRouteImport.update({
+  id: '/followers',
+  path: '/followers',
+  getParentRoute: () => UUsernameRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -85,6 +98,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
   id: '/settings/profile',
   path: '/settings/profile',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSettingsAccountRoute = AuthedSettingsAccountRouteImport.update({
+  id: '/settings/account',
+  path: '/settings/account',
   getParentRoute: () => AuthedRoute,
 } as any)
 
@@ -98,9 +116,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
-  '/u/$username': typeof UUsernameRoute
+  '/u/$username': typeof UUsernameRouteWithChildren
+  '/settings/account': typeof AuthedSettingsAccountRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/u/$username/followers': typeof UUsernameFollowersRoute
+  '/u/$username/following': typeof UUsernameFollowingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,9 +133,12 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
-  '/u/$username': typeof UUsernameRoute
+  '/u/$username': typeof UUsernameRouteWithChildren
+  '/settings/account': typeof AuthedSettingsAccountRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/u/$username/followers': typeof UUsernameFollowersRoute
+  '/u/$username/following': typeof UUsernameFollowingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,9 +152,12 @@ export interface FileRoutesById {
   '/_authed/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
-  '/u/$username': typeof UUsernameRoute
+  '/u/$username': typeof UUsernameRouteWithChildren
+  '/_authed/settings/account': typeof AuthedSettingsAccountRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/u/$username/followers': typeof UUsernameFollowersRoute
+  '/u/$username/following': typeof UUsernameFollowingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,8 +172,11 @@ export interface FileRouteTypes {
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/u/$username'
+    | '/settings/account'
     | '/settings/profile'
     | '/api/auth/$'
+    | '/u/$username/followers'
+    | '/u/$username/following'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,8 +189,11 @@ export interface FileRouteTypes {
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/u/$username'
+    | '/settings/account'
     | '/settings/profile'
     | '/api/auth/$'
+    | '/u/$username/followers'
+    | '/u/$username/following'
   id:
     | '__root__'
     | '/'
@@ -174,8 +207,11 @@ export interface FileRouteTypes {
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/u/$username'
+    | '/_authed/settings/account'
     | '/_authed/settings/profile'
     | '/api/auth/$'
+    | '/u/$username/followers'
+    | '/u/$username/following'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -185,7 +221,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   DevIgdbSearchRoute: typeof DevIgdbSearchRoute
   GamesSlugRoute: typeof GamesSlugRoute
-  UUsernameRoute: typeof UUsernameRoute
+  UUsernameRoute: typeof UUsernameRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -268,6 +304,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/u/$username/following': {
+      id: '/u/$username/following'
+      path: '/following'
+      fullPath: '/u/$username/following'
+      preLoaderRoute: typeof UUsernameFollowingRouteImport
+      parentRoute: typeof UUsernameRoute
+    }
+    '/u/$username/followers': {
+      id: '/u/$username/followers'
+      path: '/followers'
+      fullPath: '/u/$username/followers'
+      preLoaderRoute: typeof UUsernameFollowersRouteImport
+      parentRoute: typeof UUsernameRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -282,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSettingsProfileRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/settings/account': {
+      id: '/_authed/settings/account'
+      path: '/settings/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof AuthedSettingsAccountRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -290,6 +347,7 @@ interface AuthedRouteChildren {
   AuthedJournalRoute: typeof AuthedJournalRoute
   AuthedLibraryRoute: typeof AuthedLibraryRoute
   AuthedProfileRoute: typeof AuthedProfileRoute
+  AuthedSettingsAccountRoute: typeof AuthedSettingsAccountRoute
   AuthedSettingsProfileRoute: typeof AuthedSettingsProfileRoute
 }
 
@@ -298,11 +356,26 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedJournalRoute: AuthedJournalRoute,
   AuthedLibraryRoute: AuthedLibraryRoute,
   AuthedProfileRoute: AuthedProfileRoute,
+  AuthedSettingsAccountRoute: AuthedSettingsAccountRoute,
   AuthedSettingsProfileRoute: AuthedSettingsProfileRoute,
 }
 
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
+
+interface UUsernameRouteChildren {
+  UUsernameFollowersRoute: typeof UUsernameFollowersRoute
+  UUsernameFollowingRoute: typeof UUsernameFollowingRoute
+}
+
+const UUsernameRouteChildren: UUsernameRouteChildren = {
+  UUsernameFollowersRoute: UUsernameFollowersRoute,
+  UUsernameFollowingRoute: UUsernameFollowingRoute,
+}
+
+const UUsernameRouteWithChildren = UUsernameRoute._addFileChildren(
+  UUsernameRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -311,7 +384,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   DevIgdbSearchRoute: DevIgdbSearchRoute,
   GamesSlugRoute: GamesSlugRoute,
-  UUsernameRoute: UUsernameRoute,
+  UUsernameRoute: UUsernameRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

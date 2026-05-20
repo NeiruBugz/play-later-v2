@@ -121,10 +121,7 @@ export function RelatedGamesInfiniteList({
             aria-live="polite"
             className="text-muted-foreground gap-sm py-md flex items-center justify-center text-sm"
           >
-            <Loader2
-              aria-hidden="true"
-              className="h-4 w-4 animate-spin"
-            />
+            <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
             <span>Loading more games</span>
           </div>
         ) : null}

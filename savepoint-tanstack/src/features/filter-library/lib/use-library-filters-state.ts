@@ -51,7 +51,15 @@ export function useLibraryFiltersState(
   ) => {
     navigate({
       to: ".",
-      search: { status, platform, minRating, unratedOnly, sortBy, sortOrder, ...patch },
+      search: {
+        status,
+        platform,
+        minRating,
+        unratedOnly,
+        sortBy,
+        sortOrder,
+        ...patch,
+      },
     });
   };
 

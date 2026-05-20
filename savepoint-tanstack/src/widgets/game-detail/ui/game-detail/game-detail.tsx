@@ -232,18 +232,12 @@ function OverviewBody({
         </dl>
 
         <TerminalLabel>{`// GENRES`}</TerminalLabel>
-        <p
-          aria-label="Genres"
-          className="text-muted-foreground text-sm"
-        >
+        <p aria-label="Genres" className="text-muted-foreground text-sm">
           {genres.length > 0 ? genres.join(" · ") : "—"}
         </p>
 
         <TerminalLabel>{`// PLATFORMS`}</TerminalLabel>
-        <p
-          aria-label="Platforms"
-          className="text-muted-foreground text-sm"
-        >
+        <p aria-label="Platforms" className="text-muted-foreground text-sm">
           {platforms.length > 0 ? platforms.join(" · ") : "—"}
         </p>
       </div>

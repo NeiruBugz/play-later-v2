@@ -6,11 +6,7 @@ import { RelatedGamesTabs } from "./related-games-tabs";
 import type { RelatedGamesTabsSection } from "./related-games-tabs.type";
 
 vi.mock("../related-games-infinite-list", () => ({
-  RelatedGamesInfiniteList: ({
-    collectionId,
-  }: {
-    collectionId: number;
-  }) => (
+  RelatedGamesInfiniteList: ({ collectionId }: { collectionId: number }) => (
     <div data-testid={`infinite-list-${collectionId}`}>
       list for {collectionId}
     </div>
@@ -41,8 +37,7 @@ const SECTION_B = makeSection(2, "Platformers");
 const elements = {
   getTab: (name: string) => screen.getByRole("tab", { name }),
   queryTab: (name: string) => screen.queryByRole("tab", { name }),
-  getActiveTabPanel: () =>
-    screen.getByRole("tabpanel", { hidden: false }),
+  getActiveTabPanel: () => screen.getByRole("tabpanel", { hidden: false }),
   getList: (collectionId: number) =>
     screen.getByTestId(`infinite-list-${collectionId}`),
   queryList: (collectionId: number) =>

@@ -86,10 +86,7 @@ export function DashboardQuickLogHero({
                         className="h-7 px-2 text-xs"
                         onClick={() => setSelectedGameId(game.id)}
                       >
-                        <Plus
-                          className="mr-1 h-3 w-3"
-                          aria-hidden="true"
-                        />
+                        <Plus className="mr-1 h-3 w-3" aria-hidden="true" />
                         Log Session
                       </Button>
                     </div>
@@ -102,8 +99,8 @@ export function DashboardQuickLogHero({
           <div className="text-muted-foreground flex items-center gap-4 text-sm">
             <BookOpen className="h-4 w-4" aria-hidden="true" />
             <p>
-              Nothing in progress. Start something from the shelf and
-              it&apos;ll show up here.
+              Nothing in progress. Start something from the shelf and it&apos;ll
+              show up here.
             </p>
           </div>
         )}

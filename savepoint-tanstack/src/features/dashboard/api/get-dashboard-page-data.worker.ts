@@ -1,11 +1,12 @@
+import { getLibraryStats } from "@/entities/library-item/api/get-library-stats.server";
 import {
   getLibrary,
   type LibraryItemWithGame,
 } from "@/entities/library-item/api/get-library.server";
-import { getLibraryStats } from "@/entities/library-item/api/get-library-stats.server";
 import { getProfileById } from "@/entities/profile/api/get-profile.server";
-import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
 import { UnauthorizedError } from "@/shared/lib/errors";
+
+import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
 
 const QUICK_LOG_LIMIT = 3;
 const CONTINUE_PLAYING_LIMIT = 3;

@@ -284,7 +284,10 @@ describe("LibraryFilters", () => {
     it("calls navigate with sortBy=title and sortOrder=asc", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ sortBy: "title", sortOrder: "asc" }),
+          search: expect.objectContaining({
+            sortBy: "title",
+            sortOrder: "asc",
+          }),
         })
       );
     });

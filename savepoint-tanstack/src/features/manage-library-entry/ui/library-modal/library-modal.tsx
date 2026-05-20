@@ -1,5 +1,5 @@
-import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
+import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {

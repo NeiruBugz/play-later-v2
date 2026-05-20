@@ -2,6 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { getLibrary, type GetLibraryResult } from "@/entities/library-item/api";
+import {
+  getOnboardingSignals,
+  type OnboardingSignals,
+} from "@/entities/profile/api";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 const libraryStatusSchema = z.enum([
@@ -25,10 +29,18 @@ const inputSchema = z.object({
 
 export type GetLibraryPageDataInput = z.infer<typeof inputSchema>;
 
+export type GetLibraryPageDataResult = GetLibraryResult & {
+  onboarding: OnboardingSignals;
+};
+
 export const getLibraryPageDataFn = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => inputSchema.parse(input))
-  .handler(async ({ data }): Promise<GetLibraryResult> => {
+  .handler(async ({ data }): Promise<GetLibraryPageDataResult> => {
     const filters = inputSchema.parse(data);
     const userId = await requireUserId();
-    return getLibrary(userId, filters);
+    const [library, onboarding] = await Promise.all([
+      getLibrary(userId, filters),
+      getOnboardingSignals(userId),
+    ]);
+    return { ...library, onboarding };
   });

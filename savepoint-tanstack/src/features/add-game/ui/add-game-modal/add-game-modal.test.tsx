@@ -151,7 +151,9 @@ describe("AddGameModal", () => {
       await waitFor(() => {
         expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
       });
-      expect(elements.queryGameButton("Hollow Knight: Silksong")).not.toBeNull();
+      expect(
+        elements.queryGameButton("Hollow Knight: Silksong")
+      ).not.toBeNull();
       expect(elements.queryLoadingText()).toBeNull();
       expect(elements.queryNoResults()).toBeNull();
     });
@@ -222,7 +224,9 @@ describe("AddGameModal", () => {
 
     it("fires toast.success and calls router.invalidate on success", async () => {
       await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Added to library");
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
+          "Added to library"
+        );
       });
       expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
       expect(mockRouterInvalidate).toHaveBeenCalledOnce();

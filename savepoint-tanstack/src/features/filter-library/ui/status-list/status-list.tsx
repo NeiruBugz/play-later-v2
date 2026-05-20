@@ -1,8 +1,8 @@
 import {
   STATUS_ENTRIES,
   STATUS_FILTER_STYLES,
+  type LibraryStatus,
 } from "@/features/filter-library/lib";
-import type { LibraryStatus } from "@/features/filter-library/lib";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 

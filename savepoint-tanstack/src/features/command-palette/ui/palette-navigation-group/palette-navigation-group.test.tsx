@@ -53,12 +53,12 @@ describe("PaletteNavigationGroup", () => {
     });
 
     it("anchors each item at its registered route", () => {
-      expect(elements.getItem("Library").closest("a")?.getAttribute("href")).toBe(
-        "/library"
-      );
-      expect(elements.getItem("Settings").closest("a")?.getAttribute("href")).toBe(
-        "/settings/profile"
-      );
+      expect(
+        elements.getItem("Library").closest("a")?.getAttribute("href")
+      ).toBe("/library");
+      expect(
+        elements.getItem("Settings").closest("a")?.getAttribute("href")
+      ).toBe("/settings/profile");
     });
   });
 

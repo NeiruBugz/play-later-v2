@@ -14,12 +14,7 @@ import type { PaletteNavigationGroupProps } from "./palette-navigation-group.typ
 
 type NavigationItem = {
   label: string;
-  to:
-    | "/library"
-    | "/journal"
-    | "/profile"
-    | "/settings/profile"
-    | "/dashboard";
+  to: "/library" | "/journal" | "/profile" | "/settings/profile" | "/dashboard";
   icon: LucideIcon;
 };
 
@@ -58,7 +53,11 @@ export function PaletteNavigationGroup({
       {items.map((item) => {
         const Icon = item.icon;
         return (
-          <CommandItem key={item.to} value={`nav-${item.label}`} className="p-0">
+          <CommandItem
+            key={item.to}
+            value={`nav-${item.label}`}
+            className="p-0"
+          >
             <Link
               to={item.to}
               onClick={onAfterSelect}

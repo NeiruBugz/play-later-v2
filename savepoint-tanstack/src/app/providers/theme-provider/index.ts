@@ -1,7 +1,4 @@
-export {
-  SavepointThemeProvider,
-  useTheme,
-} from "./theme-provider";
+export { SavepointThemeProvider, useTheme } from "./theme-provider";
 export type {
   Theme,
   ResolvedTheme,

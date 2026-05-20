@@ -117,9 +117,7 @@ export function SavepointThemeProvider({
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (ctx === null) {
-    throw new Error(
-      "useTheme() must be used within <SavepointThemeProvider>."
-    );
+    throw new Error("useTheme() must be used within <SavepointThemeProvider>.");
   }
   return ctx;
 }

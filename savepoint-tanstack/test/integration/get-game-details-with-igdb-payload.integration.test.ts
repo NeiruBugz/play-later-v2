@@ -190,9 +190,9 @@ describe("getGameDetails — canonical dual-track contract", () => {
     it("throws NotFoundError when IGDB returns an empty array", async () => {
       vi.stubGlobal("fetch", makeFetchMock([]));
 
-      await expect(
-        getGameDetails({ slug: "no-such-slug" })
-      ).rejects.toThrow(/Game not found/);
+      await expect(getGameDetails({ slug: "no-such-slug" })).rejects.toThrow(
+        /Game not found/
+      );
     });
   });
 

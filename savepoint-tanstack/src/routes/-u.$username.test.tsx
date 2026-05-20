@@ -16,13 +16,48 @@ vi.mock("@/entities/session/api/get-current-user", () => ({
   getCurrentUserFn: vi.fn(),
 }));
 
-vi.mock("@/widgets/profile-overview", () => ({
-  ProfileOverview: ({ isOwnProfile }: { isOwnProfile?: boolean }) => (
+vi.mock("@/features/view-activity-feed/api", () => ({
+  getActivityFeedFn: vi.fn().mockResolvedValue({ items: [], nextCursor: null }),
+  getActivityForUserFn: vi
+    .fn()
+    .mockResolvedValue({ items: [], nextCursor: null }),
+}));
+
+vi.mock("@/features/follow-user", () => ({
+  FollowUserButton: () => (
+    <button data-testid="follow-button-mock">Follow</button>
+  ),
+}));
+
+vi.mock("@/features/unfollow-user", () => ({
+  UnfollowUserButton: () => (
+    <button data-testid="unfollow-button-mock">Unfollow</button>
+  ),
+}));
+
+vi.mock("@/widgets", () => ({
+  ProfileOverview: ({
+    isOwnProfile,
+    followerCount,
+    followingCount,
+    headerActions,
+  }: {
+    isOwnProfile?: boolean;
+    followerCount?: number;
+    followingCount?: number;
+    headerActions?: React.ReactNode;
+  }) => (
     <div
       data-testid="profile-overview-mock"
       data-is-own={String(!!isOwnProfile)}
-    />
+      data-follower-count={String(followerCount ?? "")}
+      data-following-count={String(followingCount ?? "")}
+    >
+      {headerActions}
+    </div>
   ),
+  ProfileActivityTab: () => <div data-testid="activity-tab-mock" />,
+  UserList: () => <div data-testid="user-list-mock" />,
 }));
 
 vi.mock("@tanstack/react-router", async () => ({
@@ -66,6 +101,10 @@ let mockLoaderData: {
     journalCount: number;
   };
   viewerId: string | null;
+  followerCount: number;
+  followingCount: number;
+  isFollowing: boolean | null;
+  activity: { items: never[]; nextCursor: null } | null;
 } = {
   profile: {
     id: "user-target",
@@ -76,6 +115,10 @@ let mockLoaderData: {
   },
   stats: { statusCounts: {}, recentGames: [], journalCount: 0 },
   viewerId: null,
+  followerCount: 0,
+  followingCount: 0,
+  isFollowing: null,
+  activity: null,
 };
 
 const invokeLoader = async (username: string) => {
@@ -94,6 +137,9 @@ describe("/u/$username route", () => {
       vi.mocked(getPublicProfilePageDataFn).mockResolvedValue({
         profile: mockLoaderData.profile,
         stats: mockLoaderData.stats,
+        followerCount: 0,
+        followingCount: 0,
+        isFollowing: null,
       } as never);
       vi.mocked(getCurrentUserFn).mockResolvedValue({ user: null } as never);
     });
@@ -109,6 +155,9 @@ describe("/u/$username route", () => {
       vi.mocked(getPublicProfilePageDataFn).mockResolvedValue({
         profile: mockLoaderData.profile,
         stats: mockLoaderData.stats,
+        followerCount: 0,
+        followingCount: 0,
+        isFollowing: null,
       } as never);
       vi.mocked(getCurrentUserFn).mockResolvedValue({
         user: { id: "user-target", name: "Target", image: null },
@@ -148,6 +197,10 @@ describe("/u/$username route", () => {
         },
         stats: { statusCounts: {}, recentGames: [], journalCount: 0 },
         viewerId: "user-target",
+        followerCount: 0,
+        followingCount: 0,
+        isFollowing: null,
+        activity: { items: [], nextCursor: null },
       };
       const Component = Route.options.component as ComponentType;
       render(<Component />);
@@ -158,6 +211,11 @@ describe("/u/$username route", () => {
         "data-is-own",
         "true"
       );
+    });
+
+    it("does not inject a follow/unfollow CTA into the header on own-profile", () => {
+      expect(screen.queryByTestId("follow-button-mock")).toBeNull();
+      expect(screen.queryByTestId("unfollow-button-mock")).toBeNull();
     });
   });
 
@@ -173,6 +231,10 @@ describe("/u/$username route", () => {
         },
         stats: { statusCounts: {}, recentGames: [], journalCount: 0 },
         viewerId: null,
+        followerCount: 0,
+        followingCount: 0,
+        isFollowing: null,
+        activity: null,
       };
       const Component = Route.options.component as ComponentType;
       render(<Component />);
@@ -183,6 +245,71 @@ describe("/u/$username route", () => {
         "data-is-own",
         "false"
       );
+    });
+
+    it("does not inject a follow/unfollow CTA for anonymous viewers", () => {
+      expect(screen.queryByTestId("follow-button-mock")).toBeNull();
+      expect(screen.queryByTestId("unfollow-button-mock")).toBeNull();
+    });
+  });
+
+  describe("given a signed-in non-owner viewer who is not following", () => {
+    beforeEach(() => {
+      mockLoaderData = {
+        profile: {
+          id: "user-target",
+          username: "targetuser",
+          name: "Target",
+          image: null,
+          isPublicProfile: true,
+        },
+        stats: { statusCounts: {}, recentGames: [], journalCount: 0 },
+        viewerId: "user-viewer",
+        followerCount: 3,
+        followingCount: 5,
+        isFollowing: false,
+        activity: { items: [], nextCursor: null },
+      };
+      const Component = Route.options.component as ComponentType;
+      render(<Component />);
+    });
+
+    it("injects the Follow button into the header", () => {
+      expect(screen.queryByTestId("follow-button-mock")).not.toBeNull();
+      expect(screen.queryByTestId("unfollow-button-mock")).toBeNull();
+    });
+
+    it("passes the follower / following counts to the widget", () => {
+      const widget = screen.getByTestId("profile-overview-mock");
+      expect(widget).toHaveAttribute("data-follower-count", "3");
+      expect(widget).toHaveAttribute("data-following-count", "5");
+    });
+  });
+
+  describe("given a signed-in non-owner viewer who is already following", () => {
+    beforeEach(() => {
+      mockLoaderData = {
+        profile: {
+          id: "user-target",
+          username: "targetuser",
+          name: "Target",
+          image: null,
+          isPublicProfile: true,
+        },
+        stats: { statusCounts: {}, recentGames: [], journalCount: 0 },
+        viewerId: "user-viewer",
+        followerCount: 3,
+        followingCount: 5,
+        isFollowing: true,
+        activity: { items: [], nextCursor: null },
+      };
+      const Component = Route.options.component as ComponentType;
+      render(<Component />);
+    });
+
+    it("injects the Unfollow button into the header", () => {
+      expect(screen.queryByTestId("unfollow-button-mock")).not.toBeNull();
+      expect(screen.queryByTestId("follow-button-mock")).toBeNull();
     });
   });
 });

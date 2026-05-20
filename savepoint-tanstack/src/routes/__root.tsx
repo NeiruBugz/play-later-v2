@@ -10,10 +10,13 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 
 import { ErrorBoundary } from "@/app";
+
 import "@/app/dev-console-error-expander";
+
 import { SavepointThemeProvider } from "@/app/providers/theme-provider";
 import { getCurrentUserFn } from "@/entities/session/api";
 import { CommandPalette } from "@/features/command-palette";
+import { WhatsNewModal } from "@/features/whats-new";
 import { Toaster } from "@/shared/ui/sonner";
 import { AppBottomNav } from "@/widgets/app-bottom-nav";
 import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
@@ -88,26 +91,27 @@ export function RootShell() {
   return (
     <QueryClientProvider client={queryClient}>
       <SavepointThemeProvider defaultTheme="system">
-      <AppShell
-        sidebar={user ? <AppSidebar user={user} /> : undefined}
-        mobileTopbar={user ? <AppMobileTopbar /> : undefined}
-        mobileBottomNav={user ? <AppBottomNav /> : undefined}
-      >
-        <Outlet />
-      </AppShell>
-      {user ? <CommandPalette /> : null}
-      <Toaster />
-      <TanStackDevtools
-        config={{
-          position: "bottom-right",
-        }}
-        plugins={[
-          {
-            name: "Tanstack Router",
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-        ]}
-      />
+        <AppShell
+          sidebar={user ? <AppSidebar user={user} /> : undefined}
+          mobileTopbar={user ? <AppMobileTopbar /> : undefined}
+          mobileBottomNav={user ? <AppBottomNav /> : undefined}
+        >
+          <Outlet />
+        </AppShell>
+        {user ? <CommandPalette /> : null}
+        {user ? <WhatsNewModal /> : null}
+        <Toaster />
+        <TanStackDevtools
+          config={{
+            position: "bottom-right",
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
       </SavepointThemeProvider>
     </QueryClientProvider>
   );

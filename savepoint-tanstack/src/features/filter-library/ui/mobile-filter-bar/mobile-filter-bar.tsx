@@ -5,8 +5,8 @@ import {
   DEFAULT_PLATFORMS,
   STATUS_ENTRIES,
   useLibraryFiltersState,
+  type LibraryStatus,
 } from "@/features/filter-library/lib";
-import type { LibraryStatus } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
 import {
   Sheet,
@@ -150,7 +150,9 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => onClearAll({ onAfterClear: () => setSheetOpen(false) })}
+              onClick={() =>
+                onClearAll({ onAfterClear: () => setSheetOpen(false) })
+              }
               aria-label="Clear all filters"
               className="w-full"
             >

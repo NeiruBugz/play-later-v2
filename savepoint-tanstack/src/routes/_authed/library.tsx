@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authed/library")({
 });
 
 function LibraryRoute() {
-  const { items, total } = Route.useLoaderData();
+  const { items, total, onboarding } = Route.useLoaderData();
   const search = Route.useSearch();
 
   return (
@@ -45,6 +45,12 @@ function LibraryRoute() {
       unratedOnly={search.unratedOnly}
       sortBy={search.sortBy ?? "updatedAt"}
       sortOrder={search.sortOrder ?? "desc"}
+      onboarding={{
+        libraryItemCount: total,
+        journalEntryCount: onboarding.journalEntryCount,
+        userImage: onboarding.image,
+        userSteamId: onboarding.steamId64,
+      }}
     />
   );
 }

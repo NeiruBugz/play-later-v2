@@ -3,7 +3,11 @@ import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./collapsible";
 
 const elements = {
   getTrigger: () => screen.getByRole("button", { name: "Toggle section" }),
@@ -22,7 +26,11 @@ const actions = {
   },
 };
 
-function UncontrolledHarness({ defaultOpen = false }: { defaultOpen?: boolean }) {
+function UncontrolledHarness({
+  defaultOpen = false,
+}: {
+  defaultOpen?: boolean;
+}) {
   return (
     <Collapsible defaultOpen={defaultOpen}>
       <CollapsibleTrigger>Toggle section</CollapsibleTrigger>

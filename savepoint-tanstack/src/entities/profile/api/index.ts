@@ -5,3 +5,7 @@ export {
   type UpdateProfileInput,
 } from "./update-profile.server";
 export { getUsernameAvailability } from "./get-username-availability.server";
+export {
+  getOnboardingSignals,
+  type OnboardingSignals,
+} from "./get-onboarding-signals.server";

@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
-import { cn } from "@/shared/lib/utils";
 // Widget-to-widget import: dashboard-page extends library-item-card's display
 // shape (the section IS a grid of those cards). Documented in DIVERGENCES.md
 // alongside the library-page → library-item-card carve-out.

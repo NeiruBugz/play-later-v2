@@ -82,6 +82,22 @@ Scope: slices 0–6. Both apps now bind to `:6060` — verification is **swap-an
 
 No findings block Slice 7. Items marked ❌ are intentional architectural / scope pivots, not regressions.
 
+## Intentional divergences (Slice 20 — social CTA wiring + feedback)
+
+> Lines 405–408 of `context/spec/021-migrate-to-tanstack-start/tasks.md`. Builds on the Slice 20 entity/server-fn floor (`isFollowing`, `countFollowers`, `countFollowing`, `getActivityFeedForViewer`, `getActivityForUser`, `listFollowers/listFollowingFn`).
+
+- **`<UserList variant="followers|following"/>` collapsed from the canonical three-file split.** Canonical ships `features/social/ui/{followers-list,following-list,user-list-item}.tsx` as three distinct components. The tanstack port collapses them into a single `widgets/user-list/ui/user-list/` widget with a `variant` discriminator. **Why:** the canonical split was duplicative — both lists rendered identical row markup and only diverged in the section heading + empty-state copy, which a discriminator handles cleanly. Per locked decision in spec 021 slice 20. The widget lives under `widgets/` (not `features/social/ui/`) because it has no mutations — it's pure display composition over the `PublicUserRef` entity shape.
+
+- **Activity tab is Radix client-tab state, not a file-based sub-route.** Canonical mounts `app/u/[username]/(tabs)/activity` as a route group. The tanstack port keeps the existing `<Tabs/>` Radix client state inside `ProfileOverview` (Overview / Library / Activity) and threads the activity content in via a new `activitySlot?: ReactNode` prop on the widget. **Why:** the canonical route-group behaves like client tabs from the user's POV (same URL while switching), and the tanstack `ProfileOverview` already owned the tabs primitive (no new route file needed). Followers / following each keep their own file-based sub-route (`u.$username.followers.tsx`, `u.$username.following.tsx`) because they are full pages with their own loaders.
+
+- **Anonymous viewers: Activity tab HIDDEN, not disabled.** Locked decision per spec — the tab trigger and content are conditionally rendered off when `viewerId === null`. Simpler than a disabled-with-tooltip affordance. Anonymous viewers still see Overview + Library tabs.
+
+- **`getActivityForUserFn` introduced as an anonymous-allowed sibling to `getActivityFeedFn`.** The entity-layer query `getActivityForUser` already existed (Slice 20 entity floor) but had no server-fn wrapper because the canonical app composes the per-user feed inside a server component. The tanstack route loader needs a client-importable surface to feed `ProfileActivityTab.loadMore` callbacks, so the wrapper ships now. Anonymous-allowed (no `requireUserId`) — the route layer gates access via `getPublicProfile`'s privacy invariant.
+
+- **`ProfileOverview` extended with three new slot/data props instead of a feature import.** New props: `followerCount`, `followingCount`, `headerActions?: ReactNode`, `activitySlot?: ReactNode`, `hideActivityTab?: boolean`. The route owns the Follow/Unfollow decision and injects the resulting feature button through `headerActions`. **Why:** keeps the widget free of cross-feature imports — `ProfileOverview` already imports `features/upload-avatar` for the own-profile case, and growing that list to also include `follow-user` / `unfollow-user` would couple the widget to every social CTA. The slot pattern mirrors Slice 6's `avatarOverlay` precedent on `ProfileHeader`.
+
+- **Feedback toasts (line 408) live inside `FollowUserButton` / `UnfollowUserButton`.** The component that fires the mutation owns the full cycle (call → success-toast → `router.invalidate()` OR error-toast). Mirrors the slice-10 `AddGameModal` and slice-11 `LibraryModal` precedents. Locked toast strings: `"Following @${username}"` / `"Unfollowed @${username}"` on success; `toast.error(err.message)` on rejection (fallback `"Could not update follow status"` for non-`Error` throws). Self-follow has no rejection toast because the button is hidden via the own-profile branch — no click path exists. No toast on activity-tab read failures (it's a read, not a mutation — surface inline `<EmptyState/>` instead; not yet wired, deferred to a polish pass).
+
 ## Intentional divergences (LibraryItemCard widget move + GameCard composition — post-Slice 14A)
 
 `LibraryItemCard` was relocated from `entities/library-item/ui/library-item-card/` to `widgets/library-item-card/` and rewritten to compose on top of `widgets/game-card`. The entity-layer placement (slice 13 decision) predated the existence of any compound card widget; once `GameCard` landed, keeping `LibraryItemCard` in the entity layer would have made the FSD rule (`entities` may not import `widgets`) block the consolidation we wanted.
@@ -746,9 +762,9 @@ gaps in the ported component:
   `CommandItem`, `CommandEmpty`, `CommandSeparator`, `CommandDialog`,
   `CommandShortcut`). `cmdk` pinned at `1.1.1` to match canonical.
 - **`ui/game-result-item/`** — cover (`buildCoverImageUrl(id,
-  "t_cover_small")`) + name + release year, wrapped in
+"t_cover_small")`) + name + release year, wrapped in
   `<Link to="/games/$slug">`. Canonical's `showAddHint`/`+ Add to Up
-  Next` badge is omitted until quick-add lands.
+Next` badge is omitted until quick-add lands.
 - **`ui/palette-navigation-group/`** — 5 jump targets. Settings points
   at `/settings/profile` because tanstack has no `/settings` index
   route registered today; swap when the settings shell lands.
@@ -770,11 +786,11 @@ gaps in the ported component:
   future public chrome.
 - `useCommandPalette` hook owns the open state, the global ⌘K / Ctrl+K
   listener (matching canonical's `metaKey || ctrlKey` + `preventDefault`
-  + toggle), and a custom-event channel
-  (`savepoint:command-palette:open`) that the desktop sidebar and
-  mobile topbar search-trigger buttons fire via `openCommandPalette()`.
-  Event-channel chosen over context provider so widgets don't depend on
-  a feature's runtime — keeps the FSD direction clean.
+  - toggle), and a custom-event channel
+    (`savepoint:command-palette:open`) that the desktop sidebar and
+    mobile topbar search-trigger buttons fire via `openCommandPalette()`.
+    Event-channel chosen over context provider so widgets don't depend on
+    a feature's runtime — keeps the FSD direction clean.
 - Debounce is imperative (timer in `useRef`, fetch fires directly
   inside the timer callback) rather than `useDebouncedValue` →
   effect-driven. Reason: the test contract asserts `searchGamesFn`
@@ -808,7 +824,6 @@ gaps in the ported component:
 - `palette-quick-actions-group.test.tsx` — both items render,
   focus-search and new-journal-entry callbacks fire, substring filter,
   no-match returns `null`.
-
 
 ## Slice 18 — Shared UI primitive backfill (audit 2026-05-19)
 
@@ -887,13 +902,12 @@ Slice 18:
 
 - **`empty-state.icon`** — typed as `LucideIcon | ReactNode`, but the
   render branches only on the LucideIcon shape (`typeof icon ===
-  "function"`); a raw `ReactNode` (e.g. an `<img>`) is currently
+"function"`); a raw `ReactNode` (e.g. an `<img>`) is currently
   rendered as `null` inside an `aria-hidden` wrapper. Parity with
   canonical, which has the identical narrowing. Documented here so a
   future consumer who passes a raw element knows to either wrap it in
   a LucideIcon-shaped functional component or extend the primitive's
   render branch.
-
 
 ## Slice 19 — Hand-rolled theme provider
 
@@ -965,3 +979,101 @@ Deliberate improvement, not a parity bug.
 **No new dependencies.** Zero-dep — `next-themes` was never installed in
 `savepoint-tanstack`. The canonical app's `package.json` still depends on it.
 `@radix-ui/react-dropdown-menu` was already in the tanstack shadcn/ui set.
+
+## Slice 20 — what's-new modal
+
+Three deliberate simplifications versus
+`savepoint-app/features/whats-new/`:
+
+**Single-version dismiss model.** Canonical stores a JSON list of
+seen announcement IDs under `savepoint:seen-announcements` and dismisses
+one entry at a time. Tanstack instead stores a single string
+`CURRENT_VERSION` under `whatsNewLastSeenVersion`. The modal opens iff
+the stored value differs from the constant in `config.ts`. Bumping
+`CURRENT_VERSION` re-shows the modal to every user once — coarser than
+per-announcement granularity, but adequate for the release cadence and
+keeps the dismiss contract (one button → one write → close) trivially
+testable. Storage key value is locked at `"whatsNewLastSeenVersion"`.
+
+**No multi-step pagination.** Canonical paginates announcements with
+Next / Dismiss-all buttons. Tanstack renders the full active list in a
+single dialog with one "Got it" dismiss button. The first announcement
+keeps the canonical hero treatment (icon + title + description + CTA);
+additional announcements render as compact list rows below.
+
+**No 1-second open delay.** Canonical's `useWhatsNew` installs a
+`setTimeout(..., 1000)` before flipping `isOpen` to true. Tanstack flips
+synchronously inside `useEffect` on mount. This keeps the component
+test (`whats-new-modal.test.tsx`) free of timer choreography and matches
+the test contract authored in the RED step (`drainTimers()` becomes a
+no-op but stays present for forward compatibility if a delay is added
+later).
+
+**Mount point.** `RootShell` in
+[`__root.tsx`](./src/routes/__root.tsx) renders `<WhatsNewModal />`
+next to `<CommandPalette />`, both gated on `user` truthiness so the
+modal never appears for anonymous visitors.
+
+**No new dependencies.** All primitives (`Dialog`, `Button`, `Badge`)
+shipped in Slice 18.
+
+## Slice 20 — onboarding-first-time
+
+First-time `/library` onboarding port. Three deliberate simplifications
+versus `savepoint-app/features/onboarding/`:
+
+**Collapsed `onboarding-step.tsx` inline.** Canonical splits a per-step
+row into its own component for a single callsite
+(`getting-started-checklist.tsx`). Tanstack's
+[`features/onboarding-first-time/ui/onboarding-checklist/onboarding-checklist.tsx`](./src/features/onboarding-first-time/ui/onboarding-checklist/onboarding-checklist.tsx)
+renders the 4 rows inline. No abstraction value at one consumer; lifting
+it back out is a 10-line edit if a second callsite appears.
+
+**Client-only progress signal, no DAL `OnboardingService`.** Canonical
+computes step completion server-side via
+`data-access-layer/services/onboarding/onboarding-service.ts` and ships
+an `OnboardingProgress` view-model. Tanstack derives step state directly
+from 4 prop primitives (`libraryItemCount`, `journalEntryCount`,
+`userImage`, `userSteamId`) plus two localStorage flags
+(`onboardingSteamDismissed`, `onboardingComplete`). Rationale: the spec
+021 DAL is the C2 two-layer pattern (no service classes), and the
+onboarding "service" was a thin orchestrator that only counted rows.
+Folding the counts into the existing library loader is cheaper than
+porting the service shell.
+
+**`/library`-only surface, dropped the dashboard CTAs.** Canonical's
+`empty-library-hero` carries Steam-import and game-search CTAs and a
+`variant="library" | "dashboard"` axis for use on both pages. Tanstack's
+[`empty-library-hero`](./src/features/onboarding-first-time/ui/empty-library-hero/empty-library-hero.tsx)
+ships the library variant only and drops the CTA buttons — the
+library-page widget already renders an `AddGameTrigger` FAB at the
+bottom-right which covers the "add a game" affordance. Steam-import +
+game-search CTAs return when those routes land in a later slice.
+
+**Loader extended, no new server fn.** Per the strict feature-server-fn
+rule, the existing `getLibraryPageDataFn` was extended to also fetch the
+3 onboarding signals via a new entity query at
+[`entities/profile/api/get-onboarding-signals.server.ts`](./src/entities/profile/api/get-onboarding-signals.server.ts).
+Result shape changed from `GetLibraryResult` to
+`GetLibraryResult & { onboarding: OnboardingSignals }`. One DB roundtrip
+(`Promise.all([getLibrary, getOnboardingSignals])`) covers both reads.
+
+**Hero falls back to generic `EmptyState` for filtered-empty.** The
+hero only mounts when `items.length === 0` (the whole library is empty,
+not just the current filter). Filtered empty still shows the Slice 18
+`EmptyState` so users see "No games match this filter" rather than the
+onboarding pitch.
+
+**SSR-safe localStorage reads.** Both `onboardingSteamDismissed` and
+`onboardingComplete` are guarded behind `typeof window === "undefined"`;
+the initial server render derives step state from props only, and the
+first client effect re-reads localStorage to flip step 4 + the all-done
+short-circuit.
+
+**No `dismissOnboarding` server action.** Canonical persists a global
+dismiss flag server-side via `dismissOnboarding`. Tanstack's checklist
+hides itself via the client-side `onboardingComplete` flag (set
+automatically when all 4 steps are done). A "I'll do it later" Steam
+dismiss button — and any explicit dismiss UI — is out of scope for this
+sub-task; the RED contract does not test it. Known-gap: add when
+Steam-import lands in a later slice.

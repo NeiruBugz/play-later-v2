@@ -50,7 +50,8 @@ const iconVariants = cva("shrink-0", {
 });
 
 export interface EmptyStateProps
-  extends Omit<ComponentPropsWithoutRef<"div">, "title">,
+  extends
+    Omit<ComponentPropsWithoutRef<"div">, "title">,
     VariantProps<typeof emptyStateVariants> {
   icon?: LucideIcon | ReactNode;
   iconProps?: VariantProps<typeof iconVariants>;
@@ -141,10 +142,7 @@ export function EmptyState({
         <div className="mt-md" role="group" aria-labelledby="empty-state-title">
           {action.to && !action.disabled ? (
             <Button asChild variant={action.variant} size={action.size}>
-              <Link
-                to={action.to}
-                search={action.search as never}
-              >
+              <Link to={action.to} search={action.search as never}>
                 {action.label}
               </Link>
             </Button>

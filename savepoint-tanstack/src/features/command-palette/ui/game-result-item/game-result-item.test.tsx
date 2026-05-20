@@ -36,7 +36,9 @@ const elements = {
   getRowByName: (name: string) => screen.getByText(name),
   queryYear: (year: string) => screen.queryByText(year),
   queryCover: () =>
-    document.querySelector('img[src*="images.igdb.com"]') as HTMLImageElement | null,
+    document.querySelector(
+      'img[src*="images.igdb.com"]'
+    ) as HTMLImageElement | null,
 };
 
 const GAME = {

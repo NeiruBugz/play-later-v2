@@ -215,7 +215,9 @@ describe("GameDetail", () => {
     beforeEach(() => {
       render(
         <GameDetail
-          data={buildData(null, { summary: "Custom summary copy for this game." })}
+          data={buildData(null, {
+            summary: "Custom summary copy for this game.",
+          })}
           viewerUserId={null}
         />
       );

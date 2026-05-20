@@ -3,7 +3,6 @@ import { EmptyState } from "@/shared/ui/empty-state";
 import { DashboardGameSection } from "../dashboard-game-section";
 import { DashboardQuickLogHero } from "../dashboard-quick-log-hero";
 import { DashboardStatsCard } from "../dashboard-stats-card";
-
 import type { DashboardPageProps } from "./dashboard-page.type";
 
 export function DashboardPage({ data }: DashboardPageProps) {

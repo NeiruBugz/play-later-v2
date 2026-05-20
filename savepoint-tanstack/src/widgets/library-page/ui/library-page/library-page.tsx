@@ -8,6 +8,7 @@ import {
   type LibraryStatusCounts,
 } from "@/features/filter-library";
 import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
+import { EmptyLibraryHero } from "@/features/onboarding-first-time";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
 import { LibraryItemCard } from "@/widgets/library-item-card";
@@ -47,6 +48,7 @@ export function LibraryPage(props: LibraryPageProps) {
     unratedOnly,
     sortBy,
     sortOrder,
+    onboarding,
   } = props;
 
   // Host owns modal state (canonical pattern). One modal mounted at the
@@ -139,15 +141,23 @@ export function LibraryPage(props: LibraryPageProps) {
 
         <div className="min-w-0 flex-1">
           {filteredItems.length === 0 ? (
-            <EmptyState
-              aria-label="Empty library"
-              title="No games yet"
-              description={
-                items.length === 0
-                  ? "Your library is empty. Import from Steam or add games manually to get started."
-                  : "No games match this filter."
-              }
-            />
+            // First-time hero only shows when the WHOLE library is empty
+            // (items.length === 0, not just the current filter). Filtered
+            // empty state still uses the generic EmptyState so users see
+            // "no matches" rather than the onboarding pitch.
+            onboarding && items.length === 0 ? (
+              <EmptyLibraryHero {...onboarding} />
+            ) : (
+              <EmptyState
+                aria-label="Empty library"
+                title="No games yet"
+                description={
+                  items.length === 0
+                    ? "Your library is empty. Import from Steam or add games manually to get started."
+                    : "No games match this filter."
+                }
+              />
+            )
           ) : (
             <ul
               aria-label="Library items"

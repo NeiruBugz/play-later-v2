@@ -6,7 +6,8 @@ import { EmptyState } from "./empty-state";
 
 const elements = {
   getHeading: () => screen.getByRole("heading", { name: "Nothing here yet" }),
-  queryHeading: () => screen.queryByRole("heading", { name: "Nothing here yet" }),
+  queryHeading: () =>
+    screen.queryByRole("heading", { name: "Nothing here yet" }),
   queryDescription: () => screen.queryByText("Your library is empty."),
   queryActionButton: () => screen.queryByRole("button", { name: "Add a game" }),
   getActionButton: () => screen.getByRole("button", { name: "Add a game" }),

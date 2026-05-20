@@ -43,7 +43,13 @@ function serializeError(err: Error): SerializedError {
     out.cause = cause instanceof Error ? serializeError(cause) : cause;
   }
   for (const key of Object.keys(err)) {
-    if (key === "name" || key === "message" || key === "stack" || key === "cause") continue;
+    if (
+      key === "name" ||
+      key === "message" ||
+      key === "stack" ||
+      key === "cause"
+    )
+      continue;
     out[key] = (err as unknown as Record<string, unknown>)[key];
   }
   return out;
@@ -66,8 +72,9 @@ if (
   !(window as unknown as { __dev_console_error_expander__?: true })
     .__dev_console_error_expander__
 ) {
-  (window as unknown as { __dev_console_error_expander__?: true }).__dev_console_error_expander__ =
-    true;
+  (
+    window as unknown as { __dev_console_error_expander__?: true }
+  ).__dev_console_error_expander__ = true;
   patch("error");
   patch("warn");
 }

@@ -1,10 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
+import { FollowUserButton } from "@/features/follow-user";
 import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
+import { UnfollowUserButton } from "@/features/unfollow-user";
+import {
+  getActivityFeedFn,
+  getActivityForUserFn,
+} from "@/features/view-activity-feed/api";
 import { NotFoundError } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
-import { ProfileOverview } from "@/widgets/profile-overview";
+import { ProfileActivityTab, ProfileOverview } from "@/widgets";
 
 /**
  * Public profile route.
@@ -15,10 +21,12 @@ import { ProfileOverview } from "@/widgets/profile-overview";
  * decide whether to show the owner-only "Edit Profile" / "Change avatar"
  * affordances.
  *
- * This route is intentionally NOT under `_authed/` — `/u/$username` mirrors
- * the canonical app's public-profile surface and must be reachable to
- * anonymous viewers. Privacy is enforced inside the entity query, not at
- * the route layer.
+ * Slice 20 additions:
+ *   - follower / following counts + isFollowing live on the page data.
+ *   - signed-in non-owner viewer sees a follow/unfollow CTA in the header.
+ *   - activity tab content is fetched server-side (per-user public stream
+ *     for other-users; viewer's own follow-graph feed for own-profile).
+ *   - anonymous viewers don't see the activity tab.
  */
 export const Route = createFileRoute("/u/$username")({
   loader: async ({ params }) => {
@@ -27,7 +35,19 @@ export const Route = createFileRoute("/u/$username")({
         getPublicProfilePageDataFn({ data: { username: params.username } }),
         getCurrentUserFn(),
       ]);
-      return { ...pageData, viewerId: viewer.user?.id ?? null };
+      const viewerId = viewer.user?.id ?? null;
+      const isOwnProfile =
+        viewerId !== null && viewerId === pageData.profile.id;
+
+      const activity = viewerId
+        ? isOwnProfile
+          ? await getActivityFeedFn({ data: {} })
+          : await getActivityForUserFn({
+              data: { targetUserId: pageData.profile.id },
+            })
+        : null;
+
+      return { ...pageData, viewerId, activity };
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw notFound();
@@ -40,8 +60,56 @@ export const Route = createFileRoute("/u/$username")({
 });
 
 function PublicProfilePage() {
-  const { profile, stats, viewerId } = Route.useLoaderData();
+  const {
+    profile,
+    stats,
+    viewerId,
+    followerCount,
+    followingCount,
+    isFollowing,
+    activity,
+  } = Route.useLoaderData();
   const isOwnProfile = viewerId != null && viewerId === profile.id;
+
+  // Decide which CTA to inject into the header. Anonymous viewers and the
+  // own-profile case → none (own-profile falls back to the widget's
+  // built-in "Edit Profile" button via the absence of `headerActions`).
+  let headerActions: React.ReactNode | undefined;
+  if (viewerId !== null && !isOwnProfile && profile.username) {
+    headerActions = isFollowing ? (
+      <UnfollowUserButton
+        profileUserId={profile.id}
+        profileUsername={profile.username}
+        viewerUserId={viewerId}
+        isFollowing={true}
+      />
+    ) : (
+      <FollowUserButton
+        profileUserId={profile.id}
+        profileUsername={profile.username}
+        viewerUserId={viewerId}
+        isFollowing={false}
+      />
+    );
+  }
+
+  // Activity tab content. The route owns the choice of loader (own vs
+  // per-user) and the "Load more" fetcher. Anonymous viewers don't see the
+  // tab at all (locked decision — hidden, not disabled).
+  const activitySlot =
+    activity !== null ? (
+      <ProfileActivityTab
+        initialItems={activity.items}
+        initialNextCursor={activity.nextCursor}
+        loadMore={async (cursor) =>
+          isOwnProfile
+            ? await getActivityFeedFn({ data: { cursor } })
+            : await getActivityForUserFn({
+                data: { targetUserId: profile.id, cursor },
+              })
+        }
+      />
+    ) : undefined;
 
   return (
     <main className="container mx-auto px-4 py-6">
@@ -49,6 +117,11 @@ function PublicProfilePage() {
         profile={profile}
         stats={stats}
         isOwnProfile={isOwnProfile}
+        followerCount={followerCount}
+        followingCount={followingCount}
+        headerActions={headerActions}
+        activitySlot={activitySlot}
+        hideActivityTab={viewerId === null}
       />
     </main>
   );

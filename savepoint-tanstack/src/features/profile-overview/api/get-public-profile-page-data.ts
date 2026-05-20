@@ -3,6 +3,11 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import {
+  countFollowers,
+  countFollowing,
+  isFollowing,
+} from "@/entities/follow/api";
+import {
   getLibraryStats,
   type LibraryStats,
 } from "@/entities/library-item/api";
@@ -17,6 +22,13 @@ const inputSchema = z.object({
 export type PublicProfilePageView = {
   profile: Profile;
   stats: LibraryStats;
+  followerCount: number;
+  followingCount: number;
+  /**
+   * Whether the signed-in viewer is currently following the profile owner.
+   * `null` for anonymous viewers (no follow relation possible).
+   */
+  isFollowing: boolean | null;
 };
 
 export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
@@ -25,6 +37,21 @@ export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
     const { username } = inputSchema.parse(data);
     const viewerId = await getServerUserId(getRequest());
     const profile = await getPublicProfile(username, viewerId ?? undefined);
-    const stats = await getLibraryStats(profile.id);
-    return { profile, stats };
+    const [stats, followerCount, followingCount, followingFlag] =
+      await Promise.all([
+        getLibraryStats(profile.id),
+        countFollowers(profile.id),
+        countFollowing(profile.id),
+        viewerId && viewerId !== profile.id
+          ? isFollowing(viewerId, profile.id)
+          : Promise.resolve(false),
+      ]);
+
+    return {
+      profile,
+      stats,
+      followerCount,
+      followingCount,
+      isFollowing: viewerId ? followingFlag : null,
+    };
   });
