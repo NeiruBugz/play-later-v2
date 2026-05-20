@@ -24,9 +24,14 @@
       "yaml": "2.8.3"
     },
     "onlyBuiltDependencies": [
-      "@prisma/engines",
       "@tailwindcss/oxide",
-      "@vercel/speed-insights"
+      "@vercel/speed-insights",
+      "esbuild",
+      "lightningcss",
+      "msw",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
     ]
   },
   "scripts": {}
