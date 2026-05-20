@@ -1,81 +1,80 @@
-import { useEffect, useState } from "react";
+import { Gamepad2, Monitor, Moon, Sparkles, Sun } from "lucide-react";
+import { type ComponentType } from "react";
 
-type ThemeMode = "light" | "dark" | "auto";
+import { useTheme } from "@/app/providers/theme-provider";
+import type { Theme } from "@/app/providers/theme-provider";
+import { Button } from "@/shared/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 
-function getInitialMode(): ThemeMode {
-  if (typeof window === "undefined") {
-    return "auto";
-  }
+// Theme value === CSS class name. Five user-selectable themes per canonical
+// (light/dark/cartridge/aurora/system). The .y2k and .jewel CSS variants in
+// styles.css are orphan — not reachable from this picker.
+const THEMES: ReadonlyArray<{
+  value: Theme;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+}> = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "cartridge", label: "Cartridge", icon: Gamepad2 },
+  { value: "aurora", label: "Aurora", icon: Sparkles },
+  { value: "system", label: "System", icon: Monitor },
+];
 
-  const stored = window.localStorage.getItem("theme");
-  if (stored === "light" || stored === "dark" || stored === "auto") {
-    return stored;
-  }
-
-  return "auto";
-}
-
-function applyThemeMode(mode: ThemeMode) {
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const resolved = mode === "auto" ? (prefersDark ? "dark" : "light") : mode;
-
-  document.documentElement.classList.remove("light", "dark");
-  document.documentElement.classList.add(resolved);
-
-  if (mode === "auto") {
-    document.documentElement.removeAttribute("data-theme");
-  } else {
-    document.documentElement.setAttribute("data-theme", mode);
-  }
-
-  document.documentElement.style.colorScheme = resolved;
+function getCurrentIcon(theme: Theme): ComponentType<{ className?: string }> {
+  // Default to Sun for the unmounted/SSR fallback; matches canonical behaviour.
+  const entry = THEMES.find((t) => t.value === theme);
+  return entry?.icon ?? Sun;
 }
 
 export function ThemeToggle() {
-  const [mode, setMode] = useState<ThemeMode>("auto");
+  const { theme, setTheme } = useTheme();
 
-  useEffect(() => {
-    const initialMode = getInitialMode();
-    setMode(initialMode);
-    applyThemeMode(initialMode);
-  }, []);
-
-  useEffect(() => {
-    if (mode !== "auto") {
-      return;
-    }
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => applyThemeMode("auto");
-
-    media.addEventListener("change", onChange);
-    return () => {
-      media.removeEventListener("change", onChange);
-    };
-  }, [mode]);
-
-  function toggleMode() {
-    const nextMode: ThemeMode =
-      mode === "light" ? "dark" : mode === "dark" ? "auto" : "light";
-    setMode(nextMode);
-    applyThemeMode(nextMode);
-    window.localStorage.setItem("theme", nextMode);
-  }
-
-  const label =
-    mode === "auto"
-      ? "Theme mode: auto (system). Click to switch to light mode."
-      : `Theme mode: ${mode}. Click to switch mode.`;
+  const CurrentIcon = getCurrentIcon(theme);
+  const currentLabel = THEMES.find((t) => t.value === theme)?.label ?? "Light";
 
   return (
-    <button
-      type="button"
-      onClick={toggleMode}
-      aria-label={label}
-      title={label}
-      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
-    >
-      {mode === "auto" ? "Auto" : mode === "dark" ? "Dark" : "Light"}
-    </button>
+    // Radix DropdownMenu provides roving-tabindex arrow-key navigation,
+    // Enter/Space activation, Escape close, and click-outside dismissal
+    // natively — no hand-rolled handlers needed. Deliberate improvement over
+    // canonical, which uses a flat <div role="menu"> with no roving tabindex.
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Change theme"
+          className="gap-2"
+        >
+          <CurrentIcon className="h-4 w-4" />
+          <span>{currentLabel}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        {THEMES.map(({ value, label, icon: Icon }) => {
+          const active = theme === value;
+          return (
+            <DropdownMenuItem
+              key={value}
+              aria-current={active ? "true" : undefined}
+              onSelect={() => setTheme(value)}
+              className={
+                active
+                  ? "bg-accent text-accent-foreground font-medium"
+                  : "text-muted-foreground"
+              }
+            >
+              <Icon className="h-4 w-4" />
+              <span>{label}</span>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

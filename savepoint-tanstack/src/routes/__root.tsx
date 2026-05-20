@@ -11,6 +11,7 @@ import { useState } from "react";
 
 import { ErrorBoundary } from "@/app";
 import "@/app/dev-console-error-expander";
+import { SavepointThemeProvider } from "@/app/providers/theme-provider";
 import { getCurrentUserFn } from "@/entities/session/api";
 import { CommandPalette } from "@/features/command-palette";
 import { Toaster } from "@/shared/ui/sonner";
@@ -21,7 +22,13 @@ import { AppSidebar } from "@/widgets/app-sidebar";
 
 import appCss from "../styles.css?url";
 
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
+// Pre-hydration theme script. Runs in <head> before React mounts to prevent
+// FOUC. Must stay in sync with the hand-rolled SavepointThemeProvider —
+// theme value === CSS class name: light→"", dark→"dark", cartridge→"cartridge",
+// aurora→"aurora", system→resolved via prefers-color-scheme. See
+// DIVERGENCES.md → Slice 19 for why this lives inline instead of inside
+// `next-themes`.
+const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var validThemes=['light','dark','cartridge','aurora','system'];var mode=validThemes.indexOf(stored)!==-1?stored:'system';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var classMap={light:'',dark:'dark',cartridge:'cartridge',aurora:'aurora'};var resolved=mode==='system'?(prefersDark?'dark':'light'):mode;var nextClass=classMap[resolved];var root=document.documentElement;root.classList.remove('dark','cartridge','aurora');if(nextClass){root.classList.add(nextClass)}if(mode==='system'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=(resolved==='dark')?'dark':'light';}catch(e){}})();`;
 
 export const Route = createRootRoute({
   head: () => ({
@@ -80,6 +87,7 @@ export function RootShell() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SavepointThemeProvider defaultTheme="system">
       <AppShell
         sidebar={user ? <AppSidebar user={user} /> : undefined}
         mobileTopbar={user ? <AppMobileTopbar /> : undefined}
@@ -100,6 +108,7 @@ export function RootShell() {
           },
         ]}
       />
+      </SavepointThemeProvider>
     </QueryClientProvider>
   );
 }

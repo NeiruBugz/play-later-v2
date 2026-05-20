@@ -893,3 +893,75 @@ Slice 18:
   future consumer who passes a raw element knows to either wrap it in
   a LucideIcon-shaped functional component or extend the primitive's
   render branch.
+
+
+## Slice 19 — Hand-rolled theme provider
+
+Spec 021 defaulted the theme provider to `next-themes@0.4.6` (matching the
+canonical Next.js app). For the TanStack Start shell we **went hand-roll
+instead** — a ~80 LOC, zero-dep `SavepointThemeProvider` lives at
+[`src/app/providers/theme-provider/`](./src/app/providers/theme-provider/).
+
+**Rationale.** `RootDocument` in [`src/routes/__root.tsx`](./src/routes/__root.tsx)
+already runs an inline pre-hydration script (`THEME_INIT_SCRIPT`) inside
+`<head>` to prevent FOUC. `next-themes` injects its **own** FOUC-prevention
+script via `dangerouslySetInnerHTML` from inside the React tree (under
+`<body>`), which runs **after** hydration and races with the `RootDocument`
+script — they fight over `<html>.className` and `data-theme`. In Next.js the
+equivalent surface is `<Script strategy="beforeInteractive">`, which Next
+places in `<head>`; TanStack Start has no such primitive, so the
+inline-in-`<head>` pattern is the only way to land the class before paint.
+
+**What the hand-roll does.**
+
+- Holds `theme: "light" | "dark" | "cartridge" | "aurora" | "system"` plus a
+  resolved variant (`"system"` → `"light"`/`"dark"` via `matchMedia`).
+- Persists to `localStorage` under the **same key `next-themes` uses by
+  default — `"theme"`** — so user preferences interop across `savepoint-app/`
+  and `savepoint-tanstack/` during the parallel-run window before S20 cutover.
+- On `setTheme`, imperatively updates `document.documentElement` (swaps
+  class, sets `data-theme`, sets `colorScheme`) mirroring the inline
+  pre-hydration script in `__root.tsx` exactly.
+- While the user is on `"system"`, listens to
+  `matchMedia("(prefers-color-scheme: dark)").addEventListener("change", …)`
+  so the OS preference flows through without a reload.
+- Mounted in `RootShell` (NOT in `RootDocument` — only the inline `<script>`
+  belongs there per the architect note).
+- `<html suppressHydrationWarning>` already in `RootDocument` covers the
+  pre-hydration-script-vs-React-tree class mismatch.
+
+**Theme value === CSS class name.** Picker exposes 5 user-selectable themes
+(`light` / `dark` / `cartridge` / `aurora` / `system`), each mapping to the
+same-named CSS class (`light` applies no class; `system` resolves to
+`light`/`dark`). This matches canonical: `savepoint-app/shared/providers/providers.tsx`
+passes `themes={["light","dark","cartridge","aurora","system"]}` to
+`next-themes` with **no `value` prop**, so `setTheme("cartridge")` applies
+the literal `.cartridge` class — defined at `savepoint-app/shared/globals.css:444`.
+Mapping is enforced in
+[`theme-provider.utility.ts`](./src/app/providers/theme-provider/theme-provider.utility.ts)
+(`THEME_CLASS_MAP`) and the extended inline `THEME_INIT_SCRIPT`.
+
+`globals.css` / `src/styles.css` also define `.y2k` and `.jewel` blocks;
+these are **orphan variants** — present in CSS, not reachable from any
+user-facing surface. Treat as dead until a code path adds them back. The
+prior Slice 19 entry incorrectly claimed `cartridge ↔ .y2k` was a
+"load-bearing indirection"; that was a stale spec line — corrected here.
+The `@custom-variant` declarations in [`src/styles.css`](./src/styles.css)
+still key on `.y2k`/`.jewel`, so no CSS changes were needed.
+
+**Pre-hydration script extended.** `THEME_INIT_SCRIPT` previously handled
+only `light` / `dark` / `auto`; it now handles all five spec themes
+(`light`, `dark`, `cartridge`, `aurora`, `system`) and uses the same
+`classMap` shape as the React-side provider so a divergence in mapping is a
+single-place edit.
+
+**Arrow-key navigation (improvement over canonical).** Canonical's picker is
+a hand-rolled `<div role="menu">` with `<button role="menuitem">` children
+and no roving-tabindex — arrow keys do not move focus between options.
+Tanstack swaps to Radix `<DropdownMenu>`, which provides arrow-key nav,
+Enter/Space activation, Escape close, and click-outside dismissal natively.
+Deliberate improvement, not a parity bug.
+
+**No new dependencies.** Zero-dep — `next-themes` was never installed in
+`savepoint-tanstack`. The canonical app's `package.json` still depends on it.
+`@radix-ui/react-dropdown-menu` was already in the tanstack shadcn/ui set.
