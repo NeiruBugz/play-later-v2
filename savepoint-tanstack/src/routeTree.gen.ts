@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as SteamCallbackRouteImport } from './routes/steam.callback'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
@@ -23,6 +24,7 @@ import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as UUsernameFollowingRouteImport } from './routes/u.$username.following'
 import { Route as UUsernameFollowersRouteImport } from './routes/u.$username.followers'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthedSteamGamesRouteImport } from './routes/_authed/steam/games'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
 import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
 
@@ -48,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SteamCallbackRoute = SteamCallbackRouteImport.update({
+  id: '/steam/callback',
+  path: '/steam/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesSlugRoute = GamesSlugRouteImport.update({
@@ -95,6 +102,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedSteamGamesRoute = AuthedSteamGamesRouteImport.update({
+  id: '/steam/games',
+  path: '/steam/games',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
   id: '/settings/profile',
   path: '/settings/profile',
@@ -116,9 +128,11 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
+  '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
   '/settings/account': typeof AuthedSettingsAccountRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
+  '/steam/games': typeof AuthedSteamGamesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/u/$username/followers': typeof UUsernameFollowersRoute
   '/u/$username/following': typeof UUsernameFollowingRoute
@@ -133,9 +147,11 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
+  '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
   '/settings/account': typeof AuthedSettingsAccountRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
+  '/steam/games': typeof AuthedSteamGamesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/u/$username/followers': typeof UUsernameFollowersRoute
   '/u/$username/following': typeof UUsernameFollowingRoute
@@ -152,9 +168,11 @@ export interface FileRoutesById {
   '/_authed/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
+  '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
   '/_authed/settings/account': typeof AuthedSettingsAccountRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
+  '/_authed/steam/games': typeof AuthedSteamGamesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/u/$username/followers': typeof UUsernameFollowersRoute
   '/u/$username/following': typeof UUsernameFollowingRoute
@@ -171,9 +189,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/dev/igdb-search'
     | '/games/$slug'
+    | '/steam/callback'
     | '/u/$username'
     | '/settings/account'
     | '/settings/profile'
+    | '/steam/games'
     | '/api/auth/$'
     | '/u/$username/followers'
     | '/u/$username/following'
@@ -188,9 +208,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/dev/igdb-search'
     | '/games/$slug'
+    | '/steam/callback'
     | '/u/$username'
     | '/settings/account'
     | '/settings/profile'
+    | '/steam/games'
     | '/api/auth/$'
     | '/u/$username/followers'
     | '/u/$username/following'
@@ -206,9 +228,11 @@ export interface FileRouteTypes {
     | '/_authed/profile'
     | '/dev/igdb-search'
     | '/games/$slug'
+    | '/steam/callback'
     | '/u/$username'
     | '/_authed/settings/account'
     | '/_authed/settings/profile'
+    | '/_authed/steam/games'
     | '/api/auth/$'
     | '/u/$username/followers'
     | '/u/$username/following'
@@ -221,6 +245,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   DevIgdbSearchRoute: typeof DevIgdbSearchRoute
   GamesSlugRoute: typeof GamesSlugRoute
+  SteamCallbackRoute: typeof SteamCallbackRoute
   UUsernameRoute: typeof UUsernameRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -260,6 +285,13 @@ declare module '@tanstack/react-router' {
       path: '/u/$username'
       fullPath: '/u/$username'
       preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/steam/callback': {
+      id: '/steam/callback'
+      path: '/steam/callback'
+      fullPath: '/steam/callback'
+      preLoaderRoute: typeof SteamCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/$slug': {
@@ -325,6 +357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/steam/games': {
+      id: '/_authed/steam/games'
+      path: '/steam/games'
+      fullPath: '/steam/games'
+      preLoaderRoute: typeof AuthedSteamGamesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/settings/profile': {
       id: '/_authed/settings/profile'
       path: '/settings/profile'
@@ -349,6 +388,7 @@ interface AuthedRouteChildren {
   AuthedProfileRoute: typeof AuthedProfileRoute
   AuthedSettingsAccountRoute: typeof AuthedSettingsAccountRoute
   AuthedSettingsProfileRoute: typeof AuthedSettingsProfileRoute
+  AuthedSteamGamesRoute: typeof AuthedSteamGamesRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -358,6 +398,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedProfileRoute: AuthedProfileRoute,
   AuthedSettingsAccountRoute: AuthedSettingsAccountRoute,
   AuthedSettingsProfileRoute: AuthedSettingsProfileRoute,
+  AuthedSteamGamesRoute: AuthedSteamGamesRoute,
 }
 
 const AuthedRouteWithChildren =
@@ -384,6 +425,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   DevIgdbSearchRoute: DevIgdbSearchRoute,
   GamesSlugRoute: GamesSlugRoute,
+  SteamCallbackRoute: SteamCallbackRoute,
   UUsernameRoute: UUsernameRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

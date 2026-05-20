@@ -12,17 +12,30 @@ vi.mock("@/features/auth-sign-out", () => ({
   ),
 }));
 
-vi.mock("@tanstack/react-router", async () => ({
-  ...(await vi.importActual<any>("@tanstack/react-router")),
-  createFileRoute: () => (opts: any) => ({
-    options: opts,
-  }),
-  Link: ({ to, href, children, ...rest }: any) => (
-    <a href={to ?? href} {...rest}>
-      {children}
-    </a>
+vi.mock("@/features/steam-connect", () => ({
+  SteamConnectCard: ({ steamId }: { steamId: string | null }) => (
+    <div data-testid="steam-connect-card-mock" data-steam-id={steamId ?? ""}>
+      Steam connect card mock
+    </div>
   ),
+  getSteamConnectionFn: vi.fn(),
 }));
+
+vi.mock("@tanstack/react-router", async () => {
+  const actual = await vi.importActual<any>("@tanstack/react-router");
+  return {
+    ...actual,
+    createFileRoute: () => (opts: any) => ({
+      options: opts,
+      useLoaderData: () => ({ steamId: null }),
+    }),
+    Link: ({ to, href, children, ...rest }: any) => (
+      <a href={to ?? href} {...rest}>
+        {children}
+      </a>
+    ),
+  };
+});
 
 const elements = {
   getHeading: () => screen.getByRole("heading", { name: "Account" }),

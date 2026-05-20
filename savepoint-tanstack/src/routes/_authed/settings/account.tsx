@@ -3,12 +3,19 @@ import { ArrowLeft } from "lucide-react";
 
 import { LogoutButton } from "@/features/auth-sign-out";
 import { SignOutCard } from "@/features/manage-account";
+import {
+  getSteamConnectionFn,
+  SteamConnectCard,
+} from "@/features/steam-connect";
 
 export const Route = createFileRoute("/_authed/settings/account")({
+  loader: () => getSteamConnectionFn(),
   component: SettingsAccountPage,
 });
 
 function SettingsAccountPage() {
+  const { steamId, connectUrl } = Route.useLoaderData();
+
   return (
     <main className="container mx-auto px-4 py-6">
       <Link
@@ -21,7 +28,10 @@ function SettingsAccountPage() {
 
       <h2 className="mb-6 text-2xl font-semibold">Account</h2>
 
-      <SignOutCard action={<LogoutButton />} />
+      <div className="space-y-6">
+        <SteamConnectCard steamId={steamId} connectUrl={connectUrl} />
+        <SignOutCard action={<LogoutButton />} />
+      </div>
     </main>
   );
 }

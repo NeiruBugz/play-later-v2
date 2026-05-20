@@ -37,7 +37,7 @@ export function useLibraryFiltersState(
   input: LibraryFiltersStateInput
 ): LibraryFiltersState {
   const { status, platform, minRating, unratedOnly, sortBy, sortOrder } = input;
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/library" });
 
   const updateSearch = (
     patch: Partial<{

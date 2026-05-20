@@ -25,7 +25,7 @@ export const ANNOUNCEMENTS: FeatureAnnouncement[] = [
     category: "integration",
     icon: Download,
     ctaLabel: "Connect Steam",
-    ctaUrl: "/settings/profile",
+    ctaUrl: "/settings/account",
     publishedAt: new Date("2025-01-20"),
   },
 ];

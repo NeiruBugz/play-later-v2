@@ -12,6 +12,8 @@ export {
 export { LandingHero } from "./landing-hero";
 export { LibraryPage } from "./library-page";
 export type { LibraryPageProps } from "./library-page";
+export { ImportedGamesPage } from "./imported-games-page";
+export type { ImportedGamesPageProps } from "./imported-games-page";
 export { ProfileActivityTab } from "./profile-activity-tab";
 export type { ProfileActivityTabProps } from "./profile-activity-tab";
 export { ProfileOverview } from "./profile-overview";

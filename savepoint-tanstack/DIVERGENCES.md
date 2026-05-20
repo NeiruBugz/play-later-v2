@@ -1077,3 +1077,224 @@ automatically when all 4 steps are done). A "I'll do it later" Steam
 dismiss button — and any explicit dismiss UI — is out of scope for this
 sub-task; the RED contract does not test it. Known-gap: add when
 Steam-import lands in a later slice.
+
+## Slice 21 Phase B — Steam connect/disconnect
+
+**OpenID flow only — no manual Steam-ID input.** Canonical's
+`SteamConnectCard` offers two parallel paths: the OpenID "Sign in with
+Steam" button AND a manual `<Input>` for entering a Steam ID / profile
+URL (via `react-hook-form` + `connectSteamSchema`). Tanstack ships the
+OpenID path only — the manual form, vanity-URL resolution, and the
+`Dialog`-based disconnect confirmation are deferred to a later phase if
+ever ported (the OpenID flow covers ≥95 % of canonical usage).
+
+**No success toast after Steam-connect.** Canonical fires
+`toast.success("Steam account connected successfully!")` on the
+post-redirect landing via a `?steam=connected` query-param round-trip
+consumed by a `useEffect` in `SteamConnectCard`. Tanstack drops the
+toast entirely — the visual flip of the card from "Connect Steam" →
+"Steam connected" after the loader re-reads `user.steamId64` IS the
+perceptible feedback. Rationale: cross-navigation toast plumbing adds
+query-param state + a clearing effect for minimal UX gain.
+
+**Static privacy hint via Slice 18 `Alert` primitive.** Connected-state
+card mounts an `Alert` with copy "If you don't see games shortly, check
+your Steam profile privacy settings." Canonical wires the live
+privacy-pending state to the player-summary fetch (`isSteamPrivacyError`
+branch); the live round-trip ships with Phase C/D when the import
+worker exists.
+
+**No disconnect confirmation dialog.** Canonical opens a `<Dialog>`
+explaining that imported games persist; tanstack's "Disconnect" button
+fires `disconnectSteamFn` immediately + toasts on resolve. Rationale:
+the operation is reversible (re-connect reinstates the Steam ID) and
+the imported-games table is not yet ported in tanstack, so the warning
+copy has no referent.
+
+**`disconnectSteamFn` takes an empty-object payload (`{ data: {} }`).**
+The fn has no semantic input — the authed session is the only signal.
+The empty `inputValidator` (`z.object({}).passthrough()`) exists purely
+to satisfy the typed call envelope locked by the component test.
+
+**`/steam/callback` is a public route.** Lives at
+`src/routes/steam.callback.tsx` (NOT under `_authed/`) because Steam
+redirects unauthenticated browsers here too if the session was lost
+mid-flow. `connectSteamFn`'s `requireUserId()` throws
+`UnauthorizedError`, surfaced inline via the route's `errorComponent`
+branching on `AppError.code`.
+
+**`getSteamConnectionFn` reuses `getOnboardingSignals`.** Rather than
+add a `steamId64`-only entity query (which would violate the
+"no specialized subset queries" rule), the new loader-only server fn
+wraps the existing onboarding-signals aggregate and projects the field.
+Wrapped in a `createServerFn` (not a direct `.server.ts` loader import)
+to dodge foot-gun #2.
+
+## Slice 21 Phase C — Library import worker + entity
+
+**No IGDB matching during import.** The slice spec mentions "matches via
+IGDB by name+platform (best-effort)" inside the import worker, but
+canonical (`savepoint-app/data-access-layer/handlers/steam-import/
+fetch-steam-games.handler.ts`) does NOT call IGDB at import time — every
+new row is written with `igdbMatchStatus: PENDING` and matching is
+deferred to downstream flows (the import-to-library use-case). Tanstack
+mirrors canonical: `importSteamLibraryWorker` performs Steam-fetch +
+upsert only, leaving rows in `PENDING`. Rationale: the import surface
+becomes batch-safe (no N IGDB rate-limit calls per import); Phase D's
+imported-games page is the natural place to surface a manual / on-demand
+match action.
+
+**Dismissal = `igdbMatchStatus: IGNORED`, NOT a `dismissed` boolean.**
+The schema (`prisma/schema.prisma:185`) does not declare a `dismissed`
+column on `ImportedGame`; canonical's `ImportedGameService.
+dismissImportedGame` (and our entity-level `dismissImportedGame`) sets
+`igdbMatchStatus: "IGNORED"` instead. The separate `IgnoredImportedGames`
+table (id, name, userId — `schema.prisma:178`) is a name-based blocklist
+("never re-surface a row matching this name"), not a per-row dismissal
+join. Phase C leaves `IgnoredImportedGames` untouched; Phase D may
+revisit it if the UI surfaces the blocklist.
+
+**`findImportedGamesForUser` excludes `IGNORED` by default.** Default
+read filters out dismissed rows + soft-deleted rows
+(`deletedAt: { equals: null }`). Pass `{ includeIgnored: true }` for a
+"show dismissed" toggle. Matches canonical's
+`findImportedGamesByUserId({ matchStatus: ["PENDING", "UNMATCHED"] })`
+shape.
+
+**Idempotency via `findFirst` + branch, not `upsert`.** The schema has
+no unique constraint on `(userId, storefront, storefrontGameId)` — only
+indexes. `upsertImportedGamesBatch` therefore prefetches existing rows
+(one `findMany` per batch), splits the payload into creates vs. updates,
+and runs the writes inside a single `$transaction`. Slower than a true
+upsert but correct given the schema. Existing rows preserve their
+`igdbMatchStatus` on update (a user who dismissed a game does NOT see it
+resurface after re-import).
+
+**`calculateSmartStatus` is a derive-on-demand utility.** Ported
+verbatim from `savepoint-app/features/steam-import/lib/
+calculate-smart-status.ts` to
+`src/features/steam-import/lib/calculate-smart-status.ts`. The schema
+has no `suggestedStatus` column, so the value is computed lazily by
+Phase D's UI when surfacing a row, not stored on `ImportedGame`. Pure
+function — argument shape is `{ playtime, lastPlayedAt }`, returns
+`LibraryItemStatus`.
+
+**Worker-split across all three feature server fns.**
+`import-steam-library`, `fetch-steam-games`, and `dismiss-imported-game`
+each ship as a `<name>.worker.ts` (server-runtime-free, integration-
+testable) + `<name>.ts` (`createServerFn` wrapper). Foot-gun #8.
+Integration tests drive the worker directly.
+
+**Steam errors bubble through the worker unchanged.**
+`SteamProfilePrivateError`, `SteamApiUnavailableError`,
+`SteamRateLimitError`, `SteamProfileNotFoundError` propagate from
+`fetchOwnedGames` straight to the route boundary — the worker does not
+catch or remap them. Routes branch on `instanceof` in the
+`errorComponent` for user-facing copy (Phase D).
+
+## Slice 21 Phase D — Imported-games page UI
+
+**`<ImportPathSelector/>` skipped.** Canonical exposes two surfaces for
+linking a Steam profile: an OpenID button and a manual SteamID input.
+Phase B locked the OpenID flow as the only path (vanity-URL resolution
+deferred). The corresponding `<ImportPathSelector/>` therefore has no
+referent in tanstack and is not ported. If a manual SteamID entry is
+ever needed, ship `ImportPathSelector` alongside the new surface.
+
+**`<IgdbManualSearch/>` is a stub.** Phase C did not ship an
+entity-layer `linkImportedGameToIgdb.server.ts` write, so the manual-
+search dialog renders the input + accepts a query, but the "Select"
+button fires `console.warn` and closes without persisting. Known gap —
+tracked for a follow-up slice.
+
+**Error-component branches on `err.name`, not `instanceof`.** TanStack
+Start serializes thrown errors across the server-fn RPC boundary; the
+client-side reconstructed value loses prototype chain identity, so
+`error instanceof SteamProfilePrivateError` returns `false` in the
+`errorComponent`. The 4 Steam error subclasses (Phase A) set a
+distinctive `name` string in their constructor, so the route branches
+on `err.name` — which survives serialization. Documented at
+`routes/_authed/steam/games.tsx`.
+
+**Bulk-add ships as a sequential per-row loop.** Locked decision 7 of
+the Phase D scope: there is no batched server fn. The widget iterates
+over selected MATCHED rows and fires `addGameToLibraryFn` for each. On
+partial failure, the toast reports `X/N succeeded`. Justified because
+the bulk surface is the natural seam to introduce batching later
+(single server fn touches the same entity write, no API change to
+consumers).
+
+**`storefrontGameId` is used as the IGDB id in bulk-add.** Canonical
+joins the imported-game row to a `Game` table to recover the matched
+`igdbId`. The tanstack mirror does NOT yet ship the joined read —
+`findImportedGamesForUser` returns the bare `ImportedGame` row. As a
+short-term measure the widget passes `Number(game.storefrontGameId)` to
+`addGameToLibraryFn`. This works only when the upstream IGDB id
+happens to equal the Steam appId (it usually does not). Tracked as a
+known gap to be unblocked when Phase E ships the joined fetch.
+
+**Dismissal has no confirmation prompt.** Per locked decision 11 — the
+operation is reversible via `?include=ignored` + Restore, so a modal
+confirmation is unnecessary friction. Canonical also lacks one.
+
+**`/steam/games` discoverability via SteamConnectCard.** Locked
+decision 10b: instead of adding a new sidebar entry, the connected
+variant of `SteamConnectCard` (`features/steam-connect`) now renders a
+"View imported games" link below the Disconnect button. Lighter touch
+than a sidebar entry; canonical exposes both — sidebar entry is a
+documented divergence skipped here.
+
+**`fetchSteamGamesFn` extended with optional input.** Phase C shipped
+the wrapper input-less; Phase D adds an optional
+`{ includeIgnored?: boolean }` Zod schema so the route loader can
+thread the `?include=ignored` search param through. Backward-compatible
+— callers passing no `data` still resolve to `includeIgnored: false`.
+
+**6 error-state cards co-located under `features/steam-import/ui/
+error-cards/`.** Named with the `-card` suffix
+(`steam-privacy-error-card`, etc.) to mark them as full surfaces, not
+inline `<Alert>` instances. The 5th surface is `generic-error-banner`;
+the 6th, `import-status-feedback`, is a set of sonner toast helpers
+(not a rendered card — canonical names it "ImportStatusToast" for
+parity).
+
+## Slice 21 Phase D — Filter / sort / search follow-up
+
+**URL search params, not local `useState`.** Canonical's
+`<ImportedGamesContainer/>` uses component-local React state for the
+filter / sort / search bar. The tanstack port stores all of it in the
+URL via `validateSearch` + `loaderDeps` (mirrors Slice 14A's library
+filters). Deep links and browser back/forward stay coherent for free;
+the route is the single source of truth.
+
+**In-Prisma filtering (not in-memory).** Phase D-follow-up extends
+`findImportedGamesForUser` with the same `playtimeStatus` /
+`playtimeRange` / `platform` / `lastPlayed` / `search` / `sortBy`
+clauses canonical pushes into Prisma `where` + `orderBy`. The route
+loader threads URL search params into `fetchSteamGamesFn` which threads
+them into the worker which threads them into the entity query — one
+filter implementation, server-side, indexed on `(userId, playtime)`
+(see schema). No in-memory pagination either; typical Steam libraries
+are <1000 rows and the full filtered list streams back.
+
+**`sortBy=last_played_*` puts NULL `lastPlayedAt` last.** Canonical
+relies on Postgres default `NULLS LAST` for `DESC`; the entity query
+sets `nulls: "last"` explicitly so `ASC` sorts also put never-played
+rows at the bottom, not the top.
+
+**Shipped vs. skipped (canonical parity).** All canonical filters
+ship: Sort (7 axes), Playtime Status, Playtime Range, Platform, Last
+Played, Search, "Show dismissed" toggle (canonical's "Show already
+imported" maps to the existing tanstack `?include=ignored` semantics —
+same toggle, different URL shape). Active-filter chip removal ships
+too; the chip removes the corresponding URL param via `useNavigate`.
+Nothing was skipped — the `ImportedGame` schema already carries
+`playtime`, `playtimeWindows`, `playtimeMac`, `playtimeLinux`, and
+`lastPlayedAt`, so every canonical filter has a referent.
+
+**No-matches empty state.** When filters are active and the server
+returns zero rows, the widget renders an `<EmptyState title="No
+matches">` with the filter bar still visible above it (so the user can
+refine without re-navigating). The onboarding empty states
+("Connect Steam" / "No games imported yet") only render when zero rows
+AND no active filters — locked decision 8 in the slice scope.
