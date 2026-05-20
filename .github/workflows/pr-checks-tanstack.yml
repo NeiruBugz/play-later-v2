@@ -42,6 +42,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # the step doesn't depend on tanstack-only PRs having DB secrets.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint-tanstack prisma:generate
 
       - name: Typecheck

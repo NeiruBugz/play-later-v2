@@ -26,6 +26,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # this step runs without exposing real secrets to jobs that only
+          # need generated types.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint prisma:generate
 
       - name: Check code formatting
@@ -52,6 +59,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # this step runs without exposing real secrets to jobs that only
+          # need generated types.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint prisma:generate
 
       - name: Run ESLint
@@ -78,6 +92,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # this step runs without exposing real secrets to jobs that only
+          # need generated types.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint prisma:generate
 
       - name: Generate Route typings
@@ -107,6 +128,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # this step runs without exposing real secrets to jobs that only
+          # need generated types.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint prisma:generate
 
       - name: Run tests
@@ -133,6 +161,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # this step runs without exposing real secrets to jobs that only
+          # need generated types.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint prisma:generate
 
       - name: Run tests
@@ -159,6 +194,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        env:
+          # prisma.config.ts requires a database URL at config-load time even
+          # for `prisma generate` (which never connects). Use a placeholder so
+          # this step runs without exposing real secrets to jobs that only
+          # need generated types.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint prisma:generate
 
       - name: Run tests
