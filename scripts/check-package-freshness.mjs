@@ -7,6 +7,48 @@
 // Defaults: --base origin/main --head HEAD --days 7
 
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ALLOWLIST_PATH = join(SCRIPT_DIR, "package-freshness-allowlist.json");
+
+function loadAllowlist() {
+  try {
+    const raw = readFileSync(ALLOWLIST_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    const today = new Date();
+    const active = [];
+    const expired = [];
+    for (const entry of parsed.entries ?? []) {
+      if (!entry?.name || !entry?.version || !entry?.expires || !entry?.reason) continue;
+      const expiresAt = new Date(entry.expires);
+      if (Number.isNaN(expiresAt.getTime())) continue;
+      if (expiresAt < today) expired.push(entry);
+      else active.push(entry);
+    }
+    return { active, expired };
+  } catch (err) {
+    if (err.code === "ENOENT") return { active: [], expired: [] };
+    console.warn(`! failed to read allowlist (${ALLOWLIST_PATH}): ${err.message}`);
+    return { active: [], expired: [] };
+  }
+}
+
+const ALLOWLIST = loadAllowlist();
+if (ALLOWLIST.expired.length > 0) {
+  console.warn(
+    `! ${ALLOWLIST.expired.length} freshness allowlist entr${ALLOWLIST.expired.length === 1 ? "y is" : "ies are"} past their expiry and will be ignored:`,
+  );
+  for (const entry of ALLOWLIST.expired) {
+    console.warn(`  - ${entry.name}@${entry.version} expired ${entry.expires}`);
+  }
+}
+
+function isAllowlisted(name, version) {
+  return ALLOWLIST.active.find((e) => e.name === name && e.version === version);
+}
 
 const args = Object.fromEntries(
   process.argv
@@ -129,6 +171,13 @@ async function main() {
         const ageMs = Date.now() - publishedAt;
         if (ageMs < MIN_AGE_MS) {
           const ageDays = (ageMs / (24 * 60 * 60 * 1000)).toFixed(1);
+          const waiver = isAllowlisted(name, version);
+          if (waiver) {
+            console.log(
+              `  ~ ${name}@${version} (${ageDays}d) — allowlisted until ${waiver.expires}: ${waiver.reason}`,
+            );
+            continue;
+          }
           violations.push({ path, name, version, ageDays, publishedAt });
         }
       } catch (err) {
@@ -155,7 +204,7 @@ async function main() {
   }
   console.error("");
   console.error(
-    "Either wait until the package ages past the quarantine, pin to an older version, or override with `--days <n>` after a documented risk review.",
+    "Either wait until the package ages past the quarantine, pin to an older version, override with `--days <n>` after a documented risk review, or add an entry to scripts/package-freshness-allowlist.json (with reason + expiry).",
   );
   process.exit(1);
 }
