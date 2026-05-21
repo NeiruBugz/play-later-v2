@@ -19,8 +19,10 @@ export const Route = createFileRoute("/_authed/profile")({
     const username = profile.username;
 
     if (!username) {
-      // Profile has no username yet — route to settings to finish setup.
-      throw redirect({ to: "/settings/profile" });
+      // Profile has no username yet — route to the first-run setup page.
+      // (Repointed from `/settings/profile` in Slice 23 / blocker
+      // remediation #2 for canonical parity with `/profile/setup`.)
+      throw redirect({ to: "/profile/setup" });
     }
 
     throw redirect({

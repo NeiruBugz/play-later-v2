@@ -89,7 +89,7 @@ describe("/_authed/profile redirect", () => {
   });
 
   describe("given the signed-in user has no username yet", () => {
-    it("redirects to /settings/profile so they can set one", async () => {
+    it("redirects to /profile/setup so they can set one", async () => {
       vi.mocked(getProfilePageDataFn).mockResolvedValue({
         profile: {
           id: "user-2",
@@ -106,7 +106,7 @@ describe("/_authed/profile redirect", () => {
       } as never);
 
       await expect(invokeBeforeLoad()).rejects.toMatchObject({
-        options: { to: "/settings/profile" },
+        options: { to: "/profile/setup" },
       });
     });
   });

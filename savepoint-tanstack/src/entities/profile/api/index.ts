@@ -9,3 +9,7 @@ export {
   getOnboardingSignals,
   type OnboardingSignals,
 } from "./get-onboarding-signals.server";
+export {
+  getProfileSetupStatus,
+  type ProfileSetupStatus,
+} from "./get-profile-setup-status.server";
