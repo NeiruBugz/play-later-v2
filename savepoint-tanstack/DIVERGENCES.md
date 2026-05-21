@@ -32,7 +32,9 @@ Scope: slices 0–6. Both apps now bind to `:6060` — verification is **swap-an
 ### Flow 2 — Own profile read (`/profile`)
 
 - ❌ **Intentional architectural pivot** (NOT a regression): canonical `/profile` is redirect-only (`/u/${username}` if set, `/profile/setup` otherwise); tanstack `/profile` renders the own-profile view inline via `<ProfileOverview/>`. Reviewers must not treat as parity break.
-- ⚠️ No `/profile/setup` onboarding route in tanstack. Out of scope for V1.
+- ✅ `/profile/setup` first-run onboarding route **BUILT in Slice 23 (blocker remediation #2)** — was previously deferred ("out of scope for V1"). The page mirrors canonical `app/(protected)/profile/setup/page.tsx`: loader reads setup status via `getProfileSetupStatusFn` (loader-safe `createServerFn` wrapping the new `getProfileSetupStatus` entity query, which mirrors `ProfileService.checkSetupStatus` — `needsSetup = !username || isNewUser`, short-circuited by `profileSetupCompletedAt`; `suggestedUsername` = slugified display name). `!needsSetup` redirects to `/dashboard`. The setup form (`widgets/profile-setup-page/`) pre-fills the suggested username, reuses `edit-profile`'s `UsernameInput` + persists via `updateProfileFn` (no parallel write path), includes `upload-avatar`'s `AvatarUpload`, and navigates to `/dashboard` on success.
+  - **`/profile` redirect repointed**: the no-username branch in `_authed/profile.tsx` now redirects to `/profile/setup` (was `/settings/profile`) for canonical parity. Its colocated test (`-_authed-profile.test.tsx`) was updated.
+  - **Deferred parity item**: the canonical "Skip for now" affordance is NOT ported. Canonical's skip sets `profileSetupCompletedAt`, a write tanstack's `updateProfile` does not yet expose; adding it would expand scope. Username-only setup is the critical path. Skip-at-setup remains a follow-up.
 - ✅ Auth guard via `_authed.tsx` → `requireUserIdOrRedirectFn`.
 - ✅ `getProfilePageDataFn` parallel-loads `getLibraryStats` + `getProfileById`.
 - ⚠️ Page `<title>` still shows starter placeholder; canonical sets `"Profile"`.
@@ -344,13 +346,15 @@ Scope: 14A's "GREEN (other in-scope hand-rolled surfaces)" subtask. Worklist dri
 Intentional divergences from `savepoint-app/features/journal/ui/journal-timeline.tsx`, all scoped to defer to Slice 16 (Journal entry CRUD) or later:
 
 - **Flat chronological list instead of grouped-by-game layout.** Canonical groups entries under per-game headers (with cover, entry count, link to `/games/$slug`). Slice 15 renders a flat `<article>` list ordered `updatedAt desc`. Rationale: grouping is structurally coupled to the compose flow (Slice 16); shipping it standalone risks duplicate work. Revisit when S16 lands.
-- **No empty-state "Log a session" CTA.** Canonical's empty state includes a `<Link to="/journal/new">` button. The `/journal/new` route does not exist on `:6061` yet (Slice 16 scope). Rendering a button to a 404 is worse than rendering no button. Restore in S16 when the compose route is wired.
+- **No empty-state "Log a session" CTA.** Canonical's empty state includes a `<Link to="/journal/new">` button. The `/journal/new` route does not exist on `:6061` yet (Slice 16 scope). Rendering a button to a 404 is worse than rendering no button. Restore in S16 when the compose route is wired. **(Slice 23 update: `/journal/new` now exists — see "Slice 23" section below. The empty-state CTA itself is still not wired; the header-row "Compose entry" link now navigates there instead.)**
 - **No cover image on entry cards.** `JOURNAL_ENTRY_GAME_SELECT` includes `coverImage`, but `JournalEntryCard` does not render it. Slice 15 contract focuses on text content + game-title link. Cover rendering can land alongside S16 without re-touching the entity-query shape.
 - **No pagination / `take` limit on `getJournalTimeline`.** Canonical fetches with `limit: 20` and offers Load More. Slice 15 fetches the full timeline. Acceptable for current journal sizes (no real user has >50 entries); revisit when S16 introduces compose-driven growth or if `:6061` rolls out to higher-volume users.
 - **No route-level `errorComponent` on `_authed/journal.tsx`.** Auth is already enforced upstream by `_authed.tsx`'s `beforeLoad`; `getJournalTimeline` returns `[]` rather than throwing for empty/missing-user/missing-game cases. The root `ErrorBoundary` is the last-resort fallback. Add a route-local error component if a future query path introduces a throw mode.
 - **Date display uses `toLocaleDateString` (absolute), not `formatRelativeDate` (relative) as in canonical.** `date-fns` is not yet a dependency of `savepoint-tanstack`. Adding it for one component is not justified pre-S16. Revisit when another surface needs richer date formatting.
 
 ## Slice 16 — Journal entry CRUD (compose / edit / delete dialogs)
+
+> **PARTIALLY SUPERSEDED by Slice 23 (blocker remediation #1).** The dialog-only pivot recorded here — building compose / detail / edit / delete as **dialogs** instead of canonical's full page routes — was reversed for the dedicated `/journal` surface. The three canonical page routes (`/journal/new`, `/journal/$id`, `/journal/$id/edit`) were RESTORED for true URL + UX parity (functional-spec §2.7). The dialog components themselves are unchanged and still power the quick-compose surfaces (game-detail, library-item-card, dashboard). See the "Slice 23" section below.
 
 Intentional divergences from `savepoint-app/features/journal/ui/`:
 
@@ -367,14 +371,50 @@ Intentional divergences from `savepoint-app/features/journal/ui/`:
 
 CTAs that open the compose / detail / edit / delete dialogs were wired into the composing widget layer to preserve the entity-layer display-only rule (`JournalEntryCard`, `JournalTeaser` are entities — they cannot import features per FSD).
 
-- **New widget: `widgets/journal-timeline-page/`.** Wraps the entity-list `JournalTimeline` widget, owns dialog state (`compose` / `detail` / `edit` / `delete`), and renders a header "Compose entry" CTA. The `/journal` route is now thin again: it loads data and renders `<JournalTimelinePage entries={...}/>`. Canonical ships a floating `JournalFAB`; tanstack uses a header-row "Compose entry" `<Button>` instead — better aligned with the existing app-shell header layout, and the slice text explicitly permits this swap. Revisit if a FAB primitive lands elsewhere.
+- **New widget: `widgets/journal-timeline-page/`.** Wraps the entity-list `JournalTimeline` widget, owns dialog state (`compose` / `detail` / `edit` / `delete`), and renders a header "Compose entry" CTA. The `/journal` route is now thin again: it loads data and renders `<JournalTimelinePage entries={...}/>`. Canonical ships a floating `JournalFAB`; tanstack uses a header-row "Compose entry" `<Button>` instead — better aligned with the existing app-shell header layout, and the slice text explicitly permits this swap. Revisit if a FAB primitive lands elsewhere. **(Slice 23 update: this widget no longer owns any dialog state. The "Compose entry" CTA is now a `<Link to="/journal/new">` and card click navigates to `/journal/$id`. The `widgets/journal-entry-detail` detail dialog is no longer used by this surface. See "Slice 23".)**
 - **New widget: `widgets/journal-entry-detail/`.** A dialog that surfaces the entry's content with Edit + Delete buttons. The widget itself does NOT import the edit / delete features — it emits `onEdit(entryId)` / `onDelete(entryId)` callbacks; the composing `JournalTimelinePage` widget routes the click to the appropriate feature dialog. Canonical has a per-viewport `JournalEntryDialog` (desktop / mobile variants) plus inline edit / delete affordances; tanstack collapses both viewports into one Radix Dialog with a Delete button (variant=destructive) and an Edit button in the footer, matching the slice-11 (LibraryModal) precedent for single responsive layouts.
 - **`JournalEntryCard` accepts optional `onSelect: (entryId) => void`.** Entity stays display-only — the callback is a prop, no feature imports introduced. When provided, the card body becomes a `<button>` (with an `aria-label="Open journal entry from {date}"` accessible name); when omitted, the card renders as before. The game-title `<Link>` inside the card calls `stopPropagation` on click so the navigation isn't hijacked by the surrounding card-click handler.
 - **`JournalTeaser` accepts optional `onAddEntryClick: () => void`.** Same display-only carve-out — the entity emits a click; the composing widget (`widgets/game-detail`) owns the compose-dialog state. The button renders as a small underlined `Add entry` text affordance both above the entries list and inside the empty state.
 - **`widgets/game-detail` owns the compose dialog for the game-detail surface.** A local `useState` for `composeOpen` and a `<ComposeJournalEntryDialog defaultGameId={game.id}/>` are mounted only for signed-in viewers (`viewerUserId !== null`). The compose dialog is the same component the `/journal` route uses — one dialog, two trigger surfaces. Anonymous viewers never see the teaser or the dialog (entity-layer privacy invariant unchanged).
 - **`widgets/journal-timeline` adds an optional `onEntrySelect` prop.** Threaded straight through to each `<JournalEntryCard onSelect=...>`. The widget itself does not change behavior when the prop is omitted — Slice-15 callers (none currently) keep working untouched.
 - **No new "view journal entry" feature created.** The detail dialog is intentionally a widget, not a feature: it carries no server-fn invocation, only `onEdit` / `onDelete` callbacks. Promoting it to a feature would add a layer without changing behavior. Revisit only if the detail dialog grows mutation surfaces of its own.
-- **Tests added (component-level, per slice DoD).** `journal-timeline-page.test.tsx` (5 tests covering: trigger renders, compose dialog opens, card click → detail dialog with Edit + Delete, Edit routes to edit dialog, Delete routes to delete dialog and fires `deleteJournalEntryFn` with the right id). `journal-entry-detail.test.tsx` (6 tests covering: content render, title render, Edit / Delete buttons render, `onEdit` / `onDelete` callback wiring). `journal-entry-card.test.tsx` (3 tests covering: optional `onSelect` semantics — present vs. absent). `journal-teaser.test.tsx` (4 tests covering: optional `onAddEntryClick` semantics — present vs. absent, empty + populated lists). `game-detail.test.tsx` extended with 2 scenarios (signed-in clicks Add entry → `createJournalEntryFn` called with `gameId: game.id`; anonymous viewers don't see the CTA). Total unit-test count: 295 → 499 (Slice-15/16 dialog GREEN steps contributed the bulk; CTA-wiring step adds the +20 tests across the five files above).
+- **Tests added (component-level, per slice DoD).** `journal-timeline-page.test.tsx` (5 tests covering: trigger renders, compose dialog opens, card click → detail dialog with Edit + Delete, Edit routes to edit dialog, Delete routes to delete dialog and fires `deleteJournalEntryFn` with the right id). `journal-entry-detail.test.tsx` (6 tests covering: content render, title render, Edit / Delete buttons render, `onEdit` / `onDelete` callback wiring). `journal-entry-card.test.tsx` (3 tests covering: optional `onSelect` semantics — present vs. absent). `journal-teaser.test.tsx` (4 tests covering: optional `onAddEntryClick` semantics — present vs. absent, empty + populated lists). `game-detail.test.tsx` extended with 2 scenarios (signed-in clicks Add entry → `createJournalEntryFn` called with `gameId: game.id`; anonymous viewers don't see the CTA). Total unit-test count: 295 → 499 (Slice-15/16 dialog GREEN steps contributed the bulk; CTA-wiring step adds the +20 tests across the five files above). **(Slice 23 update: `journal-timeline-page.test.tsx` rewritten — it now asserts the Compose link `href` and the card-click `navigate` call instead of dialog open/close. The dialog-routing assertions moved to the new page-route / page-form tests.)**
+
+## Slice 23 — Journal page routes RESTORED (blocker remediation #1)
+
+The Slice 23 URL-parity audit found three canonical journal URLs 404ing on `:6061` because Slice 16 deliberately shipped them as dialogs:
+
+- `/journal/new` — full-page compose form
+- `/journal/$id` — single entry detail page
+- `/journal/$id/edit` — full-page edit form
+
+The product owner reversed the dialog-only pivot in favor of **true page routes** for URL + UX parity (functional-spec §2.7: every previously valid URL keeps working). This section records what changed; the Slice 16 entries above are amended in-place to point here.
+
+### What was built
+
+- **Entity query `getJournalEntryById(userId, entryId)`** at `entities/journal-entry/api/get-journal-entry-by-id.server.ts`. Returns the `JournalTimelineEntry` shape (same `JOURNAL_ENTRY_GAME_SELECT` projection the detail/edit UI consumes — no new specialized subset query). **Privacy invariant (errors.md):** throws `NotFoundError` for BOTH "entry missing" AND "entry owned by another user" — the read path must not leak existence. This intentionally differs from the sibling update/delete entity queries, which throw `UnauthorizedError` on cross-user mutation (a mutation can safely reveal "you don't own this"; a read enumeration must not). Integration test `test/integration/journal-entry-by-id.integration.test.ts` pins all three branches (found-own / cross-user → NotFound / missing → NotFound).
+- **Loader-safe server fn `getJournalEntryPageDataFn`** at `features/journal-timeline/api/get-journal-entry-page-data.ts` (foot-gun #2: route loaders must not import `.server.ts` modules directly — Vite's import-protection hangs hover-preload). Validate-twice, resolves `userId` via `requireUserId()` inside the handler, delegates to the entity query. Mirrors the existing `getJournalTimelinePageDataFn` shape; lives in the same `journal-timeline` feature (cohesion: both are the journal read surface for routes).
+- **Three routes under `_authed/`** (flat-dotted child convention): `journal.new.tsx`, `journal.$id.tsx`, `journal.$id.edit.tsx`. Auth via the `_authed` group guard (parity with canonical's `(protected)`). Detail + edit routes branch their `errorComponent` on `AppError.code === "NOT_FOUND"` (per `routes.md`) for a styled 404 surface with a "Back to journal" link. `routeTree.gen.ts` regenerated.
+- **Page form/display components reuse the existing server fns and Zod schemas** — no parallel CRUD path:
+  - `features/compose-journal-entry/ui/compose-journal-entry-form/` — page variant of the compose dialog. Calls `createJournalEntryFn`; on success navigates to `/journal/$id` (canonical `NewJournalEntryPage` parity). `?gameId=` search param pre-selects the association.
+  - `features/edit-journal-entry/ui/edit-journal-entry-form/` — page variant of the edit dialog. Calls `updateJournalEntryFn`; on success navigates to `/journal/$id`.
+  - `features/delete-journal-entry/ui/delete-journal-entry-button/` — inline-confirm delete button. Calls `deleteJournalEntryFn`; on success navigates to `/journal`.
+  - `widgets/journal-entry-page/` — composes the entry display + Edit `<Link>` + the delete feature button (mutation lives in the feature, not the widget). Mirrors canonical's `JournalEntryDetail` page layout against the tanstack simplified journal model.
+
+### UX changes (what differs from the Slice 16 dialog behavior)
+
+- The `/journal` timeline now **navigates to pages**: "Compose entry" is a `<Link to="/journal/new">`; clicking a card navigates to `/journal/$id`. `widgets/journal-timeline-page` no longer holds any dialog state, and no longer imports the compose / detail / edit / delete dialog widgets.
+- The **game-detail quick-compose surface stays a dialog** (`widgets/game-detail` still mounts `ComposeJournalEntryDialog` for signed-in viewers). Same for `widgets/library-item-card` and `widgets/dashboard-quick-log-hero`. These are separate quick-add surfaces, not the dedicated journal flow — canonical keeps them as dialogs/popovers too. The dialog components were therefore NOT deleted (verified consumers via grep before touching them).
+
+### Intentional carry-overs from the Slice 16 simplification
+
+- **No game picker / kind selector on the new-entry page.** Canonical's `NewJournalEntryPage` renders an `InlineGameSelector`; the tanstack journal model dropped the picker in Slice 16 (`kind` hard-coded `QUICK`, association via `defaultGameId`). The page keeps that simplification — the `?gameId=` query param is the only association surface. Not a regression introduced here; it predates this slice.
+- **Detail page renders the tanstack journal shape, not canonical's.** Canonical's detail page surfaces `mood`, `playedMinutes`, and a derived title; those fields are not in the tanstack journal model (Slice 16 simplification). The page renders content + kind + game + date, matching the rest of the tanstack journal surfaces.
+
+### Tests added
+
+- Integration: `journal-entry-by-id.integration.test.ts` (3 — ownership invariant).
+- Component: `compose-journal-entry-form.test.tsx` (5), `edit-journal-entry-form.test.tsx` (3), `delete-journal-entry-button.test.tsx` (3), `journal-entry-page.test.tsx` (4), and three route tests `-journal.new.test.tsx` (3), `-journal.$id.test.tsx` (5), `-journal.$id.edit.test.tsx` (3). `journal-timeline-page.test.tsx` rewritten to assert navigation (2).
 
 ## Slice 18A — Visual-parity Phase 1 (Profile)
 
@@ -391,7 +431,9 @@ phase-handoff guidance. Future phases (2 = game-detail, 3 = library,
   then `throw redirect({ to: "/u/$username", params, search })`. Search
   params are preserved so `/profile?edit=true` survives the bounce. If the
   signed-in user has no username yet (newly-onboarded account), the
-  redirect goes to `/settings/profile` so they can finish setup. The
+  redirect goes to `/profile/setup` so they can finish setup (repointed from
+  `/settings/profile` in Slice 23 / blocker remediation #2 — see the
+  `/profile/setup` entry under Flow 2 above). The
   previous own-profile UI on `_authed/profile.tsx` (avatar upload +
   ProfileOverview render) was removed — that surface now lives at
   `/u/$username` for the owner with `isOwnProfile=true`.
@@ -1781,3 +1823,39 @@ uppercase`, so it already matches (the task's hunch that this label also
 - **#11** — game-detail tab spacing (`gap-1` + `px-3.5 pt-3 pb-3`).
 - **#12** — game-detail hero layout (`200px` grid, `pt-[140px]`, full-bleed
   `px-6 md:px-12`).
+
+## Slice 23 — URL parity audit, blocker remediation #5 (`/games/search` made public)
+
+The URL-parity audit found a guard mismatch that blocked cutover. Canonical
+`savepoint-app/app/games/search/page.tsx` is a **public** page: it calls
+`getServerUserId()` _optionally_ (no redirect for anon) and passes the resulting
+`userId` (`string | null`) to `<GameSearchInput>`. Anonymous users can search;
+signed-in users additionally get the add-to-library affordance.
+
+Tanstack had the route under `_authed/games.search.tsx`, so the `_authed.tsx`
+`beforeLoad` guard (`requireUserIdOrRedirectFn`) redirected anonymous visitors
+to `/login` — a functional regression vs. canonical (anonymous search was
+broken), contradicting the spec's "invisible cutover" goal.
+
+**Resolution.** Moved the route out of the guarded group:
+`src/routes/_authed/games.search.tsx` → `src/routes/games.search.tsx` (flat
+public sibling of `games.$slug.tsx`). `createFileRoute("/_authed/games/search")`
+→ `createFileRoute("/games/search")`. The `validateSearch` `{ q?: string }`
+schema is unchanged; the URL stays `/games/search`. Route tree regenerated.
+
+**No `userId` prop needed (intentional divergence from canonical's
+prop-passing).** Unlike canonical, the tanstack search UI is fully presentational
+and auth-agnostic: `SearchGamesInput` takes only `initialQuery` + `debounceMs`,
+and `SearchGamesResults` calls `searchGamesFn` — an anonymous-allowed
+`createServerFn` with no auth gate. There is no add-to-library affordance in the
+tanstack search surface yet (scoped out at Slice 22), so the route resolves no
+viewer identity. When that affordance lands, mirror `games.$slug.tsx`'s optional
+`viewerUserId` loader pattern at that time — do not add a `userId` prop the UI
+does not consume now.
+
+Inbound links (`app-sidebar`, `app-mobile-topbar`) reference the path string
+`to="/games/search"`, which is unchanged, so they were unaffected.
+
+Regression guard: `src/routes/-games.search.test.tsx` asserts the route has no
+`beforeLoad` guard (`Route.options.beforeLoad` is `undefined`) and renders the
+search surface for an anonymous visitor.
