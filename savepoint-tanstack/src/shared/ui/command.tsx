@@ -34,7 +34,7 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
 };
 
 const CommandInput = React.forwardRef<
-  React.ElementRef<typeof CommandPrimitive.Input>,
+  HTMLInputElement,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
   <div className="px-lg flex items-center border-b" cmdk-input-wrapper="">
