@@ -1,7 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { getLibrary, type GetLibraryResult } from "@/entities/library-item/api";
+import {
+  getLibrary,
+  getUniqueLibraryPlatforms,
+  type GetLibraryResult,
+} from "@/entities/library-item/api";
 import {
   getOnboardingSignals,
   type OnboardingSignals,
@@ -31,6 +35,13 @@ export type GetLibraryPageDataInput = z.infer<typeof inputSchema>;
 
 export type GetLibraryPageDataResult = GetLibraryResult & {
   onboarding: OnboardingSignals;
+  /**
+   * Distinct platform names across the user's entire library — derived from
+   * their own games (unscoped by the active filters), so the platform filter
+   * lists only platforms they actually own. Matches canonical's
+   * `getUniquePlatforms`.
+   */
+  platforms: string[];
 };
 
 export const getLibraryPageDataFn = createServerFn({ method: "GET" })
@@ -38,9 +49,10 @@ export const getLibraryPageDataFn = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<GetLibraryPageDataResult> => {
     const filters = inputSchema.parse(data);
     const userId = await requireUserId();
-    const [library, onboarding] = await Promise.all([
+    const [library, onboarding, platforms] = await Promise.all([
       getLibrary(userId, filters),
       getOnboardingSignals(userId),
+      getUniqueLibraryPlatforms(userId),
     ]);
-    return { ...library, onboarding };
+    return { ...library, onboarding, platforms };
   });

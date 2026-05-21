@@ -32,9 +32,7 @@ export function DashboardGameSection({
   return (
     <section className="bg-card text-card-foreground gap-lg p-lg flex flex-col overflow-hidden rounded-lg border">
       <header className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-tight uppercase">
-          {title}
-        </h2>
+        <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
         {showViewAll ? (
           <Button variant="ghost" size="sm" asChild className="h-auto p-0">
             <Link

@@ -277,9 +277,9 @@ describe("GameDetail", () => {
         <GameDetail
           data={buildData(null, {
             platforms: [
-              { id: 6, name: "PC" },
+              { id: 6, name: "PC (Microsoft Windows)" },
               { id: 167, name: "PlayStation 5" },
-              { id: 169, name: "Xbox Series X" },
+              { id: 169, name: "Xbox Series X|S" },
             ],
           })}
           viewerUserId={null}
@@ -287,14 +287,50 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders each platform as a chip next to the PLATFORMS label", () => {
+    it("renders each platform as an abbreviated chip next to the PLATFORMS label", () => {
       const list = elements.queryPlatformsList();
       expect(list).not.toBeNull();
-      const items = within(list!).getAllByRole("listitem");
-      expect(items.length).toBe(3);
-      expect(items[0]?.textContent).toBe("PC");
-      expect(items[1]?.textContent).toBe("PlayStation 5");
-      expect(items[2]?.textContent).toBe("Xbox Series X");
+      expect(within(list!).getByText("PC")).toBeDefined();
+      expect(within(list!).getByText("PS5")).toBeDefined();
+      expect(within(list!).getByText("XSX")).toBeDefined();
+    });
+
+    it("does not show an overflow chip when four or fewer platforms exist", () => {
+      const list = elements.queryPlatformsList();
+      expect(within(list!).queryByText("+1")).toBeNull();
+    });
+  });
+
+  describe("given igdbDetails with five platforms", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, {
+            platforms: [
+              { id: 169, name: "Xbox Series X|S" },
+              { id: 48, name: "PlayStation 4" },
+              { id: 6, name: "PC (Microsoft Windows)" },
+              { id: 167, name: "PlayStation 5" },
+              { id: 130, name: "Nintendo Switch" },
+            ],
+          })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders only the first four platforms as visible chips", () => {
+      const list = elements.queryPlatformsList();
+      expect(within(list!).getByText("XSX")).toBeDefined();
+      expect(within(list!).getByText("PS4")).toBeDefined();
+      expect(within(list!).getByText("PC")).toBeDefined();
+      expect(within(list!).getByText("PS5")).toBeDefined();
+    });
+
+    it("collapses the remaining platforms into a single overflow chip", () => {
+      const list = elements.queryPlatformsList();
+      expect(within(list!).getByText("+1")).toBeDefined();
+      expect(within(list!).queryByText("Switch")).toBeNull();
     });
   });
 

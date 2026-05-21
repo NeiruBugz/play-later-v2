@@ -65,6 +65,7 @@ const elements = {
   getActivityTab: () => screen.getByRole("tab", { name: "Activity" }),
   queryRecentlyPlayed: () => screen.queryByTestId("overview-recently-played"),
   queryLibraryEmpty: () => screen.queryByTestId("profile-library-empty"),
+  queryLibrarySlot: () => screen.queryByTestId("profile-library-slot"),
   queryActivityEmpty: () => screen.queryByTestId("profile-activity-empty"),
   getHeroBanner: () => screen.getByTestId("profile-hero-banner"),
   getStatsBar: () => screen.getByTestId("profile-stats-bar"),
@@ -137,11 +138,32 @@ describe("ProfileOverview", () => {
     });
   });
 
-  describe("given the Library tab is selected", () => {
+  describe("given the Library tab is selected without a library slot", () => {
     it("renders the library empty-state placeholder", async () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
       await actions.clickLibraryTab();
       expect(elements.queryLibraryEmpty()).not.toBeNull();
+    });
+  });
+
+  describe("given the Library tab is selected with a library slot", () => {
+    beforeEach(async () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          librarySlot={<div data-testid="profile-library-slot">Library</div>}
+        />
+      );
+      await actions.clickLibraryTab();
+    });
+
+    it("renders the provided library content", () => {
+      expect(elements.queryLibrarySlot()).not.toBeNull();
+    });
+
+    it("does not render the empty-state placeholder", () => {
+      expect(elements.queryLibraryEmpty()).toBeNull();
     });
   });
 

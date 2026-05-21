@@ -10,7 +10,7 @@ export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
     const { userId } = await getCurrentUserIdFn();
     if (userId) {
-      throw redirect({ to: "/profile" });
+      throw redirect({ to: "/dashboard" });
     }
   },
   loader: () => getEmailSignInEnabledFn(),

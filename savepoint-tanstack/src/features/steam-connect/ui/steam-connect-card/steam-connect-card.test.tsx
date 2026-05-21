@@ -1,44 +1,40 @@
 /**
- * RED component test for SteamConnectCard (Slice 21 Phase B).
+ * Component test for SteamConnectCard.
  *
- * Locked contracts:
+ * Locked contracts (aligned to canonical steam-connect-card after Slice 22):
  *   - Named export `SteamConnectCard` from `./steam-connect-card`.
- *   - Props: { steamId: string | null }.
+ *   - Props: { steamId: string | null, connectUrl: string }.
  *   - Not-connected (steamId === null):
- *       - title "Connect Steam"
+ *       - title "Connect Steam Account"
  *       - description copy
- *       - <a> link with accessible name "Connect Steam Account" pointing
- *         to Steam's OpenID login endpoint with return_to set to
- *         `${window.location.origin}/steam/callback`.
+ *       - <a> link with accessible name "Sign in with Steam" pointing to
+ *         Steam's OpenID login endpoint.
  *   - Connected (steamId is a string):
- *       - title "Steam connected"
+ *       - title "Steam Account Connected"
  *       - shows the steam id text content
  *       - Alert hint with privacy-pending copy
- *       - "Disconnect" button → calls disconnectSteamFn({ data: {} }) and on
- *         success fires toast.success("Steam disconnected") + router.invalidate.
+ *       - "Manage Imported Games" link to /steam/games
+ *       - "Disconnect" opens a confirmation Dialog; confirming calls
+ *         disconnectSteamFn({ data: {} }) and on success fires
+ *         toast.success("Steam disconnected") + router.invalidate.
  *       - On rejection fires toast.error(err.message) and does NOT invalidate.
  */
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// RED import — module does not exist until the GREEN step.
 import { disconnectSteamFn } from "../../api/disconnect-steam";
-// RED import — module does not exist until the GREEN step.
 import { SteamConnectCard } from "./steam-connect-card";
 
-// --- Server fn mock --------------------------------------------------------
 vi.mock("../../api/disconnect-steam", () => ({
   disconnectSteamFn: vi.fn(),
 }));
 
-// --- Sonner mock -----------------------------------------------------------
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-// --- Router mock -----------------------------------------------------------
 const invalidateMock = vi.fn();
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: invalidateMock }),
@@ -61,40 +57,43 @@ const CONNECT_URL =
   "https://steamcommunity.com/openid/login" +
   "?openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0" +
   "&openid.mode=checkid_setup" +
-  "&openid.return_to=http%3A%2F%2Flocalhost%2Fsteam%2Fcallback" +
-  "&openid.realm=http%3A%2F%2Flocalhost" +
-  "&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select" +
-  "&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select";
-
-// ---------------------------------------------------------------------------
-// Element vocabulary
-// ---------------------------------------------------------------------------
+  "&openid.return_to=http%3A%2F%2Flocalhost%2Fsteam%2Fcallback";
 
 const elements = {
-  queryConnectTitle: () => screen.queryByText("Connect Steam"),
-  queryConnectedTitle: () => screen.queryByText("Steam connected"),
+  queryConnectTitle: () => screen.queryByText("Connect Steam Account"),
+  queryConnectedTitle: () => screen.queryByText("Steam Account Connected"),
   queryConnectLink: () =>
-    screen.queryByRole("link", { name: "Connect Steam Account" }),
+    screen.queryByRole("link", { name: "Sign in with Steam" }),
+  queryManageLink: () =>
+    screen.queryByRole("link", { name: "Manage Imported Games" }),
   queryDisconnectButton: () =>
     screen.queryByRole("button", { name: "Disconnect" }),
-  getDisconnectButton: () => screen.getByRole("button", { name: "Disconnect" }),
+  // The card-level "Disconnect" trigger (opens the dialog). When the dialog is
+  // open both it and the confirm button share the name, so scope to the
+  // first match in the card.
+  getOpenDisconnectButton: () =>
+    screen.getAllByRole("button", { name: "Disconnect" })[0]!,
+  getDialog: () => screen.getByRole("dialog"),
+  queryDialog: () => screen.queryByRole("dialog"),
   querySteamIdText: (steamId: string) =>
-    screen.queryByText(new RegExp(steamId)),
+    screen.queryByText(steamId, { exact: false }),
   queryPrivacyHint: () =>
-    screen.queryByText(/check your Steam profile privacy settings/i),
+    screen.queryByText("check your Steam profile privacy settings", {
+      exact: false,
+    }),
 };
-
-// ---------------------------------------------------------------------------
-// Action vocabulary
-// ---------------------------------------------------------------------------
 
 const actions = {
-  clickDisconnect: () => userEvent.click(elements.getDisconnectButton()),
+  openDisconnectDialog: () =>
+    userEvent.click(elements.getOpenDisconnectButton()),
+  confirmDisconnect: async () => {
+    await userEvent.click(elements.getOpenDisconnectButton());
+    const dialog = elements.getDialog();
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Disconnect" })
+    );
+  },
 };
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("SteamConnectCard", () => {
   beforeEach(() => {
@@ -104,18 +103,16 @@ describe("SteamConnectCard", () => {
     invalidateMock.mockReset();
   });
 
-  // ---- Not connected --------------------------------------------------------
-
   describe("given steamId is null (not connected)", () => {
     beforeEach(() => {
       render(<SteamConnectCard steamId={null} connectUrl={CONNECT_URL} />);
     });
 
-    it("renders the 'Connect Steam' title", () => {
+    it("renders the 'Connect Steam Account' title", () => {
       expect(elements.queryConnectTitle()).not.toBeNull();
     });
 
-    it("renders a 'Connect Steam Account' link pointing to the Steam OpenID endpoint", () => {
+    it("renders a 'Sign in with Steam' link pointing to the Steam OpenID endpoint", () => {
       const link = elements.queryConnectLink();
       expect(link).not.toBeNull();
       const href = link!.getAttribute("href") ?? "";
@@ -131,8 +128,6 @@ describe("SteamConnectCard", () => {
     });
   });
 
-  // ---- Connected ------------------------------------------------------------
-
   describe("given steamId is set (connected)", () => {
     beforeEach(() => {
       render(
@@ -140,7 +135,7 @@ describe("SteamConnectCard", () => {
       );
     });
 
-    it("renders the 'Steam connected' title", () => {
+    it("renders the 'Steam Account Connected' title", () => {
       expect(elements.queryConnectedTitle()).not.toBeNull();
     });
 
@@ -156,20 +151,48 @@ describe("SteamConnectCard", () => {
       expect(elements.queryDisconnectButton()).not.toBeNull();
     });
 
+    it("renders the 'Manage Imported Games' link to /steam/games", () => {
+      expect(elements.queryManageLink()).toHaveAttribute(
+        "href",
+        "/steam/games"
+      );
+    });
+
     it("does not render the connect link in the connected state", () => {
       expect(elements.queryConnectLink()).toBeNull();
     });
   });
 
-  // ---- Click Disconnect → server fn + toast + invalidate --------------------
+  describe("given the user opens the disconnect dialog", () => {
+    beforeEach(async () => {
+      render(
+        <SteamConnectCard steamId={STEAM_ID_64} connectUrl={CONNECT_URL} />
+      );
+      await actions.openDisconnectDialog();
+    });
 
-  describe("given the user clicks Disconnect and the server fn resolves", () => {
+    it("shows the confirmation dialog with preservation copy", () => {
+      const dialog = elements.getDialog();
+      expect(
+        within(dialog).getByText("Disconnect Steam Account")
+      ).toBeInTheDocument();
+      expect(
+        within(dialog).getByText(/imported games will be preserved/i)
+      ).toBeInTheDocument();
+    });
+
+    it("does not call disconnectSteamFn until confirmed", () => {
+      expect(vi.mocked(disconnectSteamFn)).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given the user confirms disconnect and the server fn resolves", () => {
     beforeEach(async () => {
       vi.mocked(disconnectSteamFn).mockResolvedValue(undefined as never);
       render(
         <SteamConnectCard steamId={STEAM_ID_64} connectUrl={CONNECT_URL} />
       );
-      await actions.clickDisconnect();
+      await actions.confirmDisconnect();
     });
 
     it("calls disconnectSteamFn with the locked { data: {} } envelope", async () => {
@@ -194,8 +217,6 @@ describe("SteamConnectCard", () => {
     });
   });
 
-  // ---- Click Disconnect → server fn rejects ---------------------------------
-
   describe("given disconnectSteamFn rejects with an Error", () => {
     beforeEach(async () => {
       vi.mocked(disconnectSteamFn).mockRejectedValue(
@@ -204,7 +225,7 @@ describe("SteamConnectCard", () => {
       render(
         <SteamConnectCard steamId={STEAM_ID_64} connectUrl={CONNECT_URL} />
       );
-      await actions.clickDisconnect();
+      await actions.confirmDisconnect();
     });
 
     it("fires toast.error with the err.message verbatim", async () => {

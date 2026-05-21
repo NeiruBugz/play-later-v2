@@ -458,6 +458,9 @@ importers:
       react-hook-form:
         specifier: 7.68.0
         version: 7.68.0(react@19.2.0)
+      react-icons:
+        specifier: 5.5.0
+        version: 5.5.0(react@19.2.0)
       sonner:
         specifier: 2.0.7
         version: 2.0.7(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -14399,6 +14402,10 @@ snapshots:
   react-hook-form@7.68.0(react@19.2.5):
     dependencies:
       react: 19.2.5
+
+  react-icons@5.5.0(react@19.2.0):
+    dependencies:
+      react: 19.2.0
 
   react-icons@5.5.0(react@19.2.5):
     dependencies:

@@ -2,11 +2,13 @@
  * Props for a single Games-group row inside the command palette.
  *
  * Cover image, title, and release year. Mirrors canonical's
- * `savepoint-app/features/command-palette/ui/game-result-item.tsx` minus the
- * `showAddHint` / `onSelect` quick-add hook — those land with the quick-add
- * port (see DIVERGENCES.md → Slice 17).
+ * `savepoint-app/features/command-palette/ui/game-result-item.tsx`, including
+ * the "Add to Up Next" quick-add affordance (canonical `showAddHint` +
+ * `useQuickAddFromPalette`).
  */
 export type GameResultItemProps = {
+  /** IGDB game id — used by the "Add to Up Next" quick-add mutation. */
+  igdbId: number;
   /** IGDB image id (e.g. `co1abc`). `null` renders the placeholder. */
   coverImageId: string | null;
   /** Game title shown in the row body. */

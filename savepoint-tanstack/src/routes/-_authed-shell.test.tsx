@@ -13,6 +13,14 @@ vi.mock("@/widgets/app-sidebar", () => ({
   AppSidebar: () => <div data-testid="app-sidebar" />,
 }));
 
+// RootShell mounts <CommandPalette/> when authed. Stub the command-palette
+// barrel so its real UI (which statically chains to authed server fns →
+// auth.server's module-level env read) is not loaded in this jsdom test.
+vi.mock("@/features/command-palette", () => ({
+  CommandPalette: () => null,
+  openCommandPalette: vi.fn(),
+}));
+
 vi.mock("@/widgets/app-shell", () => ({
   AppShell: ({
     sidebar,

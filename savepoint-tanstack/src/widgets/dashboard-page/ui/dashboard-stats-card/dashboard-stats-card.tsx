@@ -16,7 +16,7 @@ export function DashboardStatsCard({
     >
       <header className="flex items-center gap-3">
         <Library className="text-muted-foreground h-5 w-5" aria-hidden="true" />
-        <span className="text-muted-foreground font-mono text-sm font-medium tracking-wider uppercase">
+        <span className="text-muted-foreground text-sm font-medium tracking-wider uppercase">
           {"// LIBRARY"}
         </span>
       </header>

@@ -36,7 +36,7 @@ function SettingsLayout() {
         Back to profile
       </Link>
 
-      <h1 className="mb-6 text-2xl font-semibold">Settings</h1>
+      <h1 className="text-h1 mb-6">Settings</h1>
 
       <div className="grid gap-6 md:grid-cols-[200px_1fr]">
         <aside>

@@ -33,6 +33,13 @@ export type ProfileOverviewProps = {
    */
   headerActions?: ReactNode;
   /**
+   * Library tab content slot. When omitted, an inline empty-state is shown.
+   * When supplied (route passes the read-only `LibraryGrid` built from the
+   * profile owner's public library), it replaces the placeholder. Mirrors
+   * canonical's `/u/[username]/library` page rendering `LibraryGrid`.
+   */
+  librarySlot?: ReactNode;
+  /**
    * Activity tab content slot. When omitted, an inline empty-state is shown
    * (preserves the slice-18 fallback for anonymous viewers / tests). When
    * supplied, replaces the static empty-state with the real activity feed.

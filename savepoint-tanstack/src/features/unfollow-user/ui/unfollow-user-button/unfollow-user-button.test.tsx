@@ -118,7 +118,10 @@ describe("UnfollowUserButton", () => {
     it("does not render a follow or unfollow button on own profile", () => {
       expect(elements.queryUnfollowButton()).toBeNull();
       expect(
-        screen.queryByRole("button", { name: /follow|unfollow/i })
+        screen.queryByRole("button", { name: `Follow @${PROFILE_USERNAME}` })
+      ).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: `Unfollow @${PROFILE_USERNAME}` })
       ).toBeNull();
     });
   });

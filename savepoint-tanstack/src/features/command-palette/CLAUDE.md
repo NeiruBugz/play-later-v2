@@ -21,6 +21,11 @@ search-trigger buttons fire `openCommandPalette()` which dispatches a
 - `ui/game-result-item/` — single Games-group row. Cover + name +
   release year wrapped in a TanStack `<Link to="/games/$slug">` so back-
   button history works and the test contract can assert on the href.
+  Also renders an "Add to Up Next" quick action.
+- `api/quick-add-to-library-fn.ts` — adds a searched IGDB game to the
+  library at `UP_NEXT` (composes `addGameToLibrary`).
+- `api/remove-library-item-fn.ts` — undo side of quick-add (composes
+  `deleteLibraryItem`).
 - `ui/palette-navigation-group/` — five jump targets (Library, Journal,
   Profile, Settings, Dashboard). Substring-filtered by the live query;
   renders nothing when no item matches.
@@ -38,16 +43,20 @@ search-trigger buttons fire `openCommandPalette()` which dispatches a
 
 ## Divergences from canonical
 
-Three remaining feature gaps vs `savepoint-app/features/command-palette/`:
+Remaining feature gaps vs `savepoint-app/features/command-palette/`:
 
-1. **No quick-add flow.** Result rows always navigate to the detail
-   page; canonical's `useQuickAddFromPalette` calls `addToLibraryAction`
-   with an undo toast. Wire when the `manage-library-entry` feature is
-   ported.
+1. ~~No quick-add flow.~~ **Closed (Slice 22).** Each game result row
+   renders an "Add to Up Next" action (canonical `showAddHint` +
+   `useQuickAddFromPalette`). It calls the feature's own
+   `quickAddToLibraryFn` (status `UP_NEXT`) and emits an undo toast that
+   calls `removeLibraryItemFn`. Both server fns live in
+   `api/` so the palette never imports another feature's server fn.
 2. **No recent-games empty state.** Canonical loads recent library
    games on open; tanstack lacks the entity query.
-3. **No mobile-sheet variant.** Spec 021 Slice 18A owns the visual-
-   parity sweep; the desktop dialog renders at every breakpoint today.
+3. ~~No mobile-sheet variant.~~ **Closed (Slice 22).** At `<768px`
+   `command-palette.tsx` renders the same `Command` body inside a bottom
+   `Sheet` (`data-testid="command-palette-mobile-sheet"`); the centered
+   `Dialog` is md+ only. Gated by `useMediaQuery("(min-width: 768px)")`.
 
 Minor: "New journal entry" routes to `/journal` (canonical goes to
 `/journal/new`, which tanstack doesn't have).

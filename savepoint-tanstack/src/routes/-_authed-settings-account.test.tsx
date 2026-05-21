@@ -41,8 +41,8 @@ const elements = {
   getHeading: () => screen.getByRole("heading", { name: "Account" }),
   getSignOutTitle: () => screen.getByText("Sign out"),
   getLogoutButton: () => screen.getByTestId("logout-button-mock"),
-  queryEmailField: () => screen.queryByLabelText(/email/i),
-  queryDeleteAccount: () => screen.queryByText(/delete account/i),
+  queryEmailField: () => screen.queryByLabelText("Email"),
+  queryDeleteAccount: () => screen.queryByText("Delete account"),
 };
 
 describe("settings/account route", () => {

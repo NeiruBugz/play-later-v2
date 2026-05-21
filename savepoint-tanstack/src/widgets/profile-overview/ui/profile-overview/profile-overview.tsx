@@ -25,6 +25,7 @@ export function ProfileOverview({
   followerCount,
   followingCount,
   headerActions,
+  librarySlot,
   activitySlot,
   hideActivityTab = false,
 }: ProfileOverviewProps) {
@@ -224,20 +225,19 @@ export function ProfileOverview({
           </div>
         }
         library={
-          // TODO(slice-18): wire to entities/library-item once profile
-          // public-library view is scoped. Empty state ships now for
-          // visual parity.
-          <EmptyState
-            data-testid="profile-library-empty"
-            title="Library view coming soon"
-            description="Browse this profile's full library from the dedicated page."
-            action={{
-              label: "Open library",
-              to: "/library",
-              variant: "outline",
-              size: "sm",
-            }}
-          />
+          // Slice 22: render the owner's read-only library grid (canonical
+          // `/u/[username]/library` renders `LibraryGrid`). The route injects
+          // the resolved grid via `librarySlot`; fall back to an empty state
+          // when omitted (tests/mocks) or when the owner has no games.
+          librarySlot !== undefined ? (
+            librarySlot
+          ) : (
+            <EmptyState
+              data-testid="profile-library-empty"
+              title="No games yet"
+              description="This profile hasn't added any games to their library."
+            />
+          )
         }
         activity={
           activitySlot !== undefined ? (

@@ -134,7 +134,7 @@ function SteamGamesRoute() {
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <h2 className="mb-6 text-2xl font-semibold">Imported games</h2>
+      <h2 className="text-h2 mb-6">Imported games</h2>
       <ImportedGamesPage
         games={games}
         steamId={steamId}
@@ -161,7 +161,7 @@ function SteamGamesError({ error }: { error: unknown }) {
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <h2 className="mb-6 text-2xl font-semibold">Imported games</h2>
+      <h2 className="text-h2 mb-6">Imported games</h2>
       {errName === "SteamProfilePrivateError" ? (
         <SteamPrivacyErrorCard message={message} />
       ) : errName === "SteamApiUnavailableError" ? (

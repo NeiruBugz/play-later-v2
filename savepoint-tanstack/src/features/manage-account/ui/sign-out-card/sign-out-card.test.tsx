@@ -9,9 +9,9 @@ const elements = {
     screen.getByText("Sign out of your account on this device."),
   getActionButton: () =>
     screen.getByRole("button", { name: "Sign out action stub" }),
-  queryEmailField: () => screen.queryByLabelText(/email/i),
-  queryDeleteAccount: () => screen.queryByText(/delete account/i),
-  queryPasswordField: () => screen.queryByLabelText(/password/i),
+  queryEmailField: () => screen.queryByLabelText("Email"),
+  queryDeleteAccount: () => screen.queryByText("Delete account"),
+  queryPasswordField: () => screen.queryByLabelText("Password"),
 };
 
 describe("SignOutCard", () => {

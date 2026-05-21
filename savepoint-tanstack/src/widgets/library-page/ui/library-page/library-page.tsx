@@ -50,6 +50,7 @@ export function LibraryPage(props: LibraryPageProps) {
     unratedOnly,
     sortBy,
     sortOrder,
+    platforms,
     onboarding,
   } = props;
 
@@ -136,6 +137,7 @@ export function LibraryPage(props: LibraryPageProps) {
         unratedOnly={unratedOnly}
         sortBy={sortBy}
         sortOrder={sortOrder}
+        platforms={platforms}
       />
 
       <div className="flex gap-6">
@@ -147,6 +149,7 @@ export function LibraryPage(props: LibraryPageProps) {
           sortBy={sortBy}
           sortOrder={sortOrder}
           counts={statusCounts}
+          platforms={platforms}
         />
 
         <div className="min-w-0 flex-1">

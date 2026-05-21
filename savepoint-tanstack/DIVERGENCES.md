@@ -1305,3 +1305,479 @@ matches">` with the filter bar still visible above it (so the user can
 refine without re-navigating). The onboarding empty states
 ("Connect Steam" / "No games imported yet") only render when zero rows
 AND no active filters — locked decision 8 in the slice scope.
+
+## Slice 22 — Visual parity (S15–S21 surfaces)
+
+GREEN scope of Slice 22 is the "port" / "drift-fix" rows of the gap matrix
+at `context/audits/2026-05-20/visual-parity-delta.md`. That matrix is a
+**stale 2026-05-20 snapshot** — by the time Slice 22's GREEN subtask ran,
+Slices 15–21 plus Slice 22's own earlier primitive-port subtasks (495–499)
+had already discharged the entire "port" / "drift-fix" worklist
+incrementally. This section records (a) the per-row validation against the
+**current** `src/` tree, so a cutover auditor can confirm the GREEN scope is
+closed without re-deriving it, and (b) the matrix's "waive" rows with their
+rationale. Per the convention note in `CLAUDE.md` ("Append new slice
+divergences [to `DIVERGENCES.md`], not [to CLAUDE.md]"), this lives here, not
+under CLAUDE.md "Known gaps". **No code changed in this subtask** — every
+port/drift-fix row was already implemented; re-porting would have been churn.
+
+### Discharged "port" / "drift-fix" rows (file:line evidence)
+
+Every row the matrix proposed an action for was found already implemented:
+
+- **`Textarea` primitive** (matrix §3, §2 compose/edit rows) — ported at
+  `src/shared/ui/textarea.tsx` (with `textarea.test.tsx`). Both journal
+  dialogs consume it: `features/compose-journal-entry/ui/compose-journal-entry-dialog/compose-journal-entry-dialog.tsx:15,79`
+  and `features/edit-journal-entry/ui/edit-journal-entry-dialog/edit-journal-entry-dialog.tsx:15,81`.
+  Hand-rolled `<textarea>` + `textareaClasses` const is gone. (Slice 22
+  subtask 495.)
+- **`SegmentedControl` primitive** (matrix §3) — ported at
+  `src/shared/ui/segmented-control.tsx` (built on the already-installed
+  `@radix-ui/react-tabs`, no new dep; `segmented-control.test.tsx` present).
+- **`library-status-switcher` → `SegmentedControl`** (matrix §2 game-detail
+  row, Section-1 "inline status switcher") — `widgets/game-detail/ui/library-status-switcher/library-status-switcher.tsx:19,130`
+  renders `<SegmentedControl<LibraryItemStatus>>`, not hand-rolled
+  `<button role="radio">` pills. Keyboard arrow-nav + focus management come
+  from Radix Tabs for free.
+- **`profile-overview` tab nav → `SegmentedControl`** (matrix §2 profile
+  row, Section-1 "sub-tabs") — `widgets/profile-overview/ui/profile-overview/profile-overview.tsx:13,289`
+  uses `<SegmentedControl<ProfileTabValue>>` for the Overview/Library/Activity
+  nav, replacing the stale-matrix-era Radix `Tabs` strip. The active panel is
+  conditionally rendered under a `role="tabpanel"` wrapper.
+- **`onboarding-first-time` `Collapsible`** (matrix §2 onboarding row) —
+  `features/onboarding-first-time/ui/onboarding-checklist/onboarding-checklist.tsx:5-9,129-152`
+  wraps the checklist in `Collapsible`/`CollapsibleTrigger`/`CollapsibleContent`
+  (primitive ported Slice 18). Header (progress summary) stays visible; step
+  list folds.
+- **`journal-entry-card` `CardDescription` meta sub-line** (matrix §2
+  journal-timeline row, Section-1 typographic hierarchy) —
+  `entities/journal-entry/ui/journal-entry-card/journal-entry-card.tsx:4,36`
+  renders the kind-label + date inside `<CardDescription>`, matching
+  canonical's title + description hierarchy.
+- **command-palette mobile `Sheet` variant** (matrix §2 command-palette row,
+  Section-5 mobile gap) —
+  `features/command-palette/ui/command-palette/command-palette.tsx:17-22,46,144-160`
+  renders the same `Command` body inside a bottom `Sheet` at `<768px`
+  (`useMediaQuery("(min-width: 768px)")`) and a centered `Dialog` at md+. The
+  `Sheet` primitive was ported Slice 18. (Note: the feature's own
+  `CLAUDE.md` "Divergences" still lists "No mobile-sheet variant" as gap 3 —
+  that prose is now stale relative to the code; flagged for a docs follow-up,
+  not a code gap.)
+- **status-filter two-tone palette** (matrix §1 status-filter-palette row) —
+  `features/filter-library/lib/status-config.ts:40-53` collapses to a single
+  two-tone shape (idle = `text-muted-foreground` transparent; active =
+  `bg-primary text-primary-foreground`), matching canonical's quiet single-
+  accent rail. (Slice 18A Phase 3.)
+- **settings navigation rail** (matrix §2 settings/account + settings/profile
+  rows, Section-5 settings-nav gap) — `widgets/settings-rail/ui/settings-rail/settings-rail.tsx`
+  renders a `<nav aria-label="Settings">` with Profile + Account links
+  (vertical at md+, horizontal-scroll stacked at <md). Wired by the layout
+  route `routes/_authed/settings.tsx:9,43` wrapping `settings/profile.tsx` +
+  `settings/account.tsx` via `<Outlet/>`; the "Back to profile" link is
+  retained alongside the rail.
+- **`/games/search` route + `search-games` UI** (matrix §2 search route +
+  search-games rows, the only "entirely missing route" the matrix flagged) —
+  route exists at `routes/_authed/games.search.tsx` (URL `/games/search`,
+  matching canonical `savepoint-app/app/games/search/page.tsx`) composing
+  `features/search-games/ui/search-games-input/` (debounced `Input`) +
+  `features/search-games/ui/search-games-results/` (IGDB results grid →
+  `<Link to="/games/$slug">`).
+- **app-shell display-name footer, library card meta-footer, status-badge
+  pill, game-detail hero/eyebrow/breadcrumb-Games-segment/chips, profile
+  hero/followers/stat-icons/recently-played, mobile bottom-nav + topbar +
+  filter-bar** (matrix §1 rows + Section-5) — all discharged across Slices
+  18A Phases 1–4 and 21; verified present in the current tree (e.g.
+  `widgets/profile-overview/.../profile-overview.tsx:66-151` hero +
+  social-counts; `game-detail.tsx:97-118` breadcrumb with the Games segment;
+  `game-detail.tsx:63-94` hero screenshot backdrop). "Structurally
+  equivalent, no primitive gap" — cross-referenced to the existing Slice 18A
+  Phase 1/2/3/4 entries above; no duplication of that prose here.
+
+### Waived rows (rationale)
+
+These matrix rows were "waive" (or resolve to a no-op against current code):
+
+- **`delete-journal-entry` dialog** — `Dialog` + `Button` only; structurally
+  equivalent to canonical, no primitive gap.
+  (`features/delete-journal-entry/ui/delete-journal-entry-dialog/`.)
+- **`journal-entry-detail` widget** — `Dialog` + `Button`; no primitive gap.
+  (`widgets/journal-entry-detail/ui/journal-entry-detail/`.)
+- **`manage-account` SignOutCard** — `Card/*` + `Button`; structurally
+  equivalent. (`features/manage-account/ui/sign-out-card/`.)
+- **`steam-connect` SteamConnectCard** — `Card/*` + `Button`; structurally
+  equivalent. (`features/steam-connect/ui/steam-connect-card/`.)
+- **`imported-games-page` + filter bar** — `Alert`/`Button`/`EmptyState`/
+  `Input`/`Select`/`Checkbox` all ported; bulk-select retired (documented
+  Slice 21 Phase D). No primitive gap.
+  (`widgets/imported-games-page/ui/{imported-games-page,imported-games-filter-bar}/`.)
+- **`steam-import` imported-game-card / import-game-modal / igdb-manual-search**
+  — `Card`/`Badge`/`DropdownMenu`/`Dialog`/`Select`/`Input` all ported; no
+  primitive gap. (`features/steam-import/ui/{imported-game-card,import-game-modal,igdb-manual-search}/`.)
+- **`follow-user` / `unfollow-user` buttons** — `Button` only; no primitive
+  gap. (`features/{follow-user,unfollow-user}/ui/`.)
+- **`profile-activity-tab`** — `Button` + `EmptyState`; activity rows are
+  plain `div`/`p`, which matches canonical (it also avoids `Card` per row).
+  No primitive gap. (`widgets/profile-activity-tab/ui/profile-activity-tab/`.)
+- **`whats-new` modal multi-step pagination** — canonical paginates
+  Next/Dismiss-all; tanstack shows one announcement with a single "Got it".
+  Cross-reference: "Slice 20 — what's-new modal" entry above. Waived.
+  (`features/whats-new/ui/whats-new-modal/`.)
+- **`toggle-theme` `DropdownMenu` upgrade** — tanstack uses shadcn
+  `DropdownMenu` where canonical hand-rolls a `<div role="menu">` popover.
+  Intentional **upgrade**, not a regression: superior focus management and
+  keyboard semantics. (`features/toggle-theme/ui/theme-toggle/theme-toggle.tsx`.)
+- **`user-list` widget** — collapsed from canonical's three-file
+  `followers-list` / `following-list` / `user-list-item` split into a single
+  `variant`-discriminated widget (documented "Slice 20 — social CTA wiring"
+  entry above). Avatars render via a plain `<img src={image ?? "/default-avatar.png"}>`
+  rather than the shadcn `Avatar` primitive the matrix assumed — functionally
+  equivalent and consistent with `ProfileOverview`'s own avatar approach; no
+  primitive gap that blocks parity. (`widgets/user-list/ui/user-list/user-list.tsx:47,56`.)
+- **`RadioGroup` (matrix §3)** — not used by any in-scope surface in either
+  app. The matrix flagged it "likely" but found no code evidence. Not ported
+  speculatively. Waived.
+- **Game-detail tabs — 4 vs canonical 3** (matrix §1 "Game Detail — tabs",
+  Open Question 3) — the current widget renders **Overview** (always) +
+  **Journal {count}** (signed-in) + **Related** (when `relatedGamesSlot`
+  supplied) + **Times to beat** (when `timesToBeatSlot` supplied), i.e. up to
+  four tabs. This intentionally diverges from canonical's three-tab model
+  (Overview / Journal {count} / Playtime, with Related folded into Overview).
+  **This also supersedes the prose in the "Slice 18A — Visual-parity Phase 2"
+  entry above** (lines ~509–518), which described a 3-tab realignment with
+  Related folded into Overview and Times-to-beat renamed Playtime — that note
+  predates the current shape. The 4-tab layout is the locked, tested design:
+  `widgets/game-detail/ui/game-detail/game-detail.tsx:160-218` and the test
+  contract `game-detail.test.tsx:209-211` ("renders the Related tab and the
+  Times to beat tab"). Keeping Related and Times-to-beat as their own tabs
+  is a product-intent decision (Open Question 3 is a product question, not a
+  code gap), so it is **waived** here rather than re-collapsed; collapsing
+  would discard already-shipped, tested surfaces. Revisit only if a product
+  decision explicitly mandates canonical's exact 3-tab taxonomy.
+
+### Out of scope (separate tasks)
+
+- Dedicated mobile-parity collapse work for the library-item card horizontal-
+  row variant at `<md` — **deferred to task 501 (GREEN mobile parity)**. (The
+  card already has a `flex-row`/`md:flex-col` responsive rule from Slice 18A
+  Phase 4; any further mobile-card polish belongs to 501.)
+- Final pixel-level visual diff sweep — **deferred to task 502.**
+
+### Mobile parity (task 501)
+
+Task 501 ("GREEN mobile parity") is the dedicated follow-up the "Out of
+scope" note above deferred from task 500. Its remit: exhaustively validate
+the `<768px` responsive collapse across **all** in-scope S15–S21 surfaces
+(not just library), confirm the three named deliverables against canonical's
+375×812 behaviour, and fix only genuine breakage. Like task 500, this turned
+out to be **validation-dominant** — Slice 18A Phase 4 ("mobile responsive
+sweep, 375×812") front-loaded the work, so every surface already collapses
+correctly. **No code changed.** Pixel-perfect comparison stays deferred to
+tasks 502/503 (visual diff sweep + pixel verification); this task is
+code-read + colocated component tests, not browser screenshots.
+
+#### Three named deliverables — confirmed against canonical 375×812
+
+- **Sidebar → bottom tab nav at `<768px`.** `widgets/app-bottom-nav/.../app-bottom-nav.tsx`
+  is `fixed inset-x-0 bottom-0 z-40 ... md:hidden` with Library/Journal/Profile
+  tabs; `widgets/app-sidebar` is `hidden md:flex`; `widgets/app-mobile-topbar`
+  (`md:hidden`) carries logo + search-link + theme toggle. All three slotted in
+  `widgets/app-shell/.../app-shell.tsx` (`main` gets `pb-16 md:pb-0` to clear
+  the fixed bottom bar). Matches canonical `savepoint-app/widgets/mobile-nav`
+  (`fixed inset-x-0 bottom-0 ... md:hidden`, same 3 destinations) +
+  `widgets/mobile-topbar`. Cosmetic-only gaps vs canonical (y2k glow,
+  `safe-area-inset-bottom` padding, active-pill scale animation) are owned by
+  502/503, not a collapse break.
+- **Library `Filters` drawer + sheet.** `features/filter-library/ui/mobile-filter-bar/mobile-filter-bar.tsx`
+  is `xl:hidden`, renders a `SlidersHorizontal` "Filters" `Button` →
+  `Sheet side="bottom"` collapsing Status / Platform / Sort + min-rating +
+  unrated-only, with an active-filter count badge. The desktop sidebar
+  (`features/filter-library/ui/library-filters/library-filters.tsx`) is the
+  mirror `hidden ... xl:flex`. Near-identical to canonical `MobileFilterBar`
+  (same `Sheet side="bottom"`, same sections, same trigger + count-badge
+  affordance). Documented divergence: tanstack omits the canonical inline
+  Steam-import shortcut button (separate widget surface here).
+- **Library card horizontal-row variant.** `widgets/library-item-card/.../library-item-card.tsx:22`
+  root is `flex flex-row gap-3 md:flex-col md:gap-0`; cover wrapper is
+  `w-20 shrink-0 md:w-auto` (small cover left + metadata right on mobile,
+  stacked column on desktop). Pinned by the colocated test
+  ("uses flex-row at mobile and flex-col at md+", asserting `\bflex-row\b`
+  and `\bmd:flex-col\b`). Matches canonical audit §5 item 3 intent.
+
+#### Per-surface mobile verdict (code-read at 375px)
+
+All surfaces verified for: (a) no horizontal overflow at 375px, (b) any
+desktop multi-column layout collapses to a single column / stacks, (c)
+interactive chrome reachable on mobile.
+
+- **`/library`** — `ok`. Filter sidebar is `hidden xl:flex` (zero-width at
+  mobile, so the items column owns full width via `min-w-0 flex-1`); mobile
+  filter `Sheet` replaces it; card grid `grid-cols-[repeat(auto-fill,minmax(150px,1fr))]`
+  reflows; FAB add-game is fixed bottom-right; `LibraryModal` is a responsive
+  `Dialog` (`w-full max-w-lg`).
+- **`/journal`** — `ok`. Header `flex items-center justify-between` (title +
+  Compose button); `JournalTimeline` is a `space-y-lg` vertical stack of
+  `JournalEntryCard`s; compose/edit/delete dialogs use the responsive
+  `DialogContent` (`w-full max-w-lg`, square corners < `sm`); edit/compose
+  `Textarea` is fluid-width.
+- **`/games/search`** — `ok`. `container mx-auto px-4`; results grid is
+  `grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7` (3 cols at
+  mobile); debounced `Input` is full-width; loading/error/empty states are
+  centered blocks.
+- **`/settings/profile` + `/settings/account`** — `ok`. Layout
+  `routes/_authed/settings.tsx` is `grid gap-6 md:grid-cols-[200px_1fr]` —
+  single column at mobile, two-column at md+. `SettingsRail` is
+  `flex flex-row gap-1 overflow-x-auto md:flex-col` (horizontal-scroll nav
+  stacked above content on mobile, vertical rail at md+). Back-link + heading
+  stack above. Forms are full-width.
+- **`/steam/games` (imported games)** — `ok`. `ImportedGamesPage` list is
+  `space-y-2` (vertical rows of `ImportedGameCard`); `ImportedGamesFilterBar`
+  filter grid is `grid-cols-2 md:grid-cols-4` (2 cols at mobile), chips
+  `flex-wrap`, pagination `flex items-center justify-between`. Sync button,
+  alert, import modal all reachable.
+- **`/u/$username` profile + Activity tab** — `ok`. `ProfileOverview` hero is
+  `flex-col sm:flex-row`; banner `h-20 sm:h-[120px]`; avatar `h-20 w-20
+sm:h-[140px]`; stats `grid-cols-2 sm:grid-cols-4`; recently-played
+  `grid-cols-3 sm:grid-cols-4 ... lg:grid-cols-7`; tab nav is a `scrollable`
+  `SegmentedControl`. `ProfileActivityTab` is a `space-y-md` + `<ul divide-y>`
+  vertical row list with a "Load more" button.
+- **Command palette** — `ok`. `features/command-palette/.../command-palette.tsx:46`
+  branches on `useMediaQuery("(min-width: 768px)")`: at `<768px` it renders
+  the same `Command` body inside a `Sheet side="bottom"`
+  (`data-testid="command-palette-mobile-sheet"`); at md+ a centered `Dialog`.
+  Matches canonical `MobileCommandPalette` intent. (Stale prose: the feature's
+  own `CLAUDE.md` "Divergences" still lists "No mobile-sheet variant" as gap 3
+  — that contradicts the shipped code; flagged for a docs follow-up, not a
+  code gap. Already noted in the discharged-rows list above.)
+- **Journal compose / edit / delete dialogs** — `ok`. All three use the
+  shared responsive `DialogContent` (`fixed top-[50%] left-[50%] ... w-full
+max-w-lg ... sm:rounded-lg`) — capped at viewport width, edge-to-edge with
+  square corners below `sm`. No fixed-px width that would overflow 375px.
+- **`/games/$slug` (game detail, S13–S14 but adjacent)** — `ok` (spot-checked).
+  Hero `grid-cols-1 md:[grid-template-columns:minmax(140px,200px)_1fr]`;
+  cover `w-32 md:w-full`; `TabsList overflow-x-auto`; Overview meta grids
+  `grid-cols-1 md:grid-cols-[...]`; genre/platform chip rows `flex-wrap`.
+
+No genuine mobile breakage found on any in-scope surface — no horizontal
+overflow, no un-collapsed desktop grid, no unreachable control. Expected
+outcome per the task framing; no fixes made.
+
+### Gate results
+
+`typecheck`, `lint`, `format:check` all exit 0; `test:unit` 794 passed
+(100 files). No code changed in this subtask — the gates confirm the
+discharged-incrementally claim against the current tree. (Re-run at task 501:
+same green result, still no code changed.)
+
+### Visual diff sweep (task 502)
+
+The static **code-level** visual-parity sweep across every in-scope S15–S21
+surface: copy strings, spacing utilities, type-ramp classes, semantic color
+tokens, and hover/focus/transition classes compared against the canonical
+`savepoint-app/` counterpart (per Section 2 of
+`context/audits/2026-05-20/visual-parity-delta.md`). The live pixel-level
+walkthrough is owned by task 503; this is the diff form. Validated against
+**current** code, not the stale 2026-05-20 matrix.
+
+**Headline finding:** parity is high. Every surface uses `@/shared/ui`
+semantic tokens — **zero stray hex/rgb/arbitrary-color values** found in any
+in-scope surface. Interactive-state classes (`hover:`, `focus-visible:ring`,
+`transition-colors`, `animate-spin`, `data-[state=open]:`) are present and
+token-equivalent. The only unintended drift was a **type-ramp** one: four
+route-shell page headings used `text-2xl font-semibold` (24px, default sans)
+where canonical uses the `text-h1` / `text-h2` display-font tokens
+(36px / 30px). Fixed (see "Fixes made").
+
+#### Per-surface verdict table
+
+| surface                                                                | verdict                                | evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/journal` route + `journal-timeline-page`                             | intentional divergence                 | h1 `text-h1` (matches canonical `heading-xl`); canonical also renders a tagline `<p body-md text-muted-foreground>` + groups entries **by game** with cover thumbnails + "Load More". Tanstack is a flat dialog-CRUD timeline with a "Compose entry" header button, no tagline, no game-grouping, mood/tags/playtime not surfaced (`TODO(021-S16)`). Architectural model differs — documented Slice 16. Tagline absence noted as a possible future polish, not drift.                                                                 |
+| `journal-timeline` widget                                              | match                                  | `space-y-lg` vertical stack; `EmptyState` copy "Nothing logged yet" + same description string as canonical.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `journal-entry-card` (entity card)                                     | match                                  | `Card`/`CardContent`/`CardDescription`, kind-label + date in `CardDescription` (canonical title+description hierarchy), `text-primary/70 tracking-widest uppercase` eyebrow, `line-clamp-4`, `transition-colors`, `focus-visible:ring-2`.                                                                                                                                                                                                                                                                                             |
+| `journal-teaser` (entity teaser)                                       | match                                  | `border-l-2 pl-3` rows, `font-mono text-xs` date, `line-clamp-2`, "Add entry" CTA link with `focus-visible:ring`.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `compose-/edit-journal-entry` dialogs                                  | intentional divergence                 | `Dialog/*` + `Textarea` primitive + `text-destructive`/`text-sm` tokens + Button variants — clean. Single-field flat dialog vs canonical's rich multi-field form (mood/tags/playtime). Documented Slice 16.                                                                                                                                                                                                                                                                                                                           |
+| `delete-journal-entry` dialog                                          | match                                  | `Dialog/*` + destructive `Button`; "Delete this entry?" / "This cannot be undone." copy.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `/games/search` route + `search-games` UI                              | match (scoped)                         | h1 `heading-lg`, tagline `text-muted-foreground text-sm` "Find games to add to your SavePoint library", input `body-md h-12` + placeholder/aria-label **byte-identical** to canonical `GameSearchInput`. Results grid `grid-cols-3 sm:4 md:5 lg:7`, semantic-token loading/error/empty states. Scoped down (no library-status / view-toggle / pagination / category badges) — documented out-of-scope. Container `px-4 py-6` is the consistent tanstack route-shell pattern vs canonical `px-2xl py-2xl` (intentional, app-wide).     |
+| `/settings` shell + child pages                                        | unintended drift (FIXED) + intentional | **Fixed:** layout `<h1 Settings>` and `<h2 Account>` were `text-2xl font-semibold` → now `text-h1` / `text-h2` matching canonical. **Intentional:** settings-rail has 2 items (Profile/Account) not canonical's 3 (no "Connected systems" — Steam folded into the account page); rail uses icons + `bg-muted` active vs canonical's left-border `bg-accent` (documented restyle, task 500). Profile settings page omits a page-level `<h2 Profile>` and splits avatar into a top-level "Profile picture" section (documented Flow 3). |
+| `manage-account` SignOutCard                                           | match                                  | `Card/*`; copy "Sign out" sentence-case (tanstack convention) vs canonical "Sign Out" — consistent within tanstack, not drift.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `steam-connect` SteamConnectCard                                       | match                                  | `Card/*` + `Alert variant="info"` + Button variants; `space-y-4`. Connect/connected/disconnect states all token-clean.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/steam/games` route + `imported-games-page`                           | unintended drift (FIXED) + intentional | **Fixed:** `<h2 Imported games>` (main + error component) `text-2xl font-semibold` → `text-h2`. **Intentional:** "Imported games" list framing vs canonical "Import from Steam" selector (bulk-select retired, filter/sort/pagination added — documented Slice 21 Phase D). `Alert`/`EmptyState`/`Button`/pagination all token-clean.                                                                                                                                                                                                 |
+| `imported-game-card`                                                   | match                                  | `Card`/`CardContent`/`Badge`/`Button` variants; `text-muted-foreground text-sm`; per-status variants.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `import-game-modal` / `igdb-manual-search`                             | match                                  | `Dialog`/`Select`/`Input`/`Card` ported (cross-ref Slice 21 + waived-rows list above).                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `command-palette`                                                      | match                                  | `Command/*` + `Dialog/*` (md+) + `Sheet side="bottom"` (`<768px`, `useMediaQuery`); `max-h-[400px]` list; centered empty/loading/error states `text-muted-foreground text-sm`. Mobile-sheet variant present (stale CLAUDE.md gap-3 prose corrected this task).                                                                                                                                                                                                                                                                        |
+| `follow-user` / `unfollow-user` buttons                                | match                                  | `Button`; toast copy `Following @${username}` / `Unfollowed @${username}` per locked Slice 20 strings.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `whats-new` modal                                                      | intentional divergence                 | `Dialog/*` + `Badge variant="secondary"` + Button; `CATEGORY_LABELS` match canonical. Single "Got it" dismiss vs canonical multi-step Next/Dismiss-all (documented Slice 20).                                                                                                                                                                                                                                                                                                                                                         |
+| `onboarding-first-time` checklist                                      | match                                  | `Collapsible/*` (matrix row closed), `bg-primary text-primary-foreground` done-marker, `body-sm`, `hover:bg-muted/40 focus-visible:ring-2`, `data-[state=open]:rotate-180` chevron.                                                                                                                                                                                                                                                                                                                                                   |
+| `toggle-theme` ThemeToggle                                             | intentional upgrade                    | `DropdownMenu/*` (roving-tabindex, Escape, click-outside) vs canonical hand-rolled `<div role="menu">`. `bg-accent text-accent-foreground` active item. Documented superior.                                                                                                                                                                                                                                                                                                                                                          |
+| `user-list` widget                                                     | intentional divergence                 | single `variant`-discriminated widget collapsing canonical's 3-file split; `divide-y divide-border/50`, `hover:bg-muted/50 transition-colors`, plain `<img>` avatar fallback. Documented Slice 20.                                                                                                                                                                                                                                                                                                                                    |
+| `profile-activity-tab`                                                 | match                                  | plain `div`/`p` rows (matches canonical, no per-row Card), `divide-y`, `Button variant="outline"` "Load more", `EmptyState`.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `profile-overview` widget (+ `/u/$username` Overview/Library/Activity) | match                                  | gradient banner, avatar-overlap hero, social-count links, 4 stat-cards w/ icons (`bg-card text-card-foreground`), recently-played grid w/ gradient mask, `SegmentedControl` tab nav. Display-name h1 `font-serif text-3xl sm:text-4xl`. All token-clean; pixel-exact heading-class comparison deferred to 503.                                                                                                                                                                                                                        |
+
+#### Fixes made (trivial unintended type-ramp drift)
+
+All four are CSS-class-only swaps from `text-2xl font-semibold` (24px sans) to
+the design-system display-font heading tokens canonical uses; no test asserts
+these classes (heading queries are by-name/by-role), so no test changes were
+needed. The tokens are byte-identical between the two apps' stylesheets
+(`.text-h1` → display font, `--font-size-heading-xl` 2.25rem; `.text-h2` →
+display font, `--font-size-heading-lg` 1.875rem).
+
+- `routes/_authed/settings.tsx` — `<h1 Settings>`: `text-2xl font-semibold` →
+  `text-h1` (canonical `app/(protected)/settings/layout.tsx` uses `text-h1`).
+- `routes/_authed/settings/account.tsx` — `<h2 Account>`:
+  `text-2xl font-semibold` → `text-h2` (canonical
+  `settings/account/page.tsx` uses `text-h2`).
+- `routes/_authed/steam/games.tsx` — `<h2 Imported games>` (both the main
+  component and the `errorComponent`): `text-2xl font-semibold` → `text-h2`
+  (canonical steam page uses `heading-xl`; `text-h2` is the right h2
+  equivalent for this list-framing).
+
+Also corrected stale prose (no code): `features/command-palette/CLAUDE.md`
+"Divergences" gap 3 ("No mobile-sheet variant") struck through and marked
+closed — the shipped code has had the `Sheet`-based mobile variant since the
+Slice 22 primitive-port subtasks. (The Slice 22 discharged-rows list above had
+already flagged this prose as stale.)
+
+#### Residual divergences handed to the 503 pixel gate
+
+None are unintended; the 503 gate should pixel-confirm these documented
+intentional differences rather than treat them as breaks:
+
+- **Journal page model** — flat dialog-CRUD timeline vs canonical's
+  group-by-game timeline with cover thumbnails, per-group entry counts,
+  mood/tags/playtime chips, and `/journal/new` page. Tagline absent. (Slice 16.)
+- **Settings rail** — 2 items + icon style + `bg-muted` active (vs canonical
+  3 items + left-border `bg-accent`). Profile settings page lacks a top-level
+  `<h2 Profile>` heading (avatar split into its own section). (Flow 3 / task 500.)
+- **`/steam/games`** — "Imported games" list framing (filter/sort/pagination,
+  no bulk-select) vs canonical "Import from Steam" selector. (Slice 21 Phase D.)
+- **Search results** — no library-status / view-toggle / pagination /
+  category badges / quick-add. (Documented out-of-scope.)
+- **Game-detail tabs** — 4 tabs vs canonical 3 (Open Question 3, product
+  decision). (Waived-rows list above.)
+- **whats-new** single-dismiss; **theme-toggle** DropdownMenu upgrade;
+  **user-list** one-file collapse — all intentional, documented.
+- **Pixel-level** heading-class / spacing exactness (e.g. profile h1
+  `font-serif text-3xl` vs canonical's exact classes, container `px-4 py-6`
+  vs `px-2xl py-2xl`) — token-equivalent at the code level; final pixel
+  comparison is 503's remit.
+
+#### Live spot-check
+
+**Skipped.** Per the task framing, the live pixel-level walkthrough (running
+both apps, screenshot matrix) is owned by task 503 and the two apps share
+`:6060` by design. The deliverable here is the code-level static diff above;
+starting the dev server for an eyeball spot-check risked rabbit-holing on
+browser tooling for no parity signal the code read didn't already give.
+
+#### Gate results (task 502)
+
+`typecheck` exit 0; `lint` exit 0; `format:check` exit 0; `test:unit` 794
+passed (100 files). Four CSS-class-only heading fixes + two docs corrections;
+all colocated tests stayed green without modification (heading assertions are
+by-name/by-role, not by-class).
+
+### Post-verification parity fixes (task 503 findings)
+
+Bugs found during the Slice 22 live verification walkthrough. The first four
+were fixed in this task (#1/#2/#6/#8); the rest (#3/#4/#5/#7/#9/#10/#11/#12)
+landed via sibling agents and are recorded here so the parity ledger is
+complete.
+
+- **#1 — Font fallback chains were doubled.** `src/styles.css` base font vars
+  (`--font-default-sans`, `--font-paper-display`, etc., lines 5–13) already
+  carried generic fallbacks (`sans-serif`/`serif`), and the theme composites
+  (`--font-runtime-sans`, `--font-display`, …) appended _more_ generics —
+  computed `font-family` came out malformed/doubled (e.g.
+  `"Source Serif 4", Georgia, "Times New Roman", serif, Georgia, serif`).
+  Stripped the base vars to the bare family name (`--font-default-sans:
+"Geist"` etc.) so each composite appends generics exactly once, matching
+  canonical's shape. Canonical stays bare because `next/font` sets each var to
+  `"<Family>", "<Family> Fallback"` (metric-matched face, no generic);
+  tanstack loads fonts via a `<link>` in `__root.tsx`, so the `"…Fallback"`
+  faces don't exist — the only remaining difference, an accepted divergence.
+  Also fixed a real dashboard font divergence: `dashboard-stats-card.tsx:19`
+  applied `font-mono` to the `// LIBRARY` label in **all** themes, but
+  canonical (`features/dashboard/ui/dashboard-stats-cards.tsx:39`) only renders
+  it mono via the `.y2k`-scoped `y2k-mono` class — the default Paper theme uses
+  the body sans font. Dropped the unconditional `font-mono`. No other dashboard
+  heading/body font divergence found (both inherit Geist body; section headings
+  use no display-font override on either app).
+  Files: `src/styles.css`,
+  `src/widgets/dashboard-page/ui/dashboard-stats-card/dashboard-stats-card.tsx`.
+- **#2 — Dashboard uppercasing removed (section heading only).**
+  `dashboard-game-section.tsx:35` applied a plain `uppercase` to the section
+  `<h2>`; canonical
+  (`features/dashboard/ui/dashboard-game-section.tsx:39`) only uppercases via
+  the `.y2k`-scoped `y2k:uppercase` variant — the base class is
+  `text-sm font-semibold tracking-tight`. Removed the base `uppercase`, kept
+  `tracking-tight`. The stats-card `// LIBRARY` label's `tracking-wider
+uppercase` was **left unchanged**: canonical's counterpart
+  (`dashboard-stats-cards.tsx:39`) carries the same base `tracking-wider
+uppercase`, so it already matches (the task's hunch that this label also
+  over-uppercased did not survive the canonical comparison).
+  File: `src/widgets/dashboard-page/ui/dashboard-game-section/dashboard-game-section.tsx`.
+- **#6 — Sidebar Library icon aligned to canonical + palette.**
+  `app-sidebar.tsx` nav used `Library` (lucide) for the Library item; canonical
+  sidebar (`savepoint-app/widgets/sidebar/ui/sidebar.tsx:26`) and the tanstack
+  command palette both use `BookMarked`. Swapped Library → `BookMarked`. Journal
+  (`BookOpen`), Profile (`User`), Settings (`Settings`) already matched
+  canonical. Canonical's sidebar has **no** Dashboard nav entry and **no**
+  "Search games" nav link (search is a dedicated trigger button), so none was
+  added/removed beyond the icon. No test asserts icons (nav is queried by
+  label/href), so no test change.
+  File: `src/widgets/app-sidebar/ui/app-sidebar/app-sidebar.tsx`.
+- **#8 — Responsiveness audit; one genuine divergence, no half-fix applied.**
+  Checked `/dashboard`, `/library`, `/journal`, `/games/search`, `/settings/*`,
+  `/steam/games`, `/u/$username`, and game-detail at 375 / 768 / 960 / 1024 /
+  1280 against canonical. All surfaces use mobile-first collapsing grids
+  (`grid-cols-1/2/3 … sm:/md:/lg:`), no fixed-width horizontal overflow, no
+  arbitrary-color leakage. Two notable comparisons:
+  - **Library filter rail (md→xl band) — GENUINE divergence, flagged not
+    fixed.** Tanstack has two filter surfaces: full rail (`LibraryFilters`,
+    `hidden … xl:flex`, ≥1280) and `MobileFilterBar` (`xl:hidden`, <1280).
+    Canonical has **three**: full rail (`xl:flex`), a collapsed icon
+    `LibraryFilterSidebarRail` (`hidden … md:flex xl:hidden`, 768–1279), and the
+    mobile bar gated `md:hidden` (<768). So at ~960px canonical shows a
+    collapsed icon rail beside the grid while tanstack shows the full-width
+    mobile filter button bar — the "awkward gap between md and xl" the
+    verification flagged. The correct fix is porting `LibraryFilterSidebarRail`
+    (a feature-sized component add), not a polish edit. Changing tanstack's
+    `MobileFilterBar` gating to `md:hidden` would regress the 768–1279 band to
+    **no** filter UI, so no half-fix was applied. Needs a product/scope decision.
+  - **Game-detail hero — NOT a divergence.** Tanstack
+    (`game-detail.tsx:122–124`) is _more_ responsive than canonical: single
+    column + `w-32` cover on mobile, `md:[grid-template-columns:200px_1fr]` +
+    `w-[200px]` on md+. Canonical
+    (`game-detail-hero.tsx:219–229`) uses a fixed `gridTemplateColumns:
+"200px 1fr"` and `paddingTop: 140px` at **all** widths. The shared
+    `pt-[140px]` is uniform on both apps. Left unchanged — editing it would
+    diverge _from_ canonical.
+
+  Net: #8 reduces to one documented genuine break (library md→xl rail) plus
+  "verified, matches canonical" elsewhere. **Resolution (2026-05-21): deferred
+  as a KNOWN GAP.** During task-503 verification the user could not recall the
+  specific responsive break they had flagged, so the feature-sized
+  `LibraryFilterSidebarRail` port (collapsed icon filter rail for the 768–1279
+  band) was not undertaken speculatively. Tanstack currently jumps from the full
+  filter rail (`xl:flex`) straight to the mobile button bar (`xl:hidden`) with no
+  intermediate icon rail; canonical shows the icon rail at 768–1279. Revisit and
+  port `LibraryFilterSidebarRail` if this mid-width gap is confirmed as a real
+  user-facing problem.
+
+#### Already-landed sibling fixes (recorded for completeness)
+
+- **#3** — library-card CTA switched to the `primary` Button variant.
+- **#4** — per-user platform filter via new
+  `entities/library-item/api/get-unique-platforms.server.ts`.
+- **#5** — command-palette "Add to Up Next" quick action; palette-owned
+  `api/quick-add-to-library-fn.ts` + `api/remove-library-item-fn.ts` (so the
+  palette never imports another feature's server fn).
+- **#7** — profile Library tab renders `LibraryGrid` via a `librarySlot`.
+- **#9** — steam-connect card aligned (Steam glyph + disconnect dialog).
+- **#10** — game-detail platform chips → new `entities/game/ui/platform-badges/`
+  (abbreviated icons + `+N` overflow); added `react-icons@5.5.0`
+  (exact-pinned, matches canonical).
+- **#11** — game-detail tab spacing (`gap-1` + `px-3.5 pt-3 pb-3`).
+- **#12** — game-detail hero layout (`200px` grid, `pt-[140px]`, full-bleed
+  `px-6 md:px-12`).

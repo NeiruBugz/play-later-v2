@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
+import { LibraryGrid } from "@/entities/library-item/ui";
 import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
 import { FollowUserButton } from "@/features/follow-user";
 import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
@@ -67,6 +68,7 @@ function PublicProfilePage() {
     followerCount,
     followingCount,
     isFollowing,
+    libraryItems = [],
     activity,
   } = Route.useLoaderData();
   const isOwnProfile = viewerId != null && viewerId === profile.id;
@@ -92,6 +94,12 @@ function PublicProfilePage() {
       />
     );
   }
+
+  // Library tab content — read-only grid of the profile owner's public
+  // library (canonical `/u/[username]/library`). When the owner has no games,
+  // leave the slot undefined so the widget shows its built-in empty state.
+  const librarySlot =
+    libraryItems.length > 0 ? <LibraryGrid games={libraryItems} /> : undefined;
 
   // Activity tab content. The route owns the choice of loader (own vs
   // per-user) and the "Load more" fetcher. Anonymous viewers don't see the
@@ -120,6 +128,7 @@ function PublicProfilePage() {
         followerCount={followerCount}
         followingCount={followingCount}
         headerActions={headerActions}
+        librarySlot={librarySlot}
         activitySlot={activitySlot}
         hideActivityTab={viewerId === null}
       />

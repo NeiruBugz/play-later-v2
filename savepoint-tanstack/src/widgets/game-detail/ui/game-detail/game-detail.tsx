@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { GameCover } from "@/entities/game";
+import { GameCover, PlatformBadges } from "@/entities/game";
 import { JournalTeaser } from "@/entities/journal-entry";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
@@ -93,10 +93,10 @@ export function GameDetail({
         />
       </div>
 
-      <div className="relative container mx-auto px-4 py-6 md:px-12">
+      <div className="relative px-6 pb-16 md:px-12">
         <nav
           aria-label="Breadcrumb"
-          className="text-caption text-muted-foreground mb-md flex items-center gap-1.5"
+          className="text-caption text-muted-foreground relative z-10 flex items-center gap-1.5 pt-3.5"
         >
           <Link
             to="/library"
@@ -119,16 +119,16 @@ export function GameDetail({
 
         <section
           id="hero"
-          className="gap-xl mb-xl grid grid-cols-1 items-end md:[grid-template-columns:minmax(140px,200px)_1fr]"
+          className="grid grid-cols-1 items-end gap-7 pt-[140px] md:[grid-template-columns:200px_1fr]"
         >
-          <div className="w-32 md:w-full">
+          <div className="w-32 md:w-[200px]">
             <GameCover src={coverUrl} alt={`Cover for ${game.title}`} />
           </div>
-          <div className="gap-md flex min-w-0 flex-col pb-1.5">
+          <div className="min-w-0 pb-1.5">
             {eyebrowParts.length > 0 ? (
               <p
                 aria-label="Release metadata"
-                className="text-caption text-muted-foreground flex flex-wrap items-center gap-2 tracking-widest uppercase"
+                className="text-caption text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 tracking-widest uppercase"
               >
                 {eyebrowParts.map((part, i) => (
                   <span key={i} className="flex items-center gap-2">
@@ -144,7 +144,9 @@ export function GameDetail({
               </p>
             ) : null}
 
-            <h1 className="text-h1 tracking-tight break-words">{game.title}</h1>
+            <h1 className="text-h1 mb-4 tracking-tight break-words">
+              {game.title}
+            </h1>
 
             {viewerUserId !== null ? (
               <LibraryStatusSwitcher
@@ -157,14 +159,16 @@ export function GameDetail({
           </div>
         </section>
 
-        <Tabs defaultValue="overview" className="gap-lg flex flex-col">
+        <Tabs defaultValue="overview" className="gap-lg mt-8 flex flex-col">
           <TabsList
             aria-label="Game detail sections"
-            className="overflow-x-auto"
+            className="gap-1 overflow-x-auto"
           >
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="overview" className="px-3.5 pt-3 pb-3">
+              Overview
+            </TabsTrigger>
             {showJournalTab ? (
-              <TabsTrigger value="journal" className="gap-1.5">
+              <TabsTrigger value="journal" className="gap-1.5 px-3.5 pt-3 pb-3">
                 <span>Journal</span>
                 <span
                   className={cn(
@@ -177,10 +181,14 @@ export function GameDetail({
               </TabsTrigger>
             ) : null}
             {showRelatedTab ? (
-              <TabsTrigger value="related">Related</TabsTrigger>
+              <TabsTrigger value="related" className="px-3.5 pt-3 pb-3">
+                Related
+              </TabsTrigger>
             ) : null}
             {showTimesToBeatTab ? (
-              <TabsTrigger value="times-to-beat">Times to beat</TabsTrigger>
+              <TabsTrigger value="times-to-beat" className="px-3.5 pt-3 pb-3">
+                Times to beat
+              </TabsTrigger>
             ) : null}
           </TabsList>
 
@@ -278,13 +286,9 @@ function OverviewBody({
 
         <TerminalLabel>{`// PLATFORMS`}</TerminalLabel>
         {platforms.length > 0 ? (
-          <ul aria-label="Platforms" className="flex flex-wrap gap-1.5 text-sm">
-            {platforms.map((p) => (
-              <li key={p}>
-                <Badge variant="outline">{p}</Badge>
-              </li>
-            ))}
-          </ul>
+          <div aria-label="Platforms">
+            <PlatformBadges platforms={platforms} />
+          </div>
         ) : (
           <p aria-label="Platforms" className="text-muted-foreground text-sm">
             —

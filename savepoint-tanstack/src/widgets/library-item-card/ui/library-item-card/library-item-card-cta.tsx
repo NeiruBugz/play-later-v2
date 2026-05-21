@@ -74,7 +74,6 @@ export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
       <Button
         type="button"
         size="sm"
-        variant="secondary"
         className="mt-2 w-full text-xs font-semibold"
         disabled={isPending}
         onClick={handleClick}

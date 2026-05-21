@@ -2,14 +2,29 @@
 @import "tw-animate-css";
 
 :root {
-  --font-default-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-default-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-paper-display: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --font-cartridge-display: "Bowlby One", "Archivo Black", sans-serif;
-  --font-cartridge-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-cartridge-mono: "Space Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-aurora-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-aurora-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Base font-family vars hold ONLY the loaded family name. The generic
+     fallbacks live on the theme-layer composites below
+     (--font-runtime-sans / --font-runtime-mono / --font-display), so the
+     computed font-family chain is not doubled (previously a base var like
+     `"Source Serif 4", Georgia, "Times New Roman", serif` composed with
+     `--font-display: var(--font-paper-display), Georgia, serif` yielded a
+     malformed `…serif, Georgia, serif`).
+
+     Canonical (`savepoint-app`) keeps these bare because next/font sets
+     each var to `"<Family>", "<Family> Fallback"` — the family plus a
+     metric-matched fallback face, with no trailing generic. tanstack
+     loads fonts via a <link> in __root.tsx, so the "…Fallback" metric
+     faces don't exist; that single difference is an accepted divergence
+     (see DIVERGENCES.md). The chain shape otherwise matches: family on
+     the base var, generics appended exactly once by the composite. */
+  --font-default-sans: "Geist";
+  --font-default-mono: "Geist Mono";
+  --font-paper-display: "Source Serif 4";
+  --font-cartridge-display: "Bowlby One";
+  --font-cartridge-sans: "Archivo";
+  --font-cartridge-mono: "Space Mono";
+  --font-aurora-display: "Space Grotesk";
+  --font-aurora-mono: "JetBrains Mono";
 }
 
 @custom-variant dark (&:is(.dark *, .y2k *, .jewel *, .aurora *));

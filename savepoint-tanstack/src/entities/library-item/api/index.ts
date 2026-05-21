@@ -11,3 +11,4 @@ export type { AddGameToLibraryInput } from "./add-game-to-library.server";
 export { updateLibraryItem } from "./update-library-item.server";
 export type { UpdateLibraryItemInput } from "./update-library-item.server";
 export { deleteLibraryItem } from "./delete-library-item.server";
+export { getUniqueLibraryPlatforms } from "./get-unique-platforms.server";

@@ -27,9 +27,9 @@ function Harness({ defaultTheme = "system" }: { defaultTheme?: Theme }) {
 const elements = {
   getTrigger: () => screen.getByRole("button", { name: "Change theme" }),
   getOptionButton: (label: string) =>
-    screen.getByRole("menuitem", { name: new RegExp(label, "i") }),
+    screen.getByRole("menuitem", { name: label }),
   queryOptionButton: (label: string) =>
-    screen.queryByRole("menuitem", { name: new RegExp(label, "i") }),
+    screen.queryByRole("menuitem", { name: label }),
 };
 
 const actions = {

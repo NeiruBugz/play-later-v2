@@ -32,13 +32,14 @@ export const Route = createFileRoute("/_authed/library")({
 });
 
 function LibraryRoute() {
-  const { items, total, onboarding } = Route.useLoaderData();
+  const { items, total, platforms, onboarding } = Route.useLoaderData();
   const search = Route.useSearch();
 
   return (
     <LibraryPage
       items={items}
       total={total}
+      platforms={platforms}
       status={search.status}
       platform={search.platform}
       minRating={search.minRating}

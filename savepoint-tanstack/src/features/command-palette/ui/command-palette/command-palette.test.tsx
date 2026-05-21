@@ -64,16 +64,30 @@ vi.mock("@/features/search-games", () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// Mock: the palette's own quick-add server fns (foot-gun #8 — these wrap
+// createServerFn and transitively import server-only auth/env, which crashes
+// the jsdom unit env). Quick-add behaviour itself is covered by
+// game-result-item.test.tsx.
+// ---------------------------------------------------------------------------
+
+vi.mock("../../api/quick-add-to-library-fn", () => ({
+  quickAddToLibraryFn: vi.fn(),
+}));
+
+vi.mock("../../api/remove-library-item-fn", () => ({
+  removeLibraryItemFn: vi.fn(),
+}));
+
+// ---------------------------------------------------------------------------
 // Element vocabulary
 // ---------------------------------------------------------------------------
 
 const elements = {
+  // cmdk's CommandInput renders role="combobox"; the accessible name comes from
+  // the `label` prop on the Command root ("Search games" in command-palette.tsx).
   querySearchInput: () =>
-    screen.queryByRole("combobox", { name: /search/i }) ??
-    screen.queryByPlaceholderText(/search/i),
-  getSearchInput: () =>
-    screen.getByRole("combobox", { name: /search/i }) ??
-    screen.getByPlaceholderText(/search/i),
+    screen.queryByRole("combobox", { name: "Search games" }),
+  getSearchInput: () => screen.getByRole("combobox", { name: "Search games" }),
   queryResultByName: (name: string) => screen.queryByText(name),
   getResultByName: (name: string) => screen.getByText(name),
 };

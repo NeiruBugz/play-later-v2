@@ -29,6 +29,14 @@ vi.mock("@/shared/api/auth-client", () => ({
   },
 }));
 
+// The sidebar only needs the `openCommandPalette` event helper. Mock the
+// command-palette barrel so its real CommandPalette UI (which statically
+// chains to authed server fns → auth.server's module-level env read) is not
+// loaded into this jsdom test graph.
+vi.mock("@/features/command-palette", () => ({
+  openCommandPalette: vi.fn(),
+}));
+
 vi.mock("@/features/toggle-theme", () => ({
   ThemeToggle: () => <button data-testid="theme-toggle" />,
 }));

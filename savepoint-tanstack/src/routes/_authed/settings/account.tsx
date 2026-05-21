@@ -19,7 +19,7 @@ function SettingsAccountPage() {
   // `_authed/settings.tsx` layout route. Child renders content only.
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold">Account</h2>
+      <h2 className="text-h2 mb-6">Account</h2>
 
       <div className="space-y-6">
         <SteamConnectCard steamId={steamId} connectUrl={connectUrl} />
