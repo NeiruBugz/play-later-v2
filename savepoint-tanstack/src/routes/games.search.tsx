@@ -7,7 +7,7 @@ const searchSchema = z.object({
   q: z.string().optional(),
 });
 
-export const Route = createFileRoute("/_authed/games/search")({
+export const Route = createFileRoute("/games/search")({
   validateSearch: (input) => searchSchema.parse(input),
   component: GameSearchRoute,
 });
