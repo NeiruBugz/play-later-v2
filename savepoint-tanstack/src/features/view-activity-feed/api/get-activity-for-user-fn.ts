@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 
 import type { ActivityFeedResult } from "@/entities/activity-feed/model";
+import { getServerUserId } from "@/entities/session/api/get-session.server";
 
 import {
   GET_ACTIVITY_FOR_USER_INPUT,
@@ -10,12 +12,15 @@ import {
 /**
  * Server-fn wrapper for the per-user activity read.
  *
- * Anonymous-allowed: callers need only the target user id; the entity layer
- * (`getActivityForUser`) is privacy-agnostic and the route layer gates on
- * `getPublicProfile` before exposing this surface.
+ * Anonymous-allowed (public profiles are viewable signed-out), so the viewer
+ * is resolved with `getServerUserId(getRequest())` — NOT `requireUserId()`.
+ * The resolved (possibly `undefined`) viewer is threaded into the worker so
+ * the entity-layer privacy gate can enforce owner-only access to PRIVATE
+ * profiles' activity. The viewer is never trusted from input.
  */
 export const getActivityForUserFn = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => GET_ACTIVITY_FOR_USER_INPUT.parse(data))
   .handler(async ({ data }): Promise<ActivityFeedResult> => {
-    return getActivityForUserWorker(undefined, data);
+    const viewerUserId = await getServerUserId(getRequest());
+    return getActivityForUserWorker(viewerUserId ?? undefined, data);
   });

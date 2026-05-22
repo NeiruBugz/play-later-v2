@@ -33,14 +33,14 @@ afterAll(async () => {
 
 let _igdbCounter = 80_000;
 
-function makeUser(suffix: string) {
+function makeUser(suffix: string, opts: { isPublicProfile?: boolean } = {}) {
   return {
     id: `gafu-user-${suffix}`,
     email: `gafu-${suffix}@example.com`,
     name: `GAFU User ${suffix}`,
     username: `gafu-${suffix}`,
     emailVerified: true,
-    isPublicProfile: true,
+    isPublicProfile: opts.isPublicProfile ?? true,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
   };
@@ -118,27 +118,27 @@ beforeEach(async () => {
 describe("getActivityForUser", () => {
   describe("given alice has two library items", () => {
     it("returns alice's own library items", async () => {
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       const userIds = result.items.map((i) => i.userId);
       expect(userIds.every((id) => id === "gafu-user-alice")).toBe(true);
     });
 
     it("returns exactly two items for alice", async () => {
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       expect(result.items).toHaveLength(2);
     });
 
     it("does not include bob's items in alice's activity", async () => {
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       const userIds = result.items.map((i) => i.userId);
       expect(userIds).not.toContain("gafu-user-bob");
     });
 
     it("returns items ordered by activityTimestamp DESC", async () => {
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       const timestamps = result.items.map((i) => i.activityTimestamp.getTime());
       for (let i = 0; i < timestamps.length - 1; i++) {
@@ -149,7 +149,7 @@ describe("getActivityForUser", () => {
 
   describe("return shape", () => {
     it("returns items with required FeedItem fields", async () => {
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       expect(result).toHaveProperty("items");
       expect(result).toHaveProperty("nextCursor");
@@ -169,7 +169,7 @@ describe("getActivityForUser", () => {
     });
 
     it("activityTimestamp is a Date instance", async () => {
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       expect(result.items[0]!.activityTimestamp).toBeInstanceOf(Date);
     });
@@ -180,7 +180,7 @@ describe("getActivityForUser", () => {
       // Create a user with no items.
       await db.prisma.user.create({ data: makeUser("empty") });
 
-      const result = await getActivityForUser("gafu-user-empty");
+      const result = await getActivityForUser("gafu-user-empty", undefined);
 
       expect(result.items).toHaveLength(0);
       expect(result.nextCursor).toBeNull();
@@ -190,31 +190,109 @@ describe("getActivityForUser", () => {
   describe("cursor pagination", () => {
     it("returns nextCursor = null when items count is below the limit", async () => {
       // alice has 2 items; default limit is 20.
-      const result = await getActivityForUser("gafu-user-alice");
+      const result = await getActivityForUser("gafu-user-alice", undefined);
 
       expect(result.nextCursor).toBeNull();
     });
 
     it("returns a non-null nextCursor when limit is smaller than total items", async () => {
-      const result = await getActivityForUser("gafu-user-alice", { limit: 1 });
+      const result = await getActivityForUser("gafu-user-alice", undefined, {
+        limit: 1,
+      });
 
       expect(result.items).toHaveLength(1);
       expect(result.nextCursor).not.toBeNull();
     });
 
     it("fetches the second page using the cursor from the first page", async () => {
-      const firstPage = await getActivityForUser("gafu-user-alice", {
+      const firstPage = await getActivityForUser("gafu-user-alice", undefined, {
         limit: 1,
       });
       expect(firstPage.nextCursor).not.toBeNull();
 
-      const secondPage = await getActivityForUser("gafu-user-alice", {
-        limit: 1,
-        cursor: firstPage.nextCursor!,
-      });
+      const secondPage = await getActivityForUser(
+        "gafu-user-alice",
+        undefined,
+        {
+          limit: 1,
+          cursor: firstPage.nextCursor!,
+        }
+      );
 
       expect(secondPage.items.length).toBeGreaterThan(0);
       expect(secondPage.items[0]!.id).not.toBe(firstPage.items[0]!.id);
+    });
+  });
+});
+
+// ---- Privacy gate (owner-bypass) -----------------------------------------
+//
+// These cases prove the entity-layer privacy invariant: a PRIVATE profile's
+// activity is visible ONLY to the owner. They FAIL against the old un-gated
+// query (which returned every row matching `li."userId" = targetUserId`
+// regardless of `isPublicProfile` or viewer), and PASS once the
+// `(u."isPublicProfile" = true OR li."userId" = viewer)` clause is in place.
+
+describe("getActivityForUser — privacy gate", () => {
+  beforeEach(async () => {
+    // carol is PRIVATE and has one library item; the shared beforeEach has
+    // already seeded public alice/bob and games a/b/c.
+    await db.prisma.user.create({
+      data: makeUser("carol", { isPublicProfile: false }),
+    });
+    await db.prisma.libraryItem.create({
+      data: makeLibraryItem("gafu-user-carol", "gafu-game-c", {
+        status: "PLAYING",
+        createdAt: new Date("2024-06-04T10:00:00.000Z"),
+      }),
+    });
+  });
+
+  describe("given a PUBLIC target profile", () => {
+    it("returns activity for an anonymous viewer", async () => {
+      const result = await getActivityForUser("gafu-user-alice", undefined);
+
+      expect(result.items.length).toBeGreaterThan(0);
+      const userIds = result.items.map((i) => i.userId);
+      expect(userIds.every((id) => id === "gafu-user-alice")).toBe(true);
+    });
+
+    it("returns activity for an other-user viewer", async () => {
+      const result = await getActivityForUser(
+        "gafu-user-alice",
+        "gafu-user-bob"
+      );
+
+      expect(result.items.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("given a PRIVATE target profile", () => {
+    it("returns EMPTY for an anonymous viewer (no rows leaked)", async () => {
+      const result = await getActivityForUser("gafu-user-carol", undefined);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.nextCursor).toBeNull();
+    });
+
+    it("returns EMPTY for a non-owner viewer (no rows leaked)", async () => {
+      const result = await getActivityForUser(
+        "gafu-user-carol",
+        "gafu-user-bob"
+      );
+
+      expect(result.items).toHaveLength(0);
+    });
+
+    it("returns the owner's activity when viewer === target", async () => {
+      const result = await getActivityForUser(
+        "gafu-user-carol",
+        "gafu-user-carol"
+      );
+
+      expect(result.items.length).toBeGreaterThan(0);
+      const userIds = result.items.map((i) => i.userId);
+      expect(userIds.every((id) => id === "gafu-user-carol")).toBe(true);
     });
   });
 });

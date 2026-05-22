@@ -7,12 +7,13 @@ import {
 } from "@/entities/activity-feed/model";
 
 /**
- * Worker for `getActivityForUserFn` — public per-user activity stream used
- * by the profile-activity tab on `/u/$username`.
+ * Worker for `getActivityForUserFn` — per-user activity stream used by the
+ * profile-activity tab on `/u/$username`.
  *
- * Anonymous-allowed: targets are public (the route layer is responsible for
- * gating on the target user's `isPublicProfile`, which the existing
- * `getPublicProfile` privacy invariant already enforces).
+ * Anonymous-allowed: the wrapper resolves the (possibly `undefined`) viewer
+ * server-side and threads it here. The privacy gate lives on the entity query
+ * (`getActivityForUser`), which only returns a PRIVATE profile's activity to
+ * its owner — anonymous and other-user viewers see public profiles only.
  */
 export const GET_ACTIVITY_FOR_USER_INPUT = z.object({
   targetUserId: z.string().min(1),
@@ -21,10 +22,10 @@ export const GET_ACTIVITY_FOR_USER_INPUT = z.object({
 });
 
 export async function getActivityForUserWorker(
-  _userId: string | undefined,
+  viewerUserId: string | undefined,
   data: unknown
 ): Promise<ActivityFeedResult> {
   const { targetUserId, limit, cursor } =
     GET_ACTIVITY_FOR_USER_INPUT.parse(data);
-  return getActivityForUser(targetUserId, { limit, cursor });
+  return getActivityForUser(targetUserId, viewerUserId, { limit, cursor });
 }

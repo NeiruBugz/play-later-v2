@@ -52,17 +52,32 @@ export async function getActivityFeedForViewer(
 }
 
 /**
- * Public activity for a single user — used by the per-user activity tab on
+ * Per-user activity for a single user — used by the per-user activity tab on
  * `/u/$username/activity`. Returns the target user's own LibraryItem stream
- * (no follow-graph join). The route layer is responsible for gating this on
- * the target user's `isPublicProfile`.
+ * (no follow-graph join).
+ *
+ * Privacy invariant (owner-bypass): a PUBLIC profile's activity is visible to
+ * anyone (signed-out included); a PRIVATE profile's activity is visible ONLY
+ * to the owner (`viewerUserId === targetUserId`). This mirrors
+ * `getPublicProfile`'s semantics (private ⇒ owner-only) and lives here on the
+ * entity — not the route — so the network-callable `getActivityForUserFn`
+ * cannot bypass it. A private-profile non-owner gets an empty list (the
+ * profile page itself already 404s a private profile via `getPublicProfile`;
+ * returning empty activity is consistent and avoids leaking existence).
+ *
+ * `viewerUserId` is the resolved server-side session id (or `undefined` for
+ * anonymous callers). It is coalesced to `null` before binding so the SQL
+ * comparison `li."userId" = NULL` is never true — anonymous viewers therefore
+ * only ever match the `isPublicProfile = true` branch.
  */
 export async function getActivityForUser(
   targetUserId: string,
+  viewerUserId: string | undefined,
   options: { cursor?: FeedCursor; limit?: number } = {}
 ): Promise<ActivityFeedResult> {
   const effectiveLimit = clampLimit(options.limit ?? FEED_DEFAULT_LIMIT);
   const cursorCondition = buildCursorCondition(options.cursor);
+  const viewerBinding = viewerUserId ?? null;
 
   const rows = await prisma.$queryRaw<Array<Record<string, unknown>>>`
     SELECT ${SELECT_COLUMNS}
@@ -70,6 +85,7 @@ export async function getActivityForUser(
     JOIN "user" u ON u."id" = li."userId"
     JOIN "Game" g ON g."id" = li."gameId"
     WHERE li."userId" = ${targetUserId}
+      AND (u."isPublicProfile" = true OR li."userId" = ${viewerBinding})
       ${cursorCondition}
     ${ORDER_BY}
     LIMIT ${effectiveLimit}`;
