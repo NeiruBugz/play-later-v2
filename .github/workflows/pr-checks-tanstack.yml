@@ -16,10 +16,25 @@ concurrency:
 
 jobs:
   quality:
-    name: Quality (typecheck, lint, format, unit)
+    name: Quality (typecheck, lint, format, coverage)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Coverage runs the merged unit + integration projects, and the
+      # integration project needs a real Postgres on :6432 (the isolated-db
+      # helper does `docker exec savepoint-postgres` + `prisma migrate deploy`).
+      # Same docker-compose service the integration.yml workflow provisions.
+      - name: Set up Postgres (Docker Compose)
+        run: docker compose -f docker-compose.yml up -d postgres-db
+
+      - name: Wait for Postgres readiness
+        run: |
+          echo "Waiting for Postgres (savepoint-postgres) to be ready..."
+          for i in {1..60}; do
+            if docker exec savepoint-postgres pg_isready -U postgres >/dev/null 2>&1; then
+              echo "Postgres is ready."; break; fi; sleep 2; done
+          docker exec savepoint-postgres pg_isready -U postgres
 
       - name: Prisma schema drift check (savepoint-app ↔ savepoint-tanstack)
         run: |
@@ -59,8 +74,16 @@ jobs:
       - name: Format check
         run: pnpm --filter savepoint-tanstack format:check
 
-      - name: Unit tests
-        run: pnpm --filter savepoint-tanstack test:unit
+      # Runs the merged unit + integration projects under v8 coverage and
+      # enforces the Slice 23 thresholds from vitest.config.ts (statements ≥85
+      # is the cutover gate; branches/lines/functions are regression floors).
+      # Replaces the prior unit-only step — test:coverage runs both projects.
+      - name: Tests + coverage gate (unit + integration)
+        run: pnpm --filter savepoint-tanstack test:coverage
+
+      - name: Teardown Docker services
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
 
   audit:
     name: Supply Chain Audit (pnpm audit)
