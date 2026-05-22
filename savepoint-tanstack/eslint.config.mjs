@@ -83,24 +83,78 @@ export default tseslint.config(
     },
   },
   // FSD layer boundary enforcement — applies only to src/**
+  //
+  // Design (Slice 23 remediation):
+  //
+  // 1. LAYER DIRECTION: app > routes > widgets > features > entities > shared.
+  //    Lower never imports upper.
+  //
+  // 2. ROUTES → APP: `routes/__root.tsx` legitimately wires the app shell
+  //    (ErrorBoundary, SavepointThemeProvider, CSS side-effect). Allowing
+  //    routes→app is cleaner than relocating root-shell providers into a
+  //    different layer. The rule allows it.
+  //
+  // 3. SAME-LAYER BARREL RE-EXPORTS: `app/index.ts` and `widgets/index.ts`
+  //    re-export their own slices — these are same-layer barrel imports, NOT
+  //    cross-slice violations.
+  //
+  // 4. FEATURES: cross-slice feature→feature imports are forbidden. Same-slice
+  //    intra-feature imports (barrel re-exports, ui→model, etc.) are allowed
+  //    by using the per-slice capture group and requiring the `slice` capture
+  //    value to match (via Handlebars `{{from.captured.slice}}`).
+  //
+  // 5. ENTITIES: same as features — cross-slice forbidden, same-slice allowed.
+  //
+  // 6. WIDGETS → WIDGETS: composition IS allowed per documented policy
+  //    (widgets.md). The linter does not forbid it; carve-outs are tracked in
+  //    DIVERGENCES.md (human + code-review discipline, not linter-enforced).
   {
     files: ["src/**/*.ts", "src/**/*.tsx"],
     plugins: {
       boundaries,
     },
     settings: {
+      // Without an explicit resolver, eslint-plugin-boundaries falls back to
+      // the bundled node resolver, which cannot resolve the `@/`, `#/`, and
+      // `@env` TypeScript path aliases. The target of every aliased import
+      // then resolves to nothing, so boundaries/dependencies silently allows
+      // it. The TS resolver reads tsconfig `paths`, making aliased imports
+      // visible to the rule. Regression-guarded by test/eslint/.
+      "import/resolver": {
+        typescript: {
+          project: new URL("./tsconfig.json", import.meta.url).pathname,
+        },
+        node: true,
+      },
       "boundaries/ignore": [
         "**/*.test.ts",
         "**/*.test.tsx",
         "**/*.spec.ts",
         "**/*.spec.tsx",
       ],
+      // Enable legacy Handlebars template syntax (`${from.slice}`) in
+      // captured-value matchers. Required for same-slice allow rules where the
+      // `to` captured value must match the `from` captured value.
+      "boundaries/legacy-templates": true,
       "boundaries/elements": [
+        // app and widgets: no per-slice capture — all internal re-exports allowed.
         { type: "app", pattern: "src/app/**/*", mode: "file" },
         { type: "routes", pattern: "src/routes/**/*", mode: "file" },
         { type: "widgets", pattern: "src/widgets/**/*", mode: "file" },
-        { type: "features", pattern: "src/features/**/*", mode: "file" },
-        { type: "entities", pattern: "src/entities/**/*", mode: "file" },
+        // features and entities: per-slice capture so cross-slice can be
+        // distinguished from same-slice (barrel re-exports, intra-slice) imports.
+        {
+          type: "feature",
+          pattern: "src/features/([^/]+)/**/*",
+          capture: ["slice"],
+          mode: "file",
+        },
+        {
+          type: "entity",
+          pattern: "src/entities/([^/]+)/**/*",
+          capture: ["slice"],
+          mode: "file",
+        },
         { type: "shared", pattern: "src/shared/**/*", mode: "file" },
       ],
     },
@@ -110,41 +164,57 @@ export default tseslint.config(
         {
           default: "disallow",
           rules: [
+            // ── app ────────────────────────────────────────────────────────
+            // app/index.ts re-exports its own slices (same-type). app may
+            // also import down from all layers.
             {
-              from: { type: "app" },
-              allow: {
-                to: { type: ["routes", "widgets", "features", "entities", "shared"] },
-              },
+              from: "app",
+              allow: ["app", "routes", "widgets", "feature", "entity", "shared"],
             },
+            // ── routes ─────────────────────────────────────────────────────
+            // routes/__root.tsx imports @/app (ErrorBoundary, theme provider,
+            // CSS side-effect). Allow routes→app for the root-shell seam.
             {
-              from: { type: "routes" },
-              allow: {
-                to: { type: ["widgets", "features", "entities", "shared"] },
-              },
+              from: "routes",
+              allow: ["app", "widgets", "feature", "entity", "shared"],
             },
+            // ── widgets ────────────────────────────────────────────────────
+            // Widget→widget composition is ALLOWED by policy (widgets.md).
+            // Carve-outs must be documented in DIVERGENCES.md.
             {
-              from: { type: "widgets" },
-              allow: {
-                to: { type: ["features", "entities", "shared"] },
-              },
+              from: "widgets",
+              allow: ["widgets", "feature", "entity", "shared"],
             },
+            // ── features ───────────────────────────────────────────────────
+            // Cross-slice feature→feature imports are FORBIDDEN.
+            // Same-slice imports are allowed (barrel re-exports, intra-slice
+            // model/ui/api cross-references within the same feature).
             {
-              from: { type: "features" },
-              allow: {
-                to: { type: ["entities", "shared"] },
-              },
+              from: "feature",
+              allow: [
+                // Same-slice only: captured "slice" value must match.
+                // `${from.slice}` is the legacy template form; legacyTemplates
+                // setting is enabled so this resolves to the `from` element's
+                // captured `slice` value at evaluation time.
+                ["feature", { slice: "${from.slice}" }],
+                "entity",
+                "shared",
+              ],
             },
+            // ── entities ───────────────────────────────────────────────────
+            // Cross-slice entity→entity imports are FORBIDDEN.
             {
-              from: { type: "entities" },
-              allow: {
-                to: { type: ["shared"] },
-              },
+              from: "entity",
+              allow: [
+                // Same-slice only: captured "slice" value must match.
+                ["entity", { slice: "${from.slice}" }],
+                "shared",
+              ],
             },
+            // ── shared ─────────────────────────────────────────────────────
             {
-              from: { type: "shared" },
-              allow: {
-                to: { type: ["shared"] },
-              },
+              from: "shared",
+              allow: ["shared"],
             },
           ],
         },

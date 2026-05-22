@@ -85,6 +85,7 @@
     "@vitejs/plugin-react": "6.0.1",
     "eslint": "9.39.1",
     "eslint-config-prettier": "10.1.8",
+    "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-boundaries": "6.0.2",
     "eslint-plugin-jest-dom": "5.5.0",
     "eslint-plugin-react-hooks": "6.1.1",
