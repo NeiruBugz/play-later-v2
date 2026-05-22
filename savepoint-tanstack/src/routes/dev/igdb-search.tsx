@@ -6,7 +6,7 @@ import { env } from "@env";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
-import { searchGamesFn } from "@/features/search-games/api/search-games";
+import { searchGamesFn } from "@/entities/game";
 import type { SearchGamesResult } from "@/shared/api/igdb";
 import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";

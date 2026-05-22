@@ -1,19 +1,16 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-
-import { searchGames, type SearchGamesResult } from "@/shared/api/igdb";
-
-const SEARCH_GAMES_INPUT = z.object({
-  name: z.string().min(1, "Search query is required").max(200),
-  offset: z.number().int().nonnegative().optional(),
-});
-
-// Anonymous-allowed: search has no auth requirement (canonical exposes search via a public route).
-export const searchGamesFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SEARCH_GAMES_INPUT.parse(data))
-  .handler(async ({ data }): Promise<SearchGamesResult> => {
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it.
-    const parsed = SEARCH_GAMES_INPUT.parse(data);
-    return searchGames({ name: parsed.name, offset: parsed.offset });
-  });
+/**
+ * Re-exports the canonical `searchGamesFn` from `entities/game/api/`.
+ *
+ * The single source of truth lives at `@/entities/game/api/search-games` so
+ * that all feature slices import downward from the entity layer rather than
+ * from each other (FSD: no cross-feature sibling imports).
+ *
+ * This file is kept as a thin re-export so the `search-games` feature's
+ * `SearchGamesResults` UI component can continue to reference
+ * `../api/search-games` without a path change — all imports still resolve
+ * to the one entity-layer server fn.
+ */
+export {
+  searchGamesFn,
+  SEARCH_GAMES_INPUT,
+} from "@/entities/game/api/search-games";

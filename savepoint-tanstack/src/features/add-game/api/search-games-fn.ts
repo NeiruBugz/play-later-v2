@@ -1,22 +1,15 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-
-import { searchGames, type SearchGamesResult } from "@/shared/api/igdb";
-
-// FSD: per-feature thin wrapper. Sibling feature `search-games` has its own
-// equivalent — duplication is the price of feature isolation. The shared
-// `searchGames` transport in `@/shared/api/igdb` is the actual reuse point.
-const SEARCH_GAMES_INPUT = z.object({
-  name: z.string().min(1, "Search query is required").max(200),
-  offset: z.number().int().nonnegative().optional(),
-});
-
-// Anonymous-allowed: search has no auth requirement.
-export const searchGamesFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SEARCH_GAMES_INPUT.parse(data))
-  .handler(async ({ data }): Promise<SearchGamesResult> => {
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it.
-    const parsed = SEARCH_GAMES_INPUT.parse(data);
-    return searchGames({ name: parsed.name, offset: parsed.offset });
-  });
+/**
+ * Re-exports the canonical `searchGamesFn` from `entities/game/api/`.
+ *
+ * The single source of truth lives at `@/entities/game/api/search-games` so
+ * that all feature slices import downward from the entity layer rather than
+ * from each other (FSD: no cross-feature sibling imports).
+ *
+ * This file is kept as a thin re-export so existing consumers that import
+ * from `@/features/add-game/api/search-games-fn` continue to work without
+ * path changes — the canonical implementation is the entity-layer server fn.
+ */
+export {
+  searchGamesFn,
+  SEARCH_GAMES_INPUT,
+} from "@/entities/game/api/search-games";

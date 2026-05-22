@@ -17,6 +17,7 @@ import {
   TimesToBeatSkeleton,
 } from "@/features/game-detail/ui";
 import { AppError } from "@/shared/lib/errors";
+import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
 export const Route = createFileRoute("/games/$slug")({
@@ -99,7 +100,19 @@ function RelatedGamesSections({
       <h2 id="related-games-heading" className="text-h3">
         Related games
       </h2>
-      <RelatedGamesTabs sections={sections} />
+      <RelatedGamesTabs
+        sections={sections}
+        renderGame={(game) => (
+          <GameCard
+            game={{
+              slug: game.slug,
+              title: game.title,
+              coverImageId: game.coverImageId,
+            }}
+            density="minimal"
+          />
+        )}
+      />
     </section>
   );
 }

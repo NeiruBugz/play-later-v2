@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { searchGamesFn } from "@/features/add-game/api/search-games-fn";
+import { searchGamesFn } from "@/entities/game";
 import type { SearchResponseItem } from "@/shared/api/igdb";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";

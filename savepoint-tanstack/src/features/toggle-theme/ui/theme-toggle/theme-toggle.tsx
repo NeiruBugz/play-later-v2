@@ -1,7 +1,7 @@
 import { Gamepad2, Monitor, Moon, Sparkles, Sun } from "lucide-react";
 import { type ComponentType } from "react";
 
-import { useTheme, type Theme } from "@/app/providers/theme-provider";
+import { useTheme, type Theme } from "@/shared/lib/theme";
 import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,

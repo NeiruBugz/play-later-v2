@@ -154,6 +154,12 @@ describe("RelatedGamesInfiniteList", () => {
           collectionId={COLLECTION_ID}
           pageSize={PAGE_SIZE}
           firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
         />
       );
     });
@@ -179,6 +185,12 @@ describe("RelatedGamesInfiniteList", () => {
           collectionId={COLLECTION_ID}
           pageSize={PAGE_SIZE}
           firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
         />
       );
 
@@ -212,6 +224,12 @@ describe("RelatedGamesInfiniteList", () => {
           collectionId={COLLECTION_ID}
           pageSize={PAGE_SIZE}
           firstPage={FIRST_PAGE_NO_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
         />
       );
     });
@@ -235,6 +253,12 @@ describe("RelatedGamesInfiniteList", () => {
           collectionId={COLLECTION_ID}
           pageSize={PAGE_SIZE}
           firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
         />
       );
 
@@ -268,6 +292,12 @@ describe("RelatedGamesInfiniteList", () => {
           collectionId={COLLECTION_ID}
           pageSize={PAGE_SIZE}
           firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
         />
       );
 
@@ -298,6 +328,12 @@ describe("RelatedGamesInfiniteList", () => {
           collectionId={COLLECTION_ID}
           pageSize={PAGE_SIZE}
           firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
         />
       );
 

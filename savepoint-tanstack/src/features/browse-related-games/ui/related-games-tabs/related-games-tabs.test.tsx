@@ -51,7 +51,7 @@ const actions = {
 describe("RelatedGamesTabs", () => {
   describe("given no sections", () => {
     beforeEach(() => {
-      render(<RelatedGamesTabs sections={[]} />);
+      render(<RelatedGamesTabs sections={[]} renderGame={() => null} />);
     });
 
     it("renders nothing", () => {
@@ -61,7 +61,12 @@ describe("RelatedGamesTabs", () => {
 
   describe("given two sections", () => {
     beforeEach(() => {
-      render(<RelatedGamesTabs sections={[SECTION_A, SECTION_B]} />);
+      render(
+        <RelatedGamesTabs
+          sections={[SECTION_A, SECTION_B]}
+          renderGame={() => null}
+        />
+      );
     });
 
     it("renders one tab per collection labelled with the collection name", () => {
@@ -92,7 +97,12 @@ describe("RelatedGamesTabs", () => {
 
   describe("given the user switches to the second tab", () => {
     beforeEach(async () => {
-      render(<RelatedGamesTabs sections={[SECTION_A, SECTION_B]} />);
+      render(
+        <RelatedGamesTabs
+          sections={[SECTION_A, SECTION_B]}
+          renderGame={() => null}
+        />
+      );
       await actions.switchToTab("Platformers");
     });
 
@@ -110,7 +120,9 @@ describe("RelatedGamesTabs", () => {
 
   describe("given a single section", () => {
     beforeEach(() => {
-      render(<RelatedGamesTabs sections={[SECTION_A]} />);
+      render(
+        <RelatedGamesTabs sections={[SECTION_A]} renderGame={() => null} />
+      );
     });
 
     it("still renders the tablist with one tab", () => {

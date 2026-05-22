@@ -59,7 +59,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 const mockSearchGamesFn = vi.fn();
 
-vi.mock("@/features/search-games", () => ({
+vi.mock("@/entities/game", () => ({
   searchGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),
 }));
 

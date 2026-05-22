@@ -1,4 +1,4 @@
-import type { ResolvedTheme, Theme } from "./theme-provider.type";
+import type { ResolvedTheme, Theme } from "@/shared/lib/theme";
 
 /** localStorage key — kept in sync with `next-themes` default (`theme`) so
  * user preferences interop with the canonical Next.js app during the

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { searchGamesFn } from "@/features/search-games";
+import { searchGamesFn } from "@/entities/game";
 import type { SearchResponseItem } from "@/shared/api/igdb";
 
 interface UseDebouncedGameSearchOptions {

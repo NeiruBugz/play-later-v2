@@ -2,11 +2,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { searchGamesFn } from "@/features/add-game/api/search-games-fn";
+import { searchGamesFn } from "@/entities/game";
 
 import { IgdbManualSearch } from "./igdb-manual-search";
 
-vi.mock("@/features/add-game/api/search-games-fn", () => ({
+vi.mock("@/entities/game", () => ({
   searchGamesFn: vi.fn(),
 }));
 

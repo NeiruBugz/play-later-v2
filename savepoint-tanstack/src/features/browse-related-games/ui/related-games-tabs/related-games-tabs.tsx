@@ -3,7 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { RelatedGamesInfiniteList } from "../related-games-infinite-list";
 import type { RelatedGamesTabsProps } from "./related-games-tabs.type";
 
-export function RelatedGamesTabs({ sections }: RelatedGamesTabsProps) {
+export function RelatedGamesTabs({
+  sections,
+  renderGame,
+}: RelatedGamesTabsProps) {
   if (sections.length === 0) return null;
 
   const firstSection = sections[0]!;
@@ -31,6 +34,7 @@ export function RelatedGamesTabs({ sections }: RelatedGamesTabsProps) {
             collectionId={section.collectionId}
             pageSize={section.pageSize}
             firstPage={section.firstPage}
+            renderGame={renderGame}
           />
         </TabsContent>
       ))}

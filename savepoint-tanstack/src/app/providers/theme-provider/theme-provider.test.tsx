@@ -19,8 +19,9 @@ import { render } from "@testing-library/react";
 import { type PropsWithChildren } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { Theme } from "@/shared/lib/theme";
+
 import { SavepointThemeProvider } from "./theme-provider";
-import type { Theme } from "./theme-provider.type";
 
 // ---------------------------------------------------------------------------
 // Helpers

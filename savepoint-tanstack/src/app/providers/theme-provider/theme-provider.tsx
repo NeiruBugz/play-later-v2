@@ -1,31 +1,27 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type {
-  Theme,
-  ThemeContextValue,
-  ThemeProviderProps,
-} from "./theme-provider.type";
+import {
+  ThemeContext,
+  type Theme,
+  type ThemeContextValue,
+} from "@/shared/lib/theme";
+
+import type { ThemeProviderProps } from "./theme-provider.type";
 import {
   applyThemeToHtml,
   getSystemPreference,
   readStoredTheme,
   resolveTheme,
-  THEME_STORAGE_KEY,
 } from "./theme-provider.utility";
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
  * Hand-rolled theme provider. Replaces `next-themes` for the TanStack Start
  * shell — see DIVERGENCES.md → Slice 19 for rationale (FOUC-script race with
  * RootDocument's inline pre-hydration script).
+ *
+ * The theme context object and `useTheme` hook live in `@/shared/lib/theme`
+ * so that lower-layer slices (e.g. `features/toggle-theme`) can read the
+ * current theme without importing from the `app/` layer.
  *
  * Responsibilities:
  *   • Hold the user-chosen `Theme` (incl. "system").
@@ -43,13 +39,9 @@ export function SavepointThemeProvider({
 }: ThemeProviderProps) {
   const initialTheme: Theme = forcedTheme ?? defaultTheme;
 
-  // FSD note: this is a client-side state hook in the `app/` layer — it owns
-  // global theme state, which providers (per FSD) are the right home for.
   const [theme, setThemeState] = useState<Theme>(initialTheme);
 
   // On mount: rehydrate from localStorage (unless forced) and apply to <html>.
-  // We always re-apply even when the inline pre-hydration script ran, because
-  // the React tree may be rendering a forcedTheme or a different default.
   useEffect(() => {
     const next = forcedTheme ?? readStoredTheme(defaultTheme);
     setThemeState(next);
@@ -87,7 +79,7 @@ export function SavepointThemeProvider({
       setThemeState(next);
       applyThemeToHtml(next);
       try {
-        window.localStorage.setItem(THEME_STORAGE_KEY, next);
+        window.localStorage.setItem("theme", next);
       } catch {
         // Ignore quota / private-mode failures; the in-memory state still
         // updates so the UI stays consistent within this tab.
@@ -108,18 +100,6 @@ export function SavepointThemeProvider({
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
-}
-
-/**
- * Read the current theme + setter. Throws if called outside a
- * `<SavepointThemeProvider>` — that's an integration bug, not a UX state.
- */
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (ctx === null) {
-    throw new Error("useTheme() must be used within <SavepointThemeProvider>.");
-  }
-  return ctx;
 }
 
 // Re-exported so tests / utilities can probe the OS preference without

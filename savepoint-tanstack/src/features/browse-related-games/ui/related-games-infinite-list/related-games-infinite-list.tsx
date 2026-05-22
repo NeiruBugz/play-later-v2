@@ -1,8 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { GameCard } from "@/widgets/game-card";
-
 import { getRelatedGamesFn, type RelatedGame } from "../../api";
 import type {
   RelatedGamesInfiniteListProps,
@@ -13,6 +11,7 @@ export function RelatedGamesInfiniteList({
   collectionId,
   pageSize,
   firstPage,
+  renderGame,
 }: RelatedGamesInfiniteListProps) {
   const [games, setGames] = useState<RelatedGame[]>(firstPage.games);
   const [latestPage, setLatestPage] = useState<RelatedGamesPage>(firstPage);
@@ -93,16 +92,7 @@ export function RelatedGamesInfiniteList({
       >
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {games.map((game) => (
-            <li key={game.igdbId}>
-              <GameCard
-                game={{
-                  slug: game.slug,
-                  title: game.title,
-                  coverImageId: game.coverImageId,
-                }}
-                density="minimal"
-              />
-            </li>
+            <li key={game.igdbId}>{renderGame(game)}</li>
           ))}
         </ul>
 

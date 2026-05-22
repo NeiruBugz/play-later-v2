@@ -1,4 +1,5 @@
 export { upsertGameFromIgdb } from "./upsert-game.server";
+export { searchGamesFn, SEARCH_GAMES_INPUT } from "./search-games";
 export { getGameDetails } from "./get-game-details.server";
 export type { GameDetails } from "./get-game-details.server";
 export { getGameCollectionsByIgdbId } from "./get-game-collections.server";
