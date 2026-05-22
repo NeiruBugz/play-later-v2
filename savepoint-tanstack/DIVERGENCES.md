@@ -1859,3 +1859,47 @@ Inbound links (`app-sidebar`, `app-mobile-topbar`) reference the path string
 Regression guard: `src/routes/-games.search.test.tsx` asserts the route has no
 `beforeLoad` guard (`Route.options.beforeLoad` is `undefined`) and renders the
 search surface for an anonymous visitor.
+
+## Slice 23 — FSD audit + boundaries remediation
+
+The FSD audit found `eslint-plugin-boundaries` was not resolving the `@/` path
+alias (no `import/resolver` in its settings block), so `lint` reported green
+while enforcing nothing on aliased imports (≈ every real import). Fixing the
+resolver surfaced 34 raw violations; triaged to 6 genuine breaks + ~5 allowed
+widget compositions + ~23 config false-positives (barrels + root-shell wiring).
+
+**Boundaries config tightened to enforce the documented policy.** Added
+`eslint-import-resolver-typescript` (exact-pinned) and redesigned
+`eslint.config.mjs` with per-slice capture groups: `features`/`entities` forbid
+cross-slice imports but allow same-slice (barrel re-exports, intra-slice) via
+`${from.slice}` matching; `widgets→widgets` allowed (composition per
+`widgets.md`); `routes→app` allowed (the `__root.tsx` shell seam); same-layer
+barrels allowed. The linter now flags ONLY genuine cross-slice/cross-layer
+breaks. Regression guard (`test/eslint/fsd-boundaries.test.ts`) extended to pin
+alias resolution + per-slice policy. (Known follow-up: the config uses the
+plugin's v5 legacy selector/`${...}` template syntax — harmless under v6.0.2 but
+prints per-run deprecation diagnostics; migrate to object-selectors + `{{...}}`.)
+
+**6 genuine violations relocated (not waived):**
+- `features/browse-related-games` no longer imports `@/widgets/game-card` — the
+  card is injected via a `renderGame: (game) => ReactNode` slot prop from the
+  composing route `games.$slug.tsx` (slot-prop is the FSD-preferred inversion).
+- `features/toggle-theme` no longer imports `@/app/...` — `Theme`,
+  `ResolvedTheme`, `ThemeContextValue`, `ThemeContext`, `useTheme` moved to
+  `@/shared/lib/theme`; `SavepointThemeProvider` stays in `app/` and imports the
+  context from shared, so lower layers consume the hook downward.
+- `command-palette` + `steam-import` no longer import a sibling feature's
+  `searchGamesFn` — the IGDB search was relocated to
+  `entities/game/api/search-games.ts`; all consumers import it downward from the
+  game entity.
+- `entities/profile/ui/overview-tab` (which imported the `library-item` entity)
+  was deleted; its cross-entity composition lives at the widget layer.
+
+**Widget-to-widget carve-outs (allowed by policy, documented per `widgets.md`):**
+- `widgets/dashboard-page/` → `widgets/library-item-card/` — the dashboard
+  game-section composes library cards (composition, not coincidence).
+- `widgets/journal-timeline-page/` → `widgets/journal-timeline/` — the page
+  widget wraps the timeline widget and owns the compose/detail navigation.
+These pre-date Slice 23 but were invisible while the linter was alias-blind;
+now surfaced and accepted as composition. The boundaries config allows
+`widgets→widgets` wholesale, so this list is the human/code-review discipline.

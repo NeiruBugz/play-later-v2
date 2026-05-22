@@ -24,12 +24,14 @@ they do NOT implement business logic.
 
 ### Widget-to-widget imports
 
-FSD nominally forbids sibling-to-sibling imports. The codebase has two intentional carve-outs:
+FSD nominally forbids sibling-to-sibling imports. The codebase has these intentional carve-outs:
 
 - `widgets/library-page/` → `widgets/library-item-card/`
 - `widgets/library-item-card/` → `widgets/game-card/` (extends GameCard's shape)
+- `widgets/dashboard-page/` → `widgets/library-item-card/` (dashboard section composes library cards)
+- `widgets/journal-timeline-page/` → `widgets/journal-timeline/` (page widget wraps its timeline + owns navigation)
 
-Both are justified in [`../../../savepoint-tanstack/DIVERGENCES.md`](../../../savepoint-tanstack/DIVERGENCES.md) (LibraryItemCard widget move post-Slice 14A). When introducing a new widget-to-widget import:
+All are justified in [`../../../savepoint-tanstack/DIVERGENCES.md`](../../../savepoint-tanstack/DIVERGENCES.md) (the first two: LibraryItemCard widget move post-Slice 14A; the latter two surfaced + documented in the Slice 23 FSD audit, when the boundaries linter was made `@/`-alias-aware). The boundaries linter does **not** enforce per-carve-out — it allows `widgets→widgets` wholesale; this list is the human/code-review discipline. When introducing a new widget-to-widget import:
 
 - The importer must fundamentally extend the importee's shape (composition, not coincidence).
 - Document the import with an inline comment pointing to the new DIVERGENCES.md entry.
