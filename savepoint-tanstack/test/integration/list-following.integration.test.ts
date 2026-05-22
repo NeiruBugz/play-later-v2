@@ -215,6 +215,17 @@ describe("listFollowingWorker", () => {
   // Empty state
   // -------------------------------------------------------------------------
 
+  describe("given the target user has a private profile", () => {
+    it("returns empty following list without throwing when target is private", async () => {
+      // private-dan has isPublicProfile = false (seeded in common setup).
+      const result = await listFollowingWorker(undefined, {
+        targetUserId: "lfg-user-private-dan",
+      });
+      expect(result.following).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+  });
+
   describe("empty state", () => {
     it("returns an empty following array when the target follows nobody", async () => {
       // eve follows nobody.

@@ -8,7 +8,7 @@
  * };
  */
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -119,6 +119,23 @@ describe("ComposeJournalEntryDialog", () => {
     });
   });
 
+  describe("given the form is submitted programmatically with empty content", () => {
+    beforeEach(() => {
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+      // Submit directly on the form element to exercise the `if (isEmpty) return`
+      // guard in handleSubmit — the Save button is disabled so userEvent won't reach it.
+      // eslint-disable-next-line testing-library/no-node-access
+      const form = elements.getContentTextarea().closest("form")!;
+      fireEvent.submit(form);
+    });
+
+    it("does not call createJournalEntryFn when content is empty", () => {
+      expect(vi.mocked(createJournalEntryFn)).not.toHaveBeenCalled();
+    });
+  });
+
   describe("given the server fn rejects", () => {
     beforeEach(async () => {
       vi.mocked(createJournalEntryFn).mockRejectedValue(
@@ -139,6 +156,38 @@ describe("ComposeJournalEntryDialog", () => {
 
     it("calls toast.error with the rejection message", () => {
       expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Server error");
+    });
+  });
+
+  describe("given the server fn rejects with a non-Error value", () => {
+    beforeEach(async () => {
+      vi.mocked(createJournalEntryFn).mockRejectedValue("string rejection");
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+      await actions.typeContent("Some content");
+      await actions.submit();
+    });
+
+    it("shows the fallback error message", async () => {
+      await waitFor(() => {
+        expect(screen.getByRole("alert").textContent).toContain(
+          "Something went wrong"
+        );
+      });
+    });
+  });
+
+  describe("given the user clicks Cancel", () => {
+    beforeEach(async () => {
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    });
+
+    it("calls onOpenChange(false) to close the dialog", () => {
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 

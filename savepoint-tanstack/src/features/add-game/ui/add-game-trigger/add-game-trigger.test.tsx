@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,14 @@ vi.mock("@/features/add-game/api/search-games-fn", () => ({
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
+}));
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useRouter: vi.fn(() => ({ invalidate: vi.fn() })),
 }));
 
 const elements = {
@@ -62,6 +70,46 @@ describe("AddGameTrigger", () => {
 
     it("renders the AddGameModal search input inside the dialog", () => {
       expect(elements.querySearchInput()).not.toBeNull();
+    });
+  });
+
+  describe("given the AddGameModal calls onAdded (e.g. after a successful add)", () => {
+    beforeEach(async () => {
+      const { addGameToLibraryFn } =
+        await import("@/features/add-game/api/add-game-to-library-fn");
+      const { searchGamesFn } =
+        await import("@/features/add-game/api/search-games-fn");
+      vi.mocked(addGameToLibraryFn).mockResolvedValue(undefined as never);
+      vi.mocked(searchGamesFn).mockResolvedValue({
+        games: [{ id: 1234, name: "Half-Life 2" }],
+        count: 1,
+      } as never);
+
+      render(<AddGameTrigger />);
+      await actions.clickTrigger();
+
+      // Type a search query and submit the form.
+      const searchInput = screen.getByRole("searchbox", {
+        name: "Search games",
+      });
+      await userEvent.type(searchInput, "half{Enter}");
+
+      // Wait for results to appear then click the first result.
+      await waitFor(() => {
+        expect(screen.queryByText("Half-Life 2")).not.toBeNull();
+      });
+      await userEvent.click(screen.getByText("Half-Life 2"));
+
+      // Click "Add to library" to trigger the onAdded callback.
+      await userEvent.click(
+        screen.getByRole("button", { name: "Add to library" })
+      );
+    });
+
+    it("closes the dialog after onAdded fires (dialog disappears)", async () => {
+      await waitFor(() => {
+        expect(elements.queryDialog()).toBeNull();
+      });
     });
   });
 

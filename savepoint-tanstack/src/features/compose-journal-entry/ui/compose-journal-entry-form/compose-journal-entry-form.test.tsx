@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -92,6 +92,47 @@ describe("ComposeJournalEntryForm", () => {
 
     it("disables the Save button", () => {
       expect(elements.getSaveButton()).toBeDisabled();
+    });
+  });
+
+  describe("given the form is submitted programmatically with empty content", () => {
+    beforeEach(() => {
+      render(<ComposeJournalEntryForm />);
+      // Submit the form directly to exercise the `if (isEmpty) return` guard
+      // in handleSubmit (the Save button is disabled, so userEvent.click won't fire).
+      // eslint-disable-next-line testing-library/no-node-access
+      const form = elements.getContent().closest("form")!;
+      fireEvent.submit(form);
+    });
+
+    it("does not call createJournalEntryFn when content is empty", () => {
+      expect(vi.mocked(createJournalEntryFn)).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given the user clicks Cancel", () => {
+    beforeEach(async () => {
+      render(<ComposeJournalEntryForm />);
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    });
+
+    it("navigates to /journal", () => {
+      expect(navigateMock).toHaveBeenCalledWith({ to: "/journal" });
+    });
+  });
+
+  describe("given the server fn rejects with a non-Error value", () => {
+    beforeEach(async () => {
+      vi.mocked(createJournalEntryFn).mockRejectedValue("string rejection");
+      render(<ComposeJournalEntryForm />);
+      await actions.typeContent("Will fail");
+      await actions.submit();
+    });
+
+    it("shows the generic fallback error message", async () => {
+      await waitFor(() => {
+        expect(elements.queryAlert()?.textContent).toBe("Something went wrong");
+      });
     });
   });
 

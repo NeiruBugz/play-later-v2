@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -280,6 +280,50 @@ describe("AddGameModal", () => {
 
     it("does not call addGameToLibraryFn when Add to library is clicked without a selection", async () => {
       // Button is disabled, but assert the fn was not called defensively.
+      expect(vi.mocked(addGameToLibraryFn)).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---- Empty query guard ---------------------------------------------------
+
+  describe("given the user submits the search form with an empty query", () => {
+    beforeEach(async () => {
+      render(<AddGameModal {...defaultProps} />);
+      // Submit the form without typing anything — bypasses the disabled check
+      // directly on the form element to hit the `if (trimmed.length === 0) return`
+      // guard in handleSubmit.
+      const searchInput = screen.getByRole("searchbox", {
+        name: "Search games",
+      });
+      // eslint-disable-next-line testing-library/no-node-access
+      const form = searchInput.closest("form")!;
+      fireEvent.submit(form);
+    });
+
+    it("does not call searchGamesFn when the query is empty", () => {
+      expect(vi.mocked(searchGamesFn)).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---- No game selected guard ----------------------------------------------
+
+  describe("given results are shown but the user clicks Add to library without selecting a game", () => {
+    beforeEach(async () => {
+      vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
+      render(<AddGameModal {...defaultProps} />);
+      await actions.submitSearch("Hollow");
+      await waitFor(() => {
+        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
+      });
+      // Do NOT select a game, then directly invoke handleAdd by finding
+      // the button and firing a click even though it is disabled.
+      // The `disabled` attribute prevents userEvent.click from firing;
+      // use fireEvent to reach the `if (selectedId == null) return` guard.
+      const addBtn = elements.getAddButton();
+      fireEvent.click(addBtn);
+    });
+
+    it("does not call addGameToLibraryFn when no game is selected", () => {
       expect(vi.mocked(addGameToLibraryFn)).not.toHaveBeenCalled();
     });
   });

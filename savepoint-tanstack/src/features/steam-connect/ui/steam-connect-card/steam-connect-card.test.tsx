@@ -242,4 +242,22 @@ describe("SteamConnectCard", () => {
       expect(invalidateMock).not.toHaveBeenCalled();
     });
   });
+
+  describe("given the user opens the disconnect dialog and clicks Cancel", () => {
+    beforeEach(async () => {
+      render(
+        <SteamConnectCard steamId={STEAM_ID_64} connectUrl={CONNECT_URL} />
+      );
+      await actions.openDisconnectDialog();
+      const dialog = elements.getDialog();
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Cancel" })
+      );
+    });
+
+    it("closes the confirmation dialog without calling disconnectSteamFn", () => {
+      expect(elements.queryDialog()).toBeNull();
+      expect(vi.mocked(disconnectSteamFn)).not.toHaveBeenCalled();
+    });
+  });
 });

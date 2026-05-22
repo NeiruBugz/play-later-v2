@@ -717,4 +717,31 @@ describe("getRelatedGames", () => {
       expect(result.page).toBe(1);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // IGDB transport failures (UpstreamError)
+  // -------------------------------------------------------------------------
+
+  describe("IGDB transport failures", () => {
+    it("throws UpstreamError when the IGDB request fails (non-OK HTTP status)", async () => {
+      const { UpstreamError } = await import("@/shared/lib/errors");
+      vi.stubGlobal(
+        "fetch",
+        makeFetchMock({ igdbOk: false, igdbStatus: 500, igdbBody: [] })
+      );
+
+      await expect(
+        getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 })
+      ).rejects.toBeInstanceOf(UpstreamError);
+    });
+
+    it("throws UpstreamError when IGDB returns a malformed (non-array) response", async () => {
+      const { UpstreamError } = await import("@/shared/lib/errors");
+      vi.stubGlobal("fetch", makeFetchMock({ igdbBody: { not: "an array" } }));
+
+      await expect(
+        getRelatedGames({ collectionId: COLLECTION_ID, page: 1, pageSize: 5 })
+      ).rejects.toBeInstanceOf(UpstreamError);
+    });
+  });
 });

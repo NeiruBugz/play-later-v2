@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -121,6 +121,117 @@ describe(IgdbManualSearch, () => {
       expect(
         screen.getByText("Failed to search games. Please try again.")
       ).toBeDefined();
+    });
+  });
+
+  describe("given the search returns a game with a cover image", () => {
+    const gameWithCover = {
+      id: 200,
+      name: "Hollow Knight",
+      slug: "hollow-knight",
+      first_release_date: 1488931200,
+      cover: { image_id: "co1x2y" },
+      platforms: [
+        { id: 6, name: "PC", abbreviation: "PC" },
+        { id: 14, name: "Mac", abbreviation: "Mac" },
+        { id: 3, name: "Linux", abbreviation: "Linux" },
+      ],
+    };
+
+    beforeEach(async () => {
+      vi.mocked(searchGamesFn).mockResolvedValue({
+        games: [gameWithCover],
+        count: 1,
+      } as never);
+      render(<IgdbManualSearch onSelect={vi.fn()} />);
+      await actions.typeQuery("hollow");
+      await waitFor(() => {
+        expect(elements.queryResultList()).not.toBeNull();
+      });
+    });
+
+    it("renders a cover image with correct alt text for results with a cover", () => {
+      expect(screen.getByAltText("Cover for Hollow Knight")).toBeDefined();
+    });
+
+    it("truncates platform list to at most 3 entries separated by commas", () => {
+      expect(screen.getByText("PC, Mac, Linux")).toBeDefined();
+    });
+  });
+
+  describe("given the component unmounts while a search success is in-flight (cancelled success path)", () => {
+    it("does not set state after unmount (exercises the cancelled-success return branch)", async () => {
+      let resolveSearch!: (v: {
+        games: typeof sampleGames;
+        count: number;
+      }) => void;
+      vi.mocked(searchGamesFn).mockReturnValue(
+        new Promise<{ games: typeof sampleGames; count: number }>((resolve) => {
+          resolveSearch = resolve;
+        }) as never
+      );
+
+      const { unmount } = render(<IgdbManualSearch onSelect={vi.fn()} />);
+      // Start a search by typing ≥3 chars and advancing past the debounce.
+      await userEvent.type(elements.getInput(), "hal");
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      // Search is now in-flight. Unmount before it resolves.
+      unmount();
+      // Resolve after unmount — cancelled guard fires.
+      act(() => {
+        resolveSearch({ games: sampleGames, count: 2 });
+      });
+      // No assertion on DOM (unmounted); passes if no React warning thrown.
+    });
+  });
+
+  describe("given the component unmounts while a search error is in-flight (cancelled error path)", () => {
+    it("does not set error state after unmount (exercises the cancelled-error return branch)", async () => {
+      let rejectSearch!: (reason: Error) => void;
+      vi.mocked(searchGamesFn).mockReturnValue(
+        new Promise<never>((_, reject) => {
+          rejectSearch = reject;
+        }) as never
+      );
+
+      const { unmount } = render(<IgdbManualSearch onSelect={vi.fn()} />);
+      await userEvent.type(elements.getInput(), "hal");
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      unmount();
+      act(() => {
+        rejectSearch(new Error("network down"));
+      });
+    });
+  });
+
+  describe("given the search returns a game with no platforms", () => {
+    const gameNoPlatforms = {
+      id: 201,
+      name: "Indie Game",
+      slug: "indie-game",
+      first_release_date: null,
+      platforms: [],
+    };
+
+    beforeEach(async () => {
+      vi.mocked(searchGamesFn).mockResolvedValue({
+        games: [gameNoPlatforms],
+        count: 1,
+      } as never);
+      render(<IgdbManualSearch onSelect={vi.fn()} />);
+      await actions.typeQuery("indie");
+      await waitFor(() => {
+        expect(elements.queryResultList()).not.toBeNull();
+      });
+    });
+
+    it("shows Unknown for release year and platform when both are absent", () => {
+      // Both year and platform render as "Unknown" — getAllByText returns both.
+      expect(screen.getAllByText("Unknown").length).toBeGreaterThanOrEqual(2);
     });
   });
 });

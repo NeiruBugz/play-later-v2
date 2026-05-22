@@ -70,6 +70,38 @@ describe("JournalEntryCard", () => {
     });
   });
 
+  describe("given an entry with a non-null title", () => {
+    beforeEach(() => {
+      render(
+        <JournalEntryCard entry={{ ...entry, title: "My Reflection Title" }} />
+      );
+    });
+
+    it("renders the title text as a heading", () => {
+      expect(screen.getByText("My Reflection Title")).toBeDefined();
+    });
+  });
+
+  describe("given an entry with kind REFLECTION", () => {
+    beforeEach(() => {
+      render(<JournalEntryCard entry={{ ...entry, kind: "REFLECTION" }} />);
+    });
+
+    it("renders Reflection as the kind label", () => {
+      expect(screen.getByText("Reflection")).toBeDefined();
+    });
+  });
+
+  describe("given an entry with no associated game", () => {
+    beforeEach(() => {
+      render(<JournalEntryCard entry={{ ...entry, game: null }} />);
+    });
+
+    it("does not render a game link", () => {
+      expect(screen.queryByRole("link")).toBeNull();
+    });
+  });
+
   describe("given an onSelect prop and the user clicks the card", () => {
     beforeEach(async () => {
       render(<JournalEntryCard entry={entry} onSelect={onSelect} />);
@@ -78,6 +110,19 @@ describe("JournalEntryCard", () => {
 
     it("calls onSelect with the entry id", () => {
       expect(onSelect).toHaveBeenCalledWith("entry-1");
+    });
+  });
+
+  describe("given an entry with a game and the user clicks the game link", () => {
+    beforeEach(async () => {
+      render(<JournalEntryCard entry={entry} onSelect={onSelect} />);
+      // Click the game title link — this fires stopPropagation to prevent
+      // the surrounding card's onClick from also firing.
+      await userEvent.click(screen.getByRole("link"));
+    });
+
+    it("does not call onSelect when clicking the game link (stopPropagation)", () => {
+      expect(onSelect).not.toHaveBeenCalled();
     });
   });
 });

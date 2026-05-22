@@ -244,6 +244,17 @@ describe("listFollowersWorker", () => {
   // Does not leak other users' follow relationships
   // -------------------------------------------------------------------------
 
+  describe("given the target user has a private profile", () => {
+    it("returns empty followers list without throwing when target is private", async () => {
+      // private-dan has isPublicProfile = false (seeded in common setup).
+      const result = await listFollowersWorker(undefined, {
+        targetUserId: "lf-user-private-dan",
+      });
+      expect(result.followers).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+  });
+
   describe("isolation", () => {
     it("does not include followers of other users in the result", async () => {
       // alice follows bob; make alice also follow eve.

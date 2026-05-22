@@ -68,4 +68,42 @@ describe("DeleteJournalEntryButton", () => {
       });
     });
   });
+
+  describe("given the user clicks Delete then cancels", () => {
+    beforeEach(async () => {
+      render(<DeleteJournalEntryButton entryId="entry-3" />);
+      await actions.clickDelete();
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    });
+
+    it("dismisses the confirm view and shows Delete button again", () => {
+      expect(elements.queryConfirmButton()).toBeNull();
+      expect(elements.getDeleteButton()).toBeDefined();
+    });
+
+    it("does not call deleteJournalEntryFn on cancel", () => {
+      expect(vi.mocked(deleteJournalEntryFn)).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given the delete call throws an error", () => {
+    beforeEach(async () => {
+      vi.mocked(deleteJournalEntryFn).mockRejectedValue(
+        new Error("Delete failed")
+      );
+      render(<DeleteJournalEntryButton entryId="entry-3" />);
+      await actions.clickDelete();
+      await actions.clickConfirm();
+    });
+
+    it("does not navigate on error", () => {
+      expect(navigateMock).not.toHaveBeenCalled();
+    });
+
+    it("resets back to the initial Delete state after error", async () => {
+      await waitFor(() => {
+        expect(elements.getDeleteButton()).toBeDefined();
+      });
+    });
+  });
 });

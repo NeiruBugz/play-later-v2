@@ -8,7 +8,7 @@
  * };
  */
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -111,6 +111,28 @@ describe("EditJournalEntryDialog", () => {
     });
   });
 
+  describe("given the form is submitted with empty content via fireEvent", () => {
+    beforeEach(async () => {
+      render(
+        <EditJournalEntryDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          entry={SEED_ENTRY}
+        />
+      );
+      // Clear content so isEmpty = true, then submit via the form element directly
+      // to exercise the `if (isEmpty) return` guard (Save button is disabled).
+      await userEvent.clear(elements.getContentTextarea());
+      // eslint-disable-next-line testing-library/no-node-access
+      const form = elements.getContentTextarea().closest("form")!;
+      fireEvent.submit(form);
+    });
+
+    it("does not call updateJournalEntryFn when content is empty", () => {
+      expect(vi.mocked(updateJournalEntryFn)).not.toHaveBeenCalled();
+    });
+  });
+
   describe("given the server fn rejects", () => {
     beforeEach(async () => {
       vi.mocked(updateJournalEntryFn).mockRejectedValue(
@@ -135,6 +157,46 @@ describe("EditJournalEntryDialog", () => {
 
     it("calls toast.error with the rejection message", () => {
       expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Update failed");
+    });
+  });
+
+  describe("given the server fn rejects with a non-Error value", () => {
+    beforeEach(async () => {
+      vi.mocked(updateJournalEntryFn).mockRejectedValue("string rejection");
+      render(
+        <EditJournalEntryDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          entry={SEED_ENTRY}
+        />
+      );
+      await actions.clearAndTypeContent("Will fail");
+      await actions.submit();
+    });
+
+    it("shows the fallback error message", async () => {
+      await waitFor(() => {
+        expect(screen.getByRole("alert").textContent).toContain(
+          "Something went wrong"
+        );
+      });
+    });
+  });
+
+  describe("given the user clicks Cancel", () => {
+    beforeEach(async () => {
+      render(
+        <EditJournalEntryDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          entry={SEED_ENTRY}
+        />
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    });
+
+    it("calls onOpenChange(false) to close the dialog", () => {
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 

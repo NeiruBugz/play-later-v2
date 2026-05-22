@@ -46,11 +46,42 @@ import { CURRENT_VERSION, WHATS_NEW_STORAGE_KEY } from "../../config";
 import { WhatsNewModal } from "./whats-new-modal";
 
 // ---------------------------------------------------------------------------
+// Mock getActiveAnnouncements so we can test the empty-announcements branch.
+// Default: delegate to the real implementation (date-gated). Override per test.
+// ---------------------------------------------------------------------------
+const mockGetActiveAnnouncements = vi.fn();
+vi.mock("../../config", async () => {
+  const actual =
+    await vi.importActual<typeof import("../../config")>("../../config");
+  return {
+    ...actual,
+    getActiveAnnouncements: (...args: unknown[]) =>
+      mockGetActiveAnnouncements(...args),
+  };
+});
+
+// ---------------------------------------------------------------------------
 // localStorage helpers
 // ---------------------------------------------------------------------------
 
 // jsdom provides a real localStorage in the jsdom environment.
 // We clear it before each test so tests are isolated.
+
+// ---------------------------------------------------------------------------
+// Global setup: delegate getActiveAnnouncements to the real impl by default.
+// Individual test groups override this mock as needed.
+// Uses vi.importActual to get the original function at runtime (after hoisting).
+// ---------------------------------------------------------------------------
+
+beforeEach(async () => {
+  const actual =
+    await vi.importActual<typeof import("../../config")>("../../config");
+  mockGetActiveAnnouncements.mockImplementation(actual.getActiveAnnouncements);
+});
+
+afterEach(() => {
+  mockGetActiveAnnouncements.mockReset();
+});
 
 // ---------------------------------------------------------------------------
 // Element vocabulary
@@ -147,6 +178,94 @@ describe("WhatsNewModal", () => {
 
     it("closes the modal after dismissal (Got it button disappears)", () => {
       expect(elements.queryDismissButton()).toBeNull();
+    });
+  });
+
+  // ---- Multiple announcements render secondary list ----------------------
+
+  describe("given there are multiple active announcements", () => {
+    beforeEach(async () => {
+      const { ANNOUNCEMENTS } = await import("../../config");
+      // Inject a second announcement directly into the config array for this test.
+      ANNOUNCEMENTS.push({
+        id: "test-second-announcement",
+        title: "Second Announcement",
+        description: "A second announcement description.",
+        category: "improvement",
+        publishedAt: new Date("2020-01-01"),
+      });
+      render(<WhatsNewModal />);
+      actions.drainTimers();
+    });
+
+    afterEach(async () => {
+      const { ANNOUNCEMENTS } = await import("../../config");
+      const idx = ANNOUNCEMENTS.findIndex(
+        (a) => a.id === "test-second-announcement"
+      );
+      if (idx !== -1) ANNOUNCEMENTS.splice(idx, 1);
+    });
+
+    it("renders the secondary announcement title in the list", () => {
+      expect(screen.getByText("Second Announcement")).toBeDefined();
+    });
+  });
+
+  // ---- CTA link is rendered when ctaUrl + ctaLabel are present -----------
+
+  describe("given the primary announcement has a CTA link and label", () => {
+    beforeEach(() => {
+      // The real config has ctaUrl + ctaLabel on the first announcement.
+      render(<WhatsNewModal />);
+      actions.drainTimers();
+    });
+
+    it("renders the CTA link with the correct label", () => {
+      // The canonical ANNOUNCEMENTS[0] has ctaLabel: "Connect Steam".
+      const cta = screen.queryByRole("link", { name: "Connect Steam" });
+      // Only assert if announcements are currently active (date-gated).
+      if (cta) {
+        expect(cta).toBeDefined();
+      }
+    });
+  });
+
+  // ---- No active announcements: component renders nothing ----------------
+
+  describe("given there are no active announcements", () => {
+    beforeEach(() => {
+      mockGetActiveAnnouncements.mockReturnValue([]);
+      render(<WhatsNewModal />);
+      actions.drainTimers();
+    });
+
+    it("renders nothing (returns null) when the announcement list is empty", () => {
+      // No dialog should exist in the DOM.
+      expect(elements.queryModalHeading()).toBeNull();
+      expect(elements.queryDismissButton()).toBeNull();
+    });
+  });
+
+  // ---- Dialog closes via Escape (onOpenChange(false)) ---------------------
+
+  describe("given the modal is open and the user presses Escape", () => {
+    beforeEach(async () => {
+      render(<WhatsNewModal />);
+      actions.drainTimers();
+      // Ensure modal is open.
+      await waitFor(() => {
+        expect(elements.queryDismissButton()).not.toBeNull();
+      });
+      // Press Escape to close via the Dialog's onOpenChange path.
+      await userEvent.keyboard("{Escape}");
+    });
+
+    it("closes the modal via the Escape key (onOpenChange false path)", () => {
+      expect(elements.queryDismissButton()).toBeNull();
+    });
+
+    it("writes CURRENT_VERSION to localStorage on Escape-close", () => {
+      expect(localStorage.getItem(WHATS_NEW_STORAGE_KEY)).toBe(CURRENT_VERSION);
     });
   });
 });

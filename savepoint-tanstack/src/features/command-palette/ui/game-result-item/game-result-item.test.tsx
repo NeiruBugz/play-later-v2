@@ -212,4 +212,73 @@ describe("GameResultItem", () => {
       expect(elements.queryCover()).toBeNull();
     });
   });
+
+  describe("given quickAddToLibraryFn rejects with an Error", () => {
+    beforeEach(async () => {
+      vi.mocked(quickAddToLibraryFn).mockRejectedValue(new Error("Add failed"));
+      renderRow();
+      await actions.clickAddToUpNext(GAME.name);
+    });
+
+    it("shows the error message via toast.error", async () => {
+      const { toast } = await import("sonner");
+      expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Add failed");
+    });
+  });
+
+  describe("given quickAddToLibraryFn rejects with a non-Error", () => {
+    beforeEach(async () => {
+      vi.mocked(quickAddToLibraryFn).mockRejectedValue("raw");
+      renderRow();
+      await actions.clickAddToUpNext(GAME.name);
+    });
+
+    it("shows a fallback error message via toast.error", async () => {
+      const { toast } = await import("sonner");
+      expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Failed to add game");
+    });
+  });
+
+  describe("given the undo action succeeds", () => {
+    beforeEach(async () => {
+      renderRow();
+      await actions.clickAddToUpNext(GAME.name);
+      const opts = showUndoToast.mock.calls[0]?.[0] as {
+        onUndo: () => void;
+      };
+      // Trigger undo
+      opts.onUndo();
+      // Wait for the async undo handler
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    it("fires a success toast with 'Removed'", async () => {
+      const { toast } = await import("sonner");
+      await vi.waitFor(() => {
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Removed", {
+          duration: 1000,
+        });
+      });
+    });
+  });
+
+  describe("given the undo removeLibraryItemFn rejects with a non-Error", () => {
+    beforeEach(async () => {
+      renderRow();
+      await actions.clickAddToUpNext(GAME.name);
+      vi.mocked(removeLibraryItemFn).mockRejectedValue("raw undo error");
+      const opts = showUndoToast.mock.calls[0]?.[0] as {
+        onUndo: () => void;
+      };
+      opts.onUndo();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    it("shows a fallback error message via toast.error for non-Error undo rejection", async () => {
+      const { toast } = await import("sonner");
+      await vi.waitFor(() => {
+        expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Failed to undo");
+      });
+    });
+  });
 });

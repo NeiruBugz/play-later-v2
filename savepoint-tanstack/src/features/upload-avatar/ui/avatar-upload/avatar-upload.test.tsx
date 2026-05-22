@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -205,6 +205,20 @@ describe("AvatarUpload", () => {
       expect(vi.mocked(setAvatarUrlFn)).not.toHaveBeenCalled();
       expect(mockRouterInvalidate).not.toHaveBeenCalled();
       expect(vi.mocked(toast.success)).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given the file input change fires with no file selected", () => {
+    beforeEach(() => {
+      vi.stubGlobal("fetch", vi.fn());
+      render(<AvatarUpload />);
+      // Fire a change event on the input with an empty FileList to hit
+      // the `if (!file) return` guard in handleChange.
+      fireEvent.change(elements.getFileInput(), { target: { files: [] } });
+    });
+
+    it("does not call getAvatarPresignedUrlFn when no file is present", () => {
+      expect(vi.mocked(getAvatarPresignedUrlFn)).not.toHaveBeenCalled();
     });
   });
 

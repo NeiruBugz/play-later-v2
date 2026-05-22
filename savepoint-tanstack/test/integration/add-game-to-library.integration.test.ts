@@ -350,4 +350,24 @@ describe("addGameToLibrary", () => {
       });
     }
   });
+
+  // -------------------------------------------------------------------------
+  // IGDB game not found — throws NotFoundError
+  // -------------------------------------------------------------------------
+
+  describe("given the igdbId is not in the DB and IGDB returns no results", () => {
+    const IGDB_ID_GHOST = 999_888_777;
+
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("ghostuser") });
+      // Override the fetch mock to return an empty array from IGDB for this game ID.
+      vi.stubGlobal("fetch", makeFetchMock([]));
+    });
+
+    it("throws when neither the DB nor IGDB knows the igdbId", async () => {
+      await expect(
+        addGameToLibrary("atl-user-ghostuser", { igdbId: IGDB_ID_GHOST })
+      ).rejects.toThrow();
+    });
+  });
 });

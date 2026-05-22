@@ -482,4 +482,107 @@ describe("LibraryModal", () => {
       expect(screen.queryByRole("combobox", { name: "Status" })).toBeNull();
     });
   });
+
+  // ---- Custom platform rendered in platform selector -------------------------
+
+  describe("given the entry has a custom platform not in the standard list", () => {
+    beforeEach(() => {
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, platform: "Atari Jaguar" }}
+        />
+      );
+    });
+
+    it("renders the custom platform option in the platform selector", () => {
+      // The SelectContent with the custom platform SelectItem renders the
+      // platform text when the platform is not in PLATFORM_OPTIONS.
+      // The custom platform value appears at least once (trigger + option in portal).
+      expect(screen.getAllByText("Atari Jaguar").length).toBeGreaterThan(0);
+    });
+  });
+
+  // ---- Rating input accepts keyboard interaction ----------------------------
+
+  describe("given the user interacts with the rating slider via keyboard", () => {
+    beforeEach(async () => {
+      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, rating: null }}
+        />
+      );
+      // Focus the rating slider and press ArrowRight to set a value, then Enter to commit
+      const slider = screen.getByRole("slider", { name: "Rating" });
+      await userEvent.click(slider);
+      await userEvent.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await actions.clickSave();
+    });
+
+    it("calls updateLibraryItemFn after a keyboard rating interaction", async () => {
+      await waitFor(() => {
+        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
+      });
+    });
+  });
+
+  // ---- Date inputs accept user input ----------------------------------------
+
+  describe("given the user types a start date", () => {
+    beforeEach(async () => {
+      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, startedAt: null }}
+        />
+      );
+      await userEvent.type(
+        screen.getByRole("textbox", { name: "Started" }),
+        "2024-05-01"
+      );
+      await actions.clickSave();
+    });
+
+    it("submits a non-null startedAt value to updateLibraryItemFn", async () => {
+      await waitFor(() => {
+        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
+      });
+      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
+        data: { startedAt: unknown };
+      };
+      // inputValueToDate converts "2024-05-01" to a Date object
+      expect(arg.data.startedAt).not.toBeNull();
+    });
+  });
+
+  describe("given the user types a completed date", () => {
+    beforeEach(async () => {
+      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, completedAt: null }}
+        />
+      );
+      await userEvent.type(
+        screen.getByRole("textbox", { name: "Completed" }),
+        "2024-06-15"
+      );
+      await actions.clickSave();
+    });
+
+    it("submits a non-null completedAt value to updateLibraryItemFn", async () => {
+      await waitFor(() => {
+        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
+      });
+      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
+        data: { completedAt: unknown };
+      };
+      // inputValueToDate converts "2024-06-15" to a Date object
+      expect(arg.data.completedAt).not.toBeNull();
+    });
+  });
 });

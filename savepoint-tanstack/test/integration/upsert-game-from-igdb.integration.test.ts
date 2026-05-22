@@ -21,7 +21,10 @@ import {
 } from "vitest";
 
 // RED import — this module does not exist until the GREEN step.
-import { upsertGameFromIgdb } from "@/entities/game/api/upsert-game.server";
+import {
+  upsertGameFromIgdb,
+  upsertGameFromIgdbPayload,
+} from "@/entities/game/api/upsert-game.server";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 
 import {
@@ -210,6 +213,38 @@ describe("upsertGameFromIgdb", () => {
         where: { igdbId: MOCK_IGDB_GAME.id },
       });
       expect(count).toBe(1);
+    });
+  });
+
+  describe("upsertGameFromIgdbPayload — cache hit path", () => {
+    const existingIgdbId = 99999;
+
+    beforeEach(async () => {
+      await db.prisma.game.create({
+        data: {
+          igdbId: existingIgdbId,
+          title: "Cached Game",
+          slug: "cached-game",
+          createdAt: new Date("2024-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+        },
+      });
+    });
+
+    it("returns the existing game when igdbId already exists (covers return existing branch)", async () => {
+      const payload = {
+        id: existingIgdbId,
+        name: "Cached Game New Name",
+        slug: "cached-game-new",
+        first_release_date: 1645747200,
+      };
+
+      const result = await upsertGameFromIgdbPayload(payload);
+
+      expect(result.igdbId).toBe(existingIgdbId);
+      // Returns the existing row, not the payload's new name
+      expect(result.title).toBe("Cached Game");
+      expect(result.slug).toBe("cached-game");
     });
   });
 

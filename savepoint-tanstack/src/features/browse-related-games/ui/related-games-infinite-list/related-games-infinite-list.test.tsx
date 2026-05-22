@@ -317,6 +317,165 @@ describe("RelatedGamesInfiniteList", () => {
     });
   });
 
+  describe("given the next-page fetch rejects with a non-Error value", () => {
+    beforeEach(async () => {
+      mockGetRelatedGamesFn.mockRejectedValue("string rejection");
+
+      render(
+        <RelatedGamesInfiniteList
+          collectionId={COLLECTION_ID}
+          pageSize={PAGE_SIZE}
+          firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
+        />
+      );
+
+      actions.triggerSentinelIntersection();
+      await act(async () => {});
+    });
+
+    it("shows the fallback error message when cause is not an Error instance", () => {
+      expect(elements.getErrorAlert().textContent).toContain(
+        "Failed to load related games"
+      );
+    });
+  });
+
+  describe("given the sentinel exits the viewport (isIntersecting = false)", () => {
+    beforeEach(async () => {
+      mockGetRelatedGamesFn.mockResolvedValue(PAGE_2_RESPONSE);
+
+      render(
+        <RelatedGamesInfiniteList
+          collectionId={COLLECTION_ID}
+          pageSize={PAGE_SIZE}
+          firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
+        />
+      );
+
+      // Fire a non-intersecting entry — should NOT trigger a fetch.
+      actions.triggerSentinelExit();
+      await act(async () => {});
+    });
+
+    it("does not call getRelatedGamesFn when the sentinel is not intersecting", () => {
+      expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given a fetch error occurred and the intersection fires again (errorRef guard)", () => {
+    beforeEach(async () => {
+      mockGetRelatedGamesFn
+        .mockRejectedValueOnce(new Error("IGDB error"))
+        .mockResolvedValue(PAGE_2_RESPONSE);
+
+      render(
+        <RelatedGamesInfiniteList
+          collectionId={COLLECTION_ID}
+          pageSize={PAGE_SIZE}
+          firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
+        />
+      );
+
+      // First intersection — triggers fetch which rejects, sets error.
+      actions.triggerSentinelIntersection();
+      await act(async () => {});
+
+      // After error, `showSentinel` = false and sentinel is removed. But the
+      // captured callback still exists (mock disconnect is a no-op). Fire again —
+      // this exercises `if (errorRef.current !== null) return` in fetchNextPage.
+      actions.triggerSentinelIntersection();
+      await act(async () => {});
+    });
+
+    it("does not call getRelatedGamesFn a second time when error is already set", () => {
+      // First call (rejected), second call guarded by errorRef — only 1 total.
+      expect(mockGetRelatedGamesFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("given all pages are loaded and the intersection fires again (hasMore guard)", () => {
+    beforeEach(async () => {
+      // First fetch returns the last page (hasMore = false).
+      mockGetRelatedGamesFn.mockResolvedValue(PAGE_2_RESPONSE);
+
+      render(
+        <RelatedGamesInfiniteList
+          collectionId={COLLECTION_ID}
+          pageSize={PAGE_SIZE}
+          firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
+        />
+      );
+
+      // Trigger first fetch — loads page 2 (hasMore = false).
+      actions.triggerSentinelIntersection();
+      await act(async () => {});
+
+      // Sentinel is now gone (showSentinel = false) but capturedCallback still
+      // holds the old reference. Fire intersection again — exercises
+      // `if (!latestPageRef.current.hasMore) return` in fetchNextPage.
+      actions.triggerSentinelIntersection();
+      await act(async () => {});
+    });
+
+    it("does not call getRelatedGamesFn a second time after all pages are loaded", () => {
+      expect(mockGetRelatedGamesFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("given the IntersectionObserver callback fires with an empty entries array", () => {
+    beforeEach(async () => {
+      mockGetRelatedGamesFn.mockResolvedValue(PAGE_2_RESPONSE);
+
+      render(
+        <RelatedGamesInfiniteList
+          collectionId={COLLECTION_ID}
+          pageSize={PAGE_SIZE}
+          firstPage={FIRST_PAGE_WITH_MORE}
+          renderGame={(game) => (
+            <img
+              alt={`Cover for ${game.title}`}
+              src={`/covers/${game.coverImageId}`}
+            />
+          )}
+        />
+      );
+
+      // Fire the callback with an empty entries array — exercises `if (!entry) return`.
+      act(() => {
+        capturedCallback?.([]);
+      });
+      await act(async () => {});
+    });
+
+    it("does not call getRelatedGamesFn when entries is empty", () => {
+      expect(mockGetRelatedGamesFn).not.toHaveBeenCalled();
+    });
+  });
+
   describe("given the next-page fetch rejects with an error", () => {
     const ERROR_MESSAGE = "IGDB upstream error";
 

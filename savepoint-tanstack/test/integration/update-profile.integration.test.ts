@@ -146,4 +146,73 @@ describe("updateProfileWorker", () => {
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
   });
+
+  describe("given a non-existent userId (P2025 path)", () => {
+    it("rejects with NotFoundError when the user does not exist", async () => {
+      const { NotFoundError } = await import("@/shared/lib/errors");
+      await expect(
+        updateProfileWorker("nonexistent-user-id-xyz", { name: "Ghost" })
+      ).rejects.toBeInstanceOf(NotFoundError);
+    });
+  });
+
+  describe("given an authenticated user updating only the name field", () => {
+    const userId = "update-profile-name-only-001";
+
+    beforeEach(async () => {
+      await db.prisma.user.create({
+        data: {
+          id: userId,
+          email: "name-only-update@example.com",
+          name: "Old Name",
+          emailVerified: true,
+          username: "nameonly001",
+          usernameNormalized: "nameonly001",
+          image: null,
+          isPublicProfile: false,
+          createdAt: new Date("2024-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+        },
+      });
+    });
+
+    it("updates only the name field without touching username", async () => {
+      await updateProfileWorker(userId, { name: "New Name" });
+      const updated = await db.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      expect(updated?.name).toBe("New Name");
+      expect(updated?.username).toBe("nameonly001");
+    });
+  });
+
+  describe("given an authenticated user updating only the image field", () => {
+    const userId = "update-profile-image-only-001";
+
+    beforeEach(async () => {
+      await db.prisma.user.create({
+        data: {
+          id: userId,
+          email: "image-only-update@example.com",
+          name: "Image User",
+          emailVerified: true,
+          username: "imgonly001",
+          usernameNormalized: "imgonly001",
+          image: null,
+          isPublicProfile: false,
+          createdAt: new Date("2024-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+        },
+      });
+    });
+
+    it("sets the image url on the user record", async () => {
+      const imageUrl = "https://example.com/avatar.jpg";
+      await updateProfileWorker(userId, { image: imageUrl });
+      const updated = await db.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      expect(updated?.image).toBe(imageUrl);
+    });
+  });
 });

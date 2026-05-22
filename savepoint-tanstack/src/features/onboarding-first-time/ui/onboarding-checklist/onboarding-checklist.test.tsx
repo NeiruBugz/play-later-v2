@@ -52,7 +52,7 @@
  */
 
 import { render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // RED import — this module does not exist until the GREEN step.
 import { OnboardingChecklist } from "./onboarding-checklist";
@@ -199,6 +199,28 @@ describe("OnboardingChecklist", () => {
 
     it("returns null immediately without rendering any step items", () => {
       expect(elements.queryChecklist()).toBeNull();
+    });
+  });
+
+  // ---- localStorage.getItem throws (catch branch in readLocalStorageFlag) --
+
+  describe("given localStorage.getItem throws (e.g., privacy-mode quota error)", () => {
+    beforeEach(() => {
+      // Simulate a browser privacy-mode where localStorage access throws.
+      vi.spyOn(window.localStorage, "getItem").mockImplementation(() => {
+        throw new Error("SecurityError: localStorage access denied");
+      });
+      render(<OnboardingChecklist {...ALL_UNDONE_PROPS} />);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("renders the checklist (readLocalStorageFlag returns false in catch, not throwing)", () => {
+      // The catch returns false, so steam is not dismissed and complete flag is false.
+      // The checklist should render normally.
+      expect(elements.queryChecklist()).not.toBeNull();
     });
   });
 });

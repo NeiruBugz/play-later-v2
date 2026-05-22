@@ -135,6 +135,32 @@ describe("importGameToLibraryWorker", () => {
     });
   });
 
+  describe("given no manualIgdbId and storefrontGameId is null (no Steam app id)", () => {
+    let importedId: string;
+    beforeEach(async () => {
+      // Insert a row with null storefrontGameId to simulate a game with no Steam app id.
+      const row = await db.prisma.importedGame.create({
+        data: {
+          userId: ALICE_ID,
+          name: "No App Id Game",
+          storefront: "STEAM",
+          storefrontGameId: null,
+          igdbMatchStatus: "PENDING",
+        },
+      });
+      importedId = row.id;
+    });
+
+    it("throws NeedsManualMatchError when storefrontGameId is null", async () => {
+      await expect(
+        importGameToLibraryWorker(ALICE_ID, {
+          importedGameId: importedId,
+          status: "SHELF",
+        })
+      ).rejects.toBeInstanceOf(NeedsManualMatchError);
+    });
+  });
+
   describe("given no manualIgdbId and the auto-matcher finds a match", () => {
     let importedId: string;
     beforeEach(async () => {
