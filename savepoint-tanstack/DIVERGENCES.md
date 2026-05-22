@@ -1881,6 +1881,7 @@ plugin's v5 legacy selector/`${...}` template syntax — harmless under v6.0.2 b
 prints per-run deprecation diagnostics; migrate to object-selectors + `{{...}}`.)
 
 **6 genuine violations relocated (not waived):**
+
 - `features/browse-related-games` no longer imports `@/widgets/game-card` — the
   card is injected via a `renderGame: (game) => ReactNode` slot prop from the
   composing route `games.$slug.tsx` (slot-prop is the FSD-preferred inversion).
@@ -1896,10 +1897,11 @@ prints per-run deprecation diagnostics; migrate to object-selectors + `{{...}}`.
   was deleted; its cross-entity composition lives at the widget layer.
 
 **Widget-to-widget carve-outs (allowed by policy, documented per `widgets.md`):**
+
 - `widgets/dashboard-page/` → `widgets/library-item-card/` — the dashboard
   game-section composes library cards (composition, not coincidence).
 - `widgets/journal-timeline-page/` → `widgets/journal-timeline/` — the page
   widget wraps the timeline widget and owns the compose/detail navigation.
-These pre-date Slice 23 but were invisible while the linter was alias-blind;
-now surfaced and accepted as composition. The boundaries config allows
-`widgets→widgets` wholesale, so this list is the human/code-review discipline.
+  These pre-date Slice 23 but were invisible while the linter was alias-blind;
+  now surfaced and accepted as composition. The boundaries config allows
+  `widgets→widgets` wholesale, so this list is the human/code-review discipline.
