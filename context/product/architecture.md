@@ -1,5 +1,7 @@
 # System Architecture Overview: SavePoint
 
+> **Active migration in progress (spec 021).** A side-by-side TanStack Start v1 rewrite of this app lives at [`savepoint-tanstack/`](../../savepoint-tanstack/). Both apps run against the same Postgres / Better Auth / S3 / IGDB instances during the migration; cutover is a single Vercel root-directory change at Slice 20. The documentation below describes the **canonical `savepoint-app/`** stack — the deployed app — until cutover lands. The rewrite's stack is documented in [`savepoint-tanstack/CLAUDE.md`](../../savepoint-tanstack/CLAUDE.md): TanStack Start + TanStack Router (file-based), C2 DAL pattern (thin entity queries + feature `createServerFn`s throwing `AppError`), Better Auth via a catch-all Web Request handler. Postgres schema is mirrored verbatim across the two apps and CI-diff-checked.
+
 ---
 
 ## 1. Application & Technology Stack

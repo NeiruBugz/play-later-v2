@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Audit Report — play-later-v2 — 2026-05-12</title>
+<style>
+  :root {
+    --pass: #22c55e;
+    --warn: #eab308;
+    --fail: #ef4444;
+    --skip: #9ca3af;
+    --grade-a: #22c55e;
+    --grade-b: #3b82f6;
+    --grade-c: #f97316;
+    --grade-d: #ef4444;
+    --grade-f: #991b1b;
+    --bg: #ffffff;
+    --fg: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --row-alt: #f9fafb;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--fg); }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+  header.report-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+  header.report-header h1 { margin: 0 0 4px; font-size: 1.5rem; }
+  header.report-header .subtitle { color: var(--muted); font-size: 0.95rem; }
+  .score-block {
+    display: flex; align-items: baseline; gap: 16px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .score-number { font-size: 3rem; font-weight: 700; letter-spacing: -0.02em; }
+  .grade-pill {
+    display: inline-block; min-width: 2.4rem; padding: 6px 12px; border-radius: 8px;
+    color: #fff; font-weight: 700; text-align: center; font-size: 1.25rem;
+  }
+  .grade-A { background: var(--grade-a); }
+  .grade-B { background: var(--grade-b); }
+  .grade-C { background: var(--grade-c); }
+  .grade-D { background: var(--grade-d); }
+  .grade-F { background: var(--grade-f); }
+  .delta-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    font-size: 0.85rem; background: #fee2e2; color: #991b1b; font-weight: 600;
+  }
+  .delta-badge.up { background: #dcfce7; color: #166534; }
+  .delta-badge.neutral { background: #f3f4f6; color: #374151; }
+
+  .toolbar {
+    position: sticky; top: 0; background: var(--bg);
+    padding: 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border);
+    z-index: 10;
+  }
+  .toolbar button {
+    font: inherit; padding: 6px 14px; border: 1px solid var(--border);
+    background: #f3f4f6; border-radius: 6px; cursor: pointer;
+  }
+  body.issues-only .toolbar button { background: #fef3c7; border-color: #fde68a; }
+
+  h2 { margin: 32px 0 12px; font-size: 1.15rem; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { margin: 20px 0 8px; font-size: 1rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th { background: #f3f4f6; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  tr.row-poor td { background: #fef2f2 !important; }
+
+  .status { display: inline-block; min-width: 50px; padding: 2px 8px; border-radius: 4px;
+    color: #fff; font-weight: 600; font-size: 0.75rem; text-align: center; letter-spacing: 0.02em; }
+  .status-PASS { background: var(--pass); }
+  .status-WARN { background: var(--warn); color: #1f2937; }
+  .status-FAIL { background: var(--fail); }
+  .status-SKIP { background: var(--skip); }
+
+  .sev { display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .sev-critical { background: #fee2e2; color: #991b1b; }
+  .sev-high     { background: #ffedd5; color: #9a3412; }
+  .sev-medium   { background: #fef3c7; color: #854d0e; }
+  .sev-low      { background: #e5e7eb; color: #374151; }
+
+  details { border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin: 12px 0; }
+  details[open] { background: #fafafa; }
+  details > summary { cursor: pointer; font-weight: 600; font-size: 1rem; list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before { content: '▸ '; color: var(--muted); }
+  details[open] > summary::before { content: '▾ '; }
+  details > summary .score { float: right; color: var(--muted); font-weight: 500; font-size: 0.9rem; }
+
+  body.issues-only tr[data-status='PASS'],
+  body.issues-only tr[data-status='SKIP'] { display: none; }
+  body.issues-only details:not(.has-issues) { display: none; }
+
+  code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+
+  @media (max-width: 600px) {
+    .container { padding: 16px 12px; }
+    table { font-size: 0.8rem; }
+    th, td { padding: 6px 5px; }
+    .score-number { font-size: 2.2rem; }
+  }
+  @media print {
+    .toolbar { display: none; }
+    details { border: none; padding: 0; }
+    details > summary::before { content: ''; }
+    details > * { display: block !important; }
+    tr[data-status='PASS'], tr[data-status='SKIP'] { display: table-row !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="report-header">
+  <h1>Code Audit Report — play-later-v2</h1>
+  <div class="subtitle">2026-05-12 · all dimensions</div>
+  <div class="score-block">
+    <span class="score-number">85%</span>
+    <span class="grade-pill grade-B">B</span>
+    <span class="delta-badge">−8 vs 2026-04-28 (was 93% A)</span>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button id="toggle-issues" type="button" onclick="document.body.classList.toggle('issues-only');this.textContent=document.body.classList.contains('issues-only')?'Show all':'Show issues only';">Show issues only</button>
+</div>
+
+<h2>Summary</h2>
+<table>
+  <thead>
+    <tr><th>#</th><th>Dimension</th><th>Score</th><th>Grade</th><th>Δ</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>Project Topology</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>2</td><td>Code Architecture</td><td>89%</td><td><span class="grade-pill grade-B">B</span></td><td>+1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+    <tr><td>3</td><td>Documentation Quality</td><td>67%</td><td><span class="grade-pill grade-C">C</span></td><td>−8</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+    <tr><td>4</td><td>AI Development Tooling</td><td>90%</td><td><span class="grade-pill grade-A">A</span></td><td>−10</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+    <tr><td>5</td><td>Prompt &amp; Agent Integrity</td><td>91%</td><td><span class="grade-pill grade-A">A</span></td><td>new</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>6</td><td>Quality Assurance</td><td>85%</td><td><span class="grade-pill grade-B">B</span></td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+    <tr><td>7</td><td>Security Guardrails</td><td>88%</td><td><span class="grade-pill grade-B">B</span></td><td>−12</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+    <tr><td>8</td><td>Software Best Practices</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>+5</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>9</td><td>Spec-Driven Development</td><td>93%</td><td><span class="grade-pill grade-A">A</span></td><td>−3</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+    <tr class="row-poor"><td>10</td><td>Supply Chain Security</td><td>56%</td><td><span class="grade-pill grade-D">D</span></td><td>new</td><td>1</td><td>3</td><td>1</td><td>0</td></tr>
+    <tr><td>11</td><td>End-to-End Delivery</td><td>79%</td><td><span class="grade-pill grade-B">B</span></td><td>−21</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<h2>Per-Dimension Detail</h2>
+
+<details open>
+  <summary>1. Project Topology <span class="score">100% · A</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>—</td><td>All 6 reconnaissance checks</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Monorepo: savepoint-app + savepoint-tanstack + infra; pnpm 10.11.0 workspace; AWOS installed</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>2. Code Architecture <span class="score">89% · B</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>1</td><td>Architectural pattern declared</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>FSD in both apps; Clean Architecture inside DAL</td></tr>
+      <tr data-status="WARN"><td>2</td><td>Layer boundaries respected</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td>4 files in savepoint-app import <code>@/widgets/game-card</code> from features layer</td></tr>
+      <tr data-status="PASS"><td>3</td><td>Modules well-scoped</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>No god directories</td></tr>
+      <tr data-status="PASS"><td>4</td><td>Separation of concerns</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>UI/hooks/server-actions/lib split</td></tr>
+      <tr data-status="PASS"><td>5</td><td>Consistent naming</td><td><span class="sev sev-low">low</span></td><td><span class="status status-PASS">PASS</span></td><td>kebab-case throughout</td></tr>
+      <tr data-status="PASS"><td>6</td><td>File-size discipline</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>0.5% over 500 LOC (excluding generated Prisma models)</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>3. Documentation Quality <span class="score">67% · C</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="WARN"><td>1</td><td>Root README accurate &amp; complete</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-WARN">WARN</span></td><td><code>README.md:10</code> and <code>CLAUDE.md:12</code> still claim retired RDS/ECS infra</td></tr>
+      <tr data-status="PASS"><td>2</td><td>Service/module READMEs present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>All 3 service dirs documented</td></tr>
+      <tr data-status="SKIP"><td>3</td><td>API/interface contracts documented</td><td><span class="sev sev-high">high</span></td><td><span class="status status-SKIP">SKIP</span></td><td>Internal-only RPC; no external API surface</td></tr>
+      <tr data-status="FAIL"><td>4</td><td>No stale or contradictory claims</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-FAIL">FAIL</span></td><td>6 stale claims (CONTEXT-MAP.md/CONTEXT.md missing; <code>savepoint-tanstack/</code> unmentioned)</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>4. AI Development Tooling <span class="score">90% · A</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>1</td><td>CLAUDE.md at root</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>Root + 27 nested CLAUDE.md files</td></tr>
+      <tr data-status="PASS"><td>2</td><td>Per-layer CLAUDE.md</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Layered (app/feature/widget)</td></tr>
+      <tr data-status="PASS"><td>3</td><td>Custom commands</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>10 AWOS slash commands</td></tr>
+      <tr data-status="PASS"><td>4</td><td>Skills with SKILL.md</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>5 valid skills</td></tr>
+      <tr data-status="PASS"><td>5</td><td>MCP servers configured</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>3 MCP servers + Playwright plugin</td></tr>
+      <tr data-status="WARN"><td>6</td><td>CLAUDE.md size discipline (≤200 LOC)</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td><code>savepoint-tanstack/CLAUDE.md</code> 484 LOC; <code>data-access-layer/CLAUDE.md</code> 224</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>5. Prompt &amp; Agent Integrity <span class="score">91% · A</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>1</td><td>No invisible Unicode</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>98 files scanned, zero invisible characters</td></tr>
+      <tr data-status="PASS"><td>2</td><td>No prompt-injection patterns</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>No role-hijack patterns</td></tr>
+      <tr data-status="PASS"><td>3</td><td>No security-bypass language</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>No bypass/exfiltration language</td></tr>
+      <tr data-status="WARN"><td>4</td><td>MCP servers reputable</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-WARN">WARN</span></td><td><code>aws-knowledge-mcp-server</code> uses generic <code>uvx fastmcp</code> with remote URL</td></tr>
+      <tr data-status="PASS"><td>5</td><td>No <code>$ARGUMENTS</code> injection surface</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>No untrusted interpolation</td></tr>
+      <tr data-status="PASS"><td>6</td><td>Prompt/hook files git-tracked</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Hooks local-only, no network calls</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>6. Quality Assurance <span class="score">85% · B</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="WARN"><td>1</td><td>Healthy unit-test linkage (&gt;60%)</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-WARN">WARN</span></td><td>~22% (250 tests vs ~1,142 source files)</td></tr>
+      <tr data-status="PASS"><td>2</td><td>Unit tier present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Vitest in both JS apps</td></tr>
+      <tr data-status="PASS"><td>3</td><td>Integration tier present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Co-located in DAL</td></tr>
+      <tr data-status="PASS"><td>4</td><td>E2E tier present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Playwright in savepoint-app</td></tr>
+      <tr data-status="PASS"><td>5</td><td>Pyramid shape healthy</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Unit-heavy</td></tr>
+      <tr data-status="WARN"><td>6</td><td>Coverage thresholds gate CI</td><td><span class="sev sev-low">low</span></td><td><span class="status status-WARN">WARN</span></td><td>No <code>thresholds</code> in <code>vitest.coverage.config.ts</code></td></tr>
+      <tr data-status="PASS"><td>7</td><td>Fixtures/factories/MSW infra</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>faker + msw + 153 mocked files</td></tr>
+      <tr data-status="PASS"><td>8</td><td>Mocking infrastructure mature</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Consistent patterns</td></tr>
+      <tr data-status="SKIP"><td>9</td><td>Contract testing</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-SKIP">SKIP</span></td><td>Single-repo, no inter-service contracts</td></tr>
+      <tr data-status="SKIP"><td>10</td><td>ML iteration testing</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-SKIP">SKIP</span></td><td>No ML layer</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>7. Security Guardrails <span class="score">88% · B</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="WARN"><td>1</td><td><code>.env*</code> gitignored</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-WARN">WARN</span></td><td><code>savepoint-app/.env.test</code> tracked under non-template name</td></tr>
+      <tr data-status="PASS"><td>2</td><td>AI agent hooks restrict sensitive reads</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>PreToolUse hook with exit-2 blocks</td></tr>
+      <tr data-status="PASS"><td>3</td><td><code>.env.example</code> template present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>3 templates with placeholders</td></tr>
+      <tr data-status="PASS"><td>4</td><td>No secrets in committed files</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>No real credentials found</td></tr>
+      <tr data-status="PASS"><td>5</td><td>Stack-relevant .gitignore</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Next.js, Vite, Prisma, Terraform, keys/certs covered</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open>
+  <summary>8. Software Best Practices <span class="score">100% · A</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>—</td><td>All 6 checks (lint, format, type-safety, CI/CD, error handling, deps)</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Zero <code>: any</code> in feature/DAL/shared/tanstack; consistent logger+rethrow pattern</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>9. Spec-Driven Development <span class="score">93% · A</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>1</td><td>AWOS installed</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>10 commands + wrappers</td></tr>
+      <tr data-status="PASS"><td>2</td><td>Product/roadmap/architecture present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>All 3 substantive</td></tr>
+      <tr data-status="WARN"><td>3</td><td>Architecture reflects codebase</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td><code>architecture.md</code> omits <code>savepoint-tanstack/</code>; lists ECS/RDS not yet in <code>infra/</code></td></tr>
+      <tr data-status="PASS"><td>4</td><td>Feat branches reference specs</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>6/8 (75%)</td></tr>
+      <tr data-status="PASS"><td>5</td><td>Spec dirs complete</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>18/20 (90%); spec 019 missing tasks.md</td></tr>
+      <tr data-status="PASS"><td>6</td><td>No stale Approved/In-Review specs</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Soft signal on 019 only</td></tr>
+      <tr data-status="PASS"><td>7</td><td>Tasks annotated with agents</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>1,031 annotations, ~98% coverage</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>10. Supply Chain Security <span class="score">56% · D</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="PASS"><td>1</td><td>Lockfile committed</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td><code>pnpm-lock.yaml</code> committed</td></tr>
+      <tr data-status="PASS"><td>2</td><td>Lockfile integrity hashes</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>SHA-512 on all 1,332 registry entries</td></tr>
+      <tr data-status="WARN"><td>3</td><td>Exact version pinning policy</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td>5 caret-range deps remain (violates project policy)</td></tr>
+      <tr data-status="PASS"><td>4</td><td>Quarantine period for new deps</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>21/21 sampled deps ≥ 9 days old</td></tr>
+      <tr data-status="WARN"><td>5</td><td>Dependabot covers all roots</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td>Missing <code>/savepoint-tanstack</code>; no CODEOWNERS</td></tr>
+      <tr data-status="FAIL"><td>6</td><td>Vulnerability scanning in CI</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-FAIL">FAIL</span></td><td>Zero scanning across 5 workflows</td></tr>
+      <tr data-status="FAIL"><td>7</td><td>Override discipline</td><td><span class="sev sev-high">high</span></td><td><span class="status status-FAIL">FAIL</span></td><td>14 <code>pnpm.overrides</code> entries; 2 use <code>&gt;=</code> ranges; no justification doc</td></tr>
+      <tr data-status="FAIL"><td>8</td><td>Dependency bloat</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-FAIL">FAIL</span></td><td>2,321 lockfile entries (above 1,000 threshold)</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details open class="has-issues">
+  <summary>11. End-to-End Delivery <span class="score">79% · B</span></summary>
+  <table>
+    <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr data-status="WARN"><td>1</td><td>Recent feat branches cross layers</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td>3/9 (33%) cross-layer — in Warn band</td></tr>
+      <tr data-status="PASS"><td>2</td><td>No layer-split branch pattern</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>No <code>*-backend</code>/<code>*-frontend</code> pairs</td></tr>
+      <tr data-status="PASS"><td>3</td><td>Spec-to-delivery traceability</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Bidirectional; commits reference spec IDs</td></tr>
+      <tr data-status="PASS"><td>4</td><td>No orphaned artifacts</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Prisma + infra modules all consumed</td></tr>
+      <tr data-status="WARN"><td>5</td><td>Shared-ownership enablers</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-WARN">WARN</span></td><td>Makefile only targets savepoint-app; root <code>package.json</code> scripts empty</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<h2>Top Recommendations</h2>
+<table>
+  <thead><tr><th>#</th><th>Priority</th><th>Effort</th><th>Dimension</th><th>Recommendation</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><span class="sev sev-critical">P0</span></td><td>Low</td><td>Supply Chain</td><td>Add <code>pnpm audit</code> / <code>dependency-review-action</code> to <code>pr-checks.yml</code></td></tr>
+    <tr><td>2</td><td><span class="sev sev-high">P1</span></td><td>Low</td><td>Documentation</td><td>Fix retired RDS/ECS claims + add <code>savepoint-tanstack/</code> mention to <code>README.md:10</code> and <code>CLAUDE.md:12</code></td></tr>
+    <tr><td>3</td><td><span class="sev sev-high">P1</span></td><td>Low</td><td>Security</td><td>Rename <code>savepoint-app/.env.test</code> → <code>.env.test.example</code></td></tr>
+    <tr><td>4</td><td><span class="sev sev-high">P1</span></td><td>Low</td><td>Supply Chain</td><td>Add <code>/savepoint-tanstack</code> to <code>dependabot.yml</code>; create <code>CODEOWNERS</code></td></tr>
+    <tr><td>5</td><td><span class="sev sev-high">P1</span></td><td>Low</td><td>Architecture</td><td>Move <code>widgets/game-card</code> to entities/shared — fixes 4 FSD violations</td></tr>
+    <tr><td>6</td><td><span class="sev sev-high">P1</span></td><td>Medium</td><td>Supply Chain</td><td>Pin 2 <code>&gt;=</code> overrides (<code>rollup</code>, <code>fast-xml-parser</code>); document <code>pnpm.overrides</code> rationale</td></tr>
+    <tr><td>7</td><td><span class="sev sev-high">P1</span></td><td>Medium</td><td>SDD</td><td>Reconcile <code>context/product/architecture.md</code> with current <code>infra/</code> + TanStack scope</td></tr>
+    <tr><td>8</td><td><span class="sev sev-high">P1</span></td><td>High</td><td>QA</td><td>Raise test linkage 22% → 60% (focus DAL services + use-cases)</td></tr>
+    <tr><td>9</td><td><span class="sev sev-medium">P2</span></td><td>Low</td><td>QA</td><td>Add <code>coverage.thresholds</code> to <code>vitest.coverage.config.ts</code></td></tr>
+    <tr><td>10</td><td><span class="sev sev-medium">P2</span></td><td>Medium</td><td>AI Tooling</td><td>Split <code>savepoint-tanstack/CLAUDE.md</code> (484 LOC → ≤200)</td></tr>
+  </tbody>
+</table>
+
+</div>
+</body>
+</html>

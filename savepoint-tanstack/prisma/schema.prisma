@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../shared/lib/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----- Better Auth Authorization Models ------//
+
+model account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  refreshToken          String?   @db.Text
+  accessToken           String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  idToken               String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model user {
+  id                      String                 @id @default(cuid())
+  name                    String?
+  email                   String?                @unique
+  emailVerified           Boolean                @default(false)
+  image                   String?
+  password                String?
+  username                String?                @unique
+  usernameNormalized      String?                @unique
+  isPublicProfile         Boolean                @default(false)
+  profileSetupCompletedAt DateTime?
+  onboardingDismissedAt   DateTime?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  steamProfileURL         String?
+  steamId64               String?
+  steamUsername           String?
+  steamAvatar             String?
+  steamConnectedAt        DateTime?
+  account                 account[]
+  session                 session[]
+  LibraryItem             LibraryItem[]
+  Review                  Review[]
+  JournalEntry            JournalEntry[]
+  IgnoredImportedGames    IgnoredImportedGames[]
+  ImportedGame            ImportedGame[]
+  followers               Follow[]               @relation("UserIsFollowed")
+  following               Follow[]               @relation("UserFollows")
+}
+
+// ----- Application Models ------//
+model Game {
+  id            String         @id @default(cuid())
+  igdbId        Int            @unique
+  hltbId        String?        @unique
+  title         String
+  description   String?
+  coverImage    String?
+  releaseDate   DateTime?
+  mainStory     Int?
+  mainExtra     Int?
+  completionist Int?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  libraryItems  LibraryItem[]  @relation("GameLibraryItems")
+  Review        Review[]
+  JournalEntry  JournalEntry[]
+  steamAppId    Int?
+  slug          String         @unique
+  franchiseId   Int?
+  genres        GameGenre[]
+  platforms     GamePlatform[]
+
+  @@index([slug])
+}
+
+model LibraryItem {
+  id              Int               @id @default(autoincrement())
+  status          LibraryItemStatus @default(SHELF)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  statusChangedAt DateTime?
+  platform        String?
+  userId          String
+  acquisitionType AcquisitionType   @default(DIGITAL)
+  gameId          String
+  game            Game              @relation("GameLibraryItems", fields: [gameId], references: [id], onDelete: Cascade)
+  User            user              @relation(fields: [userId], references: [id])
+  startedAt       DateTime?
+  completedAt     DateTime?
+  hasBeenPlayed   Boolean           @default(false)
+  rating          Int?
+  JournalEntry    JournalEntry[]
+
+  @@index([userId, status])
+  @@index([userId, platform])
+  @@index([userId, createdAt])
+  @@index([userId, rating])
+  @@index([gameId])
+  @@map("LibraryItem")
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  /// Legacy/unused. Pending Reviews spec (Phase 2B). User-facing ratings live on LibraryItem.rating (1-10 half-step scale).
+  rating      Int      @default(0)
+  content     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedOn String?
+  userId      String
+  gameId      String
+  User        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model JournalEntry {
+  id            String            @id @default(cuid())
+  kind          JournalEntryKind  @default(QUICK)
+  title         String?
+  content       String            @db.Text
+  playedMinutes Int?
+  tags          String[]          @default([])
+  mood          JournalMood?
+  playSession   Int?
+  visibility    JournalVisibility @default(PRIVATE)
+
+  userId        String
+  gameId        String?
+  libraryItemId Int?
+
+  user        user         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game        Game?        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  libraryItem LibraryItem? @relation(fields: [libraryItemId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  @@index([userId, createdAt])
+  @@index([gameId])
+  @@index([libraryItemId])
+}
+
+model IgnoredImportedGames {
+  id     String @id @default(cuid())
+  name   String
+  userId String
+  User   user   @relation(fields: [userId], references: [id])
+}
+
+model ImportedGame {
+  id               String          @id @default(cuid())
+  name             String
+  storefront       Storefront
+  storefrontGameId String?
+  playtime         Int?            @default(0)
+  playtimeWindows  Int?            @default(0)
+  playtimeMac      Int?            @default(0)
+  playtimeLinux    Int?            @default(0)
+  lastPlayedAt     DateTime?
+  img_icon_url     String?
+  img_logo_url     String?
+  igdbMatchStatus  IgdbMatchStatus @default(PENDING)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+  userId           String
+  User             user            @relation(fields: [userId], references: [id])
+
+  @@index([userId, deletedAt])
+  @@index([storefrontGameId])
+  @@index([userId, playtime])
+}
+
+enum Storefront {
+  STEAM
+  PLAYSTATION
+  XBOX
+}
+
+enum LibraryItemStatus {
+  WISHLIST
+  SHELF
+  UP_NEXT
+  PLAYING
+  PLAYED
+}
+
+enum AcquisitionType {
+  PHYSICAL
+  DIGITAL
+  SUBSCRIPTION
+}
+
+enum JournalEntryKind {
+  QUICK
+  REFLECTION
+}
+
+enum JournalMood {
+  EXCITED
+  RELAXED
+  FRUSTRATED
+  ACCOMPLISHED
+  CURIOUS
+  NOSTALGIC
+}
+
+enum JournalVisibility {
+  PRIVATE
+  FRIENDS_ONLY
+  PUBLIC
+}
+
+enum IgdbMatchStatus {
+  PENDING
+  MATCHED
+  UNMATCHED
+  IGNORED
+}
+
+// ----- Game Metadata Models ------//
+model Genre {
+  id        String      @id @default(cuid())
+  igdbId    Int         @unique
+  name      String      @unique
+  slug      String      @unique
+  checksum  String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  games     GameGenre[]
+
+  @@index([slug])
+  @@index([name])
+}
+
+model Platform {
+  id              String         @id @default(cuid())
+  igdbId          Int            @unique
+  name            String         @unique
+  slug            String         @unique
+  abbreviation    String?
+  alternativeName String?
+  generation      Int?
+  platformFamily  Int?
+  platformType    Int?
+  checksum        String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  games           GamePlatform[]
+
+  @@index([slug])
+  @@index([name])
+}
+
+model GameGenre {
+  gameId  String
+  genreId String
+  game    Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, genreId])
+  @@index([gameId])
+  @@index([genreId])
+}
+
+model GamePlatform {
+  gameId     String
+  platformId String
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, platformId])
+  @@index([gameId])
+  @@index([platformId])
+}
+
+// ----- Social Models ------//
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  user @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  following user @relation("UserIsFollowed", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}

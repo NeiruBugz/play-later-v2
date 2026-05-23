@@ -50,7 +50,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: pnpm
 
       - name: Install dependencies
@@ -58,6 +58,12 @@ jobs:
             POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
             POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm --filter savepoint prisma:generate
 
       - name: Install Playwright Browsers
         run: |

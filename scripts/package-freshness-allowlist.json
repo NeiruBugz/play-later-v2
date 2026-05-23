@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "description": "Documented exceptions to the 7-day quarantine in check-package-freshness.mjs. Each entry MUST cite a risk review and carry an expiry date; the script ignores expired entries so stale waivers fail loudly. Matched by exact { name, version } pairs.",
+  "entries": [
+    {
+      "name": "@tanstack/react-router",
+      "version": "1.170.4",
+      "reason": "CVE-2026-45321 risk review (commit ada09252): bumped past the malicious 1.169.5-1.169.8 window. 1.170.4 is the lowest non-vulnerable post-patch release at audit time.",
+      "expires": "2026-06-15"
+    },
+    {
+      "name": "@tanstack/react-router-devtools",
+      "version": "1.167.0",
+      "reason": "CVE-2026-45321 risk review (commit ada09252): bumped past the malicious 1.166.x window. 1.167.0 is the lowest non-vulnerable post-patch release at audit time.",
+      "expires": "2026-06-15"
+    },
+    {
+      "name": "@tanstack/react-router-ssr-query",
+      "version": "1.167.0",
+      "reason": "CVE-2026-45321 risk review (commit ada09252): bumped past the malicious 1.166.x window. 1.167.0 is the lowest non-vulnerable post-patch release at audit time.",
+      "expires": "2026-06-15"
+    },
+    {
+      "name": "@tanstack/react-start",
+      "version": "1.168.6",
+      "reason": "CVE-2026-45321 risk review (commit ada09252): bumped past the malicious 1.167.x window. 1.168.6 is the lowest non-vulnerable post-patch release at audit time.",
+      "expires": "2026-06-15"
+    }
+  ]
+}
