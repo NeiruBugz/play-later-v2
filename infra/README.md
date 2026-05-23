@@ -6,8 +6,8 @@ Overview
 
 - Location: `infra/`
 - Structure:
-  - `modules/cognito/`: Reusable Cognito module
-  - `modules/s3/`: Reusable S3 bucket module (versioned, CORS, IAM policy)
+  - `envs/modules/cognito/`: Reusable Cognito module
+  - `envs/modules/s3/`: Reusable S3 bucket module (versioned, CORS, IAM policy)
   - `envs/dev/`: Dev environment stack
   - `envs/prod/`: Prod environment stack
 

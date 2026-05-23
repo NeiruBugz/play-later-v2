@@ -20,50 +20,62 @@ Each entry records:
 
 ## Active overrides
 
-### `hono`: `^4.12.2`
+### `hono`: `4.12.18`
 
-- **Why**: Transitive dep pulled in by Auth.js / NextAuth providers. The
-  caret range was inherited from when the override was first added; intent is
-  "stay current on the 4.x line". Caret is broader than our project rule
-  prefers (exact pins) — flagged for cleanup.
-- **Added**: pre-2026
-- **Revisit**: when bumping NextAuth/Auth.js, drop the override and re-test.
+- **Why**: Transitive dep pulled in by Better Auth's request handling. Pinned
+  to a single exact version so installs cannot drift onto an unreviewed 4.x
+  release. (Was a `^4.12.2` caret; tightened to exact 2026-05-23 per project
+  rule `feedback_pin_exact_versions`.)
+- **Added**: pre-2026; pinned exact 2026-05-23.
+- **Revisit**: when bumping Better Auth, drop the override and re-test.
 
-### `valibot`: `^1.2.0`
+### `valibot`: `1.2.0`
 
 - **Why**: Transitive pin to keep a single major version across the workspace
   (originally added during the spec-021 parallel-app migration to stop the two
   apps resolving different valibot trees). The migration is complete and
-  `savepoint-app/` is gone; the override is now just a defensive single-version
-  pin for the remaining transitive consumers.
-- **Added**: spec 021 era
+  `savepoint-app/` is gone; the override is now a defensive single-version pin
+  for the remaining transitive consumers. (Was a `^1.2.0` caret; tightened to
+  exact 2026-05-23 — the caret already resolved to 1.2.0, so this is a no-tree
+  change that removes future re-resolution drift.)
+- **Added**: spec 021 era; pinned exact 2026-05-23.
 - **Revisit**: drop if no transitive consumer pulls valibot after a dependency
-  sweep, or pin exactly if a primary consumer settles on a fixed version.
+  sweep.
 
-### `glob`: `^10.5.0`
-
-- **Why**: Defensive — older `glob` versions surface deprecation warnings on
-  every install. Forces a single modern version.
-- **Added**: pre-2026
-- **Revisit**: when all direct consumers declare `>=10`.
-
-### `js-yaml`: `^4.1.1`
+### `js-yaml`: `4.1.1`
 
 - **Why**: CVE-driven (CVE-2019-10744 / CVE-2024-37890 family). Old YAML
   parsers still appear in transitive trees via legacy build tooling; pin
-  forces them onto a patched line.
-- **Added**: pre-2026
+  forces them onto a patched line. (Was a `^4.1.1` caret; tightened to exact
+  2026-05-23.)
+- **Added**: pre-2026; pinned exact 2026-05-23.
 - **Revisit**: only if upstream consumers move to a hard `^5` pin.
 
-### `fast-xml-parser`: `5.4.1`
+### `fast-xml-parser`: `5.7.3`
 
 - **Why**: Pinned exactly (per project rule `feedback_pin_exact_versions`) to
   the version that the AWS SDK currently resolves. Earlier versions had RCE
   CVEs (CVE-2024-41818). Replacing the previous open-ended `>=5.3.8` so future
   installs cannot drift quietly into a version we haven't reviewed.
-- **Added**: original CVE remediation pre-2026; tightened 2026-05-18.
+- **Added**: original CVE remediation pre-2026; tightened to `5.4.1` 2026-05-18,
+  bumped to `5.7.3` to track the AWS SDK's resolved version.
 - **Revisit**: when the AWS SDK or other primary consumers declare a tighter
-  range that includes `5.4.1` or later.
+  range that includes `5.7.3` or later.
+
+### `fast-xml-builder`: `1.2.0`
+
+- **Why**: Companion to the `fast-xml-parser` pin — the AWS SDK XML codec pulls
+  both. Exact pin keeps the builder on the reviewed version alongside the parser.
+- **Added**: pre-2026.
+- **Revisit**: together with `fast-xml-parser` when the AWS SDK tightens its range.
+
+### `fast-uri`: `3.1.2`
+
+- **Why**: Defensive single-version pin for a transitive URI parser (pulled via
+  the AWS SDK / Ajv chains). Older releases had ReDoS-class issues; exact pin
+  forces a single patched version across the tree.
+- **Added**: pre-2026.
+- **Revisit**: when all consumers declare a range that includes `3.1.2` or later.
 
 ### `handlebars`: `4.7.9`
 
@@ -109,6 +121,16 @@ Each entry records:
 - **Added**: pre-2026
 
 ## Removed overrides (kept for historical context)
+
+### `glob`: `^10.5.0` — removed 2026-05-23
+
+- **Why removed**: dead override. Nothing in the resolved tree pulls `glob@10`
+  (`pnpm-lock.yaml` has no `glob@10` entry), so the defensive pin had no effect
+  on the install graph — the same situation that retired the `rollup` override.
+  It was also a caret range flagged by the 2026-05-23 audit (SCS-03). Removed
+  rather than pinned exact, since pinning a version nothing resolves to is noise.
+- **Revisit**: if a future dependency reintroduces `glob@10` with deprecation
+  warnings, add a fresh exact pin then.
 
 ### `rollup`: `>=4.59.0` — removed 2026-05-18
 

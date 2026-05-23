@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Audit Report — play-later-v2 — 2026-05-23</title>
+<style>
+  :root {
+    --pass: #22c55e; --warn: #eab308; --fail: #ef4444; --skip: #9ca3af;
+    --grade-a: #22c55e; --grade-b: #3b82f6; --grade-c: #f97316; --grade-d: #ef4444; --grade-f: #991b1b;
+    --crit: #ef4444; --high: #f97316; --med: #eab308; --low: #9ca3af;
+    --bg: #ffffff; --fg: #1f2937; --muted: #6b7280; --border: #e5e7eb; --stripe: #f9fafb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--fg); background: #f3f4f6; margin: 0; line-height: 1.55;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 16px 64px; }
+  header.hero {
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 32px 16px; text-align: center;
+  }
+  header.hero .inner { max-width: 900px; margin: 0 auto; }
+  header.hero h1 { margin: 0 0 4px; font-size: 1.5rem; }
+  header.hero .date { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+  .score-block { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+  .score-num { font-size: 4rem; font-weight: 800; line-height: 1; }
+  .grade-badge {
+    font-size: 2rem; font-weight: 800; color: #fff; border-radius: 12px;
+    padding: 8px 20px; display: inline-block;
+  }
+  .delta-badge {
+    display: inline-block; background: #dcfce7; color: #166534;
+    border-radius: 999px; padding: 4px 14px; font-weight: 600; font-size: 0.95rem; margin-top: 10px;
+  }
+  .toolbar {
+    position: sticky; top: 0; z-index: 10; background: var(--bg);
+    border-bottom: 1px solid var(--border); padding: 10px 16px; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .toolbar button {
+    font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border);
+    background: #fff; border-radius: 8px; padding: 8px 16px; color: var(--fg);
+  }
+  .toolbar button:hover { background: var(--stripe); }
+  body.issues-only .toolbar button { background: #fef2f2; border-color: var(--fail); color: #991b1b; }
+  section { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 20px; }
+  section > h2 { margin-top: 0; font-size: 1.15rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+  tbody tr:nth-child(even) { background: var(--stripe); }
+  td.center, th.center { text-align: center; }
+  .grade { font-weight: 700; }
+  .g-A { color: var(--grade-a); } .g-B { color: var(--grade-b); } .g-C { color: var(--grade-c); }
+  .g-D { color: var(--grade-d); } .g-F { color: var(--grade-f); }
+  tr.row-low-grade { background: #fef2f2 !important; }
+  .delta-pos { color: #166534; font-weight: 600; } .delta-neg { color: #b91c1c; font-weight: 600; } .delta-zero { color: var(--muted); }
+  .status { font-weight: 700; padding: 2px 8px; border-radius: 6px; color: #fff; font-size: 0.78rem; display: inline-block; }
+  .st-PASS { background: var(--pass); } .st-WARN { background: var(--warn); }
+  .st-FAIL { background: var(--fail); } .st-SKIP { background: var(--skip); }
+  .sev { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: #fff; display: inline-block; }
+  .sev-critical { background: var(--crit); } .sev-high { background: var(--high); }
+  .sev-medium { background: var(--med); color: #422006; } .sev-low { background: var(--low); }
+  details { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+  details > summary {
+    cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] > summary { border-bottom: 1px solid var(--border); background: var(--stripe); }
+  details .body { padding: 4px 12px 12px; overflow-x: auto; }
+  .summary-score { font-weight: 700; white-space: nowrap; }
+  .pri { font-weight: 700; }
+  .pri-P0 { color: var(--fail); } .pri-P1 { color: var(--high); } .pri-P2 { color: var(--med); }
+  .legend { font-size: 0.78rem; color: var(--muted); margin-top: 12px; }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none; }
+    details { border: none; }
+    details > summary { pointer-events: none; }
+    details:not([open]) > .body { display: block !important; }
+    details > .body { display: block !important; }
+  }
+  @media (max-width: 600px) {
+    .score-num { font-size: 3rem; } table { font-size: 0.8rem; } th, td { padding: 6px; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="inner">
+    <h1>SavePoint (play-later-v2) — AI Readiness Audit</h1>
+    <div class="date">2026-05-23 · all dimensions</div>
+    <div class="score-block">
+      <span class="score-num g-A">94%</span>
+      <span class="grade-badge" style="background: var(--grade-a);">A</span>
+    </div>
+    <div class="delta-badge">▲ +4 vs 2026-05-18 (was 90% · B)</div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button id="filterBtn" onclick="toggleIssues()">Show issues only</button>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <h2>Summary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th class="center">#</th><th>Dimension</th><th class="center">Score</th><th class="center">Grade</th>
+          <th class="center">Δ</th><th class="center">Crit</th><th class="center">High</th><th class="center">Med</th><th class="center">Low</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="center">1</td><td>Project Topology</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-zero">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr><td class="center">2</td><td>Code Architecture</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-pos">+11</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr><td class="center">3</td><td>Documentation Quality</td><td class="center">83%</td><td class="center grade g-B">B</td><td class="center delta-neg">-3</td><td class="center">0</td><td class="center">0</td><td class="center">1</td><td class="center">0</td></tr>
+        <tr><td class="center">4</td><td>AI Development Tooling</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-zero">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr><td class="center">5</td><td>Prompt &amp; Agent Integrity</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-zero">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr><td class="center">6</td><td>Quality Assurance</td><td class="center">81%</td><td class="center grade g-B">B</td><td class="center delta-neg">-4</td><td class="center">0</td><td class="center">1</td><td class="center">0</td><td class="center">1</td></tr>
+        <tr><td class="center">7</td><td>Security Guardrails</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-zero">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr><td class="center">8</td><td>Software Best Practices</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-zero">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr><td class="center">9</td><td>Spec-Driven Development</td><td class="center">100%</td><td class="center grade g-A">A</td><td class="center delta-pos">+7</td><td class="center">0</td><td class="center">0</td><td class="center">0</td><td class="center">0</td></tr>
+        <tr class="row-low-grade"><td class="center">10</td><td>Supply Chain Security</td><td class="center">72%</td><td class="center grade g-C">C</td><td class="center delta-zero">0</td><td class="center">1</td><td class="center">1</td><td class="center">1</td><td class="center">0</td></tr>
+        <tr><td class="center">11</td><td>End-to-End Delivery</td><td class="center">93%</td><td class="center grade g-A">A</td><td class="center delta-pos">+29</td><td class="center">0</td><td class="center">0</td><td class="center">1</td><td class="center">0</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">Issue counts are FAIL + WARN combined per severity. Overall is the mean of dimension percentages (93.6%). Highlighted row = grade C or below.</p>
+  </section>
+
+  <section>
+    <h2>Per-Dimension Detail</h2>
+
+    <details open>
+      <summary><span>1 · Project Topology</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Repository structure type</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>Monorepo: 2 build roots — pnpm workspace + Terraform <code>infra</code>.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Application layer inventory</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>Full-stack TanStack Start v1 + Prisma 7 + Terraform IaC. <code>savepoint-app/</code> removed.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Database and storage detection</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>PostgreSQL 16 (Prisma, 50 migrations); AWS S3/LocalStack.</td></tr>
+        <tr data-status="PASS"><td class="center">4</td><td>Infrastructure layer detection</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>Terraform (Cognito + S3); Docker Compose; Vercel; GitHub Actions.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Language inventory</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>TS dominant (740 .ts + 411 .tsx); 14 HCL.</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>Inter-layer communication patterns</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td><code>createServerFn</code> RPC (52 files), better-auth, IGDB/Steam HTTP. No OpenAPI/gRPC/GraphQL.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details>
+      <summary><span>2 · Code Architecture</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Declared/recognizable pattern</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>FSD declared with full layer map; structure matches.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Module boundaries respected</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td><code>eslint-plugin-boundaries</code> enforced; 0 errors; regression guard exists.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>SRP — modules well-scoped</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>6 focused dirs, 29 single-intent slices, zero god modules.</td></tr>
+        <tr data-status="PASS"><td class="center">4</td><td>Separation of concerns</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>0 UI files touch Prisma; data access isolated to <code>*.server.ts</code>.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Consistent naming</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>0/734 basenames uppercase (all kebab-case); tests colocated.</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>Reasonable file sizes</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>2/735 files (0.27%) exceed 500 LOC, both tests.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details open>
+      <summary><span>3 · Documentation Quality</span><span class="summary-score g-B">83% · B</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Root README exists and is useful</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Accurate, followable; matches <code>package.json</code> scripts.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Service-level READMEs exist</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Both <code>savepoint-tanstack/</code> and <code>infra/</code> documented.</td></tr>
+        <tr data-status="SKIP"><td class="center">3</td><td>API documentation</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-SKIP">SKIP</span></td><td>Small closed internal API (co-located client + 52 RPC files, no public surface).</td></tr>
+        <tr data-status="FAIL"><td class="center">4</td><td>No stale documentation</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-FAIL">FAIL</span></td><td><code>savepoint-tanstack/README.md</code> still references removed <code>../savepoint-app/</code>, wrong prisma command, "migrate in deleted dir". Plus wrong <code>infra/</code> module path.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details>
+      <summary><span>4 · AI Development Tooling</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>CLAUDE.md ecosystem context</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>6 CLAUDE.md + CONTEXT.md + FOOT-GUNS.md + 10 rule files.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Custom slash commands exist</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>10 commands under <code>.claude/commands/awos/</code>.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Skills are configured</td><td><span class="sev sev-low">low</span></td><td><span class="status st-PASS">PASS</span></td><td>5 skills with valid frontmatter.</td></tr>
+        <tr data-status="PASS"><td class="center">4</td><td>MCP servers configured</td><td><span class="sev sev-low">low</span></td><td><span class="status st-PASS">PASS</span></td><td><code>.mcp.json</code> with 3 servers.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Hooks are configured</td><td><span class="sev sev-low">low</span></td><td><span class="status st-PASS">PASS</span></td><td>PreToolUse + PostToolUse hooks.</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>CLAUDE.md files meaningful</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>All under 200-line guideline (max 182); prescriptive content.</td></tr>
+        <tr data-status="PASS"><td class="center">7</td><td>Agent can run/observe app</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Web UI via playwright plugin, API via curl, IaC via terraform plan.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details>
+      <summary><span>5 · Prompt &amp; Agent Integrity</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>No invisible/hidden Unicode</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Byte-scan of 67 prompt files — clean.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>No prompt injection patterns</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>All <code>.env</code> mentions are defensive guidance.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Hook scripts clean</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Sensitive-file blocker + formatter only; no exfil.</td></tr>
+        <tr data-status="PASS"><td class="center">4</td><td>MCP endpoints trusted</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>All 3 servers https/official, no creds/bare IPs.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Git provenance</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Critical configs tracked; <code>settings.local.json</code> gitignored.</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>No security-bypass instructions</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>No bypass; no <code>$ARGUMENTS</code>/<code>bash -c</code> injection.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details open>
+      <summary><span>6 · Quality Assurance</span><span class="summary-score g-B">81% · B</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Test infra w/ adequate coverage</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>184 test files; v8 coverage gate (85/86/83/79) in CI.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Unit tier present</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>136 unit/component tests (jsdom + mocked Prisma).</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Integration tier present</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>48 integration tests against real PostgreSQL.</td></tr>
+        <tr data-status="FAIL"><td class="center">4</td><td>E2E tier present</td><td><span class="sev sev-high">high</span></td><td><span class="status st-FAIL">FAIL</span></td><td>No Playwright/Cypress config, deps, or <code>e2e/</code> dirs. Only material gap.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Pyramid shape — no inversion</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>unit (136) ≥ integration (48) ≥ e2e (0).</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>Coverage reporting configured</td><td><span class="sev sev-low">low</span></td><td><span class="status st-PASS">PASS</span></td><td>v8 with real thresholds, gated in CI.</td></tr>
+        <tr data-status="WARN"><td class="center">7</td><td>Test data management</td><td><span class="sev sev-low">low</span></td><td><span class="status st-WARN">WARN</span></td><td>No factory lib or <code>prisma/seed.*</code>; integration data built inline.</td></tr>
+        <tr data-status="PASS"><td class="center">8</td><td>Test isolation — mocking</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td><code>vi.mock</code> in 81/136 unit files (MSW not present).</td></tr>
+        <tr data-status="SKIP"><td class="center">9</td><td>Contract testing</td><td><span class="sev sev-high">high</span></td><td><span class="status st-SKIP">SKIP</span></td><td>Single-service repo, no inter-service comms.</td></tr>
+        <tr data-status="SKIP"><td class="center">10</td><td>ML model iteration testing</td><td><span class="sev sev-high">high</span></td><td><span class="status st-SKIP">SKIP</span></td><td>No ML layer.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details>
+      <summary><span>7 · Security Guardrails</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>.env files are gitignored</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Ignored at root &amp; service level; only <code>.env.example</code> tracked.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>AI hooks restrict sensitive files</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>PreToolUse hook blocks <code>.env</code>/<code>*.pem</code>/<code>*.key</code> — verified live.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>.env.example/template exists</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Placeholder templates at root and app dir.</td></tr>
+        <tr data-status="PASS"><td class="center">4</td><td>No secrets in committed files</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Only <code>AKIA…</code> hit is the AWS doc example string.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Sensitive files in .gitignore</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Covers env, Terraform state/tfvars, AWS creds, OS junk.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details>
+      <summary><span>8 · Software Best Practices</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Linting configured and enforced</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Flat ESLint + typescript-eslint + FSD boundaries; <code>--max-warnings 0</code>.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Formatting automated</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>Prettier config + scripts + CI gate.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Type safety enforced</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td><code>strict:true</code> + extra flags; zero <code>any</code> in non-test source.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>CI/CD pipeline exists</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>typecheck, lint, format, build, coverage gate, audit, migration check.</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>Error handling consistent</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>54 catch blocks log via pino + rethrow typed <code>AppError</code>; global ErrorBoundary.</td></tr>
+        <tr data-status="PASS"><td class="center">7</td><td>Dependencies managed</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td><code>pnpm-lock.yaml</code> + Dependabot + 7-day freshness gate.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details>
+      <summary><span>9 · Spec-Driven Development</span><span class="summary-score g-A">100% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>AWOS installed and set up</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>9 commands, 10 wrappers, 6 templates, 19 specs.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Product context complete</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>product-definition, roadmap (5 phases), architecture (256 ln).</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Architecture doc reflects reality</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Refreshed to v3.0 on 2026-05-23; no phantom Next.js drift.</td></tr>
+        <tr data-status="PASS"><td class="center">4</td><td>Features through specs</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>~75% of recent feat commits reference a spec/slice/PR.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Spec dirs structurally complete</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>18/20 dirs complete (90%).</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>No stale/abandoned specs</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>Zero stale; only Draft (016) genuinely mid-progress.</td></tr>
+        <tr data-status="PASS"><td class="center">7</td><td>Meaningful agent assignments</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>All tasks.md annotated; verification routes to QA agents.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details open>
+      <summary><span>10 · Supply Chain Security</span><span class="summary-score g-C">72% · C</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Lockfiles committed to git</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td><code>pnpm-lock.yaml</code> present and tracked.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>Lockfiles contain integrity hashes</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>All sampled registry entries carry <code>integrity:</code> hashes.</td></tr>
+        <tr data-status="WARN"><td class="center">3</td><td>No permissive version ranges</td><td><span class="sev sev-high">high</span></td><td><span class="status st-WARN">WARN</span></td><td>All 75 app deps exact-pinned; residual carets on <code>@commitlint/config-conventional</code> + 3 overrides.</td></tr>
+        <tr data-status="FAIL"><td class="center">4</td><td>7-day quarantine</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-FAIL">FAIL</span></td><td><code>nitro@3.0.260522-beta</code> published 1 day ago, inside window, NOT allowlisted.</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Dependency review enforces approval</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Dependabot (no automerge); freshness gate on PRs.</td></tr>
+        <tr data-status="PASS"><td class="center">6</td><td>Vulnerability scanning in CI</td><td><span class="sev sev-critical">critical</span></td><td><span class="status st-PASS">PASS</span></td><td>Blocking <code>pnpm audit --prod --audit-level=high</code> (was prior FAIL — fixed).</td></tr>
+        <tr data-status="PASS"><td class="center">7</td><td>Dependency overrides reviewed</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Overrides pin specific versions; documented in <code>DEPENDENCY_DECISIONS.md</code>.</td></tr>
+        <tr data-status="FAIL"><td class="center">8</td><td>Dependency count / attack surface</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-FAIL">FAIL</span></td><td>1110 resolved tarballs exceeds the &gt;1000 flag; direct-to-total ratio (~14.6:1) healthy.</td></tr>
+      </tbody></table></div>
+    </details>
+
+    <details open>
+      <summary><span>11 · End-to-End Delivery</span><span class="summary-score g-A">93% · A</span></summary>
+      <div class="body"><table><thead><tr><th class="center">#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+        <tr data-status="PASS"><td class="center">1</td><td>Cross-layer feature branches</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>6 sampled feat commits span <code>routes/</code>+<code>features/</code>+<code>entities/</code> within the full-stack app.</td></tr>
+        <tr data-status="PASS"><td class="center">2</td><td>No layer-split branching</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>No <code>*-backend</code>/<code>*-frontend</code> paired branches.</td></tr>
+        <tr data-status="PASS"><td class="center">3</td><td>Spec-to-delivery traceability</td><td><span class="sev sev-high">high</span></td><td><span class="status st-PASS">PASS</span></td><td>Bidirectional; 61/99 feat commits reference specs; 247 checked tasks match commits.</td></tr>
+        <tr data-status="WARN"><td class="center">4</td><td>No orphaned artifacts</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-WARN">WARN</span></td><td>0/42 endpoints orphaned; all 15 models connected. One documented-legacy orphan: <code>Review</code> (pending Phase 2B).</td></tr>
+        <tr data-status="PASS"><td class="center">5</td><td>Shared ownership enablers</td><td><span class="sev sev-medium">medium</span></td><td><span class="status st-PASS">PASS</span></td><td>Root <code>pnpm-workspace.yaml</code>, root <code>docker-compose.yml</code>, shared CI.</td></tr>
+      </tbody></table></div>
+    </details>
+
+  </section>
+
+  <section>
+    <h2>Top Recommendations</h2>
+    <table>
+      <thead><tr><th class="center">#</th><th class="center">Priority</th><th class="center">Effort</th><th>Dimension</th><th>Recommendation</th></tr></thead>
+      <tbody>
+        <tr><td class="center">1</td><td class="center pri pri-P0">P0</td><td class="center">Low</td><td>Supply Chain</td><td>Repin <code>nitro</code> to a &gt;7-day-old stable version, or allowlist with a documented risk review. Clears critical SCS-04.</td></tr>
+        <tr><td class="center">2</td><td class="center pri pri-P1">P1</td><td class="center">Medium</td><td>Quality Assurance</td><td>Add an E2E test tier (Playwright) for 2-3 critical user flows. Closes the only testing-pyramid gap.</td></tr>
+        <tr><td class="center">3</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>Documentation</td><td>Rewrite stale <code>savepoint-tanstack/README.md</code> — drop <code>savepoint-app/</code> refs, fix prisma command.</td></tr>
+        <tr><td class="center">4</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>Documentation</td><td>Fix <code>infra/</code> module path: <code>infra/modules/cognito</code> → <code>infra/envs/modules/cognito</code>.</td></tr>
+        <tr><td class="center">5</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>AI Tooling / Hooks</td><td>Repoint <code>.claude/hooks/format-and-lint.sh</code> from removed <code>savepoint-app/</code> to <code>savepoint-tanstack/</code> (dead hook).</td></tr>
+        <tr><td class="center">6</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>Supply Chain</td><td>Pin remaining caret deps to exact versions per the project's exact-pinning preference (SCS-03 WARN).</td></tr>
+        <tr><td class="center">7</td><td class="center pri pri-P2">P2</td><td class="center">Medium</td><td>Supply Chain</td><td>Review the 1110-package transitive tree for prunable dev deps, or document acceptance (SCS-08).</td></tr>
+        <tr><td class="center">8</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>Quality Assurance</td><td>Introduce a fixture/factory layer (<code>fishery</code>/<code>@faker-js/faker</code>) or <code>prisma/seed.*</code> (QA-07 WARN).</td></tr>
+        <tr><td class="center">9</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>Supply Chain</td><td>Refresh <code>DEPENDENCY_DECISIONS.md</code> to match current pinned versions.</td></tr>
+        <tr><td class="center">10</td><td class="center pri pri-P2">P2</td><td class="center">Low</td><td>End-to-End Delivery</td><td>Confirm intent of the legacy <code>Review</code> Prisma model (documented orphan, pending Phase 2B).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <p class="legend">Generated by /awos:ai-readiness-audit · artifacts in <code>context/audits/2026-05-23/</code> · previous audit 2026-05-18 (90% B).</p>
+</div>
+
+<script>
+  function toggleIssues() {
+    document.body.classList.toggle('issues-only');
+    var btn = document.getElementById('filterBtn');
+    var on = document.body.classList.contains('issues-only');
+    btn.textContent = on ? 'Show all' : 'Show issues only';
+    if (on) { document.querySelectorAll('details').forEach(function(d){ d.open = true; }); }
+  }
+</script>
+</body>
+</html>
