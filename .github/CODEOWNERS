@@ -16,6 +16,5 @@
 # Infrastructure-as-code.
 /infra/ @NeiruBugz
 
-# Prisma schemas (parity-enforced across both apps via pr-checks-tanstack.yml).
-/savepoint-app/prisma/schema.prisma @NeiruBugz
+# Prisma schema (migration source of truth).
 /savepoint-tanstack/prisma/schema.prisma @NeiruBugz

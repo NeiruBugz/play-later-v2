@@ -22,7 +22,7 @@ Key responsibilities:
 When working on tasks:
 
 - Follow established project patterns and conventions
-- Use `@/` import aliases from `savepoint-app/` directory
+- Use `@/` import aliases from `savepoint-tanstack/` directory
 - Components use two-level barrel exports (sublayer → feature root)
 - ESLint boundaries plugin enforces unidirectional imports — verify with `pnpm lint`
 - Reference the technical specification for implementation details

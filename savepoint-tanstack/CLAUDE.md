@@ -1,18 +1,18 @@
 # savepoint-tanstack
 
-> **Under construction.** This app is being built per spec 021 to replace `savepoint-app/`. Until cutover (Slice 20), `savepoint-app/` is the canonical, deployed app. Do NOT modify `savepoint-app/` from work in this directory unless explicitly aligned via the spec.
+The SavePoint app — TanStack Start v1. Delivered by spec 021 (migration from Next.js complete); this is the sole, deployed app. It owns Prisma migrations.
 
 ## Spec
 
-Spec 021 lives at [`../context/spec/021-migrate-to-tanstack-start/`](../context/spec/021-migrate-to-tanstack-start/):
+Spec 021 (the migration that produced this app) lives at [`../context/spec/021-migrate-to-tanstack-start/`](../context/spec/021-migrate-to-tanstack-start/):
 
-- [`functional-spec.md`](../context/spec/021-migrate-to-tanstack-start/functional-spec.md) — what behavior must match `savepoint-app/`.
+- [`functional-spec.md`](../context/spec/021-migrate-to-tanstack-start/functional-spec.md) — the behavior contract.
 - [`technical-considerations.md`](../context/spec/021-migrate-to-tanstack-start/technical-considerations.md) — stack, DAL pattern (C2), auth wiring, env, testing.
 - [`tasks.md`](../context/spec/021-migrate-to-tanstack-start/tasks.md) — slice-by-slice TDD task list. Methodology header is binding.
 
 ## Purpose
 
-Side-by-side TanStack Start v1 rewrite of the Next.js app at `savepoint-app/`. Same Postgres database, same Better Auth tables, same S3 bucket, same IGDB client. Both apps run locally during the migration; cutover is a single Vercel root-directory change at Slice 20.
+The SavePoint backlog-management app on TanStack Start v1: Postgres via Prisma, Better Auth sessions, S3 for avatars/screenshots, IGDB for game data. Runs on `:6060`; deploys via Vercel (Nitro).
 
 ## TDD policy
 
@@ -141,31 +141,31 @@ From [`tsconfig.json`](./tsconfig.json):
 
 ## Where to look first
 
-| If you want to...                           | Look here                                                                                                                                                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Add a route                                 | [`src/routes/`](./src/routes/) (TanStack file-based; `$param` for dynamic segments, `_authed/` for guarded group)                                                                                                                           |
-| Add a server fn (mutation, authed re-fetch) | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix — see "File naming" above)                                                                                                                                                      |
-| Add an entity query (read)                  | `src/entities/<name>/api/<query-name>.server.ts`                                                                                                                                                                                            |
-| Add a composite UI block                    | `src/widgets/<name>/ui/...`                                                                                                                                                                                                                 |
-| Add a shared primitive                      | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                                                                                                                              |
-| Add an env var                              | Add to [`env.ts`](./env.ts) Zod schema first, then `import { env } from "@env"`                                                                                                                                                             |
-| Schema change                               | **Don't migrate from this app.** [`prisma/schema.prisma`](./prisma/schema.prisma) is a mirror of `savepoint-app/prisma/schema.prisma`. Migrate in `savepoint-app/` first, then re-copy schema + migrations here. CI diff-checks divergence. |
-| Run tests                                   | `pnpm --filter savepoint-tanstack test:unit` (jsdom, mocked Prisma) / `test:integration` (real PG, sequential)                                                                                                                              |
-| Understand FSD layer rules                  | This file + per-layer `src/<layer>/README.md`                                                                                                                                                                                               |
+| If you want to...                           | Look here                                                                                                                                                                                                             |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a route                                 | [`src/routes/`](./src/routes/) (TanStack file-based; `$param` for dynamic segments, `_authed/` for guarded group)                                                                                                     |
+| Add a server fn (mutation, authed re-fetch) | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix — see "File naming" above)                                                                                                                                |
+| Add an entity query (read)                  | `src/entities/<name>/api/<query-name>.server.ts`                                                                                                                                                                      |
+| Add a composite UI block                    | `src/widgets/<name>/ui/...`                                                                                                                                                                                           |
+| Add a shared primitive                      | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                                                                                                        |
+| Add an env var                              | Add to [`env.ts`](./env.ts) Zod schema first, then `import { env } from "@env"`                                                                                                                                       |
+| Schema change                               | **Migrations are owned here.** Edit [`prisma/schema.prisma`](./prisma/schema.prisma), then `pnpm --filter savepoint-tanstack prisma:migrate` (dev) to author + apply. Production deploys run `prisma:migrate:deploy`. |
+| Run tests                                   | `pnpm --filter savepoint-tanstack test:unit` (jsdom, mocked Prisma) / `test:integration` (real PG, sequential)                                                                                                        |
+| Understand FSD layer rules                  | This file + per-layer `src/<layer>/README.md`                                                                                                                                                                         |
 
 ## Quick commands
 
-| Task                        | Command                                                             |
-| --------------------------- | ------------------------------------------------------------------- |
-| Dev server                  | `pnpm --filter savepoint-tanstack dev` (port 6061 — see known gaps) |
-| Typecheck                   | `pnpm --filter savepoint-tanstack typecheck`                        |
-| Lint (incl. FSD boundaries) | `pnpm --filter savepoint-tanstack lint`                             |
-| Format check                | `pnpm --filter savepoint-tanstack format:check`                     |
-| Format (write)              | `pnpm --filter savepoint-tanstack format`                           |
-| Unit tests                  | `pnpm --filter savepoint-tanstack test:unit`                        |
-| Integration tests           | `pnpm --filter savepoint-tanstack test:integration`                 |
-| Generate Prisma client      | `pnpm --filter savepoint-tanstack prisma:generate`                  |
-| Format Prisma schema        | `pnpm --filter savepoint-tanstack prisma:format`                    |
+| Task                        | Command                                             |
+| --------------------------- | --------------------------------------------------- |
+| Dev server                  | `pnpm --filter savepoint-tanstack dev` (port 6060)  |
+| Typecheck                   | `pnpm --filter savepoint-tanstack typecheck`        |
+| Lint (incl. FSD boundaries) | `pnpm --filter savepoint-tanstack lint`             |
+| Format check                | `pnpm --filter savepoint-tanstack format:check`     |
+| Format (write)              | `pnpm --filter savepoint-tanstack format`           |
+| Unit tests                  | `pnpm --filter savepoint-tanstack test:unit`        |
+| Integration tests           | `pnpm --filter savepoint-tanstack test:integration` |
+| Generate Prisma client      | `pnpm --filter savepoint-tanstack prisma:generate`  |
+| Format Prisma schema        | `pnpm --filter savepoint-tanstack prisma:format`    |
 
 ## Foot-guns reference
 
@@ -173,7 +173,7 @@ Silent-failure runtime traps surfaced during the migration — bundler-graph tra
 
 ## Divergence log
 
-Slice-by-slice "what we did differently from the canonical app and why" — including the Logger (S7) port note, the Vertical-1 verification matrix, and every "Intentional divergences (Slice N)" / "Known gaps (Slice 14A)" entry — is in [`DIVERGENCES.md`](./DIVERGENCES.md). Append new slice divergences there, not here.
+The slice-by-slice migration record — "what the spec-021 port did differently from the prior Next.js app and why," including the Logger (S7) port note, the Vertical-1 verification matrix, and every "Intentional divergences (Slice N)" / "Known gaps (Slice 14A)" entry — is in [`DIVERGENCES.md`](./DIVERGENCES.md). It is a historical log; append new entries only if a future change references a documented divergence.
 
 ## Per-layer rules
 

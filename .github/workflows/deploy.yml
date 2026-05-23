@@ -28,13 +28,13 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        working-directory: savepoint-app
+        working-directory: savepoint-tanstack
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
-        working-directory: savepoint-app
+        working-directory: savepoint-tanstack
         run: pnpm prisma:generate
 
       - name: Run database migrations
-        working-directory: savepoint-app
+        working-directory: savepoint-tanstack
         run: pnpm prisma migrate deploy

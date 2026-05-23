@@ -1,155 +1,85 @@
 # System Architecture Overview: SavePoint
 
-> **Active migration in progress (spec 021).** A side-by-side TanStack Start v1 rewrite of this app lives at [`savepoint-tanstack/`](../../savepoint-tanstack/). Both apps run against the same Postgres / Better Auth / S3 / IGDB instances during the migration; cutover is a single Vercel root-directory change at Slice 20. The documentation below describes the **canonical `savepoint-app/`** stack — the deployed app — until cutover lands. The rewrite's stack is documented in [`savepoint-tanstack/CLAUDE.md`](../../savepoint-tanstack/CLAUDE.md): TanStack Start + TanStack Router (file-based), C2 DAL pattern (thin entity queries + feature `createServerFn`s throwing `AppError`), Better Auth via a catch-all Web Request handler. Postgres schema is mirrored verbatim across the two apps and CI-diff-checked.
+> **Migrated to TanStack Start (spec 021, cut over 2026-05).** SavePoint was rebuilt from Next.js 16 (App Router) onto **TanStack Start v1**. The deployed application is `savepoint-tanstack/`; the former `savepoint-app/` (Next.js) is retained briefly as rollback insurance and will be deleted one release cycle after cutover. This document describes the **TanStack Start architecture as deployed**. The migration was user-invisible: same Postgres data, same Better Auth sessions, same URLs. Migration spec: `context/spec/021-migrate-to-tanstack-start/`.
 
 ---
 
 ## 1. Application & Technology Stack
 
-**Full-Stack Framework:** Next.js 16 with App Router (Turbopack default for dev, `cacheComponents: true` enabled)
+**Full-Stack Framework:** TanStack Start v1 (`@tanstack/react-start`) on Vite 8 (Rolldown) + **Nitro** server engine
 
-- Server Components for game detail pages and library views (SEO-optimized, efficient data fetching)
-- Server Actions for mutations (add game, write journal entry, update library status)
-- API Routes (minimal usage - primarily for authentication callbacks)
-- React 19 with TypeScript for type-safe component development
-- Turbopack for fast development builds and production optimization
-- Per-component caching via the `"use cache"` directive with `cacheLife` / `cacheTag` (adopted in spec 010); cross-route view transitions via the View Transitions API
+- **Routing:** TanStack Router (file-based) under `savepoint-tanstack/src/routes/`. `$param` for dynamic segments, `_authed/` pathless layout for guarded routes, `routes/api/*` for Web Request handlers. Generated `routeTree.gen.ts` is committed.
+- **Server functions:** `createServerFn` for mutations and authed/client-callable reads; route `loader`s for read paths.
+- **No RSC.** Every component is client-bundle eligible; data flows via loaders + server fns. There is no `"use cache"` / Server Components model — read-path caching uses TanStack Router's loader `staleTime`/`gcTime` and, where streamed, TanStack Query.
+- **React 19 + TypeScript (strict).**
 
 **Frontend Stack:**
 
 - **UI Framework:** React 19 with TypeScript
-- **Styling:** Tailwind CSS for utility-first styling
-- **Component Library:** shadcn/ui for accessible, customizable UI primitives
-- **State Management:** TanStack Query for server state synchronization and caching
+- **Styling:** Tailwind CSS v4 (`@tailwindcss/vite`)
+- **Component Library:** shadcn/ui primitives, ported into `src/shared/ui/`
+- **Server state:** TanStack Query (`@tanstack/react-query` + `react-router-ssr-query`) for streamed/client-refetchable surfaces (e.g. game-detail related games via `useSuspenseQuery`); most reads are loader-driven
 - **Form Handling:** React Hook Form with Zod validation
 
-**Data Flow Architecture (Enforced via ESLint boundaries):**
+**Data Flow Architecture — the "C2" DAL (two layers, throw-on-error):**
 
-SavePoint implements a **pragmatic four-layer architecture** where layers are used selectively based on need:
+The TanStack rewrite deliberately replaced the prior four-layer (handler → use-case → service → repository) architecture and its `Result` wrappers with a **two-layer DAL that throws typed errors**:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ App Router (Pages, Layouts, API Routes)                │
-│ - Server Components (RSC) for data fetching            │
-│ - Server Actions for mutations                         │
-│ - API Routes (only for client-side fetching patterns)  │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│ routes/  — thin loaders + route components                │
+│ - loader reads via a loader-safe createServerFn            │
+│ - beforeLoad guards (auth redirects)                       │
+│ - errorComponent branches on AppError.code                 │
+└───────────────────────────────────────────────────────────┘
                           ↓
-┌─────────────────────────────────────────────────────────┐
-│ Handler Layer (OPTIONAL - only for API routes)         │
-│ - HTTP boundary concerns (validation, rate limiting)   │
-│ - Used when: Client-side fetching with TanStack Query  │
-│ - Returns HandlerResult<TData> with HTTP status codes  │
-│ - Examples: game-search, library, platform handlers    │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│ features/<intent>/api/  — createServerFn wrappers          │
+│ - .inputValidator(Zod) + re-parse in handler (validate-2x) │
+│ - resolve userId via requireUserId() (throws)              │
+│ - delegate to entity queries / a worker (foot-gun #8 split)│
+└───────────────────────────────────────────────────────────┘
                           ↓
-┌─────────────────────────────────────────────────────────┐
-│ Use-Case Layer (OPTIONAL - only when needed)           │
-│ - Orchestrates multiple services for complex operations│
-│ - Used when: Coordinating 2+ services in a feature     │
-│ - Examples: getGameDetails (IGDB + Library + Journal)  │
-└─────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────┐
-│ Service Layer (ALWAYS - core business logic)           │
-│ - Single-domain business logic operations              │
-│ - Returns ServiceResult<TData> types                   │
-│ - Never calls other services (delegates to use-cases)  │
-│ - Examples: IgdbService, LibraryService, AuthService   │
-└─────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────┐
-│ Repository Layer (ALWAYS - data access)                │
-│ - Pure Prisma operations (domain-organized)            │
-│ - Returns RepositoryResult<TData> types                │
-│ - No business logic, only data access                  │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│ entities/<noun>/api/*.server.ts  — domain queries          │
+│ - plain async, direct Prisma                               │
+│ - throw AppError subclasses on failure                     │
+│ - privacy/ownership invariants live HERE                   │
+└───────────────────────────────────────────────────────────┘
                           ↓
                  Prisma ORM → PostgreSQL
 ```
 
-**Layer Selection Decision Matrix:**
+- **No Result wrappers, no service classes, no domain mappers, no handler/use-case/repository split.** Errors throw; routes catch via `errorComponent`.
+- **`AppError` catalog (exactly 5):** `NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`. New subclasses require spec review. Prisma constraint errors are mapped to `AppError` in exactly one place (the entity update query).
+- **`.server.ts` is a bundler boundary**, not just a naming tag: TanStack Start's `import-protection` plugin forbids `**/*.server.*` from the client bundle. Entity queries / db / auth are `.server.ts`; `createServerFn` files are **not** (`.server.ts` would break the RPC bridge). Public barrels must not re-export server-only values into client-reachable surfaces.
 
-| Scenario | Use Handler? | Use Use-Case? | Example |
-|----------|-------------|---------------|---------|
-| Server Component fetches data | ❌ No | ✅ If multi-service | Game detail page → getGameDetails use-case |
-| Server Action mutates data | ❌ No | ✅ If multi-service | Add to library → addGameToLibrary use-case |
-| Client-side fetching (TanStack Query) | ✅ Yes | ✅ If multi-service | Search games → gameSearchHandler |
-| Single service operation | ❌ No | ❌ No | Profile update → ProfileService directly |
-| Public API with rate limiting | ✅ Yes | Depends | Game search API → handler → service |
-
-**Server Action Framework:** Homegrown `createServerAction` factory (`shared/lib/server-action/`)
-
-- Type-safe server actions with Zod input validation and `ActionResult<T>` return type
-- `requireAuth` option calls `getServerUserId()` and rejects unauthenticated callers
-- Consistent error handling: `{ success: true; data: T } | { success: false; error: string }`
-- All server actions call this factory — no third-party action library in use
-
-**Result Type Patterns:**
-
-Each layer has its own discriminated union result type to prevent layer confusion:
-
-```typescript
-// Handler Layer (HTTP boundary)
-type HandlerResult<T> =
-  | { success: true; data: T; status: number }
-  | { success: false; error: string; status: number }
-
-// Service Layer (business logic)
-type ServiceResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string; code?: ServiceErrorCode }
-
-// Repository Layer (data access)
-type RepositoryResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: RepositoryError }
-```
-
-**Import Aliases:** All imports use `@/` alias from `savepoint-app/` directory for clean, relocatable imports
+**Import Aliases:** `@/*` (and `#/*`) → `savepoint-tanstack/src/*`; `@env` → typed env at `savepoint-tanstack/env.ts`. `process.env.*` is read only inside `env.ts`.
 
 ---
 
 ## 2. Authentication & Authorization
 
-**Authentication Runtime:** Better Auth (`betterAuth({...})` instance in `savepoint-app/auth.ts`)
+**Authentication Runtime:** Better Auth (`betterAuth({...})` in `savepoint-tanstack/src/shared/lib/auth.server.ts`)
 
-- **Primary identity provider:** AWS Cognito (Google federation), wired via `socialProviders.cognito`
-- **Account linking:** enabled with `trustedProviders: ["cognito"]` — Cognito accounts auto-link on first sign-in
-- **Email+password:** enabled only when `AUTH_ENABLE_CREDENTIALS=true` (non-prod / E2E testing)
-- **Route mount:** `app/api/auth/[...all]/route.ts` via `toNextJsHandler(auth)`
+- **Primary identity provider:** AWS Cognito (Google federation), via `socialProviders.cognito`
+- **Account linking:** `accountLinking.enabled = true`, `trustedProviders: ["cognito"]` — accounts auto-link on `accountId = <cognito-sub>` (no user fork)
+- **Email+password:** enabled only when `AUTH_ENABLE_CREDENTIALS=true` (non-prod / E2E)
+- **Route mount:** `routes/api/auth/$.ts` returns `auth.handler(request)` directly (Web Request/Response). `basePath: "/api/auth"`. No `toNextJsHandler`, no `nextCookies()` plugin — TanStack Start passes Better Auth's `Set-Cookie` headers through natively.
 
 **Session Management:**
 
-- DB sessions stored in the PostgreSQL `session` table (not JWT) via `prismaAdapter`
-- Server-side session lookup: `getServerUserId()` in `auth.ts` — returns `string | undefined`, backed by `auth.api.getSession({ headers })`
-- Client-side sign-out: `authClient.signOut()` from `@/shared/lib/auth-client`
+- DB sessions in the PostgreSQL `session` table (not JWT) via `prismaAdapter`
+- Server-side lookup: `getServerUserId(request)` reads the request `Headers` and calls `auth.api.getSession({ headers })` → `string | undefined`
+- Auth gates: **`requireUserId()`** in handlers (throws `UnauthorizedError`); **`requireUserIdOrRedirectFn`** in route `beforeLoad` (redirects to `/login`); raw `getServerUserId` only for anonymous-allowed reads
+- Client sign-out: `authClient.signOut()` + `router.invalidate()`
 
-**Authorization Pattern:**
+**Cross-app session continuity (cutover):** the migration shares the same `BETTER_AUTH_SECRET`, cookie name/domain, and `session` table as the legacy app, so sessions interoperate and survive cutover with no re-login (verified by the Slice 23 cross-app session audit).
 
-```typescript
-// Server Action using createServerAction (requireAuth: true by default)
-export const addGameToLibrary = createServerAction({
-  actionName: "addGameToLibrary",
-  schema: AddGameSchema,
-  handler: async ({ input, userId }) => {
-    // userId extracted from DB session by the factory
-    return GameService.addToLibrary(userId!, input);
-  },
-});
-```
+**Authorization principles:**
 
-**Migration Compatibility (Cutover Period):**
-
-- `proxy.ts` (Next.js middleware equivalent) detects stale `next-auth.*` cookies post-cutover, clears them, and sets `auth_migrated=1` cookie
-- `MigrationNotice` component (`features/auth/ui/migration-notice.tsx`) on `/login` reads the flag and shows a one-shot notice, then clears it via `clear-migrated-cookie` server action
-
-**Security Principles:**
-
-- All mutations require authenticated session
-- User ID extracted from server-side DB session (never trusted from client input)
-- Authorization checks happen before service layer execution
-- Session stored in PostgreSQL with httpOnly cookies for the session token
+- All mutations require an authenticated session; `userId` is resolved server-side, never trusted from input
+- **Privacy/ownership invariants live on the entity query** — they throw `NotFoundError` for both "missing" and "not yours" (anti-enumeration), so a network-callable `createServerFn` cannot bypass a route-layer gate
 
 ---
 
@@ -157,653 +87,170 @@ export const addGameToLibrary = createServerAction({
 
 **Primary Database:** PostgreSQL
 
-- Relational data model for users, games (IGDB metadata cache), library items, journal entries, collections
-- Local development: Docker Compose on `localhost:6432`
-- Production: AWS RDS PostgreSQL with automated backups and multi-AZ deployment
-- ACID compliance ensures data integrity for critical operations (journal entries, library updates)
+- **Production:** Neon (serverless Postgres, pooled + non-pooling URLs)
+- **Local:** Docker Compose on `localhost:6432`
+- Relational model: users, games (IGDB metadata cache), library items, journal entries, collections, follows, imported (Steam) games
 
 **ORM Layer:** Prisma
 
-- Type-safe database access with generated TypeScript types
-- Migration management via `prisma migrate`
-- Connection pooling (min: 2, max: 10 connections)
-- Prisma Studio for local database inspection
-
-**Database Schema Design (Phase 1):**
-
-- `User`: Authentication data, profile information
-- `Game`: IGDB metadata cache (covers, descriptions, platforms, release dates)
-- `LibraryItem`: User's games with journey status (Curious About, Currently Exploring, Taking a Break, Experienced, Wishlist, Revisiting)
-- `JournalEntry`: User reflections linked to specific games with timestamps
-- `Collection`: Themed game collections (Phase 2 feature, schema supports early)
+- Generated client outputs into the **source tree** at `savepoint-tanstack/src/shared/lib/prisma/` (gitignored), so `build` runs `prisma generate && vite build` to produce it on a fresh checkout (e.g. Vercel)
+- `prisma.config.ts` loads the DB URL from `process.env` (and `.env` locally) — required at config-load even for generate
+- **Migration ownership:** during the parallel-run the schema was mirrored from `savepoint-app/` (canonical) and CI diff-checked; as `savepoint-app/` is retired, migration ownership moves to `savepoint-tanstack/`
 
 **Caching Strategy:**
 
-- **Application-level caching:** Next.js 16 `cacheComponents` + `"use cache"` directive with `cacheLife` / `cacheTag` for per-component memoization (see `data-access-layer/handlers/igdb/`, `features/game-detail/use-cases/`).
-- **IGDB response caching:** Game metadata stored in PostgreSQL `Game` table acts as persistent cache.
-- **Distributed cache:** **Upstash Redis** (serverless, REST-based) for hot-path read-through caching and rate-limit primitives. Configured via `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (server-only).
+- **Read-path caching:** TanStack Router loader `staleTime`/`gcTime` (replaces the former Next.js `"use cache"` model) — revisited routes serve cached loader data without a server round-trip
+- **IGDB response caching:** game metadata persisted in the PostgreSQL `Game` table acts as a durable cache
+- **Distributed cache (optional):** Upstash Redis (`UPSTASH_REDIS_REST_*`) for hot-path read-through / rate-limit primitives
 
 ---
 
 ## 4. External Services & APIs
 
-**Game Metadata:** IGDB (Internet Games Database)
+**Game Metadata:** IGDB
 
-- Primary source for game metadata: covers, descriptions, platforms, release dates, genres, franchises
-- OAuth 2.0 token management with 60-second safety margin before expiry
-- Rate limiting handled by service layer with exponential backoff
-- **Current refactoring plan:**
-  - Deprecate legacy `shared/lib/igdb.ts` utility
-  - Consolidate to `data-access-layer/services/igdb/igdb-service.ts`
-  - Extract types to `igdb-api-types` package for unified type definitions across codebase
+- Token cache + REST client in `src/shared/api/igdb/`; OAuth token refreshed lazily with a 60s safety margin
+- Search/detail exposed as entity queries (`entities/game/api/*.server.ts`, e.g. `searchGames`, `getGameDetails`, `getRelatedGames`, `getTimesToBeat`) wrapped by feature `createServerFn`s
+- First-lookup games are upserted into the local `Game` table (durable cache)
 
-**Platform Integration (Phase 3 — currently Blocked):**
+**Steam:** account connect/disconnect + profile read are active (OpenID assertion verified against Steam before trust). Library import / sync surfaces exist but the AWS Lambda enrichment pipeline that powered deep sync was retired (spec 015); PSN/Xbox remain paused on the same dependency.
 
-- **Steam Web API:** Account linking and profile read are active; library import / ownership / achievement sync are deferred — the AWS Lambda enrichment pipeline that powered them was retired in spec 015. Sync UI surfaces remain visible and return a permanently-disabled response. PSN and Xbox integrations are paused on the same dependency.
-- **Steam OpenID:** Authentication integration not currently surfaced.
+**File Storage (avatars):** AWS S3 (LocalStack locally). Presigned PUT via `getAvatarPresignedUrlFn` (MIME allow-list + 10 MB cap, enforced server-side); key scoped `${S3_AVATAR_PATH_PREFIX}${userId}/${uuid}.<ext>`.
 
-**File Storage (Phase 3+):**
-
-- **AWS S3:** Journal screenshot uploads, user profile images
-- **LocalStack:** S3-compatible local storage for development and integration testing
-- Bucket structure: `savepoint-{env}/journal-screenshots/{userId}/{entryId}/`
-- Security: Pre-signed URLs for time-limited upload/download access
-
-**API Integration Patterns:**
-
-- Service layer encapsulates all external API calls
-- Retry logic with exponential backoff for transient failures
-- Circuit breaker pattern for degraded service scenarios
-- Structured logging for API latency and error tracking
+**Integration patterns:** external calls are wrapped at the `shared/api/<service>/` boundary and surface failures as `UpstreamError`; IGDB/Steam base URLs are hardcoded (no user-controlled URL construction → no SSRF).
 
 ---
 
 ## 5. Infrastructure & Deployment
 
-**Cloud Provider:** AWS
+**Hosting:** **Vercel** (single project; Root Directory = `savepoint-tanstack/`)
 
-- **Database:** RDS PostgreSQL with automated backups, multi-AZ for high availability in production
-- **File Storage:** S3 for journal screenshots and user-generated content (Phase 3+)
-- **Compute:** ECS Fargate for containerized Next.js application (no EC2 management overhead)
-- **Networking:** VPC with private subnets for RDS, public subnets for ALB
-- **Load Balancing:** Application Load Balancer for SSL termination and traffic distribution
+- TanStack Start builds through **Nitro**; Nitro auto-selects its **Vercel preset** from the `VERCEL` env var at build time (locally it uses the `node-server` preset → `.output/server/index.mjs`). No `vercel.json` — the project's dashboard settings handle the pnpm-workspace monorepo (install at workspace root, build `pnpm --filter savepoint-tanstack build`).
+- **Cutover** = swapping the Vercel project Root Directory to `savepoint-tanstack/`. Rollback = revert it; no data migration to undo (shared DB). Runbook: `savepoint-tanstack/docs/{vercel-deployment,cutover-rollback}.md`.
 
-**Infrastructure as Code:** Terraform
+**Database:** Neon (managed Postgres).
 
-- Codified infrastructure in `terraform/` directory
-- Environment separation: `dev`, `staging`, `production`
-- Managed resources: RDS instances, ECS cluster/service definitions, S3 buckets, IAM roles, VPC configuration
-- State management: S3 backend with DynamoDB state locking
-- Solo developer context: Simple, maintainable configurations without complex module abstractions
+**File Storage / Auth:** AWS S3 (avatars) + AWS Cognito (identity). Both provisioned via Terraform in `infra/` (currently Cognito + S3 modules).
 
-**Local Development Environment:**
+**Infrastructure as Code:** Terraform (`infra/`), `dev` / `prod` envs, local state per env.
 
-- **Docker Compose:** PostgreSQL (port 6432), pgAdmin (port 5050)
-- **LocalStack:** S3-compatible storage for testing file upload workflows
-- **Environment variables:** `.env` file (never committed, `.env.example` provided)
-- Development server: `localhost:6060` (non-standard port to avoid conflicts)
+**Local Development:**
 
-**CI/CD Pipeline (GitHub Actions):**
+- Docker Compose: PostgreSQL (`:6432`), pgAdmin (`:5050`), LocalStack S3 (`:4568`)
+- Dev server: `pnpm --filter savepoint-tanstack dev` on `localhost:6060`
+- Env via `.env` (never committed; `.env.example` provided); all keys validated by `env.ts`
 
-**PR Checks** (`.github/workflows/pr-checks.yml`):
+**CI/CD (GitHub Actions):** `pr-checks-tanstack.yml`, path-conditional on `savepoint-tanstack/**`
 
-- Code formatting validation (Prettier)
-- Linting with architectural boundary enforcement (ESLint with boundaries plugin)
-- TypeScript type checking (strict mode)
-- Unit tests (`pnpm test --project=unit`)
-- Integration tests (`pnpm test --project=integration` with Docker Compose)
-- Component tests (`pnpm test --project=components`)
-- Migration validation: Schema drift detection, destructive operation warnings
-
-**Deployment Workflow** (`.github/workflows/deploy.yml` — pending):
-
-- Database migrations via `prisma migrate deploy` (safe, idempotent).
-- Container build and push to a registry (ECR or alternative — to be re-stood-up; the previous ECR module was deleted in spec 015 along with the Lambda pipeline).
-- ECS service update with rolling deployment strategy.
-- Health check validation before completing deployment; automatic rollback on failure.
-
-**Current Focus:** Quality gates and migration safety validation. Full deployment automation to ECS deferred until production readiness.
-
-**Deployment Strategy:**
-
-- Blue-green deployments for zero-downtime updates
-- Database migrations run before application deployment
-- Feature flags for gradual rollout of new features
+- Format check, ESLint (incl. **alias-aware** `eslint-plugin-boundaries` FSD enforcement), TypeScript typecheck
+- **Production build** (`prisma generate && vite build`) — catches client/server bundler-graph breaks the type/lint/test steps miss
+- **Merged unit + integration coverage** gate (v8): statements ≥ 85% on `src/{entities,features}` is the cutover gate; branches/lines/functions are regression floors
+- Prisma schema drift check (parity between the two apps during the retirement window)
 
 ---
 
 ## 6. Observability & Monitoring
 
-**Application Logging:** Pino
-
-- Structured JSON logging for queryability in CloudWatch Logs Insights
-- Request correlation IDs for distributed tracing across service boundaries
-- Log levels: `ERROR` (system failures), `WARN` (rate limits, degraded service), `INFO` (user actions, key events), `DEBUG` (development diagnostics)
-- Automatic stdout streaming to CloudWatch Logs in ECS Fargate environment
-
-**Log Context Pattern:**
-
-```typescript
-logger.info("Journal entry created", {
-  userId: user.id,
-  gameId: game.id,
-  entryId: entry.id,
-  requestId: req.id,
-  duration: 145,
-});
-```
-
-**Infrastructure Monitoring:** AWS CloudWatch
-
-- **Logs:** Centralized log aggregation from ECS tasks with 30-day retention
-- **Metrics:** ECS task health (CPU, memory, task count), RDS performance (connections, query latency), ALB metrics (request count, error rates)
-- **Alarms:** Error rate spikes, database connection pool exhaustion, disk space warnings, task failure alerts
-- **Log Insights:** Pre-configured queries for common debugging scenarios (HTTP 5xx errors, IGDB API failures, database errors)
-
-**Database Monitoring:** RDS Performance Insights
-
-- Slow query detection with query plan analysis
-- Connection pool utilization monitoring
-- Automatic recommendations for query optimization
-- Built-in to RDS (zero additional setup for solo developer)
-
-**Error Tracking Strategy:**
-
-- CloudWatch Logs Insights queries for error aggregation
-- Custom dashboards for key metrics visualization
-- Low-cost alternative to third-party APM tools (appropriate for solo developer context)
-
-**Key Metrics to Track (Phase 1):**
-
-- **IGDB API:** Call latency (p50, p95, p99), error rates, token refresh frequency
-- **Journal Entries:** Creation success rate, read latency, user engagement patterns
-- **User Authentication:** Sign-in success rate, OAuth callback failures, session duration
-- **Database Performance:** Query execution time, connection pool saturation, slow query alerts
-
-**Alerting Strategy:**
-
-- Critical: Database connection failures, application crash loops → SMS notification
-- Warning: High error rates, API rate limit approaching → Email notification
-- Info: Deployment completion, migration success → Dashboard only
-
-**Solo Developer Context:** All monitoring tooling is AWS-native to minimize operational overhead and avoid additional service management.
+- **Application logging:** Pino (structured JSON), surfaced through Vercel's runtime/function logs. Log levels `error`/`warn`/`info`/`debug` configurable via `LOG_LEVEL`.
+- **Platform:** Vercel deployment + function logs and built-in analytics for request/latency/error signals.
+- **Database:** Neon's built-in metrics + slow-query insight.
+- **Solo-developer context:** observability stays platform-native (Vercel + Neon) to minimize operational overhead — no self-managed CloudWatch/APM stack.
 
 ---
 
 ## 7. Testing Strategy
 
-**Testing Philosophy:** Test-driven development with emphasis on service layer correctness and repository data integrity. Solo developer context requires comprehensive tests that catch regressions without maintenance burden.
+**Philosophy:** TDD per slice (tests precede implementation for query + server functions). Integration tests use a real PostgreSQL DB.
 
-**Test Pyramid:**
+**Vitest — two projects:**
 
-```
-       /\
-      /E2E\         Future: 5-10 critical flows (Playwright)
-     /------\       Phase 2+: Auth → Import → Journal
-    /Integr-\       30-50 tests: Repository + full service flows
-   /----------\     Real PostgreSQL via Docker
-  /   Unit     \    100-200 tests: Services, utilities, components
- /--------------\   Mocked dependencies for speed
-```
+- **`unit`** (`*.unit.test.ts`, `*.test.tsx`): jsdom for components, node for logic; Prisma mocked. Fast.
+- **`integration`** (`*.integration.test.ts`): node + real PostgreSQL (per-test isolated DB), run sequentially. Worker-split features import the **worker**, not the `createServerFn` wrapper (foot-gun #8).
 
-**Test Types & Execution:**
+**Coverage:** merged unit+integration v8 report over `src/{entities,features}` (barrels/types excluded). Enforced thresholds: **statements 85** (the cutover gate), with branches/lines/functions as regression floors. `pnpm --filter savepoint-tanstack test:coverage` runs both projects + enforces. Current suite: ~1615 tests across unit + integration.
 
-**1. Unit Tests** (`.unit.test.ts`)
+**Conventions:** element/action vocabulary maps, given/when/then `describe` nesting, arrange-in-`beforeEach`, strings-over-regex queries; tests verify user-observable behavior, not call-envelope shape. Regression guards live in `test/eslint/` (FSD boundary + alias resolution) and `test/canary/` (harness wiring) — do not delete.
 
-- **Scope:** Service business logic, utilities, pure functions, validation logic
-- **Environment:** Node
-- **Dependencies:** Mocked Prisma client, mocked external APIs (IGDB)
-- **Speed:** Fast (<5s for full suite, no I/O operations)
-- **Setup File:** `test/setup/unit-setup.ts` with global Prisma/auth mocks
-- **Example scenarios:** Service Zod validation errors, Result type handling, edge case logic, utility functions
-
-**2. Integration Tests** (`.integration.test.ts`)
-
-- **Scope:** Repository layer, end-to-end service-to-database flows
-- **Environment:** Node with real PostgreSQL (Docker Compose)
-- **Database Strategy:** Isolated test database per suite (`savepoint-test-{timestamp}`)
-- **Lifecycle:** Database created in `beforeAll`, migrations applied, dropped in `afterAll`
-- **Execution:** Sequential (prevents database conflicts between test suites)
-- **Speed:** Moderate (15s timeout for database operations)
-- **Setup File:** `test/setup/integration-setup.ts` with Prisma migrations
-- **Example scenarios:** Repository CRUD operations, transaction handling, complex queries, data consistency
-
-**3. Component Tests** (`.test.tsx`, `.spec.tsx`)
-
-- **Scope:** React components, UI interactions, form validation
-- **Environment:** jsdom (browser-like environment)
-- **API Mocking:** MSW (Mock Service Worker) for `/api/*` route interception
-- **Speed:** Moderate (10s timeout)
-- **Setup File:** `test/setup/client-setup.ts` with Testing Library, MSW handlers
-- **Example scenarios:** Game search with debouncing, modal interactions, form validation feedback
-
-**4. E2E Tests** (Deferred to Phase 2+)
-
-- **Tool:** Playwright with TypeScript
-- **Scope:** Critical user journeys (Google OAuth sign-in → Steam library import → journal entry creation)
-- **Authentication:** Credentials provider for programmatic test account creation
-- **Database:** Isolated test database per Playwright worker
-- **CI Integration:** Block PRs on E2E failure once implemented
-- **Deferred reason:** User flows must exist before meaningful E2E tests can be written
-
-**Vitest Configuration Structure:**
-
-```typescript
-// vitest.config.ts (three-project architecture)
-export default defineConfig({
-  test: {
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-      thresholds: {
-        branches: 80,
-        functions: 80,
-        lines: 80,
-        statements: 80,
-      },
-      exclude: [".next/", "app/", "test/", "*.config.*", "**/*.d.ts"],
-    },
-    projects: [
-      {
-        name: "unit",
-        environment: "node",
-        include: ["**/*.unit.test.ts"],
-        setupFiles: ["./test/setup/unit-setup.ts"],
-        testTimeout: 5000,
-      },
-      {
-        name: "integration",
-        environment: "node",
-        include: ["**/*.integration.test.ts"],
-        setupFiles: ["./test/setup/integration-setup.ts"],
-        testTimeout: 15000,
-        poolOptions: { threads: { singleThread: true } },
-      },
-      {
-        name: "components",
-        environment: "jsdom",
-        include: ["**/*.{test,spec}.tsx"],
-        setupFiles: ["./test/setup/client-setup.ts"],
-        testTimeout: 10000,
-      },
-    ],
-  },
-});
-```
-
-**Test Data Strategy:**
-
-- **Factories:** `test/setup/db-factories.ts` for creating consistent, reusable test data entities
-- **Fixtures:** Static JSON responses for IGDB API mocks in `test/fixtures/`
-- **Builders:** Fluent builder pattern for complex domain objects (e.g., `GameBuilder().withCover().withPlatforms().build()`)
-
-**Coverage Requirements:**
-
-- **Threshold:** ≥80% for branches, functions, lines, statements (enforced in CI)
-- **Excluded from coverage:** Next.js app directory, generated Prisma types, config files, test utilities
-- **Primary focus:** Service layer business logic and repository data access correctness
-- **CI enforcement:** PRs blocked if coverage drops below threshold
-
-**CI/CD Test Integration:**
-
-```yaml
-# .github/workflows/pr-checks.yml
-- name: Run Unit Tests
-  run: pnpm test --project=unit --coverage
-
-- name: Start Test Database
-  run: docker-compose up -d
-
-- name: Run Integration Tests
-  run: pnpm test --project=integration
-
-- name: Run Component Tests
-  run: pnpm test --project=components
-
-- name: Cleanup
-  run: docker-compose down
-```
-
-**Testing Best Practices:**
-
-- Arrange-Act-Assert pattern for test structure clarity
-- Descriptive test names: `it('should return error when game not found in IGDB')`
-- Test factories over manual object creation for maintainability
-- Integration tests verify repository contracts, not implementation details
-- Component tests focus on user interactions, not internal component state
+**E2E:** deferred (added after cutover stabilizes).
 
 ---
 
 ## 8. Security Considerations
 
-**Authentication Security:**
-
-- OAuth 2.0 via AWS Cognito (Google federation upstream)
-- Better Auth session tokens stored in httpOnly cookies (prevents XSS attacks)
-- CSRF protection built into Better Auth
-- Email+password provider gated behind `AUTH_ENABLE_CREDENTIALS` (non-prod only)
-
-**Authorization Enforcement:**
-
-- All mutations require authenticated session validation
-- User ID extracted from server-side session (never trusted from client)
-- Service layer performs authorization checks before data access
-- Row-level security principle: Users can only access their own data
-
-**Data Protection:**
-
-- Environment variables for secrets (never committed to version control)
-- `.env.example` provides structure without real credentials
-- Database connection strings use SSL in production (RDS enforced encryption)
-- S3 bucket policies restrict access to authenticated application roles only
-
-**Input Validation:**
-
-- Zod schemas validate all external input at API boundaries
-- Parameterized queries via Prisma (prevents SQL injection)
-- `createServerAction` factory enforces Zod validation before business logic
-
-**Dependency Security:**
-
-- Automated dependency updates via Dependabot
-- Regular vulnerability scanning in CI pipeline
-- Lock files committed (pnpm-lock.yaml) for reproducible builds
+- **Auth:** Better Auth session tokens in httpOnly cookies; CSRF handling built in; Cognito OAuth upstream; credentials provider gated to non-prod.
+- **Authorization:** every mutation requires a validated session; `userId` resolved server-side via `requireUserId()` (never from client input); **privacy invariants enforced at the entity layer** (throw `NotFoundError` for missing-or-denied) so RPC calls can't bypass route gates.
+- **Input validation:** Zod **validate-twice** (`inputValidator` + handler re-parse, since programmatic callers bypass the network validator); Prisma parameterized queries; ID inputs use `z.string().min(1)` (Better Auth emits 32-char nanoids, never `.cuid()`).
+- **Bundler boundary:** `import-protection` keeps `.server.*` modules (db, auth, secrets, entity queries) out of the client bundle; public barrels expose only client-safe surface.
+- **Secrets:** all via `env.ts`-validated env vars; `.env` never committed; S3 presign enforces MIME + size; Steam OpenID assertion verified before trust.
+- **Dependencies:** exact-pinned versions; lockfile committed; Dependabot.
 
 ---
 
 ## 9. Feature-Sliced Design (FSD) Architecture
 
-SavePoint implements a **modified Feature-Sliced Design (FSD)** architecture adapted for Next.js 16 App Router, combining FSD principles with Domain-Driven Design patterns and a custom data-access layer.
-
-### FSD Layer Mapping
-
-**Standard FSD Layers:**
-```
-app → processes → pages → widgets → features → entities → shared
-```
-
-**SavePoint's Adapted Layers:**
-```
-app/ (Next.js App Router)
-    ↓
-widgets/ (Composite UI blocks reused across layouts)
-    ↓
-features/ (FSD Slices)
-    ↓
-data-access-layer/ (Custom: handlers → services → repository → domain)
-    ↓
-shared/ (FSD Shared)
-    ↓
-Prisma → PostgreSQL
-```
-
-### Key Deviations from Standard FSD
-
-| Standard FSD | SavePoint Implementation | Rationale |
-|--------------|-------------------------|-----------|
-| `entities/` layer | `shared/types/` + `data-access-layer/domain/` | Entities are Prisma models; domain types in shared |
-| `widgets/` layer | `widgets/` directory | Composite UI blocks (GameCard, Header) reused across layouts |
-| `pages/` layer | `app/` (Next.js App Router) | Next.js convention takes precedence |
-| `processes/` layer | `features/*/use-cases/` | Use-cases handle multi-service orchestration |
-| Direct feature → entity | Feature → service → repository | Added abstraction for business logic |
-
-### Feature Structure (Per Feature)
+`savepoint-tanstack/src/` is organized in canonical FSD layers (top imports down only):
 
 ```
-features/[feature-name]/
-├── ui/                      # React components
-│   ├── component.tsx
-│   ├── component.types.ts
-│   └── index.ts             # Barrel export
-├── server-actions/          # Next.js server actions
-│   ├── action.ts
-│   └── index.ts
-├── hooks/                   # Feature-specific hooks
-│   └── index.ts
-├── use-cases/               # Business orchestration (optional)
-│   ├── orchestration.ts
-│   └── index.ts
-├── schemas.ts               # Zod validation
-├── types.ts                 # Feature types (if needed)
-└── index.ts                 # Public API barrel
+app  →  routes  →  widgets  →  features  →  entities  →  shared
 ```
 
-### Existing Features
+| Layer | Holds |
+|---|---|
+| `app/` | providers, root wiring, global styles, root error boundary |
+| `routes/` | TanStack file-based routes — thin loaders + route components |
+| `widgets/` | composite UI blocks (header, profile overview, library page, game detail) |
+| `features/` | user-intent slices — `model/` (schemas+types), `api/` (server fns + workers), `ui/` |
+| `entities/` | domain nouns — `model/`, `api/` (`.server.ts` queries throwing `AppError`), `ui/` (display-only) |
+| `shared/` | `lib/` (db, logger, errors, auth), `ui/` (shadcn primitives), `config/` (env), `api/` (S3, IGDB, Steam clients) |
 
-| Feature | Responsibility |
-|---------|---------------|
-| `auth` | Authentication flows (sign-in/up) |
-| `command-palette` | App-wide Cmd+K search palette |
-| `game-search` | Game search interface |
-| `game-detail` | Game detail page composition |
-| `browse-related-games` | Related/franchise games with infinite scroll |
-| `manage-library-entry` | Library entry CRUD (modal, forms, actions) |
-| `library` | User's game library views |
-| `profile` | User profile display/settings, avatar upload, username validation |
-| `setup-profile` | Initial profile creation |
-| `dashboard` | Dashboard overview |
-| `journal` | Journal entry system |
-| `onboarding` | New user getting-started flow |
-| `steam-import` | Steam account connect/disconnect, profile read, dormant sync surfaces (Lambda pipeline retired in spec 015) |
-| `social` | Follow system, activity feed, public profile interactions |
-| `whats-new` | App-wide announcement modal |
+**Import rules (enforced by `eslint-plugin-boundaries`, alias-aware):**
 
-### Existing Widgets
+- Direction is strictly downward (`app > routes > widgets > features > entities > shared`).
+- **No cross-slice imports inside `features/` or `entities/`** — enforced via per-slice capture groups (same-slice barrel/intra-slice imports allowed; cross-slice forbidden). Cross-feature reuse goes through `shared/` or an entity.
+- **`widgets/` may compose other widgets** (documented carve-outs in `DIVERGENCES.md`).
+- Server fns live in `features/*/api/`; entity queries in `entities/*/api/`. Feature fns compose entity queries; entity queries never import features.
 
-| Widget | Responsibility |
-|--------|---------------|
-| `header` | App-wide navigation header + mobile nav |
-| `game-card` | Compound game card component (cover, content, header, meta, footer, skeleton, genre badges) |
+> The boundary linter resolves the `@/` path alias (via `eslint-import-resolver-typescript`) so it actually enforces these rules on real imports — a gap fixed during the Slice 23 FSD audit, regression-guarded by `test/eslint/`.
 
-### Cross-Feature Import Rules
-
-**Rule**: Features should NOT import from other features. Exceptions are documented in `features/CLAUDE.md`.
-
-**Key exceptions:** `manage-library-entry` (shared UI library for library operations), `command-palette` (consumed by widgets/header), `profile` (consumed by setup-profile), `game-search` (consumed by command-palette). See `features/CLAUDE.md` for the full authorized imports table.
-
-### Barrel Export Strategy
-
-**Split barrel pattern** respecting the Next.js server/client boundary:
-
-```typescript
-// features/X/index.ts (client-safe)
-export { ComponentA } from "./ui/component-a";
-export { useHookA } from "./hooks/use-hook-a";
-export type { TypeA } from "./types";
-
-// features/X/index.server.ts (server-only)
-export { serverActionA } from "./server-actions/action-a";
-export { useCaseA } from "./use-cases/use-case-a";
-```
-
-All exports are explicit named exports — no wildcard re-exports (`export * from`). All `app/` pages and layouts import from barrel exports, not internal segment paths.
-
-### FSD Compliance Summary
-
-| Principle | Status | Implementation |
-|-----------|--------|----------------|
-| **Layered architecture** | ✅ Applied | app → widgets → features → data-access → shared |
-| **Sliced structure** | ✅ Applied | Features organized by business domain |
-| **Public API (barrel exports)** | ✅ Applied | Split barrel pattern (index.ts + index.server.ts) |
-| **Unidirectional imports** | ✅ Enforced | ESLint boundaries plugin, zero violations |
-| **Feature isolation** | ⚠️ Partial | Documented exceptions in features/CLAUDE.md |
-| **Entities layer** | ❌ Modified | Replaced with domain types in features + shared enums |
-| **Widgets layer** | ✅ Applied | `widgets/` for composite UI (GameCard, Header) |
-
-### Boundary Enforcement
-
-Import rules enforced via `eslint-plugin-boundaries`:
-
-| From | Allowed Imports |
-|------|-----------------|
-| `app-route` | handler, use-case, service, server-action, ui-component, widget, shared |
-| `widget` | ui-component, server-action, shared |
-| `server-action` | use-case, service, shared |
-| `handler` | use-case, service, shared |
-| `use-case` | service, shared |
-| `ui-component` | use-case, server-action, widget, shared |
-| `service` | repository, shared |
-| `repository` | prisma, shared |
-| `shared` | shared only |
+Per-layer agent rules: `.claude/rules/tanstack/`. App conventions: `savepoint-tanstack/CLAUDE.md`; DAL vocabulary: `CONTEXT.md`; runtime traps: `FOOT-GUNS.md`; divergence log: `DIVERGENCES.md`.
 
 ---
 
 ## Architecture Decision Records
 
-**ADR-001: Why Next.js 16 App Router?**
+**ADR-001: Why TanStack Start (migrated from Next.js 16)?**
+Spec 021 replaced the Next.js App Router foundation with TanStack Start v1 to get a simpler full-stack model (loaders + `createServerFn`, no RSC serialization), faster client-side navigation (loader caching vs per-navigation RSC round-trips — measurably faster page loads post-cutover), less framework lock-in (Vite/Nitro deploys anywhere, not just Vercel-optimized), and a leaner DAL. The migration was user-invisible (same data, sessions, URLs).
 
-- Server Components reduce client bundle size for game metadata rendering
-- Server Actions provide type-safe mutations without manual API route creation
-- Built-in caching and revalidation for optimal performance
-- Strong TypeScript integration for full-stack type safety
-- Spec 010 adopted `cacheComponents` + `"use cache"` + View Transitions, deepening the framework lock-in
+**ADR-002: Why the "C2" two-layer DAL (throw `AppError`) over the prior four-layer + `Result` types?**
+The legacy app used handler → use-case → service → repository with `HandlerResult`/`ServiceResult`/`RepositoryResult` wrappers. The rewrite collapses this to **entity queries (throw) + feature `createServerFn` wrappers**, with routes catching via `errorComponent`. Fewer layers between request and data, no Result-unwrapping boilerplate, and a bounded 5-class `AppError` taxonomy. Privacy/ownership invariants live on the entity so they can't be bypassed.
 
-**ADR-002: Why pragmatic four-layer architecture?**
+**ADR-003: Why PostgreSQL + Prisma?** (unchanged) Relational model (users → library items → games → journal entries), complex filtered/joined queries, ACID for library/journal writes, mature tooling.
 
-- **Base layers (always used):** Service → Repository ensures clean separation
-- **Optional layers:** Handlers (HTTP boundary) and Use-Cases (orchestration) added only when needed
-- **Enforced via ESLint:** `eslint-plugin-boundaries` prevents layer violations at compile time
-- **Service layer:** Centralizes single-domain business logic, never calls other services
-- **Repository layer:** Clean Prisma abstraction, only data access (no business logic)
-- **Pragmatic approach:** Patterns applied based on need, not dogmatically everywhere
+**ADR-004: Why Vercel + Nitro (over the previously-documented ECS Fargate/RDS plan)?**
+The app deploys as Vercel serverless functions via Nitro's Vercel preset against Neon Postgres — no container/cluster/ALB/VPC to operate. This matches the solo-developer operational budget; the earlier ECS Fargate + RDS + ALB design was never deployed. Cutover and rollback are a one-line Vercel Root-Directory change with no data migration.
 
-**ADR-003: Why Result types instead of throwing errors?**
+**ADR-005: Why FSD with alias-aware boundary enforcement?**
+Canonical FSD layers with per-slice capture-group rules in `eslint-plugin-boundaries`. The Slice 23 audit found the linter wasn't resolving the `@/` alias (enforcing nothing); fixing the resolver + adding a regression guard made the boundary rules real, so violations now fail at PR time.
 
-- Explicit error handling paths in TypeScript (no runtime surprises)
-- Services return structured `Result<TData, TError>` for predictable error handling
-- Reduces try-catch boilerplate in consumers
-- Clear contract: success path vs. error path at type level
+**ADR-006: Why LocalStack for local S3?** (unchanged) Integration-tests file-upload flows without AWS cost; production-parity S3 API; CI-friendly.
 
-**ADR-004: Why PostgreSQL over NoSQL?**
-
-- Relational data model (users → library items → games → journal entries)
-- Complex queries needed: filter library by status, join journal entries with games
-- ACID transactions for data consistency (library updates, journal creation)
-- Proven scalability for read-heavy workloads
-
-**ADR-005: Why ECS Fargate for the Next.js app?**
-
-- Next.js Server Components benefit from persistent container context
-- Avoids cold start latency for interactive user experience
-- Simpler mental model for solo developer (container vs. function lifecycle)
-- Database connection pooling more efficient with long-lived containers
-
-**ADR-006: Why LocalStack for local S3?**
-
-- Enables integration testing of file upload flows without AWS costs
-- Test environment parity with production S3 API
-- Supports CI pipeline testing without external dependencies
-
-**ADR-007: Why selective handler layer (only for client-side fetching)?**
-
-**Context:** Handler layer exists for only 3 API routes (game-search, library, platform) used by TanStack Query.
-
-**Decision:** Handlers are HTTP boundary layer, used only when:
-- Client-side data fetching with TanStack Query (requires API routes)
-- Public API endpoints requiring rate limiting
-- Explicit REST-style HTTP semantics needed
-
-**Rationale:**
-- Server Actions are preferred for mutations (type-safe, no manual API routes)
-- Server Components are preferred for data fetching (RSC, no client bundle)
-- Handlers add value only when HTTP boundary concerns (rate limiting, caching, public access) are needed
-- Avoids unnecessary abstraction for authenticated operations
-
-**Alternatives Considered:**
-- ❌ Handlers everywhere: Adds boilerplate for authenticated mutations (Server Actions are simpler)
-- ❌ No handlers: Can't rate-limit public APIs, client-side fetching requires manual API routes
-
-**Status:** Accepted (2025-01)
-
-**ADR-008: Why selective use-case pattern (only for multi-service coordination)?**
-
-**Context:** Use-cases exist in 2 features (game-detail, manage-library-entry) where multiple services must be coordinated.
-
-**Decision:** Use-cases are orchestration layer, created only when:
-- Feature requires coordinating 2+ services (e.g., IGDB + Library + Journal)
-- Complex business workflow spans multiple domains
-- Server Action or Server Component needs multi-service coordination
-
-**Rationale:**
-- Services should never call other services (violates single responsibility)
-- Use-cases centralize orchestration logic, making it testable and reusable
-- Most operations are single-service (e.g., ProfileService.updateProfile) and don't need use-cases
-- Avoids over-engineering for simple operations
-
-**Examples:**
-- ✅ `getGameDetails`: Coordinates IgdbService + LibraryService + JournalService (in `game-detail/use-cases/`)
-- ✅ `addGameToLibrary`: Coordinates GameService (find/create) + LibraryService (create item) (in `manage-library-entry/use-cases/`)
-- ❌ Profile update: Single service operation, no use-case needed
-
-**Alternatives Considered:**
-- ❌ Use-cases everywhere: Adds boilerplate for single-service operations
-- ❌ Services call services: Violates SRP, creates tight coupling, hard to test
-
-**Status:** Accepted (2025-01)
-
-**ADR-009: Why pragmatic testing (test user flows, not coverage metrics)?**
-
-**Context:** 77 test files for 278 source files (~28% file coverage ratio), but 80%+ code coverage on critical paths.
-
-**Decision:** Test strategy prioritizes:
-1. **Repository layer:** 100% integration test coverage with real PostgreSQL (validates data access correctness)
-2. **Service layer:** Comprehensive unit tests for business logic, edge cases, error handling
-3. **Use-cases:** Integration tests for multi-service orchestration (planned, currently 0 tests)
-4. **Components:** Tests for critical UI components with user interactions (library modal, profile forms)
-5. **E2E:** Tests for primary user journeys (auth, profile, game search, library management)
-6. **Excluded:** App Router pages (thin wrappers), shadcn/ui components (third-party), trivial utilities
-
-**Rationale:**
-- **Solo developer context:** Limited time, maximize ROI on testing effort
-- **Quality over quantity:** 80% coverage on critical paths > 100% coverage on everything
-- **User flow focus:** Tests should catch regressions in features users depend on
-- **Maintenance burden:** Every test must justify its maintenance cost
-- **Coverage metrics secondary:** 80% threshold enforced, but not the primary goal
-
-**Anti-Patterns Avoided:**
-- ❌ Testing for sake of coverage numbers (e.g., testing trivial getters)
-- ❌ Testing implementation details (e.g., internal component state)
-- ❌ Brittle snapshot tests without clear purpose
-- ❌ Mocking everything (integration tests use real DB)
-
-**Key Metrics:**
-- **Repository integration tests:** 7/7 repositories (100%)
-- **Service unit tests:** 6/8 services (~75%)
-- **E2E tests:** 6 critical user flows (auth, profile)
-- **Code coverage:** ≥80% on branches, functions, lines, statements (enforced in CI)
-
-**Alternatives Considered:**
-- ❌ 100% code coverage: Not pragmatic for solo developer, diminishing returns
-- ❌ Only E2E tests: Too slow, low isolation, hard to debug failures
-- ❌ No integration tests: Misses database constraints, query correctness
-
-**Status:** Accepted (2025-01)
+**ADR-007: Why `.server.ts` as a bundler boundary?**
+TanStack Start's `import-protection` forbids `*.server.*` in the client bundle. This enforces server-only code (db, auth, entity queries) staying server-side by construction; `createServerFn` files are intentionally *not* `.server.ts` (they are the client-callable RPC bridge). Public barrels must expose only client-safe surface — re-exporting a server-only value into a client-reachable barrel breaks the production build (a class of failure the CI build gate now catches).
 
 ---
 
 **Document Metadata:**
 
-- **Version:** 2.2
-- **Last Updated:** 2026-05-04 (Better Auth migration — Spec 020 Slice 8)
+- **Version:** 3.0
+- **Last Updated:** 2026-05-23 (TanStack Start migration — spec 021 cutover)
 - **Status:** Active
 - **Maintained By:** Solo developer with AI assistance
 - **Review Cadence:** After each major phase completion
-- **Changes in v2.2:**
-  - §2: Replaced NextAuth v5 with Better Auth + DB sessions. Documented Cognito social provider, account linking, `AUTH_ENABLE_CREDENTIALS` gate, `getServerUserId()`, route mount via `toNextJsHandler`, client sign-out, and migration-cutover compatibility layer (`proxy.ts` + `MigrationNotice`)
-  - §1: Replaced `next-safe-action` claims with accurate description of homegrown `createServerAction` factory (`shared/lib/server-action/`)
-  - §4: Removed stale NextAuth reference from Steam OpenID line
-  - §7: Removed NextAuth from unit-setup mock description
-  - §8: Replaced NextAuth / next-safe-action references with Better Auth / `createServerAction`
-- **Changes in v2.1:**
-  - Added `widgets/` layer to FSD hierarchy (GameCard, Header)
-  - Updated layer diagram, boundary enforcement table, and compliance summary
-  - Added `command-palette`, `onboarding`, `steam-import`, `whats-new` to feature list
-  - Updated barrel export strategy to split pattern (index.ts + index.server.ts)
-  - Updated cross-feature import rules to reference features/CLAUDE.md
-- **Changes in v2.0:**
-  - Added four-layer architecture diagram with layer selection matrix
-  - Documented Result type patterns for each layer
-  - Added ADR-007 (selective handler layer)
-  - Added ADR-008 (selective use-case pattern)
-  - Added ADR-009 (pragmatic testing philosophy)
-  - Updated ADR-002 to reflect four-layer architecture
+- **Changes in v3.0:**
+  - Rewrote the document to describe the deployed **TanStack Start** (`savepoint-tanstack/`) architecture; removed the Next.js/`savepoint-app/` four-layer DAL, `createServerAction`, `Result`-type, and RSC detail (legacy app retained briefly as rollback insurance, then deleted).
+  - §1: TanStack Start v1 + Vite/Nitro + the C2 two-layer DAL (throw `AppError`); `.server.ts` bundler boundary.
+  - §2: Better Auth mounted via the `routes/api/auth/$.ts` catch-all (Web Request/Response, no `toNextJsHandler`/`nextCookies`); `requireUserId`/`requireUserIdOrRedirectFn` gates; cross-app session continuity.
+  - §3/§5: corrected production infra to **Vercel + Neon + S3 + Cognito** (the documented ECS Fargate/RDS/ALB/VPC stack was never deployed); Prisma client generated during build.
+  - §7: Vitest two-project setup + merged coverage gate (statements ≥85).
+  - §9: rewrote FSD to the `app/routes/widgets/features/entities/shared` layer map with alias-aware boundary enforcement.
+  - ADRs: replaced the Next.js/four-layer/ECS ADRs with TanStack Start, C2 DAL, Vercel/Nitro, FSD-enforcement, and `.server.ts`-boundary decisions.

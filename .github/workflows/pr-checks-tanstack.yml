@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - "savepoint-tanstack/**"
-      - "savepoint-app/prisma/schema.prisma"
       - "pnpm-workspace.yaml"
       - "pnpm-lock.yaml"
       - ".github/workflows/pr-checks-tanstack.yml"
@@ -35,15 +34,6 @@ jobs:
             if docker exec savepoint-postgres pg_isready -U postgres >/dev/null 2>&1; then
               echo "Postgres is ready."; break; fi; sleep 2; done
           docker exec savepoint-postgres pg_isready -U postgres
-
-      - name: Prisma schema drift check (savepoint-app ↔ savepoint-tanstack)
-        run: |
-          if ! diff -q savepoint-app/prisma/schema.prisma savepoint-tanstack/prisma/schema.prisma; then
-            echo ""
-            echo "savepoint-tanstack/prisma/schema.prisma has diverged from savepoint-app/prisma/schema.prisma."
-            echo "Re-run the copy from spec 021 Slice 0 task 3 to restore parity, or update both schemas in lockstep."
-            exit 1
-          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -142,3 +132,92 @@ jobs:
       # Implements SCS-04 (2026-05-18 audit) without introducing a Renovate dependency.
       - name: Check dependency publish-age vs 7-day quarantine
         run: node scripts/check-package-freshness.mjs --base origin/${{ github.base_ref }} --head HEAD --days 7
+
+  migration-validation:
+    name: Validate Database Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for migration changes
+        id: check-migrations
+        run: |
+          MIGRATION_CHANGES=$(git diff --name-only origin/main...HEAD -- savepoint-tanstack/prisma/ | grep -E "(schema\.prisma|migrations/.*\.sql)$" || true)
+          if [ -z "$MIGRATION_CHANGES" ]; then
+            echo "No migration or schema changes detected"
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Migration or schema changes detected:"
+            echo "$MIGRATION_CHANGES"
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup pnpm
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Prisma schema
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        env:
+          # prisma.config.ts requires a DB URL at config-load even for validate
+          # (which never connects) — placeholder, same as the generate step.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
+        run: pnpm --filter savepoint-tanstack exec prisma validate
+
+      - name: Check for schema drift (schema changed without a migration)
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: |
+          NEW_MIGRATIONS=$(git diff --name-only origin/main...HEAD -- savepoint-tanstack/prisma/migrations/ | grep -E "\.sql$" || true)
+          SCHEMA_CHANGES=$(git diff --name-only origin/main...HEAD -- savepoint-tanstack/prisma/schema.prisma || true)
+          if [ -n "$SCHEMA_CHANGES" ] && [ -z "$NEW_MIGRATIONS" ]; then
+            echo "⚠️ Schema changes detected but no new migration files found."
+            echo "Run 'pnpm --filter savepoint-tanstack prisma:migrate --name descriptive_name' to generate one."
+            exit 1
+          elif [ -n "$SCHEMA_CHANGES" ] && [ -n "$NEW_MIGRATIONS" ]; then
+            echo "✅ Schema changes detected with corresponding migration files."
+          elif [ -n "$NEW_MIGRATIONS" ] && [ -z "$SCHEMA_CHANGES" ]; then
+            echo "ℹ️ Migration files added without schema changes (manual migrations)."
+          else
+            echo "✅ No schema drift detected."
+          fi
+
+      - name: Check for destructive migrations
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: |
+          NEW_MIGRATIONS=$(git diff --name-only origin/main...HEAD -- savepoint-tanstack/prisma/migrations/ | grep -E "\.sql$" || true)
+          if [ -n "$NEW_MIGRATIONS" ]; then
+            echo "Checking new migrations for destructive operations..."
+            DESTRUCTIVE_FOUND=false
+            for migration in $NEW_MIGRATIONS; do
+              if [ -f "$migration" ]; then
+                echo "Checking $migration:"
+                if grep -i "DROP[[:space:]]\+\(TABLE\|COLUMN\|INDEX\|CONSTRAINT\)" "$migration"; then
+                  echo "⚠️ Found potentially destructive DROP operation in $migration"
+                  DESTRUCTIVE_FOUND=true
+                fi
+                if grep -i "ALTER[[:space:]]\+COLUMN.*TYPE" "$migration"; then
+                  echo "⚠️ Found column type change in $migration - review for potential data loss"
+                  DESTRUCTIVE_FOUND=true
+                fi
+              fi
+            done
+            if [ "$DESTRUCTIVE_FOUND" = true ]; then
+              echo ""
+              echo "🚨 Destructive operations detected — review for data backup, reversibility, and stakeholder awareness. If intentional, note it in the PR."
+            else
+              echo "✅ No destructive operations found in new migrations."
+            fi
+          fi

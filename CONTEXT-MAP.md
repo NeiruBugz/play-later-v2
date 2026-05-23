@@ -8,15 +8,12 @@ See [`docs/agents/domain.md`](./docs/agents/domain.md) for how the engineering s
 
 | Context | Role | Glossary (`CONTEXT.md`) | Rule book (`CLAUDE.md`) |
 |---|---|---|---|
-| `savepoint-tanstack/` | **Primary app** (TanStack Start v1). Delivered by spec 021; becomes the deployed app at cutover (Slice 24). | [`savepoint-tanstack/CONTEXT.md`](./savepoint-tanstack/CONTEXT.md) — DAL terminology (loader-direct read, UX-hint query, privacy invariant) | [`savepoint-tanstack/CLAUDE.md`](./savepoint-tanstack/CLAUDE.md) |
-| `savepoint-app/` | **Legacy app** (Next.js 16). Retained as rollback insurance for one release cycle post-cutover, then deleted in a follow-up PR. Still owns Prisma migrations. | _(no `CONTEXT.md` today)_ | [`savepoint-app/CLAUDE.md`](./savepoint-app/CLAUDE.md) and its sub-layer `CLAUDE.md` files |
+| `savepoint-tanstack/` | **The app** (TanStack Start v1). Delivered by spec 021 (migration complete); deployed via Vercel. Owns Prisma migrations. | [`savepoint-tanstack/CONTEXT.md`](./savepoint-tanstack/CONTEXT.md) — DAL terminology (loader-direct read, UX-hint query, privacy invariant) | [`savepoint-tanstack/CLAUDE.md`](./savepoint-tanstack/CLAUDE.md) |
 | `infra/` | Terraform IaC (Cognito + S3). | _(no `CONTEXT.md` today)_ | [`infra/CLAUDE.md`](./infra/CLAUDE.md) |
-
-> **Cutover status.** The spec 021 cutover PR is being assembled but not yet merged/deployed. Until the Vercel project root is swapped to `savepoint-tanstack/` at merge time, production still serves the legacy `savepoint-app/`. Both apps share the same Postgres DB and Better Auth tables. See the rollback runbook at [`docs/cutover-rollback.md`](./docs/cutover-rollback.md).
 
 ## System-wide decisions
 
-System-wide architectural decisions live in `docs/adr/` (created lazily — none recorded yet). Context-scoped decisions live under each context's own `docs/adr/` when they exist (e.g. `savepoint-app/docs/adr/`).
+System-wide architectural decisions live in `docs/adr/` (created lazily — none recorded yet). Context-scoped decisions live under each context's own `docs/adr/` when they exist.
 
 ## Conventions
 

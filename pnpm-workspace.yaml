@@ -1,5 +1,4 @@
 packages:
-  - savepoint-app
   - savepoint-tanstack
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'

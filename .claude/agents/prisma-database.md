@@ -20,7 +20,7 @@ When working on tasks:
 
 - Follow established project patterns and conventions
 - Repository functions return `{ ok: true, data }` or `{ ok: false, error: { code, message } }`
-- Use `@/` import aliases from `savepoint-app/` directory
+- Use `@/` import aliases from `savepoint-tanstack/` directory
 - Integration tests use isolated test databases per suite
 - Reference the technical specification for implementation details
 - Ensure all changes maintain a working, runnable application state

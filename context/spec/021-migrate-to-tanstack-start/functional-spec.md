@@ -1,8 +1,10 @@
 # Functional Specification: SavePoint Foundation Replacement
 
 - **Roadmap Item:** Tech Health (Phase 5) — replace the application's underlying technical foundation with no user-visible behavior change.
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Nail Badiullin
+
+> **Verified 2026-05-23 (`/awos:verify 021`).** All acceptance criteria (§2.1–2.9) met. Evidence: the six Slice 23 parity gates all PASS (URL parity, FSD, test coverage ≥85%, cross-app session interop, independent code review, env+secrets — artifacts in `audits/`); 1615 passing tests (unit+integration); shared Postgres + Better Auth tables (no data migration ⇒ no data loss, sessions interoperable); and a live Vercel deploy of `savepoint-tanstack/` serving authed routes (Lighthouse: Performance 97 / A11y 100 / Best Practices 100 / SEO 92). The success measure "zero user-reported regressions in the first 7 days" (§1) is an ongoing post-cutover observation window. Two non-blocking follow-ups remain tracked in `tasks.md` (Slice 24): `setAvatarUrlFn` URL-origin hardening and the +1-release-cycle deletion of `savepoint-app/`.
 
 ---
 
@@ -26,71 +28,71 @@ The motivation is long-term product sustainability: a more straightforward found
 
 - **As a** signed-in user, **I want** my session to survive the change, **so that** I don't need to sign in again.
   - **Acceptance Criteria:**
-    - [ ] Given I was signed in before cutover, when I open SavePoint after cutover, then I am still signed in and land on my usual home view.
-    - [ ] Given I sign in with Google after cutover, when I complete the sign-in, then I land on my profile with my full library and journal intact.
-    - [ ] Given I sign out, when I sign back in, then my account, library, journal, and settings appear unchanged.
+    - [x] Given I was signed in before cutover, when I open SavePoint after cutover, then I am still signed in and land on my usual home view.
+    - [x] Given I sign in with Google after cutover, when I complete the sign-in, then I land on my profile with my full library and journal intact.
+    - [x] Given I sign out, when I sign back in, then my account, library, journal, and settings appear unchanged.
 
 ### 2.2 Library continuity
 
 - **As a** user with games in my library, **I want** every game preserved exactly, **so that** my curation work is not lost.
   - **Acceptance Criteria:**
-    - [ ] Every game previously in my library is still there with the same status (Want to Play / Owned / Playing / Played), rating, platform, and personal notes.
-    - [ ] Filters, sorts, and view modes work identically.
-    - [ ] Adding a new game from search adds it to the library and it is visible immediately.
-    - [ ] Changing a status, rating, or platform persists and is visible on refresh.
+    - [x] Every game previously in my library is still there with the same status (Want to Play / Owned / Playing / Played), rating, platform, and personal notes.
+    - [x] Filters, sorts, and view modes work identically.
+    - [x] Adding a new game from search adds it to the library and it is visible immediately.
+    - [x] Changing a status, rating, or platform persists and is visible on refresh.
 
 ### 2.3 Journal continuity
 
 - **As a** user with journal entries, **I want** all my reflections preserved and editable, **so that** my gaming memories remain intact.
   - **Acceptance Criteria:**
-    - [ ] Every journal entry I wrote before cutover is visible afterward, attached to the same game, with the same text and timestamp.
-    - [ ] Writing a new entry, editing an existing one, and deleting one all work identically to before.
-    - [ ] The chronological journal timeline shows entries in the same order.
+    - [x] Every journal entry I wrote before cutover is visible afterward, attached to the same game, with the same text and timestamp.
+    - [x] Writing a new entry, editing an existing one, and deleting one all work identically to before.
+    - [x] The chronological journal timeline shows entries in the same order.
 
 ### 2.4 Profile continuity
 
 - **As a** user, **I want** my profile (mine and the public-facing one) to look and behave identically.
   - **Acceptance Criteria:**
-    - [ ] My profile page shows the same display name, avatar, username, stats, and visibility setting as before.
-    - [ ] Visiting `/u/<my-username>` shows the same public profile as before.
-    - [ ] Editing username, uploading a new avatar, toggling visibility, and updating settings all work identically and persist on refresh.
-    - [ ] Username availability checks behave the same way during edit.
+    - [x] My profile page shows the same display name, avatar, username, stats, and visibility setting as before.
+    - [x] Visiting `/u/<my-username>` shows the same public profile as before.
+    - [x] Editing username, uploading a new avatar, toggling visibility, and updating settings all work identically and persist on refresh.
+    - [x] Username availability checks behave the same way during edit.
 
 ### 2.5 Game discovery continuity
 
 - **As a** user, **I want** game search, game detail pages, and the add-to-library flow to work identically.
   - **Acceptance Criteria:**
-    - [ ] Searching for a game returns the same results in the same order.
-    - [ ] Opening a game detail page shows the same metadata, cover art, and personal information.
-    - [ ] Adding a game to my library from search works and the game appears immediately.
+    - [x] Searching for a game returns the same results in the same order.
+    - [x] Opening a game detail page shows the same metadata, cover art, and personal information.
+    - [x] Adding a game to my library from search works and the game appears immediately.
 
 ### 2.6 Social continuity
 
 - **As a** user with followers/following, **I want** my social graph and activity feed preserved.
   - **Acceptance Criteria:**
-    - [ ] My followers and following lists are identical.
-    - [ ] My activity feed shows the same entries.
-    - [ ] Follow / unfollow actions behave identically.
+    - [x] My followers and following lists are identical.
+    - [x] My activity feed shows the same entries.
+    - [x] Follow / unfollow actions behave identically.
 
 ### 2.7 URLs and bookmarks
 
 - **As a** user with bookmarked links into SavePoint, **I want** every URL to keep working.
   - **Acceptance Criteria:**
-    - [ ] Every previously valid URL (profile, public profile, game detail, library, journal, settings) returns the expected page after cutover.
+    - [x] Every previously valid URL (profile, public profile, game detail, library, journal, settings) returns the expected page after cutover.
 
 ### 2.8 In-progress actions during cutover
 
 - **As a** user actively using SavePoint at the moment of cutover, **I want** a graceful experience.
   - **Acceptance Criteria:**
-    - [ ] A user mid-action may need to refresh the page once after cutover and can then continue normally.
-    - [ ] No data the user had successfully saved before cutover is lost.
+    - [x] A user mid-action may need to refresh the page once after cutover and can then continue normally.
+    - [x] No data the user had successfully saved before cutover is lost.
 
 ### 2.9 Invisible cutover
 
 - **As a** user, **I should not** see any banner, modal, or message about the change.
   - **Acceptance Criteria:**
-    - [ ] No in-app communication about the foundation change is shown.
-    - [ ] No new sign-in prompt, terms acceptance, or onboarding step is triggered by the change.
+    - [x] No in-app communication about the foundation change is shown.
+    - [x] No new sign-in prompt, terms acceptance, or onboarding step is triggered by the change.
 
 ---
 

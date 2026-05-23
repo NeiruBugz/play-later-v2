@@ -1,7 +1,7 @@
 # Technical Specification: SavePoint Foundation Replacement (Migrate to TanStack Start)
 
 - **Functional Specification:** [functional-spec.md](./functional-spec.md)
-- **Status:** Draft
+- **Status:** Completed
 - **Author(s):** Nail Badiullin
 
 ---
