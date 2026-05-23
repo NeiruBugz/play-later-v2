@@ -1,13 +1,13 @@
 /**
- * Env validation for savepoint-tanstack.
+ * Env validation for savepoint-tanstack — the owner of the env schema.
  *
- * Mirrors savepoint-app/env.mjs key-for-key (same Zod rules), but:
+ * Notes on the two non-obvious choices:
  *   1. Uses @t3-oss/env-core (framework-agnostic) instead of @t3-oss/env-nextjs,
  *      because TanStack Start runs on Vite — there is no Next.js runtime.
  *   2. Configures clientPrefix: "VITE_" so any future client-exposed variable is
  *      named VITE_FOO (Vite only inlines variables matching its prefix into the
- *      browser bundle). The savepoint-app schema currently has zero client keys,
- *      so this is forward-compat only — no renames required today.
+ *      browser bundle). The schema currently has zero client keys, so this is
+ *      forward-compat only — no renames required today.
  *
  * All app code MUST import `env` from this file. Never read `process.env.*`
  * directly outside this module.

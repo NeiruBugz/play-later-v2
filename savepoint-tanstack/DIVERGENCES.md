@@ -2,7 +2,7 @@
 
 > Extracted from `CLAUDE.md` on 2026-05-18 to keep the main agent context scan-able. Linked back from `CLAUDE.md` under "Divergence log".
 >
-> This is the historical record of intentional differences between this app and the canonical `savepoint-app/`, organized by spec-021 slice. Append-only by convention — earlier entries are not edited retroactively even when superseded by later slices; the supersede relationship is noted in-place.
+> This is the historical record of intentional differences between this app and the prior Next.js app it replaced (spec 021), organized by migration slice. Append-only by convention — earlier entries are not edited retroactively even when superseded by later slices; the supersede relationship is noted in-place. References to `savepoint-app/` below are historical: that app has been deleted now that the migration is complete.
 
 ## Logger (S7)
 

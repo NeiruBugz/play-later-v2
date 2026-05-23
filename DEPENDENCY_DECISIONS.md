@@ -32,11 +32,13 @@ Each entry records:
 ### `valibot`: `^1.2.0`
 
 - **Why**: Transitive pin to keep a single major version across the workspace
-  during the parallel-app migration (spec 021). Without this, the two apps
-  resolve different valibot trees and bloat the bundle.
+  (originally added during the spec-021 parallel-app migration to stop the two
+  apps resolving different valibot trees). The migration is complete and
+  `savepoint-app/` is gone; the override is now just a defensive single-version
+  pin for the remaining transitive consumers.
 - **Added**: spec 021 era
-- **Revisit**: once spec 021 lands and one of `savepoint-app`/`savepoint-tanstack`
-  is retired.
+- **Revisit**: drop if no transitive consumer pulls valibot after a dependency
+  sweep, or pin exactly if a primary consumer settles on a fixed version.
 
 ### `glob`: `^10.5.0`
 

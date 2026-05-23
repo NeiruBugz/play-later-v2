@@ -22,6 +22,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,mdx,md,json,css}\" --cache",
     "prisma:generate": "prisma generate",
     "prisma:format": "prisma format",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "test:db:clean": "node ./test/setup/clean-test-dbs.mjs"
   },
   "dependencies": {

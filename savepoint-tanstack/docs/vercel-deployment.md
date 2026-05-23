@@ -1,8 +1,7 @@
 # Vercel deployment runbook — savepoint-tanstack
 
-How to deploy the TanStack Start app (`savepoint-tanstack/`) to Vercel for the
-spec-021 cutover. Read this with [`../CLAUDE.md`](../CLAUDE.md) and
-[`../FOOT-GUNS.md`](../FOOT-GUNS.md).
+How to deploy the TanStack Start app (`savepoint-tanstack/`) to Vercel. Read
+this with [`../CLAUDE.md`](../CLAUDE.md) and [`../FOOT-GUNS.md`](../FOOT-GUNS.md).
 
 ## How the build produces a deployable artifact
 
@@ -69,10 +68,9 @@ If Vercel's monorepo auto-detection offers to set Root Directory =
 
 ## Required environment variables
 
-Set every server-side key from the env audit in
-[`../env.ts`](../env.ts) on the Vercel project (Production + Preview). All are
-server-only (no `VITE_`/client-exposed vars in this app). Mirror values from
-`savepoint-app`'s deployed env for the shared keys.
+Set every server-side key defined in [`../env.ts`](../env.ts) on the Vercel
+project (Production + Preview). All are server-only (no `VITE_`/client-exposed
+vars in this app).
 
 **Auth (Better Auth + Cognito):** `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (set
 to the deployed origin), `AUTH_MIGRATION_CUTOVER_AT`, `AUTH_COGNITO_ID`,
@@ -111,10 +109,10 @@ test -f savepoint-tanstack/.output/server/index.mjs && echo OK   # Nitro server 
 pnpm --filter savepoint-tanstack start            # boots node .output/server/index.mjs
 ```
 
-## Cutover
+## Rollback
 
-Cutover (spec 021, Slice 24) is flipping the production Vercel project's Root
-Directory from `savepoint-app` to `savepoint-tanstack` (or repointing the
-domain to this project). Both apps share the same Postgres, Better Auth tables,
-S3 bucket, and IGDB client, so no data migration is required. Roll back by
-reverting the Root Directory.
+To roll back a bad production deploy, revert the offending change on `main` (or
+promote a known-good prior Vercel deployment) and redeploy — no data migration
+is involved, and Better Auth sessions in the shared Postgres survive. The full
+runbook, including the disaster-case path, is at
+[`../../docs/cutover-rollback.md`](../../docs/cutover-rollback.md).
