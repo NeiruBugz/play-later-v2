@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { updateLibraryItem } from "@/entities/library-item/api";
+import { updateLibraryItem } from "@/entities/library-item/api/update-library-item.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 import type { LibraryItem } from "../../../../shared/lib/prisma/client.ts";

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { findImportedGamesForUser } from "@/entities/imported-game/api";
+import { findImportedGamesForUser } from "@/entities/imported-game/api/find-imported-games-for-user.server";
 import type { PaginatedImportedGames } from "@/entities/imported-game/model/types";
 import { UnauthorizedError } from "@/shared/lib/errors";
 

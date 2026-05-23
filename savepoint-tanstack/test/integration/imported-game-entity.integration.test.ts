@@ -33,12 +33,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 // RED imports — modules do not exist until the GREEN step.
-import {
-  dismissImportedGame,
-  findImportedGamesForUser,
-  updateImportedGameStatus,
-  upsertImportedGamesBatch,
-} from "@/entities/imported-game/api";
+import { dismissImportedGame } from "@/entities/imported-game/api/dismiss-imported-game.server";
+import { findImportedGamesForUser } from "@/entities/imported-game/api/find-imported-games-for-user.server";
+import { updateImportedGameStatus } from "@/entities/imported-game/api/update-imported-game-status.server";
+import { upsertImportedGamesBatch } from "@/entities/imported-game/api/upsert-imported-games-batch.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import {

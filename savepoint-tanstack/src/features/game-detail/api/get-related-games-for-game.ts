@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { getGameCollectionsByIgdbId } from "@/entities/game/api/get-game-collections.server";
 import {
-  getGameCollectionsByIgdbId,
   getRelatedGames,
   type GetRelatedGamesResult,
-} from "@/entities/game/api";
+} from "@/entities/game/api/get-related-games.server";
 import { createLogger } from "@/shared/lib";
 
 const logger = createLogger({ service: "get-related-games-for-game" });

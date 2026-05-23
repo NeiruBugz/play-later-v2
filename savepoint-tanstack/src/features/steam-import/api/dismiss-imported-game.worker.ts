@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { dismissImportedGame } from "@/entities/imported-game/api";
+import { dismissImportedGame } from "@/entities/imported-game/api/dismiss-imported-game.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 /**

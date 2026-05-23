@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-import { getUsernameAvailability } from "@/entities/profile/api";
+import { getUsernameAvailability } from "@/entities/profile/api/get-username-availability.server";
 import type { Profile } from "@/entities/profile/model/types";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";

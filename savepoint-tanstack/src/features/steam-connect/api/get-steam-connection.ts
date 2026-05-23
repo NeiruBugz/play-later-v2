@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 
-import { getOnboardingSignals } from "@/entities/profile/api";
+import { getOnboardingSignals } from "@/entities/profile/api/get-onboarding-signals.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 import { buildSteamOpenIdLoginUrl } from "../ui/steam-connect-card/steam-connect-card.utility";

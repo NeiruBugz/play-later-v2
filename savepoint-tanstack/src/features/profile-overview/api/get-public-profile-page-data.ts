@@ -2,17 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
+import { countFollowers } from "@/entities/follow/api/count-followers.server";
+import { countFollowing } from "@/entities/follow/api/count-following.server";
+import { isFollowing } from "@/entities/follow/api/is-following.server";
 import {
-  countFollowers,
-  countFollowing,
-  isFollowing,
-} from "@/entities/follow/api";
-import {
-  getLibrary,
   getLibraryStats,
   type LibraryStats,
-} from "@/entities/library-item/api";
-import { getPublicProfile } from "@/entities/profile/api";
+} from "@/entities/library-item/api/get-library-stats.server";
+import { getLibrary } from "@/entities/library-item/api/get-library.server";
+import { getPublicProfile } from "@/entities/profile/api/get-public-profile.server";
 import type { Profile } from "@/entities/profile/model/types";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
 

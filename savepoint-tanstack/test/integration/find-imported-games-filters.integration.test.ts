@@ -15,7 +15,7 @@
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { findImportedGamesForUser } from "@/entities/imported-game/api";
+import { findImportedGamesForUser } from "@/entities/imported-game/api/find-imported-games-for-user.server";
 
 import {
   setupIsolatedDatabase,

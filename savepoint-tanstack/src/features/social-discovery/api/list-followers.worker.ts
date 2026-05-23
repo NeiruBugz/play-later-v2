@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { getFollowers } from "@/entities/follow/api";
+import { getFollowers } from "@/entities/follow/api/get-followers.server";
 import type { ListFollowersResult } from "@/entities/follow/model/types";
 
 /**

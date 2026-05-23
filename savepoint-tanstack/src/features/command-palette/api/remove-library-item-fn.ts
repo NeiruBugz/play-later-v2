@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { deleteLibraryItem } from "@/entities/library-item/api";
+import { deleteLibraryItem } from "@/entities/library-item/api/delete-library-item.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 /**

@@ -3,13 +3,13 @@ import { z } from "zod";
 
 import {
   getLibrary,
-  getUniqueLibraryPlatforms,
   type GetLibraryResult,
-} from "@/entities/library-item/api";
+} from "@/entities/library-item/api/get-library.server";
+import { getUniqueLibraryPlatforms } from "@/entities/library-item/api/get-unique-platforms.server";
 import {
   getOnboardingSignals,
   type OnboardingSignals,
-} from "@/entities/profile/api";
+} from "@/entities/profile/api/get-onboarding-signals.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 const libraryStatusSchema = z.enum([

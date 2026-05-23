@@ -16,7 +16,7 @@ import {
   vi,
 } from "vitest";
 
-import { getGameCollectionsByIgdbId } from "@/entities/game/api";
+import { getGameCollectionsByIgdbId } from "@/entities/game/api/get-game-collections.server";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 import { UpstreamError } from "@/shared/lib/errors";
 

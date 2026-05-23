@@ -120,7 +120,7 @@ import {
 // audit's HIGH-severity cross-feature-import finding). Tests import the entity
 // directly per foot-gun #8 (createServerFn returns undefined when invoked
 // programmatically in vitest without the Vite plugin loaded).
-import { getRelatedGames } from "@/entities/game/api";
+import { getRelatedGames } from "@/entities/game/api/get-related-games.server";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 import { NotFoundError, ValidationError } from "@/shared/lib/errors";
 

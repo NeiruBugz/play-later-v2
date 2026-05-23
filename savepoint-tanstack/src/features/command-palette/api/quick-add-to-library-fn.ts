@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { addGameToLibrary } from "@/entities/library-item/api";
+import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 /**

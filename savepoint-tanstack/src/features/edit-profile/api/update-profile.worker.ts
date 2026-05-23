@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { updateProfile } from "@/entities/profile/api";
+import { updateProfile } from "@/entities/profile/api/update-profile.server";
 import type { Profile } from "@/entities/profile/model/types";
 import {
   USERNAME_MAX_LENGTH,

@@ -15,7 +15,7 @@ import {
   vi,
 } from "vitest";
 
-import { getTimesToBeat } from "@/entities/game/api";
+import { getTimesToBeat } from "@/entities/game/api/get-times-to-beat.server";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 import { UpstreamError } from "@/shared/lib/errors";
 

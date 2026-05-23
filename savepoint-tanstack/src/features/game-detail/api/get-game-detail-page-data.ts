@@ -2,7 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-import { getGameDetails, type GameDetails } from "@/entities/game/api";
+import {
+  getGameDetails,
+  type GameDetails,
+} from "@/entities/game/api/get-game-details.server";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
 
 const inputSchema = z.object({

@@ -1,4 +1,4 @@
-import { upsertImportedGamesBatch } from "@/entities/imported-game/api";
+import { upsertImportedGamesBatch } from "@/entities/imported-game/api/upsert-imported-games-batch.server";
 import type { SteamImportedGameInput } from "@/entities/imported-game/model/types";
 import { fetchOwnedGames, type OwnedGame } from "@/shared/api/steam";
 import { prisma } from "@/shared/lib/db.server";

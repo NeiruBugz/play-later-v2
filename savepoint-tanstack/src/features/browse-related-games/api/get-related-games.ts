@@ -12,7 +12,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { getRelatedGames } from "@/entities/game/api";
+import { getRelatedGames } from "@/entities/game/api/get-related-games.server";
 
 const inputSchema = z.object({
   collectionId: z.number().int().positive(),

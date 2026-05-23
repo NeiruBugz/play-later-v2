@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import {
   getProfileSetupStatus,
   type ProfileSetupStatus,
-} from "@/entities/profile/api";
+} from "@/entities/profile/api/get-profile-setup-status.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 /**
