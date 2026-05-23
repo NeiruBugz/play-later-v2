@@ -6,9 +6,8 @@ settings:
 
 overrides:
   hono: 4.12.18
-  valibot: ^1.2.0
-  glob: ^10.5.0
-  js-yaml: ^4.1.1
+  valibot: 1.2.0
+  js-yaml: 4.1.1
   fast-xml-parser: 5.7.3
   fast-xml-builder: 1.2.0
   fast-uri: 3.1.2
@@ -26,7 +25,7 @@ importers:
   .:
     devDependencies:
       '@commitlint/config-conventional':
-        specifier: ^20.2.0
+        specifier: 20.2.0
         version: 20.2.0
 
   savepoint-tanstack:
@@ -2372,7 +2371,7 @@ packages:
     peerDependencies:
       arktype: ^2.1.0
       typescript: '>=5.0.0'
-      valibot: ^1.2.0
+      valibot: 1.2.0
       zod: ^3.24.0 || ^4.0.0
     peerDependenciesMeta:
       arktype:
@@ -8810,7 +8809,7 @@ snapshots:
 
   '@types/conventional-commits-parser@5.0.2':
     dependencies:
-      '@types/node': 24.10.1
+      '@types/node': 22.10.2
 
   '@types/deep-eql@4.0.2': {}
 
