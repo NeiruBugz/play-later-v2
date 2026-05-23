@@ -74,6 +74,13 @@ jobs:
       - name: Format check
         run: pnpm --filter savepoint-tanstack format:check
 
+      # Compiles the production bundle (vite build + nitro/vite → .output/).
+      # Catches client/server bundler-graph breaks the type/lint/test steps miss
+      # — e.g. a public barrel re-exporting a server-only `.server.ts` value into
+      # the client bundle, which trips tanstack-start's import-protection plugin.
+      - name: Build (production bundle)
+        run: pnpm --filter savepoint-tanstack build
+
       # Runs the merged unit + integration projects under v8 coverage and
       # enforces the Slice 23 thresholds from vitest.config.ts (statements ≥85
       # is the cutover gate; branches/lines/functions are regression floors).
