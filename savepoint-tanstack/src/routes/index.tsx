@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     const { user } = await getCurrentUserFn();
     if (user) {
-      throw redirect({ to: "/profile" });
+      throw redirect({ to: "/dashboard" });
     }
   },
   component: LandingPage,

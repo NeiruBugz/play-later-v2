@@ -55,9 +55,9 @@ describe("index route", () => {
       });
     });
 
-    it("redirects to /profile", async () => {
+    it("redirects to /dashboard", async () => {
       await expect(actions.invokeBeforeLoad()).rejects.toMatchObject({
-        options: { to: "/profile" },
+        options: { to: "/dashboard" },
       });
     });
   });
