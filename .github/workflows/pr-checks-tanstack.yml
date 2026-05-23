@@ -79,6 +79,14 @@ jobs:
       # — e.g. a public barrel re-exporting a server-only `.server.ts` value into
       # the client bundle, which trips tanstack-start's import-protection plugin.
       - name: Build (production bundle)
+        env:
+          # `build` now runs `prisma generate && vite build` so a fresh checkout
+          # (e.g. Vercel) generates the client into the source tree before
+          # bundling. `prisma.config.ts` requires a DB URL at config-load even
+          # for generate (which never connects) — placeholder, mirroring the
+          # dedicated generate step above.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint-tanstack build
 
       # Runs the merged unit + integration projects under v8 coverage and

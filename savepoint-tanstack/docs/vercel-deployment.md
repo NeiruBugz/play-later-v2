@@ -7,7 +7,17 @@ spec-021 cutover. Read this with [`../CLAUDE.md`](../CLAUDE.md) and
 ## How the build produces a deployable artifact
 
 - The app builds with Vite: `pnpm --filter savepoint-tanstack build` (script
-  `build` = `vite build`).
+  `build` = **`prisma generate && vite build`**).
+- **Prisma client is generated as part of the build.** The generator outputs to
+  the source tree (`shared/lib/prisma/`, per `prisma/schema.prisma`
+  `output = "../shared/lib/prisma"`), which is **gitignored** — so a fresh
+  checkout (every Vercel build) has no client until generated. Folding
+  `prisma generate` into `build` guarantees it exists before bundling.
+  `prisma.config.ts` loads `.env` locally and requires
+  `POSTGRES_URL_NON_POOLING` (or `POSTGRES_PRISMA_URL`) at config-load — even
+  though generate never connects — so **that DB URL must be present in the
+  Vercel build environment** (it is, if set for the deploying environment; see
+  Required environment variables).
 - `vite.config.ts` runs `tanstackStart()` **then** `nitro()` (the `nitro/vite`
   plugin from the `nitro` package). Nitro is the agnostic server layer
   TanStack Start v1 deploys through — without it, `vite build` only emits
@@ -86,21 +96,24 @@ to the deployed origin), `AUTH_MIGRATION_CUTOVER_AT`, `AUTH_COGNITO_ID`,
 
 **Runtime:** `NODE_ENV=production`, `LOG_LEVEL` (optional).
 
-`env.ts` validates these at startup; a missing required key fails the build/boot
-fast with a clear message.
+`env.ts` validates these at startup; a missing required key fails the boot fast
+with a clear message. Separately, a missing `POSTGRES_URL_NON_POOLING` /
+`POSTGRES_PRISMA_URL` fails the **build** (the `prisma generate` step's
+`prisma.config.ts` throws) — so ensure those are set for the deploying
+environment, not just at runtime.
 
 ## Verifying a build locally before deploy
 
 ```bash
-docker compose up -d                              # local Postgres on :6432 (only needed at runtime, not for the build)
-pnpm --filter savepoint-tanstack build            # must exit 0
+docker compose up -d                              # local Postgres on :6432 (runtime; build only needs the DB URL in .env, not a live connection)
+pnpm --filter savepoint-tanstack build            # prisma generate (reads .env) + vite build; must exit 0
 test -f savepoint-tanstack/.output/server/index.mjs && echo OK   # Nitro server entry present
 pnpm --filter savepoint-tanstack start            # boots node .output/server/index.mjs
 ```
 
 ## Cutover
 
-Cutover (spec 021, Slice 20) is flipping the production Vercel project's Root
+Cutover (spec 021, Slice 24) is flipping the production Vercel project's Root
 Directory from `savepoint-app` to `savepoint-tanstack` (or repointing the
 domain to this project). Both apps share the same Postgres, Better Auth tables,
 S3 bucket, and IGDB client, so no data migration is required. Roll back by
