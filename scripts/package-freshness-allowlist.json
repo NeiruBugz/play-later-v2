@@ -25,6 +25,12 @@
       "version": "1.168.6",
       "reason": "CVE-2026-45321 risk review (commit ada09252): bumped past the malicious 1.167.x window. 1.168.6 is the lowest non-vulnerable post-patch release at audit time.",
       "expires": "2026-06-15"
+    },
+    {
+      "name": "nitro",
+      "version": "3.0.260522-beta",
+      "reason": "nitro 3.x is pre-release-only (no stable release exists); 3.0.260522-beta is the npm `latest` and the documented Vercel deploy server layer (savepoint-tanstack/docs/vercel-deployment.md). TanStack Start does not bundle nitro transitively, so it is a direct exact pin. 2026-05-23 audit (SCS-04) risk review: deliberate beta dependency, not an accidental fresh-publish. Re-pin to a stable release when nitro 3.x ships one.",
+      "expires": "2026-08-31"
     }
   ]
 }

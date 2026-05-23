@@ -10,18 +10,18 @@ The SavePoint app — TanStack Start v1. Delivered by [spec 021](../context/spec
 
 ## Stack
 
-| Concern               | Choice                                                                        |
-| --------------------- | ----------------------------------------------------------------------------- |
-| Framework             | TanStack Start v1 + TanStack Router (file-based)                              |
-| Data access           | C2 pattern: thin entity queries + feature `createServerFn`s, throw `AppError` |
-| Auth                  | Better Auth (catch-all Web Request handler)                                   |
-| Server bridge         | `createServerFn` (TanStack RPC)                                              |
-| Database              | PostgreSQL via Prisma — **migrations owned here**                             |
-| Storage / external    | S3 for avatars/screenshots; IGDB for game data                               |
-| Test runner           | Vitest (unit / integration / components) + boundary-rule regression test     |
-| FSD enforcement       | `eslint-plugin-boundaries`                                                    |
-| Deploy                | Vercel (Nitro)                                                               |
-| Dev port              | `:6060`                                                                       |
+| Concern            | Choice                                                                        |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Framework          | TanStack Start v1 + TanStack Router (file-based)                              |
+| Data access        | C2 pattern: thin entity queries + feature `createServerFn`s, throw `AppError` |
+| Auth               | Better Auth (catch-all Web Request handler)                                   |
+| Server bridge      | `createServerFn` (TanStack RPC)                                               |
+| Database           | PostgreSQL via Prisma — **migrations owned here**                             |
+| Storage / external | S3 for avatars/screenshots; IGDB for game data                                |
+| Test runner        | Vitest (unit / integration / components) + boundary-rule regression test      |
+| FSD enforcement    | `eslint-plugin-boundaries`                                                    |
+| Deploy             | Vercel (Nitro)                                                                |
+| Dev port           | `:6060`                                                                       |
 
 ## Getting started
 
@@ -37,18 +37,18 @@ pnpm --filter savepoint-tanstack dev                  # start the app on :6060
 
 ## Common commands
 
-| Task                           | Command                                              |
-| ------------------------------ | ---------------------------------------------------- |
-| Dev server                     | `pnpm --filter savepoint-tanstack dev`               |
-| Typecheck                      | `pnpm --filter savepoint-tanstack typecheck`         |
-| Lint (incl. FSD boundary rule) | `pnpm --filter savepoint-tanstack lint`              |
-| Format check                   | `pnpm --filter savepoint-tanstack format:check`      |
-| Unit tests                     | `pnpm --filter savepoint-tanstack test:unit`         |
-| Integration tests              | `pnpm --filter savepoint-tanstack test:integration`  |
-| Migrate (dev)                  | `pnpm --filter savepoint-tanstack prisma:migrate`    |
+| Task                           | Command                                                  |
+| ------------------------------ | -------------------------------------------------------- |
+| Dev server                     | `pnpm --filter savepoint-tanstack dev`                   |
+| Typecheck                      | `pnpm --filter savepoint-tanstack typecheck`             |
+| Lint (incl. FSD boundary rule) | `pnpm --filter savepoint-tanstack lint`                  |
+| Format check                   | `pnpm --filter savepoint-tanstack format:check`          |
+| Unit tests                     | `pnpm --filter savepoint-tanstack test:unit`             |
+| Integration tests              | `pnpm --filter savepoint-tanstack test:integration`      |
+| Migrate (dev)                  | `pnpm --filter savepoint-tanstack prisma:migrate`        |
 | Migrate (deploy)               | `pnpm --filter savepoint-tanstack prisma:migrate:deploy` |
-| Generate Prisma client         | `pnpm --filter savepoint-tanstack prisma:generate`   |
-| Format Prisma schema           | `pnpm --filter savepoint-tanstack prisma:format`     |
+| Generate Prisma client         | `pnpm --filter savepoint-tanstack prisma:generate`       |
+| Format Prisma schema           | `pnpm --filter savepoint-tanstack prisma:format`         |
 
 ## Notes for contributors
 
@@ -59,12 +59,12 @@ pnpm --filter savepoint-tanstack dev                  # start the app on :6060
 
 ## Where things are
 
-| You want to              | Look here                                                                                                                                                                                            |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Add a route              | [`src/routes/`](./src/routes/) (file-based)                                                                                                                                                          |
-| Add a server fn          | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix)                                                                                                                                         |
-| Add an entity query      | `src/entities/<noun>/api/<query-name>.server.ts`                                                                                                                                                     |
-| Add a composite UI block | `src/widgets/<name>/ui/...`                                                                                                                                                                          |
-| Add a shared primitive   | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                                                                                       |
-| Add an env var           | [`env.ts`](./env.ts) (Zod schema first, then `import { env } from "@env"`)                                                                                                                           |
+| You want to              | Look here                                                                                                                                                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a route              | [`src/routes/`](./src/routes/) (file-based)                                                                                                                                                                    |
+| Add a server fn          | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix)                                                                                                                                                   |
+| Add an entity query      | `src/entities/<noun>/api/<query-name>.server.ts`                                                                                                                                                               |
+| Add a composite UI block | `src/widgets/<name>/ui/...`                                                                                                                                                                                    |
+| Add a shared primitive   | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                                                                                                 |
+| Add an env var           | [`env.ts`](./env.ts) (Zod schema first, then `import { env } from "@env"`)                                                                                                                                     |
 | Schema change            | **Migrations are owned here.** Edit [`prisma/schema.prisma`](./prisma/schema.prisma), then `pnpm --filter savepoint-tanstack prisma:migrate` (dev) to author + apply. Production runs `prisma:migrate:deploy`. |
