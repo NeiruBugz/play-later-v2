@@ -4,9 +4,10 @@ How the engineering skills should consume this repo's domain documentation when 
 
 ## Layout: multi-context monorepo
 
-This repo splits into two top-level contexts that already have their own `CLAUDE.md` files:
+This repo splits into top-level contexts that each have their own `CLAUDE.md` files:
 
-- `savepoint-app/` — Next.js app (frontend + backend API)
+- `savepoint-tanstack/` — **primary app** (TanStack Start v1). Has its own `CONTEXT.md` glossary (DAL terminology).
+- `savepoint-app/` — **legacy** Next.js app, retained as rollback insurance post-cutover (spec 021, Slice 24).
 - `infra/` — Terraform IaC
 
 Domain docs follow the same split.
@@ -14,12 +15,16 @@ Domain docs follow the same split.
 ```
 /
 ├── CONTEXT-MAP.md                ← points at each context's CONTEXT.md
-├── docs/adr/                     ← system-wide architectural decisions
-├── savepoint-app/
-│   ├── CONTEXT.md                ← app-layer glossary (gaming/library/journal terms)
+├── docs/adr/                     ← system-wide architectural decisions (created lazily)
+├── docs/cutover-rollback.md      ← spec 021 cutover rollback runbook
+├── savepoint-tanstack/           ← primary app
+│   ├── CONTEXT.md                ← DAL terminology dictionary (loader-direct read, UX-hint query, ...)
+│   └── docs/adr/                 ← app-scoped decisions (when they exist)
+├── savepoint-app/                ← legacy app
+│   ├── CONTEXT.md                ← app-layer glossary (gaming/library/journal terms) — when it exists
 │   └── docs/adr/                 ← app-scoped decisions (DAL, FSD, caching, etc.)
 └── infra/
-    ├── CONTEXT.md                ← infra-layer glossary (modules, envs, state)
+    ├── CONTEXT.md                ← infra-layer glossary (modules, envs, state) — when it exists
     └── docs/adr/                 ← infra-scoped decisions
 ```
 
@@ -30,7 +35,7 @@ Domain docs follow the same split.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. Producer skills (`/grill-with-docs`, `/improve-codebase-architecture`) create them lazily when terms or decisions actually get resolved.
 
-Note: `savepoint-app/CLAUDE.md`, `savepoint-app/app/CLAUDE.md`, `savepoint-app/data-access-layer/CLAUDE.md`, `savepoint-app/features/CLAUDE.md`, `savepoint-app/widgets/CLAUDE.md`, and `infra/CLAUDE.md` are the canonical source of truth for layer conventions. Domain docs (`CONTEXT.md`, ADRs) complement, not replace, those files.
+Note: for the primary app, `savepoint-tanstack/CLAUDE.md` (+ its `CONTEXT.md` and per-layer `src/<layer>/README.md`) is the source of truth for layer conventions. For the legacy app, `savepoint-app/CLAUDE.md` and its sub-layer `CLAUDE.md` files apply; `infra/CLAUDE.md` covers infra. Domain docs (`CONTEXT.md`, ADRs) complement, not replace, those files.
 
 ## Use the glossary's vocabulary
 
