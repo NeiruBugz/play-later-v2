@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -38,13 +38,14 @@ const stubProfile: Profile = {
 
 const stubStats: LibraryStats = {
   statusCounts: {
-    BACKLOG: 1,
-    IN_PROGRESS: 0,
-    COMPLETED: 2,
-    ABANDONED: 0,
-    FULL_COMPLETION: 0,
+    SHELF: 3,
     PLAYING: 1,
-  } as never,
+    // PLAYED includes dropped + finished games; deliberately larger than the
+    // real completion count so the two stats are observably distinct.
+    PLAYED: 5,
+  },
+  // Real completions (`completedAt IS NOT NULL`) — fewer than PLAYED.
+  completedCount: 2,
   recentGames: [
     {
       gameId: "game-1",
@@ -54,7 +55,7 @@ const stubStats: LibraryStats = {
     },
   ],
   journalCount: 3,
-} as unknown as LibraryStats;
+};
 
 const elements = {
   getEditProfileLink: () => screen.getByRole("link", { name: "Edit Profile" }),
@@ -132,9 +133,26 @@ describe("ProfileOverview", () => {
       expect(style).toContain("linear-gradient");
     });
 
-    it("renders four stat cards on the overview tab", () => {
+    it("renders five stat cards on the overview tab", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      expect(screen.getAllByTestId("profile-stats-bar-item").length).toBe(4);
+      expect(screen.getAllByTestId("profile-stats-bar-item").length).toBe(5);
+    });
+
+    it("shows Played and Completed as distinct stats (no phantom COMPLETED fallback)", () => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+      const cards = screen.getAllByTestId("profile-stats-bar-item");
+      const playedCard = cards.find(
+        (card) => within(card).queryByText("Played") !== null
+      );
+      const completedCard = cards.find(
+        (card) => within(card).queryByText("Completed") !== null
+      );
+      // PLAYED status count (5) and real completions (2) are different numbers
+      // rendered in their own cards — proving the two metrics aren't conflated.
+      expect(playedCard).toBeDefined();
+      expect(completedCard).toBeDefined();
+      expect(within(playedCard!).getByText("5")).toBeInTheDocument();
+      expect(within(completedCard!).getByText("2")).toBeInTheDocument();
     });
   });
 

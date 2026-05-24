@@ -6,7 +6,11 @@ import { Card, CardContent } from "@/shared/ui/card";
 
 import { calculateSmartStatus } from "../../lib/calculate-smart-status";
 import type { ImportedGameCardProps } from "./imported-game-card.type";
-import { formatPlaytime, getSteamIconUrl } from "./imported-game-card.utility";
+import {
+  formatLastPlayed,
+  formatPlaytime,
+  getSteamIconUrl,
+} from "./imported-game-card.utility";
 
 /**
  * Per-row imported-game card (Slice 21 Phase D).
@@ -37,6 +41,7 @@ export function ImportedGameCard({
     playtime: game.playtime,
     lastPlayedAt: game.lastPlayedAt,
   });
+  const lastPlayedLabel = formatLastPlayed(game.lastPlayedAt);
   const isIgnored = game.igdbMatchStatus === "IGNORED";
 
   return (
@@ -71,8 +76,14 @@ export function ImportedGameCard({
               {smartStatus}
             </Badge>
           </div>
-          <div className="text-muted-foreground flex gap-3 text-sm">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
             <span>{formatPlaytime(game.playtime)}</span>
+            {lastPlayedLabel ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{lastPlayedLabel}</span>
+              </>
+            ) : null}
           </div>
         </div>
 

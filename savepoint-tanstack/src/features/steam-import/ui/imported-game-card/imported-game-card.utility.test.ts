@@ -33,17 +33,14 @@ describe("formatPlaytime", () => {
   });
 
   it("returns minutes-only format when playtime is under one hour", () => {
-    // 45 minutes → 0h 45m → hours === 0 branch
     expect(formatPlaytime(45)).toBe("45m");
   });
 
   it("returns hours-only format when playtime is an exact multiple of 60", () => {
-    // 120 minutes → 2h 0m → minutes === 0 branch
     expect(formatPlaytime(120)).toBe("2h");
   });
 
   it("returns combined hours and minutes format for mixed durations", () => {
-    // 135 minutes → 2h 15m
     expect(formatPlaytime(135)).toBe("2h 15m");
   });
 });

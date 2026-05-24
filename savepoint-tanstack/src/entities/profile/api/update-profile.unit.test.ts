@@ -22,7 +22,6 @@ import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 import { Prisma } from "../../../../shared/lib/prisma/client.ts";
 import { updateProfile } from "./update-profile.server";
 
-// Pull the mocked Prisma client.
 const mockedUpdate = vi.mocked(prisma.user.update);
 
 function makePrismaError(
@@ -66,7 +65,6 @@ describe("updateProfile — Prisma error mapping", () => {
 
   describe("given prisma.user.update throws P2002 with array meta.target (legacy Prisma format)", () => {
     beforeEach(() => {
-      // Legacy Prisma format: meta.target is a string[] containing field names.
       mockedUpdate.mockRejectedValue(
         makePrismaError("P2002", {
           target: ["usernameNormalized"],
@@ -152,7 +150,6 @@ describe("updateProfile — Prisma error mapping", () => {
 
   describe("given prisma.user.update throws P2002 with null meta (targetsUsername null-guard path)", () => {
     beforeEach(() => {
-      // Simulate a P2002 error where meta is null (defensive guard in targetsUsername).
       const err = Object.create(
         Prisma.PrismaClientKnownRequestError.prototype
       ) as Prisma.PrismaClientKnownRequestError;
@@ -170,7 +167,6 @@ describe("updateProfile — Prisma error mapping", () => {
     });
 
     it("re-throws the raw error when meta is null (not a known username constraint)", async () => {
-      // targetsUsername(null) returns false → the error is not a ConflictError
       await expect(
         updateProfile("user-abc", { username: "anyname" })
       ).rejects.toMatchObject({ code: "P2002" });

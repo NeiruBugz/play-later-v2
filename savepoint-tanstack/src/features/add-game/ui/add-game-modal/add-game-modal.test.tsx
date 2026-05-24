@@ -57,7 +57,6 @@ const onAdded = vi.fn();
 
 const defaultProps = { onAdded };
 
-// Element vocabulary — names are locked by these queries.
 const elements = {
   getSearchInput: () => screen.getByRole("searchbox", { name: "Search games" }),
   getAddButton: () => screen.getByRole("button", { name: "Add to library" }),
@@ -71,7 +70,6 @@ const elements = {
   queryNoResults: () => screen.queryByText("No results found"),
 };
 
-// Action vocabulary
 const actions = {
   typeQuery: (query: string) =>
     userEvent.type(elements.getSearchInput(), query),
@@ -80,10 +78,6 @@ const actions = {
   selectGame: (name: string) => userEvent.click(elements.getGameButton(name)),
   clickAdd: () => userEvent.click(elements.getAddButton()),
 };
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("AddGameModal", () => {
   beforeEach(() => {
@@ -94,8 +88,6 @@ describe("AddGameModal", () => {
     mockRouterInvalidate.mockReset();
     onAdded.mockReset();
   });
-
-  // ---- Initial render -------------------------------------------------------
 
   describe("given the modal is rendered with no prior interaction", () => {
     beforeEach(() => {
@@ -117,8 +109,6 @@ describe("AddGameModal", () => {
     });
   });
 
-  // ---- Loading state --------------------------------------------------------
-
   describe("given the user submits a search and it is pending", () => {
     beforeEach(async () => {
       // Never resolves during this describe block — keeps loading state.
@@ -137,8 +127,6 @@ describe("AddGameModal", () => {
       });
     });
   });
-
-  // ---- Results rendering ----------------------------------------------------
 
   describe("given the user submits a search and results arrive", () => {
     beforeEach(async () => {
@@ -159,8 +147,6 @@ describe("AddGameModal", () => {
     });
   });
 
-  // ---- Empty-results state --------------------------------------------------
-
   describe("given the user submits a search that returns zero results", () => {
     beforeEach(async () => {
       vi.mocked(searchGamesFn).mockResolvedValue(STUB_EMPTY_RESULT);
@@ -176,13 +162,10 @@ describe("AddGameModal", () => {
     });
   });
 
-  // ---- No search before submit ----------------------------------------------
-
   describe("given the user types in the input but does not submit", () => {
     beforeEach(async () => {
       vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
       render(<AddGameModal {...defaultProps} />);
-      // Type without pressing Enter.
       await actions.typeQuery("Hollow");
     });
 
@@ -190,8 +173,6 @@ describe("AddGameModal", () => {
       expect(vi.mocked(searchGamesFn)).not.toHaveBeenCalled();
     });
   });
-
-  // ---- Select a result then add --------------------------------------------
 
   describe("given the user searches, selects Hollow Knight, and clicks Add to library", () => {
     beforeEach(async () => {
@@ -233,8 +214,6 @@ describe("AddGameModal", () => {
     });
   });
 
-  // ---- Second result selection ----------------------------------------------
-
   describe("given the user selects the second result (Silksong) and adds it", () => {
     beforeEach(async () => {
       vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
@@ -261,8 +240,6 @@ describe("AddGameModal", () => {
     });
   });
 
-  // ---- Add button only enabled after selection ------------------------------
-
   describe("given results are showing but no game is selected", () => {
     beforeEach(async () => {
       vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
@@ -284,14 +261,11 @@ describe("AddGameModal", () => {
     });
   });
 
-  // ---- Empty query guard ---------------------------------------------------
-
   describe("given the user submits the search form with an empty query", () => {
     beforeEach(async () => {
       render(<AddGameModal {...defaultProps} />);
-      // Submit the form without typing anything — bypasses the disabled check
-      // directly on the form element to hit the `if (trimmed.length === 0) return`
-      // guard in handleSubmit.
+      // Submit the form directly to bypass the disabled check and hit the
+      // `if (trimmed.length === 0) return` guard in handleSubmit.
       const searchInput = screen.getByRole("searchbox", {
         name: "Search games",
       });
@@ -304,8 +278,6 @@ describe("AddGameModal", () => {
       expect(vi.mocked(searchGamesFn)).not.toHaveBeenCalled();
     });
   });
-
-  // ---- No game selected guard ----------------------------------------------
 
   describe("given results are shown but the user clicks Add to library without selecting a game", () => {
     beforeEach(async () => {
@@ -327,8 +299,6 @@ describe("AddGameModal", () => {
       expect(vi.mocked(addGameToLibraryFn)).not.toHaveBeenCalled();
     });
   });
-
-  // ---- Toast feedback: error path ------------------------------------------
 
   describe("given addGameToLibraryFn rejects", () => {
     const ADD_ERROR_MESSAGE = "Game not found in IGDB";

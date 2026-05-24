@@ -8,12 +8,7 @@ import {
 } from "@/shared/lib/errors";
 
 /**
- * Worker for `followUserFn` (Slice 20 — social graph).
- *
- * Plain async function that owns the auth gate, input validation, privacy
- * check, and idempotent DB write. Intentionally split from the server-fn
- * wrapper so integration tests can import it directly without going through
- * the TanStack Start request runtime (foot-gun #8).
+ * Worker for `followUserFn`.
  *
  * Locked divergences from canonical:
  *   - Self-follow → `ValidationError` (canonical: `ConflictError`).

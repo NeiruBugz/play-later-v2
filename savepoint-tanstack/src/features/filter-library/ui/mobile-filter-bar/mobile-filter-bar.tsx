@@ -17,9 +17,11 @@ import {
   SheetTrigger,
 } from "@/shared/ui/sheet";
 
+import { AcquisitionList } from "../acquisition-list";
 import { PlatformSelect } from "../platform-select";
 import { RatingControls } from "../rating-controls";
 import { SortSelect } from "../sort-select";
+import { StartedOnlyToggle } from "../started-only-toggle";
 import { StatusList } from "../status-list";
 import type { MobileFilterBarProps } from "./mobile-filter-bar.type";
 
@@ -38,6 +40,8 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   const {
     status,
     platform,
+    acquisition,
+    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
@@ -50,11 +54,15 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
 
   const {
     currentStatus,
+    currentAcquisition,
+    startedOnly: startedOnlyChecked,
     sortValue,
     platformValue,
     hasActiveFilters,
     activeFilterCount,
     onStatusPick,
+    onAcquisitionPick,
+    onStartedOnlyChange,
     onPlatformChange,
     onSortChange,
     onMinRatingChange,
@@ -64,6 +72,8 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   } = useLibraryFiltersState({
     status,
     platform,
+    acquisition,
+    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
@@ -127,6 +137,25 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               platforms={platforms}
               rawPlatform={platform}
               onChange={onPlatformChange}
+            />
+          </section>
+
+          <section>
+            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
+              Acquisition
+            </p>
+            <AcquisitionList
+              current={currentAcquisition}
+              onPick={onAcquisitionPick}
+              variant="sheet"
+            />
+          </section>
+
+          <section>
+            <StartedOnlyToggle
+              id="mobile-started-only"
+              checked={startedOnlyChecked}
+              onCheckedChange={onStartedOnlyChange}
             />
           </section>
 

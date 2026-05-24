@@ -75,7 +75,6 @@ export function StatusList({
           );
         }
 
-        // sheet variant
         return (
           <li key={entry.value}>
             <Button

@@ -97,10 +97,6 @@ export async function getActivityForUser(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
 const SELECT_COLUMNS = Prisma.sql`
   li."id",
   li."status",

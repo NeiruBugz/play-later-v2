@@ -67,8 +67,6 @@ export const getAvatarPresignedUrlFn = createServerFn({ method: "POST" })
   })
   .handler(
     async ({ data }): Promise<{ uploadUrl: string; publicUrl: string }> => {
-      // Re-parse server-side: inputValidator runs only on cross-network
-      // calls; programmatic callers (other server fns) bypass it.
       let parsed: z.infer<typeof INPUT_SCHEMA>;
       try {
         parsed = INPUT_SCHEMA.parse(data);

@@ -2,6 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import {
+  getLibraryStatusCounts,
+  type LibraryStatusCountMap,
+} from "@/entities/library-item/api/get-library-status-counts.server";
+import {
   getLibrary,
   type GetLibraryResult,
 } from "@/entities/library-item/api/get-library.server";
@@ -11,6 +15,7 @@ import {
   type OnboardingSignals,
 } from "@/entities/profile/api/get-onboarding-signals.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
+import { ratingStarsToStorage } from "@/shared/lib/rating";
 
 const libraryStatusSchema = z.enum([
   "PLAYING",
@@ -20,13 +25,18 @@ const libraryStatusSchema = z.enum([
   "WISHLIST",
 ]);
 
+const acquisitionSchema = z.enum(["DIGITAL", "SUBSCRIPTION", "PHYSICAL"]);
 const sortBySchema = z.enum(["title", "createdAt", "updatedAt"]);
 const sortOrderSchema = z.enum(["asc", "desc"]);
 
 const inputSchema = z.object({
   status: libraryStatusSchema.optional(),
   platform: z.string().min(1).optional(),
-  minRating: z.number().int().min(1).max(10).optional(),
+  acquisition: acquisitionSchema.optional(),
+  startedOnly: z.boolean().optional(),
+  // Stars (0.5–5), the user-facing unit. Converted to the 1–10 storage int
+  // before hitting Prisma (see handler).
+  minRating: z.number().min(0.5).max(5).multipleOf(0.5).optional(),
   sortBy: sortBySchema.optional(),
   sortOrder: sortOrderSchema.optional(),
 });
@@ -42,6 +52,12 @@ export type GetLibraryPageDataResult = GetLibraryResult & {
    * `getUniquePlatforms`.
    */
   platforms: string[];
+  /**
+   * Per-status counts across the **entire** library, unscoped by the active
+   * filters — so the status rail always tells the truth ("47 PLAYED games
+   * exist") even while the grid is filtered to a single status.
+   */
+  statusCounts: LibraryStatusCountMap;
 };
 
 export const getLibraryPageDataFn = createServerFn({ method: "GET" })
@@ -49,10 +65,20 @@ export const getLibraryPageDataFn = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<GetLibraryPageDataResult> => {
     const filters = inputSchema.parse(data);
     const userId = await requireUserId();
-    const [library, onboarding, platforms] = await Promise.all([
-      getLibrary(userId, filters),
+    // The grid query speaks the storage unit; translate the star filter here so
+    // the entity stays in DB units and the UI/URL stay in stars.
+    const libraryFilters = {
+      ...filters,
+      minRating:
+        filters.minRating === undefined
+          ? undefined
+          : ratingStarsToStorage(filters.minRating),
+    };
+    const [library, onboarding, platforms, statusCounts] = await Promise.all([
+      getLibrary(userId, libraryFilters),
       getOnboardingSignals(userId),
       getUniqueLibraryPlatforms(userId),
+      getLibraryStatusCounts(userId),
     ]);
-    return { ...library, onboarding, platforms };
+    return { ...library, onboarding, platforms, statusCounts };
   });

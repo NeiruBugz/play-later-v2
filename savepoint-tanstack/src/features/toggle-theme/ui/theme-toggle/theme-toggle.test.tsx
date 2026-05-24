@@ -187,13 +187,11 @@ describe("ThemeToggle", () => {
 
   describe("given dark theme is stored in localStorage", () => {
     beforeEach(() => {
-      // Simulate a previous session that persisted "dark"
       localStorage.setItem("theme", "dark");
       render(<Harness defaultTheme="dark" />);
     });
 
     it("renders the trigger (persistence acknowledged by defaultTheme prop)", () => {
-      // The trigger should be present; the icon reflects stored dark mode
       expect(elements.getTrigger()).toBeInTheDocument();
     });
   });

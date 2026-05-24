@@ -16,8 +16,6 @@ import { Textarea } from "@/shared/ui/textarea";
 
 import type { EditJournalEntryDialogProps } from "./edit-journal-entry-dialog.type";
 
-// FSD: feature/ui component invoking its own feature/api server fn directly.
-
 export function EditJournalEntryDialog({
   open,
   onOpenChange,

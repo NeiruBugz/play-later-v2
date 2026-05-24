@@ -90,6 +90,30 @@ describe("GameCard", () => {
     });
   });
 
+  describe("given no coverImageId and a cover accent", () => {
+    beforeEach(() => {
+      render(
+        <GameCard
+          game={{ ...baseGame, coverImageId: null }}
+          coverAccentClassName="bg-gradient-to-br from-[var(--status-shelf)] to-background"
+          asLink={false}
+        />
+      );
+    });
+
+    it("applies the accent class to the placeholder", () => {
+      expect(elements.queryCoverPlaceholder()?.className).toContain(
+        "from-[var(--status-shelf)]"
+      );
+    });
+
+    it("paints the title onto the gradient placeholder", () => {
+      // The title now appears twice: the h3 below the cover + the overlay
+      // span on the accent placeholder.
+      expect(screen.getAllByText("Hollow Knight").length).toBeGreaterThan(1);
+    });
+  });
+
   describe("given asLink=false and an onClick handler", () => {
     const onClick = vi.fn();
 

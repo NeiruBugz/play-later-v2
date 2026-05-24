@@ -29,19 +29,28 @@ describe("calculateSmartStatus", () => {
   });
 
   describe("given playtime > 0 and lastPlayedAt is more than 7 days ago", () => {
-    it("returns PLAYED", () => {
+    it("returns SHELF (played but set aside — never auto-PLAYED)", () => {
       const oldDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
       expect(
         calculateSmartStatus({ playtime: 300, lastPlayedAt: oldDate })
-      ).toBe("PLAYED");
+      ).toBe("SHELF");
     });
   });
 
   describe("given playtime > 0 and lastPlayedAt is null", () => {
-    it("returns PLAYED (no recent session recorded)", () => {
+    it("returns SHELF (no recent session recorded — never auto-PLAYED)", () => {
       expect(calculateSmartStatus({ playtime: 60, lastPlayedAt: null })).toBe(
-        "PLAYED"
+        "SHELF"
       );
+    });
+  });
+
+  describe("given a brief, stale session (the destructive-default case)", () => {
+    it("returns SHELF, not PLAYED, for a 48-minute game last played 9 days ago", () => {
+      const nineDaysAgo = new Date(Date.now() - 9 * 24 * 60 * 60 * 1000);
+      expect(
+        calculateSmartStatus({ playtime: 48, lastPlayedAt: nineDaysAgo })
+      ).toBe("SHELF");
     });
   });
 });

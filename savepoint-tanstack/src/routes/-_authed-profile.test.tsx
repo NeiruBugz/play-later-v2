@@ -53,6 +53,7 @@ describe("/_authed/profile redirect", () => {
         },
         stats: {
           statusCounts: {} as never,
+          completedCount: 0,
           recentGames: [],
           journalCount: 0,
         },
@@ -77,6 +78,7 @@ describe("/_authed/profile redirect", () => {
         },
         stats: {
           statusCounts: {} as never,
+          completedCount: 0,
           recentGames: [],
           journalCount: 0,
         },
@@ -100,6 +102,7 @@ describe("/_authed/profile redirect", () => {
         },
         stats: {
           statusCounts: {} as never,
+          completedCount: 0,
           recentGames: [],
           journalCount: 0,
         },

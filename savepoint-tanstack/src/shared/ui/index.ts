@@ -1,6 +1,10 @@
 export { Alert, AlertDescription, AlertTitle } from "./alert";
 export type { AlertProps } from "./alert";
+export { Calendar } from "./calendar";
+export type { CalendarProps } from "./calendar";
 export { Checkbox } from "./checkbox";
+export { DatePicker } from "./date-picker";
+export type { DatePickerProps } from "./date-picker";
 export {
   Collapsible,
   CollapsibleContent,

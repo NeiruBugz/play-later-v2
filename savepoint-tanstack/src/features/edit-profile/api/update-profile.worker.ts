@@ -19,19 +19,6 @@ export const UPDATE_PROFILE_INPUT = z.object({
   isPublicProfile: z.boolean().optional(),
 });
 
-/**
- * Plain async worker for the update-profile flow.
- *
- * Pulled out of the `createServerFn` wrapper so integration tests can
- * exercise the full auth + parse + delegate path without booting the
- * TanStack Start server runtime — `@tanstack/react-start@>=1.168`'s
- * `getRequest()` is strict about `AsyncLocalStorage` context and refuses
- * programmatic invocation. See `savepoint-tanstack/CLAUDE.md` foot-gun #8.
- *
- * Accepts `userId | undefined` so the auth gate is the worker's own
- * responsibility — keeps the unauthorized-rejection branch reachable from
- * tests that don't go through `requireUserId()`.
- */
 export async function updateProfileWorker(
   userId: string | undefined,
   data: unknown

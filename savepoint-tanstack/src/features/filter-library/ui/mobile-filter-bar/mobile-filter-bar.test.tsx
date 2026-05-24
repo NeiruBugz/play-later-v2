@@ -4,11 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MobileFilterBar } from "./mobile-filter-bar";
 
-// --- Router mock -----------------------------------------------------------
-// Same shape as `library-filters.test.tsx` — `useNavigate` is the only
-// TanStack Router surface this component reaches for. Mocking it sidesteps
-// router-context wiring.
-
 const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
@@ -16,29 +11,22 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-// ---------------------------------------------------------------------------
-// Default props
-// ---------------------------------------------------------------------------
-
 const defaultProps = {
   status: undefined,
   platform: undefined,
+  acquisition: undefined,
+  startedOnly: undefined,
   minRating: undefined,
   unratedOnly: undefined,
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
 };
 
-// ---------------------------------------------------------------------------
-// Element vocabulary
-// ---------------------------------------------------------------------------
-
 const elements = {
   getOpenFiltersButton: () =>
     screen.getByRole("button", { name: "Open filters" }),
   queryDialog: () => screen.queryByRole("dialog"),
   findDialog: () => screen.findByRole("dialog"),
-  // Inside the sheet (queries fall back to portal-rendered content)
   getStatusFilterButton: (label: string) =>
     screen.getByRole("button", { name: `Filter by ${label}` }),
   getStatusClearButton: (label: string) =>
@@ -51,6 +39,10 @@ const elements = {
     screen.getByRole("slider", { name: "Minimum rating filter" }),
   getUnratedSwitch: () =>
     screen.getByRole("switch", { name: "Show only unrated games" }),
+  getAcquisitionOption: (label: string) =>
+    screen.getByRole("button", { name: `Filter by ${label}` }),
+  getStartedSwitch: () =>
+    screen.getByRole("switch", { name: "Hide untouched games" }),
   queryClearAllButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
   getClearAllButton: () =>
@@ -60,10 +52,6 @@ const elements = {
   getClearMinRatingButton: () =>
     screen.getByRole("button", { name: "Clear minimum rating" }),
 };
-
-// ---------------------------------------------------------------------------
-// Action vocabulary
-// ---------------------------------------------------------------------------
 
 const actions = {
   openSheet: () => userEvent.click(elements.getOpenFiltersButton()),
@@ -78,6 +66,9 @@ const actions = {
   openSortSelect: () => userEvent.click(elements.getSortTrigger()),
   pickSortOption: (name: string) => userEvent.click(elements.getOption(name)),
   toggleUnrated: () => userEvent.click(elements.getUnratedSwitch()),
+  pickAcquisition: (label: string) =>
+    userEvent.click(elements.getAcquisitionOption(label)),
+  toggleStarted: () => userEvent.click(elements.getStartedSwitch()),
   clearAll: () => userEvent.click(elements.getClearAllButton()),
   clearMinRating: () => userEvent.click(elements.getClearMinRatingButton()),
 };
@@ -110,13 +101,11 @@ describe("MobileFilterBar", () => {
 
     it("renders all filter controls inside the sheet", async () => {
       await elements.findDialog();
-      // Five status buttons
       expect(elements.getStatusFilterButton("Up Next")).toBeDefined();
       expect(elements.getStatusFilterButton("Playing")).toBeDefined();
       expect(elements.getStatusFilterButton("Shelf")).toBeDefined();
       expect(elements.getStatusFilterButton("Played")).toBeDefined();
       expect(elements.getStatusFilterButton("Wishlist")).toBeDefined();
-      // Platform, sort, rating, unrated-only
       expect(elements.getPlatformTrigger()).toBeDefined();
       expect(elements.getSortTrigger()).toBeDefined();
       expect(elements.getMinRatingSlider()).toBeDefined();
@@ -251,7 +240,7 @@ describe("MobileFilterBar", () => {
 
   describe("given a minimum rating is set and the user clears it", () => {
     beforeEach(async () => {
-      render(<MobileFilterBar {...defaultProps} minRating={6} />);
+      render(<MobileFilterBar {...defaultProps} minRating={3} />);
       await actions.openSheet();
       await elements.findDialog();
       await actions.clearMinRating();
@@ -272,6 +261,8 @@ describe("MobileFilterBar", () => {
         <MobileFilterBar
           status="PLAYING"
           platform="PC"
+          acquisition={undefined}
+          startedOnly={undefined}
           minRating={7}
           unratedOnly={true}
           sortBy="title"
@@ -306,6 +297,40 @@ describe("MobileFilterBar", () => {
 
     it("renders the active status label inline on the trigger", () => {
       expect(elements.getOpenFiltersButton()).toHaveTextContent("Playing");
+    });
+  });
+
+  describe("given the user picks an acquisition inside the sheet", () => {
+    beforeEach(async () => {
+      render(<MobileFilterBar {...defaultProps} />);
+      await actions.openSheet();
+      await elements.findDialog();
+      await actions.pickAcquisition("Physical");
+    });
+
+    it("calls navigate with search.acquisition set to PHYSICAL", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ acquisition: "PHYSICAL" }),
+        })
+      );
+    });
+  });
+
+  describe("given the user enables 'Only games I've started' in the sheet", () => {
+    beforeEach(async () => {
+      render(<MobileFilterBar {...defaultProps} />);
+      await actions.openSheet();
+      await elements.findDialog();
+      await actions.toggleStarted();
+    });
+
+    it("calls navigate with search.startedOnly set to true", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ startedOnly: true }),
+        })
+      );
     });
   });
 });

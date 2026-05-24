@@ -88,19 +88,16 @@ describe("AddGameTrigger", () => {
       render(<AddGameTrigger />);
       await actions.clickTrigger();
 
-      // Type a search query and submit the form.
       const searchInput = screen.getByRole("searchbox", {
         name: "Search games",
       });
       await userEvent.type(searchInput, "half{Enter}");
 
-      // Wait for results to appear then click the first result.
       await waitFor(() => {
         expect(screen.queryByText("Half-Life 2")).not.toBeNull();
       });
       await userEvent.click(screen.getByText("Half-Life 2"));
 
-      // Click "Add to library" to trigger the onAdded callback.
       await userEvent.click(
         screen.getByRole("button", { name: "Add to library" })
       );

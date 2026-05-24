@@ -3,10 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useLibraryFiltersState } from "./use-library-filters-state";
 
-// ---------------------------------------------------------------------------
-// Mock @tanstack/react-router
-// ---------------------------------------------------------------------------
-
 const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
@@ -16,6 +12,8 @@ vi.mock("@tanstack/react-router", () => ({
 const defaultInput = {
   status: undefined,
   platform: undefined,
+  acquisition: undefined,
+  startedOnly: undefined,
   minRating: undefined,
   unratedOnly: undefined,
   sortBy: "updatedAt" as const,
@@ -203,6 +201,76 @@ describe("useLibraryFiltersState", () => {
           search: expect.objectContaining({ status: undefined }),
         })
       );
+    });
+  });
+
+  describe("onAcquisitionPick", () => {
+    it("sets the acquisition filter when none is active", () => {
+      const { result } = renderHook(() => useLibraryFiltersState(defaultInput));
+      act(() => {
+        result.current.onAcquisitionPick("SUBSCRIPTION");
+      });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ acquisition: "SUBSCRIPTION" }),
+        })
+      );
+    });
+
+    it("toggles the acquisition filter off when re-picking the active value", () => {
+      const { result } = renderHook(() =>
+        useLibraryFiltersState({ ...defaultInput, acquisition: "PHYSICAL" })
+      );
+      act(() => {
+        result.current.onAcquisitionPick("PHYSICAL");
+      });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ acquisition: undefined }),
+        })
+      );
+    });
+  });
+
+  describe("onStartedOnlyChange", () => {
+    it("sets startedOnly true when checked", () => {
+      const { result } = renderHook(() => useLibraryFiltersState(defaultInput));
+      act(() => {
+        result.current.onStartedOnlyChange(true);
+      });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ startedOnly: true }),
+        })
+      );
+    });
+
+    it("clears startedOnly (undefined) when unchecked", () => {
+      const { result } = renderHook(() =>
+        useLibraryFiltersState({ ...defaultInput, startedOnly: true })
+      );
+      act(() => {
+        result.current.onStartedOnlyChange(false);
+      });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ startedOnly: undefined }),
+        })
+      );
+    });
+  });
+
+  describe("activeFilterCount with acquisition and startedOnly", () => {
+    it("counts both new axes alongside the existing ones", () => {
+      const { result } = renderHook(() =>
+        useLibraryFiltersState({
+          ...defaultInput,
+          status: "PLAYING",
+          acquisition: "SUBSCRIPTION",
+          startedOnly: true,
+        })
+      );
+      expect(result.current.activeFilterCount).toBe(3);
     });
   });
 });

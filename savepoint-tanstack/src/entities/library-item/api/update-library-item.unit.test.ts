@@ -59,7 +59,6 @@ describe("updateLibraryItem — Prisma error mapping", () => {
   beforeEach(() => {
     mockedFindUnique.mockReset();
     mockedUpdate.mockReset();
-    // Stub findUnique to return a matching item by default.
     mockedFindUnique.mockResolvedValue(STUB_ITEM as never);
   });
 

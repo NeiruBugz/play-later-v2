@@ -5,8 +5,8 @@ import { SearchGamesResults } from "./search-games-results";
 
 // Mock the server fn wrapper — the TanStack Start runtime is not available in jsdom.
 const mockSearchGamesFn = vi.fn();
-vi.mock("@/features/search-games/api/search-games", () => ({
-  searchGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),
+vi.mock("@/features/search-games/api/search-library-aware-games", () => ({
+  searchLibraryAwareGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),
 }));
 
 // Mock Link from tanstack router to a plain <a> so we don't need RouterProvider.
@@ -40,7 +40,11 @@ function makeIgdbGame(
   id: number,
   name: string,
   slug: string,
-  opts: { coverImageId?: string; firstReleaseDate?: number } = {}
+  opts: {
+    coverImageId?: string;
+    firstReleaseDate?: number;
+    library?: { status: string; rating: number | null } | null;
+  } = {}
 ) {
   return {
     id,
@@ -48,6 +52,10 @@ function makeIgdbGame(
     slug,
     cover: opts.coverImageId ? { image_id: opts.coverImageId } : undefined,
     first_release_date: opts.firstReleaseDate,
+    // `library` MUST default to null (not undefined) — the card's owned check
+    // is `game.library !== null`, and `undefined !== null` would mis-read every
+    // unowned result as owned.
+    library: opts.library ?? null,
   };
 }
 
@@ -218,7 +226,6 @@ describe("SearchGamesResults", () => {
       );
 
       const { unmount } = render(<SearchGamesResults query="zelda" />);
-      // Component is now in loading state with the fetch in-flight.
       expect(elements.getLoadingSpinner()).toBeDefined();
 
       // Unmount — sets cancelled = true before the promise resolves.
@@ -267,6 +274,65 @@ describe("SearchGamesResults", () => {
       expect(elements.getErrorAlert().textContent).toContain(
         "Game search is temporarily unavailable"
       );
+    });
+  });
+
+  describe("given some results are already in the viewer's library", () => {
+    const renderAddAction = vi.fn(
+      ({ name }: { igdbId: number; name: string }) => (
+        <button type="button">Add {name}</button>
+      )
+    );
+
+    beforeEach(async () => {
+      renderAddAction.mockClear();
+      mockSearchGamesFn.mockResolvedValue({
+        games: [
+          makeIgdbGame(1, "Hades", "hades", {
+            library: { status: "PLAYED", rating: 9 },
+          }),
+          makeIgdbGame(2, "Sword of Hades", "sword-of-hades", {
+            library: null,
+          }),
+        ],
+        count: 2,
+        ownedCount: 1,
+      });
+      render(
+        <SearchGamesResults query="hades" renderAddAction={renderAddAction} />
+      );
+      await act(async () => {});
+    });
+
+    it("summarises how many results are already owned", () => {
+      expect(screen.getByText("1 in your library")).toBeInTheDocument();
+    });
+
+    it("shows the library status on an owned result", () => {
+      expect(screen.getByLabelText("Status: Played")).toBeInTheDocument();
+    });
+
+    it("renders the add affordance only for unowned results", () => {
+      expect(
+        screen.getByRole("button", { name: "Add Sword of Hades" })
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Add Hades" })).toBeNull();
+    });
+  });
+
+  describe("given no add-action slot is supplied", () => {
+    beforeEach(async () => {
+      mockSearchGamesFn.mockResolvedValue({
+        games: [makeIgdbGame(1, "Hades", "hades", { library: null })],
+        count: 1,
+        ownedCount: 0,
+      });
+      render(<SearchGamesResults query="hades" />);
+      await act(async () => {});
+    });
+
+    it("omits the owned summary when nothing is owned", () => {
+      expect(screen.queryByText(/in your library/)).toBeNull();
     });
   });
 });

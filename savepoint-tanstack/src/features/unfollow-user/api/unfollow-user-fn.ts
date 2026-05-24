@@ -7,12 +7,6 @@ import {
   unfollowUserWorker,
 } from "./unfollow-user.worker";
 
-/**
- * Server-fn wrapper for the unfollow-user mutation.
- *
- * Validate-twice: `inputValidator` runs only on cross-network calls, so the
- * worker re-parses internally to cover programmatic callers.
- */
 export const unfollowUserFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UNFOLLOW_USER_INPUT.parse(data))
   .handler(async ({ data }): Promise<void> => {

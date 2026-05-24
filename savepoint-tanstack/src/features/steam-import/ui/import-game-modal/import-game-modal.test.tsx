@@ -287,7 +287,6 @@ describe(ImportGameModal, () => {
       onClose.mockReset();
       onImported.mockReset();
 
-      // Mock IgdbManualSearch's searchGamesFn to return one result.
       vi.mocked(entitySearchGamesFn).mockResolvedValue({
         games: [
           {
@@ -317,13 +316,11 @@ describe(ImportGameModal, () => {
         />
       );
 
-      // Type in the search input to trigger IgdbManualSearch.
       const input = screen.getByRole("textbox", { name: "IGDB search query" });
       await userEvent.type(input, "half");
-      // Advance fake timers past the 300ms debounce.
+      // Advance past the 300ms debounce.
       vi.advanceTimersByTime(400);
 
-      // Wait for the result to appear and click Select.
       await waitFor(() => {
         expect(
           screen.queryByRole("button", { name: "Select Half-Life 2" })

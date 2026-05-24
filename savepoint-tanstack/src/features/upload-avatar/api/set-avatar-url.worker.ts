@@ -7,19 +7,6 @@ export const SET_AVATAR_URL_INPUT = z.object({
   url: z.url(),
 });
 
-/**
- * Plain async worker for the set-avatar-url flow.
- *
- * Split out of the `createServerFn` wrapper so integration tests can call
- * the auth + parse + persist path without the TanStack Start server runtime
- * (`getRequest()` is strict about `AsyncLocalStorage` context under
- * `@tanstack/react-start@>=1.168`). See `savepoint-tanstack/CLAUDE.md`
- * foot-gun #8.
- *
- * Accepts `userId | undefined` so the worker owns its own auth gate — the
- * unauthorized branch stays reachable from tests that don't go through
- * `requireUserId()`.
- */
 export async function setAvatarUrlWorker(
   userId: string | undefined,
   data: unknown

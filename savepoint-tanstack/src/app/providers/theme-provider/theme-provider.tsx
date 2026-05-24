@@ -41,7 +41,6 @@ export function SavepointThemeProvider({
 
   const [theme, setThemeState] = useState<Theme>(initialTheme);
 
-  // On mount: rehydrate from localStorage (unless forced) and apply to <html>.
   useEffect(() => {
     const next = forcedTheme ?? readStoredTheme(defaultTheme);
     setThemeState(next);
@@ -56,7 +55,6 @@ export function SavepointThemeProvider({
     applyThemeToHtml(forcedTheme);
   }, [forcedTheme]);
 
-  // While on "system", listen for OS preference changes and re-apply.
   useEffect(() => {
     if (theme !== "system") return;
     if (typeof window === "undefined") return;

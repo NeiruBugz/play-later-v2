@@ -4,11 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LibraryFilters } from "./library-filters";
 
-// --- Router mock -----------------------------------------------------------
-// `useNavigate` is the only TanStack Router surface this component reaches for.
-// Mocking the whole module sidesteps router-context wiring and lets the
-// assertions inspect what navigation payload was produced.
-
 const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
@@ -16,53 +11,39 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-// ---------------------------------------------------------------------------
-// Default props
-// ---------------------------------------------------------------------------
-
 const defaultProps = {
   status: undefined,
   platform: undefined,
+  acquisition: undefined,
+  startedOnly: undefined,
   minRating: undefined,
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
 };
 
-// ---------------------------------------------------------------------------
-// Element vocabulary — Radix-aware (Select renders an internal `combobox`-role
-// trigger; options are `option`-role inside a portaled listbox).
-// ---------------------------------------------------------------------------
-
 const elements = {
-  // Status section
   getStatusButton: (label: string) =>
     screen.getByRole("button", { name: label }),
   queryStatusButton: (label: string) =>
     screen.queryByRole("button", { name: label }),
-  // "All" pill
   getAllStatusesButton: () =>
     screen.getByRole("button", { name: "Show all statuses" }),
-  // Platform Radix Select
   getPlatformTrigger: () => screen.getByRole("combobox", { name: "Platform" }),
-  // Sort Radix Select
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
-  // Listbox option (any open Select)
   getOption: (name: string) =>
     screen.getByRole("option", { name, hidden: true }),
-  // Clear-all CTA
+  getAcquisitionOption: (label: string) =>
+    screen.getByRole("button", { name: `Filter by ${label}` }),
+  getStartedSwitch: () =>
+    screen.getByRole("switch", { name: "Hide untouched games" }),
   getClearFiltersButton: () =>
     screen.getByRole("button", { name: "Clear all filters" }),
   queryClearFiltersButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
-  // Section labels
   queryStatusHeading: () => screen.queryByText("Status"),
   queryPlatformHeading: () => screen.queryByText("Platform"),
   querySortHeading: () => screen.queryByText("Sort"),
 };
-
-// ---------------------------------------------------------------------------
-// Action vocabulary
-// ---------------------------------------------------------------------------
 
 const actions = {
   selectStatus: (label: string) =>
@@ -78,16 +59,10 @@ const actions = {
   clearFilters: () => userEvent.click(elements.getClearFiltersButton()),
 };
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 describe("LibraryFilters", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
   });
-
-  // ---- Initial render ------------------------------------------------------
 
   describe("given the component is rendered", () => {
     beforeEach(() => {
@@ -118,8 +93,6 @@ describe("LibraryFilters", () => {
       expect(elements.queryClearFiltersButton()).toBeNull();
     });
   });
-
-  // ---- Active-status state -------------------------------------------------
 
   describe("given a status filter is active", () => {
     beforeEach(() => {
@@ -152,8 +125,6 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Status count badges -------------------------------------------------
-
   describe("given counts are supplied", () => {
     beforeEach(() => {
       render(
@@ -175,8 +146,6 @@ describe("LibraryFilters", () => {
       );
     });
   });
-
-  // ---- Status filter interactions ------------------------------------------
 
   describe("given the user clicks the Playing status button", () => {
     beforeEach(async () => {
@@ -238,8 +207,6 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Platform Radix Select interactions ---------------------------------
-
   describe("given the user opens the platform select and picks PC", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} />);
@@ -271,8 +238,6 @@ describe("LibraryFilters", () => {
       );
     });
   });
-
-  // ---- Sort Radix Select interactions -------------------------------------
 
   describe("given the user changes the sort to Title A–Z", () => {
     beforeEach(async () => {
@@ -314,15 +279,15 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Clear all filters ---------------------------------------------------
-
   describe("given filters are active and the user clicks clear all", () => {
     beforeEach(async () => {
       render(
         <LibraryFilters
           status="PLAYING"
           platform="PC"
-          minRating={7}
+          acquisition={undefined}
+          startedOnly={undefined}
+          minRating={3.5}
           sortBy="title"
           sortOrder="asc"
         />
@@ -345,7 +310,35 @@ describe("LibraryFilters", () => {
     });
   });
 
-  // ---- Router is the integration boundary (not the DAL) -------------------
+  describe("given the user picks the Subscription acquisition", () => {
+    beforeEach(async () => {
+      render(<LibraryFilters {...defaultProps} />);
+      await userEvent.click(elements.getAcquisitionOption("Subscription"));
+    });
+
+    it("calls navigate with search.acquisition set to SUBSCRIPTION", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ acquisition: "SUBSCRIPTION" }),
+        })
+      );
+    });
+  });
+
+  describe("given the user enables 'Only games I've started'", () => {
+    beforeEach(async () => {
+      render(<LibraryFilters {...defaultProps} />);
+      await userEvent.click(elements.getStartedSwitch());
+    });
+
+    it("calls navigate with search.startedOnly set to true", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ startedOnly: true }),
+        })
+      );
+    });
+  });
 
   describe("given any filter change is made", () => {
     beforeEach(async () => {

@@ -16,12 +16,7 @@ const DELETE_LIBRARY_ITEM_INPUT = z.object({
 export const deleteLibraryItemFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => DELETE_LIBRARY_ITEM_INPUT.parse(data))
   .handler(async ({ data }): Promise<void> => {
-    // Auth gate first: unauthenticated callers get `UnauthorizedError`
-    // before any Zod parsing (matches `addGameToLibraryFn` / `connectSteamFn`).
     const userId = await requireUserId();
-
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it.
     const { itemId } = DELETE_LIBRARY_ITEM_INPUT.parse(data);
 
     await deleteLibraryItem(userId, itemId);

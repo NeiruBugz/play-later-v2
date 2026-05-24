@@ -20,6 +20,8 @@ export function GameCard({
   children,
   badges,
   overlay,
+  coverAccentClassName,
+  titleClassName,
   className,
   ...props
 }: GameCardProps) {
@@ -55,8 +57,17 @@ export function GameCard({
           <div
             role="img"
             aria-label={`Cover for ${title}`}
-            className="bg-muted h-full w-full"
-          />
+            className={cn(
+              "flex h-full w-full items-center justify-center p-4",
+              coverAccentClassName ?? "bg-muted"
+            )}
+          >
+            {coverAccentClassName ? (
+              <span className="line-clamp-3 text-center text-lg font-bold tracking-wide text-white uppercase">
+                {title}
+              </span>
+            ) : null}
+          </div>
         )}
         {badges ? (
           <div className="pointer-events-none absolute inset-0">{badges}</div>
@@ -69,7 +80,8 @@ export function GameCard({
           <h3
             className={cn(
               gameCardTitleVariants({ clamp: true }),
-              "min-w-0 flex-1"
+              "min-w-0 flex-1",
+              titleClassName
             )}
           >
             {title}

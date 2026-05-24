@@ -3,10 +3,12 @@ import type {
   LibraryItemWithGame,
 } from "@/entities/library-item/model";
 import type {
+  LibraryAcquisition,
   LibraryFiltersProps,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatus,
+  LibraryStatusCounts,
 } from "@/features/filter-library";
 
 export type LibraryPageOnboardingSignals = {
@@ -21,6 +23,8 @@ export type LibraryPageProps = {
   total: GetLibraryResult["total"];
   status: LibraryStatus | undefined;
   platform: string | undefined;
+  acquisition?: LibraryAcquisition | undefined;
+  startedOnly?: boolean | undefined;
   minRating: number | undefined;
   unratedOnly?: boolean | undefined;
   sortBy: LibrarySortBy;
@@ -31,6 +35,14 @@ export type LibraryPageProps = {
    * (preserves existing tests that don't supply this prop).
    */
   platforms?: ReadonlyArray<string>;
+  /**
+   * Per-status counts across the entire library, unscoped by the active
+   * filters — supplied by the loader so the status rail shows full-library
+   * truth ("47 PLAYED") even while the grid is filtered to one status. When
+   * omitted (older tests), the page falls back to deriving counts from the
+   * loaded items.
+   */
+  statusCounts?: LibraryStatusCounts;
   /**
    * Optional onboarding signals for the first-time `/library` hero. When
    * present AND `total === 0`, the page renders `<EmptyLibraryHero/>`

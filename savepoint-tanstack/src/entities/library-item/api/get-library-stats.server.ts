@@ -6,24 +6,30 @@ import type { LibraryStats, RecentGame } from "../model/types";
 export type { LibraryStats, RecentGame } from "../model/types";
 
 export async function getLibraryStats(userId: string): Promise<LibraryStats> {
-  const [statusCountsRaw, recentItems, journalCount] = await Promise.all([
-    prisma.libraryItem.groupBy({
-      by: ["status"],
-      where: { userId },
-      _count: true,
-    }),
-    prisma.libraryItem.findMany({
-      where: { userId, status: "PLAYING" },
-      include: {
-        game: {
-          select: { id: true, title: true, coverImage: true },
+  const [statusCountsRaw, completedCount, recentItems, journalCount] =
+    await Promise.all([
+      prisma.libraryItem.groupBy({
+        by: ["status"],
+        where: { userId },
+        _count: true,
+      }),
+      // Real completions — a timestamp, not a status. PLAYED includes dropped
+      // games; this counts only games the user explicitly marked complete.
+      prisma.libraryItem.count({
+        where: { userId, completedAt: { not: null } },
+      }),
+      prisma.libraryItem.findMany({
+        where: { userId, status: "PLAYING" },
+        include: {
+          game: {
+            select: { id: true, title: true, coverImage: true },
+          },
         },
-      },
-      orderBy: { updatedAt: "desc" },
-      take: RECENT_GAMES_LIMIT,
-    }),
-    prisma.journalEntry.count({ where: { userId } }),
-  ]);
+        orderBy: { updatedAt: "desc" },
+        take: RECENT_GAMES_LIMIT,
+      }),
+      prisma.journalEntry.count({ where: { userId } }),
+    ]);
 
   const statusCounts = statusCountsRaw.reduce<Record<string, number>>(
     (acc, item) => {
@@ -40,5 +46,5 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     lastPlayed: item.updatedAt,
   }));
 
-  return { statusCounts, recentGames, journalCount };
+  return { statusCounts, completedCount, recentGames, journalCount };
 }

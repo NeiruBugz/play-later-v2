@@ -64,6 +64,8 @@ function makeGame(
 
 type Status = "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
 
+type Acquisition = "DIGITAL" | "SUBSCRIPTION" | "PHYSICAL";
+
 function makeLibraryItem(
   userId: string,
   gameId: string,
@@ -71,6 +73,10 @@ function makeLibraryItem(
     status?: Status;
     platform?: string;
     rating?: number | null;
+    acquisitionType?: Acquisition;
+    hasBeenPlayed?: boolean;
+    startedAt?: Date | null;
+    completedAt?: Date | null;
     createdAt?: Date;
     updatedAt?: Date;
   } = {}
@@ -80,7 +86,10 @@ function makeLibraryItem(
     userId,
     gameId,
     status: overrides.status ?? ("SHELF" as Status),
-    acquisitionType: "DIGITAL" as const,
+    acquisitionType: overrides.acquisitionType ?? ("DIGITAL" as const),
+    hasBeenPlayed: overrides.hasBeenPlayed ?? false,
+    startedAt: overrides.startedAt ?? null,
+    completedAt: overrides.completedAt ?? null,
     platform: overrides.platform ?? null,
     rating: overrides.rating ?? null,
     createdAt: overrides.createdAt ?? new Date("2024-01-01T00:00:00.000Z"),
@@ -303,6 +312,147 @@ describe("getLibrary", () => {
 
       // Only items with rating exactly 10 should appear; none exist here.
       expect(result.items.every((item) => (item.rating ?? 0) >= 10)).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Acquisition filter (F03)
+  // -------------------------------------------------------------------------
+
+  describe("acquisition filter", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("acq") });
+      await Promise.all([
+        db.prisma.game.create({ data: makeGame("acq1", { title: "Owned A" }) }),
+        db.prisma.game.create({ data: makeGame("acq2", { title: "Owned B" }) }),
+        db.prisma.game.create({ data: makeGame("acq3", { title: "Sub A" }) }),
+        db.prisma.game.create({
+          data: makeGame("acq4", { title: "Physical A" }),
+        }),
+      ]);
+      await db.prisma.libraryItem.createMany({
+        data: [
+          makeLibraryItem("lib-user-acq", "lib-game-acq1", {
+            acquisitionType: "DIGITAL",
+          }),
+          makeLibraryItem("lib-user-acq", "lib-game-acq2", {
+            acquisitionType: "DIGITAL",
+          }),
+          makeLibraryItem("lib-user-acq", "lib-game-acq3", {
+            acquisitionType: "SUBSCRIPTION",
+          }),
+          makeLibraryItem("lib-user-acq", "lib-game-acq4", {
+            acquisitionType: "PHYSICAL",
+          }),
+        ],
+      });
+    });
+
+    it("returns only SUBSCRIPTION items when acquisition is SUBSCRIPTION", async () => {
+      const result = await getLibrary("lib-user-acq", {
+        acquisition: "SUBSCRIPTION",
+      });
+
+      expect(result.items).toHaveLength(1);
+      expect(
+        result.items.every((item) => item.acquisitionType === "SUBSCRIPTION")
+      ).toBe(true);
+    });
+
+    it("returns only DIGITAL items when acquisition is DIGITAL", async () => {
+      const result = await getLibrary("lib-user-acq", {
+        acquisition: "DIGITAL",
+      });
+
+      expect(result.items).toHaveLength(2);
+      expect(
+        result.items.every((item) => item.acquisitionType === "DIGITAL")
+      ).toBe(true);
+    });
+
+    it("returns every source when no acquisition filter is applied", async () => {
+      const result = await getLibrary("lib-user-acq", {});
+
+      expect(result.total).toBe(4);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Started-only filter (F04 — derived "touched": status / startedAt / completedAt)
+  // -------------------------------------------------------------------------
+
+  describe("started-only filter (derived touched)", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("started") });
+      await Promise.all([
+        db.prisma.game.create({
+          data: makeGame("st1", { title: "Tried Shelf" }),
+        }),
+        db.prisma.game.create({
+          data: makeGame("st2", { title: "Playing" }),
+        }),
+        db.prisma.game.create({
+          data: makeGame("st3", { title: "Untouched Shelf" }),
+        }),
+        db.prisma.game.create({
+          data: makeGame("st4", { title: "Finished Shelf" }),
+        }),
+      ]);
+      await db.prisma.libraryItem.createMany({
+        data: [
+          // Shelved but started → touched via startedAt.
+          makeLibraryItem("lib-user-started", "lib-game-st1", {
+            status: "SHELF",
+            startedAt: new Date("2024-02-01T00:00:00.000Z"),
+          }),
+          // Currently playing, no dates → touched via status.
+          makeLibraryItem("lib-user-started", "lib-game-st2", {
+            status: "PLAYING",
+          }),
+          // Shelved, never touched → excluded.
+          makeLibraryItem("lib-user-started", "lib-game-st3", {
+            status: "SHELF",
+          }),
+          // Shelved but completed → touched via completedAt.
+          makeLibraryItem("lib-user-started", "lib-game-st4", {
+            status: "SHELF",
+            completedAt: new Date("2024-03-01T00:00:00.000Z"),
+          }),
+        ],
+      });
+    });
+
+    it("returns only touched games (status PLAYING/PLAYED, startedAt, or completedAt)", async () => {
+      const result = await getLibrary("lib-user-started", {
+        startedOnly: true,
+      });
+
+      expect(result.items).toHaveLength(3);
+      expect(
+        result.items.every(
+          (item) =>
+            item.status === "PLAYING" ||
+            item.status === "PLAYED" ||
+            item.startedAt !== null ||
+            item.completedAt !== null
+        )
+      ).toBe(true);
+    });
+
+    it("excludes the untouched shelf item", async () => {
+      const result = await getLibrary("lib-user-started", {
+        startedOnly: true,
+      });
+
+      expect(
+        result.items.some((item) => item.game.title === "Untouched Shelf")
+      ).toBe(false);
+    });
+
+    it("returns every item when startedOnly is not set", async () => {
+      const result = await getLibrary("lib-user-started", {});
+
+      expect(result.total).toBe(4);
     });
   });
 

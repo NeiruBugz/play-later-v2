@@ -49,6 +49,21 @@ const iconVariants = cva("shrink-0", {
   },
 });
 
+export type EmptyStateAction = {
+  label: string;
+  /**
+   * TanStack Router `to` path. When provided (and not disabled), the action
+   * renders as a `<Link>`-backed button. Mirrors canonical's `href`.
+   */
+  to?: string;
+  /** TanStack Router `search` params, forwarded to the `<Link>` when `to` is set. */
+  search?: Record<string, unknown>;
+  onClick?: () => void;
+  variant?: ButtonProps["variant"];
+  size?: ButtonProps["size"];
+  disabled?: boolean;
+};
+
 export interface EmptyStateProps
   extends
     Omit<ComponentPropsWithoutRef<"div">, "title">,
@@ -57,23 +72,38 @@ export interface EmptyStateProps
   iconProps?: VariantProps<typeof iconVariants>;
   title: string;
   description?: string;
-  action?: {
-    label: string;
-    /**
-     * TanStack Router `to` path. When provided (and not disabled), the action
-     * renders as a `<Link>`-backed button. Mirrors canonical's `href`.
-     */
-    to?: string;
-    /** TanStack Router `search` params, forwarded to the `<Link>` when `to` is set. */
-    search?: Record<string, unknown>;
-    onClick?: () => void;
-    variant?: ButtonProps["variant"];
-    size?: ButtonProps["size"];
-    disabled?: boolean;
-  };
+  action?: EmptyStateAction;
+  /**
+   * Optional second CTA rendered next to `action`. Powers the "first-run"
+   * template's dual call-to-action (e.g. "Add a game" + "Import Steam") while
+   * keeping a single empty-state voice across the app.
+   */
+  secondaryAction?: EmptyStateAction;
   maxWidth?: "sm" | "md" | "lg" | "xl";
   role?: "status" | "alert";
   ariaLive?: "polite" | "assertive" | "off";
+}
+
+function ActionButton({ action }: { action: EmptyStateAction }) {
+  if (action.to && !action.disabled) {
+    return (
+      <Button asChild variant={action.variant} size={action.size}>
+        <Link to={action.to} search={action.search as never}>
+          {action.label}
+        </Link>
+      </Button>
+    );
+  }
+  return (
+    <Button
+      onClick={action.disabled ? undefined : action.onClick}
+      variant={action.variant}
+      size={action.size}
+      disabled={action.disabled}
+    >
+      {action.label}
+    </Button>
+  );
 }
 
 export function EmptyState({
@@ -84,6 +114,7 @@ export function EmptyState({
   title,
   description,
   action,
+  secondaryAction,
   maxWidth = "md",
   role = "status",
   ariaLive = "polite",
@@ -96,7 +127,6 @@ export function EmptyState({
     xl: "max-w-xl",
   };
 
-  // Check if icon is a Lucide component or raw ReactNode
   const isLucideIcon =
     IconOrNode &&
     typeof IconOrNode === "function" &&
@@ -139,23 +169,13 @@ export function EmptyState({
       </div>
 
       {action && (
-        <div className="mt-md" role="group" aria-labelledby="empty-state-title">
-          {action.to && !action.disabled ? (
-            <Button asChild variant={action.variant} size={action.size}>
-              <Link to={action.to} search={action.search as never}>
-                {action.label}
-              </Link>
-            </Button>
-          ) : (
-            <Button
-              onClick={action.disabled ? undefined : action.onClick}
-              variant={action.variant}
-              size={action.size}
-              disabled={action.disabled}
-            >
-              {action.label}
-            </Button>
-          )}
+        <div
+          className="gap-sm mt-md flex flex-wrap items-center justify-center"
+          role="group"
+          aria-labelledby="empty-state-title"
+        >
+          <ActionButton action={action} />
+          {secondaryAction && <ActionButton action={secondaryAction} />}
         </div>
       )}
     </div>

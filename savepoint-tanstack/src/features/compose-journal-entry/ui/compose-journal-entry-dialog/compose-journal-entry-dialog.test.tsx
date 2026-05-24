@@ -1,13 +1,3 @@
-/**
- * Pinned prop contract (RED — component does not exist yet):
- *
- * type Props = {
- *   open: boolean;
- *   onOpenChange: (open: boolean) => void;
- *   defaultGameId?: string;   // pre-select a game (used when opened from game-detail)
- * };
- */
-
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
@@ -104,7 +94,6 @@ describe("ComposeJournalEntryDialog", () => {
       render(
         <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
       );
-      // textarea is left empty — do not type anything
     });
 
     it("does not call createJournalEntryFn when content is empty", async () => {

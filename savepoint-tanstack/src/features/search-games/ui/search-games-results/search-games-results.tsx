@@ -2,9 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { searchGamesFn } from "@/features/search-games/api/search-games";
-import type { SearchGamesResult } from "@/shared/api/igdb";
+import { LibraryStatusBadge } from "@/entities/library-item";
+import { searchLibraryAwareGamesFn } from "@/features/search-games/api/search-library-aware-games";
+import type { LibraryAwareSearchResult } from "@/features/search-games/api/search-library-aware-games.worker";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { RatingInput } from "@/shared/ui/rating-input";
 
 import type { SearchGamesResultsProps } from "./search-games-results.type";
 
@@ -13,14 +15,17 @@ type Status = "idle" | "loading" | "success" | "error";
 const MIN_QUERY_LENGTH = 3;
 
 /**
- * Fetches IGDB search results for `query` and renders a grid of game cards
- * linking to the detail page. Mirrors the result-list shape of canonical
- * `features/game-search/ui/game-search-results.tsx`, but without library-
- * status / view-toggle / pagination — those are scoped out of Slice 22.
+ * Fetches library-aware IGDB search results for `query` and renders a grid of
+ * cards. Results the viewer already owns show their library status (and rating
+ * when set) and skip the add affordance; unowned results render the
+ * route-injected `renderAddAction` slot. (F08)
  */
-export function SearchGamesResults({ query }: SearchGamesResultsProps) {
+export function SearchGamesResults({
+  query,
+  renderAddAction,
+}: SearchGamesResultsProps) {
   const [status, setStatus] = useState<Status>("idle");
-  const [result, setResult] = useState<SearchGamesResult | null>(null);
+  const [result, setResult] = useState<LibraryAwareSearchResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,7 +40,9 @@ export function SearchGamesResults({ query }: SearchGamesResultsProps) {
     setErrorMessage(null);
     void (async () => {
       try {
-        const data = await searchGamesFn({ data: { name: query } });
+        const data = await searchLibraryAwareGamesFn({
+          data: { name: query },
+        });
         if (cancelled) return;
         setResult(data);
         setStatus("success");
@@ -86,6 +93,7 @@ export function SearchGamesResults({ query }: SearchGamesResultsProps) {
   }
 
   const games = result?.games ?? [];
+  const ownedCount = result?.ownedCount ?? 0;
 
   if (status === "success" && games.length === 0) {
     return (
@@ -103,6 +111,14 @@ export function SearchGamesResults({ query }: SearchGamesResultsProps) {
     <div aria-live="polite" aria-atomic="false" className="space-y-3xl">
       <p className="text-muted-foreground body-sm">
         {games.length} result{games.length !== 1 ? "s" : ""}
+        {ownedCount > 0 ? (
+          <>
+            {" · "}
+            <span className="text-foreground font-medium">
+              {ownedCount} in your library
+            </span>
+          </>
+        ) : null}
       </p>
       <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
         {games.map((game) => {
@@ -113,31 +129,66 @@ export function SearchGamesResults({ query }: SearchGamesResultsProps) {
           const releaseYear = game.first_release_date
             ? new Date(game.first_release_date * 1000).getFullYear()
             : null;
+          const owned = game.library !== null;
           return (
-            <li key={game.id}>
+            <li key={game.id} className="relative">
               <Link
                 to="/games/$slug"
                 params={{ slug: game.slug }}
                 className="block space-y-1"
               >
-                {coverUrl ? (
-                  <img
-                    src={coverUrl}
-                    alt={`Cover for ${game.name}`}
-                    loading="lazy"
-                    className="shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg object-cover"
-                  />
-                ) : (
-                  <div
-                    role="img"
-                    aria-label={`Cover for ${game.name}`}
-                    className="bg-muted shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg"
-                  />
-                )}
+                <div className="relative">
+                  {coverUrl ? (
+                    <img
+                      src={coverUrl}
+                      alt={`Cover for ${game.name}`}
+                      loading="lazy"
+                      className="shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div
+                      role="img"
+                      aria-label={`Cover for ${game.name}`}
+                      className="bg-muted shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg"
+                    />
+                  )}
+                  {game.library !== null ? (
+                    <div className="absolute top-1 left-1">
+                      <LibraryStatusBadge status={game.library.status} />
+                    </div>
+                  ) : null}
+                  {!owned && renderAddAction ? (
+                    // Add affordance overlays the cover bottom-right. It sits
+                    // inside the navigating <Link>; the bubble-phase handler
+                    // stops the click from reaching the link so a tap adds the
+                    // game without navigating to its detail page.
+                    <div
+                      className="absolute right-1.5 bottom-1.5"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
+                      {renderAddAction({ igdbId: game.id, name: game.name })}
+                    </div>
+                  ) : null}
+                </div>
                 <p className="truncate text-sm font-medium">{game.name}</p>
-                {releaseYear !== null && (
-                  <p className="text-muted-foreground text-xs">{releaseYear}</p>
-                )}
+                <div className="flex h-4 items-center gap-1">
+                  {releaseYear !== null && (
+                    <span className="text-muted-foreground text-xs tabular-nums">
+                      {releaseYear}
+                    </span>
+                  )}
+                  {game.library !== null && game.library.rating !== null ? (
+                    <RatingInput
+                      value={game.library.rating}
+                      size="sm"
+                      readOnly
+                      aria-label={`Your rating: ${game.library.rating / 2} out of 5 stars`}
+                    />
+                  ) : null}
+                </div>
               </Link>
             </li>
           );

@@ -1,61 +1,30 @@
-import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import {
+  Archive,
+  ListPlus,
+  Play,
+  Plus,
+  RotateCcw,
+  type LucideIcon,
+} from "lucide-react";
+
+import {
+  getStatusEntry,
+  type LibraryItemWithGame,
+  type StatusBadgeVariant,
+} from "@/entities/library-item/model";
 
 type LibraryItemStatus = LibraryItemWithGame["status"];
 
-const MILLISECONDS_PER_DAY = 86_400_000;
-const ABSOLUTE_THRESHOLD_DAYS = 60;
-
-function toDate(value: Date | string | null | undefined): Date | null {
-  if (value === null || value === undefined) return null;
-  if (value instanceof Date) return value;
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-export function formatRelativeDate(date: Date, now: Date = new Date()): string {
-  const diffDays = Math.round(
-    (now.getTime() - date.getTime()) / MILLISECONDS_PER_DAY
-  );
-
-  if (Math.abs(diffDays) > ABSOLUTE_THRESHOLD_DAYS) {
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(date);
-  }
-
-  return new Intl.RelativeTimeFormat("en-US", { numeric: "auto" }).format(
-    -diffDays,
-    "day"
-  );
-}
-
-export type ContextualDateInput = {
-  status: LibraryItemStatus;
-  startedAt?: Date | string | null;
-  createdAt: Date | string;
-  updatedAt?: Date | string | null;
+const COVER_ACCENT_GRADIENT: Record<StatusBadgeVariant, string> = {
+  playing: "bg-gradient-to-br from-[var(--status-playing)] to-background",
+  played: "bg-gradient-to-br from-[var(--status-played)] to-background",
+  shelf: "bg-gradient-to-br from-[var(--status-shelf)] to-background",
+  upNext: "bg-gradient-to-br from-[var(--status-upNext)] to-background",
+  wishlist: "bg-gradient-to-br from-[var(--status-wishlist)] to-background",
 };
 
-export function getContextualDate(input: ContextualDateInput): string | null {
-  const { status, startedAt, createdAt, updatedAt } = input;
-  const created = toDate(createdAt);
-  const started = toDate(startedAt);
-  const updated = toDate(updatedAt);
-
-  if (status === "PLAYING" || status === "UP_NEXT") {
-    if (started) return `Started ${formatRelativeDate(started)}`;
-    if (created) return `Added ${formatRelativeDate(created)}`;
-    return null;
-  }
-  if (status === "PLAYED") {
-    if (updated) return `Finished ${formatRelativeDate(updated)}`;
-    if (created) return `Added ${formatRelativeDate(created)}`;
-    return null;
-  }
-  if (created) return `Added ${formatRelativeDate(created)}`;
-  return null;
+export function getStatusCoverAccent(status: LibraryItemStatus): string {
+  return COVER_ACCENT_GRADIENT[getStatusEntry(status).badgeVariant];
 }
 
 export type CardCtaAction =
@@ -67,17 +36,31 @@ export type CardCtaAction =
       startedAtNullableSet?: boolean;
     };
 
-export type CardCtaPayload = { label: string; action: CardCtaAction };
+export type CardCtaEmphasis = "primary" | "outline" | "ghost";
+
+export type CardCtaPayload = {
+  label: string;
+  icon: LucideIcon;
+  emphasis: CardCtaEmphasis;
+  action: CardCtaAction;
+};
 
 export function getPrimaryCtaPayload(
   status: LibraryItemStatus
 ): CardCtaPayload {
   switch (status) {
     case "PLAYING":
-      return { label: "Log Session", action: { kind: "logSession" } };
+      return {
+        label: "Log Session",
+        icon: Plus,
+        emphasis: "primary",
+        action: { kind: "logSession" },
+      };
     case "UP_NEXT":
       return {
         label: "Start Playing",
+        icon: Play,
+        emphasis: "outline",
         action: {
           kind: "updateStatus",
           status: "PLAYING",
@@ -87,11 +70,15 @@ export function getPrimaryCtaPayload(
     case "SHELF":
       return {
         label: "Queue It",
+        icon: ListPlus,
+        emphasis: "outline",
         action: { kind: "updateStatus", status: "UP_NEXT" },
       };
     case "PLAYED":
       return {
         label: "Replay",
+        icon: RotateCcw,
+        emphasis: "ghost",
         action: {
           kind: "updateStatus",
           status: "UP_NEXT",
@@ -101,6 +88,8 @@ export function getPrimaryCtaPayload(
     case "WISHLIST":
       return {
         label: "Add to Shelf",
+        icon: Archive,
+        emphasis: "ghost",
         action: { kind: "updateStatus", status: "SHELF" },
       };
     default: {

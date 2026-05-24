@@ -8,11 +8,8 @@ import { Textarea } from "@/shared/ui/textarea";
 
 import type { ComposeJournalEntryFormProps } from "./compose-journal-entry-form.type";
 
-// FSD: feature/ui component invoking its own feature/api server fn directly
-// (no useServerFn) — mirrors the ComposeJournalEntryDialog precedent. This is
-// the full-page variant used by the `/journal/new` route (Slice 23 page
-// restore); the dialog variant lives alongside it for the game-detail
-// quick-compose surface.
+// Full-page variant used by the `/journal/new` route; the dialog variant
+// lives alongside it for the game-detail quick-compose surface.
 
 export function ComposeJournalEntryForm({
   defaultGameId,

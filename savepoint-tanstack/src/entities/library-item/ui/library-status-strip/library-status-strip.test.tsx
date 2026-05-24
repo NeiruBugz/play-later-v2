@@ -76,7 +76,6 @@ describe("LibraryStatusStrip", () => {
     });
 
     it("does not render a platform", () => {
-      // Verify no platform text appears alongside the status
       expect(elements.getStatusText("Playing")).toBeDefined();
       expect(screen.queryByText("PC")).toBeNull();
     });

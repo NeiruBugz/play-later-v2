@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { Download } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Download, Library, SearchX } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
@@ -18,11 +18,12 @@ import { LibraryItemCard } from "@/widgets/library-item-card";
 import type { LibraryPageProps } from "./library-page.type";
 
 /**
- * Compute per-status counts from the loaded items (the search-param
- * contract does not yet supply a `getStatusCounts` server fn — see
- * audit `context/audits/2026-05-18/visual-parity.md` § Library). The
- * counts shape mirrors `LibraryStatusCounts` so it can be passed
- * straight through to `LibraryFilters`.
+ * Fallback per-status counts derived from the loaded items. Used ONLY when the
+ * loader doesn't supply full-library `statusCounts` (older tests). This derives
+ * counts from the *filtered* page, so it goes stale the moment a status is
+ * selected — which is exactly why the real counts come from
+ * `getLibraryStatusCounts` (an unfiltered GROUP BY) via the loader. The counts
+ * shape mirrors `LibraryStatusCounts` so it passes straight to `LibraryFilters`.
  */
 function computeStatusCounts(
   items: ReadonlyArray<LibraryItemWithGame>
@@ -46,25 +47,43 @@ export function LibraryPage(props: LibraryPageProps) {
     total,
     status,
     platform,
+    acquisition,
+    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
     sortOrder,
     platforms,
+    statusCounts: statusCountsProp,
     onboarding,
   } = props;
 
-  // Host owns modal state (canonical pattern). One modal mounted at the
-  // page level; each card receives an onClick that selects its entry.
-  // Avoids N modals in the DOM and keeps the entity card display-only.
+  // One modal at the page level — see README "Host-owned modal state".
   const [selectedEntry, setSelectedEntry] =
     useState<LibraryItemWithGame | null>(null);
 
-  // Client-side title filter — keystroke-driven, no server roundtrip.
-  // The `/` keyboard hint focuses the input when pressed outside any
-  // other input.
+  const navigate = useNavigate();
+
+  // Client-side title filter, no server roundtrip. The `/` keyboard hint
+  // focuses the input when pressed outside any other input.
   const [titleQuery, setTitleQuery] = useState("");
   const filterInputRef = useRef<HTMLInputElement | null>(null);
+
+  // F10 — distinguish "library is genuinely empty" (first-run) from "filters
+  // exclude everything" (no-results). The latter gets a Clear-filters action
+  // instead of an onboarding pitch.
+  const serverFiltersActive = Boolean(
+    status ||
+    platform ||
+    acquisition ||
+    startedOnly ||
+    minRating !== undefined ||
+    unratedOnly === true
+  );
+  const clearFilters = () => {
+    setTitleQuery("");
+    navigate({ to: "/library", search: {} });
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -90,7 +109,13 @@ export function LibraryPage(props: LibraryPageProps) {
     return items.filter((item) => item.game.title.toLowerCase().includes(q));
   }, [items, titleQuery]);
 
-  const statusCounts = useMemo(() => computeStatusCounts(items), [items]);
+  // Loader counts cover the full library; the derived fallback only sees the
+  // (filtered) page, so it is used only when the prop is absent.
+  const derivedStatusCounts = useMemo(
+    () => computeStatusCounts(items),
+    [items]
+  );
+  const statusCounts = statusCountsProp ?? derivedStatusCounts;
 
   // Drop the `3 games` count chip from the header — canonical's `/library`
   // h1 reads just "Library". `total` remains in scope as an aria-live
@@ -111,7 +136,6 @@ export function LibraryPage(props: LibraryPageProps) {
         </Link>
       </header>
 
-      {/* Filter-by-title input with `/` keyboard hint. Client-side only. */}
       <div className="relative w-full">
         <Input
           ref={filterInputRef}
@@ -133,6 +157,8 @@ export function LibraryPage(props: LibraryPageProps) {
       <MobileFilterBar
         status={status}
         platform={platform}
+        acquisition={acquisition}
+        startedOnly={startedOnly}
         minRating={minRating}
         unratedOnly={unratedOnly}
         sortBy={sortBy}
@@ -144,6 +170,8 @@ export function LibraryPage(props: LibraryPageProps) {
         <LibraryFilters
           status={status}
           platform={platform}
+          acquisition={acquisition}
+          startedOnly={startedOnly}
           minRating={minRating}
           unratedOnly={unratedOnly}
           sortBy={sortBy}
@@ -154,21 +182,35 @@ export function LibraryPage(props: LibraryPageProps) {
 
         <div className="min-w-0 flex-1">
           {filteredItems.length === 0 ? (
-            // First-time hero only shows when the WHOLE library is empty
-            // (items.length === 0, not just the current filter). Filtered
-            // empty state still uses the generic EmptyState so users see
-            // "no matches" rather than the onboarding pitch.
-            onboarding && items.length === 0 ? (
-              <EmptyLibraryHero {...onboarding} />
+            items.length === 0 && !serverFiltersActive ? (
+              // First-run: the library is genuinely empty. The onboarding hero
+              // takes over when signals are present; otherwise the first-run
+              // template offers the two ways to populate a library.
+              onboarding ? (
+                <EmptyLibraryHero {...onboarding} />
+              ) : (
+                <EmptyState
+                  aria-label="Empty library"
+                  icon={Library}
+                  title="No games yet"
+                  description="Start your library by adding a game, or import your shelf from Steam."
+                  action={{ label: "Browse games", to: "/games/search" }}
+                  secondaryAction={{
+                    label: "Import from Steam",
+                    to: "/steam/games",
+                    variant: "outline",
+                  }}
+                />
+              )
             ) : (
+              // No-results: items exist but the active filters (server-side or
+              // the title query) exclude everything. Always offer Clear filters.
               <EmptyState
-                aria-label="Empty library"
-                title="No games yet"
-                description={
-                  items.length === 0
-                    ? "Your library is empty. Import from Steam or add games manually to get started."
-                    : "No games match this filter."
-                }
+                aria-label="No games match filters"
+                icon={SearchX}
+                title="Nothing matches these filters"
+                description="No games in your library match the current filters."
+                action={{ label: "Clear filters", onClick: clearFilters }}
               />
             )
           ) : (

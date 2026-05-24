@@ -16,22 +16,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CommandPalette } from "@/features/command-palette/ui/command-palette";
 
-// ---------------------------------------------------------------------------
-// Mock: useMediaQuery — controls desktop vs. mobile sheet branch.
-// Default to desktop (true) so existing tests keep working; override to
-// false in mobile-specific describe blocks.
-// ---------------------------------------------------------------------------
-
+// Default to desktop (true); override to false in mobile-specific describe blocks.
 let mockIsDesktop = true;
 
 vi.mock("../../hooks/use-media-query", () => ({
   useMediaQuery: () => mockIsDesktop,
 }));
-
-// ---------------------------------------------------------------------------
-// Mock: @tanstack/react-router — Link resolves to a plain <a> with the
-// interpolated href so href assertions work without a RouterProvider.
-// ---------------------------------------------------------------------------
 
 const mockNavigate = vi.fn();
 
@@ -64,23 +54,11 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
-// ---------------------------------------------------------------------------
-// Mock: @/features/search-games (foot-gun #8: never cross the real
-// createServerFn boundary in vitest).
-// ---------------------------------------------------------------------------
-
 const mockSearchGamesFn = vi.fn();
 
 vi.mock("@/entities/game", () => ({
   searchGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),
 }));
-
-// ---------------------------------------------------------------------------
-// Mock: the palette's own quick-add server fns (foot-gun #8 — these wrap
-// createServerFn and transitively import server-only auth/env, which crashes
-// the jsdom unit env). Quick-add behaviour itself is covered by
-// game-result-item.test.tsx.
-// ---------------------------------------------------------------------------
 
 vi.mock("../../api/quick-add-to-library-fn", () => ({
   quickAddToLibraryFn: vi.fn(),
@@ -89,10 +67,6 @@ vi.mock("../../api/quick-add-to-library-fn", () => ({
 vi.mock("../../api/remove-library-item-fn", () => ({
   removeLibraryItemFn: vi.fn(),
 }));
-
-// ---------------------------------------------------------------------------
-// Element vocabulary
-// ---------------------------------------------------------------------------
 
 const elements = {
   // cmdk's CommandInput renders role="combobox"; the accessible name comes from
@@ -104,18 +78,10 @@ const elements = {
   getResultByName: (name: string) => screen.getByText(name),
 };
 
-// ---------------------------------------------------------------------------
-// Action vocabulary
-// ---------------------------------------------------------------------------
-
 const actions = {
   pressMetaK: () => userEvent.keyboard("{Meta>}k{/Meta}"),
   pressCtrlK: () => userEvent.keyboard("{Control>}k{/Control}"),
 };
-
-// ---------------------------------------------------------------------------
-// Suite
-// ---------------------------------------------------------------------------
 
 describe("CommandPalette", () => {
   beforeEach(() => {
@@ -313,9 +279,7 @@ describe("CommandPalette", () => {
     beforeEach(async () => {
       render(<CommandPalette />);
       await user.keyboard("{Meta>}k{/Meta}");
-      // Confirm it opened
       expect(elements.querySearchInput()).not.toBeNull();
-      // Press Escape to close
       await user.keyboard("{Escape}");
     });
 
@@ -363,7 +327,6 @@ describe("CommandPalette", () => {
     });
 
     it("does not navigate away (focuses the search input instead)", () => {
-      // The onFocusSearch callback focuses the input; navigate should not be called.
       expect(mockNavigate).not.toHaveBeenCalled();
     });
   });

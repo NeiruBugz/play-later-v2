@@ -81,7 +81,6 @@ vi.mock("@tanstack/react-router-devtools", () => ({
   TanStackRouterDevtoolsPanel: () => null,
 }));
 
-// CSS import stub
 vi.mock("../styles.css?url", () => ({ default: "" }));
 
 describe("_authed route", () => {

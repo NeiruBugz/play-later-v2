@@ -8,10 +8,8 @@ import { Textarea } from "@/shared/ui/textarea";
 
 import type { EditJournalEntryFormProps } from "./edit-journal-entry-form.type";
 
-// FSD: feature/ui component invoking its own feature/api server fn directly
-// (no useServerFn) — mirrors the EditJournalEntryDialog precedent. This is the
-// full-page variant used by the `/journal/$id/edit` route (Slice 23 page
-// restore).
+// Full-page variant used by the `/journal/$id/edit` route; the dialog variant
+// lives alongside it for the game-detail surface.
 
 export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
   const navigate = useNavigate();

@@ -172,12 +172,10 @@ describe(IgdbManualSearch, () => {
       );
 
       const { unmount } = render(<IgdbManualSearch onSelect={vi.fn()} />);
-      // Start a search by typing ≥3 chars and advancing past the debounce.
       await userEvent.type(elements.getInput(), "hal");
       act(() => {
         vi.advanceTimersByTime(400);
       });
-      // Search is now in-flight. Unmount before it resolves.
       unmount();
       // Resolve after unmount — cancelled guard fires.
       act(() => {

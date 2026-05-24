@@ -1,67 +1,23 @@
-/**
- * RED component test for UnfollowUserButton (Slice 20 — social graph).
- *
- * This file is intentionally failing at module resolution:
- * `./unfollow-user-button` does not exist yet — the component is created in
- * the GREEN step (tasks.md line 405). Do NOT implement the component here.
- *
- * `../../api/unfollow-user-fn` also does not exist — RED import.
- *
- * =========================================================================
- * Contracts locked by this test
- * =========================================================================
- *
- * Component export:
- *   `UnfollowUserButton` — named export from `./unfollow-user-button`
- *
- * Props (locked):
- *   profileUserId:   string        — the user being unfollowed
- *   profileUsername: string        — display username for accessible label
- *   viewerUserId:    string | null — the signed-in viewer (null = anonymous)
- *   isFollowing:     boolean       — current follow state (parent-computed)
- *
- * Render contract (locked):
- *   - own-profile view (viewerUserId === profileUserId): returns null — no button rendered
- *   - not-following view (isFollowing === false, non-self): returns null — FollowUserButton owns that state
- *   - following view (isFollowing === true, non-self): renders <button name="Unfollow @alice">
- *   - anonymous viewer (viewerUserId === null): returns null — no button rendered
- *
- * Server-fn call contract (locked):
- *   - clicking the Unfollow button calls unfollowUserFn({ data: { targetUserId: profileUserId } })
- *
- * Accessible name (locked):
- *   `"Unfollow @<username>"` — exact string, no regex.
- */
-
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// RED import — this module does not exist until the GREEN step.
 import { unfollowUserFn } from "../../api/unfollow-user-fn";
-// RED import — this module does not exist until the GREEN step.
 import { UnfollowUserButton } from "./unfollow-user-button";
 
-// --- Server fn mock (mirrors add-game-modal precedent) ---------------------
 vi.mock("../../api/unfollow-user-fn", () => ({
   unfollowUserFn: vi.fn(),
 }));
 
-// --- Sonner mock -----------------------------------------------------------
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-// --- Router mock (mirrors add-game-modal precedent) ------------------------
 const invalidateMock = vi.fn();
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: invalidateMock }),
 }));
-
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
 
 const VIEWER_ID = "viewer-user-abc";
 const PROFILE_ID = "profile-user-xyz";
@@ -74,10 +30,6 @@ const baseProps = {
   isFollowing: true,
 };
 
-// ---------------------------------------------------------------------------
-// Element vocabulary
-// ---------------------------------------------------------------------------
-
 const elements = {
   queryUnfollowButton: () =>
     screen.queryByRole("button", { name: `Unfollow @${PROFILE_USERNAME}` }),
@@ -85,24 +37,14 @@ const elements = {
     screen.getByRole("button", { name: `Unfollow @${PROFILE_USERNAME}` }),
 };
 
-// ---------------------------------------------------------------------------
-// Action vocabulary
-// ---------------------------------------------------------------------------
-
 const actions = {
   clickUnfollow: () => userEvent.click(elements.getUnfollowButton()),
 };
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("UnfollowUserButton", () => {
   beforeEach(() => {
     vi.mocked(unfollowUserFn).mockReset();
   });
-
-  // ---- Own-profile: button hidden -------------------------------------------
 
   describe("given viewerUserId equals profileUserId (own-profile view)", () => {
     beforeEach(() => {
@@ -126,8 +68,6 @@ describe("UnfollowUserButton", () => {
     });
   });
 
-  // ---- Anonymous viewer: button hidden --------------------------------------
-
   describe("given viewerUserId is null (anonymous viewer)", () => {
     beforeEach(() => {
       render(
@@ -144,8 +84,6 @@ describe("UnfollowUserButton", () => {
     });
   });
 
-  // ---- Not following: button hidden (FollowUserButton owns this state) ------
-
   describe("given isFollowing is false", () => {
     beforeEach(() => {
       render(<UnfollowUserButton {...baseProps} isFollowing={false} />);
@@ -156,8 +94,6 @@ describe("UnfollowUserButton", () => {
     });
   });
 
-  // ---- Following: Unfollow button shown -------------------------------------
-
   describe("given isFollowing is true and viewer is not the profile owner", () => {
     beforeEach(() => {
       render(<UnfollowUserButton {...baseProps} isFollowing={true} />);
@@ -167,8 +103,6 @@ describe("UnfollowUserButton", () => {
       expect(elements.queryUnfollowButton()).not.toBeNull();
     });
   });
-
-  // ---- Click fires unfollowUserFn with { data: { targetUserId } } ----------
 
   describe("given the Unfollow button is rendered and the user clicks it", () => {
     beforeEach(async () => {
@@ -203,8 +137,6 @@ describe("UnfollowUserButton", () => {
       });
     });
   });
-
-  // ---- Click rejects → toast.error with err.message ------------------------
 
   describe("given unfollowUserFn rejects with an Error", () => {
     beforeEach(async () => {

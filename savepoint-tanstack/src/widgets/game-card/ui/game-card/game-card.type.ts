@@ -21,4 +21,6 @@ export interface GameCardProps
   children?: ReactNode;
   badges?: ReactNode;
   overlay?: ReactNode;
+  coverAccentClassName?: string;
+  titleClassName?: string;
 }

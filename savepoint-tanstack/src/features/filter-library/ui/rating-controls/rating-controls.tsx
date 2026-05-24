@@ -1,5 +1,9 @@
 import { X } from "lucide-react";
 
+import {
+  ratingStarsToStorage,
+  ratingStorageToStars,
+} from "@/shared/lib/rating";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import { RatingInput } from "@/shared/ui/rating-input";
@@ -21,10 +25,16 @@ export function RatingControls({
       </p>
       <div className="gap-sm flex items-center">
         <Label className="text-sm font-medium">Minimum rating</Label>
+        {/* `minRating` is in stars (the URL/user unit); RatingInput speaks the
+            1–10 storage int internally, so convert across this boundary. */}
         <RatingInput
-          value={minRating ?? null}
+          value={minRating != null ? ratingStarsToStorage(minRating) : null}
           readOnly={false}
-          onChange={onMinRatingChange}
+          onChange={(storage) =>
+            onMinRatingChange(
+              storage === null ? null : ratingStorageToStars(storage)
+            )
+          }
           size="sm"
           aria-label="Minimum rating filter"
         />

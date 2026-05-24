@@ -20,7 +20,6 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   return (
     <div className="dark bg-background text-foreground relative flex min-h-screen flex-col overflow-hidden">
-      {/* Ambient violet glow */}
       <div
         aria-hidden="true"
         className="bg-primary/20 pointer-events-none absolute -top-32 -left-24 h-[480px] w-[480px] rounded-full blur-3xl"
