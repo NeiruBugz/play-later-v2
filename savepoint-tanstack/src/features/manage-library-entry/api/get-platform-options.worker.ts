@@ -1,4 +1,4 @@
-import { getGamePlatforms } from "@/entities/game/api";
+import { getGamePlatforms } from "@/entities/game/api/get-game-platforms.server";
 import { getUniqueLibraryPlatforms } from "@/entities/library-item/api/get-unique-platforms.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
