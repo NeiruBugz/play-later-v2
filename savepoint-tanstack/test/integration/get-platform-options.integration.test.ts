@@ -1,9 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import {
-  DEFAULT_PLATFORMS,
-  getPlatformOptionsWorker,
-} from "@/features/manage-library-entry/api/get-platform-options.worker";
+import { getPlatformOptionsWorker } from "@/features/manage-library-entry/api/get-platform-options.worker";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 import {
@@ -113,36 +110,48 @@ describe("getPlatformOptionsWorker", () => {
       await logPlatform("plat-user-union", other.id, "PlayStation 5");
     });
 
-    it("returns the union of IGDB platforms and the user's logged platforms, deduped and sorted", async () => {
+    it("groups the game's IGDB platforms separately from the user's other logged platforms", async () => {
       const result = await getPlatformOptionsWorker("plat-user-union", {
         gameId: "plat-game-subject",
       });
 
-      expect(result).toEqual(["Nintendo Switch", "PC", "PlayStation 5"]);
+      expect(result).toEqual([
+        { label: "This game", platforms: ["Nintendo Switch", "PC"] },
+        { label: "Your platforms", platforms: ["PlayStation 5"] },
+      ]);
     });
   });
 
-  describe("given a game with no stored IGDB platforms", () => {
+  describe("given a game with no stored IGDB platforms but the user has logged platforms", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("fallback") });
       const subject = await makeGame("fallback");
       await logPlatform("plat-user-fallback", subject.id, "Steam Deck");
     });
 
-    it("returns DEFAULT_PLATFORMS unioned with the user's logged platforms", async () => {
+    it("returns only the user's logged platforms (no Common platforms group)", async () => {
       const result = await getPlatformOptionsWorker("plat-user-fallback", {
         gameId: "plat-game-fallback",
       });
 
-      const expected = Array.from(
-        new Set([...DEFAULT_PLATFORMS, "Steam Deck"])
-      ).sort((a, b) => a.localeCompare(b));
+      expect(result).toEqual([
+        { label: "Your platforms", platforms: ["Steam Deck"] },
+      ]);
+    });
+  });
 
-      expect(result).toEqual(expected);
-      expect(result).toContain("Steam Deck");
-      for (const platform of DEFAULT_PLATFORMS) {
-        expect(result).toContain(platform);
-      }
+  describe("given a game with no IGDB platforms and the user has logged none", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("empty") });
+      await makeGame("empty");
+    });
+
+    it("returns an empty array", async () => {
+      const result = await getPlatformOptionsWorker("plat-user-empty", {
+        gameId: "plat-game-empty",
+      });
+
+      expect(result).toEqual([]);
     });
   });
 

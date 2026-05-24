@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
@@ -22,12 +22,12 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 
+import { getPlatformOptionsFn } from "../../api/get-platform-options";
+import { type PlatformOptions } from "../../api/get-platform-options.constants";
+import { searchPlatformsFn } from "../../api/search-platforms-fn";
 import { DeleteConfirm } from "./delete-confirm";
-import {
-  PLATFORM_OPTIONS,
-  STATUS_VALUES,
-  useLibraryModalForm,
-} from "./library-modal.utility";
+import { STATUS_VALUES, useLibraryModalForm } from "./library-modal.utility";
+import { PlatformCombobox } from "./platform-combobox";
 
 type LibraryModalProps = {
   entry: LibraryItemWithGame;
@@ -38,6 +38,21 @@ type LibraryModalProps = {
 export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
   const onClose = () => onOpenChange(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [platformOptions, setPlatformOptions] = useState<PlatformOptions>([]);
+
+  useEffect(() => {
+    let active = true;
+    getPlatformOptionsFn({ data: { gameId: entry.game.id } })
+      .then((opts) => {
+        if (active) setPlatformOptions(opts);
+      })
+      .catch(() => {
+        /* keep the default fallback list */
+      });
+    return () => {
+      active = false;
+    };
+  }, [entry.game.id]);
 
   const {
     status,
@@ -98,30 +113,12 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
 
             <div className="gap-xs flex flex-col text-sm">
               <span id="library-modal-platform-label">Platform</span>
-              <Select
-                value={platform === "" ? "__none__" : platform}
-                onValueChange={(next) =>
-                  setPlatform(next === "__none__" ? "" : next)
-                }
-              >
-                <SelectTrigger
-                  aria-label="Platform"
-                  aria-labelledby="library-modal-platform-label"
-                >
-                  <SelectValue placeholder="Select platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">No platform</SelectItem>
-                  {PLATFORM_OPTIONS.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p}
-                    </SelectItem>
-                  ))}
-                  {platform !== "" && !PLATFORM_OPTIONS.includes(platform) ? (
-                    <SelectItem value={platform}>{platform}</SelectItem>
-                  ) : null}
-                </SelectContent>
-              </Select>
+              <PlatformCombobox
+                value={platform}
+                groups={platformOptions}
+                onChange={setPlatform}
+                searchRemote={(q) => searchPlatformsFn({ data: { query: q } })}
+              />
             </div>
 
             <div className="gap-xs flex flex-col text-sm">

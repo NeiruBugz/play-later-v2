@@ -31,6 +31,16 @@ vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-library-entry/api/get-platform-options", () => ({
+  getPlatformOptionsFn: vi.fn(() =>
+    Promise.resolve([{ label: "This game", platforms: ["PC"] }])
+  ),
+}));
+
+vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
+  searchPlatformsFn: vi.fn(() => Promise.resolve([])),
+}));
+
 vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));

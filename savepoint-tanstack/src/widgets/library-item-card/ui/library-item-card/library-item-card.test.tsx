@@ -124,11 +124,11 @@ describe("LibraryItemCard", () => {
       render(<LibraryItemCard item={buildItem({ coverImage: "co9wzc" })} />);
     });
 
-    it("builds a full IGDB URL at t_cover_big with the 'Cover for' alt prefix", () => {
+    it("builds a full IGDB URL at t_720p with the 'Cover for' alt prefix", () => {
       const img = elements.queryCoverImage("Hollow Knight");
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toBe(
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg"
+        "https://images.igdb.com/igdb/image/upload/t_720p/co9wzc.jpg"
       );
     });
   });
@@ -145,11 +145,11 @@ describe("LibraryItemCard", () => {
       );
     });
 
-    it("upgrades the size segment from t_thumb to t_cover_big", () => {
+    it("upgrades the size segment from t_thumb to t_720p", () => {
       const img = elements.queryCoverImage("Hollow Knight");
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toBe(
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg"
+        "https://images.igdb.com/igdb/image/upload/t_720p/co1234.jpg"
       );
     });
   });

@@ -1,36 +1,33 @@
-import { z } from "zod";
-
 import { getGamePlatforms } from "@/entities/game/api";
 import { getUniqueLibraryPlatforms } from "@/entities/library-item/api/get-unique-platforms.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
-export const GET_PLATFORM_OPTIONS_INPUT = z.object({
-  gameId: z.string().min(1),
-});
+import {
+  GET_PLATFORM_OPTIONS_INPUT,
+  PLATFORM_GROUP_LABELS,
+  type PlatformOptions,
+} from "./get-platform-options.constants";
+
+export { GET_PLATFORM_OPTIONS_INPUT } from "./get-platform-options.constants";
+
+const sortUnique = (platforms: string[]): string[] =>
+  Array.from(new Set(platforms)).sort((a, b) => a.localeCompare(b));
 
 /**
- * Default platform list shown when a game has no stored IGDB platform data.
- * Single source of truth for the modal's fallback option set.
- */
-export const DEFAULT_PLATFORMS = [
-  "PC",
-  "PlayStation 5",
-  "PlayStation 4",
-  "Xbox Series X|S",
-  "Xbox One",
-  "Nintendo Switch",
-] as const;
-
-/**
- * Platform options for the library modal's Platform dropdown:
- * the game's stored IGDB platforms ∪ the user's distinct logged platforms,
- * falling back to (DEFAULT_PLATFORMS ∪ the user's logged platforms) when the
- * game has no IGDB platform data. De-duplicated and sorted (localeCompare).
+ * Platform options for the library modal's Platform combobox, grouped by
+ * provenance so the UI can visually separate them:
+ *  - "This game": the game's stored IGDB platforms (if any),
+ *  - "Your platforms": the user's distinct logged platforms not already in
+ *    the first group (if any).
+ * Each group is de-duplicated and sorted (localeCompare); empty groups are
+ * omitted. The result may be an empty array when the game has no IGDB
+ * platforms and the user has logged none — the combobox still lets the user
+ * type and add any platform.
  */
 export async function getPlatformOptionsWorker(
   userId: string | undefined,
   data: unknown
-): Promise<string[]> {
+): Promise<PlatformOptions> {
   if (!userId) throw new UnauthorizedError("Sign in required");
 
   const { gameId } = GET_PLATFORM_OPTIONS_INPUT.parse(data);
@@ -40,9 +37,21 @@ export async function getPlatformOptionsWorker(
     getUniqueLibraryPlatforms(userId),
   ]);
 
-  const base = igdb.length > 0 ? igdb : [...DEFAULT_PLATFORMS];
+  const groups: PlatformOptions = [];
 
-  return Array.from(new Set([...base, ...mine])).sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const gamePlatforms = sortUnique(igdb);
+  if (gamePlatforms.length > 0) {
+    groups.push({
+      label: PLATFORM_GROUP_LABELS.game,
+      platforms: gamePlatforms,
+    });
+  }
+
+  const alreadyListed = new Set(gamePlatforms);
+  const userOnly = sortUnique(mine.filter((p) => !alreadyListed.has(p)));
+  if (userOnly.length > 0) {
+    groups.push({ label: PLATFORM_GROUP_LABELS.user, platforms: userOnly });
+  }
+
+  return groups;
 }

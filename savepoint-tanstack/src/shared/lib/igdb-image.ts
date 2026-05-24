@@ -23,7 +23,7 @@ export const IGDB_COVER_DIMENSIONS: Record<
 
 export function buildCoverImageUrl(
   coverImage: string | null | undefined,
-  size: IgdbCoverSize = "t_cover_big"
+  size: IgdbCoverSize = "t_720p"
 ): string | null {
   if (!coverImage) return null;
   if (IGDB_SIZE_SEGMENT_RE.test(coverImage)) {

@@ -19,6 +19,7 @@ import type { LibraryItemWithGame } from "@/entities/library-item/api";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
+import { getPlatformOptionsFn } from "../../api/get-platform-options";
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
 import { LibraryModal } from "./library-modal";
 
@@ -42,6 +43,19 @@ vi.mock("../../api/update-library-item-fn", () => ({
 vi.mock("../../api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
 }));
+
+vi.mock("../../api/get-platform-options", () => ({
+  getPlatformOptionsFn: vi.fn(),
+}));
+
+vi.mock("../../api/search-platforms-fn", () => ({
+  searchPlatformsFn: vi.fn(() => Promise.resolve([])),
+}));
+
+const PLATFORM_OPTIONS_RESULT = [
+  { label: "This game", platforms: ["PC", "Switch"] },
+  { label: "Your platforms", platforms: ["Steam Deck"] },
+];
 
 const STUB_ENTRY: LibraryItemWithGame = {
   id: 42,
@@ -77,7 +91,7 @@ const defaultProps = {
 
 const elements = {
   getStatusCombobox: () => screen.getByRole("combobox", { name: "Status" }),
-  getPlatformCombobox: () => screen.getByRole("combobox", { name: "Platform" }),
+  getPlatformCombobox: () => screen.getByRole("button", { name: "Platform" }),
   getRatingInput: () => screen.getByRole("slider", { name: "Rating" }),
   getStartedTrigger: () => screen.getByRole("button", { name: "Started" }),
   getCompletedTrigger: () => screen.getByRole("button", { name: "Completed" }),
@@ -109,6 +123,7 @@ const elements = {
 const actions = {
   clickSave: () => userEvent.click(elements.getSaveButton()),
   clickMarkComplete: () => userEvent.click(elements.getMarkCompleteButton()),
+  openPlatformSelect: () => userEvent.click(elements.getPlatformCombobox()),
   pickStartedDay: async (dayOfMonth: string) => {
     await userEvent.click(elements.getStartedTrigger());
     await userEvent.click(elements.getCalendarDayButton(dayOfMonth));
@@ -126,6 +141,8 @@ describe("LibraryModal", () => {
   beforeEach(() => {
     vi.mocked(updateLibraryItemFn).mockReset();
     vi.mocked(deleteLibraryItemFn).mockReset();
+    vi.mocked(getPlatformOptionsFn).mockReset();
+    vi.mocked(getPlatformOptionsFn).mockResolvedValue(PLATFORM_OPTIONS_RESULT);
     onOpenChange.mockReset();
     vi.mocked(toast.success).mockReset();
     vi.mocked(toast.error).mockReset();
@@ -461,8 +478,47 @@ describe("LibraryModal", () => {
       );
     });
 
-    it("renders the custom platform option in the platform selector", () => {
-      expect(screen.getAllByText("Atari Jaguar").length).toBeGreaterThan(0);
+    it("renders the custom platform option in the platform selector", async () => {
+      expect(
+        (await screen.findAllByText("Atari Jaguar")).length
+      ).toBeGreaterThan(0);
+    });
+  });
+
+  describe("given the platform options resolve from the server", () => {
+    beforeEach(() => {
+      render(<LibraryModal {...defaultProps} />);
+    });
+
+    it("requests platform options for the entry's game id", async () => {
+      await waitFor(() => {
+        expect(vi.mocked(getPlatformOptionsFn)).toHaveBeenCalledWith({
+          data: { gameId: STUB_ENTRY.game.id },
+        });
+      });
+    });
+
+    it("renders a returned platform option in the platform selector", async () => {
+      await waitFor(() =>
+        expect(vi.mocked(getPlatformOptionsFn)).toHaveBeenCalled()
+      );
+      await actions.openPlatformSelect();
+      expect((await screen.findAllByText("Switch")).length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("given the platform select is opened", () => {
+    beforeEach(async () => {
+      render(<LibraryModal {...defaultProps} />);
+      await waitFor(() =>
+        expect(vi.mocked(getPlatformOptionsFn)).toHaveBeenCalled()
+      );
+      await actions.openPlatformSelect();
+    });
+
+    it("separates the game's platforms from the user's under section headings", async () => {
+      expect(await screen.findByText("This game")).toBeInTheDocument();
+      expect(screen.getByText("Your platforms")).toBeInTheDocument();
     });
   });
 

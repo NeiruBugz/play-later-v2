@@ -60,11 +60,11 @@ describe("GameCard", () => {
       expect(elements.getTitle()).toBeDefined();
     });
 
-    it("renders a cover <img> with a full IGDB URL at t_cover_big", () => {
+    it("renders a cover <img> with a full IGDB URL at t_720p", () => {
       const img = elements.queryCover();
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toBe(
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg"
+        "https://images.igdb.com/igdb/image/upload/t_720p/co9wzc.jpg"
       );
     });
 
