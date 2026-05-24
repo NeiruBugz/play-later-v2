@@ -11,9 +11,9 @@ describe("buildCoverImageUrl", () => {
     expect(buildCoverImageUrl(undefined)).toBeNull();
   });
 
-  it("builds a full IGDB URL from a bare imageId at t_cover_big by default", () => {
+  it("builds a full IGDB URL from a bare imageId at t_720p by default", () => {
     expect(buildCoverImageUrl("co9wzc")).toBe(
-      "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg"
+      "https://images.igdb.com/igdb/image/upload/t_720p/co9wzc.jpg"
     );
   });
 
@@ -23,12 +23,12 @@ describe("buildCoverImageUrl", () => {
     );
   });
 
-  it("upgrades an IGDB t_thumb URL to t_cover_big by default", () => {
+  it("upgrades an IGDB t_thumb URL to t_720p by default", () => {
     expect(
       buildCoverImageUrl(
         "https://images.igdb.com/igdb/image/upload/t_thumb/co1.jpg"
       )
-    ).toBe("https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg");
+    ).toBe("https://images.igdb.com/igdb/image/upload/t_720p/co1.jpg");
   });
 
   it("honors the size argument when upgrading a URL", () => {

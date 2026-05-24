@@ -17,7 +17,6 @@ const mockCheckUsernameFn = vi.fn();
 
 vi.mock("../api/update-profile", () => ({
   checkUsernameFn: (...args: unknown[]) => mockCheckUsernameFn(...args),
-  // Other exports from update-profile are not needed by this hook.
 }));
 
 describe("useUsernameValidation", () => {

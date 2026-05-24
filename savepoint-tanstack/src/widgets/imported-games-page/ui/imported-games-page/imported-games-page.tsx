@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type { ImportedGame } from "@/entities/imported-game/model/types";
-// Import server fns from their individual module paths (not the feature
-// barrel) so component tests can mock each module without dragging the
-// rest of the feature's server chain into the jsdom env.
+// Server fns are imported from individual module paths (not the feature barrel)
+// so component tests can mock each module without dragging the rest of the
+// feature's server chain into the jsdom env.
 import { dismissImportedGameFn } from "@/features/steam-import/api/dismiss-imported-game";
 import { importSteamLibraryFn } from "@/features/steam-import/api/import-steam-library";
 import {
@@ -48,9 +48,8 @@ export function ImportedGamesPage({
   includeIgnored = false,
   filters = {},
 }: ImportedGamesPageProps) {
-  // "Filtered" = any URL search-param state is active. Used to differentiate
-  // the no-matches empty state from the onboarding empty states (locked
-  // decision 8: only render no-matches when items.length > 0 — here
+  // Distinguishes the no-matches empty state from the onboarding empty states
+  // (decision 8: only render no-matches when items.length > 0 — here
   // items.length is the filtered result, so we infer it from `filters`).
   const hasActiveFilters =
     includeIgnored ||
@@ -68,15 +67,12 @@ export function ImportedGamesPage({
   } | null>(null);
 
   const sortedGames = useMemo(() => {
-    // Order: MATCHED → PENDING/UNMATCHED → IGNORED (bottom).
-    return [...games].sort((a, b) => {
-      const order = (g: ImportedGame) => {
-        if (g.igdbMatchStatus === "MATCHED") return 0;
-        if (g.igdbMatchStatus === "IGNORED") return 2;
-        return 1;
-      };
-      return order(a) - order(b);
-    });
+    const matchStatusOrder = (g: ImportedGame) => {
+      if (g.igdbMatchStatus === "MATCHED") return 0;
+      if (g.igdbMatchStatus === "IGNORED") return 2;
+      return 1;
+    };
+    return [...games].sort((a, b) => matchStatusOrder(a) - matchStatusOrder(b));
   }, [games]);
 
   const hasUnmatched = sortedGames.some(
@@ -113,10 +109,9 @@ export function ImportedGamesPage({
     }
   };
 
-  // --- Empty states ---------------------------------------------------------
   if (sortedGames.length === 0) {
-    // No-matches branch: filters are active but the server returned zero rows.
-    // Keep the filter bar visible so the user can refine without re-navigating.
+    // Filters active but the server returned zero rows: keep the filter bar
+    // visible so the user can refine without re-navigating.
     if (hasActiveFilters) {
       return (
         <div className="space-y-4" data-testid="imported-games-page">
@@ -127,7 +122,12 @@ export function ImportedGamesPage({
           <EmptyState
             icon={Gamepad2}
             title="No matches"
-            description="No imported games match your current filters. Try clearing one."
+            description="No imported games match your current filters."
+            action={{
+              label: "Clear filters",
+              to: "/steam/games",
+              search: {},
+            }}
           />
         </div>
       );
@@ -161,7 +161,6 @@ export function ImportedGamesPage({
     );
   }
 
-  // --- Populated ------------------------------------------------------------
   return (
     <div className="space-y-4" data-testid="imported-games-page">
       <ImportedGamesFilterBar

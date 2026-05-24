@@ -96,7 +96,6 @@ describe("UsernameInput", () => {
         <ControlledUsernameInput initialValue="" currentUsername="oldhandle" />
       );
 
-      // Type a new value to trigger the validation hook.
       await actions.typeValue("newhandle");
 
       // Advance past the USERNAME_VALIDATION_DEBOUNCE_MS (500ms) inside act

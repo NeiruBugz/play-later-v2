@@ -15,8 +15,6 @@ import {
 
 import type { DeleteJournalEntryDialogProps } from "./delete-journal-entry-dialog.type";
 
-// FSD: feature/ui component invoking its own feature/api server fn directly.
-
 export function DeleteJournalEntryDialog({
   open,
   onOpenChange,

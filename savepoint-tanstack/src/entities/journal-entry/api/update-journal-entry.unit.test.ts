@@ -55,7 +55,6 @@ describe("updateJournalEntry — Prisma error mapping", () => {
   beforeEach(() => {
     mockedFindUnique.mockReset();
     mockedUpdate.mockReset();
-    // Default: entry exists and is owned by the caller.
     mockedFindUnique.mockResolvedValue(STUB_ENTRY as never);
   });
 

@@ -29,12 +29,8 @@ import { PaletteNavigationGroup } from "../palette-navigation-group";
 import { PaletteQuickActionsGroup } from "../palette-quick-actions-group";
 import type { CommandPaletteProps } from "./command-palette.type";
 
-// Global ⌘K / Ctrl+K palette. Mounted once at the app root.
-// At <768px we render the same Command body inside a bottom-sheet (canonical
-// MobileCommandPalette). At md+ we render a centered Dialog.
 // Divergence vs. canonical: no recent-games empty state (see
-// DIVERGENCES.md → Slice 17). Quick-add ("Add to Up Next") is live on each
-// game result row — see ui/game-result-item.
+// DIVERGENCES.md → Slice 17).
 export function CommandPalette({
   open: openProp,
   onOpenChange,

@@ -8,8 +8,6 @@ import { dismissImportedGameFn } from "@/features/steam-import";
 
 import { ImportedGamesPage } from "./imported-games-page";
 
-// --- Mocks ----------------------------------------------------------------
-
 // Mock every server-fn module the widget transitively imports — their deps
 // reach `entities/session/api/get-session.server.ts` which the t3-env
 // client guard refuses to load in jsdom.
@@ -51,8 +49,6 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-// --- Fixtures -------------------------------------------------------------
-
 function makeGame(
   overrides: Partial<ImportedGame> & Pick<ImportedGame, "id" | "name">
 ): ImportedGame {
@@ -86,8 +82,6 @@ const pending = makeGame({
   name: "Pending Game",
   igdbMatchStatus: "PENDING",
 });
-
-// --- Element / action vocabulary ------------------------------------------
 
 const elements = {
   queryEmptyConnect: () =>
@@ -139,8 +133,6 @@ function readLastNavigatePatch(): Record<string, unknown> {
   }
   return (searchArg as Record<string, unknown>) ?? {};
 }
-
-// --- Tests ----------------------------------------------------------------
 
 describe("ImportedGamesPage", () => {
   beforeEach(() => {
@@ -248,7 +240,6 @@ describe("ImportedGamesPage", () => {
     });
   });
 
-  // --- Filter / sort / search bar ----------------------------------------
   describe("given the filter bar is rendered with populated games", () => {
     beforeEach(() => {
       render(
@@ -340,6 +331,10 @@ describe("ImportedGamesPage", () => {
 
     it("still renders the filter bar so the user can refine", () => {
       expect(elements.getSearchInput()).toBeTruthy();
+    });
+
+    it("offers a Clear filters action (no-results template always can clear)", () => {
+      expect(screen.getByText("Clear filters")).toBeInTheDocument();
     });
   });
 });

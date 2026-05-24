@@ -33,8 +33,6 @@ const GET_JOURNAL_ENTRY_INPUT = z.object({
 export const getJournalEntryPageDataFn = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => GET_JOURNAL_ENTRY_INPUT.parse(data))
   .handler(async ({ data }): Promise<JournalTimelineEntry> => {
-    // Validate twice: inputValidator runs only on cross-network calls;
-    // programmatic callers (route loaders) bypass it.
     const { entryId } = GET_JOURNAL_ENTRY_INPUT.parse(data);
 
     const userId = await requireUserId();

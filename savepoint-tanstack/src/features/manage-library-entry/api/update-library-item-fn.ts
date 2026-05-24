@@ -36,13 +36,7 @@ const UPDATE_LIBRARY_ITEM_INPUT = z.object({
 export const updateLibraryItemFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UPDATE_LIBRARY_ITEM_INPUT.parse(data))
   .handler(async ({ data }): Promise<LibraryItem> => {
-    // Auth gate first: unauthenticated callers get `UnauthorizedError`
-    // before any Zod parsing (matches `addGameToLibraryFn` / `connectSteamFn`).
     const userId = await requireUserId();
-
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it. See
-    // CLAUDE.md "Validate twice".
     const parsed = UPDATE_LIBRARY_ITEM_INPUT.parse(data);
     const { itemId, ...input } = parsed;
 

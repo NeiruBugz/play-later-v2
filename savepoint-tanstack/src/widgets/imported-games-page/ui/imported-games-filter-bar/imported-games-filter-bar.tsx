@@ -52,9 +52,8 @@ export function ImportedGamesFilterBar({
 }: ImportedGamesFilterBarProps) {
   const navigate = useNavigate({ from: "/steam/games" });
 
-  // Local input state for the search box — committed on Enter / blur so we
-  // don't navigate on every keystroke. Re-syncs when the URL changes (e.g.
-  // chip-removal).
+  // Committed on Enter / blur so we don't navigate on every keystroke;
+  // re-synced when the URL changes (e.g. chip-removal).
   const [searchValue, setSearchValue] = useState(filters.q ?? "");
   useEffect(() => {
     setSearchValue(filters.q ?? "");
@@ -75,7 +74,6 @@ export function ImportedGamesFilterBar({
       to: ".",
       search: (prev) => {
         const next: Record<string, unknown> = { ...prev, ...patch };
-        // Strip falsy / "all" / undefined so they don't appear in the URL.
         for (const k of Object.keys(next)) {
           const v = next[k];
           if (v === undefined || v === "" || v === "all") delete next[k];
@@ -105,8 +103,7 @@ export function ImportedGamesFilterBar({
     update({ q: undefined });
   };
 
-  // Selected values fall back to "all" so <Select> always has a value.
-  const sel = {
+  const selectedValues = {
     playtimeStatus: filters.playtimeStatus ?? "all",
     playtimeRange: filters.playtimeRange ?? "all",
     platform: filters.platform ?? "all",
@@ -192,7 +189,6 @@ export function ImportedGamesFilterBar({
 
   return (
     <div className="space-y-4" data-testid="imported-games-filter-bar">
-      {/* Search */}
       <div className="relative">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
@@ -224,7 +220,6 @@ export function ImportedGamesFilterBar({
         ) : null}
       </div>
 
-      {/* Sort */}
       <div className="space-y-1">
         <Label
           htmlFor="sort-selector"
@@ -233,7 +228,7 @@ export function ImportedGamesFilterBar({
           Sort by
         </Label>
         <Select
-          value={sel.sortBy}
+          value={selectedValues.sortBy}
           onValueChange={(value) =>
             update({
               sortBy:
@@ -258,7 +253,6 @@ export function ImportedGamesFilterBar({
         </Select>
       </div>
 
-      {/* Show dismissed toggle */}
       <div className="flex items-center space-x-2">
         <Checkbox
           id="show-dismissed"
@@ -275,7 +269,6 @@ export function ImportedGamesFilterBar({
         </Label>
       </div>
 
-      {/* Filter grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="space-y-1">
           <Label
@@ -285,7 +278,7 @@ export function ImportedGamesFilterBar({
             Playtime Status
           </Label>
           <Select
-            value={sel.playtimeStatus}
+            value={selectedValues.playtimeStatus}
             onValueChange={(v) => setEnum("playtimeStatus", v)}
           >
             <SelectTrigger
@@ -310,7 +303,7 @@ export function ImportedGamesFilterBar({
             Playtime Range
           </Label>
           <Select
-            value={sel.playtimeRange}
+            value={selectedValues.playtimeRange}
             onValueChange={(v) => setEnum("playtimeRange", v)}
           >
             <SelectTrigger
@@ -337,7 +330,7 @@ export function ImportedGamesFilterBar({
             Platform
           </Label>
           <Select
-            value={sel.platform}
+            value={selectedValues.platform}
             onValueChange={(v) => setEnum("platform", v)}
           >
             <SelectTrigger id="platform-filter" aria-label="Filter by platform">
@@ -360,7 +353,7 @@ export function ImportedGamesFilterBar({
             Last Played
           </Label>
           <Select
-            value={sel.lastPlayed}
+            value={selectedValues.lastPlayed}
             onValueChange={(v) => setEnum("lastPlayed", v)}
           >
             <SelectTrigger
@@ -380,7 +373,6 @@ export function ImportedGamesFilterBar({
         </div>
       </div>
 
-      {/* Active chips */}
       {chips.length > 0 ? (
         <div
           className="flex flex-wrap items-center gap-2"

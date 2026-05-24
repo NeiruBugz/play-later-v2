@@ -98,3 +98,5 @@ override.tf.json
 *.pfx
 credentials*
 secrets*
+
+CLAUDE.local.md

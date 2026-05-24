@@ -55,7 +55,6 @@ describe("deleteJournalEntry — Prisma error mapping", () => {
   beforeEach(() => {
     mockedFindUnique.mockReset();
     mockedDelete.mockReset();
-    // Stub findUnique to return a matching entry by default.
     mockedFindUnique.mockResolvedValue(STUB_ENTRY as never);
   });
 

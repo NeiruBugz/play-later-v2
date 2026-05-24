@@ -38,7 +38,6 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
-// Server fns are not mocked-out behaviorally — we assert on call args.
 vi.mock("../../api/quick-add-to-library-fn", () => ({
   quickAddToLibraryFn: vi.fn(),
 }));
@@ -46,7 +45,6 @@ vi.mock("../../api/remove-library-item-fn", () => ({
   removeLibraryItemFn: vi.fn(),
 }));
 
-// Capture undo-toast invocations so the test can trigger the undo path.
 const showUndoToast = vi.fn();
 vi.mock("@/shared/ui/undo-toast", () => ({
   showUndoToast: (opts: { message: string; onUndo: () => void }) =>
@@ -246,9 +244,7 @@ describe("GameResultItem", () => {
       const opts = showUndoToast.mock.calls[0]?.[0] as {
         onUndo: () => void;
       };
-      // Trigger undo
       opts.onUndo();
-      // Wait for the async undo handler
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 

@@ -41,7 +41,6 @@ export function useDebouncedGameSearch({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestSeqRef = useRef(0);
 
-  // Reset state when the palette closes so the next open starts fresh.
   useEffect(() => {
     if (!isOpen) {
       setQueryState("");
@@ -54,7 +53,6 @@ export function useDebouncedGameSearch({
     }
   }, [isOpen]);
 
-  // Cleanup on unmount.
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current !== null) {

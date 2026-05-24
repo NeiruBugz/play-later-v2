@@ -3,29 +3,9 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
-// ---------------------------------------------------------------------------
-// Status / Platform constants
-// ---------------------------------------------------------------------------
-
 import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
-
-// ---------------------------------------------------------------------------
-// Date helpers
-// ---------------------------------------------------------------------------
-
-export function dateToInputValue(date: Date | null): string {
-  if (date === null) return "";
-  // Render YYYY-MM-DD for <input type="date">.
-  const iso = date.toISOString();
-  return iso.slice(0, 10);
-}
-
-export function inputValueToDate(raw: string): Date | null {
-  if (raw === "") return null;
-  return new Date(raw);
-}
 
 export const STATUS_VALUES = [
   "WISHLIST",
@@ -37,21 +17,8 @@ export const STATUS_VALUES = [
 
 export type StatusValue = (typeof STATUS_VALUES)[number];
 
-export const PLATFORM_OPTIONS: ReadonlyArray<string> = [
-  "PC",
-  "PlayStation 5",
-  "PlayStation 4",
-  "Xbox Series X|S",
-  "Xbox One",
-  "Nintendo Switch",
-];
-
 export const inputClasses =
   "h-10 rounded-lg border border-border bg-card px-md text-sm text-foreground shadow-paper-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-
-// ---------------------------------------------------------------------------
-// Form hook
-// ---------------------------------------------------------------------------
 
 type UseLibraryModalFormOptions = {
   entry: LibraryItemWithGame;
@@ -71,12 +38,18 @@ export function useLibraryModalForm({
   const [rating, setRating] = useState<string>(
     entry.rating === null ? "" : String(entry.rating)
   );
-  const [startedAt, setStartedAt] = useState<string>(
-    dateToInputValue(entry.startedAt)
+  const [startedAt, setStartedAt] = useState<Date | null>(entry.startedAt);
+  const [completedAt, setCompletedAtValue] = useState<Date | null>(
+    entry.completedAt
   );
-  const [completedAt, setCompletedAt] = useState<string>(
-    dateToInputValue(entry.completedAt)
-  );
+
+  // Setting a completion date implies the game is finished — surface PLAYED in
+  // the status select so the two fields cannot silently disagree. Clearing the
+  // date leaves the status untouched; the user can still override afterward.
+  const setCompletedAt = (value: Date | null) => {
+    setCompletedAtValue(value);
+    if (value !== null) setStatus("PLAYED");
+  };
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,8 +65,8 @@ export function useLibraryModalForm({
           status,
           platform: platform === "" ? null : platform,
           rating: ratingValue,
-          startedAt: inputValueToDate(startedAt),
-          completedAt: inputValueToDate(completedAt),
+          startedAt,
+          completedAt,
         },
       });
       setError(null);
@@ -110,7 +83,6 @@ export function useLibraryModalForm({
   };
 
   return {
-    // Field state
     status,
     setStatus,
     platform,
@@ -121,7 +93,6 @@ export function useLibraryModalForm({
     setStartedAt,
     completedAt,
     setCompletedAt,
-    // Submission
     error,
     isSubmitting,
     handleSubmit,

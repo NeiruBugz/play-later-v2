@@ -33,6 +33,7 @@ const elements = {
   queryRestoreButton: () =>
     screen.queryByRole("button", { name: "Restore Half-Life 2" }),
   queryName: () => screen.queryByText("Half-Life 2"),
+  queryLastPlayed: () => screen.queryByText(/last played/),
 };
 
 describe("ImportedGameCard", () => {
@@ -72,6 +73,39 @@ describe("ImportedGameCard", () => {
     it("fires onDismiss when the dismiss button is clicked", async () => {
       await userEvent.click(elements.queryDismissButton()!);
       expect(onDismiss).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("given a game with a last-played timestamp", () => {
+    beforeEach(() => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+      render(
+        <ImportedGameCard
+          game={{ ...baseGame, playtime: 300, lastPlayedAt: tenDaysAgo }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("surfaces when the game was last played", () => {
+      expect(elements.queryLastPlayed()).not.toBeNull();
+    });
+  });
+
+  describe("given a game with no last-played timestamp", () => {
+    beforeEach(() => {
+      render(
+        <ImportedGameCard
+          game={{ ...baseGame, lastPlayedAt: null }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("omits the last-played line entirely", () => {
+      expect(elements.queryLastPlayed()).toBeNull();
     });
   });
 

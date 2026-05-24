@@ -14,8 +14,6 @@
 
 import { createContext, useContext } from "react";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 /**
  * The five named themes from spec 021. Each theme value maps to a same-named
  * CSS class via the provider's THEME_CLASS_MAP, except "light" (no class) and
@@ -38,11 +36,7 @@ export type ThemeContextValue = {
   setTheme: (theme: Theme) => void;
 };
 
-// ── Context ───────────────────────────────────────────────────────────────────
-
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-// ── Hook ─────────────────────────────────────────────────────────────────────
 
 /**
  * Read the current theme + setter. Throws if called outside a

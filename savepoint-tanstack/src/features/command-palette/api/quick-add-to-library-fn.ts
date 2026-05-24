@@ -20,8 +20,6 @@ const QUICK_ADD_INPUT = z.object({
 export const quickAddToLibraryFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => QUICK_ADD_INPUT.parse(data))
   .handler(async ({ data }): Promise<{ id: number }> => {
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it.
     const { igdbId } = QUICK_ADD_INPUT.parse(data);
 
     const userId = await requireUserId();

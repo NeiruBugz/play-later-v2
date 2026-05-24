@@ -43,11 +43,9 @@ const NAV_ITEMS = [
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
 
-  // Never display the email. Legacy accounts seed `name=email`, so we filter
-  // any `@`-shaped name and prefer the user-chosen username. Final fallback
-  // is the generic "Account" label — the raw user id is never user-visible.
-  const safeName = user.name && !user.name.includes("@") ? user.name : null;
-  const displayName = safeName ?? user.username ?? "Account";
+  // Never display the email — see README "Display-name privacy".
+  const nonEmailName = user.name && !user.name.includes("@") ? user.name : null;
+  const displayName = nonEmailName ?? user.username ?? "Account";
   // Initial-avatar fallback. Canonical renders the first character of the
   // display name, not the stock cartoon image — see audit
   // `context/audits/2026-05-18/visual-parity.md` § Library global chrome.
@@ -69,7 +67,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
       aria-label="Primary navigation"
       className="bg-background sticky top-0 hidden h-screen w-64 shrink-0 flex-col self-start border-r md:flex"
     >
-      {/* Top: brand + search trigger */}
       <div className="space-y-3 px-4 pt-4">
         <Link
           to="/dashboard"
@@ -100,7 +97,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </button>
       </div>
 
-      {/* Middle: primary nav — flex-1 pushes bottom cluster down */}
+      {/* flex-1 pushes the bottom cluster down */}
       <nav className="mt-4 flex-1 overflow-y-auto px-2">
         {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
           <Link
@@ -118,7 +115,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
         ))}
       </nav>
 
-      {/* Bottom: theme toggle + user identity */}
       <div className="mt-2 space-y-2 border-t px-3 pt-3 pb-4">
         <ThemeToggle />
 

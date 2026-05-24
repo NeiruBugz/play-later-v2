@@ -164,7 +164,6 @@ describe("useCommandPalette", () => {
 
       unmount();
 
-      // Dispatching after unmount should not throw and the ref result is stable.
       act(() => {
         document.dispatchEvent(
           new KeyboardEvent("keydown", {
@@ -175,7 +174,6 @@ describe("useCommandPalette", () => {
         );
       });
 
-      // The hook is unmounted — we can only verify no errors were thrown.
       expect(result.current.isOpen).toBe(false);
     });
   });
@@ -183,7 +181,6 @@ describe("useCommandPalette", () => {
 
 describe("openCommandPalette (standalone)", () => {
   it("is a no-op when document is not defined (SSR guard)", () => {
-    // Temporarily remove document to simulate SSR.
     const originalDocument = globalThis.document;
     // @ts-expect-error — deliberately clobbering document for SSR simulation
     delete globalThis.document;

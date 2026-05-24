@@ -4,10 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LogoutButton } from "./logout-button";
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
 const mockRouterInvalidate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
@@ -22,10 +18,6 @@ vi.mock("@/shared/api/auth-client", () => ({
   },
 }));
 
-// ---------------------------------------------------------------------------
-// Element / action vocabulary
-// ---------------------------------------------------------------------------
-
 const elements = {
   getSignOutButton: () => screen.getByRole("button", { name: "Sign out" }),
 };
@@ -33,10 +25,6 @@ const elements = {
 const actions = {
   clickSignOut: () => userEvent.click(elements.getSignOutButton()),
 };
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("LogoutButton", () => {
   beforeEach(() => {

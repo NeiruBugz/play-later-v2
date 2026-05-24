@@ -17,9 +17,6 @@ const ADD_GAME_INPUT = z.object({
 export const addGameToLibraryFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => ADD_GAME_INPUT.parse(data))
   .handler(async ({ data }): Promise<LibraryItem> => {
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it. See
-    // CONTEXT.md "Feature server fn".
     const parsed = ADD_GAME_INPUT.parse(data);
 
     const userId = await requireUserId();

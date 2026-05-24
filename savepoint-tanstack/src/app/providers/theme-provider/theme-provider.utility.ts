@@ -66,7 +66,6 @@ export function applyThemeToHtml(theme: Theme): void {
   const resolved = resolveTheme(theme);
   const root = document.documentElement;
 
-  // Remove all theme classes we own, then add the resolved one (if any).
   for (const cls of THEME_CLASS_NAMES) {
     root.classList.remove(cls);
   }

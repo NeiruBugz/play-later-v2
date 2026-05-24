@@ -62,7 +62,6 @@ describe("useWhatsNew", () => {
 
     it("treats the storage error as unseen — isOpen becomes true", () => {
       const { result } = renderHook(() => useWhatsNew());
-      // Catch path: stored = null → opens modal
       expect(result.current.isOpen).toBe(true);
     });
   });
@@ -83,7 +82,6 @@ describe("useWhatsNew", () => {
       act(() => {
         result.current.dismiss();
       });
-      // Modal should still close — catch block only suppresses the error.
       expect(result.current.isOpen).toBe(false);
     });
   });

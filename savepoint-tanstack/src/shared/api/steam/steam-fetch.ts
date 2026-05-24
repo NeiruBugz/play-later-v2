@@ -34,10 +34,6 @@ const logger = createLogger({ service: "steam-fetch" });
 
 const STEAM_BASE_URL = "https://api.steampowered.com";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
 const PlayerSummarySchema = z.object({
   steamid: z.string(),
   personaname: z.string(),
@@ -97,10 +93,6 @@ export const PlayerSummarySchemaPublic = z.object({
 export type OwnedGame = z.infer<typeof OwnedGameSchema>;
 export type PlayerSummary = z.infer<typeof PlayerSummarySchemaPublic>;
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
 /**
  * Map an HTTP non-2xx (or network failure) to the appropriate AppError
  * subclass. Caller passes the resource label for log context.
@@ -143,10 +135,6 @@ async function safeFetch(url: string, resource: string): Promise<Response> {
     throwHttpError(resource, { cause: (err as Error)?.message });
   }
 }
-
-// ---------------------------------------------------------------------------
-// Public surface
-// ---------------------------------------------------------------------------
 
 export async function fetchPlayerSummary(
   steamId64: string

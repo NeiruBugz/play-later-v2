@@ -50,7 +50,8 @@ function makeLibraryItem(
   userId: string,
   gameId: string,
   status: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED",
-  updatedAt?: Date
+  updatedAt?: Date,
+  completedAt?: Date
 ) {
   return {
     id: parseInt(suffix, 10),
@@ -60,6 +61,7 @@ function makeLibraryItem(
     acquisitionType: "DIGITAL" as const,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: updatedAt ?? new Date("2024-01-01T00:00:00.000Z"),
+    completedAt: completedAt ?? null,
   };
 }
 
@@ -73,6 +75,7 @@ describe("getLibraryStats", () => {
       const stats = await getLibraryStats("stats-user-001");
 
       expect(stats.statusCounts).toEqual({});
+      expect(stats.completedCount).toBe(0);
       expect(stats.recentGames).toEqual([]);
       expect(stats.journalCount).toBe(0);
     });
@@ -113,6 +116,51 @@ describe("getLibraryStats", () => {
       const counts = stats.statusCounts as Record<string, number>;
       const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
       expect(total).toBe(6);
+    });
+  });
+
+  describe("given completion is a timestamp, not a status", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("005") });
+      await Promise.all([
+        db.prisma.game.create({ data: makeGame("h", 10008) }),
+        db.prisma.game.create({ data: makeGame("i", 10009) }),
+        db.prisma.game.create({ data: makeGame("j", 10010) }),
+      ]);
+      const completedOn = new Date("2024-03-01T00:00:00.000Z");
+      await db.prisma.libraryItem.createMany({
+        data: [
+          // PLAYED but never marked complete (a dropped game).
+          makeLibraryItem("1008", "stats-user-005", "stats-game-h", "PLAYED"),
+          // PLAYED and completed.
+          makeLibraryItem(
+            "1009",
+            "stats-user-005",
+            "stats-game-i",
+            "PLAYED",
+            undefined,
+            completedOn
+          ),
+          // SHELF but completed (e.g. completed, then archived to the shelf).
+          makeLibraryItem(
+            "1010",
+            "stats-user-005",
+            "stats-game-j",
+            "SHELF",
+            undefined,
+            completedOn
+          ),
+        ],
+      });
+    });
+
+    it("counts completedAt-not-null rows independently of the PLAYED status", async () => {
+      const stats = await getLibraryStats("stats-user-005");
+
+      // 2 games are PLAYED, but only 2 have a completedAt — and one of those
+      // is SHELF, not PLAYED. The two metrics are not the same set.
+      expect(stats.statusCounts["PLAYED"]).toBe(2);
+      expect(stats.completedCount).toBe(2);
     });
   });
 

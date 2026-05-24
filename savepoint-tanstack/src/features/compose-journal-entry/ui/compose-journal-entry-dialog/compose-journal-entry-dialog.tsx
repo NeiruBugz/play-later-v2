@@ -16,9 +16,6 @@ import { Textarea } from "@/shared/ui/textarea";
 
 import type { ComposeJournalEntryDialogProps } from "./compose-journal-entry-dialog.type";
 
-// FSD: feature/ui component invoking its own feature/api server fn directly
-// (no useServerFn) — mirrors the LibraryModal precedent.
-
 export function ComposeJournalEntryDialog({
   open,
   onOpenChange,

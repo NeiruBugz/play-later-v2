@@ -1,8 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// RED import — module does not exist until the GREEN step.
-// Module-not-found IS the expected failure mode.
 import { RelatedGamesInfiniteList } from "@/features/browse-related-games/ui/related-games-infinite-list";
 
 // Foot-gun #8: mock the server fn wrapper (createServerFn returns undefined without the Vite plugin).

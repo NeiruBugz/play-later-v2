@@ -11,18 +11,18 @@
  */
 
 import {
+  ACQUISITION_FILTER_ENTRIES,
   getStatusEntry,
   STATUS_ENTRIES,
+  type AcquisitionFilterEntry,
   type StatusBadgeVariant,
   type StatusEntry,
 } from "@/entities/library-item";
 
 import type { LibrarySortBy, LibrarySortOrder } from "./types";
 
-// Re-export the entity-owned status surface so existing
-// `@/features/filter-library` callers don't need to be rewritten.
-export { STATUS_ENTRIES, getStatusEntry };
-export type { StatusBadgeVariant, StatusEntry };
+export { STATUS_ENTRIES, getStatusEntry, ACQUISITION_FILTER_ENTRIES };
+export type { StatusBadgeVariant, StatusEntry, AcquisitionFilterEntry };
 
 /**
  * Two-tone filter styling — Slice 18A visual-parity push (Phase 3).
@@ -41,6 +41,16 @@ const IDLE = "border-transparent text-muted-foreground hover:bg-muted/50";
 const ACTIVE =
   "bg-primary text-primary-foreground border-transparent hover:bg-primary/90";
 
+/**
+ * Shared two-tone toggle styling for any single-select filter button (status,
+ * acquisition). Active = primary token; idle = muted. Keeps the rail visually
+ * uniform across sections.
+ */
+export const FILTER_TOGGLE_STYLE: { active: string; inactive: string } = {
+  active: ACTIVE,
+  inactive: IDLE,
+};
+
 export const STATUS_FILTER_STYLES: Record<
   StatusBadgeVariant,
   { active: string; inactive: string }
@@ -51,10 +61,6 @@ export const STATUS_FILTER_STYLES: Record<
   upNext: { active: ACTIVE, inactive: IDLE },
   wishlist: { active: ACTIVE, inactive: IDLE },
 };
-
-// ---------------------------------------------------------------------------
-// Sort config
-// ---------------------------------------------------------------------------
 
 export type SortOption = {
   value: string;

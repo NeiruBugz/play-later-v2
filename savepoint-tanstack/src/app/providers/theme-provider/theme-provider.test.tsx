@@ -23,10 +23,6 @@ import type { Theme } from "@/shared/lib/theme";
 
 import { SavepointThemeProvider } from "./theme-provider";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function getHtmlClasses(): string[] {
   return Array.from(document.documentElement.classList);
 }
@@ -60,10 +56,6 @@ function stubMatchMedia(prefersDark: boolean) {
       }) as unknown as MediaQueryList
   );
 }
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("ThemeProvider (html class application)", () => {
   afterEach(() => {

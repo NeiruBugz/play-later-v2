@@ -6,9 +6,6 @@ import { Button } from "@/shared/ui/button";
 export function LandingHero() {
   return (
     <div className="space-y-10">
-      {/* Top bar */}
-
-      {/* Hero block */}
       <div className="space-y-6">
         <span className="border-border/40 bg-primary/5 text-muted-foreground inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-medium tracking-[0.18em] uppercase">
           <span

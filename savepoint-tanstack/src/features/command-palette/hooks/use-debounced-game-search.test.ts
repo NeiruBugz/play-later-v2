@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useDebouncedGameSearch } from "./use-debounced-game-search";
 
-// Mock searchGamesFn — TanStack Start runtime not available in jsdom.
 const mockSearchGamesFn = vi.fn();
 vi.mock("@/entities/game", () => ({
   searchGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),

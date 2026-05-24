@@ -56,12 +56,8 @@ describe("GameMetadata", () => {
     });
 
     it("does not render a date element", () => {
-      // There should be no date-like text in the document
-      // We verify by checking nothing that looks like a date appears
-      // The title text should be the only substantial content
       const heading = elements.getTitleHeading("Hollow Knight");
       expect(heading).toBeDefined();
-      // Date element omitted — no sibling with a localized date string
     });
   });
 

@@ -98,8 +98,9 @@ describe("getAccessToken", () => {
 
     // Advance past expiresAt: startMs/1000 + EXPIRES_IN - 60 + 1 seconds
     // = startMs + (EXPIRES_IN - 60 + 1) * 1000 ms
-    const safetyMargin = 60; // TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS
-    const expiredMs = startMs + (EXPIRES_IN - safetyMargin + 1) * 1000;
+    const tokenExpirySafetyMarginSeconds = 60;
+    const expiredMs =
+      startMs + (EXPIRES_IN - tokenExpirySafetyMarginSeconds + 1) * 1000;
     dateSpy.mockReturnValue(expiredMs);
 
     await getAccessToken();

@@ -25,6 +25,16 @@ vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-library-entry/api/get-platform-options", () => ({
+  getPlatformOptionsFn: vi.fn(() =>
+    Promise.resolve([{ label: "This game", platforms: ["PC"] }])
+  ),
+}));
+
+vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
+  searchPlatformsFn: vi.fn(() => Promise.resolve([])),
+}));
+
 const buildEntry = (overrides: Partial<LibraryItem> = {}): LibraryItem => ({
   id: 42,
   status: "PLAYING",

@@ -1,6 +1,8 @@
 export {
   STATUS_ENTRIES,
   STATUS_FILTER_STYLES,
+  ACQUISITION_FILTER_ENTRIES,
+  FILTER_TOGGLE_STYLE,
   SORT_OPTIONS,
   SORT_VALUE_MAP,
   DEFAULT_PLATFORMS,
@@ -9,10 +11,12 @@ export {
 export type {
   StatusEntry,
   StatusBadgeVariant,
+  AcquisitionFilterEntry,
   SortOption,
 } from "./status-config";
 export type {
   LibraryStatus,
+  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,

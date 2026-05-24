@@ -7,12 +7,10 @@ import { OnboardingChecklist } from "../onboarding-checklist";
 import type { EmptyLibraryHeroProps } from "./empty-library-hero.type";
 
 /**
- * First-time-on-`/library` welcome surface. Renders the checklist
- * underneath a branded hero. The hero is responsible for its own
- * `onboardingComplete` short-circuit via the embedded checklist —
- * if the checklist returns null the hero still renders the welcome
- * copy. Library widget already provides an `AddGameTrigger` FAB for
- * the "add your first game" CTA, so no CTA buttons here.
+ * First-time-on-`/library` welcome surface, rendering the checklist beneath a
+ * branded hero. When the embedded checklist returns null the hero still renders
+ * the welcome copy. No CTA buttons here — the Library widget already provides an
+ * `AddGameTrigger` FAB for the "add your first game" CTA.
  */
 export function EmptyLibraryHero(props: EmptyLibraryHeroProps) {
   return (

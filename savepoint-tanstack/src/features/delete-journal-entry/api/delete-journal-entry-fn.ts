@@ -16,8 +16,6 @@ const DELETE_JOURNAL_ENTRY_INPUT = z.object({
 export const deleteJournalEntryFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => DELETE_JOURNAL_ENTRY_INPUT.parse(data))
   .handler(async ({ data }): Promise<void> => {
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
-    // programmatic callers (other server fns, tests) bypass it.
     const { entryId } = DELETE_JOURNAL_ENTRY_INPUT.parse(data);
 
     const userId = await requireUserId();

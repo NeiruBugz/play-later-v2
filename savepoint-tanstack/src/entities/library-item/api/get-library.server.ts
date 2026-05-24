@@ -1,6 +1,7 @@
 import { prisma } from "@/shared/lib/db.server";
 
 import type { Prisma } from "../../../../shared/lib/prisma/client.ts";
+import { TOUCHED_STATUSES } from "../model/touched";
 import type { GetLibraryFilters, GetLibraryResult } from "../model/types";
 
 export type {
@@ -13,12 +14,30 @@ export async function getLibrary(
   userId: string,
   filters: GetLibraryFilters
 ): Promise<GetLibraryResult> {
-  const { status, platform, minRating, sortBy, sortOrder = "desc" } = filters;
+  const {
+    status,
+    platform,
+    acquisition,
+    startedOnly,
+    minRating,
+    sortBy,
+    sortOrder = "desc",
+  } = filters;
 
   const where: Prisma.LibraryItemWhereInput = {
     userId,
     ...(status && { status }),
     ...(platform && { platform }),
+    ...(acquisition && { acquisitionType: acquisition }),
+    // "Touched" is derived from real play signals, not the dead `hasBeenPlayed`
+    // flag: currently/formerly playing, or with a recorded start/finish date.
+    ...(startedOnly && {
+      OR: [
+        { status: { in: [...TOUCHED_STATUSES] } },
+        { startedAt: { not: null } },
+        { completedAt: { not: null } },
+      ],
+    }),
     ...(minRating !== undefined && { rating: { gte: minRating } }),
   };
 

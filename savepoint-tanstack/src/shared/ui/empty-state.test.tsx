@@ -84,4 +84,25 @@ describe("EmptyState", () => {
       expect(onClick).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("given both a primary and a secondary action", () => {
+    beforeEach(() => {
+      render(
+        <EmptyState
+          title="Start your library"
+          action={{ label: "Add a game", onClick: vi.fn() }}
+          secondaryAction={{ label: "Import from Steam", onClick: vi.fn() }}
+        />
+      );
+    });
+
+    it("renders both call-to-action buttons", () => {
+      expect(
+        screen.getByRole("button", { name: "Add a game" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Import from Steam" })
+      ).toBeInTheDocument();
+    });
+  });
 });

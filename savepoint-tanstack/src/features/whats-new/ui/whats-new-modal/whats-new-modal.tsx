@@ -13,19 +13,14 @@ import { getActiveAnnouncements } from "../../config";
 import type { AnnouncementCategory } from "../../model/types";
 import { useWhatsNew } from "../../model/use-whats-new";
 
-// Localised badge labels for each announcement category. Same set as
-// canonical `savepoint-app/features/whats-new/ui/whats-new-modal.tsx`.
 const CATEGORY_LABELS: Record<AnnouncementCategory, string> = {
   feature: "New Feature",
   improvement: "Improvement",
   integration: "Integration",
 };
 
-// "What's new" modal. Mounted once at `RootShell` next to `CommandPalette`
-// (gated on authed user). Renders the full active-announcement list in a
-// single dialog with one "Got it" dismiss button. Multi-step pagination
-// (canonical's Next / Dismiss-all flow) is intentionally dropped — see
-// DIVERGENCES.md → Slice 20.
+// Multi-step pagination (canonical's Next / Dismiss-all flow) is intentionally
+// dropped in favour of a single dialog — see DIVERGENCES.md → Slice 20.
 export function WhatsNewModal() {
   const { isOpen, dismiss } = useWhatsNew();
   const announcements = getActiveAnnouncements();

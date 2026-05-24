@@ -20,7 +20,6 @@ vi.mock("@/shared/lib", async (importOriginal) => {
     fatal: vi.fn(),
     child: vi.fn(),
   };
-  // self-reference for child()
   stub.child = vi.fn(() => stub);
   return { ...actual, createLogger: vi.fn(() => stub) };
 });

@@ -11,18 +11,13 @@ import {
 import type { OnboardingChecklistProps } from "./onboarding-checklist.type";
 
 /**
- * First-time onboarding checklist (4 steps) — collapsed from canonical's
+ * First-time onboarding checklist — collapsed from canonical's
  * `getting-started` + `getting-started-checklist` + `onboarding-step` trio
- * into a single component. The split was a single-callsite indirection;
- * see DIVERGENCES.md "Slice 20 — onboarding-first-time".
+ * into a single component (single-callsite indirection); see DIVERGENCES.md
+ * "Slice 20 — onboarding-first-time".
  *
- * Step state derivation is pure on props except for the Steam step, which
- * also reads `onboardingSteamDismissed` from localStorage so a user who
- * never plans to connect Steam can clear the row.
- *
- * When all 4 steps are done, the component writes
- * `onboardingComplete=1` and returns `null`, hiding itself permanently
- * (until that flag is cleared).
+ * The Steam step also reads `onboardingSteamDismissed` from localStorage so a
+ * user who never plans to connect Steam can clear the row.
  */
 
 const STEAM_DISMISSED_KEY = "onboardingSteamDismissed";
@@ -121,10 +116,7 @@ export function OnboardingChecklist({
 
   const doneCount = steps.filter((s) => s.done).length;
 
-  // Collapsible-wrapped onboarding card matches canonical's expand/collapse
-  // UX — header (with progress summary) stays visible; the step list folds
-  // away. Default open so first-time users see all steps without an extra
-  // click; Radix keyboard semantics come for free.
+  // Default open so first-time users see all steps without an extra click.
   return (
     <Collapsible
       defaultOpen

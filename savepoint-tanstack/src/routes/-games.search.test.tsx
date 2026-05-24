@@ -17,6 +17,14 @@ vi.mock("@/features/search-games", () => ({
   ),
 }));
 
+// The route injects QuickAddButton into SearchGamesResults' add slot; its real
+// module pulls the server-only add fn (auth env), so stub the feature barrel.
+vi.mock("@/features/add-game", () => ({
+  QuickAddButton: ({ gameTitle }: { gameTitle: string }) => (
+    <button type="button">Add {gameTitle}</button>
+  ),
+}));
+
 vi.mock("@tanstack/react-router", async () => ({
   ...(await vi.importActual<typeof import("@tanstack/react-router")>(
     "@tanstack/react-router"

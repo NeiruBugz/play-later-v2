@@ -36,7 +36,6 @@ export function LandingPreviewCard() {
   return (
     <div className="relative">
       <div className="border-border/40 bg-card/40 relative overflow-hidden rounded-3xl border p-5 shadow-2xl backdrop-blur-sm">
-        {/* Gradient block with title */}
         <div className="from-primary relative h-56 overflow-hidden rounded-2xl bg-gradient-to-br via-fuchsia-500 to-rose-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_60%)]" />
           <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/20 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.16em] text-white/90 uppercase backdrop-blur-sm">
@@ -56,7 +55,6 @@ export function LandingPreviewCard() {
           </div>
         </div>
 
-        {/* Stat row */}
         <div className="mt-4 flex items-center justify-between">
           <p className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
             SESSION 12 · 47H TOTAL
@@ -79,7 +77,6 @@ export function LandingPreviewCard() {
           </div>
         </div>
 
-        {/* Journal entry inset */}
         <div className="border-border/40 bg-background/40 mt-4 rounded-xl border p-4">
           <p className="text-muted-foreground text-[10px] font-medium tracking-[0.18em] uppercase">
             APR 22 · JOURNAL ENTRY
@@ -90,7 +87,6 @@ export function LandingPreviewCard() {
           </p>
         </div>
 
-        {/* Up next row */}
         <div className="mt-4 flex items-center justify-between">
           <p className="text-muted-foreground text-[11px] font-medium tracking-[0.18em] uppercase">
             UP NEXT
@@ -103,7 +99,6 @@ export function LandingPreviewCard() {
         </div>
       </div>
 
-      {/* Floating library count */}
       <div className="border-border/40 bg-background/80 text-muted-foreground absolute right-4 -bottom-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] backdrop-blur-sm">
         <span aria-hidden="true">↳</span>
         <span>218 in your library</span>

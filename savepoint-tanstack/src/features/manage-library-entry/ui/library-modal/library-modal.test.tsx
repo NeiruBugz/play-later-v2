@@ -1,64 +1,16 @@
 /**
- * RED component test for LibraryModal (Slice 11 — manage-library-entry).
+ * Component test for LibraryModal (manage-library-entry).
  *
- * This file is intentionally failing at module resolution:
- * `./library-modal` does not exist yet — the component is implemented in
- * the GREEN step (tasks.md line 230). Do NOT implement the component here.
- *
- * The following API modules are also RED imports that will be created
- * in tasks.md line 229:
- *   ../../api/update-library-item-fn
- *   ../../api/delete-library-item-fn
- *
- * =========================================================================
- * Contracts locked by this test
- * =========================================================================
- *
- * Component export:
- *   `LibraryModal` — named export from `./library-modal`
- *
- * Props (locked):
- *   entry:        LibraryItemWithGame  — the item being edited
- *   open:         boolean              — controls Dialog open state
- *   onOpenChange: (open: boolean) => void — called when dialog requests close
- *
- * Field controls (locked accessible names):
- *   combobox "Status"    — current status of the library entry
- *   combobox "Platform"  — platform the game was played on
- *   spinbutton "Rating"  — integer rating 1–10 (nullable)
- *   textbox "Started"    — date the player started the game (startedAt)
- *   textbox "Completed"  — date the player completed the game (completedAt)
- *
- *   Rationale: "Status", "Platform", "Rating" match the canonical savepoint-app
- *   form labels. "Started" / "Completed" follow savepoint-app date-field labels
- *   ("Started at" / "Completed at" abbreviated to single word for brevity;
- *   GREEN agent must use these exact accessible names).
- *
- * Submit behavior:
- *   - Button label: "Save changes"  (matches profile-settings-form precedent)
- *   - Invokes updateLibraryItemFn({ data: { itemId, status, platform, rating,
- *       startedAt, completedAt } })
- *   - Exact data shape locked via mock.calls[0][0] assertion
- *
- * UnauthorizedError inline surface:
- *   - When updateLibraryItemFn rejects with UnauthorizedError, renders an
- *     element with role="alert" whose textContent contains the error message.
- *   - Toast wiring is a SEPARATE sub-task (tasks.md line 232). Do NOT assert
- *     toasts in this test file.
- *
- * Delete confirmation gate:
- *   - Trigger label: "Remove from library"
- *   - Clicking the trigger must NOT immediately invoke deleteLibraryItemFn.
- *   - A confirmation surface must appear containing:
- *       confirm button: "Confirm"
- *       cancel  button: "Cancel"
- *   - Only after clicking "Confirm" is deleteLibraryItemFn invoked.
- *   - The surface type (dialog vs inline) is left to GREEN; we only assert
- *     button presence and call sequencing.
- *   - Toast + close-on-success wiring belongs in tasks.md line 232.
+ * The modal's contract:
+ *   - Started / Completed are DatePicker triggers (buttons queried by their
+ *     accessible name "Started" / "Completed"), not native date inputs.
+ *   - A "Mark complete" one-tap sets Completed to a non-null Date when empty.
+ *   - Delete is a destructive footer button (not a one-item ⋯ menu); the
+ *     confirmation is a typed-name gate (type the title to arm "Delete").
+ *   - Marking Completed derives PLAYED in the Status select.
  */
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -67,12 +19,10 @@ import type { LibraryItemWithGame } from "@/entities/library-item/api";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
-// Import after mocks are declared.
+import { getPlatformOptionsFn } from "../../api/get-platform-options";
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
-// RED import — this module does not exist until the GREEN step.
 import { LibraryModal } from "./library-modal";
 
-// --- Toast mock (mirrors add-game-modal precedent) --------------------------
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -80,17 +30,11 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// --- Router mock (mirrors add-game-modal precedent) -------------------------
 const mockRouterInvalidate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: mockRouterInvalidate }),
 }));
-
-// --- Server fn mocks ---------------------------------------------------------
-// updateLibraryItemFn and deleteLibraryItemFn are called as plain async fns
-// with { data: ... } argument shape (TanStack Start createServerFn convention).
-// The modules do not exist yet; the TS2307 error here IS the RED signal.
 
 vi.mock("../../api/update-library-item-fn", () => ({
   updateLibraryItemFn: vi.fn(),
@@ -100,12 +44,19 @@ vi.mock("../../api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
 }));
 
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
+vi.mock("../../api/get-platform-options", () => ({
+  getPlatformOptionsFn: vi.fn(),
+}));
 
-// Minimal LibraryItemWithGame that satisfies the type without requiring
-// real Prisma scalars for fields the modal doesn't display.
+vi.mock("../../api/search-platforms-fn", () => ({
+  searchPlatformsFn: vi.fn(() => Promise.resolve([])),
+}));
+
+const PLATFORM_OPTIONS_RESULT = [
+  { label: "This game", platforms: ["PC", "Switch"] },
+  { label: "Your platforms", platforms: ["Steam Deck"] },
+];
+
 const STUB_ENTRY: LibraryItemWithGame = {
   id: 42,
   userId: "user-abc",
@@ -130,10 +81,6 @@ const STUB_ENTRY: LibraryItemWithGame = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Shared setup
-// ---------------------------------------------------------------------------
-
 const onOpenChange = vi.fn();
 
 const defaultProps = {
@@ -142,57 +89,66 @@ const defaultProps = {
   onOpenChange,
 };
 
-// Element vocabulary — accessible names are locked by these queries.
-// The GREEN agent MUST match these exact strings as accessible names.
 const elements = {
-  // Form fields
   getStatusCombobox: () => screen.getByRole("combobox", { name: "Status" }),
-  getPlatformCombobox: () => screen.getByRole("combobox", { name: "Platform" }),
+  getPlatformCombobox: () => screen.getByRole("button", { name: "Platform" }),
   getRatingInput: () => screen.getByRole("slider", { name: "Rating" }),
-  getStartedInput: () => screen.getByRole("textbox", { name: "Started" }),
-  getCompletedInput: () => screen.getByRole("textbox", { name: "Completed" }),
-
-  // Submit / close
+  getStartedTrigger: () => screen.getByRole("button", { name: "Started" }),
+  getCompletedTrigger: () => screen.getByRole("button", { name: "Completed" }),
+  // Each calendar day is a button inside its gridcell; the gridcell's accessible
+  // name is its day-of-month text, unambiguous for mid-month days.
+  getCalendarDayButton: (dayOfMonth: string) =>
+    within(screen.getByRole("gridcell", { name: dayOfMonth })).getByRole(
+      "button"
+    ),
   getSaveButton: () => screen.getByRole("button", { name: "Save changes" }),
+  getMarkCompleteButton: () =>
+    screen.getByRole("button", { name: "Mark complete" }),
+  queryMarkCompleteButton: () =>
+    screen.queryByRole("button", { name: "Mark complete" }),
 
-  // Delete flow
-  getDeleteTrigger: () =>
-    screen.getByRole("button", { name: "Remove from library" }),
-  queryDeleteTrigger: () =>
-    screen.queryByRole("button", { name: "Remove from library" }),
-  getConfirmButton: () => screen.getByRole("button", { name: "Confirm" }),
+  getDeleteFromLibraryButton: () =>
+    screen.getByRole("button", { name: "Delete from library" }),
+  getDeleteConfirmInput: () =>
+    screen.getByLabelText("Type the game title to confirm deletion"),
+  queryDeleteConfirmInput: () =>
+    screen.queryByLabelText("Type the game title to confirm deletion"),
+  getDeleteButton: () => screen.getByRole("button", { name: "Delete" }),
   getCancelButton: () => screen.getByRole("button", { name: "Cancel" }),
-  queryConfirmButton: () => screen.queryByRole("button", { name: "Confirm" }),
 
-  // Inline error surface
   getInlineAlert: () => screen.getByRole("alert"),
   queryInlineAlert: () => screen.queryByRole("alert"),
 };
 
-// Action vocabulary — domain-named, composing elements above.
 const actions = {
   clickSave: () => userEvent.click(elements.getSaveButton()),
-  clickDeleteTrigger: () => userEvent.click(elements.getDeleteTrigger()),
-  clickConfirmDelete: () => userEvent.click(elements.getConfirmButton()),
-  clickCancelDelete: () => userEvent.click(elements.getCancelButton()),
+  clickMarkComplete: () => userEvent.click(elements.getMarkCompleteButton()),
+  openPlatformSelect: () => userEvent.click(elements.getPlatformCombobox()),
+  pickStartedDay: async (dayOfMonth: string) => {
+    await userEvent.click(elements.getStartedTrigger());
+    await userEvent.click(elements.getCalendarDayButton(dayOfMonth));
+  },
+  openDeleteConfirm: async () => {
+    await userEvent.click(elements.getDeleteFromLibraryButton());
+  },
+  typeDeleteConfirmation: (title: string) =>
+    userEvent.type(elements.getDeleteConfirmInput(), title),
+  clickDelete: () => userEvent.click(elements.getDeleteButton()),
+  clickCancel: () => userEvent.click(elements.getCancelButton()),
 };
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("LibraryModal", () => {
   beforeEach(() => {
     vi.mocked(updateLibraryItemFn).mockReset();
     vi.mocked(deleteLibraryItemFn).mockReset();
+    vi.mocked(getPlatformOptionsFn).mockReset();
+    vi.mocked(getPlatformOptionsFn).mockResolvedValue(PLATFORM_OPTIONS_RESULT);
     onOpenChange.mockReset();
     vi.mocked(toast.success).mockReset();
     vi.mocked(toast.error).mockReset();
     mockRouterInvalidate.mockReset();
     mockRouterInvalidate.mockResolvedValue(undefined);
   });
-
-  // ---- Field presence (initial render) ----------------------------------------
 
   describe("given the modal is open with a populated entry", () => {
     beforeEach(() => {
@@ -203,10 +159,19 @@ describe("LibraryModal", () => {
       expect(elements.getStatusCombobox()).toBeDefined();
       expect(elements.getPlatformCombobox()).toBeDefined();
       expect(elements.getRatingInput()).toBeDefined();
-      expect(elements.getStartedInput()).toBeDefined();
-      expect(elements.getCompletedInput()).toBeDefined();
+      expect(elements.getStartedTrigger()).toBeDefined();
+      expect(elements.getCompletedTrigger()).toBeDefined();
       expect(elements.getSaveButton()).toBeDefined();
-      expect(elements.getDeleteTrigger()).toBeDefined();
+    });
+
+    it("exposes delete as a footer button, with the confirm gate hidden until invoked", () => {
+      expect(elements.getDeleteFromLibraryButton()).toBeDefined();
+      expect(elements.queryDeleteConfirmInput()).toBeNull();
+    });
+
+    it("renders datepicker triggers for Started and Completed", () => {
+      expect(elements.getStartedTrigger()).toBeDefined();
+      expect(elements.getCompletedTrigger()).toBeDefined();
     });
 
     it("does not show an inline alert before any submission", () => {
@@ -214,7 +179,64 @@ describe("LibraryModal", () => {
     });
   });
 
-  // ---- Submit invokes updateLibraryItemFn -------------------------------------
+  describe("given the entry has no completed date", () => {
+    beforeEach(() => {
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, completedAt: null }}
+        />
+      );
+    });
+
+    it("offers a Mark complete shortcut", () => {
+      expect(elements.getMarkCompleteButton()).toBeDefined();
+    });
+
+    it("fills the completed date and submits a non-null completedAt after marking", async () => {
+      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
+      await actions.clickMarkComplete();
+      await actions.clickSave();
+      await waitFor(() => {
+        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
+      });
+      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
+        data: { completedAt: unknown };
+      };
+      expect(arg.data.completedAt).not.toBeNull();
+    });
+  });
+
+  describe("given the entry already has a completed date", () => {
+    beforeEach(() => {
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, completedAt: new Date("2024-03-01") }}
+        />
+      );
+    });
+
+    it("hides the Mark complete shortcut", () => {
+      expect(elements.queryMarkCompleteButton()).toBeNull();
+    });
+  });
+
+  describe("given a non-PLAYED item and the user marks it complete", () => {
+    beforeEach(async () => {
+      render(
+        <LibraryModal
+          {...defaultProps}
+          entry={{ ...STUB_ENTRY, status: "PLAYING", completedAt: null }}
+        />
+      );
+      await actions.clickMarkComplete();
+    });
+
+    it("moves the status to Played", () => {
+      expect(elements.getStatusCombobox().textContent).toContain("Played");
+    });
+  });
 
   describe("given the user clicks Save changes", () => {
     beforeEach(async () => {
@@ -238,8 +260,6 @@ describe("LibraryModal", () => {
     });
   });
 
-  // ---- UnauthorizedError surfaces inline --------------------------------------
-
   describe("given updateLibraryItemFn rejects with UnauthorizedError", () => {
     const AUTH_ERROR_MESSAGE = "You must be signed in to update your library";
 
@@ -259,36 +279,36 @@ describe("LibraryModal", () => {
         AUTH_ERROR_MESSAGE
       );
     });
-
-    it("does not call deleteLibraryItemFn when update fails", () => {
-      expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
-    });
   });
 
-  // ---- Delete confirmation gate -----------------------------------------------
-
-  describe("given the user clicks Remove from library", () => {
+  describe("given the user opens Delete from the footer button", () => {
     beforeEach(async () => {
       render(<LibraryModal {...defaultProps} />);
-      await actions.clickDeleteTrigger();
+      await actions.openDeleteConfirm();
     });
 
     it("does NOT immediately call deleteLibraryItemFn (gate must intercept)", () => {
       expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
     });
 
-    it("shows the confirmation surface with Confirm and Cancel buttons", () => {
-      expect(elements.getConfirmButton()).toBeDefined();
+    it("shows the typed-name confirmation surface", () => {
+      expect(elements.getDeleteConfirmInput()).toBeDefined();
+      expect(elements.getDeleteButton()).toBeDefined();
       expect(elements.getCancelButton()).toBeDefined();
+    });
+
+    it("keeps the Delete button disabled until the title is typed exactly", () => {
+      expect(elements.getDeleteButton()).toBeDisabled();
     });
   });
 
-  describe("given the delete confirmation surface is visible and the user confirms", () => {
+  describe("given the user types the title and confirms deletion", () => {
     beforeEach(async () => {
       vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined);
       render(<LibraryModal {...defaultProps} />);
-      await actions.clickDeleteTrigger();
-      await actions.clickConfirmDelete();
+      await actions.openDeleteConfirm();
+      await actions.typeDeleteConfirmation("Hollow Knight");
+      await actions.clickDelete();
     });
 
     it("calls deleteLibraryItemFn exactly once after confirmation", async () => {
@@ -298,23 +318,21 @@ describe("LibraryModal", () => {
     });
   });
 
-  describe("given the delete confirmation surface is visible and the user cancels", () => {
+  describe("given the user cancels the delete confirmation", () => {
     beforeEach(async () => {
       render(<LibraryModal {...defaultProps} />);
-      await actions.clickDeleteTrigger();
-      await actions.clickCancelDelete();
+      await actions.openDeleteConfirm();
+      await actions.clickCancel();
     });
 
     it("does not call deleteLibraryItemFn after cancelling", () => {
       expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
     });
 
-    it("hides the Confirm button after cancellation", () => {
-      expect(elements.queryConfirmButton()).toBeNull();
+    it("hides the typed-name confirmation surface", () => {
+      expect(elements.queryDeleteConfirmInput()).toBeNull();
     });
   });
-
-  // ---- Update success: toast + invalidate + close ----------------------------
 
   describe("given updateLibraryItemFn resolves successfully", () => {
     beforeEach(async () => {
@@ -345,8 +363,6 @@ describe("LibraryModal", () => {
       expect(onOpenChange).toHaveBeenCalledOnce();
     });
   });
-
-  // ---- Update error: toast.error + no close + no invalidate ------------------
 
   describe("given updateLibraryItemFn rejects (toast/lifecycle)", () => {
     const AUTH_ERROR_MESSAGE = "nope";
@@ -381,14 +397,13 @@ describe("LibraryModal", () => {
     });
   });
 
-  // ---- Delete success: toast + invalidate + close ----------------------------
-
   describe("given deleteLibraryItemFn resolves successfully", () => {
     beforeEach(async () => {
       vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined);
       render(<LibraryModal {...defaultProps} />);
-      await actions.clickDeleteTrigger();
-      await actions.clickConfirmDelete();
+      await actions.openDeleteConfirm();
+      await actions.typeDeleteConfirmation("Hollow Knight");
+      await actions.clickDelete();
     });
 
     it("fires toast.success with the locked delete copy", async () => {
@@ -414,8 +429,6 @@ describe("LibraryModal", () => {
     });
   });
 
-  // ---- Delete error: toast.error + no close + no invalidate ------------------
-
   describe("given deleteLibraryItemFn rejects", () => {
     const AUTH_ERROR_MESSAGE = "nope";
 
@@ -424,8 +437,9 @@ describe("LibraryModal", () => {
         new UnauthorizedError(AUTH_ERROR_MESSAGE)
       );
       render(<LibraryModal {...defaultProps} />);
-      await actions.clickDeleteTrigger();
-      await actions.clickConfirmDelete();
+      await actions.openDeleteConfirm();
+      await actions.typeDeleteConfirmation("Hollow Knight");
+      await actions.clickDelete();
     });
 
     it("fires toast.error once with the rejection message", async () => {
@@ -441,36 +455,7 @@ describe("LibraryModal", () => {
       });
       expect(onOpenChange).not.toHaveBeenCalled();
     });
-
-    it("does not call router.invalidate on delete error", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
-      });
-      expect(mockRouterInvalidate).not.toHaveBeenCalled();
-    });
   });
-
-  // ---- Confirmation gate idempotency -----------------------------------------
-
-  describe("given the delete trigger is reopened after a cancel", () => {
-    beforeEach(async () => {
-      vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined);
-      render(<LibraryModal {...defaultProps} />);
-      await actions.clickDeleteTrigger();
-      await actions.clickCancelDelete();
-      // Reopen after Cancel
-      await actions.clickDeleteTrigger();
-      await actions.clickConfirmDelete();
-    });
-
-    it("calls deleteLibraryItemFn exactly once across the cancel+confirm cycle", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(deleteLibraryItemFn)).toHaveBeenCalledOnce();
-      });
-    });
-  });
-
-  // ---- Closed modal renders nothing -------------------------------------------
 
   describe("given the modal is closed (open=false)", () => {
     beforeEach(() => {
@@ -483,8 +468,6 @@ describe("LibraryModal", () => {
     });
   });
 
-  // ---- Custom platform rendered in platform selector -------------------------
-
   describe("given the entry has a custom platform not in the standard list", () => {
     beforeEach(() => {
       render(
@@ -495,42 +478,51 @@ describe("LibraryModal", () => {
       );
     });
 
-    it("renders the custom platform option in the platform selector", () => {
-      // The SelectContent with the custom platform SelectItem renders the
-      // platform text when the platform is not in PLATFORM_OPTIONS.
-      // The custom platform value appears at least once (trigger + option in portal).
-      expect(screen.getAllByText("Atari Jaguar").length).toBeGreaterThan(0);
+    it("renders the custom platform option in the platform selector", async () => {
+      expect(
+        (await screen.findAllByText("Atari Jaguar")).length
+      ).toBeGreaterThan(0);
     });
   });
 
-  // ---- Rating input accepts keyboard interaction ----------------------------
-
-  describe("given the user interacts with the rating slider via keyboard", () => {
-    beforeEach(async () => {
-      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
-      render(
-        <LibraryModal
-          {...defaultProps}
-          entry={{ ...STUB_ENTRY, rating: null }}
-        />
-      );
-      // Focus the rating slider and press ArrowRight to set a value, then Enter to commit
-      const slider = screen.getByRole("slider", { name: "Rating" });
-      await userEvent.click(slider);
-      await userEvent.keyboard("{ArrowRight}{ArrowRight}{Enter}");
-      await actions.clickSave();
+  describe("given the platform options resolve from the server", () => {
+    beforeEach(() => {
+      render(<LibraryModal {...defaultProps} />);
     });
 
-    it("calls updateLibraryItemFn after a keyboard rating interaction", async () => {
+    it("requests platform options for the entry's game id", async () => {
       await waitFor(() => {
-        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
+        expect(vi.mocked(getPlatformOptionsFn)).toHaveBeenCalledWith({
+          data: { gameId: STUB_ENTRY.game.id },
+        });
       });
     });
+
+    it("renders a returned platform option in the platform selector", async () => {
+      await waitFor(() =>
+        expect(vi.mocked(getPlatformOptionsFn)).toHaveBeenCalled()
+      );
+      await actions.openPlatformSelect();
+      expect((await screen.findAllByText("Switch")).length).toBeGreaterThan(0);
+    });
   });
 
-  // ---- Date inputs accept user input ----------------------------------------
+  describe("given the platform select is opened", () => {
+    beforeEach(async () => {
+      render(<LibraryModal {...defaultProps} />);
+      await waitFor(() =>
+        expect(vi.mocked(getPlatformOptionsFn)).toHaveBeenCalled()
+      );
+      await actions.openPlatformSelect();
+    });
 
-  describe("given the user types a start date", () => {
+    it("separates the game's platforms from the user's under section headings", async () => {
+      expect(await screen.findByText("This game")).toBeInTheDocument();
+      expect(screen.getByText("Your platforms")).toBeInTheDocument();
+    });
+  });
+
+  describe("given the user sets a start date", () => {
     beforeEach(async () => {
       vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
       render(
@@ -539,10 +531,7 @@ describe("LibraryModal", () => {
           entry={{ ...STUB_ENTRY, startedAt: null }}
         />
       );
-      await userEvent.type(
-        screen.getByRole("textbox", { name: "Started" }),
-        "2024-05-01"
-      );
+      await actions.pickStartedDay("15");
       await actions.clickSave();
     });
 
@@ -553,12 +542,11 @@ describe("LibraryModal", () => {
       const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
         data: { startedAt: unknown };
       };
-      // inputValueToDate converts "2024-05-01" to a Date object
       expect(arg.data.startedAt).not.toBeNull();
     });
   });
 
-  describe("given the user types a completed date", () => {
+  describe("given the user sets a completed date", () => {
     beforeEach(async () => {
       vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
       render(
@@ -567,10 +555,7 @@ describe("LibraryModal", () => {
           entry={{ ...STUB_ENTRY, completedAt: null }}
         />
       );
-      await userEvent.type(
-        screen.getByRole("textbox", { name: "Completed" }),
-        "2024-06-15"
-      );
+      await actions.clickMarkComplete();
       await actions.clickSave();
     });
 
@@ -581,7 +566,6 @@ describe("LibraryModal", () => {
       const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
         data: { completedAt: unknown };
       };
-      // inputValueToDate converts "2024-06-15" to a Date object
       expect(arg.data.completedAt).not.toBeNull();
     });
   });

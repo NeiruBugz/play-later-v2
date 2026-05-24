@@ -7,10 +7,8 @@ import { Button } from "@/shared/ui/button";
 
 import type { DeleteJournalEntryButtonProps } from "./delete-journal-entry-button.type";
 
-// FSD: feature/ui component invoking its own feature/api server fn directly
-// (no useServerFn) — mirrors the DeleteJournalEntryDialog precedent. This is
-// the page variant used by the `/journal/$id` detail route (Slice 23 page
-// restore): a single inline confirm → delete → navigate to `/journal`.
+// Page variant used by the `/journal/$id` detail route: a single inline
+// confirm → delete → navigate to `/journal`. The dialog variant lives alongside it.
 
 export function DeleteJournalEntryButton({
   entryId,

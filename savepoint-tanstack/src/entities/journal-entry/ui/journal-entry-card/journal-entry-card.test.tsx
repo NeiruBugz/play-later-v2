@@ -116,8 +116,6 @@ describe("JournalEntryCard", () => {
   describe("given an entry with a game and the user clicks the game link", () => {
     beforeEach(async () => {
       render(<JournalEntryCard entry={entry} onSelect={onSelect} />);
-      // Click the game title link — this fires stopPropagation to prevent
-      // the surrounding card's onClick from also firing.
       await userEvent.click(screen.getByRole("link"));
     });
 

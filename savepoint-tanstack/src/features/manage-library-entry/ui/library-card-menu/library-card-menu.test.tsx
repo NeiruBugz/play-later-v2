@@ -6,7 +6,6 @@ import type { LibraryItemWithGame } from "@/entities/library-item/api";
 
 import { LibraryCardMenu } from "./library-card-menu";
 
-// Mock server fn wrappers — TanStack Start runtime is not available in jsdom.
 const mockUpdateLibraryItemFn = vi.fn();
 const mockDeleteLibraryItemFn = vi.fn();
 
@@ -18,7 +17,6 @@ vi.mock("../../api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: (...args: unknown[]) => mockDeleteLibraryItemFn(...args),
 }));
 
-// Router mock: router.invalidate is needed by the component after mutations.
 const mockInvalidate = vi.fn();
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -46,7 +44,6 @@ vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: mockInvalidate }),
 }));
 
-// Sonner toast mock.
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -54,7 +51,6 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// Minimal LibraryItemWithGame fixture.
 function makeItem(
   overrides: Partial<LibraryItemWithGame> = {}
 ): LibraryItemWithGame {

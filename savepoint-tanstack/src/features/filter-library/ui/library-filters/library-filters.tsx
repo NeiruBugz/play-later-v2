@@ -1,6 +1,7 @@
 import {
   DEFAULT_PLATFORMS,
   useLibraryFiltersState,
+  type LibraryAcquisition,
   type LibrarySortBy,
   type LibrarySortOrder,
   type LibraryStatus,
@@ -8,13 +9,15 @@ import {
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
 
+import { AcquisitionList } from "../acquisition-list";
 import { PlatformSelect } from "../platform-select";
 import { SortSelect } from "../sort-select";
+import { StartedOnlyToggle } from "../started-only-toggle";
 import { StatusList } from "../status-list";
 
-// Re-export types so existing callers that import from this module continue to compile.
 export type {
   LibraryStatus,
+  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,
@@ -23,6 +26,8 @@ export type {
 export type LibraryFiltersProps = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
+  acquisition: LibraryAcquisition | undefined;
+  startedOnly: boolean | undefined;
   minRating: number | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
@@ -50,6 +55,8 @@ export function LibraryFilters(props: LibraryFiltersProps) {
   const {
     status,
     platform,
+    acquisition,
+    startedOnly,
     minRating,
     sortBy,
     sortOrder,
@@ -60,17 +67,23 @@ export function LibraryFilters(props: LibraryFiltersProps) {
 
   const {
     currentStatus,
+    currentAcquisition,
+    startedOnly: startedOnlyChecked,
     sortValue,
     platformValue,
     hasActiveFilters,
     onStatusPick,
     onStatusAll,
+    onAcquisitionPick,
+    onStartedOnlyChange,
     onPlatformChange,
     onSortChange,
     onClearAll,
   } = useLibraryFiltersState({
     status,
     platform,
+    acquisition,
+    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
@@ -112,6 +125,28 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           platforms={platforms}
           rawPlatform={platform}
           onChange={onPlatformChange}
+        />
+      </section>
+
+      <section>
+        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
+          Acquisition
+        </p>
+        <AcquisitionList
+          current={currentAcquisition}
+          onPick={onAcquisitionPick}
+          variant="sidebar"
+        />
+      </section>
+
+      <section>
+        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
+          Activity
+        </p>
+        <StartedOnlyToggle
+          id="sidebar-started-only"
+          checked={startedOnlyChecked}
+          onCheckedChange={onStartedOnlyChange}
         />
       </section>
 

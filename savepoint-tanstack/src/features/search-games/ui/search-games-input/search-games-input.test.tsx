@@ -64,7 +64,6 @@ describe("SearchGamesInput", () => {
     beforeEach(async () => {
       render(<SearchGamesInput initialQuery="" debounceMs={300} />);
       await actions.typeInSearch("mario");
-      // Advance fake timers past the debounce period inside act to flush state updates.
       await act(async () => {
         vi.advanceTimersByTime(400);
       });
@@ -90,8 +89,6 @@ describe("SearchGamesInput", () => {
     });
 
     it("calls navigate with an empty search object when query is cleared", () => {
-      // When debounced is empty string, navigate is called with {} search.
-      // We simply verify navigate was called (query change happened).
       expect(mockNavigate).toHaveBeenCalled();
     });
   });
@@ -99,7 +96,6 @@ describe("SearchGamesInput", () => {
   describe("given user types the same value as initialQuery", () => {
     beforeEach(async () => {
       render(<SearchGamesInput initialQuery="zelda" debounceMs={300} />);
-      // Clear and retype same value to simulate no effective change.
       const input = elements.getSearchInput();
       await userEvent.clear(input);
       await userEvent.type(input, "zelda");

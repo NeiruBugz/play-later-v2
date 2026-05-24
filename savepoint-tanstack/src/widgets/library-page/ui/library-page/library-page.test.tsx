@@ -54,6 +54,16 @@ vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-library-entry/api/get-platform-options", () => ({
+  getPlatformOptionsFn: vi.fn(() =>
+    Promise.resolve([{ label: "This game", platforms: ["PC"] }])
+  ),
+}));
+
+vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
+  searchPlatformsFn: vi.fn(() => Promise.resolve([])),
+}));
+
 vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
@@ -106,6 +116,8 @@ const elements = {
     screen.getByRole("button", { name: "Filter by Playing" }),
   getAllFilterButton: () =>
     screen.getByRole("button", { name: "Show all statuses" }),
+  getPlayedFilterButton: () =>
+    screen.getByRole("button", { name: "Filter by Played" }),
   queryGameTitleHeading: (title: string) =>
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
@@ -140,6 +152,21 @@ describe("LibraryPage", () => {
       expect(elements.queryEmptyHeading()).not.toBeNull();
     });
 
+    it("offers the first-run dual CTAs (browse + import)", () => {
+      expect(
+        screen.getByRole("link", { name: "Browse games" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Import from Steam" })
+      ).toBeInTheDocument();
+    });
+
+    it("does not offer Clear filters when no filters are active", () => {
+      expect(
+        screen.queryByRole("button", { name: "Clear filters" })
+      ).toBeNull();
+    });
+
     it("does not render the library list when empty", () => {
       expect(elements.queryLibraryList()).toBeNull();
     });
@@ -150,6 +177,35 @@ describe("LibraryPage", () => {
 
     it("mounts the AddGameTrigger in the page header", () => {
       expect(elements.queryAddGameTrigger()).not.toBeNull();
+    });
+  });
+
+  describe("given filters are active but exclude every game", () => {
+    beforeEach(() => {
+      render(
+        <LibraryPage
+          items={[]}
+          total={0}
+          {...defaultViewProps}
+          status="PLAYING"
+        />
+      );
+    });
+
+    it("shows the no-results template, not the first-run empty state", () => {
+      expect(
+        screen.getByRole("heading", {
+          name: "Nothing matches these filters",
+          level: 2,
+        })
+      ).toBeInTheDocument();
+      expect(elements.queryEmptyHeading()).toBeNull();
+    });
+
+    it("offers a Clear filters action", () => {
+      expect(
+        screen.getByRole("button", { name: "Clear filters" })
+      ).toBeInTheDocument();
     });
   });
 
@@ -240,6 +296,43 @@ describe("LibraryPage", () => {
       it("renders the totalCount next to the All button", () => {
         const all = elements.getAllFilterButton();
         expect(all.textContent).toContain("3");
+      });
+    });
+
+    describe("given full-library statusCounts while the grid is filtered to PLAYING", () => {
+      beforeEach(() => {
+        // The grid shows only the 2 PLAYING items, but the loader-supplied
+        // statusCounts describe the WHOLE library (47 PLAYED exist elsewhere).
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+        ];
+        render(
+          <LibraryPage
+            items={items}
+            total={2}
+            status="PLAYING"
+            statusCounts={{
+              WISHLIST: 12,
+              SHELF: 84,
+              UP_NEXT: 6,
+              PLAYING: 2,
+              PLAYED: 47,
+            }}
+            platform={undefined}
+            minRating={undefined}
+            sortBy="updatedAt"
+            sortOrder="desc"
+          />
+        );
+      });
+
+      it("shows the full-library PLAYED count (47), not 0, even though no PLAYED item is on the page", () => {
+        expect(elements.getPlayedFilterButton().textContent).toContain("47");
+      });
+
+      it("still shows the PLAYING count from the full-library counts", () => {
+        expect(elements.getPlayingFilterButton().textContent).toContain("2");
       });
     });
 

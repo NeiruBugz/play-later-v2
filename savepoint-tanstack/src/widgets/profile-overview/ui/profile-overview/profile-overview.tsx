@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Gamepad2, Notebook, Trophy } from "lucide-react";
+import {
+  BookOpen,
+  CircleCheck,
+  Gamepad2,
+  Notebook,
+  Trophy,
+} from "lucide-react";
 import { useState, type ReactNode } from "react";
 
-// FSD: widgets may import features. ProfileOverview composes the upload
-// affordance and the "Edit Profile" navigation into the layout. The avatar
-// upload comes from `features/upload-avatar`; the `Edit Profile` Link
-// targets `/settings/profile` (own-profile only) — wiring is route-aware
-// but the widget stays props-driven via `isOwnProfile`.
 import { AvatarUpload } from "@/features/upload-avatar";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -29,12 +30,10 @@ export function ProfileOverview({
   activitySlot,
   hideActivityTab = false,
 }: ProfileOverviewProps) {
-  // Never expose an email-shaped `name` (legacy accounts seeded with email
-  // as the display name leak the address otherwise). Prefer the user-chosen
-  // username, fall back to a name only when it clearly isn't an email.
-  const safeName =
+  // Never expose an email-shaped `name` — see README "Display-name privacy".
+  const nonEmailName =
     profile.name && !profile.name.includes("@") ? profile.name : null;
-  const displayName = safeName ?? profile.username ?? "User";
+  const displayName = nonEmailName ?? profile.username ?? "User";
   const usernameSlug = profile.username ?? profile.id;
   const avatarSrc = profile.image ?? DEFAULT_AVATAR_SRC;
 
@@ -43,8 +42,13 @@ export function ProfileOverview({
     0
   );
   const playing = stats.statusCounts.PLAYING ?? 0;
-  const completed =
-    stats.statusCounts.COMPLETED ?? stats.statusCounts.PLAYED ?? 0;
+  // "Played" and "Completed" are different things and must not be conflated.
+  // PLAYED is a status (started, then set aside or finished — includes dropped
+  // games). Completion is a timestamp (`completedAt IS NOT NULL`). There is no
+  // COMPLETED status enum, so the old `statusCounts.COMPLETED` read was a
+  // phantom that always fell through to PLAYED and mislabeled it "Completed".
+  const played = stats.statusCounts.PLAYED ?? 0;
+  const completed = stats.completedCount ?? 0;
 
   const statCards: ReadonlyArray<{
     label: string;
@@ -53,6 +57,7 @@ export function ProfileOverview({
   }> = [
     { label: "In Library", value: gameCount, icon: BookOpen },
     { label: "Playing", value: playing, icon: Gamepad2 },
+    { label: "Played", value: played, icon: CircleCheck },
     { label: "Completed", value: completed, icon: Trophy },
     {
       label: "Journal Entries",
@@ -63,7 +68,6 @@ export function ProfileOverview({
 
   return (
     <div className="space-y-8">
-      {/* Hero — gradient banner + avatar overlap + identity block */}
       <header data-testid="profile-hero">
         <div
           data-testid="profile-hero-banner"
@@ -160,7 +164,7 @@ export function ProfileOverview({
         overview={
           <div className="space-y-8">
             <div
-              className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
               data-testid="profile-stats-bar"
             >
               {statCards.map(({ label, value, icon: Icon }) => (

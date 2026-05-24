@@ -8,7 +8,19 @@ import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
 import { Button } from "@/shared/ui/button";
 
-import { getPrimaryCtaPayload } from "./library-item-card.utility";
+import {
+  getPrimaryCtaPayload,
+  type CardCtaEmphasis,
+} from "./library-item-card.utility";
+
+const EMPHASIS_VARIANT: Record<
+  CardCtaEmphasis,
+  "default" | "outline" | "ghost"
+> = {
+  primary: "default",
+  outline: "outline",
+  ghost: "ghost",
+};
 
 const stop = (event: SyntheticEvent) => {
   event.preventDefault();
@@ -34,7 +46,12 @@ export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
   const [isPending, setIsPending] = useState(false);
   const [logSessionOpen, setLogSessionOpen] = useState(false);
 
-  const { label, action } = getPrimaryCtaPayload(item.status);
+  const {
+    label,
+    icon: Icon,
+    emphasis,
+    action,
+  } = getPrimaryCtaPayload(item.status);
 
   const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
     stop(event);
@@ -74,6 +91,7 @@ export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
       <Button
         type="button"
         size="sm"
+        variant={EMPHASIS_VARIANT[emphasis]}
         className="mt-2 w-full text-xs font-semibold"
         disabled={isPending}
         onClick={handleClick}
@@ -83,7 +101,10 @@ export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
         {isPending ? (
           <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
         ) : (
-          label
+          <>
+            <Icon aria-hidden />
+            {label}
+          </>
         )}
       </Button>
 

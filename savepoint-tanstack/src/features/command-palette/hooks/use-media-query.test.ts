@@ -3,10 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useMediaQuery } from "./use-media-query";
 
-// ---------------------------------------------------------------------------
-// MediaQueryList mock infrastructure
-// ---------------------------------------------------------------------------
-
 type MediaQueryChangeListener = (event: MediaQueryListEvent) => void;
 
 interface MockMQL {
@@ -78,8 +74,6 @@ describe("useMediaQuery", () => {
     it("returns true after the effect reads the initial match", () => {
       const { result } = renderHook(() => useMediaQuery("(min-width: 768px)"));
 
-      // The effect runs after initial render and calls update() which sets
-      // state to mql.matches (true).
       expect(result.current).toBe(true);
     });
   });
