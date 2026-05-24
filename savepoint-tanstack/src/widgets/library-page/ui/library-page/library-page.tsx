@@ -216,7 +216,7 @@ export function LibraryPage(props: LibraryPageProps) {
           ) : (
             <ul
               aria-label="Library items"
-              className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
+              className="grid grid-cols-1 gap-3 md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
             >
               {filteredItems.map((item) => (
                 <li key={item.id}>

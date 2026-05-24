@@ -46,9 +46,8 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
             coverImageId: item.game.coverImage,
           }}
           asLink
-          density="standard"
+          density="minimal"
           coverAccentClassName={getStatusCoverAccent(item.status)}
-          titleClassName="md:min-h-[2lh]"
           badges={
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
               <LibraryStatusBadge
@@ -70,6 +69,10 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col md:contents">
+        <h3 className="mt-0.5 line-clamp-2 text-sm leading-tight font-semibold md:mt-2 md:min-h-[2lh]">
+          {item.game.title}
+        </h3>
+
         <LibraryLifecycleStrip
           status={item.status}
           createdAt={item.createdAt}
