@@ -4,20 +4,16 @@ import { useState } from "react";
 import { GameCover, PlatformBadges } from "@/entities/game";
 import { JournalTeaser } from "@/entities/journal-entry";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import {
+  buildCoverImageUrl,
+  buildScreenshotUrl,
+} from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 
 import { LibraryStatusSwitcher } from "../library-status-switcher";
 import type { GameDetailProps } from "./game-detail.type";
-
-const IGDB_IMAGE_BASE = "https://images.igdb.com/igdb/image/upload";
-
-function buildScreenshotUrl(imageId: string | undefined): string | null {
-  if (!imageId) return null;
-  return `${IGDB_IMAGE_BASE}/t_1080p/${imageId}.jpg`;
-}
 
 export function GameDetail({
   data,

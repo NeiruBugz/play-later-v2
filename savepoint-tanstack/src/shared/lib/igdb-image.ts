@@ -20,3 +20,10 @@ export function buildCoverImageUrl(
   if (/^https?:\/\//.test(coverImage)) return coverImage;
   return `${IGDB_IMAGE_BASE}/${size}/${coverImage}.jpg`;
 }
+
+export function buildScreenshotUrl(
+  imageId: string | null | undefined,
+  size: IgdbCoverSize = "t_1080p"
+): string | null {
+  return buildCoverImageUrl(imageId, size);
+}
