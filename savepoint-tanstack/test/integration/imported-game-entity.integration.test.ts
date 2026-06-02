@@ -15,10 +15,6 @@
  *     - Missing id throws NotFoundError.
  *     - Idempotent: re-dismissing a dismissed row is a no-op.
  *
- *   updateImportedGameStatus(userId, importedGameId, status): Promise<ImportedGame>
- *     - Updates `igdbMatchStatus` to the given status.
- *     - Same ownership / not-found semantics as dismissImportedGame.
- *
  *   upsertImportedGamesBatch(userId, games): Promise<{ created: number; updated: number }>
  *     - Upserts a batch of Steam-shaped payloads inside a single transaction.
  *     - Matches existing rows by `(userId, storefront=STEAM, storefrontGameId)`.
@@ -35,7 +31,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 // RED imports — modules do not exist until the GREEN step.
 import { dismissImportedGame } from "@/entities/imported-game/api/dismiss-imported-game.server";
 import { findImportedGamesForUser } from "@/entities/imported-game/api/find-imported-games-for-user.server";
-import { updateImportedGameStatus } from "@/entities/imported-game/api/update-imported-game-status.server";
 import { upsertImportedGamesBatch } from "@/entities/imported-game/api/upsert-imported-games-batch.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -438,59 +433,6 @@ describe("dismissImportedGame", () => {
       await expect(dismissImportedGame(ALICE_ID, "no-such-id")).rejects.toThrow(
         NotFoundError
       );
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// updateImportedGameStatus
-// ---------------------------------------------------------------------------
-
-describe("updateImportedGameStatus", () => {
-  describe("happy path", () => {
-    let rowId: string;
-    beforeEach(async () => {
-      rowId = await createRow({ userId: ALICE_ID, storefrontGameId: "1" });
-    });
-
-    it("transitions PENDING → MATCHED", async () => {
-      const updated = await updateImportedGameStatus(
-        ALICE_ID,
-        rowId,
-        "MATCHED"
-      );
-      expect(updated.igdbMatchStatus).toBe("MATCHED");
-    });
-
-    it("transitions to UNMATCHED", async () => {
-      const updated = await updateImportedGameStatus(
-        ALICE_ID,
-        rowId,
-        "UNMATCHED"
-      );
-      expect(updated.igdbMatchStatus).toBe("UNMATCHED");
-    });
-  });
-
-  describe("cross-user ownership", () => {
-    let aliceRowId: string;
-    beforeEach(async () => {
-      aliceRowId = await createRow({
-        userId: ALICE_ID,
-        storefrontGameId: "1",
-      });
-    });
-
-    it("throws NotFoundError when Bob targets Alice's row", async () => {
-      await expect(
-        updateImportedGameStatus(BOB_ID, aliceRowId, "MATCHED")
-      ).rejects.toThrow(NotFoundError);
-    });
-
-    it("throws NotFoundError when the id does not exist", async () => {
-      await expect(
-        updateImportedGameStatus(ALICE_ID, "no-such-id", "MATCHED")
-      ).rejects.toThrow(NotFoundError);
     });
   });
 });

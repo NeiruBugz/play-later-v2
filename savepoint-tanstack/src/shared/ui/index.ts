@@ -12,7 +12,6 @@ export {
 } from "./collapsible";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
-export { ScrollArea, ScrollBar } from "./scroll-area";
 export { SegmentedControl } from "./segmented-control";
 export type {
   SegmentedControlOption,

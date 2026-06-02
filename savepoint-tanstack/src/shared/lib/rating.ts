@@ -12,11 +12,6 @@
  * 5-star control).
  */
 
-/** Smallest selectable rating increment, in stars. */
-export const RATING_STAR_STEP = 0.5;
-/** Maximum rating, in stars. */
-export const RATING_MAX_STARS = 5;
-
 /** Stars (0.5–5) → storage Int (1–10). */
 export function ratingStarsToStorage(stars: number): number {
   return Math.round(stars * 2);
