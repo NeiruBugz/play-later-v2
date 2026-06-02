@@ -1,6 +1,7 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { createLogger } from "@/shared/lib/logger";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -15,16 +16,14 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 
 import type { PlatformComboboxProps } from "./platform-combobox.type";
+import {
+  computeVisibleItems,
+  NO_PLATFORM_LABEL,
+  REMOTE_SEARCH_MIN_LENGTH,
+  REMOTE_SEARCH_RESULTS_LABEL,
+} from "./platform-combobox.utility";
 
-const NO_PLATFORM_LABEL = "No platform";
-const REMOTE_SEARCH_RESULTS_LABEL = "Search results";
-const REMOTE_SEARCH_MIN_LENGTH = 2;
-
-const matches = (a: string, b: string): boolean =>
-  a.toLowerCase() === b.toLowerCase();
-
-const includesQuery = (haystack: string, query: string): boolean =>
-  haystack.toLowerCase().includes(query.toLowerCase());
+const log = createLogger({ service: "platform-combobox" });
 
 export function PlatformCombobox({
   value,
@@ -76,7 +75,11 @@ export function PlatformCombobox({
         setRemoteResults(names);
         setRemoteLoading(false);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        log.error(
+          { err: error, query: debouncedQuery },
+          "remote platform search failed"
+        );
         if (latestQueryRef.current !== debouncedQuery) return;
         setRemoteResults([]);
         setRemoteLoading(false);
@@ -86,37 +89,23 @@ export function PlatformCombobox({
   // `shouldFilter={false}`: cmdk would otherwise hide items whose text does not
   // match the query, which would also hide the "Add" affordance for an
   // arbitrary platform (e.g. "Steam Deck") that appears in no group. We own the
-  // filtering so the create item is always reachable.
-  const visibleGroups = groups
-    .map((group) => ({
-      label: group.label,
-      platforms: group.platforms.filter(
-        (platform) =>
-          trimmedQuery === "" || includesQuery(platform, trimmedQuery)
-      ),
-    }))
-    .filter((group) => group.platforms.length > 0);
-
-  const allPlatforms = groups.flatMap((group) => group.platforms);
-  const isLocallyKnown = (platform: string): boolean =>
-    matches(platform, value) ||
-    allPlatforms.some((known) => matches(known, platform));
-
-  const remoteOnlyResults = remoteResults.filter(
-    (name) => !isLocallyKnown(name)
-  );
-
-  const showRemoteSearching = remoteEnabled && remoteLoading;
-  const showRemoteGroup =
-    remoteEnabled && (showRemoteSearching || remoteOnlyResults.length > 0);
-
-  const showCreate =
-    trimmedQuery !== "" &&
-    !matches(trimmedQuery, NO_PLATFORM_LABEL) &&
-    !allPlatforms.some((platform) => matches(platform, trimmedQuery));
-
-  const showNoPlatform =
-    trimmedQuery === "" || includesQuery(NO_PLATFORM_LABEL, trimmedQuery);
+  // filtering (in computeVisibleItems) so the create item is always reachable.
+  const {
+    visibleGroups,
+    remoteOnlyResults,
+    showRemoteSearching,
+    showRemoteGroup,
+    showCreate,
+    showNoPlatform,
+    hasAnyItem,
+  } = computeVisibleItems({
+    groups,
+    value,
+    trimmedQuery,
+    remoteResults,
+    remoteEnabled,
+    remoteLoading,
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -212,12 +201,9 @@ export function PlatformCombobox({
               </CommandGroup>
             ) : null}
 
-            {!showCreate &&
-            !showNoPlatform &&
-            !showRemoteGroup &&
-            visibleGroups.length === 0 ? (
+            {hasAnyItem ? null : (
               <CommandEmpty>No platform found.</CommandEmpty>
-            ) : null}
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
