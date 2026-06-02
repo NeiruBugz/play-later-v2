@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { upsertGameFromIgdb } from "@/entities/game/api/upsert-game.server";
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
@@ -24,8 +25,10 @@ export const quickAddToLibraryFn = createServerFn({ method: "POST" })
 
     const userId = await requireUserId();
 
+    const game = await upsertGameFromIgdb(igdbId);
+
     const item = await addGameToLibrary(userId, {
-      igdbId,
+      gameId: game.id,
       status: "UP_NEXT",
     });
 

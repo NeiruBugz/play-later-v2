@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { upsertGameFromIgdb } from "@/entities/game/api/upsert-game.server";
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
@@ -21,5 +22,11 @@ export const addGameToLibraryFn = createServerFn({ method: "POST" })
 
     const userId = await requireUserId();
 
-    return addGameToLibrary(userId, parsed);
+    const game = await upsertGameFromIgdb(parsed.igdbId);
+
+    return addGameToLibrary(userId, {
+      gameId: game.id,
+      status: parsed.status,
+      platform: parsed.platform,
+    });
   });

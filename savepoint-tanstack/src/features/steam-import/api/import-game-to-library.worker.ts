@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 import {
-  getGameByIgdbId,
+  upsertGameFromIgdb,
+  upsertGameFromIgdbPayload,
+} from "@/entities/game/api/upsert-game.server";
+import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
+import {
   matchSteamGameByAppId,
   type SearchResponseItem,
 } from "@/shared/api/igdb";
@@ -30,29 +34,17 @@ export type ImportGameToLibraryResult = {
   gameSlug: string;
 };
 
-const IGDB_IMAGE_BASE = "https://images.igdb.com/igdb/image/upload";
-
-function buildCoverUrl(imageId: string): string {
-  return `${IGDB_IMAGE_BASE}/t_cover_big/${imageId}.jpg`;
-}
-
 /**
  * Worker for the combined "match + add to library" action.
- *
- * Mirrors canonical `features/steam-import/use-cases/import-game-to-library.ts`
- * but tightened to the throw-on-error AppError taxonomy.
  *
  * Flow:
  *  1. Two-step ownership read on the imported-game row.
  *  2. Resolve igdbId: `manualIgdbId` if provided, otherwise throw
- *     `NeedsManualMatchError` (the auto Steam→IGDB matcher port is a
- *     follow-up — see DIVERGENCES.md).
- *  3. Cache-or-fetch a local `Game` row by `igdbId` (inlined here because
- *     eslint-plugin-boundaries forbids feature→entity-other-than-its-own
- *     calls; the same inline lives in `addGameToLibrary`).
+ *     `NeedsManualMatchError`.
+ *  3. Cache-or-fetch a local `Game` row by `igdbId` via entities/game.
  *  4. Refuse if the user already has a LibraryItem for this game (throws
  *     `ConflictError`; the modal surfaces "already in library").
- *  5. Create the LibraryItem and flip `igdbMatchStatus: MATCHED`.
+ *  5. Create the LibraryItem via entities/library-item and flip `igdbMatchStatus: MATCHED`.
  */
 export async function importGameToLibraryWorker(
   userId: string | undefined,
@@ -108,32 +100,12 @@ export async function importGameToLibraryWorker(
     matchedRemote = match;
   }
 
-  let game = await prisma.game.findUnique({ where: { igdbId } });
-  if (!game) {
-    // Prefer the payload we already have from the auto-matcher; otherwise
-    // fetch by id. Either way we end up writing a Game row keyed by igdbId.
-    const remote = matchedRemote ?? (await getGameByIgdbId(igdbId));
-    if (!remote) {
-      throw new NotFoundError("Game not found in IGDB", { igdbId });
-    }
-    const releaseDate =
-      typeof remote.first_release_date === "number"
-        ? new Date(remote.first_release_date * 1000)
-        : null;
-    const coverImage = remote.cover?.image_id
-      ? buildCoverUrl(remote.cover.image_id)
-      : null;
-    game = await prisma.game.create({
-      data: {
-        igdbId: remote.id,
-        title: remote.name,
-        slug: remote.slug,
-        releaseDate,
-        coverImage,
-      },
-    });
-  }
+  // Delegate caching and URL generation cleanly to entities/game
+  const game = matchedRemote
+    ? await upsertGameFromIgdbPayload(matchedRemote)
+    : await upsertGameFromIgdb(igdbId);
 
+  // Assert duplicate presence at the feature level before adding (to throw specific ConflictError)
   const existing = await prisma.libraryItem.findFirst({
     where: { userId, gameId: game.id },
   });
@@ -149,13 +121,11 @@ export async function importGameToLibraryWorker(
     });
   }
 
-  const libraryItem = await prisma.libraryItem.create({
-    data: {
-      userId,
-      gameId: game.id,
-      status,
-      platform: "PC (Microsoft Windows)",
-    },
+  // Create LibraryItem via entities/library-item
+  const libraryItem = await addGameToLibrary(userId, {
+    gameId: game.id,
+    status,
+    platform: "PC (Microsoft Windows)",
   });
 
   await prisma.importedGame.update({
