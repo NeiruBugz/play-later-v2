@@ -16,6 +16,7 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
+import { z } from "zod";
 
 import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
 
@@ -55,6 +56,35 @@ export const STATUS_ENTRIES: ReadonlyArray<StatusEntry> = [
     icon: Bookmark,
   },
 ];
+
+/**
+ * Canonical, ordered value list for the library status taxonomy — the single
+ * source the `z.enum` schema and every UI option array derive from. The order
+ * is the user-facing select order; it deliberately differs from
+ * `STATUS_ENTRIES` (badge order). The `satisfies` clause keys it to
+ * `LibraryItemStatus`, and `assertCoversStatusEntries` below guarantees it can
+ * never drift from the set of values declared in `STATUS_ENTRIES`.
+ */
+export const LIBRARY_STATUS_VALUES = [
+  "WISHLIST",
+  "SHELF",
+  "UP_NEXT",
+  "PLAYING",
+  "PLAYED",
+] as const satisfies ReadonlyArray<LibraryItemStatus>;
+
+export const libraryItemStatusSchema = z.enum(LIBRARY_STATUS_VALUES);
+
+type StatusEntryValue = (typeof STATUS_ENTRIES)[number]["value"];
+type LibraryStatusValue = (typeof LIBRARY_STATUS_VALUES)[number];
+
+// Compile-time guard: the canonical value list and STATUS_ENTRIES must cover
+// exactly the same set of statuses. If either side gains/loses a value without
+// the other matching, one of these assignments stops type-checking.
+const _entriesCoverValues: StatusEntryValue = "" as LibraryStatusValue;
+const _valuesCoverEntries: LibraryStatusValue = "" as StatusEntryValue;
+void _entriesCoverValues;
+void _valuesCoverEntries;
 
 const STATUS_ENTRY_MAP = new Map<LibraryItemStatus, StatusEntry>(
   STATUS_ENTRIES.map((e) => [e.value, e])

@@ -2,7 +2,10 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { getStatusLabel } from "@/entities/library-item/model";
+import {
+  getStatusLabel,
+  LIBRARY_STATUS_VALUES,
+} from "@/entities/library-item/model";
 import { importGameToLibraryFn } from "@/features/steam-import/api/import-game-to-library";
 import { calculateSmartStatus } from "@/features/steam-import/lib/calculate-smart-status";
 import { formatPlaytime } from "@/features/steam-import/ui/imported-game-card/imported-game-card.utility";
@@ -27,13 +30,7 @@ import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.
 import { IgdbManualSearch } from "../igdb-manual-search";
 import type { ImportGameModalProps } from "./import-game-modal.type";
 
-const STATUS_OPTIONS: LibraryItemStatus[] = [
-  "WISHLIST",
-  "SHELF",
-  "UP_NEXT",
-  "PLAYING",
-  "PLAYED",
-];
+const STATUS_OPTIONS = LIBRARY_STATUS_VALUES;
 
 function formatLastPlayed(date: Date | null | undefined): string {
   if (!date) return "Never";

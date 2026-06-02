@@ -3,15 +3,14 @@ import { z } from "zod";
 
 import { upsertGameFromIgdb } from "@/entities/game/api/upsert-game.server";
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
+import { libraryItemStatusSchema } from "@/entities/library-item/model";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 import type { LibraryItem } from "../../../../shared/lib/prisma/client.ts";
 
 const ADD_GAME_INPUT = z.object({
   igdbId: z.number().int().positive(),
-  status: z
-    .enum(["WISHLIST", "SHELF", "UP_NEXT", "PLAYING", "PLAYED"])
-    .optional(),
+  status: libraryItemStatusSchema.optional(),
   platform: z.string().min(1).max(64).optional(),
 });
 

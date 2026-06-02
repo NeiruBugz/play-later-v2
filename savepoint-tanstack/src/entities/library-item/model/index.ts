@@ -1,9 +1,11 @@
 export {
   LIBRARY_STATUS_LABELS,
+  LIBRARY_STATUS_VALUES,
   STATUS_ENTRIES,
   getStatusEntry,
   getStatusLabel,
   getUpNextLabel,
+  libraryItemStatusSchema,
 } from "./status";
 export type { StatusBadgeVariant, StatusEntry } from "./status";
 export { TOUCHED_STATUSES, isTouched } from "./touched";
