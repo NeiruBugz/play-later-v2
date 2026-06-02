@@ -1,3 +1,5 @@
+import { formatAbsoluteDate } from "@/shared/lib/date";
+
 import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.ts";
 
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -47,14 +49,6 @@ function clampPct(value: number): number {
   return value;
 }
 
-function formatFull(date: Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date);
-}
-
 function compactElapsed(date: Date, now: Date): string {
   const days = Math.max(
     0,
@@ -102,9 +96,9 @@ export function computeLifecycleStrip(
     endLabel = "—";
   }
 
-  const hoverParts = [`Added ${formatFull(created)}`];
-  if (started) hoverParts.push(`Started ${formatFull(started)}`);
-  if (completed) hoverParts.push(`Completed ${formatFull(completed)}`);
+  const hoverParts = [`Added ${formatAbsoluteDate(created)}`];
+  if (started) hoverParts.push(`Started ${formatAbsoluteDate(started)}`);
+  if (completed) hoverParts.push(`Completed ${formatAbsoluteDate(completed)}`);
 
   return {
     addedLabel: `added ${compactElapsed(created, now)}`,

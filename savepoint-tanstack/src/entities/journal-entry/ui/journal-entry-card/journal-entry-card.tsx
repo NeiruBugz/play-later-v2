@@ -1,17 +1,10 @@
 import { Link } from "@tanstack/react-router";
 
+import { formatJournalDate } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription } from "@/shared/ui/card";
 
 import type { JournalEntryCardProps } from "./journal-entry-card.type";
-
-function formatEntryDate(date: Date): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  });
-}
 
 /**
  * Display-only journal entry card. Renders the entry's content, kind badge,
@@ -41,7 +34,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
             dateTime={new Date(entry.updatedAt).toISOString()}
             className="text-muted-foreground font-mono text-xs"
           >
-            {formatEntryDate(entry.updatedAt)}
+            {formatJournalDate(entry.updatedAt)}
           </time>
         </CardDescription>
         {title ? (
@@ -53,7 +46,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           </h3>
         ) : (
           <h3 id={`journal-entry-${entry.id}-heading`} className="sr-only">
-            {kindLabel} from {formatEntryDate(entry.updatedAt)}
+            {kindLabel} from {formatJournalDate(entry.updatedAt)}
           </h3>
         )}
       </header>
@@ -85,7 +78,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           <button
             type="button"
             onClick={() => onSelect(entry.id)}
-            aria-label={`Open journal entry from ${formatEntryDate(entry.updatedAt)}`}
+            aria-label={`Open journal entry from ${formatJournalDate(entry.updatedAt)}`}
             className={cn(
               "block w-full cursor-pointer text-left",
               "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"

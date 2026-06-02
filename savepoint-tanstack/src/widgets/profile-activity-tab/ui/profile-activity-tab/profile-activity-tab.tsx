@@ -8,6 +8,8 @@ import {
   getStatusLabel,
   type LibraryItemStatus,
 } from "@/entities/library-item/model";
+import { formatLocaleDate } from "@/shared/lib/date";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 
@@ -50,9 +52,7 @@ export function ProfileActivityTab({
       setItems((prev) => [...prev, ...next.items]);
       setCursor(next.nextCursor);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Couldn't load more activity"
-      );
+      setError(getErrorMessage(err, "Couldn't load more activity"));
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export function ProfileActivityTab({
           >
             <p className="text-foreground">{activityLine(item)}</p>
             <p className="text-muted-foreground text-xs">
-              {item.activityTimestamp.toLocaleDateString()}
+              {formatLocaleDate(item.activityTimestamp)}
             </p>
           </li>
         ))}
