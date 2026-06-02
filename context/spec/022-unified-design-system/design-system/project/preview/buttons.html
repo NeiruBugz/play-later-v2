@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background);color:var(--foreground);font-family:var(--font-runtime-sans);padding:20px 24px;-webkit-font-smoothing:antialiased}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
+.sw{border-radius:8px;border:1px solid var(--border)}
+.mono{font-family:var(--font-runtime-mono)}
+.mut{color:var(--muted-foreground)}
+.lbl{font-size:11px;letter-spacing:.04em}
+
+.btn{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:var(--radius-btn);font-size:14px;font-weight:500;border:1px solid transparent;font-family:inherit}
+.b-default{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--shadow-paper-sm)}
+.b-secondary{background:var(--secondary);color:var(--secondary-foreground);box-shadow:var(--shadow-paper-sm)}
+.b-outline{border-color:var(--border);background:var(--card);color:var(--foreground)}
+.b-ghost{color:var(--muted-foreground);background:transparent}
+.b-link{color:var(--primary);background:transparent;text-decoration:underline;text-underline-offset:4px}
+
+</style></head><body>
+<div class="lbl mono mut" style="margin-bottom:14px">BUTTONS</div>
+<div class="row" style="gap:10px">
+  <button class="btn b-default">Start your library</button>
+  <button class="btn b-secondary">Secondary</button>
+  <button class="btn b-outline">Outline</button>
+  <button class="btn b-ghost">Ghost</button>
+  <button class="btn b-link">Link</button>
+</div>
+<div class="lbl mut" style="margin-top:14px">Press = active:scale(.98) + deepen to --primary-active. Hover lifts shadow.</div>
+</body></html>

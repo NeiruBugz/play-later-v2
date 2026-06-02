@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SavePoint — Logo Exploration</title>
+  <link rel="stylesheet" href="colors_and_type.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--background); color: var(--foreground);
+      font-family: var(--font-runtime-sans); -webkit-font-smoothing: antialiased;
+      padding: 40px clamp(20px, 5vw, 72px) 80px;
+    }
+    .head { max-width: 1100px; margin: 0 auto 28px; }
+    .eyebrow { font-family: var(--font-runtime-mono); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-foreground); }
+    h1 { font-family: var(--font-display); font-weight: 700; font-size: 2rem; letter-spacing: -0.02em; margin: 6px 0 8px; }
+    .sub { color: var(--muted-foreground); max-width: 640px; line-height: 1.6; margin: 0; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin: 22px 0 0; }
+    .ctl-group { display: flex; align-items: center; gap: 10px; }
+    .ctl-label { font-size: .8125rem; color: var(--muted-foreground); }
+    .swatch { width: 22px; height: 22px; border-radius: 9999px; cursor: pointer; padding: 0; border: 2px solid transparent; }
+    .swatch[data-on="true"] { border-color: var(--foreground); outline: 1px solid var(--foreground); outline-offset: 1px; }
+    .seg { display: inline-flex; gap: 4px; padding: 4px; background: var(--muted); border-radius: var(--radius-btn); }
+    .seg button { border: 0; background: transparent; cursor: pointer; padding: 6px 14px; border-radius: calc(var(--radius-btn) - 1px); font: inherit; font-size: .8125rem; font-weight: 600; color: var(--muted-foreground); }
+    .seg button[data-on="true"] { background: var(--card); color: var(--foreground); box-shadow: var(--shadow-1); }
+
+    .grid { max-width: 1100px; margin: 32px auto 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .card { background: var(--card); border: 1px solid color-mix(in oklch, var(--border) 55%, transparent); border-radius: var(--radius-card); box-shadow: var(--shadow-2); padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+    .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .card-name { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; margin: 0; }
+    .card-no { font-family: var(--font-runtime-mono); font-size: .75rem; color: var(--muted-foreground); }
+    .rationale { color: var(--muted-foreground); font-size: .875rem; line-height: 1.55; margin: 0; }
+
+    .stage { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 8px 0 4px; }
+    .mark-lg { color: var(--primary); }
+    .lockup { display: flex; align-items: center; gap: 12px; color: var(--foreground); }
+    .lockup .wm { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.015em; }
+    .mini { display: flex; align-items: center; gap: 14px; padding-top: 4px; border-top: 1px dashed var(--border); }
+    .chip { width: 36px; height: 36px; border-radius: var(--radius-cover); background: var(--primary); color: var(--primary-foreground); display: flex; align-items: center; justify-content: center; }
+    .chip.sm { width: 22px; height: 22px; border-radius: var(--radius-chip); }
+    .mini-label { font-size: .75rem; color: var(--muted-foreground); margin-left: auto; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <div class="eyebrow">SavePoint · Brand</div>
+    <h1>Logomark directions</h1>
+    <p class="sub">Four takes on the <strong>save point</strong> metaphor — the deliberate, rationed moment you chose to stop and keep your progress. Each mark is drawn with <code>currentColor</code>, so it tints to the active accent. Switch accent and mode below to compare.</p>
+    <div class="controls">
+      <div class="ctl-group">
+        <span class="ctl-label">Accent</span>
+        <button class="swatch" data-acc="indigo" style="background:#5a52d6" title="Indigo"></button>
+        <button class="swatch" data-acc="sage" style="background:#468b85" title="Sage"></button>
+        <button class="swatch" data-acc="clay" style="background:#b3623f" title="Clay"></button>
+        <button class="swatch" data-acc="plum" style="background:#9c4f86" title="Plum"></button>
+      </div>
+      <div class="ctl-group">
+        <span class="ctl-label">Mode</span>
+        <div class="seg" id="mode">
+          <button data-mode="light">Light</button>
+          <button data-mode="dark">Dark</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <script>
+    // ---- The four marks (48×48, currentColor) ----
+    const MARKS = {
+      glow: `<svg width="WW" height="WW" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="SW" stroke-linejoin="round">
+        <rect x="13.2" y="13.2" width="21.6" height="21.6" rx="4" transform="rotate(45 24 24)"/>
+        <rect x="19.5" y="19.5" width="9" height="9" rx="1.5" transform="rotate(45 24 24)" fill="currentColor" stroke="none"/>
+      </svg>`,
+      shrine: `<svg width="WW" height="WW" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="SW" stroke-linejoin="round">
+        <rect x="15" y="7" width="18" height="34" rx="9"/>
+        <rect x="15" y="21.5" width="18" height="5.5" fill="currentColor" stroke="none"/>
+        <path d="M24 41 v0" />
+      </svg>`,
+      bookmark: `<svg width="WW" height="WW" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="SW" stroke-linejoin="round">
+        <path d="M14 9 h20 a2 2 0 0 1 2 2 v29 l-12 -8.5 l-12 8.5 v-29 a2 2 0 0 1 2 -2 z"/>
+        <circle cx="24" cy="21" r="3.6" fill="currentColor" stroke="none"/>
+      </svg>`,
+      card: `<svg width="WW" height="WW" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="SW" stroke-linejoin="round">
+        <path d="M14 9 H30 L39 18 V34 a4 4 0 0 1 -4 4 H13 a4 4 0 0 1 -4 -4 V14 a4 4 0 0 1 4 -4 Z"/>
+        <line x1="16.5" y1="30.5" x2="31.5" y2="30.5"/>
+        <rect x="16.5" y="16" width="8" height="6" rx="1" fill="currentColor" stroke="none"/>
+      </svg>`,
+    };
+    const DIRS = [
+      { key: "glow", no: "01", name: "Save Glow", text: "The pulsing diamond that hovered over a save spot in old RPGs. Reads as ‘you are here — this moment matters.’ The most evocative of the metaphor." },
+      { key: "shrine", no: "02", name: "Save Shrine", text: "The physical save spot as a glowing pylon / save room. Architectural and calm — a place you traveled to and chose to rest." },
+      { key: "bookmark", no: "03", name: "Checkpoint Bookmark", text: "A bookmark that doubles as a location pin, with a save dot. Ties saving + journaling together — strong fit for a library + journal." },
+      { key: "card", no: "04", name: "Refined Memory Card", text: "Keeps the heritage object, redrawn clean and geometric with the corner notch + one highlighted save block. Familiar, modernized." },
+    ];
+
+    function mark(key, size, sw) {
+      return MARKS[key].replace(/WW/g, size).replace(/SW/g, sw);
+    }
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = DIRS.map((d) => `
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-name">${d.name}</h2>
+          <span class="card-no">${d.no}</span>
+        </div>
+        <div class="stage">
+          <span class="mark-lg">${mark(d.key, 72, 2.4)}</span>
+          <span class="lockup">${mark(d.key, 34, 2.6)}<span class="wm">SavePoint</span></span>
+        </div>
+        <p class="rationale">${d.text}</p>
+        <div class="mini">
+          <span class="chip">${mark(d.key, 22, 3)}</span>
+          <span class="chip sm">${mark(d.key, 14, 3.4)}</span>
+          <span class="mini-label">app icon · favicon</span>
+        </div>
+      </div>
+    `).join("");
+
+    // ---- Controls ----
+    const root = document.documentElement;
+    function setAccent(a) {
+      root.setAttribute("data-accent", a);
+      document.querySelectorAll(".swatch").forEach((s) => s.setAttribute("data-on", s.dataset.acc === a));
+    }
+    function setMode(m) {
+      root.classList.toggle("dark", m === "dark");
+      document.querySelectorAll("#mode button").forEach((b) => b.setAttribute("data-on", b.dataset.mode === m));
+    }
+    document.querySelectorAll(".swatch").forEach((s) => s.addEventListener("click", () => setAccent(s.dataset.acc)));
+    document.querySelectorAll("#mode button").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+    setAccent("sage");
+    setMode("light");
+  </script>
+</body>
+</html>

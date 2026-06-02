@@ -77,11 +77,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
             src="/logo.svg"
             alt=""
             aria-hidden="true"
-            className="y2k-logo-glow jewel-logo-glow h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0"
           />
-          <span className="text-h3 y2k-chrome-text y2k:tracking-wider jewel-display jewel:tracking-[0.14em]">
-            SavePoint
-          </span>
+          <span className="text-h3">SavePoint</span>
         </Link>
 
         <button

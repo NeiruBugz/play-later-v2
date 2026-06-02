@@ -9,32 +9,21 @@ export const THEME_STORAGE_KEY = "theme";
 export const THEME_LABELS: readonly Theme[] = [
   "light",
   "dark",
-  "cartridge",
-  "aurora",
   "system",
 ] as const;
 
 /**
  * Theme value → CSS class mapping. "" means no theme class is applied.
  * "system" is intentionally absent; it resolves to either "light" or "dark"
- * first. Theme value === CSS class name. Five user-selectable themes per
- * canonical (light/dark/cartridge/aurora/system). The `.y2k` and `.jewel`
- * CSS variants in styles.css are orphan — present in CSS, not reachable
- * from any user-facing surface.
+ * first. The only class this provider ever writes is `dark`.
  */
 export const THEME_CLASS_MAP: Record<ResolvedTheme, string> = {
   light: "",
   dark: "dark",
-  cartridge: "cartridge",
-  aurora: "aurora",
 };
 
 /** All non-empty class names that this provider may add/remove on <html>. */
-export const THEME_CLASS_NAMES: readonly string[] = [
-  "dark",
-  "cartridge",
-  "aurora",
-];
+export const THEME_CLASS_NAMES: readonly string[] = ["dark"];
 
 export function isTheme(value: unknown): value is Theme {
   return typeof value === "string" && THEME_LABELS.includes(value as Theme);
@@ -74,8 +63,8 @@ export function applyThemeToHtml(theme: Theme): void {
     root.classList.add(nextClass);
   }
 
-  // data-theme tracks the LABEL (so CSS can key on "cartridge" if it wants),
-  // but is omitted when the user is on "system" — matching the inline script.
+  // data-theme tracks the LABEL ("light"/"dark"), but is omitted when the user
+  // is on "system" — matching the inline pre-hydration script.
   if (theme === "system") {
     root.removeAttribute("data-theme");
   } else {

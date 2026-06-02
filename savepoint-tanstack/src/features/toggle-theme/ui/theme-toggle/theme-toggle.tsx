@@ -1,4 +1,4 @@
-import { Gamepad2, Monitor, Moon, Sparkles, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { type ComponentType } from "react";
 
 import { useTheme, type Theme } from "@/shared/lib/theme";
@@ -10,9 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
-// Theme value === CSS class name. Five user-selectable themes per canonical
-// (light/dark/cartridge/aurora/system). The .y2k and .jewel CSS variants in
-// styles.css are orphan — not reachable from this picker.
+// Three theme options (spec 022): Light / Dark / System.
 const THEMES: ReadonlyArray<{
   value: Theme;
   label: string;
@@ -20,8 +18,6 @@ const THEMES: ReadonlyArray<{
 }> = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
-  { value: "cartridge", label: "Cartridge", icon: Gamepad2 },
-  { value: "aurora", label: "Aurora", icon: Sparkles },
   { value: "system", label: "System", icon: Monitor },
 ];
 
