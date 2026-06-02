@@ -8,6 +8,7 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
 } from "@/shared/lib/constants";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -58,7 +59,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
       toast.success("Profile setup complete!");
       router.navigate({ to: "/dashboard" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Setup failed";
+      const message = getErrorMessage(err, "Setup failed");
       setServerError(message);
       toast.error(message);
     } finally {
