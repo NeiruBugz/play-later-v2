@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { deleteJournalEntryFn } from "@/features/delete-journal-entry/api/delete-journal-entry-fn";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -33,8 +34,7 @@ export function DeleteJournalEntryDialog({
       await router.invalidate();
       onOpenChange(false);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Something went wrong";
+      const message = getErrorMessage(err, "Something went wrong");
       setError(message);
       toast.error(message);
     } finally {

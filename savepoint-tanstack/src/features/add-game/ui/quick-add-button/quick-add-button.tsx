@@ -3,6 +3,7 @@ import { Check, Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { getErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 
 import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
@@ -30,7 +31,7 @@ export function QuickAddButton({ igdbId, gameTitle }: QuickAddButtonProps) {
       await router.invalidate();
     } catch (err: unknown) {
       setPhase("idle");
-      toast.error(err instanceof Error ? err.message : String(err));
+      toast.error(getErrorMessage(err, "Could not add game to library"));
     }
   };
 

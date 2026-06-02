@@ -1,11 +1,10 @@
-import { useRouter } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useState, type MouseEvent, type SyntheticEvent } from "react";
-import { toast } from "sonner";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
+import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import { Button } from "@/shared/ui/button";
 
 import {
@@ -42,8 +41,7 @@ export type LibraryItemCardCtaProps = {
  * the link-bubble bug cannot resurface.
  */
 export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
-  const router = useRouter();
-  const [isPending, setIsPending] = useState(false);
+  const { pending: isPending, run } = useMutationAction();
   const [logSessionOpen, setLogSessionOpen] = useState(false);
 
   const {
@@ -61,29 +59,25 @@ export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
       return;
     }
 
-    setIsPending(true);
-    try {
-      const startedAt =
-        action.startedAtNullableSet && item.startedAt === null
-          ? new Date()
-          : undefined;
+    const startedAt =
+      action.startedAtNullableSet && item.startedAt === null
+        ? new Date()
+        : undefined;
 
-      await updateLibraryItemFn({
-        data: {
-          itemId: item.id,
-          status: action.status,
-          ...(startedAt !== undefined ? { startedAt } : {}),
-        },
-      });
-      toast.success("Status updated");
-      await router.invalidate();
-    } catch (cause) {
-      const message =
-        cause instanceof Error ? cause.message : "Failed to update status";
-      toast.error(message);
-    } finally {
-      setIsPending(false);
-    }
+    await run(
+      () =>
+        updateLibraryItemFn({
+          data: {
+            itemId: item.id,
+            status: action.status,
+            ...(startedAt !== undefined ? { startedAt } : {}),
+          },
+        }),
+      {
+        successMessage: "Status updated",
+        errorFallback: "Failed to update status",
+      }
+    );
   };
 
   return (

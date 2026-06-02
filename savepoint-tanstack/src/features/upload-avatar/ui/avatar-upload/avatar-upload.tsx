@@ -1,6 +1,6 @@
-import { useRouter } from "@tanstack/react-router";
-import { useState, type ChangeEvent } from "react";
-import { toast } from "sonner";
+import { type ChangeEvent } from "react";
+
+import { useMutationAction } from "@/shared/lib/use-mutation-action";
 
 import { getAvatarPresignedUrlFn } from "../../api/get-avatar-presigned-url";
 import { setAvatarUrlFn } from "../../api/set-avatar-url";
@@ -23,8 +23,7 @@ export type AvatarUploadProps = {
 export function AvatarUpload({
   label = "Upload avatar",
 }: AvatarUploadProps = {}) {
-  const router = useRouter();
-  const [isUploading, setIsUploading] = useState(false);
+  const { pending: isUploading, run } = useMutationAction();
 
   async function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -32,32 +31,28 @@ export function AvatarUpload({
     event.currentTarget.value = "";
     if (!file) return;
 
-    setIsUploading(true);
-    try {
-      const { uploadUrl, publicUrl } = await getAvatarPresignedUrlFn({
-        data: { contentType: file.type, contentLength: file.size },
-      });
+    await run(
+      async () => {
+        const { uploadUrl, publicUrl } = await getAvatarPresignedUrlFn({
+          data: { contentType: file.type, contentLength: file.size },
+        });
 
-      const response = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type },
-      });
-      if (!response.ok) {
-        throw new Error(`S3 PUT failed with status ${response.status}`);
+        const response = await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type },
+        });
+        if (!response.ok) {
+          throw new Error(`S3 PUT failed with status ${response.status}`);
+        }
+
+        await setAvatarUrlFn({ data: { url: publicUrl } });
+      },
+      {
+        successMessage: "Avatar updated",
+        errorFallback: "Could not update avatar",
       }
-
-      await setAvatarUrlFn({ data: { url: publicUrl } });
-
-      router.invalidate();
-      toast.success("Avatar updated");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not update avatar";
-      toast.error(message);
-    } finally {
-      setIsUploading(false);
-    }
+    );
   }
 
   return (

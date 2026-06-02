@@ -1,10 +1,10 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { FaSteam } from "react-icons/fa";
-import { toast } from "sonner";
 
+import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import { Alert, AlertDescription } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
 import {
@@ -58,8 +58,7 @@ export function SteamConnectCard({
   steamId,
   connectUrl,
 }: SteamConnectCardProps) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useMutationAction();
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
 
   if (steamId === null) {
@@ -88,19 +87,11 @@ export function SteamConnectCard({
   }
 
   const handleDisconnect = async () => {
-    setPending(true);
-    try {
-      await disconnectSteamFn({ data: {} });
-      toast.success("Steam disconnected");
-      setShowDisconnectDialog(false);
-      router.invalidate();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not disconnect Steam";
-      toast.error(message);
-    } finally {
-      setPending(false);
-    }
+    await run(() => disconnectSteamFn({ data: {} }), {
+      successMessage: "Steam disconnected",
+      errorFallback: "Could not disconnect Steam",
+      onSuccess: () => setShowDisconnectDialog(false),
+    });
   };
 
   return (

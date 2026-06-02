@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 import { LIBRARY_STATUS_VALUES } from "@/entities/library-item/model";
+import { getErrorMessage } from "@/shared/lib/errors";
 
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
 
@@ -68,7 +69,7 @@ export function useLibraryModalForm({
       await router.invalidate();
       onClose();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = getErrorMessage(err, "Failed to update library entry");
       setError(message);
       toast.error(message);
     } finally {

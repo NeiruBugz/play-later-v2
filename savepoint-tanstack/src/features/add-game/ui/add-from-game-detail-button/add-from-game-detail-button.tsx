@@ -2,6 +2,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 
 import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
@@ -27,7 +28,7 @@ export function AddFromGameDetailButton({
       toast.success("Added to library");
       await router.invalidate();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = getErrorMessage(err, "Could not add game to library");
       setError(message);
       toast.error(message);
     } finally {
