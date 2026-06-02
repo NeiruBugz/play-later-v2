@@ -1,5 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
-import { ConflictError, NotFoundError } from "@/shared/lib/errors";
+import { ConflictError } from "@/shared/lib/errors";
+import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 
 import { Prisma } from "../../../../shared/lib/prisma/client.ts";
 import type { Profile } from "../model/types";
@@ -47,20 +48,19 @@ export async function updateProfile(
       select: PROFILE_SELECT,
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2025") {
-        throw new NotFoundError("User not found while updating profile", {
-          userId,
-        });
-      }
-      if (error.code === "P2002" && targetsUsername(error.meta)) {
-        throw new ConflictError("Username already taken", {
-          userId,
-          username: input.username,
-        });
-      }
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002" &&
+      targetsUsername(error.meta)
+    ) {
+      throw new ConflictError("Username already taken", {
+        userId,
+        username: input.username,
+      });
     }
-    throw error;
+    mapP2025ToNotFound(error, "User not found while updating profile", {
+      userId,
+    });
   }
 }
 

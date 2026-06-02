@@ -1,5 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
+import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 
 import {
   Prisma,
@@ -47,12 +48,6 @@ export async function updateLibraryItem(
       data,
     });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      throw new NotFoundError("Library item not found", { itemId });
-    }
-    throw error;
+    mapP2025ToNotFound(error, "Library item not found", { itemId });
   }
 }
