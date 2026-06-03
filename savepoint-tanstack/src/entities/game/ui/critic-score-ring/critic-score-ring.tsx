@@ -16,8 +16,8 @@ export function CriticScoreRing({ value }: CriticScoreRingProps) {
     return null;
   }
 
-  const rounded = Math.round(value);
-  const degrees = Math.max(0, Math.min(100, rounded)) * 3.6;
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  const degrees = clamped * 3.6;
 
   return (
     <div
@@ -33,7 +33,7 @@ export function CriticScoreRing({ value }: CriticScoreRingProps) {
       >
         <div className="bg-card absolute inset-[7px] flex flex-col items-center justify-center rounded-full">
           <span className="text-foreground text-xl leading-none font-bold tabular-nums">
-            {rounded}
+            {clamped}
           </span>
         </div>
       </div>

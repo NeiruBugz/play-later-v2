@@ -6,11 +6,9 @@ import {
   TooltipTrigger,
 } from "@/shared/ui/tooltip";
 
-import type { PlatformBadgesProps } from "./platform-badges.type";
-import {
-  MAX_VISIBLE_PLATFORMS,
-} from "./platform-badges.utility";
 import { PlatformBadgeItem } from "./platform-badge";
+import type { PlatformBadgesProps } from "./platform-badges.type";
+import { MAX_VISIBLE_PLATFORMS } from "./platform-badges.utility";
 
 export function PlatformBadges({ platforms }: PlatformBadgesProps) {
   const visible = platforms.slice(0, MAX_VISIBLE_PLATFORMS);
@@ -19,7 +17,9 @@ export function PlatformBadges({ platforms }: PlatformBadgesProps) {
   return (
     <TooltipProvider>
       <div className="gap-xs flex flex-wrap items-center">
-        {visible.map((name) => <PlatformBadgeItem name={name} key={name} />)}
+        {visible.map((name) => (
+          <PlatformBadgeItem name={name} key={name} />
+        ))}
         {remaining.length > 0 ? (
           <Tooltip>
             <TooltipTrigger asChild>

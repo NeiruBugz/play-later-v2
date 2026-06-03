@@ -1,10 +1,12 @@
 import { Badge } from "@/shared/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
+
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/shared/ui/tooltip";
-import { getPlatformIcon, abbreviatePlatformName, getPlatformBadgeVariant, getPlatformFamily } from "./platform-badges.utility";
+  abbreviatePlatformName,
+  getPlatformBadgeVariant,
+  getPlatformFamily,
+  getPlatformIcon,
+} from "./platform-badges.utility";
 
 export function PlatformBadgeItem({ name }: { name: string }) {
   const Icon = getPlatformIcon(name);

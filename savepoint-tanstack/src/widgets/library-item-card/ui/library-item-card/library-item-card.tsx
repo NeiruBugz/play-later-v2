@@ -1,3 +1,4 @@
+import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
   isTouched,
   LibraryLifecycleStrip,
@@ -10,13 +11,11 @@ import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { RatingInput } from "@/shared/ui/rating-input";
 import { TooltipProvider } from "@/shared/ui/tooltip";
-
 import { GameCard } from "@/widgets/game-card";
 
 import { LibraryItemCardCta } from "./library-item-card-cta";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { getStatusCoverAccent } from "./library-item-card.utility";
-import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 
 export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
   const hasPlatform =
@@ -101,7 +100,7 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
               className={cn(
                 "h-4 px-1.5 py-0 text-[10px] leading-none font-medium uppercase",
                 acquisitionEmphasis === "subscription" &&
-                "bg-primary/10 text-primary border-transparent"
+                  "bg-primary/10 text-primary border-transparent"
               )}
             >
               {acquisitionLabel}
