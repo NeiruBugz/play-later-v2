@@ -1,7 +1,4 @@
-import { useRouter } from "@tanstack/react-router";
-import { useState } from "react";
-import { toast } from "sonner";
-
+import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import { Button } from "@/shared/ui/button";
 
 import { followUserFn } from "../../api/follow-user-fn";
@@ -19,26 +16,17 @@ export function FollowUserButton({
   viewerUserId,
   isFollowing,
 }: FollowUserButtonProps) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useMutationAction();
 
   if (viewerUserId === null) return null;
   if (viewerUserId === profileUserId) return null;
   if (isFollowing) return null;
 
   const handleClick = async () => {
-    setPending(true);
-    try {
-      await followUserFn({ data: { targetUserId: profileUserId } });
-      toast.success(`Following @${profileUsername}`);
-      router.invalidate();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not update follow status";
-      toast.error(message);
-    } finally {
-      setPending(false);
-    }
+    await run(() => followUserFn({ data: { targetUserId: profileUserId } }), {
+      successMessage: `Following @${profileUsername}`,
+      errorFallback: "Could not update follow status",
+    });
   };
 
   return (

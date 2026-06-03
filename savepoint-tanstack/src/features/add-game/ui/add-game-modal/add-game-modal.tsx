@@ -1,8 +1,7 @@
-import { useRouter } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { toast } from "sonner";
 
 import type { SearchResponseItem } from "@/shared/api/igdb";
+import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -15,13 +14,12 @@ type AddGameModalProps = {
 };
 
 export function AddGameModal({ onAdded }: AddGameModalProps) {
-  const router = useRouter();
+  const { pending: isAdding, run } = useMutationAction();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResponseItem[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searched, setSearched] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,19 +40,11 @@ export function AddGameModal({ onAdded }: AddGameModalProps) {
 
   const handleAdd = async () => {
     if (selectedId == null) return;
-    setIsAdding(true);
-    try {
-      await addGameToLibraryFn({ data: { igdbId: selectedId } });
-      toast.success("Added to library");
-      router.invalidate();
-      onAdded();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not add game to library";
-      toast.error(message);
-    } finally {
-      setIsAdding(false);
-    }
+    await run(() => addGameToLibraryFn({ data: { igdbId: selectedId } }), {
+      successMessage: "Added to library",
+      errorFallback: "Could not add game to library",
+      onSuccess: onAdded,
+    });
   };
 
   const showEmpty =

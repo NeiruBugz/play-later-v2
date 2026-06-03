@@ -122,6 +122,20 @@ export function LibraryPage(props: LibraryPageProps) {
   // status update consumed elsewhere if needed; current header omits it.
   void total;
 
+  // Flat discriminant for the grid region, replacing a triple-nested ternary.
+  // "onboarding"/"empty" are the first-run branch (library genuinely empty,
+  // no active server filters); "no-results" is the filtered-out branch (items
+  // exist but the active filters or title query exclude everything).
+  const isFirstRunEmpty = items.length === 0 && !serverFiltersActive;
+  const renderState: "list" | "onboarding" | "empty" | "no-results" =
+    filteredItems.length > 0
+      ? "list"
+      : isFirstRunEmpty
+        ? onboarding
+          ? "onboarding"
+          : "empty"
+        : "no-results";
+
   return (
     <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
       <header className="gap-md flex items-baseline justify-between">
@@ -181,38 +195,29 @@ export function LibraryPage(props: LibraryPageProps) {
         />
 
         <div className="min-w-0 flex-1">
-          {filteredItems.length === 0 ? (
-            items.length === 0 && !serverFiltersActive ? (
-              // First-run: the library is genuinely empty. The onboarding hero
-              // takes over when signals are present; otherwise the first-run
-              // template offers the two ways to populate a library.
-              onboarding ? (
-                <EmptyLibraryHero {...onboarding} />
-              ) : (
-                <EmptyState
-                  aria-label="Empty library"
-                  icon={Library}
-                  title="No games yet"
-                  description="Start your library by adding a game, or import your shelf from Steam."
-                  action={{ label: "Browse games", to: "/games/search" }}
-                  secondaryAction={{
-                    label: "Import from Steam",
-                    to: "/steam/games",
-                    variant: "outline",
-                  }}
-                />
-              )
-            ) : (
-              // No-results: items exist but the active filters (server-side or
-              // the title query) exclude everything. Always offer Clear filters.
-              <EmptyState
-                aria-label="No games match filters"
-                icon={SearchX}
-                title="Nothing matches these filters"
-                description="No games in your library match the current filters."
-                action={{ label: "Clear filters", onClick: clearFilters }}
-              />
-            )
+          {renderState === "onboarding" && onboarding ? (
+            <EmptyLibraryHero {...onboarding} />
+          ) : renderState === "empty" ? (
+            <EmptyState
+              aria-label="Empty library"
+              icon={Library}
+              title="No games yet"
+              description="Start your library by adding a game, or import your shelf from Steam."
+              action={{ label: "Browse games", to: "/games/search" }}
+              secondaryAction={{
+                label: "Import from Steam",
+                to: "/steam/games",
+                variant: "outline",
+              }}
+            />
+          ) : renderState === "no-results" ? (
+            <EmptyState
+              aria-label="No games match filters"
+              icon={SearchX}
+              title="Nothing matches these filters"
+              description="No games in your library match the current filters."
+              action={{ label: "Clear filters", onClick: clearFilters }}
+            />
           ) : (
             <ul
               aria-label="Library items"

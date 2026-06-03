@@ -1,6 +1,7 @@
 import { Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
 
+import { formatAbsoluteDate } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 
 import { Button } from "./button";
@@ -14,13 +15,6 @@ export type DatePickerProps = {
   id?: string;
   placeholder?: string;
 };
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  timeZone: "UTC",
-});
 
 function DatePicker({
   value,
@@ -45,7 +39,9 @@ function DatePicker({
           )}
         >
           <CalendarIcon aria-hidden="true" />
-          {value === null ? placeholder : dateFormatter.format(value)}
+          {value === null
+            ? placeholder
+            : formatAbsoluteDate(value, { utc: true })}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

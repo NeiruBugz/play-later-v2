@@ -5,14 +5,9 @@ import {
 } from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
+import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 
 import type { Game } from "../../../../shared/lib/prisma/client.ts";
-
-const IGDB_IMAGE_BASE = "https://images.igdb.com/igdb/image/upload";
-
-function buildCoverUrl(imageId: string): string {
-  return `${IGDB_IMAGE_BASE}/t_cover_big/${imageId}.jpg`;
-}
 
 export async function upsertGameFromIgdbPayload(
   payload: SearchResponseItem
@@ -29,9 +24,7 @@ export async function upsertGameFromIgdbPayload(
       ? new Date(payload.first_release_date * 1000)
       : null;
 
-  const coverImage = payload.cover?.image_id
-    ? buildCoverUrl(payload.cover.image_id)
-    : null;
+  const coverImage = buildCoverImageUrl(payload.cover?.image_id, "t_cover_big");
 
   return prisma.game.create({
     data: {
@@ -59,9 +52,7 @@ export async function upsertThinGameFromIgdbDetailsPayload(
       ? new Date(payload.first_release_date * 1000)
       : null;
 
-  const coverImage = payload.cover?.image_id
-    ? buildCoverUrl(payload.cover.image_id)
-    : null;
+  const coverImage = buildCoverImageUrl(payload.cover?.image_id, "t_cover_big");
 
   return prisma.game.create({
     data: {

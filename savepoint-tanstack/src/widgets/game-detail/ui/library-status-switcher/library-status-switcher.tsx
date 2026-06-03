@@ -8,6 +8,7 @@ import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-
 import { LibraryModal } from "@/features/manage-library-entry";
 import { deleteLibraryItemFn } from "@/features/manage-library-entry/api/delete-library-item-fn";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
@@ -62,8 +63,7 @@ export function LibraryStatusSwitcher({
       await router.invalidate();
     } catch (err: unknown) {
       setOptimisticEntry(previous);
-      const message = err instanceof Error ? err.message : String(err);
-      toast.error(message);
+      toast.error(getErrorMessage(err, "Something went wrong"));
     } finally {
       setPending(false);
     }
@@ -83,8 +83,7 @@ export function LibraryStatusSwitcher({
       await router.invalidate();
     } catch (err: unknown) {
       setOptimisticEntry(previous);
-      const message = err instanceof Error ? err.message : String(err);
-      toast.error(message);
+      toast.error(getErrorMessage(err, "Something went wrong"));
     } finally {
       setPending(false);
     }
@@ -101,8 +100,7 @@ export function LibraryStatusSwitcher({
       await router.invalidate();
     } catch (err: unknown) {
       setOptimisticEntry(previous);
-      const message = err instanceof Error ? err.message : String(err);
-      toast.error(message);
+      toast.error(getErrorMessage(err, "Something went wrong"));
     } finally {
       setPending(false);
     }

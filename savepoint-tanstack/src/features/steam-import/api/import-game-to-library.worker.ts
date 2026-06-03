@@ -5,6 +5,7 @@ import {
   upsertGameFromIgdbPayload,
 } from "@/entities/game/api/upsert-game.server";
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
+import { libraryItemStatusSchema } from "@/entities/library-item/model";
 import {
   matchSteamGameByAppId,
   type SearchResponseItem,
@@ -20,7 +21,7 @@ import { NeedsManualMatchError } from "./errors";
 
 export const IMPORT_GAME_TO_LIBRARY_INPUT = z.object({
   importedGameId: z.string().min(1),
-  status: z.enum(["WISHLIST", "SHELF", "UP_NEXT", "PLAYING", "PLAYED"]),
+  status: libraryItemStatusSchema,
   manualIgdbId: z.number().int().positive().optional(),
 });
 

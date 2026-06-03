@@ -1,17 +1,10 @@
 import { Link } from "@tanstack/react-router";
 
 import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
+import { formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 
 import type { JournalEntryPageProps } from "./journal-entry-page.type";
-
-function formatEntryDate(date: Date): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  });
-}
 
 /**
  * Full-page journal entry detail (Slice 23 page restore for `/journal/$id`).
@@ -29,7 +22,7 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
   const title = entry.title?.trim() || null;
   const kindLabel = entry.kind === "QUICK" ? "Quick note" : "Reflection";
   const displayTitle =
-    title ?? `${kindLabel} from ${formatEntryDate(entry.updatedAt)}`;
+    title ?? `${kindLabel} from ${formatJournalDate(entry.updatedAt)}`;
 
   return (
     <article className="space-y-xl mx-auto max-w-prose">
@@ -62,7 +55,7 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
         ) : null}
         {entry.game ? <span> · </span> : null}
         <time dateTime={new Date(entry.createdAt).toISOString()}>
-          {formatEntryDate(entry.createdAt)}
+          {formatJournalDate(entry.createdAt)}
         </time>
       </p>
 

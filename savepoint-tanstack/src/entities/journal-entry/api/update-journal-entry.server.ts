@@ -1,5 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
+import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 
 import { Prisma } from "../../../../shared/lib/prisma/client.ts";
 import {
@@ -44,21 +45,19 @@ export async function updateJournalEntry(
       include: { game: { select: JOURNAL_ENTRY_GAME_SELECT } },
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2025") {
-        throw new NotFoundError("Journal entry not found", { entryId });
-      }
-      if (error.code === "P2003") {
-        // Same Prisma 7 meta-probe as createJournalEntry — see that file.
-        const probe = JSON.stringify(error.meta ?? {}).toLowerCase();
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      // Same Prisma 7 meta-probe as createJournalEntry — see that file.
+      const probe = JSON.stringify(error.meta ?? {}).toLowerCase();
 
-        if (probe.includes("game")) {
-          throw new NotFoundError("Referenced game does not exist", {
-            gameId: input.gameId ?? null,
-          });
-        }
+      if (probe.includes("game")) {
+        throw new NotFoundError("Referenced game does not exist", {
+          gameId: input.gameId ?? null,
+        });
       }
     }
-    throw error;
+    mapP2025ToNotFound(error, "Journal entry not found", { entryId });
   }
 }

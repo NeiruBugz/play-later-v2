@@ -1,10 +1,6 @@
-import type { GameMetadataProps } from "./game-metadata.type";
+import { formatAbsoluteDate } from "@/shared/lib/date";
 
-const ABSOLUTE_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-});
+import type { GameMetadataProps } from "./game-metadata.type";
 
 export function GameMetadata({
   title,
@@ -19,7 +15,7 @@ export function GameMetadata({
           dateTime={releaseDate.toISOString()}
           className="text-caption text-muted-foreground"
         >
-          {ABSOLUTE_DATE_FORMATTER.format(releaseDate)}
+          {formatAbsoluteDate(releaseDate)}
         </time>
       ) : null}
       {summary ? (

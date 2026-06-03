@@ -10,6 +10,7 @@ import {
   SteamProfileNotFoundErrorCard,
   SteamRateLimitErrorCard,
 } from "@/features/steam-import/ui/error-cards";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { ImportedGamesPage } from "@/widgets/imported-games-page";
 
 /**
@@ -156,8 +157,7 @@ function SteamGamesRoute() {
  */
 function SteamGamesError({ error }: { error: unknown }) {
   const errName = error instanceof Error ? error.name : "";
-  const message =
-    error instanceof Error ? error.message : "Could not load Steam games";
+  const message = getErrorMessage(error, "Could not load Steam games");
 
   return (
     <main className="container mx-auto px-4 py-6">

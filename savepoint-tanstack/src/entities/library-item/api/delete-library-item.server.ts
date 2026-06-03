@@ -1,7 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
-
-import { Prisma } from "../../../../shared/lib/prisma/client.ts";
+import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 
 export async function deleteLibraryItem(
   userId: string,
@@ -26,12 +25,6 @@ export async function deleteLibraryItem(
       where: { id: itemId },
     });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      throw new NotFoundError("Library item not found", { itemId });
-    }
-    throw error;
+    mapP2025ToNotFound(error, "Library item not found", { itemId });
   }
 }

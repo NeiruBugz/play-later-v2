@@ -2,10 +2,15 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { getStatusLabel } from "@/entities/library-item/model";
+import {
+  getStatusLabel,
+  LIBRARY_STATUS_VALUES,
+} from "@/entities/library-item/model";
 import { importGameToLibraryFn } from "@/features/steam-import/api/import-game-to-library";
 import { calculateSmartStatus } from "@/features/steam-import/lib/calculate-smart-status";
 import { formatPlaytime } from "@/features/steam-import/ui/imported-game-card/imported-game-card.utility";
+import { formatAbsoluteDate } from "@/shared/lib/date";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -27,22 +32,11 @@ import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.
 import { IgdbManualSearch } from "../igdb-manual-search";
 import type { ImportGameModalProps } from "./import-game-modal.type";
 
-const STATUS_OPTIONS: LibraryItemStatus[] = [
-  "WISHLIST",
-  "SHELF",
-  "UP_NEXT",
-  "PLAYING",
-  "PLAYED",
-];
+const STATUS_OPTIONS = LIBRARY_STATUS_VALUES;
 
 function formatLastPlayed(date: Date | null | undefined): string {
   if (!date) return "Never";
-  const d = new Date(date);
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatAbsoluteDate(new Date(date), { locale: undefined });
 }
 
 /**
@@ -98,8 +92,7 @@ export function ImportGameModal({
         err && typeof err === "object" && "name" in err
           ? String((err as { name: unknown }).name)
           : "";
-      const message =
-        err instanceof Error ? err.message : "Could not import game";
+      const message = getErrorMessage(err, "Could not import game");
       if (errorName === "NeedsManualMatchError") {
         setShowSearch(true);
         return;

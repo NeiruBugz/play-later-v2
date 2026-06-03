@@ -1,14 +1,7 @@
+import { formatJournalDate } from "@/shared/lib/date";
 import { EmptyState } from "@/shared/ui/empty-state";
 
 import type { JournalTeaserProps } from "./journal-teaser.type";
-
-function formatEntryDate(date: Date): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  });
-}
 
 /**
  * Read-only teaser of a viewer's recent journal entries for a game.
@@ -61,7 +54,7 @@ export function JournalTeaser({
                 dateTime={new Date(entry.createdAt).toISOString()}
                 className="text-muted-foreground font-mono text-xs"
               >
-                {formatEntryDate(entry.createdAt)}
+                {formatJournalDate(entry.createdAt)}
               </time>
               <p className="text-sm leading-snug font-semibold">{title}</p>
               {snippet ? (

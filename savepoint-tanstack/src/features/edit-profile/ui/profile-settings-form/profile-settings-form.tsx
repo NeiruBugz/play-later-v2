@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -39,7 +40,7 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
       await updateProfileFn({ data: values });
       toast.success("Profile updated");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Update failed";
+      const message = getErrorMessage(err, "Update failed");
       setServerError(message);
       toast.error(message);
     }

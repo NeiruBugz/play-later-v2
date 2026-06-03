@@ -1,7 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
-
-import { Prisma } from "../../../../shared/lib/prisma/client.ts";
+import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 
 export async function deleteJournalEntry(
   userId: string,
@@ -26,12 +25,6 @@ export async function deleteJournalEntry(
       where: { id: entryId },
     });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      throw new NotFoundError("Journal entry not found", { entryId });
-    }
-    throw error;
+    mapP2025ToNotFound(error, "Journal entry not found", { entryId });
   }
 }

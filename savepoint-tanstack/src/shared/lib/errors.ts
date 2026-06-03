@@ -65,3 +65,7 @@ export class UpstreamError extends AppError {
     super("UPSTREAM", message, context);
   }
 }
+
+export function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}

@@ -3,6 +3,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useState, type MouseEvent } from "react";
 import { toast } from "sonner";
 
+import { getErrorMessage } from "@/shared/lib/errors";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
 import { CommandItem } from "@/shared/ui/command";
@@ -50,9 +51,7 @@ export function GameResultItem({
               toast.success("Removed", { duration: 1000 });
               await router.invalidate();
             } catch (cause) {
-              const message =
-                cause instanceof Error ? cause.message : "Failed to undo";
-              toast.error(message);
+              toast.error(getErrorMessage(cause, "Failed to undo"));
             }
           })();
         },
@@ -60,9 +59,7 @@ export function GameResultItem({
       await router.invalidate();
       onAfterSelect();
     } catch (cause) {
-      const message =
-        cause instanceof Error ? cause.message : "Failed to add game";
-      toast.error(message);
+      toast.error(getErrorMessage(cause, "Failed to add game"));
     } finally {
       setIsAdding(false);
     }

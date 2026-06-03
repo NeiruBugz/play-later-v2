@@ -1,9 +1,9 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { BookOpen, MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { useState, type SyntheticEvent } from "react";
-import { toast } from "sonner";
+import { type SyntheticEvent } from "react";
 
 import { STATUS_ENTRIES } from "@/entities/library-item/model";
+import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,44 +35,26 @@ const stopProp = (event: SyntheticEvent) => {
  * `#journal-heading` anchor will land in S15.
  */
 export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
-  const router = useRouter();
-  const [isPending, setIsPending] = useState(false);
+  const { pending: isPending, run } = useMutationAction();
 
   const handleStatusChange = async (
     next: (typeof STATUS_ENTRIES)[number]["value"]
   ) => {
     if (next === item.status) return;
-    setIsPending(true);
-    try {
-      await updateLibraryItemFn({
-        data: { itemId: item.id, status: next },
-      });
-      toast.success("Status updated");
-      await router.invalidate();
-    } catch (cause) {
-      const message =
-        cause instanceof Error ? cause.message : "Failed to update status";
-      toast.error(message);
-    } finally {
-      setIsPending(false);
-    }
+    await run(
+      () => updateLibraryItemFn({ data: { itemId: item.id, status: next } }),
+      {
+        successMessage: "Status updated",
+        errorFallback: "Failed to update status",
+      }
+    );
   };
 
   const handleRemove = async () => {
-    setIsPending(true);
-    try {
-      await deleteLibraryItemFn({ data: { itemId: item.id } });
-      toast.success("Removed from library");
-      await router.invalidate();
-    } catch (cause) {
-      const message =
-        cause instanceof Error
-          ? cause.message
-          : "Failed to remove from library";
-      toast.error(message);
-    } finally {
-      setIsPending(false);
-    }
+    await run(() => deleteLibraryItemFn({ data: { itemId: item.id } }), {
+      successMessage: "Removed from library",
+      errorFallback: "Failed to remove from library",
+    });
   };
 
   return (

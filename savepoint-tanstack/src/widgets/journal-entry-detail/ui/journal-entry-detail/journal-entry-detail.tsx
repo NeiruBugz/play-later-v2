@@ -1,3 +1,4 @@
+import { formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -9,14 +10,6 @@ import {
 } from "@/shared/ui/dialog";
 
 import type { JournalEntryDetailProps } from "./journal-entry-detail.type";
-
-function formatEntryDate(date: Date): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  });
-}
 
 /**
  * Widget that surfaces a journal entry's content + Edit/Delete affordances.
@@ -38,7 +31,7 @@ export function JournalEntryDetail({
   const title = entry.title?.trim() || null;
   const kindLabel = entry.kind === "QUICK" ? "Quick note" : "Reflection";
   const displayTitle =
-    title ?? `${kindLabel} from ${formatEntryDate(entry.updatedAt)}`;
+    title ?? `${kindLabel} from ${formatJournalDate(entry.updatedAt)}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,7 +39,7 @@ export function JournalEntryDetail({
         <DialogHeader>
           <DialogTitle>{displayTitle}</DialogTitle>
           <DialogDescription>
-            {kindLabel} · {formatEntryDate(entry.updatedAt)}
+            {kindLabel} · {formatJournalDate(entry.updatedAt)}
           </DialogDescription>
         </DialogHeader>
 

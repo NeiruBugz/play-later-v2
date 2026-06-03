@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { updateJournalEntryFn } from "@/features/edit-journal-entry/api/update-journal-entry-fn";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
 
@@ -38,8 +39,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
       // Canonical parity: back to the entry's detail page on success.
       await navigate({ to: "/journal/$id", params: { id: entry.id } });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Something went wrong";
+      const message = getErrorMessage(err, "Something went wrong");
       setError(message);
       toast.error(message);
       setIsSubmitting(false);

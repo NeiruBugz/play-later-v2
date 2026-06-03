@@ -31,17 +31,108 @@ import type {
  * `<Select>` requires a non-empty string value. When the user picks "all" we
  * delete the param from the URL so it doesn't show up.
  */
-const SORT_LABELS: Record<
-  NonNullable<ImportedGamesFilters["sortBy"]>,
-  string
-> = {
-  added_desc: "Recently Added",
-  name_asc: "Name (A-Z)",
-  name_desc: "Name (Z-A)",
-  playtime_desc: "Playtime (High to Low)",
-  playtime_asc: "Playtime (Low to High)",
-  last_played_desc: "Last Played (Recent)",
-  last_played_asc: "Last Played (Oldest)",
+/**
+ * Single source of truth for every filter/sort `<Select>` on this bar.
+ *
+ * Both the rendered `<SelectItem>`s AND the active-filter chips are derived
+ * from this config so a label change is a one-place edit.
+ *
+ * Per option:
+ * - `label` is the text shown inside the `<Select>`.
+ * - `chipLabel` (optional) is the text shown on the active-filter chip when it
+ *   intentionally differs from the Select label (e.g. abbreviated playtime
+ *   ranges). When omitted the chip reuses `label`.
+ *
+ * Per field:
+ * - `sentinel` is the value that means "no filter" (`"all"`) or, for sort, the
+ *   implicit default (`"added_desc"`). Picking the sentinel deletes the param.
+ * - `chipPrefix` is the leading text on the chip (`"Status: "`); sort has no
+ *   chip, so it omits the prefix.
+ */
+const ALL = "all" as const;
+const SORT_DEFAULT = "added_desc" as const;
+
+type FilterOption = { value: string; label: string; chipLabel?: string };
+
+type FilterFieldConfig = {
+  paramKey: "playtimeStatus" | "playtimeRange" | "platform" | "lastPlayed";
+  fieldLabel: string;
+  triggerId: string;
+  triggerAriaLabel: string;
+  chipPrefix: string;
+  options: readonly FilterOption[];
+};
+
+const FILTER_FIELDS: readonly FilterFieldConfig[] = [
+  {
+    paramKey: "playtimeStatus",
+    fieldLabel: "Playtime Status",
+    triggerId: "playtime-status-filter",
+    triggerAriaLabel: "Filter by playtime status",
+    chipPrefix: "Status: ",
+    options: [
+      { value: ALL, label: "All" },
+      { value: "played", label: "Played" },
+      { value: "never_played", label: "Never Played" },
+    ],
+  },
+  {
+    paramKey: "playtimeRange",
+    fieldLabel: "Playtime Range",
+    triggerId: "playtime-range-filter",
+    triggerAriaLabel: "Filter by playtime range",
+    chipPrefix: "Playtime: ",
+    options: [
+      { value: ALL, label: "All" },
+      { value: "under_1h", label: "Under 1 hour", chipLabel: "Under 1h" },
+      { value: "1_to_10h", label: "1-10 hours", chipLabel: "1-10h" },
+      { value: "10_to_50h", label: "10-50 hours", chipLabel: "10-50h" },
+      { value: "over_50h", label: "50+ hours", chipLabel: "50+h" },
+    ],
+  },
+  {
+    paramKey: "platform",
+    fieldLabel: "Platform",
+    triggerId: "platform-filter",
+    triggerAriaLabel: "Filter by platform",
+    chipPrefix: "Platform: ",
+    options: [
+      { value: ALL, label: "All Platforms" },
+      { value: "windows", label: "Windows" },
+      { value: "mac", label: "Mac" },
+      { value: "linux", label: "Linux" },
+    ],
+  },
+  {
+    paramKey: "lastPlayed",
+    fieldLabel: "Last Played",
+    triggerId: "last-played-filter",
+    triggerAriaLabel: "Filter by last played date",
+    chipPrefix: "Last played: ",
+    options: [
+      { value: ALL, label: "All Time" },
+      { value: "30_days", label: "Last 30 days" },
+      { value: "1_year", label: "Last year" },
+      { value: "over_1_year", label: "Over a year ago" },
+      { value: "never", label: "Never" },
+    ],
+  },
+];
+
+const SORT_OPTIONS: readonly FilterOption[] = [
+  { value: SORT_DEFAULT, label: "Recently Added" },
+  { value: "name_asc", label: "Name (A-Z)" },
+  { value: "name_desc", label: "Name (Z-A)" },
+  { value: "playtime_desc", label: "Playtime (High to Low)" },
+  { value: "playtime_asc", label: "Playtime (Low to High)" },
+  { value: "last_played_desc", label: "Last Played (Recent)" },
+  { value: "last_played_asc", label: "Last Played (Oldest)" },
+];
+
+const chipLabelFor = (field: FilterFieldConfig, value: string) => {
+  const option = field.options.find((o) => o.value === value);
+  const text = option?.chipLabel ?? option?.label ?? value;
+  return `${field.chipPrefix}${text}`;
 };
 
 type ChipDef = { key: string; label: string; onRemove: () => void };
@@ -76,7 +167,7 @@ export function ImportedGamesFilterBar({
         const next: Record<string, unknown> = { ...prev, ...patch };
         for (const k of Object.keys(next)) {
           const v = next[k];
-          if (v === undefined || v === "" || v === "all") delete next[k];
+          if (v === undefined || v === "" || v === ALL) delete next[k];
         }
         return next;
       },
@@ -89,7 +180,7 @@ export function ImportedGamesFilterBar({
     key: K,
     value: string
   ) => {
-    update({ [key]: value === "all" ? undefined : (value as never) });
+    update({ [key]: value === ALL ? undefined : (value as never) });
   };
 
   const commitSearch = () => {
@@ -103,13 +194,8 @@ export function ImportedGamesFilterBar({
     update({ q: undefined });
   };
 
-  const selectedValues = {
-    playtimeStatus: filters.playtimeStatus ?? "all",
-    playtimeRange: filters.playtimeRange ?? "all",
-    platform: filters.platform ?? "all",
-    lastPlayed: filters.lastPlayed ?? "all",
-    sortBy: filters.sortBy ?? "added_desc",
-  };
+  const selectedValueFor = (key: FilterFieldConfig["paramKey"]) =>
+    filters[key] ?? ALL;
 
   const chips: ChipDef[] = [];
   if (filters.q && filters.q.trim().length > 0) {
@@ -122,54 +208,15 @@ export function ImportedGamesFilterBar({
       },
     });
   }
-  if (filters.playtimeStatus && filters.playtimeStatus !== "all") {
-    const m: Record<string, string> = {
-      played: "Played",
-      never_played: "Never Played",
-    };
-    chips.push({
-      key: "playtimeStatus",
-      label: `Status: ${m[filters.playtimeStatus] ?? filters.playtimeStatus}`,
-      onRemove: () => update({ playtimeStatus: undefined }),
-    });
-  }
-  if (filters.playtimeRange && filters.playtimeRange !== "all") {
-    const m: Record<string, string> = {
-      under_1h: "Under 1h",
-      "1_to_10h": "1-10h",
-      "10_to_50h": "10-50h",
-      over_50h: "50+h",
-    };
-    chips.push({
-      key: "playtimeRange",
-      label: `Playtime: ${m[filters.playtimeRange] ?? filters.playtimeRange}`,
-      onRemove: () => update({ playtimeRange: undefined }),
-    });
-  }
-  if (filters.platform && filters.platform !== "all") {
-    const m: Record<string, string> = {
-      windows: "Windows",
-      mac: "Mac",
-      linux: "Linux",
-    };
-    chips.push({
-      key: "platform",
-      label: `Platform: ${m[filters.platform] ?? filters.platform}`,
-      onRemove: () => update({ platform: undefined }),
-    });
-  }
-  if (filters.lastPlayed && filters.lastPlayed !== "all") {
-    const m: Record<string, string> = {
-      "30_days": "Last 30 days",
-      "1_year": "Last year",
-      over_1_year: "Over a year ago",
-      never: "Never",
-    };
-    chips.push({
-      key: "lastPlayed",
-      label: `Last played: ${m[filters.lastPlayed] ?? filters.lastPlayed}`,
-      onRemove: () => update({ lastPlayed: undefined }),
-    });
+  for (const field of FILTER_FIELDS) {
+    const value = filters[field.paramKey];
+    if (value && value !== ALL) {
+      chips.push({
+        key: field.paramKey,
+        label: chipLabelFor(field, value),
+        onRemove: () => update({ [field.paramKey]: undefined }),
+      });
+    }
   }
   if (includeIgnored) {
     chips.push({
@@ -228,11 +275,11 @@ export function ImportedGamesFilterBar({
           Sort by
         </Label>
         <Select
-          value={selectedValues.sortBy}
+          value={filters.sortBy ?? SORT_DEFAULT}
           onValueChange={(value) =>
             update({
               sortBy:
-                value === "added_desc"
+                value === SORT_DEFAULT
                   ? undefined
                   : (value as ImportedGamesFilters["sortBy"]),
             })
@@ -242,13 +289,11 @@ export function ImportedGamesFilterBar({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {(Object.keys(SORT_LABELS) as Array<keyof typeof SORT_LABELS>).map(
-              (key) => (
-                <SelectItem key={key} value={key}>
-                  {SORT_LABELS[key]}
-                </SelectItem>
-              )
-            )}
+            {SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -270,107 +315,34 @@ export function ImportedGamesFilterBar({
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="space-y-1">
-          <Label
-            htmlFor="playtime-status-filter"
-            className="text-muted-foreground text-xs"
-          >
-            Playtime Status
-          </Label>
-          <Select
-            value={selectedValues.playtimeStatus}
-            onValueChange={(v) => setEnum("playtimeStatus", v)}
-          >
-            <SelectTrigger
-              id="playtime-status-filter"
-              aria-label="Filter by playtime status"
+        {FILTER_FIELDS.map((field) => (
+          <div key={field.paramKey} className="space-y-1">
+            <Label
+              htmlFor={field.triggerId}
+              className="text-muted-foreground text-xs"
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="played">Played</SelectItem>
-              <SelectItem value="never_played">Never Played</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label
-            htmlFor="playtime-range-filter"
-            className="text-muted-foreground text-xs"
-          >
-            Playtime Range
-          </Label>
-          <Select
-            value={selectedValues.playtimeRange}
-            onValueChange={(v) => setEnum("playtimeRange", v)}
-          >
-            <SelectTrigger
-              id="playtime-range-filter"
-              aria-label="Filter by playtime range"
+              {field.fieldLabel}
+            </Label>
+            <Select
+              value={selectedValueFor(field.paramKey)}
+              onValueChange={(v) => setEnum(field.paramKey, v)}
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="under_1h">Under 1 hour</SelectItem>
-              <SelectItem value="1_to_10h">1-10 hours</SelectItem>
-              <SelectItem value="10_to_50h">10-50 hours</SelectItem>
-              <SelectItem value="over_50h">50+ hours</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label
-            htmlFor="platform-filter"
-            className="text-muted-foreground text-xs"
-          >
-            Platform
-          </Label>
-          <Select
-            value={selectedValues.platform}
-            onValueChange={(v) => setEnum("platform", v)}
-          >
-            <SelectTrigger id="platform-filter" aria-label="Filter by platform">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Platforms</SelectItem>
-              <SelectItem value="windows">Windows</SelectItem>
-              <SelectItem value="mac">Mac</SelectItem>
-              <SelectItem value="linux">Linux</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label
-            htmlFor="last-played-filter"
-            className="text-muted-foreground text-xs"
-          >
-            Last Played
-          </Label>
-          <Select
-            value={selectedValues.lastPlayed}
-            onValueChange={(v) => setEnum("lastPlayed", v)}
-          >
-            <SelectTrigger
-              id="last-played-filter"
-              aria-label="Filter by last played date"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="30_days">Last 30 days</SelectItem>
-              <SelectItem value="1_year">Last year</SelectItem>
-              <SelectItem value="over_1_year">Over a year ago</SelectItem>
-              <SelectItem value="never">Never</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+              <SelectTrigger
+                id={field.triggerId}
+                aria-label={field.triggerAriaLabel}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {field.options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
       </div>
 
       {chips.length > 0 ? (

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { deleteJournalEntryFn } from "@/features/delete-journal-entry/api/delete-journal-entry-fn";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 
 import type { DeleteJournalEntryButtonProps } from "./delete-journal-entry-button.type";
@@ -25,8 +26,7 @@ export function DeleteJournalEntryButton({
       // Canonical parity: back to the timeline after delete.
       await navigate({ to: "/journal" });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Something went wrong";
+      const message = getErrorMessage(err, "Something went wrong");
       toast.error(message);
       setIsDeleting(false);
       setConfirming(false);

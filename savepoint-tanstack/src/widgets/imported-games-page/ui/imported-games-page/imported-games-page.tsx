@@ -16,6 +16,7 @@ import {
 } from "@/features/steam-import/ui/error-cards/import-status-feedback";
 import { ImportGameModal } from "@/features/steam-import/ui/import-game-modal";
 import { ImportedGameCard } from "@/features/steam-import/ui/imported-game-card";
+import { getErrorMessage } from "@/shared/lib/errors";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -86,9 +87,7 @@ export function ImportedGamesPage({
       toast.success("Removed from list");
       router.invalidate();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not dismiss game";
-      toast.error(message);
+      toast.error(getErrorMessage(err, "Could not dismiss game"));
     } finally {
       setPending(false);
     }
@@ -102,8 +101,7 @@ export function ImportedGamesPage({
       showSyncCompletedToast(imported);
       router.invalidate();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Sync failed";
-      showSyncFailedToast(message);
+      showSyncFailedToast(getErrorMessage(err, "Sync failed"));
     } finally {
       setPending(false);
     }

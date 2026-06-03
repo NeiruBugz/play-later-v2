@@ -1,6 +1,8 @@
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { getErrorMessage } from "@/shared/lib/errors";
+
 import { getRelatedGamesFn, type RelatedGame } from "../../api";
 import type {
   RelatedGamesInfiniteListProps,
@@ -52,8 +54,7 @@ export function RelatedGamesInfiniteList({
       setLatestPage(result);
       latestPageRef.current = result;
     } catch (cause) {
-      const message =
-        cause instanceof Error ? cause.message : "Failed to load related games";
+      const message = getErrorMessage(cause, "Failed to load related games");
       setError(message);
       errorRef.current = message;
     } finally {

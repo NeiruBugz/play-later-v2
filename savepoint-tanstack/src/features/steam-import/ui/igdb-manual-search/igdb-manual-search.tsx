@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { searchGamesFn } from "@/entities/game";
 import type { SearchResponseItem } from "@/shared/api/igdb";
+import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
@@ -11,12 +12,6 @@ import type { IgdbManualSearchProps } from "./igdb-manual-search.type";
 
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
-const IGDB_IMAGE_BASE = "https://images.igdb.com/igdb/image/upload";
-
-function getCoverUrl(imageId: string | undefined | null): string {
-  if (!imageId) return "";
-  return `${IGDB_IMAGE_BASE}/t_cover_small/${imageId}.jpg`;
-}
 
 function getReleaseYear(timestamp: number | null | undefined): string {
   if (!timestamp) return "Unknown";
@@ -140,7 +135,10 @@ export function IgdbManualSearch({
           aria-label="IGDB search results"
         >
           {results.map((game) => {
-            const coverUrl = getCoverUrl(game.cover?.image_id);
+            const coverUrl = buildCoverImageUrl(
+              game.cover?.image_id,
+              "t_cover_small"
+            );
             const year = getReleaseYear(game.first_release_date);
             const platforms = getPlatformLabel(game.platforms);
             return (

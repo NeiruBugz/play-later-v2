@@ -78,6 +78,15 @@ function clampRating(value: number): number {
   return value;
 }
 
+function starValueFromPointer(
+  starIndex: number,
+  event: React.MouseEvent<HTMLSpanElement>
+): number {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const isLeftHalf = event.clientX - rect.left < rect.width / 2;
+  return isLeftHalf ? starIndex * 2 - 1 : starIndex * 2;
+}
+
 export function RatingInput({
   value,
   size = "md",
@@ -122,10 +131,7 @@ export function RatingInput({
     event: React.MouseEvent<HTMLSpanElement>
   ) => {
     if (!interactive) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const isLeft = event.clientX - rect.left < rect.width / 2;
-    const next = isLeft ? starIndex * 2 - 1 : starIndex * 2;
-    setPreview(next);
+    setPreview(starValueFromPointer(starIndex, event));
   };
 
   const handleMouseLeave = () => {
@@ -138,24 +144,18 @@ export function RatingInput({
     event: React.MouseEvent<HTMLSpanElement>
   ) => {
     if (!interactive) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const isLeft = event.clientX - rect.left < rect.width / 2;
-    const next = isLeft ? starIndex * 2 - 1 : starIndex * 2;
-    if (next === value) {
-      commit(null);
-    } else {
-      commit(next);
-    }
+    const next = starValueFromPointer(starIndex, event);
+    commit(next === value ? null : next);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!interactive) return;
     if (event.key === "ArrowRight" || event.key === "ArrowUp") {
       event.preventDefault();
-      setPreview((prev) => clampRating((prev ?? 0) + 1));
+      setPreview((prev) => (prev === null ? MIN_VALUE : clampRating(prev + 1)));
     } else if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
       event.preventDefault();
-      setPreview((prev) => clampRating((prev ?? MIN_VALUE + 1) - 1));
+      setPreview((prev) => (prev === null ? MIN_VALUE : clampRating(prev - 1)));
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       if (preview !== null) commit(preview);
