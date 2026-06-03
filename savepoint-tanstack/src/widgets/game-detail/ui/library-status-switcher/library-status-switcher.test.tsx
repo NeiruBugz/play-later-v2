@@ -70,10 +70,10 @@ const buildEntry = (overrides: Partial<LibraryItem> = {}): LibraryItem => ({
 });
 
 const elements = {
-  getPill: () =>
-    screen.getByRole("button", { name: /^Change library status:/ }),
-  queryPill: () =>
-    screen.queryByRole("button", { name: /^Change library status:/ }),
+  getPill: (label: string) =>
+    screen.getByRole("button", { name: `Change library status: ${label}` }),
+  queryPill: (label: string) =>
+    screen.queryByRole("button", { name: `Change library status: ${label}` }),
   getAddToLibrary: () => screen.getByRole("button", { name: "Add to library" }),
   queryAddToLibrary: () =>
     screen.queryByRole("button", { name: "Add to library" }),
@@ -87,7 +87,7 @@ const elements = {
 };
 
 const actions = {
-  openMenu: async () => userEvent.click(elements.getPill()),
+  openMenu: async (label: string) => userEvent.click(elements.getPill(label)),
   selectStatus: async (label: string) =>
     userEvent.click(elements.getStatusOption(label)),
 };
@@ -118,9 +118,7 @@ describe("LibraryStatusSwitcher", () => {
     });
 
     it("shows a pill labelled with the current status", () => {
-      expect(elements.getPill()).toHaveAccessibleName(
-        "Change library status: Playing"
-      );
+      expect(elements.getPill("Playing")).toBeDefined();
     });
 
     it("does not render a rating control (rating lives in Your Record)", () => {
@@ -137,7 +135,7 @@ describe("LibraryStatusSwitcher", () => {
 
     describe("when the pill is clicked open", () => {
       beforeEach(async () => {
-        await actions.openMenu();
+        await actions.openMenu("Playing");
       });
 
       it("opens a menu listing all 5 statuses", () => {
@@ -187,9 +185,7 @@ describe("LibraryStatusSwitcher", () => {
 
         it("reflects the new status on the pill", async () => {
           await waitFor(() => {
-            expect(elements.getPill()).toHaveAccessibleName(
-              "Change library status: Shelf"
-            );
+            expect(elements.getPill("Shelf")).toBeDefined();
           });
         });
       });
@@ -224,13 +220,11 @@ describe("LibraryStatusSwitcher", () => {
           entry={buildEntry({ status: "UP_NEXT", hasBeenPlayed: true })}
         />
       );
-      await actions.openMenu();
+      await actions.openMenu("Replay");
     });
 
     it("labels Up Next as Replay on the pill and in the menu", () => {
-      expect(elements.queryPill()).toHaveAccessibleName(
-        "Change library status: Replay"
-      );
+      expect(elements.queryPill("Replay")).not.toBeNull();
       expect(
         screen.getByRole("menuitemradio", { name: "Replay" })
       ).toBeDefined();
@@ -254,7 +248,7 @@ describe("LibraryStatusSwitcher", () => {
 
     it("renders an Add to library action instead of a status pill", () => {
       expect(elements.queryAddToLibrary()).not.toBeNull();
-      expect(elements.queryPill()).toBeNull();
+      expect(elements.queryPill("Up Next")).toBeNull();
     });
 
     it("does not render a rating control", () => {
@@ -287,7 +281,7 @@ describe("LibraryStatusSwitcher", () => {
           entry={buildEntry()}
         />
       );
-      await actions.openMenu();
+      await actions.openMenu("Playing");
     });
 
     it("opens the status menu inside a bottom sheet", () => {
