@@ -46,12 +46,35 @@ export const Route = createRootRoute({
       {
         title: "SavePoint",
       },
+      {
+        name: "description",
+        content:
+          "A library, not a backlog. Curate your collection across every platform and journal what made each game matter.",
+      },
+      { property: "og:title", content: "SavePoint" },
+      {
+        property: "og:description",
+        content: "A library, not a backlog. For patient gamers.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:image", content: "/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "SavePoint" },
+      {
+        name: "twitter:description",
+        content: "A library, not a backlog. For patient gamers.",
+      },
+      { name: "twitter:image", content: "/og-image.png" },
     ],
     links: [
       {
         rel: "icon",
         type: "image/svg+xml",
         href: "/favicon.svg",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/apple-touch-icon.png",
       },
       {
         rel: "preconnect",
