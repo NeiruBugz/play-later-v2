@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background);color:var(--foreground);font-family:var(--font-runtime-sans);padding:20px 24px;-webkit-font-smoothing:antialiased}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
+.sw{border-radius:8px;border:1px solid var(--border)}
+.mono{font-family:var(--font-runtime-mono)}
+.mut{color:var(--muted-foreground)}
+.lbl{font-size:11px;letter-spacing:.04em}
+
+.badge{display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;border-radius:var(--radius-chip);padding:2px 8px;font-size:12px;font-weight:500}
+.b-sec{background:var(--secondary);color:var(--secondary-foreground)}
+.b-out{border-color:var(--border);color:var(--foreground)}
+.st{text-transform:uppercase;font-size:10px;letter-spacing:.04em;font-weight:700;border-radius:var(--radius-chip);padding:3px 8px}
+
+</style></head><body>
+<div class="lbl mono mut" style="margin-bottom:12px">BADGES & STATUS</div>
+<div class="row" style="gap:8px;margin-bottom:12px">
+  <span class="badge b-sec">Indie</span><span class="badge b-out">Outline</span>
+  <span class="badge" style="background:color-mix(in oklch,#0070d1 14%,transparent);color:#0070d1;font-weight:600">PlayStation</span>
+  <span class="badge" style="background:color-mix(in oklch,#107c10 14%,transparent);color:#107c10;font-weight:600">Xbox</span>
+</div>
+<div class="row" style="gap:8px">
+  <span class="st" style="background:var(--status-playing);color:var(--status-playing-foreground)">Playing</span>
+  <span class="st" style="background:var(--status-upNext);color:var(--status-upNext-foreground)">Up Next</span>
+  <span class="st" style="background:var(--status-played);color:var(--status-played-foreground)">Played</span>
+</div></body></html>

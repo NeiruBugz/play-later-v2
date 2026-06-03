@@ -43,6 +43,7 @@ _Everything we can ship on our own data + IGDB, with no AWS / external platform 
 - [x] **Patient-Gamer UX Overhaul** _(post-011)_ — UX pass shipped on top of star ratings.
 - [x] **UX Audit — Round 1** _(Spec 012)_ — library scannability, mobile filters, dashboard hero, onboarding entry, library card redesign, quick add.
 - [x] **UX Audit — Round 2** _(Spec 014)_ — game detail / journal / profile / settings / auth surfaces; navigational connective tissue; Raycast-style command center direction. 12 pinned findings (3 High / 7 Medium / 2 Low).
+- [x] **Unified Design System (Light + Dark)** _(Spec 022)_ — consolidated 5 themes → warm-cream Light + warm-charcoal Dark on one swappable accent (sage, baked in), Space Grotesk headings, crisp 3px radii, layered shadows, new Save Glow logo. Retired-theme users fall back to System. _Supersedes the "Theme Variants & Density Modes" archive note below — the product now ships exactly two themes by design, not Terminal Green._
 
 ### In Progress
 
@@ -132,7 +133,7 @@ _Items previously on the roadmap that have been dropped to keep the working list
 
 - **Mood-Based Recommendations** — speculative; no clear signal users want a "cozy tonight" filter over their own library.
 - **Year-in-Review / Wrapped** — seasonal one-shot; high cost relative to once-a-year payoff.
-- **Theme Variants & Density Modes** — Terminal Green is the brand; alternative themes dilute identity for marginal user value.
+- **Theme Variants & Density Modes** — Terminal Green is the brand; alternative themes dilute identity for marginal user value. _(Superseded 2026-06-02 by Spec 022: the brand was re-based on a unified warm Light + Dark system with a single sage accent — not Terminal Green — and the surplus themes were retired. The "alternative themes dilute identity" instinct held; the resolution was consolidation, not a single theme.)_
 - **Logged-Out Landing Page** — marketing surface, not core loop; defer until there's a growth motion to support.
 - **Profile Slug Resolution** — minor polish on a low-traffic 404 path; not worth bespoke "did you mean…" infrastructure.
 - **Keyboard Navigation Palette** _(g l, g j, n, etc.)_ — power-user shortcut layer; ⌘K already covers the same intent.

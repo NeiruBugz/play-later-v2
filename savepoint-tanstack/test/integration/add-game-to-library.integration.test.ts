@@ -11,14 +11,7 @@
  *   application layer. ConflictError is NOT thrown on duplicate.
  */
 
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
 

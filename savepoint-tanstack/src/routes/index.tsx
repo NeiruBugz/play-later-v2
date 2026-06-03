@@ -35,12 +35,12 @@ function LandingPage() {
           aria-label="SavePoint"
           className="group flex items-center gap-3 no-underline"
         >
-          <span
+          <img
+            src="/logo.svg"
+            alt=""
             aria-hidden="true"
-            className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold shadow-sm"
-          >
-            S
-          </span>
+            className="h-8 w-8 shrink-0"
+          />
           <span className="text-foreground text-base font-semibold tracking-tight">
             SavePoint
           </span>

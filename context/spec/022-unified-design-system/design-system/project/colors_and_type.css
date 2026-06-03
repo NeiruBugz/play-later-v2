@@ -1,0 +1,274 @@
+/* ============================================================================
+   SavePoint — Colors & Type Foundations  (UNIFIED v2)
+   ----------------------------------------------------------------------------
+   One coherent system expressed as two surfaces:
+
+     :root  → LIGHT — warm cream, cozy "curation desk"
+     .dark  → DARK  — warm charcoal, dim "reading room"
+
+   These are TRUE INVERSIONS of one identity. Both share:
+     • the SAME accent hue (swappable — see ACCENT PRESETS below)
+     • the SAME geometric sans type (Space Grotesk display + Geist body)
+     • the SAME crisp 3px radii
+     • the SAME layered elevation tiers (--shadow-1..4)
+
+   Only the surface values (bg / fg / border) and the accent's lightness flip
+   between modes. The four extra themes (Cartridge / Y2K / Jewel / Aurora) were
+   retired in v2 to keep the system consistent and product-fit.
+
+   ── ACCENT ──────────────────────────────────────────────────────────────────
+   The brand accent is a single swappable variable. Set `data-accent` on <html>
+   to one of: indigo · sage · clay · plum. Default (no attribute) = sage.
+   Each preset supplies a LIGHT tone (mid-dark, for cream) and a DARK tone
+   (lighter, for charcoal). Hover/active and the "Playing" status derive from it.
+
+   Fonts load from Google Fonts (Geist, Geist Mono, Space Grotesk).
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+/* ============================ ACCENT PRESETS ============================== */
+/* Each defines --acc-l (light-mode primary) + --acc-d (dark-mode primary).
+   Foregrounds are standardized: light accents take cream text, dark accents
+   take near-black text. */
+:root {
+  --acc-fg-l: oklch(0.99 0.01 85);   /* text on light-mode primary  */
+  --acc-fg-d: oklch(0.16 0.012 70);  /* text on dark-mode primary   */
+  /* default accent = sage */
+  --acc-l: oklch(0.52 0.085 195);
+  --acc-d: oklch(0.72 0.085 195);
+}
+[data-accent="indigo"] { --acc-l: oklch(0.50 0.15 274); --acc-d: oklch(0.72 0.14 274); }
+[data-accent="sage"]   { --acc-l: oklch(0.52 0.085 195); --acc-d: oklch(0.72 0.085 195); }
+[data-accent="clay"]   { --acc-l: oklch(0.55 0.13 42);  --acc-d: oklch(0.72 0.115 45); }
+[data-accent="plum"]   { --acc-l: oklch(0.50 0.13 330); --acc-d: oklch(0.72 0.12 330); }
+
+/* ================================ LIGHT ================================== */
+:root {
+  /* Type families */
+  --font-runtime-sans: "Geist", system-ui, sans-serif;
+  --font-runtime-mono: "Geist Mono", ui-monospace, monospace;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+
+  /* Warm cream surfaces (layered: bg sits under card) */
+  --background: oklch(0.96 0.014 85);
+  --foreground: oklch(0.20 0.02 60);
+  --foreground-body: oklch(0.31 0.018 60);
+  --card: oklch(0.99 0.008 85);
+  --card-foreground: oklch(0.20 0.02 60);
+  --popover: oklch(0.99 0.008 85);
+  --popover-foreground: oklch(0.20 0.02 60);
+
+  /* Primary = accent (light tone) */
+  --primary: var(--acc-l);
+  --primary-foreground: var(--acc-fg-l);
+  --primary-hover: oklch(from var(--primary) calc(l - 0.05) c h);
+  --primary-active: oklch(from var(--primary) calc(l - 0.10) c h);
+
+  --secondary: oklch(0.93 0.015 85);
+  --secondary-foreground: oklch(0.20 0.02 60);
+  --muted: oklch(0.93 0.015 85);
+  --muted-foreground: oklch(0.48 0.015 60);
+  --accent: oklch(0.91 0.018 82);
+  --accent-foreground: oklch(0.20 0.02 60);
+
+  /* Light surfaces DARKEN on interaction */
+  --surface-hover: oklch(from var(--card) calc(l - 0.03) c h);
+  --surface-active: oklch(from var(--card) calc(l - 0.06) c h);
+
+  --destructive: oklch(0.55 0.20 25);
+  --destructive-foreground: oklch(0.99 0.002 25);
+  --success: oklch(0.52 0.12 150);
+  --success-foreground: oklch(0.99 0.002 150);
+  --warning: oklch(0.60 0.13 70);
+  --warning-foreground: oklch(0.20 0.02 60);
+  --info: oklch(0.52 0.13 250);
+  --info-foreground: oklch(0.99 0.002 250);
+
+  --border: oklch(0.86 0.018 82);
+  --input: oklch(0.86 0.018 82);
+  --ring: var(--primary);
+
+  /* Sidebar — a touch deeper than the page */
+  --sidebar: oklch(0.94 0.015 85);
+  --sidebar-foreground: oklch(0.20 0.02 60);
+  --sidebar-border: oklch(0.88 0.016 82);
+
+  /* Status — game-journey taxonomy. Consistent hues across both modes;
+     only lightness flips. "Playing" inherits the accent. */
+  --status-wishlist: oklch(0.52 0.13 250);  --status-wishlist-foreground: oklch(0.99 0 0);
+  --status-shelf: oklch(0.50 0.02 70);       --status-shelf-foreground: oklch(0.99 0.01 85);
+  --status-upNext: oklch(0.60 0.13 70);      --status-upNext-foreground: oklch(0.20 0.02 60);
+  --status-playing: var(--primary);          --status-playing-foreground: var(--primary-foreground);
+  --status-played: oklch(0.52 0.12 150);     --status-played-foreground: oklch(0.99 0 0);
+
+  /* Platform brand colors (constant) */
+  --color-nintendo: #e60012;
+  --color-playstation: #0070d1;
+  --color-xbox: #107c10;
+  --color-pc: #1b2838;
+
+  /* Charts */
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.52 0.12 150);
+  --chart-3: oklch(0.60 0.13 70);
+  --chart-4: oklch(0.52 0.13 250);
+  --chart-5: oklch(0.50 0.13 330);
+
+  /* ---- CRISP RADII (both modes) ---------------------------------------- */
+  --radius: 0.1875rem;        /* 3px */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.1875rem;
+  --radius-lg: 0.25rem;
+  --radius-card: 0.1875rem;
+  --radius-cover: 0.625rem;   /* rounded cover art (exception to the crisp scale) */
+  --radius-btn: 0.1875rem;
+  --radius-chip: 0.25rem;
+  --radius-pill: 9999px;
+
+  /* ---- LAYERED ELEVATION (clear tiers) --------------------------------- */
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.06), 0 1px 1px oklch(0 0 0 / 0.04);
+  --shadow-2: 0 2px 4px oklch(0 0 0 / 0.07), 0 4px 8px oklch(0 0 0 / 0.06);
+  --shadow-3: 0 4px 8px oklch(0 0 0 / 0.07), 0 12px 24px oklch(0 0 0 / 0.09);
+  --shadow-4: 0 8px 16px oklch(0 0 0 / 0.08), 0 24px 48px oklch(0 0 0 / 0.12);
+  /* Back-compat aliases (old component class names) */
+  --shadow-paper-sm: var(--shadow-1);
+  --shadow-paper: var(--shadow-2);
+  --shadow-paper-md: var(--shadow-3);
+  --shadow-paper-lg: var(--shadow-4);
+  --shadow-cover: var(--shadow-3);
+  --shadow-btn: var(--shadow-1);
+
+  /* ---- TYPE SCALE ------------------------------------------------------- */
+  --font-size-display-2xl: 4.5rem;   --font-line-height-display-2xl: 1;    --font-letter-spacing-display-2xl: -0.02em;
+  --font-size-display-xl: 3.75rem;   --font-line-height-display-xl: 1.05;  --font-letter-spacing-display-xl: -0.02em;
+  --font-size-display-lg: 3rem;      --font-line-height-display-lg: 1.08;  --font-letter-spacing-display-lg: -0.02em;
+  --font-size-heading-xl: 2.25rem;   --font-line-height-heading-xl: 1.15;  --font-letter-spacing-heading-xl: -0.015em;
+  --font-size-heading-lg: 1.875rem;  --font-line-height-heading-lg: 1.2;   --font-letter-spacing-heading-lg: -0.015em;
+  --font-size-heading-md: 1.5rem;    --font-line-height-heading-md: 1.25;  --font-letter-spacing-heading-md: -0.01em;
+  --font-size-heading-sm: 1.25rem;   --font-line-height-heading-sm: 1.35;  --font-letter-spacing-heading-sm: -0.01em;
+  --font-size-heading-xs: 1.125rem;  --font-line-height-heading-xs: 1.4;   --font-letter-spacing-heading-xs: -0.01em;
+  --font-size-body-lg: 1.125rem;     --font-line-height-body-lg: 1.6;
+  --font-size-body-md: 1rem;         --font-line-height-body-md: 1.6;
+  --font-size-body-sm: 0.875rem;     --font-line-height-body-sm: 1.5;
+  --font-size-body-xs: 0.75rem;      --font-line-height-body-xs: 1.5;
+  --font-size-caption: 0.75rem;      --font-line-height-caption: 1.4;      --font-letter-spacing-caption: 0.01em;
+  --font-size-overline: 0.75rem;     --font-line-height-overline: 1.3;     --font-letter-spacing-overline: 0.10em;
+
+  --font-weight-display: 700;
+  --font-weight-heading: 600;
+  --font-weight-subheading: 600;
+  --font-weight-body: 400;
+  --font-weight-caption: 500;
+
+  /* ---- SPACING (Tailwind-aligned) -------------------------------------- */
+  --space-xs: 0.25rem; --space-sm: 0.375rem; --space-md: 0.5rem; --space-lg: 0.75rem;
+  --space-xl: 1rem; --space-2xl: 1.5rem; --space-3xl: 2rem; --space-4xl: 3rem; --space-5xl: 6rem;
+
+  /* ---- MOTION ----------------------------------------------------------- */
+  --duration-instant: 100ms; --duration-fast: 150ms; --duration-normal: 200ms;
+  --duration-slow: 300ms; --duration-slower: 500ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  color-scheme: light;
+}
+
+/* ================================= DARK ================================== */
+/* Warm charcoal — a dim reading room, NOT cold violet. Hue stays warm (~70)
+   and low-chroma so it reads as the same family as the cream light mode. */
+.dark {
+  --background: oklch(0.17 0.008 70);
+  --foreground: oklch(0.94 0.008 85);
+  --foreground-body: oklch(0.82 0.010 85);
+  --card: oklch(0.205 0.009 70);
+  --card-foreground: oklch(0.94 0.008 85);
+  --popover: oklch(0.205 0.009 70);
+  --popover-foreground: oklch(0.94 0.008 85);
+
+  --primary: var(--acc-d);
+  --primary-foreground: var(--acc-fg-d);
+  --primary-hover: oklch(from var(--primary) calc(l + 0.05) c h);
+  --primary-active: oklch(from var(--primary) calc(l + 0.10) c h);
+
+  --secondary: oklch(0.25 0.010 70);
+  --secondary-foreground: oklch(0.94 0.008 85);
+  --muted: oklch(0.25 0.010 70);
+  --muted-foreground: oklch(0.66 0.012 80);
+  --accent: oklch(0.27 0.012 72);
+  --accent-foreground: oklch(0.94 0.008 85);
+
+  /* Dark surfaces LIGHTEN on interaction */
+  --surface-hover: oklch(from var(--card) calc(l + 0.04) c h);
+  --surface-active: oklch(from var(--card) calc(l + 0.07) c h);
+
+  --destructive: oklch(0.62 0.20 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --success: oklch(0.72 0.13 150);
+  --success-foreground: oklch(0.16 0.012 70);
+  --warning: oklch(0.78 0.13 70);
+  --warning-foreground: oklch(0.16 0.012 70);
+  --info: oklch(0.70 0.13 250);
+  --info-foreground: oklch(0.16 0.012 70);
+
+  --border: oklch(0.28 0.010 72);
+  --input: oklch(0.28 0.010 72);
+  --ring: var(--primary);
+
+  --sidebar: oklch(0.145 0.008 70);
+  --sidebar-foreground: oklch(0.94 0.008 85);
+  --sidebar-border: oklch(0.25 0.010 72);
+
+  --status-wishlist: oklch(0.70 0.13 250);  --status-wishlist-foreground: oklch(0.16 0.012 70);
+  --status-shelf: oklch(0.62 0.015 80);      --status-shelf-foreground: oklch(0.16 0.012 70);
+  --status-upNext: oklch(0.78 0.13 70);      --status-upNext-foreground: oklch(0.16 0.012 70);
+  --status-playing: var(--primary);          --status-playing-foreground: var(--primary-foreground);
+  --status-played: oklch(0.72 0.13 150);     --status-played-foreground: oklch(0.16 0.012 70);
+
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.72 0.13 150);
+  --chart-3: oklch(0.78 0.13 70);
+  --chart-4: oklch(0.70 0.13 250);
+  --chart-5: oklch(0.72 0.12 330);
+
+  /* Deeper layered shadows for the dark room */
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.4);
+  --shadow-2: 0 2px 6px oklch(0 0 0 / 0.45), 0 4px 10px oklch(0 0 0 / 0.35);
+  --shadow-3: 0 6px 14px oklch(0 0 0 / 0.5), 0 14px 30px oklch(0 0 0 / 0.45);
+  --shadow-4: 0 10px 24px oklch(0 0 0 / 0.55), 0 28px 56px oklch(0 0 0 / 0.55);
+  --shadow-paper-sm: var(--shadow-1);
+  --shadow-paper: var(--shadow-2);
+  --shadow-paper-md: var(--shadow-3);
+  --shadow-paper-lg: var(--shadow-4);
+  --shadow-cover: var(--shadow-3);
+  --shadow-btn: var(--shadow-1);
+
+  color-scheme: dark;
+}
+
+/* ===================== SEMANTIC TYPE CLASSES ============================= */
+.display-2xl { font-family: var(--font-display); font-size: var(--font-size-display-2xl); line-height: var(--font-line-height-display-2xl); letter-spacing: var(--font-letter-spacing-display-2xl); font-weight: var(--font-weight-display); }
+.display-xl  { font-family: var(--font-display); font-size: var(--font-size-display-xl);  line-height: var(--font-line-height-display-xl);  letter-spacing: var(--font-letter-spacing-display-xl);  font-weight: var(--font-weight-display); }
+.display-lg  { font-family: var(--font-display); font-size: var(--font-size-display-lg);  line-height: var(--font-line-height-display-lg);  letter-spacing: var(--font-letter-spacing-display-lg);  font-weight: var(--font-weight-display); }
+
+.text-h1, .heading-xl { font-family: var(--font-display); font-size: var(--font-size-heading-xl); line-height: var(--font-line-height-heading-xl); letter-spacing: var(--font-letter-spacing-heading-xl); font-weight: var(--font-weight-heading); }
+.text-h2, .heading-lg { font-family: var(--font-display); font-size: var(--font-size-heading-lg); line-height: var(--font-line-height-heading-lg); letter-spacing: var(--font-letter-spacing-heading-lg); font-weight: var(--font-weight-heading); }
+.text-h3, .heading-md { font-family: var(--font-display); font-size: var(--font-size-heading-md); line-height: var(--font-line-height-heading-md); letter-spacing: var(--font-letter-spacing-heading-md); font-weight: var(--font-weight-heading); }
+.heading-sm { font-family: var(--font-display); font-size: var(--font-size-heading-sm); line-height: var(--font-line-height-heading-sm); letter-spacing: var(--font-letter-spacing-heading-sm); font-weight: var(--font-weight-heading); }
+.heading-xs { font-family: var(--font-display); font-size: var(--font-size-heading-xs); line-height: var(--font-line-height-heading-xs); letter-spacing: var(--font-letter-spacing-heading-xs); font-weight: var(--font-weight-heading); }
+
+.subheading-lg { font-size: var(--font-size-heading-lg); line-height: var(--font-line-height-heading-lg); font-weight: var(--font-weight-subheading); }
+.subheading-md { font-size: var(--font-size-heading-md); line-height: var(--font-line-height-heading-md); font-weight: var(--font-weight-subheading); }
+
+.text-body { font-size: var(--font-size-body-md); line-height: var(--font-line-height-body-md); font-weight: var(--font-weight-body); }
+.body-lg { font-size: var(--font-size-body-lg); line-height: var(--font-line-height-body-lg); font-weight: var(--font-weight-body); }
+.body-md { font-size: var(--font-size-body-md); line-height: var(--font-line-height-body-md); font-weight: var(--font-weight-body); }
+.body-sm { font-size: var(--font-size-body-sm); line-height: var(--font-line-height-body-sm); font-weight: var(--font-weight-body); }
+.body-xs { font-size: var(--font-size-body-xs); line-height: var(--font-line-height-body-xs); font-weight: var(--font-weight-body); }
+
+.caption, .text-caption { font-size: var(--font-size-caption); line-height: var(--font-line-height-caption); letter-spacing: var(--font-letter-spacing-caption); font-weight: var(--font-weight-caption); }
+.overline { font-size: var(--font-size-overline); line-height: var(--font-line-height-overline); letter-spacing: var(--font-letter-spacing-overline); font-weight: var(--font-weight-caption); text-transform: uppercase; }
+
+/* Mono "terminal label" — // LIBRARY, // GAME.DETAIL */
+.terminal-label { font-family: var(--font-runtime-mono); font-size: var(--font-size-body-xs); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-foreground); }

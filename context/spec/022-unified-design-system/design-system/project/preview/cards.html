@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background);color:var(--foreground);font-family:var(--font-runtime-sans);padding:20px 24px;-webkit-font-smoothing:antialiased}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
+.sw{border-radius:8px;border:1px solid var(--border)}
+.mono{font-family:var(--font-runtime-mono)}
+.mut{color:var(--muted-foreground)}
+.lbl{font-size:11px;letter-spacing:.04em}
+
+.c{background:var(--card);border:1px solid color-mix(in oklch,var(--border) 40%,transparent);border-radius:var(--radius-card);padding:16px;width:150px}
+
+</style></head><body>
+<div class="lbl mono mut" style="margin-bottom:12px">CARD VARIANTS</div>
+<div class="row" style="gap:14px">
+  <div class="c"><div style="font-family:var(--font-display);font-weight:700;font-size:15px">default</div><div class="lbl mut" style="margin-top:6px">hairline border /10</div></div>
+  <div class="c" style="box-shadow:var(--shadow-paper)"><div style="font-family:var(--font-display);font-weight:700;font-size:15px">elevated</div><div class="lbl mut" style="margin-top:6px">paper shadow</div></div>
+  <div class="c" style="border-color:color-mix(in oklch,var(--border) 70%,transparent)"><div style="font-family:var(--font-display);font-weight:700;font-size:15px">outlined</div><div class="lbl mut" style="margin-top:6px">stronger rule</div></div>
+</div></body></html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background);color:var(--foreground);font-family:var(--font-runtime-sans);padding:20px 24px;-webkit-font-smoothing:antialiased}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
+.sw{border-radius:8px;border:1px solid var(--border)}
+.mono{font-family:var(--font-runtime-mono)}
+.mut{color:var(--muted-foreground)}
+.lbl{font-size:11px;letter-spacing:.04em}
+
+</style></head><body>
+<div class="lbl mono mut" style="margin-bottom:12px">SPACING — Tailwind-aligned semantic scale</div>
+<div class="col" style="gap:7px">
+  <div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">xs</div><div style="height:12px;width:var(--space-xs);background:var(--primary);border-radius:2px"></div><div class="lbl mut">4px</div></div><div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">sm</div><div style="height:12px;width:var(--space-sm);background:var(--primary);border-radius:2px"></div><div class="lbl mut">6px</div></div><div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">md</div><div style="height:12px;width:var(--space-md);background:var(--primary);border-radius:2px"></div><div class="lbl mut">8px</div></div><div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">lg</div><div style="height:12px;width:var(--space-lg);background:var(--primary);border-radius:2px"></div><div class="lbl mut">12px</div></div><div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">xl</div><div style="height:12px;width:var(--space-xl);background:var(--primary);border-radius:2px"></div><div class="lbl mut">16px</div></div><div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">2xl</div><div style="height:12px;width:var(--space-2xl);background:var(--primary);border-radius:2px"></div><div class="lbl mut">24px</div></div><div class="row" style="gap:10px;align-items:center"><div style="width:46px" class="lbl mut mono">3xl</div><div style="height:12px;width:var(--space-3xl);background:var(--primary);border-radius:2px"></div><div class="lbl mut">32px</div></div>
+</div></body></html>

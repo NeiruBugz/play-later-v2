@@ -15,17 +15,17 @@
 import { createContext, useContext } from "react";
 
 /**
- * The five named themes from spec 021. Each theme value maps to a same-named
- * CSS class via the provider's THEME_CLASS_MAP, except "light" (no class) and
- * "system" (resolves to light/dark via matchMedia).
+ * The three theme options (spec 022). "light" applies no CSS class, "dark"
+ * applies the `dark` class via the provider's THEME_CLASS_MAP, and "system"
+ * resolves to light/dark via matchMedia.
  */
-export type Theme = "light" | "dark" | "cartridge" | "aurora" | "system";
+export type Theme = "light" | "dark" | "system";
 
 /**
- * The concrete CSS class names that may be applied to <html>. "system" is
+ * The concrete light/dark surface that may be applied to <html>. "system" is
  * never written here — it resolves to "light" or "dark" via matchMedia.
  */
-export type ResolvedTheme = "light" | "dark" | "cartridge" | "aurora";
+export type ResolvedTheme = "light" | "dark";
 
 export type ThemeContextValue = {
   /** The user's chosen theme — may include "system". */

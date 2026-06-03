@@ -4,11 +4,13 @@
  * These tests assert that the `<html>` element receives the correct CSS class
  * for each named theme. Theme value === CSS class name:
  *
- *   light     → no theme class on <html>
- *   dark      → <html class="dark …">
- *   cartridge → <html class="cartridge …">
- *   aurora    → <html class="aurora …">
- *   system    → resolved via prefers-color-scheme
+ *   light  → no theme class on <html>
+ *   dark   → <html class="dark …">
+ *   system → resolved via prefers-color-scheme
+ *
+ * Spec 022 Slice 2: the theme system is consolidated to Light / Dark / System.
+ * A stored retired theme (e.g. "cartridge", "aurora") is no longer valid and
+ * falls back to the configured default; the provider only ever toggles `dark`.
  *
  * Slice 19 GREEN: the provider is hand-rolled (NOT `next-themes`). See
  * DIVERGENCES.md for rationale. The wrapper config below mirrors the canonical
@@ -62,6 +64,7 @@ describe("ThemeProvider (html class application)", () => {
     document.documentElement.className = "";
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.style.colorScheme = "";
+    localStorage.clear();
     vi.unstubAllGlobals();
   });
 
@@ -103,37 +106,47 @@ describe("ThemeProvider (html class application)", () => {
     });
   });
 
-  describe("given theme is cartridge", () => {
+  describe("given a retired theme 'cartridge' is stored in localStorage", () => {
     beforeEach(() => {
       stubMatchMedia(false);
+      localStorage.setItem("theme", "cartridge");
       render(
-        <ThemeHarness theme="cartridge">
+        <SavepointThemeProvider defaultTheme="system">
           <div />
-        </ThemeHarness>
+        </SavepointThemeProvider>
       );
     });
 
-    it("applies the cartridge class to <html>", () => {
-      expect(getHtmlClasses()).toContain("cartridge");
+    it("does not apply a cartridge class to <html> (falls back to system)", () => {
+      expect(getHtmlClasses()).not.toContain("cartridge");
     });
 
-    it("does not apply a class named y2k to <html>", () => {
-      expect(getHtmlClasses()).not.toContain("y2k");
+    it("only ever toggles the dark class, never a retired theme class", () => {
+      const classes = getHtmlClasses();
+      expect(classes).not.toContain("cartridge");
+      expect(classes).not.toContain("aurora");
+      expect(classes).not.toContain("y2k");
+      expect(classes).not.toContain("jewel");
     });
   });
 
-  describe("given theme is aurora", () => {
+  describe("given a retired theme 'aurora' is stored in localStorage", () => {
     beforeEach(() => {
-      stubMatchMedia(false);
+      stubMatchMedia(true);
+      localStorage.setItem("theme", "aurora");
       render(
-        <ThemeHarness theme="aurora">
+        <SavepointThemeProvider defaultTheme="system">
           <div />
-        </ThemeHarness>
+        </SavepointThemeProvider>
       );
     });
 
-    it("applies the aurora class to <html>", () => {
-      expect(getHtmlClasses()).toContain("aurora");
+    it("does not apply an aurora class to <html> (falls back to system)", () => {
+      expect(getHtmlClasses()).not.toContain("aurora");
+    });
+
+    it("resolves to system — applies the dark class when system prefers dark", () => {
+      expect(getHtmlClasses()).toContain("dark");
     });
   });
 

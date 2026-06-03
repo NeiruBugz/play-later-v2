@@ -125,7 +125,7 @@ export function LibraryPage(props: LibraryPageProps) {
   return (
     <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
       <header className="gap-md flex items-baseline justify-between">
-        <h1 className="heading-lg y2k-chrome-text">Library</h1>
+        <h1 className="heading-lg">Library</h1>
         <Link
           to="/steam/games"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SavePoint — App UI Kit</title>
+  <link rel="icon" href="assets/logo.svg" />
+  <link rel="stylesheet" href="../../colors_and_type.css" />
+  <link rel="stylesheet" href="kit.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" src="kit.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const NAV = [
+      { key: "library", label: "Library", icon: "BookMarked" },
+      { key: "search", label: "Search games", icon: "Search" },
+      { key: "journal", label: "Journal", icon: "BookOpen" },
+      { key: "profile", label: "Profile", icon: "User" },
+      { key: "settings", label: "Settings", icon: "Settings" },
+    ];
+
+    const ACCENTS = [
+      { key: "indigo", label: "Indigo", swatch: "#5a52d6" },
+      { key: "sage", label: "Sage", swatch: "#468b85" },
+      { key: "clay", label: "Clay", swatch: "#b3623f" },
+      { key: "plum", label: "Plum", swatch: "#9c4f86" },
+    ];
+
+    function Sidebar({ screen, go, theme, toggleTheme, accent, setAccent }) {
+      const map = { dashboard: "library", game: "library" };
+      const active = map[screen] || screen;
+      return (
+        <aside className="sidebar">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 16px 0" }}>
+            <div style={{ cursor: "pointer" }} onClick={() => go("dashboard")}><Wordmark size={32} /></div>
+            <button className="sidebar-search" onClick={() => go("search")}>
+              <span>Search</span><kbd>⌘K</kbd>
+            </button>
+          </div>
+          <nav style={{ marginTop: 16, flex: 1, padding: "0 8px", display: "flex", flexDirection: "column", gap: 2 }}>
+            {NAV.map((n) => (
+              <div key={n.key} className="nav-item" aria-current={active === n.key ? "page" : undefined} onClick={() => go(n.key)}>
+                <Icon name={n.icon} size={16} /> {n.label}
+              </div>
+            ))}
+          </nav>
+          <div style={{ marginTop: 8, borderTop: "1px solid var(--border)", padding: "12px", display: "flex", flexDirection: "column", gap: 8 }}>
+            {/* Accent switcher — explore the brand hue live */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 8px" }}>
+              <span className="caption" style={{ color: "var(--muted-foreground)", flex: 1 }}>Accent</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                {ACCENTS.map((a) => (
+                  <button key={a.key} title={a.label} onClick={() => setAccent(a.key)}
+                    style={{ width: 18, height: 18, borderRadius: 9999, background: a.swatch, cursor: "pointer",
+                      border: accent === a.key ? "2px solid var(--foreground)" : "2px solid transparent",
+                      outline: accent === a.key ? "1px solid var(--foreground)" : "none", outlineOffset: 1, padding: 0 }} />
+                ))}
+              </div>
+            </div>
+            <button className="nav-item" style={{ width: "100%", border: 0, background: "transparent", justifyContent: "flex-start" }} onClick={toggleTheme}>
+              <Icon name={theme === "dark" ? "Sun" : "Moon"} size={16} /> {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
+            <div className="nav-item" style={{ gap: 8 }}>
+              <span style={{ width: 28, height: 28, borderRadius: 9999, background: "var(--primary)", color: "var(--primary-foreground)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: ".8rem", fontWeight: 600 }}>A</span>
+              <span style={{ fontWeight: 400 }}>Alex Rivera</span>
+            </div>
+          </div>
+        </aside>
+      );
+    }
+
+    function App() {
+      const [screen, setScreen] = useState("landing");
+      const [gameId, setGameId] = useState("hk");
+      const [theme, setTheme] = useState("light");
+      const [accent, setAccentState] = useState("sage");
+
+      const apply = (t) => {
+        document.documentElement.classList.toggle("dark", t === "dark");
+        setTheme(t);
+      };
+      const setAccent = (a) => {
+        document.documentElement.setAttribute("data-accent", a);
+        setAccentState(a);
+      };
+      React.useEffect(() => { apply("light"); setAccent("sage"); }, []);
+
+      window.SP_NAV = {
+        go: (s) => { setScreen(s); window.scrollTo(0, 0); },
+        openGame: (id) => { setGameId(id); setScreen("game"); window.scrollTo(0, 0); },
+      };
+
+      // Landing forces its own dark wrapper; render bare.
+      if (screen === "landing") return <LandingScreen theme={theme} accent={accent} setAccent={setAccent} />;
+
+      let content;
+      if (screen === "dashboard") content = <DashboardScreen />;
+      else if (screen === "library") content = <LibraryScreen />;
+      else if (screen === "game") content = <GameDetailScreen gameId={gameId} />;
+      else if (screen === "journal") content = <JournalScreen />;
+      else content = <Placeholder screen={screen} />;
+
+      return (
+        <div className="app-shell">
+          <Sidebar screen={screen} go={(s) => window.SP_NAV.go(s)} theme={theme} toggleTheme={() => apply(theme === "dark" ? "light" : "dark")} accent={accent} setAccent={setAccent} />
+          <main className="app-main">{content}</main>
+        </div>
+      );
+    }
+
+    function Placeholder({ screen }) {
+      const titles = { search: "Search games", profile: "Profile", settings: "Settings" };
+      return (
+        <div className="container">
+          <h1 className="text-h1">{titles[screen] || screen}</h1>
+          <p className="body-md" style={{ color: "var(--muted-foreground)", maxWidth: 520 }}>
+            This surface exists in the product but isn't recreated in the kit. Core flows — dashboard,
+            library, game detail, and journal — are fully built. Use the sidebar to explore them.
+          </p>
+          <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+            <Button onClick={() => window.SP_NAV.go("dashboard")}>Back to dashboard</Button>
+            <Button variant="outline" onClick={() => window.SP_NAV.go("library")}>Open library</Button>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

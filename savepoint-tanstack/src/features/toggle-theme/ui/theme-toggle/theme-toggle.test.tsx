@@ -10,11 +10,10 @@ import {
 import { ThemeToggle } from "./theme-toggle";
 
 // Theme value → CSS class mapping (value === class name):
-//   light     → "" (no class)
-//   dark      → "dark"
-//   cartridge → "cartridge"
-//   aurora    → "aurora"
-//   system    → resolved via prefers-color-scheme
+//   light  → "" (no class)
+//   dark   → "dark"
+//   system → resolved via prefers-color-scheme
+// Spec 022 Slice 2 consolidates the picker to exactly Light / Dark / System.
 
 function Harness({ defaultTheme = "system" }: { defaultTheme?: Theme }) {
   return (
@@ -60,8 +59,6 @@ describe("ThemeToggle", () => {
     it("does not show any option buttons before the picker is opened", () => {
       expect(elements.queryOptionButton("Light")).toBeNull();
       expect(elements.queryOptionButton("Dark")).toBeNull();
-      expect(elements.queryOptionButton("Cartridge")).toBeNull();
-      expect(elements.queryOptionButton("Aurora")).toBeNull();
       expect(elements.queryOptionButton("System")).toBeNull();
     });
   });
@@ -80,16 +77,16 @@ describe("ThemeToggle", () => {
       expect(elements.getOptionButton("Dark")).toBeInTheDocument();
     });
 
-    it("shows the Cartridge option button", () => {
-      expect(elements.getOptionButton("Cartridge")).toBeInTheDocument();
-    });
-
-    it("shows the Aurora option button", () => {
-      expect(elements.getOptionButton("Aurora")).toBeInTheDocument();
-    });
-
     it("shows the System option button", () => {
       expect(elements.getOptionButton("System")).toBeInTheDocument();
+    });
+
+    it("does not offer the retired Cartridge option", () => {
+      expect(elements.queryOptionButton("Cartridge")).toBeNull();
+    });
+
+    it("does not offer the retired Aurora option", () => {
+      expect(elements.queryOptionButton("Aurora")).toBeNull();
     });
   });
 
@@ -122,27 +119,15 @@ describe("ThemeToggle", () => {
     });
   });
 
-  describe("given the user selects Cartridge", () => {
+  describe("given the user selects System", () => {
     beforeEach(async () => {
-      render(<Harness defaultTheme="system" />);
+      render(<Harness defaultTheme="light" />);
       await actions.openPicker();
-      await actions.selectOption("Cartridge");
+      await actions.selectOption("System");
     });
 
     it("closes the picker after selection", () => {
-      expect(elements.queryOptionButton("Cartridge")).toBeNull();
-    });
-  });
-
-  describe("given the user selects Aurora", () => {
-    beforeEach(async () => {
-      render(<Harness defaultTheme="system" />);
-      await actions.openPicker();
-      await actions.selectOption("Aurora");
-    });
-
-    it("closes the picker after selection", () => {
-      expect(elements.queryOptionButton("Aurora")).toBeNull();
+      expect(elements.queryOptionButton("System")).toBeNull();
     });
   });
 

@@ -19,11 +19,9 @@ export function AppMobileTopbar() {
           src="/logo.svg"
           alt=""
           aria-hidden="true"
-          className="y2k-logo-glow jewel-logo-glow h-7 w-7 shrink-0"
+          className="h-7 w-7 shrink-0"
         />
-        <span className="text-h3 y2k-chrome-text y2k:tracking-wider jewel-display jewel:tracking-[0.14em]">
-          SavePoint
-        </span>
+        <span className="text-h3">SavePoint</span>
       </Link>
 
       <div className="flex items-center gap-1">
