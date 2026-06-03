@@ -24,7 +24,9 @@ export function ThemesTagsPanel({
           <ul aria-label="Themes" className="flex flex-wrap gap-1.5 text-sm">
             {themes.map((theme) => (
               <li key={theme}>
-                <Badge variant="secondary" className="rounded-md">{theme}</Badge>
+                <Badge variant="secondary" className="rounded-md">
+                  {theme}
+                </Badge>
               </li>
             ))}
           </ul>
@@ -37,7 +39,9 @@ export function ThemesTagsPanel({
           <ul aria-label="Genres" className="flex flex-wrap gap-1.5 text-sm">
             {genres.map((genre) => (
               <li key={genre}>
-                <Badge variant="secondary" className="rounded-md">{genre}</Badge>
+                <Badge variant="secondary" className="rounded-md">
+                  {genre}
+                </Badge>
               </li>
             ))}
           </ul>
