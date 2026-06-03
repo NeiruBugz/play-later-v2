@@ -44,6 +44,7 @@ _Everything we can ship on our own data + IGDB, with no AWS / external platform 
 - [x] **UX Audit — Round 1** _(Spec 012)_ — library scannability, mobile filters, dashboard hero, onboarding entry, library card redesign, quick add.
 - [x] **UX Audit — Round 2** _(Spec 014)_ — game detail / journal / profile / settings / auth surfaces; navigational connective tissue; Raycast-style command center direction. 12 pinned findings (3 High / 7 Medium / 2 Low).
 - [x] **Unified Design System (Light + Dark)** _(Spec 022)_ — consolidated 5 themes → warm-cream Light + warm-charcoal Dark on one swappable accent (sage, baked in), Space Grotesk headings, crisp 3px radii, layered shadows, new Save Glow logo. Retired-theme users fall back to System. _Supersedes the "Theme Variants & Density Modes" archive note below — the product now ships exactly two themes by design, not Terminal Green._
+- [x] **Game Detail — Enrichment Pass** _(Spec 023)_ — recomposed the tabbed game-detail page into an inline bento dashboard surfacing data the app already had: critic-score ring, screenshot gallery + lightbox, About, Themes & Tags (family-colored platform badges), consolidated "Your Record" (playtime / sessions / rating), in-place status pill (popover desktop / sheet mobile), "Log a session" with optional minutes, you-vs-benchmark Times to Beat with a "Your Pace" fallback, related games, and full graceful degradation. No migration. _Ships independently of and partially ahead of the fuller "Game Detail Redesign" (#4); accent = "you" design rule._
 
 ### In Progress
 
@@ -55,7 +56,7 @@ _Everything we can ship on our own data + IGDB, with no AWS / external platform 
 
 3. [ ] **Public Reflections** — opt-in to make journal entries public; browse community reflections on a game. _Builds on Spec 008 public profiles._
 
-4. [ ] **Game Detail Redesign** — single coordinated pass: hero with blurred cover backdrop, one-click status strip (no modal), personal stats column (playthroughs / your rating / journal count), community stats column, playthrough timeline, reviews feed, franchise / series / expansions / related games. _Consumes Per-Playthrough Logs + Reviews; replaces piecemeal asks (in-page status toggles, enhanced game details, fallback cover rendering)._
+4. [ ] **Game Detail Redesign** — single coordinated pass: hero with blurred cover backdrop, one-click status strip (no modal), personal stats column (playthroughs / your rating / journal count), community stats column, playthrough timeline, reviews feed, franchise / series / expansions / related games. _Consumes Per-Playthrough Logs + Reviews; replaces piecemeal asks (in-page status toggles, enhanced game details, fallback cover rendering)._ **Note (Spec 023):** the enrichment pass already shipped the catalog-side and personal-single-playthrough parts (bento hero + backdrop, in-place status pill, your-record stats, related games, times-to-beat). What remains here is strictly the multi-playthrough/community layer — playthrough timeline, community stats column, reviews feed — which still depends on Per-Playthrough Logs + Reviews._
 
 5. [ ] **Aggregate Game Stats** — community data on game detail: play counts (playing / played / backlog / wishlist), average rating + histogram, average / median completion time, review count. _Depends on Reviews._
 

@@ -8,5 +8,7 @@ export {
 export {
   TimesToBeatSection,
   TimesToBeatSkeleton,
+  YourPacePanel,
   type TimesToBeatSectionProps,
+  type YourPacePanelProps,
 } from "./ui";

@@ -184,8 +184,16 @@ describe("LibraryItemCard", () => {
         );
       });
 
-      it("renders the platform badge", () => {
+      it("renders the platform badge with the full platform label", () => {
         expect(screen.getByText("PlayStation 5")).toBeDefined();
+      });
+
+      it("colors the platform badge with the playstation family variant", () => {
+        // The single chosen platform keeps its full label but is now tinted
+        // by family color instead of the neutral `secondary` variant.
+        const badge = screen.getByText("PlayStation 5");
+        expect(badge.className).toContain("text-[#0070d1]");
+        expect(badge.className).not.toContain("bg-secondary");
       });
 
       it("dates the play window in the lifecycle caption", () => {
@@ -202,6 +210,22 @@ describe("LibraryItemCard", () => {
         expect(
           screen.getByRole("button", { name: "Log Session" })
         ).toBeDefined();
+      });
+    });
+
+    describe("given an item on a neutral platform (Stadia)", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            item={buildItem({ status: "PLAYING", platform: "Stadia" })}
+          />
+        );
+      });
+
+      it("renders the platform badge with the subtle (neutral) variant", () => {
+        const badge = screen.getByText("Stadia");
+        expect(badge.className).toContain("text-muted-foreground");
+        expect(badge.className).not.toContain("text-[#0070d1]");
       });
     });
 

@@ -17,6 +17,7 @@ import {
   TimesToBeatSkeleton,
 } from "@/features/game-detail/ui";
 import { AppError } from "@/shared/lib/errors";
+import { Card } from "@/shared/ui/card";
 import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
@@ -46,21 +47,34 @@ function GameDetailRoute() {
           }
         >
           <Suspense fallback={<TimesToBeatSkeleton />}>
-            <TimesToBeatSlot igdbId={igdbId} />
+            <TimesToBeatSlot
+              igdbId={igdbId}
+              playtimeTotalMinutes={data.playtimeTotalMinutes}
+              journalCount={data.journalCount}
+              recentSessionMinutes={data.recentSessionMinutes}
+            />
           </Suspense>
         </SectionErrorBoundary>
       }
       relatedGamesSlot={
         <SectionErrorBoundary
           fallback={
-            <SectionErrorMessage
-              headingId="related-games-heading"
-              heading="Related games"
-              message="Couldn't load related games"
-            />
+            <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <SectionErrorMessage
+                headingId="related-games-heading"
+                heading="Related games"
+                message="Couldn't load related games"
+              />
+            </Card>
           }
         >
-          <Suspense fallback={<RelatedGamesSkeleton />}>
+          <Suspense
+            fallback={
+              <Card variant="flat" className="gap-md p-xl flex flex-col">
+                <RelatedGamesSkeleton />
+              </Card>
+            }
+          >
             <RelatedGamesSlot igdbId={igdbId} />
           </Suspense>
         </SectionErrorBoundary>
@@ -69,13 +83,29 @@ function GameDetailRoute() {
   );
 }
 
-function TimesToBeatSlot({ igdbId }: { igdbId: number }) {
+function TimesToBeatSlot({
+  igdbId,
+  playtimeTotalMinutes,
+  journalCount,
+  recentSessionMinutes,
+}: {
+  igdbId: number;
+  playtimeTotalMinutes: number;
+  journalCount: number;
+  recentSessionMinutes: number[];
+}) {
   const { data: timesToBeat } = useSuspenseQuery({
     queryKey: ["times-to-beat", igdbId],
     queryFn: () => getTimesToBeatForGameFn({ data: { igdbId } }),
   });
-  if (timesToBeat === null) return null;
-  return <TimesToBeatSection timesToBeat={timesToBeat} />;
+  return (
+    <TimesToBeatSection
+      timesToBeat={timesToBeat}
+      playtimeTotalMinutes={playtimeTotalMinutes}
+      journalCount={journalCount}
+      recentSessionMinutes={recentSessionMinutes}
+    />
+  );
 }
 
 function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
@@ -93,27 +123,29 @@ function RelatedGamesSections({
   sections: RelatedCollectionSection[];
 }) {
   return (
-    <section
-      aria-labelledby="related-games-heading"
-      className="gap-md flex flex-col"
-    >
-      <h2 id="related-games-heading" className="text-h3">
-        Related games
-      </h2>
-      <RelatedGamesTabs
-        sections={sections}
-        renderGame={(game) => (
-          <GameCard
-            game={{
-              slug: game.slug,
-              title: game.title,
-              coverImageId: game.coverImageId,
-            }}
-            density="minimal"
-          />
-        )}
-      />
-    </section>
+    <Card variant="flat" className="gap-md p-xl flex flex-col">
+      <section
+        aria-labelledby="related-games-heading"
+        className="gap-md flex flex-col"
+      >
+        <h2 id="related-games-heading" className="text-h3">
+          Related games
+        </h2>
+        <RelatedGamesTabs
+          sections={sections}
+          renderGame={(game) => (
+            <GameCard
+              game={{
+                slug: game.slug,
+                title: game.title,
+                coverImageId: game.coverImageId,
+              }}
+              density="minimal"
+            />
+          )}
+        />
+      </section>
+    </Card>
   );
 }
 

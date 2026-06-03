@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 
 import type { ComposeJournalEntryDialogProps } from "./compose-journal-entry-dialog.type";
@@ -24,11 +25,18 @@ export function ComposeJournalEntryDialog({
 }: ComposeJournalEntryDialogProps) {
   const router = useRouter();
   const [content, setContent] = useState("");
+  const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const trimmed = content.trim();
   const isEmpty = trimmed.length === 0;
+
+  const parsedMinutes = Number.parseInt(minutes, 10);
+  const playedMinutes =
+    Number.isInteger(parsedMinutes) && parsedMinutes > 0
+      ? parsedMinutes
+      : undefined;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -40,10 +48,12 @@ export function ComposeJournalEntryDialog({
           content: trimmed,
           kind: "QUICK",
           gameId: defaultGameId ?? null,
+          ...(playedMinutes !== undefined ? { playedMinutes } : {}),
         },
       });
       setError(null);
       setContent("");
+      setMinutes("");
       toast.success("Entry posted");
       await router.invalidate();
       onOpenChange(false);
@@ -79,6 +89,20 @@ export function ComposeJournalEntryDialog({
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder="What happened in your session?"
+            />
+          </label>
+
+          <label className="gap-xs flex flex-col text-sm">
+            <span className="text-muted-foreground">Time played (minutes)</span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step={1}
+              aria-label="Time played (minutes)"
+              value={minutes}
+              onChange={(event) => setMinutes(event.target.value)}
+              placeholder="Optional"
             />
           </label>
 

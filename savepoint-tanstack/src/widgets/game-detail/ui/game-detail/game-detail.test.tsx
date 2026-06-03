@@ -97,9 +97,11 @@ const buildData = (
 ): GameDetailData => ({
   game: buildGame(gameOverrides),
   igdbDetails: buildIgdbDetails(igdbOverrides),
-  relatedGames: [],
   libraryEntry,
   journalTeaser: [],
+  journalCount: 0,
+  playtimeTotalMinutes: 0,
+  recentSessionMinutes: [],
 });
 
 const elements = {
@@ -107,17 +109,20 @@ const elements = {
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
   queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
   queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
-  queryStatusPill: (label: string) =>
-    screen.queryByRole("tab", { name: label }),
+  queryStatusPill: () =>
+    screen.queryByRole("button", { name: /^Change library status:/ }),
+  queryAddToLibrary: () =>
+    screen.queryByRole("button", { name: "Add to library" }),
   queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
-  queryRatingSlider: () => screen.queryByRole("slider"),
+  queryRatingSliders: () => screen.queryAllByRole("slider"),
   queryMoreMenuTrigger: () =>
     screen.queryByRole("button", { name: "More library actions" }),
-  getOverviewTab: () => screen.getByRole("tab", { name: "Overview" }),
-  queryJournalTab: () => screen.queryByRole("tab", { name: /^Journal/ }),
-  queryTimesToBeatTab: () =>
-    screen.queryByRole("tab", { name: "Times to beat" }),
-  queryRelatedTab: () => screen.queryByRole("tab", { name: "Related" }),
+  queryAllTablists: () => screen.queryAllByRole("tablist"),
+  queryAllTabpanels: () => screen.queryAllByRole("tabpanel"),
+  queryOverviewTab: () => screen.queryByRole("tab", { name: "Overview" }),
+  queryJournalHeading: () => screen.queryByRole("heading", { name: "Journal" }),
+  queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
+  queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
   querySummary: () => screen.queryByLabelText("Game summary"),
   queryGameDetailLabel: () => screen.queryByText("// GAME.DETAIL"),
   queryGenresLabel: () => screen.queryByText("// GENRES"),
@@ -125,7 +130,28 @@ const elements = {
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
+  queryCriticScoreRing: () => screen.queryByLabelText("Critic score"),
+  queryRoundedScore: (rounded: string) => screen.queryByText(rounded),
+  queryAboutCard: () => screen.queryByTestId("game-detail-about-card"),
+  queryThemesTagsCard: () =>
+    screen.queryByTestId("game-detail-themes-tags-card"),
+  queryLegacyCatalogCard: () =>
+    screen.queryByTestId("game-detail-catalog-card"),
+  queryEyebrow: () => screen.queryByLabelText("Release metadata"),
+  queryYourRecord: () => screen.queryByTestId("your-record-panel"),
+  queryThemesLabel: () => screen.queryByText("// THEMES"),
+  queryEmDash: () => screen.queryByText("—"),
+  queryScreenshotsRegion: () =>
+    screen.queryByLabelText("Screenshots of Hollow Knight"),
+  queryTrackInvite: () => screen.queryByTestId("add-to-track-invite"),
+  querySignInLink: () => screen.queryByRole("link", { name: "Sign in" }),
+  getBentoGrid: () => screen.getByTestId("game-detail-bento-grid"),
 };
+
+const PRECEDING = Node.DOCUMENT_POSITION_PRECEDING;
+
+const precedes = (first: Element, second: Element): boolean =>
+  Boolean(second.compareDocumentPosition(first) & PRECEDING);
 
 describe("GameDetail", () => {
   describe("given an anonymous viewer with no slots", () => {
@@ -133,46 +159,101 @@ describe("GameDetail", () => {
       render(<GameDetail data={buildData(null)} viewerUserId={null} />);
     });
 
-    it("renders the game title, breadcrumbs, Overview tab, and metadata labels", () => {
+    it("renders the game title, breadcrumbs, and the About facts label", () => {
       expect(elements.getTitle()).toBeDefined();
       expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
       expect(elements.queryBreadcrumbGames()).not.toBeNull();
-      expect(elements.getOverviewTab()).toBeDefined();
       expect(elements.queryGameDetailLabel()).not.toBeNull();
-      expect(elements.queryGenresLabel()).not.toBeNull();
-      expect(elements.queryPlatformsLabel()).not.toBeNull();
     });
 
-    it("does not render the status switcher or Journal tab for anonymous viewers", () => {
+    it("renders the panels inline with no tablist, tab, or tabpanel roles", () => {
+      expect(elements.queryAllTablists()).toHaveLength(0);
+      expect(elements.queryOverviewTab()).toBeNull();
+      expect(elements.queryAllTabpanels()).toHaveLength(0);
+    });
+
+    it("omits the genres and platforms rows when those are absent", () => {
+      expect(elements.queryGenresLabel()).toBeNull();
+      expect(elements.queryPlatformsLabel()).toBeNull();
+    });
+
+    it("does not render the status switcher or Journal panel for anonymous viewers", () => {
       expect(elements.queryStatusSwitcher()).toBeNull();
-      expect(elements.queryJournalTab()).toBeNull();
+      expect(elements.queryJournalHeading()).toBeNull();
     });
   });
 
   describe("given a signed-in viewer with no library entry", () => {
     beforeEach(() => {
-      render(<GameDetail data={buildData(null)} viewerUserId="user-1" />);
+      render(
+        <GameDetail
+          data={buildData(null, {
+            summary: "A challenging metroidvania.",
+            genres: [{ id: 12, name: "Adventure" }],
+            platforms: [{ id: 6, name: "PC (Microsoft Windows)" }],
+          })}
+          viewerUserId="user-1"
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
     });
 
-    it("renders the status switcher with all 5 pills unchecked", () => {
+    it("renders an Add to library action and no status pill", () => {
       expect(elements.queryStatusSwitcher()).not.toBeNull();
-      for (const label of [
-        "Up Next",
-        "Playing",
-        "Shelf",
-        "Played",
-        "Wishlist",
-      ]) {
-        expect(elements.queryStatusPill(label)).toHaveAttribute(
-          "aria-selected",
-          "false"
-        );
-      }
+      expect(elements.queryAddToLibrary()).not.toBeNull();
+      expect(elements.queryStatusPill()).toBeNull();
     });
 
-    it("does not render the rating slider or overflow menu when there is no entry", () => {
-      expect(elements.queryRatingSlider()).toBeNull();
+    it("does not render the overflow menu when there is no entry", () => {
       expect(elements.queryMoreMenuTrigger()).toBeNull();
+    });
+
+    it("replaces the personal panels with a single start-tracking invitation", () => {
+      expect(elements.queryTrackInvite()).not.toBeNull();
+      expect(elements.queryYourRecord()).toBeNull();
+      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryTimesToBeatSlot()).toBeNull();
+    });
+
+    it("renders About and Themes as two separate cards (no merged catalog card)", () => {
+      expect(elements.queryAboutCard()).not.toBeNull();
+      expect(elements.queryThemesTagsCard()).not.toBeNull();
+      expect(elements.queryLegacyCatalogCard()).toBeNull();
+    });
+  });
+
+  describe("given a logged-out viewer with catalog data and slots", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, {
+            summary: "A challenging metroidvania.",
+            genres: [{ id: 12, name: "Adventure" }],
+            platforms: [{ id: 6, name: "PC (Microsoft Windows)" }],
+          })}
+          viewerUserId={null}
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
+    });
+
+    it("renders no personal panels", () => {
+      expect(elements.queryYourRecord()).toBeNull();
+      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryTimesToBeatSlot()).toBeNull();
+      expect(elements.queryStatusSwitcher()).toBeNull();
+    });
+
+    it("renders About and Themes as two separate cards (no merged catalog card)", () => {
+      expect(elements.queryAboutCard()).not.toBeNull();
+      expect(elements.queryThemesTagsCard()).not.toBeNull();
+      expect(elements.queryLegacyCatalogCard()).toBeNull();
+    });
+
+    it("offers a start-tracking invitation with a sign-in affordance", () => {
+      expect(elements.queryTrackInvite()).not.toBeNull();
+      expect(elements.querySignInLink()).not.toBeNull();
+      expect(elements.queryAddToLibrary()).toBeNull();
     });
   });
 
@@ -186,25 +267,40 @@ describe("GameDetail", () => {
       );
     });
 
-    it("marks only the Playing pill as active", () => {
-      expect(elements.queryStatusPill("Playing")).toHaveAttribute(
-        "aria-selected",
-        "true"
-      );
-      expect(elements.queryStatusPill("Shelf")).toHaveAttribute(
-        "aria-selected",
-        "false"
+    it("shows a status pill reflecting the current status", () => {
+      expect(elements.queryStatusPill()).toHaveAccessibleName(
+        "Change library status: Playing"
       );
     });
 
-    it("renders the rating slider, overflow menu, and Journal tab", () => {
-      expect(elements.queryRatingSlider()).not.toBeNull();
+    it("renders exactly one rating slider (single-sourced in Your Record), overflow menu, and Journal panel", () => {
+      expect(elements.queryRatingSliders()).toHaveLength(1);
       expect(elements.queryMoreMenuTrigger()).not.toBeNull();
-      expect(elements.queryJournalTab()).not.toBeNull();
+      expect(elements.queryJournalHeading()).not.toBeNull();
     });
   });
 
-  describe("given both phase-2 slots are passed", () => {
+  describe("given both phase-2 slots are passed (in-library viewer)", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+          relatedGamesSlot={<div data-testid="related-games-slot" />}
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
+    });
+
+    it("renders both slots inline with no tablist or tabpanel roles", () => {
+      expect(elements.queryRelatedSlot()).not.toBeNull();
+      expect(elements.queryTimesToBeatSlot()).not.toBeNull();
+      expect(elements.queryAllTablists()).toHaveLength(0);
+      expect(elements.queryAllTabpanels()).toHaveLength(0);
+    });
+  });
+
+  describe("given a related slot but no 'you' layer (logged out)", () => {
     beforeEach(() => {
       render(
         <GameDetail
@@ -216,9 +312,85 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the Related tab and the Times to beat tab", () => {
-      expect(elements.queryRelatedTab()).not.toBeNull();
-      expect(elements.queryTimesToBeatTab()).not.toBeNull();
+    it("renders the catalog related slot but suppresses the personal times-to-beat slot", () => {
+      expect(elements.queryRelatedSlot()).not.toBeNull();
+      expect(elements.queryTimesToBeatSlot()).toBeNull();
+    });
+  });
+
+  describe("given a signed-in viewer with an entry and both phase-2 slots", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry(), {
+            summary: "A challenging metroidvania.",
+            genres: [{ id: 12, name: "Adventure" }],
+            platforms: [{ id: 6, name: "PC (Microsoft Windows)" }],
+          })}
+          viewerUserId="user-1"
+          relatedGamesSlot={<div data-testid="related-games-slot" />}
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
+    });
+
+    it("renders every panel simultaneously, inline, with no game-detail tabpanels", () => {
+      expect(elements.querySummary()).not.toBeNull();
+      expect(elements.queryGameDetailLabel()).not.toBeNull();
+      expect(elements.queryGenresLabel()).not.toBeNull();
+      expect(elements.queryPlatformsLabel()).not.toBeNull();
+      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryRelatedSlot()).not.toBeNull();
+      expect(elements.queryTimesToBeatSlot()).not.toBeNull();
+      expect(elements.queryAllTabpanels()).toHaveLength(0);
+    });
+
+    it("renders About and Themes as two separate cards when catalog data is present", () => {
+      expect(elements.queryAboutCard()).not.toBeNull();
+      expect(elements.queryThemesTagsCard()).not.toBeNull();
+      expect(elements.queryLegacyCatalogCard()).toBeNull();
+    });
+  });
+
+  describe("given a fully-populated in-library viewer with screenshots and both slots", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry(), {
+            summary: "A challenging metroidvania.",
+            genres: [{ id: 12, name: "Adventure" }],
+            platforms: [{ id: 6, name: "PC (Microsoft Windows)" }],
+            screenshots: [
+              { id: 1, image_id: "abc123" },
+              { id: 2, image_id: "def456" },
+            ],
+          })}
+          viewerUserId="user-1"
+          relatedGamesSlot={<div data-testid="related-games-slot" />}
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
+    });
+
+    it("renders the screenshots strip above the bento grid", () => {
+      expect(
+        precedes(elements.queryScreenshotsRegion()!, elements.getBentoGrid())
+      ).toBe(true);
+    });
+
+    it("orders the bento cells Record, Times, About, Themes, Journal, Related", () => {
+      const record = elements.queryYourRecord()!;
+      const times = elements.queryTimesToBeatSlot()!;
+      const about = elements.queryAboutCard()!;
+      const themes = elements.queryThemesTagsCard()!;
+      const journal = elements.queryJournalHeading()!;
+      const related = elements.queryRelatedSlot()!;
+
+      expect(precedes(record, times)).toBe(true);
+      expect(precedes(times, about)).toBe(true);
+      expect(precedes(about, themes)).toBe(true);
+      expect(precedes(themes, journal)).toBe(true);
+      expect(precedes(journal, related)).toBe(true);
     });
   });
 
@@ -344,7 +516,7 @@ describe("GameDetail", () => {
     });
   });
 
-  describe("given igdbDetails with an involved developer company", () => {
+  describe("given igdbDetails with both a developer and publisher company", () => {
     beforeEach(() => {
       render(
         <GameDetail
@@ -367,10 +539,42 @@ describe("GameDetail", () => {
       );
     });
 
-    it("shows the developer name uppercased in the eyebrow row, not the publisher", () => {
+    it("shows the publisher name uppercased in the eyebrow row, not the developer", () => {
       const eyebrow = screen.getByLabelText("Release metadata");
-      expect(eyebrow.textContent).toContain("TEAM CHERRY");
-      expect(eyebrow.textContent).not.toContain("SKYBOUND");
+      expect(eyebrow.textContent).toContain("SKYBOUND GAMES");
+      expect(eyebrow.textContent).not.toContain("TEAM CHERRY");
+    });
+  });
+
+  describe("given igdbDetails with an aggregated rating", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, { aggregated_rating: 91.4 })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("renders the critic score ring with the rounded score", () => {
+      const ring = elements.queryCriticScoreRing();
+      expect(ring).not.toBeNull();
+      expect(elements.queryRoundedScore("91")).not.toBeNull();
+    });
+  });
+
+  describe("given igdbDetails with no aggregated rating", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(null, { aggregated_rating: undefined })}
+          viewerUserId={null}
+        />
+      );
+    });
+
+    it("does not render the critic score ring", () => {
+      expect(elements.queryCriticScoreRing()).toBeNull();
     });
   });
 
@@ -384,9 +588,11 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the em-dash placeholder for both genres and platforms", () => {
-      expect(elements.queryGenresList()?.textContent).toBe("—");
-      expect(elements.queryPlatformsList()?.textContent).toBe("—");
+    it("omits the genres and platforms rows entirely", () => {
+      expect(elements.queryGenresList()).toBeNull();
+      expect(elements.queryPlatformsList()).toBeNull();
+      expect(elements.queryGenresLabel()).toBeNull();
+      expect(elements.queryPlatformsLabel()).toBeNull();
     });
   });
 
@@ -427,6 +633,107 @@ describe("GameDetail", () => {
     });
   });
 
+  describe("given a title-only game that is in the viewer's library", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(
+            buildLibraryEntry(),
+            {
+              summary: undefined,
+              genres: [],
+              platforms: [],
+              themes: [],
+              screenshots: undefined,
+              involved_companies: [],
+              aggregated_rating: undefined,
+            },
+            { releaseDate: null }
+          )}
+          viewerUserId="user-1"
+          timesToBeatSlot={<div data-testid="times-to-beat-slot" />}
+        />
+      );
+    });
+
+    it("renders the hero title, status pill, and the Your Record panel", () => {
+      expect(elements.getTitle()).toBeDefined();
+      expect(elements.queryStatusPill()).not.toBeNull();
+      expect(elements.queryYourRecord()).not.toBeNull();
+    });
+
+    it("renders the personal slots (Your Pace / Times to beat and Journal)", () => {
+      expect(elements.queryTimesToBeatSlot()).not.toBeNull();
+      expect(elements.queryJournalHeading()).not.toBeNull();
+    });
+
+    it("omits every catalog surface (eyebrow, critic ring, About, Themes & Tags, Screenshots, Related)", () => {
+      expect(elements.queryEyebrow()).toBeNull();
+      expect(elements.queryCriticScoreRing()).toBeNull();
+      expect(elements.queryAboutCard()).toBeNull();
+      expect(elements.queryThemesTagsCard()).toBeNull();
+      expect(elements.queryGameDetailLabel()).toBeNull();
+      expect(elements.queryThemesLabel()).toBeNull();
+      expect(elements.queryScreenshotsRegion()).toBeNull();
+      expect(elements.queryRelatedSlot()).toBeNull();
+    });
+
+    it("never renders an em-dash placeholder", () => {
+      expect(elements.queryEmDash()).toBeNull();
+    });
+  });
+
+  describe("given a game with no catalog facts but rich personal data", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={{
+            ...buildData(
+              buildLibraryEntry(),
+              {
+                summary: undefined,
+                genres: [],
+                platforms: [],
+                themes: [],
+                involved_companies: [],
+              },
+              { releaseDate: null }
+            ),
+            playtimeTotalMinutes: 600,
+            journalCount: 4,
+          }}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("collapses both catalog cards rather than rendering an empty box", () => {
+      expect(elements.queryAboutCard()).toBeNull();
+      expect(elements.queryThemesTagsCard()).toBeNull();
+      expect(elements.queryLegacyCatalogCard()).toBeNull();
+    });
+
+    it("does not emit an em-dash anywhere on the page", () => {
+      expect(elements.queryEmDash()).toBeNull();
+    });
+  });
+
+  describe("given a related-games slot that resolves to empty content", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+          relatedGamesSlot={null}
+        />
+      );
+    });
+
+    it("does not render an empty Related card", () => {
+      expect(elements.queryRelatedSlot()).toBeNull();
+    });
+  });
+
   describe("given the user navigates between two games on the same route", () => {
     beforeEach(() => {
       const { rerender } = render(
@@ -448,11 +755,9 @@ describe("GameDetail", () => {
     });
 
     it("does not preserve the previous game's library status across navigation", () => {
-      expect(elements.queryStatusPill("Playing")).toHaveAttribute(
-        "aria-selected",
-        "false"
-      );
-      expect(elements.queryRatingSlider()).toBeNull();
+      expect(elements.queryStatusPill()).toBeNull();
+      expect(elements.queryAddToLibrary()).not.toBeNull();
+      expect(elements.queryRatingSliders()).toHaveLength(0);
     });
   });
 });

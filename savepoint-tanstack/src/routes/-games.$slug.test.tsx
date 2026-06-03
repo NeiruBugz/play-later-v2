@@ -58,10 +58,13 @@ vi.mock("@/features/game-detail/ui", () => ({
   TimesToBeatSection: ({
     timesToBeat,
   }: {
-    timesToBeat: { mainStory: number | null; completionist: number | null };
+    timesToBeat: {
+      mainStory: number | null;
+      completionist: number | null;
+    } | null;
   }) => (
     <div data-testid="times-to-beat-section">
-      ms:{timesToBeat.mainStory ?? "null"}
+      ms:{timesToBeat?.mainStory ?? "null"}
     </div>
   ),
   TimesToBeatSkeleton: () => <div data-testid="times-to-beat-skeleton" />,
@@ -98,9 +101,11 @@ const buildView = (
       name: "Celeste",
       slug: "celeste",
     },
-    relatedGames: [],
     libraryEntry: null,
     journalTeaser: [],
+    journalCount: 0,
+    playtimeTotalMinutes: 0,
+    recentSessionMinutes: [],
   },
   viewerUserId: null,
   ...overrides,

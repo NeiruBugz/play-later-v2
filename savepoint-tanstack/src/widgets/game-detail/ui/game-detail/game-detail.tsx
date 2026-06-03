@@ -1,18 +1,22 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { GameCover, PlatformBadges } from "@/entities/game";
-import { JournalTeaser } from "@/entities/journal-entry";
+import { CriticScoreRing, GameCover } from "@/entities/game";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
 import {
   buildCoverImageUrl,
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
-import { cn } from "@/shared/lib/utils";
-import { Badge } from "@/shared/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Card } from "@/shared/ui/card";
 
+import { AboutPanel } from "../about-panel";
+import { AddToTrackInvite } from "../add-to-track-invite";
+import { JournalPanel } from "../journal-panel";
 import { LibraryStatusSwitcher } from "../library-status-switcher";
+import { RelatedPanel } from "../related-panel";
+import { ScreenshotsPanel } from "../screenshots-panel";
+import { ThemesTagsPanel } from "../themes-tags-panel";
+import { YourRecordPanel } from "../your-record-panel";
 import type { GameDetailProps } from "./game-detail.type";
 
 export function GameDetail({
@@ -21,7 +25,14 @@ export function GameDetail({
   relatedGamesSlot,
   timesToBeatSlot,
 }: GameDetailProps) {
-  const { game, igdbDetails, libraryEntry, journalTeaser } = data;
+  const {
+    game,
+    igdbDetails,
+    libraryEntry,
+    journalTeaser,
+    journalCount,
+    playtimeTotalMinutes,
+  } = data;
   const [composeOpen, setComposeOpen] = useState(false);
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
@@ -30,29 +41,43 @@ export function GameDetail({
     : null;
 
   const summary = igdbDetails.summary ?? null;
+  const themes = igdbDetails.themes?.map((t) => t.name) ?? [];
   const genres = igdbDetails.genres?.map((g) => g.name) ?? [];
   const platforms = igdbDetails.platforms?.map((p) => p.name) ?? [];
   const developer =
     igdbDetails.involved_companies?.find((c) => c.developer)?.company.name ??
     null;
+  const publisher =
+    igdbDetails.involved_companies?.find((c) => c.publisher)?.company.name ??
+    null;
   const screenshotBgUrl = buildScreenshotUrl(
     igdbDetails.screenshots?.[0]?.image_id
   );
 
-  const eyebrowParts: string[] = [
-    releaseYear,
-    developer,
-    genres.length > 0 ? genres.slice(0, 2).join(", ") : null,
-  ]
+  const criticScore = igdbDetails.aggregated_rating ?? null;
+
+  const eyebrowParts: string[] = [releaseYear, publisher, genres[0] ?? null]
     .filter((p): p is string => Boolean(p))
     .map((p) => p.toUpperCase());
 
-  const journalCount = journalTeaser.length;
-  const showJournalTab = viewerUserId !== null;
-  const showRelatedTab =
+  const hasAboutData = Boolean(
+    summary || releaseYear || developer || publisher
+  );
+  const hasThemesTagsData =
+    themes.length > 0 || genres.length > 0 || platforms.length > 0;
+
+  const isInLibrary = libraryEntry !== null;
+  const showPersonalPanels = viewerUserId !== null && isInLibrary;
+  const showTrackInvite = !showPersonalPanels;
+
+  const showScreenshotsPanel = (igdbDetails.screenshots?.length ?? 0) > 0;
+  const showJournalPanel = showPersonalPanels;
+  const showRelatedPanel =
     relatedGamesSlot !== null && relatedGamesSlot !== undefined;
-  const showTimesToBeatTab =
-    timesToBeatSlot !== null && timesToBeatSlot !== undefined;
+  const showTimesToBeatPanel =
+    showPersonalPanels &&
+    timesToBeatSlot !== null &&
+    timesToBeatSlot !== undefined;
 
   return (
     <main className="relative flex flex-col">
@@ -121,28 +146,34 @@ export function GameDetail({
             <GameCover src={coverUrl} alt={`Cover for ${game.title}`} />
           </div>
           <div className="min-w-0 pb-1.5">
-            {eyebrowParts.length > 0 ? (
-              <p
-                aria-label="Release metadata"
-                className="text-caption text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 tracking-widest uppercase"
-              >
-                {eyebrowParts.map((part, i) => (
-                  <span key={i} className="flex items-center gap-2">
-                    {i > 0 ? (
-                      <span
-                        aria-hidden="true"
-                        className="bg-muted-foreground inline-block h-[3px] w-[3px] rounded-full"
-                      />
-                    ) : null}
-                    {part}
-                  </span>
-                ))}
-              </p>
-            ) : null}
+            <div className="flex items-start justify-between gap-6">
+              <div className="min-w-0 flex-1">
+                {eyebrowParts.length > 0 ? (
+                  <p
+                    aria-label="Release metadata"
+                    className="text-caption text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 tracking-widest uppercase"
+                  >
+                    {eyebrowParts.map((part, i) => (
+                      <span key={i} className="flex items-center gap-2">
+                        {i > 0 ? (
+                          <span
+                            aria-hidden="true"
+                            className="bg-muted-foreground inline-block h-[3px] w-[3px] rounded-full"
+                          />
+                        ) : null}
+                        {part}
+                      </span>
+                    ))}
+                  </p>
+                ) : null}
 
-            <h1 className="text-h1 mb-4 tracking-tight break-words">
-              {game.title}
-            </h1>
+                <h1 className="text-h1 mb-4 tracking-tight break-words">
+                  {game.title}
+                </h1>
+              </div>
+
+              <CriticScoreRing value={criticScore} />
+            </div>
 
             {viewerUserId !== null ? (
               <LibraryStatusSwitcher
@@ -155,72 +186,90 @@ export function GameDetail({
           </div>
         </section>
 
-        <Tabs defaultValue="overview" className="gap-lg mt-8 flex flex-col">
-          <TabsList
-            aria-label="Game detail sections"
-            className="gap-1 overflow-x-auto"
-          >
-            <TabsTrigger value="overview" className="px-3.5 pt-3 pb-3">
-              Overview
-            </TabsTrigger>
-            {showJournalTab ? (
-              <TabsTrigger value="journal" className="gap-1.5 px-3.5 pt-3 pb-3">
-                <span>Journal</span>
-                <span
-                  className={cn(
-                    "text-caption rounded-full px-1.5 py-0.5 leading-none",
-                    "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {journalCount}
-                </span>
-              </TabsTrigger>
-            ) : null}
-            {showRelatedTab ? (
-              <TabsTrigger value="related" className="px-3.5 pt-3 pb-3">
-                Related
-              </TabsTrigger>
-            ) : null}
-            {showTimesToBeatTab ? (
-              <TabsTrigger value="times-to-beat" className="px-3.5 pt-3 pb-3">
-                Times to beat
-              </TabsTrigger>
-            ) : null}
-          </TabsList>
-
-          <TabsContent value="overview" className="gap-xl flex flex-col">
-            <OverviewBody
-              summary={summary}
-              releaseYear={releaseYear}
-              genres={genres}
-              platforms={platforms}
+        {showScreenshotsPanel ? (
+          <Card variant="flat" className="gap-md p-xl mt-8 flex flex-col">
+            <ScreenshotsPanel
+              screenshots={igdbDetails.screenshots}
+              gameTitle={game.title}
             />
-          </TabsContent>
+          </Card>
+        ) : null}
 
-          {showJournalTab ? (
-            <TabsContent value="journal" className="gap-md flex flex-col">
-              <h2 id="journal-teaser-heading" className="text-h3">
-                Journal
-              </h2>
-              <JournalTeaser
+        <div
+          data-testid="game-detail-bento-grid"
+          className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
+        >
+          {showPersonalPanels ? (
+            <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <YourRecordPanel
+                itemId={libraryEntry?.id ?? null}
+                rating={libraryEntry?.rating ?? null}
+                playtimeTotalMinutes={playtimeTotalMinutes}
+                journalCount={journalCount}
+                gameTitle={game.title}
+                onLogSession={() => setComposeOpen(true)}
+              />
+            </Card>
+          ) : null}
+
+          {showTrackInvite ? (
+            <Card variant="flat" className="flex flex-col">
+              <AddToTrackInvite
+                igdbId={game.igdbId}
+                gameTitle={game.title}
+                isSignedIn={viewerUserId !== null}
+              />
+            </Card>
+          ) : null}
+
+          {showTimesToBeatPanel ? (
+            <Card variant="flat" className="gap-md p-xl flex flex-col">
+              {timesToBeatSlot}
+            </Card>
+          ) : null}
+
+          {hasAboutData ? (
+            <Card
+              variant="flat"
+              data-testid="game-detail-about-card"
+              className="gap-lg p-xl flex flex-col"
+            >
+              <AboutPanel
+                summary={summary}
+                releaseYear={releaseYear}
+                developer={developer}
+                publisher={publisher}
+              />
+            </Card>
+          ) : null}
+
+          {hasThemesTagsData ? (
+            <Card
+              variant="flat"
+              data-testid="game-detail-themes-tags-card"
+              className="gap-lg p-xl flex flex-col"
+            >
+              <ThemesTagsPanel
+                themes={themes}
+                genres={genres}
+                platforms={platforms}
+              />
+            </Card>
+          ) : null}
+
+          {showJournalPanel ? (
+            <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <JournalPanel
                 entries={journalTeaser}
                 onAddEntryClick={() => setComposeOpen(true)}
               />
-            </TabsContent>
+            </Card>
           ) : null}
 
-          {showRelatedTab ? (
-            <TabsContent value="related" className="gap-md flex flex-col">
-              {relatedGamesSlot}
-            </TabsContent>
+          {showRelatedPanel ? (
+            <RelatedPanel>{relatedGamesSlot}</RelatedPanel>
           ) : null}
-
-          {showTimesToBeatTab ? (
-            <TabsContent value="times-to-beat" className="gap-md flex flex-col">
-              {timesToBeatSlot}
-            </TabsContent>
-          ) : null}
-        </Tabs>
+        </div>
 
         {viewerUserId ? (
           <ComposeJournalEntryDialog
@@ -231,74 +280,5 @@ export function GameDetail({
         ) : null}
       </div>
     </main>
-  );
-}
-
-function OverviewBody({
-  summary,
-  releaseYear,
-  genres,
-  platforms,
-}: {
-  summary: string | null;
-  releaseYear: string | null;
-  genres: string[];
-  platforms: string[];
-}) {
-  return (
-    <>
-      {summary ? (
-        <p
-          aria-label="Game summary"
-          className="text-body text-foreground/85 max-w-[720px] leading-relaxed"
-        >
-          {summary}
-        </p>
-      ) : null}
-
-      <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
-        <TerminalLabel>{`// GAME.DETAIL`}</TerminalLabel>
-        <dl className="text-sm">
-          <div className="flex gap-2">
-            <dt className="text-muted-foreground w-24">Release year</dt>
-            <dd className="text-foreground">{releaseYear ?? "—"}</dd>
-          </div>
-        </dl>
-
-        <TerminalLabel>{`// GENRES`}</TerminalLabel>
-        {genres.length > 0 ? (
-          <ul aria-label="Genres" className="flex flex-wrap gap-1.5 text-sm">
-            {genres.map((g) => (
-              <li key={g}>
-                <Badge variant="secondary">{g}</Badge>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p aria-label="Genres" className="text-muted-foreground text-sm">
-            —
-          </p>
-        )}
-
-        <TerminalLabel>{`// PLATFORMS`}</TerminalLabel>
-        {platforms.length > 0 ? (
-          <div aria-label="Platforms">
-            <PlatformBadges platforms={platforms} />
-          </div>
-        ) : (
-          <p aria-label="Platforms" className="text-muted-foreground text-sm">
-            —
-          </p>
-        )}
-      </div>
-    </>
-  );
-}
-
-function TerminalLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
-      {children}
-    </span>
   );
 }

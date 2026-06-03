@@ -4,120 +4,168 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { TimesToBeatSection } from "./times-to-beat-section";
 
 const elements = {
-  getMainStoryValue: () => {
-    const dts = screen.getAllByRole("term");
-    const mainStoryIdx = Array.from(dts).findIndex(
-      (dt) => dt.textContent === "Main story"
-    );
-    const dds = screen.getAllByRole("definition");
-    return dds[mainStoryIdx];
-  },
-  getCompletionistValue: () => {
-    const dts = screen.getAllByRole("term");
-    const completionistIdx = Array.from(dts).findIndex(
-      (dt) => dt.textContent === "Completionist"
-    );
-    const dds = screen.getAllByRole("definition");
-    return dds[completionistIdx];
-  },
   getSection: () => screen.getByRole("region", { name: "Times to beat" }),
+  querySection: () => screen.queryByRole("region", { name: "Times to beat" }),
+  queryPace: () => screen.queryByRole("region", { name: "Your pace" }),
+  getYouMarker: () => screen.getByText(/^You ·/),
+  queryYouMarker: () => screen.queryByText(/^You ·/),
+  getMainStoryTick: () => screen.queryByText("Main story"),
+  getCompletionistTick: () => screen.queryByText("100%"),
+  getContext: () => screen.getByTestId("times-to-beat-context"),
+};
+
+const noPace = {
+  playtimeTotalMinutes: 0,
+  journalCount: 0,
+  recentSessionMinutes: [],
 };
 
 describe("TimesToBeatSection", () => {
-  describe("given both mainStory and completionist are provided as seconds", () => {
+  describe("given a benchmark with both main-story and completionist plus viewer hours", () => {
     beforeEach(() => {
+      // mainStory 36000s = 10h, completionist 72000s = 20h, viewer 720min = 12h
       render(
         <TimesToBeatSection
           timesToBeat={{ mainStory: 36000, completionist: 72000 }}
+          playtimeTotalMinutes={720}
+          journalCount={3}
+          recentSessionMinutes={[120, 240, 360]}
         />
       );
     });
 
-    it("renders the section heading", () => {
+    it("renders the times-to-beat section (benchmark mode)", () => {
       expect(elements.getSection()).toBeDefined();
     });
 
-    it("formats mainStory seconds to decimal hours", () => {
-      // 36000 seconds = 10.0 hours
-      expect(elements.getMainStoryValue()?.textContent).toBe("10.0 h");
+    it("does not render the Your Pace fallback", () => {
+      expect(elements.queryPace()).toBeNull();
     });
 
-    it("formats completionist seconds to decimal hours", () => {
-      // 72000 seconds = 20.0 hours
-      expect(elements.getCompletionistValue()?.textContent).toBe("20.0 h");
+    it("marks the viewer's hours with an accent 'You' marker", () => {
+      expect(elements.getYouMarker().textContent).toContain("12h");
+    });
+
+    it("renders the main-story benchmark tick", () => {
+      expect(elements.getMainStoryTick()).not.toBeNull();
+    });
+
+    it("renders the 100% benchmark tick", () => {
+      expect(elements.getCompletionistTick()).not.toBeNull();
+    });
+
+    it("puts the viewer's progress in context relative to the main story", () => {
+      // 12h - 10h = 2h past the main story; 20h - 12h = 8h left to 100%
+      const text = elements.getContext().textContent ?? "";
+      expect(text).toContain("2h past");
+      expect(text).toContain("8h");
     });
   });
 
-  describe("given fractional hours (rounding)", () => {
+  describe("given the viewer is short of the main story", () => {
     beforeEach(() => {
+      // mainStory 36000s = 10h, viewer 180min = 3h
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: 5400, completionist: 3700 }}
+          timesToBeat={{ mainStory: 36000, completionist: 72000 }}
+          playtimeTotalMinutes={180}
+          journalCount={1}
+          recentSessionMinutes={[180]}
         />
       );
     });
 
-    it("rounds mainStory to one decimal place", () => {
-      // 5400 / 3600 = 1.5 h
-      expect(elements.getMainStoryValue()?.textContent).toBe("1.5 h");
-    });
-
-    it("rounds completionist to one decimal place", () => {
-      // 3700 / 3600 = 1.0277... → rounds to 1.0 h
-      expect(elements.getCompletionistValue()?.textContent).toBe("1.0 h");
+    it("phrases the context as hours from the main story", () => {
+      const text = elements.getContext().textContent ?? "";
+      expect(text).toContain("7h from");
     });
   });
 
-  describe("given mainStory is null (no data)", () => {
+  describe("given only the main-story benchmark is present", () => {
     beforeEach(() => {
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: null, completionist: 14400 }}
+          timesToBeat={{ mainStory: 36000, completionist: null }}
+          {...noPace}
         />
       );
     });
 
-    it("renders the em-dash for the null main story value", () => {
-      expect(elements.getMainStoryValue()?.textContent).toBe("—");
+    it("renders the main-story tick", () => {
+      expect(elements.getMainStoryTick()).not.toBeNull();
     });
 
-    it("still renders the completionist value", () => {
-      // 14400 / 3600 = 4.0 h
-      expect(elements.getCompletionistValue()?.textContent).toBe("4.0 h");
+    it("omits the 100% tick", () => {
+      expect(elements.getCompletionistTick()).toBeNull();
     });
   });
 
-  describe("given completionist is null (no data)", () => {
+  describe("given only the completionist benchmark is present", () => {
     beforeEach(() => {
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: 10800, completionist: null }}
+          timesToBeat={{ mainStory: null, completionist: 72000 }}
+          {...noPace}
         />
       );
     });
 
-    it("renders the em-dash for the null completionist value", () => {
-      expect(elements.getCompletionistValue()?.textContent).toBe("—");
+    it("renders the 100% tick", () => {
+      expect(elements.getCompletionistTick()).not.toBeNull();
     });
 
-    it("still renders the main story value", () => {
-      // 10800 / 3600 = 3.0 h
-      expect(elements.getMainStoryValue()?.textContent).toBe("3.0 h");
+    it("omits the main-story tick", () => {
+      expect(elements.getMainStoryTick()).toBeNull();
     });
   });
 
-  describe("given both values are null", () => {
+  describe("given a benchmark object whose fields are both null", () => {
     beforeEach(() => {
       render(
         <TimesToBeatSection
           timesToBeat={{ mainStory: null, completionist: null }}
+          {...noPace}
         />
       );
     });
 
-    it("renders em-dash for both fields", () => {
-      expect(elements.getMainStoryValue()?.textContent).toBe("—");
-      expect(elements.getCompletionistValue()?.textContent).toBe("—");
+    it("still renders the benchmark section rather than the pace fallback", () => {
+      expect(elements.getSection()).toBeDefined();
+      expect(elements.queryPace()).toBeNull();
+    });
+
+    it("renders neither benchmark tick", () => {
+      expect(elements.getMainStoryTick()).toBeNull();
+      expect(elements.getCompletionistTick()).toBeNull();
+    });
+
+    it("renders an empty context sentence rather than fabricating a benchmark", () => {
+      expect(elements.getContext().textContent).toBe("");
+    });
+  });
+
+  describe("given no benchmark (null)", () => {
+    beforeEach(() => {
+      render(
+        <TimesToBeatSection
+          timesToBeat={null}
+          playtimeTotalMinutes={600}
+          journalCount={4}
+          recentSessionMinutes={[60, 120, 180, 240]}
+        />
+      );
+    });
+
+    it("falls back to the Your Pace panel", () => {
+      expect(elements.queryPace()).not.toBeNull();
+    });
+
+    it("does not render the benchmark section", () => {
+      expect(elements.querySection()).toBeNull();
+    });
+
+    it("does not render a 'You' benchmark marker", () => {
+      expect(elements.queryYouMarker()).toBeNull();
     });
   });
 });

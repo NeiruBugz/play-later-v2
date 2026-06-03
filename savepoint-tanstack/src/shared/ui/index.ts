@@ -12,6 +12,8 @@ export {
 } from "./collapsible";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
+export { ImageLightbox } from "./image-lightbox";
+export type { ImageLightboxProps, LightboxImage } from "./image-lightbox";
 export { SegmentedControl } from "./segmented-control";
 export type {
   SegmentedControlOption,

@@ -11,6 +11,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   abbreviatePlatformName,
+  getPlatformBadgeVariant,
+  getPlatformFamily,
   getPlatformIcon,
 } from "./platform-badges.utility";
 
@@ -62,6 +64,104 @@ describe("getPlatformIcon", () => {
 
   it("returns TbDeviceGamepad2 for an unrecognised platform name", () => {
     expect(getPlatformIcon("Atari Jaguar")).toBe(TbDeviceGamepad2);
+  });
+});
+
+describe("getPlatformFamily", () => {
+  describe("playstation family", () => {
+    it("classifies 'PlayStation 5'", () => {
+      expect(getPlatformFamily("PlayStation 5")).toBe("playstation");
+    });
+
+    it("classifies 'PlayStation Vita'", () => {
+      expect(getPlatformFamily("PlayStation Vita")).toBe("playstation");
+    });
+
+    it("classifies a standalone 'PS' (matched by \\bps\\b)", () => {
+      expect(getPlatformFamily("PS")).toBe("playstation");
+    });
+  });
+
+  describe("xbox family", () => {
+    it("classifies 'Xbox Series X|S'", () => {
+      expect(getPlatformFamily("Xbox Series X|S")).toBe("xbox");
+    });
+  });
+
+  describe("nintendo family", () => {
+    it("classifies 'New Nintendo 3DS'", () => {
+      expect(getPlatformFamily("New Nintendo 3DS")).toBe("nintendo");
+    });
+
+    it("classifies 'Wii'", () => {
+      expect(getPlatformFamily("Wii")).toBe("nintendo");
+    });
+  });
+
+  describe("pc family", () => {
+    it("classifies 'PC (Microsoft Windows)'", () => {
+      expect(getPlatformFamily("PC (Microsoft Windows)")).toBe("pc");
+    });
+
+    it("classifies 'Steam Deck'", () => {
+      expect(getPlatformFamily("Steam Deck")).toBe("pc");
+    });
+
+    it("classifies 'Mac'", () => {
+      expect(getPlatformFamily("Mac")).toBe("pc");
+    });
+
+    it("classifies 'Linux'", () => {
+      expect(getPlatformFamily("Linux")).toBe("pc");
+    });
+
+    it("classifies a standalone 'PC' (matched by \\bpc\\b)", () => {
+      expect(getPlatformFamily("PC")).toBe("pc");
+    });
+  });
+
+  describe("other family (neutral)", () => {
+    it("classifies 'Sega Genesis'", () => {
+      expect(getPlatformFamily("Sega Genesis")).toBe("other");
+    });
+
+    it("classifies an unrecognised platform name", () => {
+      expect(getPlatformFamily("Atari Jaguar")).toBe("other");
+    });
+
+    it("classifies mobile 'iOS' as other, not pc", () => {
+      expect(getPlatformFamily("iOS")).toBe("other");
+    });
+
+    it("classifies mobile 'Android' as other, not pc", () => {
+      expect(getPlatformFamily("Android")).toBe("other");
+    });
+
+    it("classifies 'Windows Phone' as other despite containing 'windows'", () => {
+      expect(getPlatformFamily("Windows Phone")).toBe("other");
+    });
+  });
+});
+
+describe("getPlatformBadgeVariant", () => {
+  it("maps the playstation family to the 'playstation' variant", () => {
+    expect(getPlatformBadgeVariant("playstation")).toBe("playstation");
+  });
+
+  it("maps the xbox family to the 'xbox' variant", () => {
+    expect(getPlatformBadgeVariant("xbox")).toBe("xbox");
+  });
+
+  it("maps the nintendo family to the 'nintendo' variant", () => {
+    expect(getPlatformBadgeVariant("nintendo")).toBe("nintendo");
+  });
+
+  it("maps the pc family to the 'pc' variant", () => {
+    expect(getPlatformBadgeVariant("pc")).toBe("pc");
+  });
+
+  it("maps the other family to the neutral 'subtle' variant", () => {
+    expect(getPlatformBadgeVariant("other")).toBe("subtle");
   });
 });
 

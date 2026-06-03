@@ -9,35 +9,88 @@ import {
 } from "react-icons/si";
 import { TbBrandWindows, TbDeviceGamepad2 } from "react-icons/tb";
 
+import type { BadgeProps } from "@/shared/ui/badge";
+
+export type PlatformFamily =
+  | "playstation"
+  | "xbox"
+  | "nintendo"
+  | "pc"
+  | "other";
+
+const isPlaystation = (lowerName: string): boolean =>
+  lowerName.includes("playstation") ||
+  lowerName.includes("vita") ||
+  /\bps\b/.test(lowerName);
+
+const isXbox = (lowerName: string): boolean => lowerName.includes("xbox");
+
+const NINTENDO_SUBSTRINGS = [
+  "switch",
+  "gamecube",
+  "super nintendo",
+  "game boy",
+  "gameboy",
+  "famicom",
+  "virtual boy",
+  "game & watch",
+  "satellaview",
+];
+
+// Short, ambiguous tokens (e.g. "nes" matches "geNESis") must match as whole
+// words so unrelated platforms like "Sega Genesis" do not classify as nintendo.
+const NINTENDO_WORD_TOKENS = [
+  "wii",
+  "n64",
+  "snes",
+  "nes",
+  "gba",
+  "gbc",
+  "3ds",
+  "ds",
+  "64dd",
+];
+
+const NINTENDO_WORD_PATTERN = new RegExp(
+  `\\b(${NINTENDO_WORD_TOKENS.join("|")})\\b`
+);
+
+const isNintendo = (lowerName: string): boolean =>
+  lowerName.includes("nintendo") ||
+  NINTENDO_SUBSTRINGS.some((keyword) => lowerName.includes(keyword)) ||
+  NINTENDO_WORD_PATTERN.test(lowerName);
+
+const MOBILE_KEYWORDS = ["windows phone", "windows mobile", "ios", "android"];
+
+const isMobile = (lowerName: string): boolean =>
+  MOBILE_KEYWORDS.some((keyword) => lowerName.includes(keyword));
+
+const isPc = (lowerName: string): boolean =>
+  lowerName.includes("windows") ||
+  lowerName.includes("mac") ||
+  lowerName.includes("macos") ||
+  lowerName.includes("linux") ||
+  lowerName.includes("steam") ||
+  lowerName.includes("dos") ||
+  /\bpc\b/.test(lowerName);
+
 // Mirrors savepoint-app `shared/lib/platform/get-platform-icon.tsx` so the
 // game-detail platform row renders identical brand glyphs across both apps.
+// Keyword cascade is shared with `getPlatformFamily` so a badge's glyph and
+// brand color always agree.
 export function getPlatformIcon(platformName: string): IconType {
   const lowerName = platformName.toLowerCase();
-  if (lowerName.includes("playstation") || /\bps\b/.test(lowerName)) {
+  if (isPlaystation(lowerName)) {
     return SiPlaystation;
   }
-  if (lowerName.includes("xbox")) {
+  if (isXbox(lowerName)) {
     return BsXbox;
   }
-  const nintendoPlatforms = [
-    "switch",
-    "wii",
-    "gamecube",
-    "nintendo 64",
-    "n64",
-    "super nintendo",
-    "snes",
-    "nes",
-    "game boy",
-    "gameboy",
-    "3ds",
-    "ds",
-  ];
-  if (
-    lowerName.includes("nintendo") ||
-    nintendoPlatforms.some((platform) => lowerName.includes(platform))
-  ) {
+  if (isNintendo(lowerName)) {
     return SiNintendo;
+  }
+  if (isMobile(lowerName)) {
+    return TbDeviceGamepad2;
   }
   if (lowerName.includes("windows")) {
     return TbBrandWindows;
@@ -55,6 +108,35 @@ export function getPlatformIcon(platformName: string): IconType {
     return TbDeviceGamepad2;
   }
   return TbDeviceGamepad2;
+}
+
+// Maps an IGDB platform name to its brand family. The cascade order and
+// keywords mirror `getPlatformIcon`; mobile is checked before pc so
+// "Windows Phone" classifies as `other`, not pc.
+export function getPlatformFamily(platformName: string): PlatformFamily {
+  const lowerName = platformName.toLowerCase();
+  if (isPlaystation(lowerName)) {
+    return "playstation";
+  }
+  if (isXbox(lowerName)) {
+    return "xbox";
+  }
+  if (isNintendo(lowerName)) {
+    return "nintendo";
+  }
+  if (isMobile(lowerName)) {
+    return "other";
+  }
+  if (isPc(lowerName)) {
+    return "pc";
+  }
+  return "other";
+}
+
+type BadgeVariant = NonNullable<BadgeProps["variant"]>;
+
+export function getPlatformBadgeVariant(family: PlatformFamily): BadgeVariant {
+  return family === "other" ? "subtle" : family;
 }
 
 // Mirrors savepoint-app `shared/components/platform-badges.tsx`
