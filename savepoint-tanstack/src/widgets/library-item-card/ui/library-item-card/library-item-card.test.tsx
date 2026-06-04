@@ -47,6 +47,15 @@ vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
 
+// The platform chip renders the abbreviation/icon inside a Badge <div> that
+// carries the variant classes. Walking to the nearest classed ancestor reaches
+// the Badge — mirrors the helper in entities/game/ui/platform-badges.test.tsx.
+const badgeClassNameFor = (text: HTMLElement | null): string => {
+  // eslint-disable-next-line testing-library/no-node-access
+  const badge = text?.closest("[class]");
+  return badge?.className ?? "";
+};
+
 const buildItem = (
   overrides: Partial<LibraryItemWithGame> & {
     gameTitle?: string;
@@ -184,16 +193,17 @@ describe("LibraryItemCard", () => {
         );
       });
 
-      it("renders the platform badge with the full platform label", () => {
-        expect(screen.getByText("PlayStation 5")).toBeDefined();
+      it("renders the platform badge with the abbreviated platform label", () => {
+        expect(screen.getByText("PS5")).toBeDefined();
       });
 
       it("colors the platform badge with the playstation family variant", () => {
-        // The single chosen platform keeps its full label but is now tinted
-        // by family color instead of the neutral `secondary` variant.
-        const badge = screen.getByText("PlayStation 5");
-        expect(badge.className).toContain("text-[#0070d1]");
-        expect(badge.className).not.toContain("bg-secondary");
+        // The platform chip delegates to the shared PlatformBadgeItem, which
+        // abbreviates the label and tints it via the badge `playstation`
+        // variant (brand color) rather than the neutral `subtle` variant.
+        const className = badgeClassNameFor(screen.getByText("PS5"));
+        expect(className).toContain("text-[#0070d1]");
+        expect(className).not.toContain("text-muted-foreground");
       });
 
       it("dates the play window in the lifecycle caption", () => {
@@ -223,9 +233,11 @@ describe("LibraryItemCard", () => {
       });
 
       it("renders the platform badge with the subtle (neutral) variant", () => {
-        const badge = screen.getByText("Stadia");
-        expect(badge.className).toContain("text-muted-foreground");
-        expect(badge.className).not.toContain("text-[#0070d1]");
+        // Stadia has no family mapping, so it keeps its full label and falls
+        // back to the neutral `subtle` badge variant (muted foreground).
+        const className = badgeClassNameFor(screen.getByText("Stadia"));
+        expect(className).toContain("text-muted-foreground");
+        expect(className).not.toContain("text-[#0070d1]");
       });
     });
 
