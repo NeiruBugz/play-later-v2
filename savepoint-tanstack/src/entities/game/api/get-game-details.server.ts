@@ -13,13 +13,21 @@ import type {
 import { upsertThinGameFromIgdbDetailsPayload } from "./upsert-game.server";
 
 const JOURNAL_TEASER_LIMIT = 3;
+const RECENT_SESSION_LIMIT = 9;
 
 export interface GameDetails {
   game: Game;
   igdbDetails: GameDetailsResponseItem;
-  relatedGames: Game[];
   libraryEntry: LibraryItem | null;
   journalTeaser: JournalEntry[];
+  /** True count of the viewer's journal entries — NOT capped at the teaser limit. */
+  journalCount: number;
+  /** SUM of the viewer's logged playedMinutes for this game; 0 when none. */
+  playtimeTotalMinutes: number;
+  /** Count of journal entries carrying non-null playedMinutes — the true denominator for average session length. */
+  playtimeSessionCount: number;
+  /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
+  recentSessionMinutes: number[];
 }
 
 export async function getGameDetails(params: {
@@ -37,23 +45,59 @@ export async function getGameDetails(params: {
 
   let libraryEntry: LibraryItem | null = null;
   let journalTeaser: JournalEntry[] = [];
+  let journalCount = 0;
+  let playtimeTotalMinutes = 0;
+  let playtimeSessionCount = 0;
+  let recentSessionMinutes: number[] = [];
 
   if (userId) {
-    [libraryEntry, journalTeaser] = await Promise.all([
-      prisma.libraryItem.findFirst({
-        where: { userId, gameId: game.id },
-        orderBy: { updatedAt: "desc" },
-      }),
-      prisma.journalEntry.findMany({
-        where: { userId, gameId: game.id },
-        orderBy: { createdAt: "desc" },
-        take: JOURNAL_TEASER_LIMIT,
-      }),
-    ]);
+    const [entry, teaser, count, playtimeAggregate, recentMinutesRows] =
+      await Promise.all([
+        prisma.libraryItem.findFirst({
+          where: { userId, gameId: game.id },
+          orderBy: { updatedAt: "desc" },
+        }),
+        prisma.journalEntry.findMany({
+          where: { userId, gameId: game.id },
+          orderBy: { createdAt: "desc" },
+          take: JOURNAL_TEASER_LIMIT,
+        }),
+        prisma.journalEntry.count({
+          where: { userId, gameId: game.id },
+        }),
+        prisma.journalEntry.aggregate({
+          where: { userId, gameId: game.id },
+          _sum: { playedMinutes: true },
+          _count: { playedMinutes: true },
+        }),
+        prisma.journalEntry.findMany({
+          where: { userId, gameId: game.id, playedMinutes: { not: null } },
+          orderBy: { createdAt: "desc" },
+          take: RECENT_SESSION_LIMIT,
+          select: { playedMinutes: true },
+        }),
+      ]);
+
+    libraryEntry = entry;
+    journalTeaser = teaser;
+    journalCount = count;
+    playtimeTotalMinutes = playtimeAggregate._sum.playedMinutes ?? 0;
+    playtimeSessionCount = playtimeAggregate._count.playedMinutes;
+    // Fetched newest→oldest for the "most recent" bound; reverse to oldest→newest
+    // so the rhythm chart reads left-to-right.
+    recentSessionMinutes = recentMinutesRows
+      .map((row) => row.playedMinutes as number)
+      .reverse();
   }
 
-  // relatedGames kept for backward-compat; live surface is deferredRelatedGames in the loader.
-  const relatedGames: Game[] = [];
-
-  return { game, igdbDetails, relatedGames, libraryEntry, journalTeaser };
+  return {
+    game,
+    igdbDetails,
+    libraryEntry,
+    journalTeaser,
+    journalCount,
+    playtimeTotalMinutes,
+    playtimeSessionCount,
+    recentSessionMinutes,
+  };
 }

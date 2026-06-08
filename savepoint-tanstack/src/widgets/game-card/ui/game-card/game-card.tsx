@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { PlatformBadges } from "@/entities/game";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
 
@@ -95,16 +96,7 @@ export function GameCard({
                 </span>
               ) : null}
               {platforms.length > 0 ? (
-                <div className="gap-xs flex flex-wrap">
-                  {platforms.map((platform) => (
-                    <span
-                      key={platform}
-                      className="bg-secondary text-secondary-foreground px-xs py-2xs rounded text-xs"
-                    >
-                      {platform}
-                    </span>
-                  ))}
-                </div>
+                <PlatformBadges platforms={platforms} />
               ) : null}
             </div>
           ) : null}

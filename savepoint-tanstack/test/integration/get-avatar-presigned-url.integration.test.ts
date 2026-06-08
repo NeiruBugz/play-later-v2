@@ -1,18 +1,12 @@
 /**
- * RED integration test for getAvatarPresignedUrlFn (Slice 6 — Avatar Upload).
+ * Integration test for getAvatarPresignedUrl (Slice 6 — Avatar Upload).
  *
- * This test is intentionally failing: the production module does not exist yet.
- * The import below will throw at module resolution time — that is the expected
- * RED state. Do not implement production code in this file.
- *
- * LocalStack S3 must be reachable at AWS_ENDPOINT_URL (http://localhost:4568).
- * Start with: docker compose up -d
+ * Presigning is a local SigV4 computation — `getSignedUrl` never opens a
+ * network connection — so this suite needs no running S3. It exercises the
+ * full presigned-URL path plus the validation-rejection branches against
+ * static AWS credentials, which makes it deterministic in every environment
+ * (local with or without LocalStack, and the Postgres-only PR-quality CI job).
  */
-import {
-  CreateBucketCommand,
-  HeadBucketCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { getServerUserId } from "@/entities/session/api/get-session.server";
@@ -49,41 +43,9 @@ const ALLOWED_MIME_TYPES = [
 const ONE_MB = 1 * 1024 * 1024;
 const TEST_USER_ID = "avatar-presign-integration-user-001";
 
-// ---------------------------------------------------------------------------
-// S3 setup helpers — bucket create-if-not-exists (mirrors canonical test)
-// ---------------------------------------------------------------------------
-function makeS3Client(): S3Client {
-  return new S3Client({
-    region: process.env.AWS_REGION ?? "us-east-1",
-    endpoint: process.env.AWS_ENDPOINT_URL ?? "http://localhost:4568",
-    forcePathStyle: true,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "test",
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "test",
-    },
-  });
-}
-
-beforeAll(async () => {
+beforeAll(() => {
   mockGetServerUserId.mockResolvedValue(TEST_USER_ID);
-
-  const s3 = makeS3Client();
-  const bucket = process.env.S3_BUCKET_NAME ?? "savepoint-dev";
-
-  try {
-    await s3.send(new HeadBucketCommand({ Bucket: bucket }));
-  } catch (error: unknown) {
-    const err = error as { name?: string };
-    if (err.name === "NotFound" || err.name === "NoSuchBucket") {
-      await s3.send(new CreateBucketCommand({ Bucket: bucket }));
-    } else {
-      throw new Error(
-        `LocalStack S3 is not reachable at ${process.env.AWS_ENDPOINT_URL ?? "http://localhost:4568"}. ` +
-          `Ensure docker compose is running: docker compose up -d\nCause: ${error}`
-      );
-    }
-  }
-}, 30_000);
+});
 
 afterAll(() => {
   vi.resetAllMocks();

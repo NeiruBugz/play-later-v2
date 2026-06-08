@@ -30,6 +30,8 @@ const onOpenChange = vi.fn();
 
 const elements = {
   getContentTextarea: () => screen.getByRole("textbox", { name: "Content" }),
+  getMinutesInput: () =>
+    screen.getByRole("spinbutton", { name: "Time played (minutes)" }),
   getSubmitButton: () => screen.getByRole("button", { name: "Save" }),
   getCancelButton: () => screen.getByRole("button", { name: "Cancel" }),
   queryDialog: () => screen.queryByRole("dialog"),
@@ -38,6 +40,8 @@ const elements = {
 const actions = {
   typeContent: (text: string) =>
     userEvent.type(elements.getContentTextarea(), text),
+  typeMinutes: (value: string) =>
+    userEvent.type(elements.getMinutesInput(), value),
   submit: () => userEvent.click(elements.getSubmitButton()),
   cancel: () => userEvent.click(elements.getCancelButton()),
 };
@@ -65,6 +69,51 @@ describe("ComposeJournalEntryDialog", () => {
 
     it("renders a cancel button", () => {
       expect(elements.getCancelButton()).toBeDefined();
+    });
+
+    it("renders an optional time-played (minutes) field", () => {
+      expect(elements.getMinutesInput()).toBeDefined();
+    });
+  });
+
+  describe("given the user submits content with a time-played value", () => {
+    beforeEach(async () => {
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+
+      await actions.typeContent("Two solid hours tonight.");
+      await actions.typeMinutes("120");
+      await actions.submit();
+    });
+
+    it("calls createJournalEntryFn with the entered playedMinutes", () => {
+      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            content: "Two solid hours tonight.",
+            playedMinutes: 120,
+          }),
+        })
+      );
+    });
+  });
+
+  describe("given the user submits content without a time-played value", () => {
+    beforeEach(async () => {
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+
+      await actions.typeContent("Quick note, no timing.");
+      await actions.submit();
+    });
+
+    it("calls createJournalEntryFn without a playedMinutes value", () => {
+      const call = vi.mocked(createJournalEntryFn).mock.calls[0]?.[0] as {
+        data: { playedMinutes?: number };
+      };
+      expect(call.data.playedMinutes).toBeUndefined();
     });
   });
 

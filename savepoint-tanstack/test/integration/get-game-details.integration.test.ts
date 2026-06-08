@@ -17,9 +17,11 @@
  *   userId?: string;
  * }): Promise<{
  *   game: Game;                    // local Game row (cache-upserted from IGDB)
- *   relatedGames: Game[];          // best-effort; may be []; impl decides strategy
  *   libraryEntry: LibraryItem | null;
  *   journalTeaser: JournalEntry[]; // most recent N (e.g. 3); [] when anon or none
+ *   journalCount: number;          // TRUE count (not capped at the teaser limit)
+ *   playtimeTotalMinutes: number;  // SUM(playedMinutes), null-safe → 0
+ *   recentSessionMinutes: number[]; // recent non-null playedMinutes, oldest→newest, ~9
  * }>
  *
  * Throws NotFoundError when IGDB returns an empty array for the given slug.
@@ -187,7 +189,7 @@ describe("getGameDetails", () => {
   // -------------------------------------------------------------------------
 
   describe("anonymous — no userId provided", () => {
-    it("returns game, relatedGames array, null libraryEntry, and empty journalTeaser", async () => {
+    it("returns the resolved game, null libraryEntry, and empty journalTeaser", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG });
 
       expect(result.game).toBeDefined();
@@ -195,9 +197,16 @@ describe("getGameDetails", () => {
       expect(result.game.igdbId).toBe(IGDB_ID);
       expect(result.game.title).toBe(MOCK_IGDB_GAME.name);
 
-      expect(Array.isArray(result.relatedGames)).toBe(true);
       expect(result.libraryEntry).toBeNull();
       expect(result.journalTeaser).toEqual([]);
+    });
+
+    it("zeroes all personal aggregates for an anonymous viewer", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG });
+
+      expect(result.journalCount).toBe(0);
+      expect(result.playtimeTotalMinutes).toBe(0);
+      expect(result.recentSessionMinutes).toEqual([]);
     });
 
     it("inserts a Game row on cache miss", async () => {
@@ -332,6 +341,157 @@ describe("getGameDetails", () => {
 
       // Most recent entry (index 4) has content "Journal entry 4".
       expect(result.journalTeaser[0]!.content).toBe("Journal entry 4");
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Personal aggregates — journalCount, playtimeTotalMinutes, recentSessionMinutes
+  // -------------------------------------------------------------------------
+
+  describe("personal aggregates with more than the teaser limit of entries", () => {
+    const USER_ID = "ggd-user-dave";
+    // playedMinutes for 12 entries in createdAt order (entry 1 = oldest).
+    // Some are null to exercise null-safety and the non-null series filter.
+    const MINUTES_BY_INDEX: Array<number | null> = [
+      30, // 1 (oldest)
+      null, // 2
+      45, // 3
+      60, // 4
+      null, // 5
+      15, // 6
+      90, // 7
+      20, // 8
+      25, // 9
+      35, // 10
+      40, // 11
+      50, // 12 (newest)
+    ];
+
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("dave") });
+      await db.prisma.game.create({
+        data: {
+          igdbId: IGDB_ID,
+          title: MOCK_IGDB_GAME.name,
+          slug: GAME_SLUG,
+          createdAt: new Date("2024-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+        },
+      });
+      const game = await db.prisma.game.findUnique({
+        where: { slug: GAME_SLUG },
+      });
+      for (let i = 0; i < MINUTES_BY_INDEX.length; i++) {
+        const day = String(i + 1).padStart(2, "0");
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: USER_ID,
+            gameId: game!.id,
+            content: `Journal entry ${i + 1}`,
+            kind: "QUICK",
+            playedMinutes: MINUTES_BY_INDEX[i],
+            createdAt: new Date(`2024-01-${day}T00:00:00.000Z`),
+            updatedAt: new Date(`2024-01-${day}T00:00:00.000Z`),
+          },
+        });
+      }
+    });
+
+    it("returns the true journal count, not capped at the teaser limit", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
+
+      expect(result.journalCount).toBe(MINUTES_BY_INDEX.length);
+      expect(result.journalCount).toBeGreaterThan(result.journalTeaser.length);
+    });
+
+    it("sums playedMinutes across all entries, ignoring nulls", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
+
+      const expectedSum = MINUTES_BY_INDEX.reduce<number>(
+        (acc, m) => acc + (m ?? 0),
+        0
+      );
+      expect(result.playtimeTotalMinutes).toBe(expectedSum);
+    });
+
+    it("counts only entries with logged minutes, not every journal entry", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
+
+      const expectedWithMinutes = MINUTES_BY_INDEX.filter(
+        (m) => m !== null
+      ).length;
+      expect(result.playtimeSessionCount).toBe(expectedWithMinutes);
+      // The null entries make this strictly smaller than journalCount — the
+      // gap is exactly what would dilute an "average session" computed off
+      // journalCount.
+      expect(result.playtimeSessionCount).toBeLessThan(result.journalCount);
+    });
+
+    it("returns the most-recent non-null playedMinutes series oldest→newest, bounded to ~9", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
+
+      // Non-null minutes in createdAt order:
+      // 30,45,60,15,90,20,25,35,40,50 (10 values). Bounded to the most recent 9
+      // and presented oldest→newest for a left-to-right rhythm chart.
+      expect(result.recentSessionMinutes).toEqual([
+        45, 60, 15, 90, 20, 25, 35, 40, 50,
+      ]);
+      expect(result.recentSessionMinutes.length).toBeLessThanOrEqual(9);
+    });
+  });
+
+  describe("personal aggregates with entries but no logged minutes", () => {
+    const USER_ID = "ggd-user-erin";
+
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("erin") });
+      await db.prisma.game.create({
+        data: {
+          igdbId: IGDB_ID,
+          title: MOCK_IGDB_GAME.name,
+          slug: GAME_SLUG,
+          createdAt: new Date("2024-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+        },
+      });
+      const game = await db.prisma.game.findUnique({
+        where: { slug: GAME_SLUG },
+      });
+      await db.prisma.journalEntry.create({
+        data: {
+          userId: USER_ID,
+          gameId: game!.id,
+          content: "No minutes logged",
+          kind: "QUICK",
+          playedMinutes: null,
+        },
+      });
+    });
+
+    it("reports zero total playtime and an empty session series when no minutes are logged", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
+
+      expect(result.journalCount).toBe(1);
+      expect(result.playtimeTotalMinutes).toBe(0);
+      expect(result.playtimeSessionCount).toBe(0);
+      expect(result.recentSessionMinutes).toEqual([]);
+    });
+  });
+
+  describe("signed-in with no entries at all", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("frank") });
+    });
+
+    it("zeroes journalCount, playtime, and the session series", async () => {
+      const result = await getGameDetails({
+        slug: GAME_SLUG,
+        userId: "ggd-user-frank",
+      });
+
+      expect(result.journalCount).toBe(0);
+      expect(result.playtimeTotalMinutes).toBe(0);
+      expect(result.recentSessionMinutes).toEqual([]);
     });
   });
 

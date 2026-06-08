@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
 import { deleteLibraryItemFn } from "@/features/manage-library-entry/api/delete-library-item-fn";
@@ -35,6 +35,23 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
   searchPlatformsFn: vi.fn(() => Promise.resolve([])),
 }));
 
+const DESKTOP_QUERY = "(min-width: 768px)";
+
+const setViewport = (variant: "desktop" | "mobile") => {
+  const isDesktop = variant === "desktop";
+  const matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches: query === DESKTOP_QUERY ? isDesktop : false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
+  vi.stubGlobal("matchMedia", matchMedia);
+};
+
 const buildEntry = (overrides: Partial<LibraryItem> = {}): LibraryItem => ({
   id: 42,
   status: "PLAYING",
@@ -53,66 +70,41 @@ const buildEntry = (overrides: Partial<LibraryItem> = {}): LibraryItem => ({
 });
 
 const elements = {
-  getPill: (label: string) => screen.getByRole("tab", { name: label }),
+  getPill: (label: string) =>
+    screen.getByRole("button", { name: `Change library status: ${label}` }),
+  queryPill: (label: string) =>
+    screen.queryByRole("button", { name: `Change library status: ${label}` }),
+  getAddToLibrary: () => screen.getByRole("button", { name: "Add to library" }),
+  queryAddToLibrary: () =>
+    screen.queryByRole("button", { name: "Add to library" }),
+  getMenu: () => screen.getByRole("menu", { name: "Set status" }),
+  queryMenu: () => screen.queryByRole("menu", { name: "Set status" }),
+  getStatusOption: (label: string) =>
+    screen.getByRole("menuitemradio", { name: label }),
+  queryRating: () => screen.queryByRole("slider"),
   getMoreTrigger: () =>
     screen.getByRole("button", { name: "More library actions" }),
 };
 
 const actions = {
-  clickPill: async (label: string) => userEvent.click(elements.getPill(label)),
+  openMenu: async (label: string) => userEvent.click(elements.getPill(label)),
+  selectStatus: async (label: string) =>
+    userEvent.click(elements.getStatusOption(label)),
 };
 
 describe("LibraryStatusSwitcher", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setViewport("desktop");
   });
 
-  describe("given no library entry yet", () => {
-    beforeEach(() => {
-      vi.mocked(addGameToLibraryFn).mockResolvedValue(
-        buildEntry({ status: "UP_NEXT" })
-      );
-      render(
-        <LibraryStatusSwitcher
-          igdbId={1234}
-          gameTitle="Hollow Knight"
-          entry={null}
-        />
-      );
-    });
-
-    it("renders all 5 pills with no active selection", () => {
-      for (const label of [
-        "Up Next",
-        "Playing",
-        "Shelf",
-        "Played",
-        "Wishlist",
-      ]) {
-        expect(elements.getPill(label)).toHaveAttribute(
-          "aria-selected",
-          "false"
-        );
-      }
-    });
-
-    describe("when the user clicks the Up Next pill", () => {
-      beforeEach(async () => {
-        await actions.clickPill("Up Next");
-      });
-
-      it("calls addGameToLibraryFn with the chosen status", async () => {
-        await waitFor(() => {
-          expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledWith({
-            data: { igdbId: 1234, status: "UP_NEXT" },
-          });
-        });
-      });
-    });
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
-  describe("given an existing entry with status PLAYING", () => {
+  describe("given an existing entry with status PLAYING (desktop)", () => {
     beforeEach(() => {
+      setViewport("desktop");
       vi.mocked(updateLibraryItemFn).mockResolvedValue(
         buildEntry({ status: "SHELF" })
       );
@@ -125,43 +117,81 @@ describe("LibraryStatusSwitcher", () => {
       );
     });
 
-    it("marks the Playing pill as active", () => {
-      expect(elements.getPill("Playing")).toHaveAttribute(
-        "aria-selected",
-        "true"
-      );
+    it("shows a pill labelled with the current status", () => {
+      expect(elements.getPill("Playing")).toBeDefined();
     });
 
-    it("renders the rating slider", () => {
-      expect(screen.getByRole("slider")).toBeDefined();
+    it("does not render a rating control (rating lives in Your Record)", () => {
+      expect(elements.queryRating()).toBeNull();
     });
 
-    it("renders the overflow menu trigger", () => {
+    it("keeps the overflow / remove affordance available", () => {
       expect(elements.getMoreTrigger()).toBeDefined();
     });
 
-    describe("when the user clicks the Shelf pill", () => {
+    it("does not show the status menu until the pill is clicked", () => {
+      expect(elements.queryMenu()).toBeNull();
+    });
+
+    describe("when the pill is clicked open", () => {
       beforeEach(async () => {
-        await actions.clickPill("Shelf");
+        await actions.openMenu("Playing");
       });
 
-      it("calls updateLibraryItemFn with the chosen status", async () => {
-        await waitFor(() => {
-          expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledWith({
-            data: { itemId: 42, status: "SHELF" },
+      it("opens a menu listing all 5 statuses", () => {
+        const menu = elements.getMenu();
+        for (const label of [
+          "Wishlist",
+          "Shelf",
+          "Up Next",
+          "Playing",
+          "Played",
+        ]) {
+          expect(
+            within(menu).getByRole("menuitemradio", { name: label })
+          ).toBeDefined();
+        }
+      });
+
+      it("checks the current status option", () => {
+        expect(elements.getStatusOption("Playing")).toHaveAttribute(
+          "aria-checked",
+          "true"
+        );
+        expect(elements.getStatusOption("Shelf")).toHaveAttribute(
+          "aria-checked",
+          "false"
+        );
+      });
+
+      describe("and a different status is selected", () => {
+        beforeEach(async () => {
+          await actions.selectStatus("Shelf");
+        });
+
+        it("calls updateLibraryItemFn with the chosen status", async () => {
+          await waitFor(() => {
+            expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledWith({
+              data: { itemId: 42, status: "SHELF" },
+            });
+          });
+        });
+
+        it("closes the menu", async () => {
+          await waitFor(() => {
+            expect(elements.queryMenu()).toBeNull();
+          });
+        });
+
+        it("reflects the new status on the pill", async () => {
+          await waitFor(() => {
+            expect(elements.getPill("Shelf")).toBeDefined();
           });
         });
       });
-
-      it("flips the active pill to Shelf optimistically", () => {
-        expect(elements.getPill("Shelf")).toHaveAttribute(
-          "aria-selected",
-          "true"
-        );
-      });
     });
 
-    describe("when deleteLibraryItemFn is invoked via the overflow menu", () => {
+    describe("when removed via the overflow menu", () => {
       beforeEach(async () => {
         vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined as never);
         await userEvent.click(elements.getMoreTrigger());
@@ -177,6 +207,93 @@ describe("LibraryStatusSwitcher", () => {
           });
         });
       });
+    });
+  });
+
+  describe("given an existing UP_NEXT entry that has been played (desktop)", () => {
+    beforeEach(async () => {
+      setViewport("desktop");
+      render(
+        <LibraryStatusSwitcher
+          igdbId={1234}
+          gameTitle="Hollow Knight"
+          entry={buildEntry({ status: "UP_NEXT", hasBeenPlayed: true })}
+        />
+      );
+      await actions.openMenu("Replay");
+    });
+
+    it("labels Up Next as Replay on the pill and in the menu", () => {
+      expect(elements.queryPill("Replay")).not.toBeNull();
+      expect(
+        screen.getByRole("menuitemradio", { name: "Replay" })
+      ).toBeDefined();
+    });
+  });
+
+  describe("given no library entry yet (desktop)", () => {
+    beforeEach(() => {
+      setViewport("desktop");
+      vi.mocked(addGameToLibraryFn).mockResolvedValue(
+        buildEntry({ status: "UP_NEXT" })
+      );
+      render(
+        <LibraryStatusSwitcher
+          igdbId={1234}
+          gameTitle="Hollow Knight"
+          entry={null}
+        />
+      );
+    });
+
+    it("renders an Add to library action instead of a status pill", () => {
+      expect(elements.queryAddToLibrary()).not.toBeNull();
+      expect(elements.queryPill("Up Next")).toBeNull();
+    });
+
+    it("does not render a rating control", () => {
+      expect(elements.queryRating()).toBeNull();
+    });
+
+    describe("when a status is chosen from the add menu", () => {
+      beforeEach(async () => {
+        await userEvent.click(elements.getAddToLibrary());
+        await actions.selectStatus("Up Next");
+      });
+
+      it("calls addGameToLibraryFn with the chosen status", async () => {
+        await waitFor(() => {
+          expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledWith({
+            data: { igdbId: 1234, status: "UP_NEXT" },
+          });
+        });
+      });
+    });
+  });
+
+  describe("given an existing entry on mobile", () => {
+    beforeEach(async () => {
+      setViewport("mobile");
+      render(
+        <LibraryStatusSwitcher
+          igdbId={1234}
+          gameTitle="Hollow Knight"
+          entry={buildEntry()}
+        />
+      );
+      await actions.openMenu("Playing");
+    });
+
+    it("opens the status menu inside a bottom sheet", () => {
+      expect(elements.getMenu()).toBeDefined();
+      expect(screen.getByTestId("status-sheet")).toBeDefined();
+    });
+
+    it("checks the current status inside the sheet", () => {
+      expect(elements.getStatusOption("Playing")).toHaveAttribute(
+        "aria-checked",
+        "true"
+      );
     });
   });
 });

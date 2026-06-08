@@ -154,7 +154,11 @@ describe("GameCard", () => {
     beforeEach(() => {
       render(
         <GameCard
-          game={{ ...baseGame, releaseYear: 2017, platforms: ["PC", "Switch"] }}
+          game={{
+            ...baseGame,
+            releaseYear: 2017,
+            platforms: ["PlayStation 5", "Nintendo Switch"],
+          }}
           density="detailed"
           asLink={false}
         />
@@ -165,8 +169,30 @@ describe("GameCard", () => {
       expect(screen.getByText("2017")).toBeDefined();
     });
 
-    it("renders the first platform", () => {
-      expect(screen.getByText("PC")).toBeDefined();
+    it("renders platforms through PlatformBadges with abbreviated labels", () => {
+      // PlatformBadges abbreviates "PlayStation 5" → "PS5" and
+      // "Nintendo Switch" → "Switch"; the old full-name chips are gone.
+      expect(screen.getByText("PS5")).toBeDefined();
+      expect(screen.getByText("Switch")).toBeDefined();
+      expect(screen.queryByText("PlayStation 5")).toBeNull();
+    });
+
+    it("does not render the old grey full-name chip", () => {
+      // Family color + variant coverage lives in PlatformBadges' own test;
+      // here we only prove GameCard routes platforms through that component.
+      expect(screen.queryByText("PlayStation 5")).toBeNull();
+    });
+  });
+
+  describe("given density='minimal' with no platforms", () => {
+    beforeEach(() => {
+      render(<GameCard game={baseGame} density="minimal" asLink={false} />);
+    });
+
+    it("renders no platform row", () => {
+      // minimal density renders no meta block at all; the related-games and
+      // library cover cards pass no platforms — PlatformBadges must not render.
+      expect(screen.queryByText("PS5")).toBeNull();
     });
   });
 });

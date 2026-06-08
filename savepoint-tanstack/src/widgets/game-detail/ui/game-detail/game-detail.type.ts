@@ -17,9 +17,16 @@ export type GameDetailData = {
    * persisted. The widget reads display data from here.
    */
   igdbDetails: GameDetailsResponseItem;
-  relatedGames: Game[];
   libraryEntry: LibraryItem | null;
   journalTeaser: JournalEntry[];
+  /** True count of the viewer's journal entries — NOT capped at the teaser limit. */
+  journalCount: number;
+  /** SUM of the viewer's logged playedMinutes for this game; 0 when none. */
+  playtimeTotalMinutes: number;
+  /** Count of journal entries carrying non-null playedMinutes — the true denominator for average session length. */
+  playtimeSessionCount: number;
+  /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
+  recentSessionMinutes: number[];
 };
 
 export type GameDetailProps = {

@@ -11,6 +11,7 @@ export type CreateJournalEntryInput = {
   content: string;
   kind?: "QUICK" | "REFLECTION";
   gameId?: string | null;
+  playedMinutes?: number | null;
 };
 
 export async function createJournalEntry(
@@ -24,6 +25,7 @@ export async function createJournalEntry(
         content: input.content,
         kind: input.kind ?? "QUICK",
         gameId: input.gameId ?? null,
+        playedMinutes: input.playedMinutes ?? null,
       },
       include: { game: { select: JOURNAL_ENTRY_GAME_SELECT } },
     });

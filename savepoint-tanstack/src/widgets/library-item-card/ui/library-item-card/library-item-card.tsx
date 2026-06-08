@@ -1,3 +1,4 @@
+import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
   isTouched,
   LibraryLifecycleStrip,
@@ -9,6 +10,7 @@ import {
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { TooltipProvider } from "@/shared/ui/tooltip";
 import { GameCard } from "@/widgets/game-card";
 
 import { LibraryItemCardCta } from "./library-item-card-cta";
@@ -86,12 +88,9 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
           data-testid="library-item-card-metadata"
         >
           {hasPlatform ? (
-            <Badge
-              variant="secondary"
-              className="h-4 px-1.5 py-0 text-[10px] leading-none font-medium"
-            >
-              {item.platform}
-            </Badge>
+            <TooltipProvider>
+              <PlatformBadgeItem name={item.platform!} />
+            </TooltipProvider>
           ) : null}
           {showAcquisitionChip ? (
             <Badge

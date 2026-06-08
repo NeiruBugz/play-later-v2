@@ -317,6 +317,56 @@ describe("createJournalEntry", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Optional playedMinutes (Slice 2 — "Log a session" captures optional minutes)
+  // -------------------------------------------------------------------------
+
+  describe("playedMinutes field", () => {
+    it("persists playedMinutes when provided", async () => {
+      const result = await createJournalEntry("cje-user-owner", {
+        content: "Played for a bit",
+        gameId: "cje-game-a",
+        playedMinutes: 45,
+      });
+
+      expect(result.playedMinutes).toBe(45);
+
+      const row = await db.prisma.journalEntry.findUnique({
+        where: { id: result.id },
+      });
+      expect(row?.playedMinutes).toBe(45);
+    });
+
+    it("stores playedMinutes as null when omitted", async () => {
+      const result = await createJournalEntry("cje-user-owner", {
+        content: "No minutes recorded",
+      });
+
+      expect(result.playedMinutes).toBeNull();
+
+      const row = await db.prisma.journalEntry.findUnique({
+        where: { id: result.id },
+      });
+      expect(row?.playedMinutes).toBeNull();
+    });
+
+    it("records an entry with empty content and no minutes", async () => {
+      const result = await createJournalEntry("cje-user-owner", {
+        content: "",
+      });
+
+      expect(result.content).toBe("");
+      expect(result.playedMinutes).toBeNull();
+
+      const row = await db.prisma.journalEntry.findUnique({
+        where: { id: result.id },
+      });
+      expect(row).not.toBeNull();
+      expect(row?.content).toBe("");
+      expect(row?.playedMinutes).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Isolation — userId is taken from the argument, not input
   // -------------------------------------------------------------------------
 
