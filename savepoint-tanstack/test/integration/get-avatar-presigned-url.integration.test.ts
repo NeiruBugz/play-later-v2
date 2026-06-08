@@ -1,18 +1,12 @@
 /**
- * RED integration test for getAvatarPresignedUrlFn (Slice 6 — Avatar Upload).
+ * Integration test for getAvatarPresignedUrl (Slice 6 — Avatar Upload).
  *
- * This test is intentionally failing: the production module does not exist yet.
- * The import below will throw at module resolution time — that is the expected
- * RED state. Do not implement production code in this file.
- *
- * LocalStack S3 must be reachable at AWS_ENDPOINT_URL (http://localhost:4568).
- * Start with: docker compose up -d
+ * Presigning is a local SigV4 computation — `getSignedUrl` never opens a
+ * network connection — so this suite needs no running S3. It exercises the
+ * full presigned-URL path plus the validation-rejection branches against
+ * static AWS credentials, which makes it deterministic in every environment
+ * (local with or without LocalStack, and the Postgres-only PR-quality CI job).
  */
-import {
-  CreateBucketCommand,
-  HeadBucketCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { getServerUserId } from "@/entities/session/api/get-session.server";
@@ -49,49 +43,6 @@ const ALLOWED_MIME_TYPES = [
 const ONE_MB = 1 * 1024 * 1024;
 const TEST_USER_ID = "avatar-presign-integration-user-001";
 
-// ---------------------------------------------------------------------------
-// S3 setup helpers — bucket create-if-not-exists (mirrors canonical test)
-// ---------------------------------------------------------------------------
-function makeS3Client(): S3Client {
-  return new S3Client({
-    region: process.env.AWS_REGION ?? "us-east-1",
-    endpoint: process.env.AWS_ENDPOINT_URL ?? "http://localhost:4568",
-    forcePathStyle: true,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "test",
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "test",
-    },
-  });
-}
-
-// LocalStack S3 is an optional local dependency. CI's PR-quality job runs the
-// integration project against Postgres only (no LocalStack service), so this
-// suite skips itself when S3 is unreachable rather than failing the whole run.
-// It still executes in full locally (`docker compose up -d`) and in the
-// dedicated integration workflow that does provision LocalStack.
-//
-// The reachability probe runs at module-collection time (top-level await) so
-// `describe.skipIf` below can read its result before tests are scheduled.
-async function ensureBucketReachable(): Promise<boolean> {
-  const s3 = makeS3Client();
-  const bucket = process.env.S3_BUCKET_NAME ?? "savepoint-dev";
-
-  try {
-    await s3.send(new HeadBucketCommand({ Bucket: bucket }));
-    return true;
-  } catch (error: unknown) {
-    const err = error as { name?: string };
-    if (err.name === "NotFound" || err.name === "NoSuchBucket") {
-      await s3.send(new CreateBucketCommand({ Bucket: bucket }));
-      return true;
-    }
-    // Connection refused / timeout — LocalStack is not running.
-    return false;
-  }
-}
-
-const s3Available = await ensureBucketReachable();
-
 beforeAll(() => {
   mockGetServerUserId.mockResolvedValue(TEST_USER_ID);
 });
@@ -103,7 +54,7 @@ afterAll(() => {
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
-describe.skipIf(!s3Available)("getAvatarPresignedUrl", () => {
+describe("getAvatarPresignedUrl", () => {
   describe("given a valid image/png payload within the size limit", () => {
     it("returns an object with uploadUrl and publicUrl", async () => {
       const result = await getAvatarPresignedUrl({
