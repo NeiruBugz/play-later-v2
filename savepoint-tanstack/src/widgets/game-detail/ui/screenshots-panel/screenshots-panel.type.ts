@@ -1,7 +1,8 @@
-export type Screenshot = {
-  id: number;
-  image_id: string;
-};
+import type { GameDetailsResponseItem } from "@/shared/api/igdb";
+
+export type Screenshot = NonNullable<
+  GameDetailsResponseItem["screenshots"]
+>[number];
 
 export type ScreenshotsPanelProps = {
   screenshots: Screenshot[] | undefined;
