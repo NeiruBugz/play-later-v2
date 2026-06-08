@@ -7,13 +7,6 @@ updates:
     commit-message:
       prefix: "chore(deps)"
 
-  - package-ecosystem: "npm"
-    directory: "/savepoint-tanstack"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore(deps)"
-
   - package-ecosystem: "terraform"
     directory: "/infra"
     schedule:
