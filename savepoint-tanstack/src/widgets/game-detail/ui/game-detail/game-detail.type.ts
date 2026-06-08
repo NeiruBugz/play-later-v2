@@ -23,6 +23,8 @@ export type GameDetailData = {
   journalCount: number;
   /** SUM of the viewer's logged playedMinutes for this game; 0 when none. */
   playtimeTotalMinutes: number;
+  /** Count of journal entries carrying non-null playedMinutes — the true denominator for average session length. */
+  playtimeSessionCount: number;
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
 };

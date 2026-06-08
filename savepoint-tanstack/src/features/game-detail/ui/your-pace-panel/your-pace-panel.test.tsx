@@ -17,6 +17,7 @@ describe("YourPacePanel", () => {
         <YourPacePanel
           journalCount={4}
           playtimeTotalMinutes={600}
+          playtimeSessionCount={4}
           recentSessionMinutes={[60, 120, 180, 240]}
         />
       );
@@ -53,12 +54,38 @@ describe("YourPacePanel", () => {
     });
   });
 
+  describe("given some entries carry no recorded minutes", () => {
+    beforeEach(() => {
+      // 4 journal entries, but only 2 logged minutes (600 total).
+      render(
+        <YourPacePanel
+          journalCount={4}
+          playtimeTotalMinutes={600}
+          playtimeSessionCount={2}
+          recentSessionMinutes={[240, 360]}
+        />
+      );
+    });
+
+    it("counts every journal entry under Sessions", () => {
+      expect(within(elements.getStat("Sessions")).getByText("4")).toBeDefined();
+    });
+
+    it("averages only over sessions that logged minutes, not all entries", () => {
+      // 600min / 2 contributing sessions = 5h — not 600 / 4 = 2.5h.
+      expect(
+        within(elements.getStat("Avg session")).getByText("5h")
+      ).toBeDefined();
+    });
+  });
+
   describe("given no recorded session minutes", () => {
     beforeEach(() => {
       render(
         <YourPacePanel
           journalCount={2}
           playtimeTotalMinutes={0}
+          playtimeSessionCount={0}
           recentSessionMinutes={[]}
         />
       );
@@ -79,6 +106,7 @@ describe("YourPacePanel", () => {
         <YourPacePanel
           journalCount={0}
           playtimeTotalMinutes={0}
+          playtimeSessionCount={0}
           recentSessionMinutes={[]}
         />
       );

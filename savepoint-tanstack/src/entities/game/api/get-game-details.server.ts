@@ -24,6 +24,8 @@ export interface GameDetails {
   journalCount: number;
   /** SUM of the viewer's logged playedMinutes for this game; 0 when none. */
   playtimeTotalMinutes: number;
+  /** Count of journal entries carrying non-null playedMinutes — the true denominator for average session length. */
+  playtimeSessionCount: number;
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
 }
@@ -45,6 +47,7 @@ export async function getGameDetails(params: {
   let journalTeaser: JournalEntry[] = [];
   let journalCount = 0;
   let playtimeTotalMinutes = 0;
+  let playtimeSessionCount = 0;
   let recentSessionMinutes: number[] = [];
 
   if (userId) {
@@ -65,6 +68,7 @@ export async function getGameDetails(params: {
         prisma.journalEntry.aggregate({
           where: { userId, gameId: game.id },
           _sum: { playedMinutes: true },
+          _count: { playedMinutes: true },
         }),
         prisma.journalEntry.findMany({
           where: { userId, gameId: game.id, playedMinutes: { not: null } },
@@ -78,6 +82,7 @@ export async function getGameDetails(params: {
     journalTeaser = teaser;
     journalCount = count;
     playtimeTotalMinutes = playtimeAggregate._sum.playedMinutes ?? 0;
+    playtimeSessionCount = playtimeAggregate._count.playedMinutes;
     // Fetched newest→oldest for the "most recent" bound; reverse to oldest→newest
     // so the rhythm chart reads left-to-right.
     recentSessionMinutes = recentMinutesRows
@@ -92,6 +97,7 @@ export async function getGameDetails(params: {
     journalTeaser,
     journalCount,
     playtimeTotalMinutes,
+    playtimeSessionCount,
     recentSessionMinutes,
   };
 }

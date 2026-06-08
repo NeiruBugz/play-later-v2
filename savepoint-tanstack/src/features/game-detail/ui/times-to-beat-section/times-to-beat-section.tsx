@@ -19,6 +19,7 @@ export function TimesToBeatSection({
   timesToBeat,
   playtimeTotalMinutes,
   journalCount,
+  playtimeSessionCount,
   recentSessionMinutes,
 }: TimesToBeatSectionProps) {
   if (timesToBeat === null) {
@@ -26,6 +27,7 @@ export function TimesToBeatSection({
       <YourPacePanel
         journalCount={journalCount}
         playtimeTotalMinutes={playtimeTotalMinutes}
+        playtimeSessionCount={playtimeSessionCount}
         recentSessionMinutes={recentSessionMinutes}
       />
     );

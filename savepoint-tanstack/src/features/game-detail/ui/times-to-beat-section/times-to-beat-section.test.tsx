@@ -17,6 +17,7 @@ const elements = {
 const noPace = {
   playtimeTotalMinutes: 0,
   journalCount: 0,
+  playtimeSessionCount: 0,
   recentSessionMinutes: [],
 };
 
@@ -29,6 +30,7 @@ describe("TimesToBeatSection", () => {
           timesToBeat={{ mainStory: 36000, completionist: 72000 }}
           playtimeTotalMinutes={720}
           journalCount={3}
+          playtimeSessionCount={3}
           recentSessionMinutes={[120, 240, 360]}
         />
       );
@@ -70,6 +72,7 @@ describe("TimesToBeatSection", () => {
           timesToBeat={{ mainStory: 36000, completionist: 72000 }}
           playtimeTotalMinutes={180}
           journalCount={1}
+          playtimeSessionCount={1}
           recentSessionMinutes={[180]}
         />
       );
@@ -151,6 +154,7 @@ describe("TimesToBeatSection", () => {
           timesToBeat={null}
           playtimeTotalMinutes={600}
           journalCount={4}
+          playtimeSessionCount={4}
           recentSessionMinutes={[60, 120, 180, 240]}
         />
       );

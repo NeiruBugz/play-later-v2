@@ -7,6 +7,8 @@ export type TimesToBeatSectionProps = {
   playtimeTotalMinutes: number;
   /** Viewer's journal-entry count for this game. */
   journalCount: number;
+  /** Viewer's count of sessions carrying logged minutes. */
+  playtimeSessionCount: number;
   /** Viewer's recent non-null per-session minutes, oldest→newest. */
   recentSessionMinutes: number[];
 };

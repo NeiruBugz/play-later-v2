@@ -101,6 +101,7 @@ const buildData = (
   journalTeaser: [],
   journalCount: 0,
   playtimeTotalMinutes: 0,
+  playtimeSessionCount: 0,
   recentSessionMinutes: [],
 });
 

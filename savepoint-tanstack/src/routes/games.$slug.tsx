@@ -51,6 +51,7 @@ function GameDetailRoute() {
               igdbId={igdbId}
               playtimeTotalMinutes={data.playtimeTotalMinutes}
               journalCount={data.journalCount}
+              playtimeSessionCount={data.playtimeSessionCount}
               recentSessionMinutes={data.recentSessionMinutes}
             />
           </Suspense>
@@ -87,11 +88,13 @@ function TimesToBeatSlot({
   igdbId,
   playtimeTotalMinutes,
   journalCount,
+  playtimeSessionCount,
   recentSessionMinutes,
 }: {
   igdbId: number;
   playtimeTotalMinutes: number;
   journalCount: number;
+  playtimeSessionCount: number;
   recentSessionMinutes: number[];
 }) {
   const { data: timesToBeat } = useSuspenseQuery({
@@ -103,6 +106,7 @@ function TimesToBeatSlot({
       timesToBeat={timesToBeat}
       playtimeTotalMinutes={playtimeTotalMinutes}
       journalCount={journalCount}
+      playtimeSessionCount={playtimeSessionCount}
       recentSessionMinutes={recentSessionMinutes}
     />
   );

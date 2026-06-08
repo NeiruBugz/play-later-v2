@@ -414,6 +414,19 @@ describe("getGameDetails", () => {
       expect(result.playtimeTotalMinutes).toBe(expectedSum);
     });
 
+    it("counts only entries with logged minutes, not every journal entry", async () => {
+      const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
+
+      const expectedWithMinutes = MINUTES_BY_INDEX.filter(
+        (m) => m !== null
+      ).length;
+      expect(result.playtimeSessionCount).toBe(expectedWithMinutes);
+      // The null entries make this strictly smaller than journalCount — the
+      // gap is exactly what would dilute an "average session" computed off
+      // journalCount.
+      expect(result.playtimeSessionCount).toBeLessThan(result.journalCount);
+    });
+
     it("returns the most-recent non-null playedMinutes series oldest→newest, bounded to ~9", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
 
@@ -460,6 +473,7 @@ describe("getGameDetails", () => {
 
       expect(result.journalCount).toBe(1);
       expect(result.playtimeTotalMinutes).toBe(0);
+      expect(result.playtimeSessionCount).toBe(0);
       expect(result.recentSessionMinutes).toEqual([]);
     });
   });

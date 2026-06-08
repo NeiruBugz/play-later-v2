@@ -15,10 +15,14 @@ function toAverageHours(totalMinutes: number, sessions: number): number {
 export function YourPacePanel({
   journalCount,
   playtimeTotalMinutes,
+  playtimeSessionCount,
   recentSessionMinutes,
 }: YourPacePanelProps) {
   const totalHours = toHours(playtimeTotalMinutes);
-  const averageHours = toAverageHours(playtimeTotalMinutes, journalCount);
+  const averageHours = toAverageHours(
+    playtimeTotalMinutes,
+    playtimeSessionCount
+  );
   const recent = recentSessionMinutes.slice(-RECENT_BAR_LIMIT);
   const maxMinutes = Math.max(...recent, 1);
 
