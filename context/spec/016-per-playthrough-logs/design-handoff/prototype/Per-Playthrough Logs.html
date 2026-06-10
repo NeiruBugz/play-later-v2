@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SavePoint — Per-Playthrough Logs</title>
+  <link rel="icon" href="https://fcd1cd26-c71b-4b27-ac6e-824858ea381b.example/assets/logo.svg" />
+  <link rel="stylesheet" href="lib/colors_and_type.css" />
+  <link rel="stylesheet" href="lib/kit.css" />
+  <style>
+    @keyframes sp-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes sp-slide-in { from { transform: translateX(28px); } to { transform: translateX(0); } }
+    /* date input glyph follows color-scheme (set per mode in tokens) */
+    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .6; }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+    .app-main { overflow-x: hidden; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <template id="__bundler_thumbnail">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="background:#1b2820">
+      <g fill="none" stroke="#7fb8ac" stroke-width="2.6" stroke-linejoin="round">
+        <rect x="13.2" y="13.2" width="21.6" height="21.6" rx="4" transform="rotate(45 24 24)" />
+      </g>
+      <rect x="19.5" y="19.5" width="9" height="9" rx="1.5" transform="rotate(45 24 24)" fill="#7fb8ac" />
+    </svg>
+  </template>
+
+  <script type="text/babel" src="lib/tweaks-panel.jsx"></script>
+  <script type="text/babel" src="lib/kit.jsx"></script>
+  <script type="text/babel" src="playthroughs.jsx"></script>
+  <script type="text/babel" src="panels.jsx"></script>
+  <script type="text/babel" src="drawers.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
