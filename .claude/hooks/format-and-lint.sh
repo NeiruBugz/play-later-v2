@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="/Users/nailbadiullin/Developer/personal/play-later-v2/savepoint-tanstack"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-/Users/nailbadiullin/Developer/personal/play-later-v2}/savepoint-tanstack"
 
 file=$(jq -r '.tool_input.file_path // .tool_response.filePath')
 
