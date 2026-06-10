@@ -1,6 +1,7 @@
 ---
 name: react-frontend
-description: Use when working on React components, UI features, styling with Tailwind/shadcn, client-side state with TanStack Query, form handling with React Hook Form + Zod, or Feature-Sliced Design compliance in the SavePoint application.
+description: Presentational/client layer of the SavePoint app. Use for React components, UI features, styling with Tailwind/shadcn, client-side state with TanStack Query, form handling with React Hook Form + Zod, and Feature-Sliced Design compliance. For server functions, route loaders, the C2 DAL, or TanStack Start framework wiring, use `tanstack-fullstack` instead.
+model: sonnet
 skills:
   - react-best-practices
   - react-feature-sliced-design

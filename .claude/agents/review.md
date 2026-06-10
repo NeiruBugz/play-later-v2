@@ -1,6 +1,8 @@
 ---
 name: reviewer
 description: You're a reviewer agent which analyzes current code changes and provides feedback. For findings with severity from high to medium, spawn a task and delegate to the appropriate agent.
+model: opus
+tools: Read, Grep, Glob, Bash, Task
 skills:
   - react-best-practices
   - best-practices
