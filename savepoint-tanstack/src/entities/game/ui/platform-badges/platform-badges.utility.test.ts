@@ -1,11 +1,5 @@
-import { BsXbox } from "react-icons/bs";
-import {
-  SiApple,
-  SiLinux,
-  SiNintendo,
-  SiPlaystation,
-  SiSteam,
-} from "react-icons/si";
+import { BsNintendoSwitch, BsXbox } from "react-icons/bs";
+import { SiApple, SiLinux, SiPlaystation, SiSteam } from "react-icons/si";
 import { TbBrandWindows, TbDeviceGamepad2 } from "react-icons/tb";
 import { describe, expect, it } from "vitest";
 
@@ -30,12 +24,12 @@ describe("getPlatformIcon", () => {
     expect(getPlatformIcon("Xbox Series X|S")).toBe(BsXbox);
   });
 
-  it("returns SiNintendo for 'Nintendo Switch'", () => {
-    expect(getPlatformIcon("Nintendo Switch")).toBe(SiNintendo);
+  it("returns BsNintendoSwitch for 'Nintendo Switch'", () => {
+    expect(getPlatformIcon("Nintendo Switch")).toBe(BsNintendoSwitch);
   });
 
-  it("returns SiNintendo for 'Wii'", () => {
-    expect(getPlatformIcon("Wii")).toBe(SiNintendo);
+  it("returns BsNintendoSwitch for 'Wii'", () => {
+    expect(getPlatformIcon("Wii")).toBe(BsNintendoSwitch);
   });
 
   it("returns TbBrandWindows for 'PC (Microsoft Windows)'", () => {

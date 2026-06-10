@@ -1,12 +1,6 @@
 import type { IconType } from "react-icons";
-import { BsXbox } from "react-icons/bs";
-import {
-  SiApple,
-  SiLinux,
-  SiNintendo,
-  SiPlaystation,
-  SiSteam,
-} from "react-icons/si";
+import { BsNintendoSwitch, BsXbox } from "react-icons/bs";
+import { SiApple, SiLinux, SiPlaystation, SiSteam } from "react-icons/si";
 import { TbBrandWindows, TbDeviceGamepad2 } from "react-icons/tb";
 
 import type { BadgeProps } from "@/shared/ui/badge";
@@ -87,7 +81,7 @@ export function getPlatformIcon(platformName: string): IconType {
     return BsXbox;
   }
   if (isNintendo(lowerName)) {
-    return SiNintendo;
+    return BsNintendoSwitch;
   }
   if (isMobile(lowerName)) {
     return TbDeviceGamepad2;
