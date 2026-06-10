@@ -65,7 +65,7 @@ Then, only if the diff warrants it, ask:
 
 Build the message:
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body, wrapped at ~100 cols, blank line above>
