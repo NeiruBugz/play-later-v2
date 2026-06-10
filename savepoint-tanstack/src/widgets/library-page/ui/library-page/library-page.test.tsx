@@ -85,6 +85,7 @@ const buildItem = (overrides: {
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusIsManual: false,
   game: {
     id: `game-${overrides.id}`,
     igdbId: 1,

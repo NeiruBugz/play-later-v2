@@ -65,6 +65,7 @@ const buildEntry = (overrides: Partial<LibraryItem> = {}): LibraryItem => ({
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusIsManual: false,
   rating: null,
   ...overrides,
 });

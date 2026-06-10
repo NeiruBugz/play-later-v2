@@ -22,6 +22,7 @@ function makeEntry(): JournalEntry {
     createdAt: new Date("2024-01-15T12:00:00Z"),
     updatedAt: new Date("2024-01-15T12:00:00Z"),
     publishedAt: null,
+    playthroughId: null,
   };
 }
 

@@ -42,6 +42,7 @@ const buildEntry = (): LibraryItemWithGame => ({
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusIsManual: false,
   game: {
     id: "game-1",
     igdbId: 1,

@@ -123,7 +123,9 @@ model LibraryItem {
   completedAt     DateTime?
   hasBeenPlayed   Boolean           @default(false)
   rating          Int?
+  statusIsManual  Boolean           @default(false)
   JournalEntry    JournalEntry[]
+  playthroughs    Playthrough[]
 
   @@index([userId, status])
   @@index([userId, platform])
@@ -161,10 +163,12 @@ model JournalEntry {
   userId        String
   gameId        String?
   libraryItemId Int?
+  playthroughId String?
 
   user        user         @relation(fields: [userId], references: [id], onDelete: Cascade)
   game        Game?        @relation(fields: [gameId], references: [id], onDelete: Cascade)
   libraryItem LibraryItem? @relation(fields: [libraryItemId], references: [id], onDelete: SetNull)
+  playthrough Playthrough? @relation(fields: [playthroughId], references: [id], onDelete: SetNull)
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -172,6 +176,29 @@ model JournalEntry {
 
   @@index([userId, createdAt])
   @@index([gameId])
+  @@index([libraryItemId])
+  @@index([playthroughId])
+}
+
+model Playthrough {
+  id              String            @id @default(cuid())
+  libraryItemId   Int
+  libraryItem     LibraryItem       @relation(fields: [libraryItemId], references: [id], onDelete: Cascade)
+  ordinal         Int
+  kind            PlaythroughKind   @default(REPLAY)
+  status          PlaythroughStatus @default(PLAYING)
+  platform        String?
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  playtimeMinutes Int               @default(0)
+  rating          Int?
+  completion      String?
+  notes           String?           @db.Text
+  journalEntries  JournalEntry[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([libraryItemId, ordinal])
   @@index([libraryItemId])
 }
 
@@ -251,6 +278,17 @@ enum IgdbMatchStatus {
   MATCHED
   UNMATCHED
   IGNORED
+}
+
+enum PlaythroughKind {
+  FIRST
+  REPLAY
+}
+
+enum PlaythroughStatus {
+  PLAYING
+  FINISHED
+  ABANDONED
 }
 
 // ----- Game Metadata Models ------//

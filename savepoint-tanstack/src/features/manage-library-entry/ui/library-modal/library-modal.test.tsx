@@ -71,6 +71,7 @@ const STUB_ENTRY: LibraryItemWithGame = {
   statusChangedAt: null,
   acquisitionType: "DIGITAL",
   hasBeenPlayed: true,
+  statusIsManual: false,
   game: {
     id: "game-xyz",
     igdbId: 1234,

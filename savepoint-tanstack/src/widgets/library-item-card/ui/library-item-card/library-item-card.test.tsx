@@ -76,6 +76,7 @@ const buildItem = (
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusIsManual: false,
   ...overrides,
   game: {
     id: "game-1",

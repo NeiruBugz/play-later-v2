@@ -87,6 +87,7 @@ const buildLibraryEntry = (): LibraryItem => ({
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusIsManual: false,
   rating: null,
 });
 
