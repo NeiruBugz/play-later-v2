@@ -1,6 +1,7 @@
 ---
 name: aws-infra
 description: Use when working on AWS infrastructure (ECS Fargate, RDS, S3, ALB, VPC), Terraform configurations, Docker Compose local dev setup, LocalStack S3 testing, or GitHub Actions CI/CD pipelines in the SavePoint application.
+model: sonnet
 skills:
   - terraform-conventions
 ---

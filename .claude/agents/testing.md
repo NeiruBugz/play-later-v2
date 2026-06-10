@@ -1,6 +1,7 @@
 ---
 name: testing
 description: Use when writing, reviewing, or debugging unit tests, integration tests, component tests, or E2E tests in the SavePoint application. Covers Vitest, Playwright, MSW, and React Testing Library.
+model: sonnet
 skills:
   - tdd
 ---

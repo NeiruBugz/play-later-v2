@@ -23,6 +23,24 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/typecheck.sh",
+            "timeout": 120,
+            "statusMessage": "Typechecking..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/test-gate.sh",
+            "timeout": 180,
+            "statusMessage": "Running affected unit tests..."
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {

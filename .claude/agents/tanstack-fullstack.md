@@ -1,6 +1,7 @@
 ---
 name: tanstack-fullstack
-description: Use when working in the savepoint-tanstack/ app (the SavePoint app). Covers TanStack Start v1 (full-stack framework), TanStack Router file-based routing, route loaders, createServerFn server functions, Web Request/Response handler mounting (e.g. Better Auth catch-all), Vite + Vitest configuration tailored to TanStack Start, and the C2 DAL pattern (server functions + thin lib/queries/* + throw-on-error AppError taxonomy, no Result wrappers).
+description: Server/framework/data layer of the SavePoint app (savepoint-tanstack/). Use for TanStack Start v1, TanStack Router file-based routing, route loaders, createServerFn server functions, Web Request/Response handler mounting (e.g. Better Auth catch-all), Vite/Vitest config, and the C2 DAL pattern (server functions + thin lib/queries/* + throw-on-error AppError taxonomy, no Result wrappers). For presentational components, styling, and client-side UI state, use `react-frontend` instead.
+model: sonnet
 skills: []
 ---
 

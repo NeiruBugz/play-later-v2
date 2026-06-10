@@ -1,6 +1,7 @@
 ---
 name: prisma-database
 description: Use when working on database schema design, Prisma migrations, repository layer code, query optimization, or data model changes in the SavePoint application.
+model: sonnet
 skills: []
 ---
 
