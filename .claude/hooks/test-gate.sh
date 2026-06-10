@@ -6,7 +6,7 @@ set -uo pipefail
 # Postgres and run too slowly for a per-turn gate; they stay in CI.
 # Exit 0 = allow stop, Exit 2 = block stop and feed stderr back to Claude.
 
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-/Users/nailbadiullin/Developer/personal/play-later-v2}/savepoint-tanstack"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/savepoint-tanstack"
 
 input=$(cat)
 
