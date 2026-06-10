@@ -109,7 +109,7 @@ All commands run from `infra/envs/dev/` (or `prod/`).
 
 **Branch naming**: `feat/`, `fix/`, `chore/` prefixes (e.g., `feat/steam-import-pipeline`).
 
-**Conventional commits**: enforced via commitlint (`@commitlint/config-conventional`). Messages follow the format: `type(scope): description` (e.g., `feat(library): add bulk delete`).
+**Conventional commits**: enforced via commitlint (`@commitlint/config-conventional`). Messages follow the format: `type(scope): description` (e.g., `feat(library): add bulk delete`). Run `/cz` for a guided, diff-aware commit that infers type/scope and builds a commitlint-valid message.
 
 **Cross-layer changes**: Keep changes that span layers (e.g. `savepoint-tanstack` + `infra`) in a single branch. Do not split features into separate per-layer branches.
 
