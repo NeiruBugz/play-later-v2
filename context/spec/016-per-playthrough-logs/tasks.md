@@ -63,15 +63,15 @@ lost); the DB has the full shape and the pure status/aggregate logic is in place
 **User-visible value:** game detail shows the spine timeline of (backfilled) runs with the
 aggregate band, or the empty-state invite. Read-only — no add/edit/status changes yet.
 
-- [ ] RED — component tests for `entities/playthrough/ui` atoms: `RunMarker` (state→color), `RunStatusBadge` (label+icon), `PlatformPill` (wraps `PlatformBadgeItem`). **[Agent: testing]**
-- [ ] RED — component test `playthroughs-panel.test.tsx`: empty state (faded marker, "No playthroughs yet", "Log your first playthrough"); populated (aggregate band figures, timeline newest-first, per-run header/meta/notes). **[Agent: testing]**
-- [ ] GREEN — build `entities/playthrough/ui/{run-marker,run-status-badge,platform-pill}/` (one-folder-per-component; `RunMarker` = inline SVG diamond tinted via `--status-*` / currentColor). **[Agent: react-frontend]**
-- [ ] GREEN — extend `entities/game/api/get-game-details.server.ts`: include `playthroughs` (ordinal desc, journal entries included); **change `playtimeTotalMinutes` source to `Σ playthroughs.playtimeMinutes`**; add `derivedStatus`, `statusIsManual`, `hasBeenPlayed` to `GameDetails`. Anonymous → `playthroughs: []`. **[Agent: tanstack-fullstack]**
-- [ ] RED→GREEN — update `get-game-details` integration test for the new fields + playtime-source change. **[Agent: testing]**
-- [ ] GREEN — build `widgets/game-detail/ui/playthroughs-panel/` (AggregateBand + timeline) and `widgets/game-detail/ui/playthrough-timeline/` (spine: `PlaythroughNode` with RunHeader/RunMeta/notes + trailing non-functional `AddPlaythroughNode`). **[Agent: react-frontend]**
-- [ ] GREEN — mount `PlaythroughsPanel` in the bento left column in place of `YourRecordPanel`; delete `your-record-panel/` and migrate its still-relevant test assertions. **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — a backfilled game shows its run on the timeline + correct aggregate hours; a never-played game shows the empty state. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate (incl. `test:integration`). **[Agent: tanstack-fullstack]**
+- [x] RED — component tests for `entities/playthrough/ui` atoms: `RunMarker` (state→color), `RunStatusBadge` (label+icon), `PlatformPill` (wraps `PlatformBadgeItem`). **[Agent: testing]**
+- [x] RED — component test `playthroughs-panel.test.tsx`: empty state (faded marker, "No playthroughs yet", "Log your first playthrough"); populated (aggregate band figures, timeline newest-first, per-run header/meta/notes). **[Agent: testing]**
+- [x] GREEN — build `entities/playthrough/ui/{run-marker,run-status-badge,platform-pill}/` (one-folder-per-component; `RunMarker` = inline SVG diamond tinted via `--status-*` / currentColor). **[Agent: react-frontend]**
+- [x] GREEN — extend `entities/game/api/get-game-details.server.ts`: include `playthroughs` (ordinal desc, journal entries included); **change `playtimeTotalMinutes` source to `Σ playthroughs.playtimeMinutes`**; add `derivedStatus`, `statusIsManual`, `hasBeenPlayed` to `GameDetails`. Anonymous → `playthroughs: []`. **[Agent: tanstack-fullstack]**
+- [x] RED→GREEN — update `get-game-details` integration test for the new fields + playtime-source change. **[Agent: testing]**
+- [x] GREEN — build `widgets/game-detail/ui/playthroughs-panel/` (AggregateBand + timeline) and `widgets/game-detail/ui/playthrough-timeline/` (spine: `PlaythroughNode` with RunHeader/RunMeta/notes + trailing non-functional `AddPlaythroughNode`). **[Agent: react-frontend]**
+- [x] GREEN — mount `PlaythroughsPanel` in the bento left column in place of `YourRecordPanel`; delete `your-record-panel/` and migrate its still-relevant test assertions. **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** game-detail SSR 500s because IGDB/Twitch OAuth is network-unreachable in this sandbox (fails upstream of playthrough code), and the Chrome extension is disconnected. Verified instead via green component + integration + route tests. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate: format/lint/typecheck clean; unit + integration green in isolation (full-suite failures were environmental DB-setup timeouts, not regressions). **[Agent: tanstack-fullstack]**
 
 ---
 

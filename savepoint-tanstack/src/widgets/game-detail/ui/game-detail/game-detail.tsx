@@ -13,10 +13,10 @@ import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
 import { JournalPanel } from "../journal-panel";
 import { LibraryStatusSwitcher } from "../library-status-switcher";
+import { PlaythroughsPanel } from "../playthroughs-panel";
 import { RelatedPanel } from "../related-panel";
 import { ScreenshotsPanel } from "../screenshots-panel";
 import { ThemesTagsPanel } from "../themes-tags-panel";
-import { YourRecordPanel } from "../your-record-panel";
 import type { GameDetailProps } from "./game-detail.type";
 
 export function GameDetail({
@@ -30,8 +30,7 @@ export function GameDetail({
     igdbDetails,
     libraryEntry,
     journalTeaser,
-    journalCount,
-    playtimeTotalMinutes,
+    playthroughs = [],
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
@@ -201,12 +200,12 @@ export function GameDetail({
         >
           {showPersonalPanels ? (
             <Card variant="flat" className="gap-md p-xl flex flex-col">
-              <YourRecordPanel
-                itemId={libraryEntry?.id ?? null}
-                rating={libraryEntry?.rating ?? null}
-                playtimeTotalMinutes={playtimeTotalMinutes}
-                journalCount={journalCount}
-                gameTitle={game.title}
+              <PlaythroughsPanel
+                libraryItemId={String(libraryEntry?.id ?? "")}
+                playthroughs={playthroughs}
+                framing="journey"
+                onAddPlaythrough={() => {}}
+                onEditPlaythrough={() => {}}
                 onLogSession={() => setComposeOpen(true)}
               />
             </Card>

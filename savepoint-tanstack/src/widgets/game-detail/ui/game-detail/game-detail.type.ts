@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
@@ -27,6 +28,8 @@ export type GameDetailData = {
   playtimeSessionCount: number;
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
+  /** Playthroughs for the viewer's library entry, newest-first. */
+  playthroughs?: PlaythroughWithEntries[];
 };
 
 export type GameDetailProps = {

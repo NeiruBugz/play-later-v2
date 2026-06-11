@@ -78,6 +78,10 @@ export default tseslint.config(
       "src/features/command-palette/ui/command-palette/command-palette.test.tsx",
       "src/features/command-palette/ui/game-result-item/game-result-item.test.tsx",
       "src/features/command-palette/ui/palette-navigation-group/palette-navigation-group.test.tsx",
+      // RunStatusBadge test queries the Lucide SVG icon via document.querySelector —
+      // there is no accessible role/name on a bare <svg aria-hidden>; direct access
+      // is the only viable approach here.
+      "src/entities/playthrough/ui/run-status-badge/run-status-badge.test.tsx",
     ],
     rules: {
       "testing-library/no-node-access": "off",

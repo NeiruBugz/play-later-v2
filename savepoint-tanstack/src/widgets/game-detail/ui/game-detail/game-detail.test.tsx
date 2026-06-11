@@ -116,7 +116,6 @@ const elements = {
   queryAddToLibrary: () =>
     screen.queryByRole("button", { name: "Add to library" }),
   queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
-  queryRatingSliders: () => screen.queryAllByRole("slider"),
   queryMoreMenuTrigger: () =>
     screen.queryByRole("button", { name: "More library actions" }),
   queryAllTablists: () => screen.queryAllByRole("tablist"),
@@ -140,7 +139,7 @@ const elements = {
   queryLegacyCatalogCard: () =>
     screen.queryByTestId("game-detail-catalog-card"),
   queryEyebrow: () => screen.queryByLabelText("Release metadata"),
-  queryYourRecord: () => screen.queryByTestId("your-record-panel"),
+  queryYourRecord: () => screen.queryByTestId("playthroughs-panel"),
   queryThemesLabel: () => screen.queryByText("// THEMES"),
   queryEmDash: () => screen.queryByText("—"),
   queryScreenshotsRegion: () =>
@@ -275,8 +274,7 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders exactly one rating slider (single-sourced in Your Record), overflow menu, and Journal panel", () => {
-      expect(elements.queryRatingSliders()).toHaveLength(1);
+    it("renders the overflow menu and Journal panel", () => {
       expect(elements.queryMoreMenuTrigger()).not.toBeNull();
       expect(elements.queryJournalHeading()).not.toBeNull();
     });
@@ -759,7 +757,6 @@ describe("GameDetail", () => {
     it("does not preserve the previous game's library status across navigation", () => {
       expect(elements.queryStatusPill()).toBeNull();
       expect(elements.queryAddToLibrary()).not.toBeNull();
-      expect(elements.queryRatingSliders()).toHaveLength(0);
     });
   });
 });

@@ -11,5 +11,5 @@ export type RunStatusEntry = {
 export const RUN_STATUS: Record<PlaythroughStatus, RunStatusEntry> = {
   PLAYING: { label: "Playing", icon: Gamepad2, token: "playing" },
   FINISHED: { label: "Finished", icon: CheckCircle, token: "played" },
-  ABANDONED: { label: "Abandoned", icon: Archive, token: "abandoned" },
+  ABANDONED: { label: "Abandoned", icon: Archive, token: "shelf" },
 };
