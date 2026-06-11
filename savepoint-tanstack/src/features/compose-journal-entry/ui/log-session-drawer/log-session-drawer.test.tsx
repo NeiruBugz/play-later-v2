@@ -389,6 +389,30 @@ describe("LogSessionDrawer", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Bug #1 — blank hours must omit playedMinutes (not send 0 which fails .positive())
+  // -------------------------------------------------------------------------
+
+  describe("given the user enters a thought but leaves hours blank, then submits", () => {
+    beforeEach(async () => {
+      render(<LogSessionDrawer {...baseProps} />);
+      await actions.typeThoughts("Just a thought");
+      // Hours field is intentionally left blank
+      await actions.submit();
+    });
+
+    it("calls createJournalEntryFn with playedMinutes undefined (not 0)", () => {
+      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            content: "Just a thought",
+            playedMinutes: undefined,
+          }),
+        })
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Success path: closes drawer and invalidates router
   // -------------------------------------------------------------------------
 

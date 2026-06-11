@@ -1,6 +1,6 @@
-import type { JournalTimelineEntry } from "@/entities/journal-entry/model/types";
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
 
+import type { JournalEntry } from "../../../../../shared/lib/prisma/client.ts";
 import type { JournalFeedProps } from "./journal-feed.type";
 
 const KIND_LABEL: Record<string, string> = {
@@ -9,7 +9,7 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 type FlatEntry = {
-  entry: JournalTimelineEntry;
+  entry: JournalEntry;
   runLabel: string | null;
 };
 
@@ -28,16 +28,11 @@ function formatHours(minutes: number | null | undefined): string | null {
 
 function flattenEntries(
   playthroughs: PlaythroughWithEntries[],
-  legacyEntries: JournalTimelineEntry[]
+  legacyEntries: JournalEntry[]
 ): FlatEntry[] {
-  const runById = new Map<string, PlaythroughWithEntries>();
-  for (const pt of playthroughs) {
-    runById.set(pt.id, pt);
-  }
-
   const fromRuns: FlatEntry[] = playthroughs.flatMap((pt) =>
     pt.journalEntries.map((entry) => ({
-      entry: entry as JournalTimelineEntry,
+      entry,
       runLabel: KIND_LABEL[pt.kind] ?? null,
     }))
   );

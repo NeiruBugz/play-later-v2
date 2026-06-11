@@ -111,6 +111,7 @@ const buildView = (
     derivedStatus: "SHELF" as const,
     statusIsManual: false,
     hasBeenPlayed: false,
+    unattachedJournalEntries: [],
   },
   viewerUserId: null,
   ...overrides,

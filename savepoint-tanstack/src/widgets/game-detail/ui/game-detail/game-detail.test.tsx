@@ -1,10 +1,12 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
   Game,
+  JournalEntry,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client";
 import { GameDetail } from "./game-detail";
@@ -783,6 +785,101 @@ describe("GameDetail", () => {
     it("does not preserve the previous game's library status across navigation", () => {
       expect(elements.queryStatusPill()).toBeNull();
       expect(elements.queryAddToLibrary()).not.toBeNull();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RED: unattachedJournalEntries wiring (spec 016 §2.7 / §2.10)
+  // ---------------------------------------------------------------------------
+  // GameDetail must pass data.unattachedJournalEntries as legacyEntries to
+  // JournalFeed so that detached / legacy entries appear in the feed when the
+  // game has runs. The test fails (RED) until GameDetailData carries the field
+  // and game-detail.tsx wires it through.
+  // ---------------------------------------------------------------------------
+
+  describe("given a game with runs and unattached journal entries (spec 016 §2.7 / §2.10)", () => {
+    const legacyEntry: JournalEntry = {
+      id: "entry-legacy-gd-001",
+      kind: "QUICK",
+      title: null,
+      content: "Old note before runs existed",
+      playedMinutes: null,
+      tags: [],
+      mood: null,
+      playSession: null,
+      visibility: "PRIVATE",
+      userId: "user-1",
+      gameId: "game-1",
+      libraryItemId: 42,
+      playthroughId: null,
+      createdAt: new Date("2023-05-01T10:00:00Z"),
+      updatedAt: new Date("2023-05-01T10:00:00Z"),
+      publishedAt: null,
+    };
+
+    const runEntry: JournalEntry = {
+      id: "entry-run-gd-001",
+      kind: "QUICK",
+      title: null,
+      content: "First run note",
+      playedMinutes: 60,
+      tags: [],
+      mood: null,
+      playSession: null,
+      visibility: "PRIVATE",
+      userId: "user-1",
+      gameId: "game-1",
+      libraryItemId: 42,
+      playthroughId: "pt-gd-001",
+      createdAt: new Date("2024-01-10T10:00:00Z"),
+      updatedAt: new Date("2024-01-10T10:00:00Z"),
+      publishedAt: null,
+    };
+
+    const firstRun: PlaythroughWithEntries = {
+      id: "pt-gd-001",
+      ordinal: 1,
+      kind: "FIRST",
+      status: "FINISHED",
+      platform: null,
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 60,
+      rating: null,
+      completion: null,
+      notes: null,
+      journalEntries: [runEntry],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    };
+
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={{
+            ...buildData(buildLibraryEntry()),
+            playthroughs: [firstRun],
+            unattachedJournalEntries: [legacyEntry],
+          }}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("renders the legacy entry content in the journal feed", () => {
+      expect(screen.queryByText("Old note before runs existed")).not.toBeNull();
+    });
+
+    it("renders the legacy entry with no run label inside the journal feed", () => {
+      // Scope to the JournalFeed section to avoid matching "First playthrough"
+      // rendered elsewhere in the widget (e.g. PlaythroughTimeline).
+      const feed = screen.getByRole("region", { name: "Journal feed" });
+      // The run entry carries a "First playthrough" label; the legacy entry
+      // (playthroughId: null) must NOT produce a second one.
+      const labelsInFeed = within(feed).queryAllByText("First playthrough");
+      expect(labelsInFeed).toHaveLength(1);
     });
   });
 });

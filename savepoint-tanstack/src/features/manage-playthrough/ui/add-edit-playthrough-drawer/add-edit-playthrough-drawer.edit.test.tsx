@@ -32,6 +32,10 @@ vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
   updatePlaythroughFn: vi.fn(),
 }));
 
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
 const elements = {
   getTitle: () => screen.getByRole("heading", { name: "Edit playthrough" }),
   queryAddTitle: () =>
@@ -39,6 +43,7 @@ const elements = {
   getSubmitButton: () => screen.getByRole("button", { name: "Save changes" }),
   getNotesInput: () => screen.getByLabelText("Notes"),
   getHoursInput: () => screen.getByLabelText("Hours"),
+  getStatusControl: () => screen.getByRole("combobox", { name: "Status" }),
 };
 
 const actions = {
@@ -46,6 +51,10 @@ const actions = {
     const input = elements.getNotesInput();
     await userEvent.clear(input);
     await userEvent.type(input, value);
+  },
+  setStatus: async (label: string) => {
+    await userEvent.click(elements.getStatusControl());
+    await userEvent.click(screen.getByRole("option", { name: label }));
   },
   submit: () => userEvent.click(elements.getSubmitButton()),
 };
@@ -63,6 +72,11 @@ const prefillValues = {
   rating: null,
   completion: "Story",
   notes: "Original notes",
+};
+
+const prefillWithFinishedAt = {
+  ...prefillValues,
+  finishedAt: new Date("2024-03-01"),
 };
 
 const editModeProps = {
@@ -143,6 +157,43 @@ describe("AddEditPlaythroughDrawer — edit mode", () => {
           expect.objectContaining({
             data: expect.objectContaining({
               notes: "Edited notes",
+            }),
+          })
+        );
+      });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Bug #3 — editing a FINISHED run to "Playing" must clear finishedAt so the
+  // schema refine !(status==="PLAYING" && finishedAt != null) doesn't block Save
+  // -------------------------------------------------------------------------
+
+  describe("given a FINISHED run with finishedAt set, when status is changed to Playing and submitted", () => {
+    beforeEach(async () => {
+      render(
+        <AddEditPlaythroughDrawer
+          open={true}
+          mode="edit"
+          libraryItemId={42}
+          existingPlaythroughCount={1}
+          playthroughId={EXISTING_RUN_ID}
+          playthrough={prefillWithFinishedAt}
+          onOpenChange={vi.fn()}
+        />
+      );
+      await actions.setStatus("Playing");
+      await actions.submit();
+    });
+
+    it("calls updatePlaythroughFn with finishedAt null (not the prefilled date)", async () => {
+      await waitFor(() => {
+        expect(vi.mocked(updatePlaythroughFn)).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              id: EXISTING_RUN_ID,
+              status: "PLAYING",
+              finishedAt: null,
             }),
           })
         );

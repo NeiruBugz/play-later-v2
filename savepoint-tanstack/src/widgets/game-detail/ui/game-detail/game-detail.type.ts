@@ -42,6 +42,15 @@ export type GameDetailData = {
    * and the derived status should NOT overwrite it (spec 016 §2.9).
    */
   statusIsManual?: boolean;
+  /**
+   * Journal entries with no associated playthrough (playthroughId = null).
+   * Covers spec 016 §2.7 (entries detached when a run is deleted) and §2.10
+   * (legacy pre-spec entries created before playthroughs existed).
+   * Only populated when the game has ≥1 run; [] otherwise (the data layer
+   * already gates this to match the JournalFeed §2.11 visibility rule).
+   * Passed as `legacyEntries` to JournalFeed — rendered with no run label.
+   */
+  unattachedJournalEntries?: JournalEntry[];
 };
 
 export type GameDetailProps = {

@@ -40,6 +40,20 @@ export interface GameDetails {
   derivedStatus: LibraryItemStatus;
   statusIsManual: boolean;
   hasBeenPlayed: boolean;
+  /**
+   * Journal entries for this game with no associated playthrough (playthroughId = null).
+   * Covers two cases from spec 016:
+   *   §2.7  — entries detached when a run is deleted.
+   *   §2.10 — legacy pre-spec entries created before playthroughs existed.
+   *
+   * Only populated when the user is authenticated AND the game has at least one run.
+   * Per §2.11 the JournalFeed is hidden when there are no runs, so we gate the
+   * fetch here to keep the data-layer contract consistent with the UI invariant.
+   * Empty ([]) for anonymous viewers, games with no library entry, or games with no runs.
+   *
+   * NOTE for react-frontend agent: pass this field as `legacyEntries` to `JournalFeed`.
+   */
+  unattachedJournalEntries: JournalEntry[];
 }
 
 export async function getGameDetails(params: {
@@ -62,6 +76,7 @@ export async function getGameDetails(params: {
   let playtimeSessionCount = 0;
   let recentSessionMinutes: number[] = [];
   let playthroughs: PlaythroughWithEntries[] = [];
+  let unattachedJournalEntries: JournalEntry[] = [];
 
   if (userId) {
     // Step 1: fetch library entry + journal aggregates in parallel.
@@ -115,6 +130,17 @@ export async function getGameDetails(params: {
       (sum, p) => sum + (p.playtimeMinutes ?? 0),
       0
     );
+
+    // Step 3: fetch unattached (null-playthroughId) entries only when at least
+    // one run exists. Per §2.11 the JournalFeed is hidden when there are no runs,
+    // so fetching them for a no-run game is wasted work and would mislead callers
+    // into thinking the feed should show something.
+    if (playthroughs.length > 0) {
+      unattachedJournalEntries = await prisma.journalEntry.findMany({
+        where: { userId, gameId: game.id, playthroughId: null },
+        orderBy: { createdAt: "desc" },
+      });
+    }
   }
 
   const derivedStatus = deriveLibraryStatus(
@@ -137,5 +163,6 @@ export async function getGameDetails(params: {
     derivedStatus,
     statusIsManual,
     hasBeenPlayed,
+    unattachedJournalEntries,
   };
 }

@@ -54,7 +54,7 @@ export function LogSessionDrawer({
       const playedMinutes =
         Number.isFinite(parsedHours) && parsedHours > 0
           ? Math.round(parsedHours * 60)
-          : 0;
+          : undefined;
 
       await createJournalEntryFn({
         data: {

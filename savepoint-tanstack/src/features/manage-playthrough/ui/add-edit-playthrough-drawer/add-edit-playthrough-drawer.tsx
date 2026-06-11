@@ -176,9 +176,11 @@ export function AddEditPlaythroughDrawer({
             <Label htmlFor="playthrough-status">Status</Label>
             <Select
               value={status}
-              onValueChange={(v) =>
-                setValue("status", v as PlaythroughFormValues["status"])
-              }
+              onValueChange={(v) => {
+                const next = v as PlaythroughFormValues["status"];
+                setValue("status", next);
+                if (next === "PLAYING") setValue("finishedAt", null);
+              }}
             >
               <SelectTrigger id="playthrough-status" aria-label="Status">
                 <SelectValue placeholder="Select status" />

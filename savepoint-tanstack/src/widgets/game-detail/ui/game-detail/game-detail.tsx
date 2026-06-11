@@ -42,6 +42,7 @@ export function GameDetail({
     playthroughs = [],
     derivedStatus,
     statusIsManual = false,
+    unattachedJournalEntries = [],
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
 
@@ -329,7 +330,10 @@ export function GameDetail({
           ) : null}
         </div>
 
-        <JournalFeed playthroughs={playthroughs} />
+        <JournalFeed
+          playthroughs={playthroughs}
+          legacyEntries={unattachedJournalEntries}
+        />
 
         {viewerUserId ? (
           <ComposeJournalEntryDialog
