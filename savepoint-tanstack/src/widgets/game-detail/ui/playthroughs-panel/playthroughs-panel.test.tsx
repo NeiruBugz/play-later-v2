@@ -6,6 +6,14 @@ import type { PlaythroughWithEntries } from "@/entities/playthrough";
 
 import { PlaythroughsPanel } from "./playthroughs-panel";
 
+vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
+  deletePlaythroughFn: vi.fn(),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useRouter: () => ({ invalidate: vi.fn() }),
+}));
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

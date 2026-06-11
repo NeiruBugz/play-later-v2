@@ -97,13 +97,13 @@ a right drawer; saving creates a run that appears at the top of the timeline and
 **User-visible value:** the per-run Edit button reopens the drawer pre-filled and saves changes;
 delete confirms and removes the run while keeping its journal entries (now unattached).
 
-- [ ] RED — unit + integration tests for `update-playthrough` (partial patch, ownership, status re-sync on state change) and `delete-playthrough` (ownership, status re-sync, journal entries `playthroughId`→null and survive). **[Agent: testing]**
-- [ ] RED — component test: Edit pre-fills "Edit playthrough" drawer; delete shows the detach-warning confirm. **[Agent: testing]**
-- [ ] GREEN — `entities/playthrough/api/{update-playthrough.server.ts,delete-playthrough.server.ts}` (two-step ownership; map Prisma constraint errors in the update query only; both call `syncLibraryStatusFromRuns`). **[Agent: tanstack-fullstack]**
-- [ ] GREEN — `features/manage-playthrough/api/{update-playthrough-fn.ts,delete-playthrough-fn.ts}`. **[Agent: tanstack-fullstack]**
-- [ ] GREEN — wire per-run Edit (drawer in edit mode) + delete confirm in `PlaythroughNode`. **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — edit a run's hours/rating (timeline + band update); delete a run and confirm its journal entries remain on the game. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate (incl. `test:integration`). **[Agent: tanstack-fullstack]**
+- [x] RED — unit + integration tests for `update-playthrough` (partial patch, ownership, status re-sync on state change) and `delete-playthrough` (ownership, status re-sync, journal entries `playthroughId`→null and survive). **[Agent: testing]**
+- [x] RED — component test: Edit pre-fills "Edit playthrough" drawer; delete shows the detach-warning confirm. **[Agent: testing]**
+- [x] GREEN — `entities/playthrough/api/{update-playthrough.server.ts,delete-playthrough.server.ts}` (two-step ownership; map Prisma constraint errors in the update query only; both call `syncLibraryStatusFromRuns`). **[Agent: tanstack-fullstack]**
+- [x] GREEN — `features/manage-playthrough/api/{update-playthrough-fn.ts,delete-playthrough-fn.ts}`. **[Agent: tanstack-fullstack]**
+- [x] GREEN — wire per-run Edit (drawer in edit mode) + delete confirm in `PlaythroughNode`. **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** IGDB-dependent game-detail unrenderable here + Chrome ext disconnected. Verified via green unit+integration+component tests. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate: format/lint/typecheck clean; targeted unit (185) + integration (67) green. **[Agent: tanstack-fullstack]**
 
 ---
 

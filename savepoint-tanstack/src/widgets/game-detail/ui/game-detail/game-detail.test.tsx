@@ -49,6 +49,14 @@ vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
   createPlaythroughFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
+  updatePlaythroughFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
+  deletePlaythroughFn: vi.fn(),
+}));
+
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
   igdbId: 1234,

@@ -46,6 +46,10 @@ vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
   createPlaythroughFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
+  updatePlaythroughFn: vi.fn(),
+}));
+
 const elements = {
   getDrawer: () => screen.getByRole("dialog"),
   queryDrawer: () => screen.queryByRole("dialog"),

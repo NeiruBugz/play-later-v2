@@ -4,6 +4,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 
 import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
+import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
 import {
   playthroughFormSchema,
   type PlaythroughFormValues,
@@ -67,6 +68,7 @@ export function AddEditPlaythroughDrawer({
   mode,
   libraryItemId,
   existingPlaythroughCount,
+  playthroughId,
   playthrough,
   onOpenChange,
 }: AddEditPlaythroughDrawerProps) {
@@ -87,20 +89,37 @@ export function AddEditPlaythroughDrawer({
 
   const onSubmit = async (values: PlaythroughFormValues) => {
     try {
-      await createPlaythroughFn({
-        data: {
-          libraryItemId,
-          status: values.status,
-          playtimeHours: values.playtimeHours,
-          notes: values.notes,
-          kind: values.kind,
-          platform: values.platform,
-          startedAt: values.startedAt,
-          finishedAt: values.finishedAt,
-          rating: values.rating,
-          completion: values.completion,
-        },
-      });
+      if (mode === "edit" && playthroughId) {
+        await updatePlaythroughFn({
+          data: {
+            id: playthroughId,
+            status: values.status,
+            playtimeHours: values.playtimeHours,
+            notes: values.notes,
+            kind: values.kind,
+            platform: values.platform,
+            startedAt: values.startedAt,
+            finishedAt: values.finishedAt,
+            rating: values.rating,
+            completion: values.completion,
+          },
+        });
+      } else {
+        await createPlaythroughFn({
+          data: {
+            libraryItemId,
+            status: values.status,
+            playtimeHours: values.playtimeHours,
+            notes: values.notes,
+            kind: values.kind,
+            platform: values.platform,
+            startedAt: values.startedAt,
+            finishedAt: values.finishedAt,
+            rating: values.rating,
+            completion: values.completion,
+          },
+        });
+      }
       await router.invalidate();
       onOpenChange(false);
     } catch (err: unknown) {
