@@ -57,6 +57,20 @@ vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
   deletePlaythroughFn: vi.fn(),
 }));
 
+vi.mock(
+  "@/features/manage-playthrough/api/set-library-status-manual-fn",
+  () => ({
+    setLibraryStatusManualFn: vi.fn(),
+  })
+);
+
+vi.mock(
+  "@/features/manage-playthrough/api/clear-library-status-manual-fn",
+  () => ({
+    clearLibraryStatusManualFn: vi.fn(),
+  })
+);
+
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
   igdbId: 1234,

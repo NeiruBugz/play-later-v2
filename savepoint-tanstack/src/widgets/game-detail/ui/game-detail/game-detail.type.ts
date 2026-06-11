@@ -7,6 +7,7 @@ import type {
   Game,
   JournalEntry,
   LibraryItem,
+  LibraryItemStatus,
 } from "../../../../../shared/lib/prisma/client.ts";
 
 export type GameDetailData = {
@@ -30,6 +31,17 @@ export type GameDetailData = {
   recentSessionMinutes: number[];
   /** Playthroughs for the viewer's library entry, newest-first. */
   playthroughs?: PlaythroughWithEntries[];
+  /**
+   * Status derived from the viewer's runs (spec 016 §2.8).
+   * Playing > any Finished/Abandoned → Played.
+   * Falls back to the entry's current status when no playthroughs exist.
+   */
+  derivedStatus?: LibraryItemStatus;
+  /**
+   * True when the viewer has pinned a library status manually via "Set manually"
+   * and the derived status should NOT overwrite it (spec 016 §2.9).
+   */
+  statusIsManual?: boolean;
 };
 
 export type GameDetailProps = {

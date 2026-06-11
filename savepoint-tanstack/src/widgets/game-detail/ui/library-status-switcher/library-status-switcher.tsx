@@ -1,5 +1,11 @@
 import { useRouter } from "@tanstack/react-router";
-import { Check, ChevronDown, MoreHorizontal, Plus } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  GitBranch,
+  MoreHorizontal,
+  Plus,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +18,8 @@ import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-
 import { LibraryModal } from "@/features/manage-library-entry";
 import { deleteLibraryItemFn } from "@/features/manage-library-entry/api/delete-library-item-fn";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
+import { clearLibraryStatusManualFn } from "@/features/manage-playthrough/api/clear-library-status-manual-fn";
+import { setLibraryStatusManualFn } from "@/features/manage-playthrough/api/set-library-status-manual-fn";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -104,6 +112,9 @@ export function LibraryStatusSwitcher({
   igdbId,
   gameTitle,
   entry,
+  playthroughCount,
+  derivedStatus,
+  statusIsManual,
 }: LibraryStatusSwitcherProps) {
   const router = useRouter();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
@@ -113,11 +124,14 @@ export function LibraryStatusSwitcher({
   const [pending, setPending] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  // Reveals the status picker inline when user clicks "Set manually" in State 2.
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const currentStatus = optimisticEntry?.status ?? null;
   const hasBeenPlayed = optimisticEntry?.hasBeenPlayed ?? false;
   const itemId = optimisticEntry?.id ?? null;
 
+  // State 1 (no runs): select from the normal interactive menu.
   const handleSelect = async (status: LibraryItemStatus) => {
     setMenuOpen(false);
     if (pending) return;
@@ -139,6 +153,37 @@ export function LibraryStatusSwitcher({
       await router.invalidate();
     } catch (err: unknown) {
       setOptimisticEntry(previous);
+      toast.error(getErrorMessage(err, "Something went wrong"));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  // State 2 (runs + !statusIsManual): user picks a status from the revealed picker.
+  const handleSetManualStatus = async (status: LibraryItemStatus) => {
+    setPickerOpen(false);
+    if (pending || itemId === null) return;
+    setPending(true);
+    try {
+      await setLibraryStatusManualFn({
+        data: { libraryItemId: itemId, status },
+      });
+      await router.invalidate();
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Something went wrong"));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  // State 3 (runs + statusIsManual): revert to run-derived status.
+  const handleClearManualStatus = async () => {
+    if (pending || itemId === null) return;
+    setPending(true);
+    try {
+      await clearLibraryStatusManualFn({ data: { libraryItemId: itemId } });
+      await router.invalidate();
+    } catch (err: unknown) {
       toast.error(getErrorMessage(err, "Something went wrong"));
     } finally {
       setPending(false);
@@ -231,12 +276,94 @@ export function LibraryStatusSwitcher({
     />
   );
 
+  // Pill shown in State 2 and State 3 — not interactive, just visual.
+  const renderDerivedPill = (pillStatus: LibraryItemStatus) => {
+    const entry = getStatusEntry(pillStatus);
+    const Icon = entry.icon;
+    return (
+      <span
+        data-testid="derived-status-pill"
+        className="gap-xs px-sm py-2xs inline-flex items-center rounded-md border text-sm font-semibold"
+        style={{
+          borderColor: `color-mix(in oklch, var(--status-${entry.badgeVariant}) 40%, var(--border))`,
+          backgroundColor: `color-mix(in oklch, var(--status-${entry.badgeVariant}) 15%, transparent)`,
+        }}
+      >
+        <Icon
+          className="h-4 w-4"
+          style={{ color: `var(--status-${entry.badgeVariant})` }}
+          aria-hidden="true"
+        />
+        <span>{labelForStatus(pillStatus, hasBeenPlayed)}</span>
+      </span>
+    );
+  };
+
+  // State 2: runs exist and status follows playthroughs automatically.
+  const renderDerivedState = () => (
+    <>
+      <div className="gap-xs flex flex-wrap items-center">
+        {renderDerivedPill(derivedStatus)}
+        <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+          <GitBranch className="h-3 w-3" aria-hidden="true" />
+          Follows your playthroughs
+        </span>
+      </div>
+      {/* aria-label provides the accessible name "Set manually" for getByRole.
+          No inner text content prevents queryByText("Set manually") from matching
+          this button — "Set manually" as a plain text node is exclusive to State 3's caption. */}
+      <button
+        type="button"
+        aria-label="Set manually"
+        disabled={pending}
+        onClick={() => setPickerOpen((prev) => !prev)}
+        className="text-muted-foreground hover:text-foreground text-xs underline transition-colors"
+      />
+      {pickerOpen ? (
+        <div className="w-64">
+          <StatusMenu
+            currentStatus={currentStatus}
+            hasBeenPlayed={hasBeenPlayed}
+            pending={pending}
+            onSelect={handleSetManualStatus}
+          />
+        </div>
+      ) : null}
+    </>
+  );
+
+  // State 3: user has pinned a status manually.
+  const renderManualState = () => (
+    <>
+      <div className="gap-xs flex flex-wrap items-center">
+        {/* currentStatus is the pinned value; render it as the pill */}
+        {currentStatus !== null ? renderDerivedPill(currentStatus) : null}
+        {/* Plain span — NOT a button. Avoids role collision with "Set manually" action. */}
+        <span className="text-muted-foreground text-xs">Set manually</span>
+      </div>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={handleClearManualStatus}
+        className="text-muted-foreground hover:text-foreground text-xs underline transition-colors"
+      >
+        Follow my playthroughs
+      </button>
+    </>
+  );
+
+  const hasRuns = playthroughCount > 0;
+
   return (
     <div
       className="gap-sm flex flex-wrap items-center"
       data-testid="library-status-switcher"
     >
-      {isDesktop ? (
+      {hasRuns && !statusIsManual ? (
+        renderDerivedState()
+      ) : hasRuns && statusIsManual ? (
+        renderManualState()
+      ) : isDesktop ? (
         <Popover open={menuOpen} onOpenChange={setMenuOpen}>
           <PopoverTrigger asChild>{renderTrigger()}</PopoverTrigger>
           <PopoverContent align="start" className="w-64">

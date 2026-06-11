@@ -128,12 +128,12 @@ run, and the entry shows both under its run and in a full-width feed below the p
 playthroughs" pill; "Set manually" pins a chosen status that holds across run changes; "Follow my
 playthroughs" reverts. Up Next reads "Replay" after a game's been played.
 
-- [ ] RED — integration test: a manual override **sticks** across a subsequent run create/update (status unchanged while `statusIsManual`); clear → recomputes from runs. **[Agent: testing]**
-- [ ] RED — component test `library-status-switcher.test.tsx` three states: no-runs interactive menu (with "Replay" when `hasBeenPlayed`); runs+derived read-only pill + "Set manually"; runs+manual pinned pill + "Follow my playthroughs". **[Agent: testing]**
-- [ ] GREEN — `entities/playthrough/api/{set-library-status-manual.server.ts,clear-library-status-manual.server.ts}` + `features/manage-playthrough/api/{set,clear}-library-status-manual-fn.ts`. **[Agent: tanstack-fullstack]**
-- [ ] GREEN — rewire `widgets/game-detail/ui/library-status-switcher/` to branch on `playthroughs.length` / `statusIsManual` using the loader fields; keep the no-runs path intact. **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — add a Playing run (pill flips to Playing, read-only); "Set manually"→Played sticks after editing the run; "Follow my playthroughs" restores derived. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate (incl. `test:integration`). **[Agent: tanstack-fullstack]**
+- [x] RED — integration test: a manual override **sticks** across a subsequent run create/update (status unchanged while `statusIsManual`); clear → recomputes from runs. **[Agent: testing]**
+- [x] RED — component test `library-status-switcher.test.tsx` three states: no-runs interactive menu (with "Replay" when `hasBeenPlayed`); runs+derived read-only pill + "Set manually"; runs+manual pinned pill + "Follow my playthroughs". **[Agent: testing]**
+- [x] GREEN — `entities/playthrough/api/{set-library-status-manual.server.ts,clear-library-status-manual.server.ts}` + `features/manage-playthrough/api/{set,clear}-library-status-manual-fn.ts`. **[Agent: tanstack-fullstack]**
+- [x] GREEN — rewire `widgets/game-detail/ui/library-status-switcher/` to branch on `playthroughs.length` / `statusIsManual` using the loader fields; keep the no-runs path intact. **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** IGDB-dependent game-detail unrenderable here + Chrome ext disconnected. Verified via green unit+integration+component tests. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate: format/lint/typecheck clean; targeted unit (230) + integration (31) green. **[Agent: tanstack-fullstack]**
 
 ---
 

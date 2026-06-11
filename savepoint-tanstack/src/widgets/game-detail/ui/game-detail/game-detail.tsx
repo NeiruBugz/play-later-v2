@@ -40,6 +40,8 @@ export function GameDetail({
     libraryEntry,
     journalTeaser,
     playthroughs = [],
+    derivedStatus,
+    statusIsManual = false,
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
 
@@ -221,6 +223,9 @@ export function GameDetail({
                 igdbId={game.igdbId}
                 gameTitle={game.title}
                 entry={libraryEntry}
+                playthroughCount={playthroughs.length}
+                derivedStatus={derivedStatus ?? libraryEntry?.status ?? "SHELF"}
+                statusIsManual={statusIsManual}
               />
             ) : null}
           </div>
