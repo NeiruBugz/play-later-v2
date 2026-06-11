@@ -45,6 +45,10 @@ vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
+  createPlaythroughFn: vi.fn(),
+}));
+
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
   igdbId: 1234,

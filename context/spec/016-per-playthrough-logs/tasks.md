@@ -80,15 +80,15 @@ aggregate band, or the empty-state invite. Read-only — no add/edit/status chan
 **User-visible value:** "New playthrough" / "Start a new playthrough" / empty-state button opens
 a right drawer; saving creates a run that appears at the top of the timeline and updates totals.
 
-- [ ] RED — unit test `create-playthrough.unit.test.ts` (mocked Prisma): next-ordinal assignment, second `FIRST`→`REPLAY` coercion, ownership `NotFoundError`/`UnauthorizedError`. **[Agent: testing]**
-- [ ] RED — integration test `test/integration/create-playthrough.integration.test.ts` (import the **worker**, foot-gun #8): create in a txn + `syncLibraryStatusFromRuns` flips library status (e.g. SHELF→PLAYING). **[Agent: testing]**
-- [ ] RED — component test `add-edit-playthrough-drawer.test.tsx`: fields render; Run-type defaults to Replay when a first run exists; Finished date disabled + "Still playing" while status=Playing; submit calls the fn. **[Agent: testing]**
-- [ ] GREEN — `entities/playthrough/api/{create-playthrough.server.ts,get-playthroughs.server.ts}` + shared `syncLibraryStatusFromRuns(tx, libraryItemId)` (recompute unless `statusIsManual`; always refresh `hasBeenPlayed`). **[Agent: tanstack-fullstack]**
-- [ ] GREEN — `features/manage-playthrough/`: zod `model/` schema, `api/create-playthrough-fn.ts` (+ `.worker.ts`), validate-twice + `requireUserId()` + `router.invalidate()`. **[Agent: tanstack-fullstack]**
-- [ ] GREEN — `features/manage-playthrough/ui/add-edit-playthrough-drawer/` (`Sheet side="right"`; `SegmentedControl` for Type/Platform/Status; date inputs; hours; completion; `RatingInput`; notes; preview chip). Animation gated on `prefers-reduced-motion`. **[Agent: react-frontend]**
-- [ ] GREEN — wire the panel/timeline "New playthrough" + `AddPlaythroughNode` + empty-state button to open the drawer (state lifted in `GameDetail`, mirroring `composeOpen`). **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — add a Replay; it appears top-of-timeline and the aggregate count/hours update without full reload. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate (incl. `test:integration`). **[Agent: tanstack-fullstack]**
+- [x] RED — unit test `create-playthrough.unit.test.ts` (mocked Prisma): next-ordinal assignment, second `FIRST`→`REPLAY` coercion, ownership `NotFoundError`/`UnauthorizedError`. **[Agent: testing]**
+- [x] RED — integration test `test/integration/create-playthrough.integration.test.ts` (import the **worker**, foot-gun #8): create in a txn + `syncLibraryStatusFromRuns` flips library status (e.g. SHELF→PLAYING). **[Agent: testing]**
+- [x] RED — component test `add-edit-playthrough-drawer.test.tsx`: fields render; Run-type defaults to Replay when a first run exists; Finished date disabled + "Still playing" while status=Playing; submit calls the fn. **[Agent: testing]**
+- [x] GREEN — `entities/playthrough/api/{create-playthrough.server.ts,get-playthroughs.server.ts}` + shared `syncLibraryStatusFromRuns(tx, libraryItemId)` (recompute unless `statusIsManual`; always refresh `hasBeenPlayed`). **[Agent: tanstack-fullstack]**
+- [x] GREEN — `features/manage-playthrough/`: zod `model/` schema, `api/create-playthrough-fn.ts` (+ `.worker.ts`), validate-twice + `requireUserId()` + `router.invalidate()`. **[Agent: tanstack-fullstack]**
+- [x] GREEN — `features/manage-playthrough/ui/add-edit-playthrough-drawer/` (`Sheet side="right"`; `SegmentedControl` for Type/Platform/Status; date inputs; hours; completion; `RatingInput`; notes; preview chip). Animation gated on `prefers-reduced-motion`. **[Agent: react-frontend]**
+- [x] GREEN — wire the panel/timeline "New playthrough" + `AddPlaythroughNode` + empty-state button to open the drawer (state lifted in `GameDetail`, mirroring `composeOpen`). **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** game-detail SSR 500s (IGDB/Twitch OAuth network-unreachable here, upstream of playthrough code) + Chrome extension disconnected. Verified via green unit+integration+component tests instead. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate: format/lint/typecheck clean; targeted unit (156) + integration (56) green. **[Agent: tanstack-fullstack]**
 
 ---
 

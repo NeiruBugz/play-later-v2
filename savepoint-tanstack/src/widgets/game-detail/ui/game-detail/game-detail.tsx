@@ -2,7 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { CriticScoreRing, GameCover } from "@/entities/game";
+import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
+import {
+  AddEditPlaythroughDrawer,
+  type PlaythroughFormValues,
+} from "@/features/manage-playthrough";
 import {
   buildCoverImageUrl,
   buildScreenshotUrl,
@@ -33,6 +38,30 @@ export function GameDetail({
     playthroughs = [],
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
+
+  type DrawerState =
+    | { open: false }
+    | { open: true; mode: "add" }
+    | { open: true; mode: "edit"; prefill: PlaythroughFormValues };
+
+  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false });
+
+  function mapPlaythroughToFormValues(
+    pt: PlaythroughWithEntries
+  ): PlaythroughFormValues {
+    return {
+      libraryItemId: pt.libraryItemId,
+      kind: pt.kind ?? undefined,
+      platform: pt.platform ?? null,
+      status: pt.status as PlaythroughFormValues["status"],
+      startedAt: pt.startedAt ?? null,
+      finishedAt: pt.finishedAt ?? null,
+      playtimeHours: pt.playtimeMinutes / 60,
+      rating: pt.rating ?? null,
+      completion: pt.completion ?? null,
+      notes: pt.notes ?? null,
+    };
+  }
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
   const releaseYear = game.releaseDate
@@ -204,8 +233,16 @@ export function GameDetail({
                 libraryItemId={String(libraryEntry?.id ?? "")}
                 playthroughs={playthroughs}
                 framing="journey"
-                onAddPlaythrough={() => {}}
-                onEditPlaythrough={() => {}}
+                onAddPlaythrough={() =>
+                  setDrawerState({ open: true, mode: "add" })
+                }
+                onEditPlaythrough={(pt) =>
+                  setDrawerState({
+                    open: true,
+                    mode: "edit",
+                    prefill: mapPlaythroughToFormValues(pt),
+                  })
+                }
                 onLogSession={() => setComposeOpen(true)}
               />
             </Card>
@@ -275,6 +312,23 @@ export function GameDetail({
             open={composeOpen}
             onOpenChange={setComposeOpen}
             defaultGameId={game.id}
+          />
+        ) : null}
+
+        {showPersonalPanels && libraryEntry ? (
+          <AddEditPlaythroughDrawer
+            open={drawerState.open}
+            mode={drawerState.open ? drawerState.mode : "add"}
+            libraryItemId={libraryEntry.id}
+            existingPlaythroughCount={playthroughs.length}
+            playthrough={
+              drawerState.open && drawerState.mode === "edit"
+                ? drawerState.prefill
+                : undefined
+            }
+            onOpenChange={(open) => {
+              if (!open) setDrawerState({ open: false });
+            }}
           />
         ) : null}
       </div>
