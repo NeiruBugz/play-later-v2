@@ -3,7 +3,10 @@ import { useState } from "react";
 
 import { CriticScoreRing, GameCover } from "@/entities/game";
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
-import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
+import {
+  ComposeJournalEntryDialog,
+  LogSessionDrawer,
+} from "@/features/compose-journal-entry";
 import {
   AddEditPlaythroughDrawer,
   type PlaythroughFormValues,
@@ -16,6 +19,7 @@ import { Card } from "@/shared/ui/card";
 
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
+import { JournalFeed } from "../journal-feed";
 import { JournalPanel } from "../journal-panel";
 import { LibraryStatusSwitcher } from "../library-status-switcher";
 import { PlaythroughsPanel } from "../playthroughs-panel";
@@ -45,6 +49,14 @@ export function GameDetail({
     | { open: true; mode: "edit"; prefill: PlaythroughFormValues };
 
   const [drawerState, setDrawerState] = useState<DrawerState>({ open: false });
+
+  type LogSessionState =
+    | { open: false }
+    | { open: true; preselectedPlaythroughId: string };
+
+  const [logSessionState, setLogSessionState] = useState<LogSessionState>({
+    open: false,
+  });
 
   function mapPlaythroughToFormValues(
     pt: PlaythroughWithEntries
@@ -243,7 +255,12 @@ export function GameDetail({
                     prefill: mapPlaythroughToFormValues(pt),
                   })
                 }
-                onLogSession={() => setComposeOpen(true)}
+                onLogSession={(pt) =>
+                  setLogSessionState({
+                    open: true,
+                    preselectedPlaythroughId: pt.id,
+                  })
+                }
               />
             </Card>
           ) : null}
@@ -307,11 +324,28 @@ export function GameDetail({
           ) : null}
         </div>
 
+        <JournalFeed playthroughs={playthroughs} />
+
         {viewerUserId ? (
           <ComposeJournalEntryDialog
             open={composeOpen}
             onOpenChange={setComposeOpen}
             defaultGameId={game.id}
+          />
+        ) : null}
+
+        {showPersonalPanels &&
+        libraryEntry &&
+        logSessionState.open &&
+        playthroughs.length > 0 ? (
+          <LogSessionDrawer
+            open={logSessionState.open}
+            onOpenChange={(open) => {
+              if (!open) setLogSessionState({ open: false });
+            }}
+            playthroughs={playthroughs}
+            preselectedPlaythroughId={logSessionState.preselectedPlaythroughId}
+            gameId={game.id}
           />
         ) : null}
 

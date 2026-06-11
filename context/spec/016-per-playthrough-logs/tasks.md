@@ -112,13 +112,13 @@ delete confirms and removes the run while keeping its journal entries (now unatt
 **User-visible value:** "Log session" attaches an entry to a chosen run, adds its hours to that
 run, and the entry shows both under its run and in a full-width feed below the page.
 
-- [ ] RED — integration test (worker): `createJournalEntryFn` with `playthroughId` adds `playedMinutes` to that run's `playtimeMinutes` **and** sets the entry's `playthroughId` in one txn; rejects a run not owned by the same user/item. **[Agent: testing]**
-- [ ] RED — component tests: log-session run picker preselects the clicked run + switchable; thoughts optional ("playtime alone is fine"); `NestedJournal` lists entries (date · hours · italic); `JournalFeed` shows run label per entry and omits the label for legacy null-run entries; feed hidden when no runs. **[Agent: testing]**
-- [ ] GREEN — extend `compose-journal-entry`: input `playthroughId?: string` (optional, validate-twice); worker adds `hours*60` to the run in the same txn; `entities/journal-entry/model/types.ts` carries `playthroughId` + run label. **[Agent: tanstack-fullstack]**
-- [ ] GREEN — log-session drawer (run picker + date + hours + optional thoughts) reusing the composer; preselect from the clicked run. **[Agent: react-frontend]**
-- [ ] GREEN — `NestedJournal` under `PlaythroughNode` (`// JOURNAL · N` + Log-session button + entries) and a full-width run-aware `JournalFeed` mounted below the bento grid (hidden when no runs). **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — log a session on a run; its hours roll into the run + aggregate; the entry shows under the run and in the full-width feed with the right run label. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate (incl. `test:integration`). **[Agent: tanstack-fullstack]**
+- [x] RED — integration test (worker): `createJournalEntryFn` with `playthroughId` adds `playedMinutes` to that run's `playtimeMinutes` **and** sets the entry's `playthroughId` in one txn; rejects a run not owned by the same user/item. **[Agent: testing]**
+- [x] RED — component tests: log-session run picker preselects the clicked run + switchable; thoughts optional ("playtime alone is fine"); `NestedJournal` lists entries (date · hours · italic); `JournalFeed` shows run label per entry and omits the label for legacy null-run entries; feed hidden when no runs. **[Agent: testing]**
+- [x] GREEN — extend `compose-journal-entry`: input `playthroughId?: string` (optional, validate-twice); worker adds `hours*60` to the run in the same txn; `entities/journal-entry/model/types.ts` carries `playthroughId` + run label. **[Agent: tanstack-fullstack]**
+- [x] GREEN — log-session drawer (run picker + date + hours + optional thoughts) reusing the composer; preselect from the clicked run. **[Agent: react-frontend]**
+- [x] GREEN — `NestedJournal` under `PlaythroughNode` (`// JOURNAL · N` + Log-session button + entries) and a full-width run-aware `JournalFeed` mounted below the bento grid (hidden when no runs). **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** IGDB-dependent game-detail unrenderable here + Chrome ext disconnected. Verified via green unit+integration+component tests. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate: format/lint/typecheck clean; targeted unit (250) + integration (76) green. **[Agent: tanstack-fullstack]**
 
 ---
 

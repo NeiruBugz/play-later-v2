@@ -2,6 +2,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import type { JournalTimelineEntry } from "@/entities/journal-entry/model/types";
 import {
   PlatformPill,
   RunMarker,
@@ -13,6 +14,7 @@ import { Button } from "@/shared/ui/button";
 import { RatingInput } from "@/shared/ui/rating-input";
 
 import type { PlaythroughWithEntries } from "../../../../entities/playthrough/model/types";
+import { NestedJournal } from "./nested-journal";
 import type { PlaythroughTimelineProps } from "./playthrough-timeline.type";
 
 const KIND_LABEL: Record<string, string> = {
@@ -68,9 +70,11 @@ function DeleteConfirmDialog({
 function PlaythroughNode({
   playthrough,
   onEdit,
+  onLogSession,
 }: {
   playthrough: PlaythroughWithEntries;
   onEdit: () => void;
+  onLogSession: () => void;
 }) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -155,6 +159,12 @@ function PlaythroughNode({
               </button>
             )}
           </div>
+
+          <NestedJournal
+            playthroughId={playthrough.id}
+            entries={playthrough.journalEntries as JournalTimelineEntry[]}
+            onLogSession={onLogSession}
+          />
         </div>
       </div>
 
@@ -190,6 +200,7 @@ export function PlaythroughTimeline({
   playthroughs,
   onAddPlaythrough,
   onEditPlaythrough,
+  onLogSession,
 }: PlaythroughTimelineProps) {
   return (
     <div className="flex flex-col">
@@ -198,6 +209,7 @@ export function PlaythroughTimeline({
           key={pt.id}
           playthrough={pt}
           onEdit={() => onEditPlaythrough(pt)}
+          onLogSession={() => onLogSession(pt)}
         />
       ))}
       <AddPlaythroughNode onAdd={onAddPlaythrough} />

@@ -82,6 +82,10 @@ export default tseslint.config(
       // there is no accessible role/name on a bare <svg aria-hidden>; direct access
       // is the only viable approach here.
       "src/entities/playthrough/ui/run-status-badge/run-status-badge.test.tsx",
+      // Slice-5 (016) tests detect italic body text via closest("em") — bare <em>
+      // has no accessible role, so direct DOM traversal is the only viable approach.
+      "src/widgets/game-detail/ui/playthrough-timeline/nested-journal.test.tsx",
+      "src/widgets/game-detail/ui/journal-feed/journal-feed.test.tsx",
     ],
     rules: {
       "testing-library/no-node-access": "off",

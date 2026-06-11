@@ -4,6 +4,8 @@ export { AddToTrackInvite } from "./add-to-track-invite";
 export type { AddToTrackInviteProps } from "./add-to-track-invite";
 export { GameDetail } from "./game-detail";
 export type { GameDetailData, GameDetailProps } from "./game-detail";
+export { JournalFeed } from "./journal-feed";
+export type { JournalFeedProps } from "./journal-feed";
 export { JournalPanel } from "./journal-panel";
 export type { JournalPanelProps } from "./journal-panel";
 export { LibraryStatusSwitcher } from "./library-status-switcher";
