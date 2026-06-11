@@ -142,10 +142,10 @@ playthroughs" reverts. Up Next reads "Replay" after a game's been played.
 **User-visible value:** an "Add playthrough" action on each library card opens the same drawer
 over the library; saving updates the card (status / run count) without a full reload.
 
-- [ ] RED — component test: the library card exposes "Add playthrough"; clicking opens the drawer; on save the card reflects the change. **[Agent: testing]**
-- [ ] GREEN — add the action to the library-grid card and lift `manage-playthrough` drawer state to the library widget; `router.invalidate()` on save. **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — add a playthrough from a card; the card's status/derived state updates in place. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate. **[Agent: react-frontend]**
+- [x] RED — component test: the library card exposes "Add playthrough"; clicking opens the drawer; on save the card reflects the change. **[Agent: testing]**
+- [x] GREEN — add the action to the library-grid card and lift `manage-playthrough` drawer state to the library widget; `router.invalidate()` on save. **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** IGDB/network + Chrome ext disconnected. Verified via green unit+integration+component tests. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate. **[Agent: react-frontend]**
 
 ---
 
@@ -154,12 +154,12 @@ over the library; saving updates the card (status / run count) without a full re
 **User-visible value:** a visitor to a public `/u/[username]` sees the user's recent runs (game
 cover/title link, platform, dates, rating, note); hidden on private profiles and when empty.
 
-- [ ] RED — integration test `get-profile-playthroughs.integration.test.ts`: returns recent runs for a public profile; **empties/denies for a private profile** (gated on `isPublicProfile`). **[Agent: testing]**
-- [ ] RED — component test: section renders entries newest-first; hidden when empty; hidden for a private profile. **[Agent: testing]**
-- [ ] GREEN — `entities/playthrough/api/get-profile-playthroughs.server.ts` (privacy invariant on the entity; joined to game cover/title/slug). **[Agent: tanstack-fullstack]**
-- [ ] GREEN — add the Playthroughs section to the profile-overview widget + wire the profile route loader. **[Agent: react-frontend]**
-- [ ] Verify: chrome MCP — a public profile with runs shows the timeline; a private profile hides it. **[Agent: react-frontend + claude-in-chrome MCP]**
-- [ ] Gate (incl. `test:integration`). **[Agent: tanstack-fullstack]**
+- [x] RED — integration test `get-profile-playthroughs.integration.test.ts`: returns recent runs for a public profile; **empties/denies for a private profile** (gated on `isPublicProfile`). **[Agent: testing]**
+- [x] RED — component test: section renders entries newest-first; hidden when empty; hidden for a private profile. **[Agent: testing]**
+- [x] GREEN — `entities/playthrough/api/get-profile-playthroughs.server.ts` (privacy invariant on the entity; joined to game cover/title/slug). **[Agent: tanstack-fullstack]**
+- [x] GREEN — add the Playthroughs section to the profile-overview widget + wire the profile route loader. **[Agent: react-frontend]**
+- [~] Verify: chrome MCP — **BLOCKED (environment):** IGDB/network + Chrome ext disconnected. Verified via green unit+integration+component tests. **[Agent: react-frontend + claude-in-chrome MCP]**
+- [x] Gate: format/lint/typecheck clean; targeted unit + integration green. **[Agent: tanstack-fullstack]**
 
 ---
 

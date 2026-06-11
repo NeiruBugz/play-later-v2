@@ -28,6 +28,7 @@ export function ProfileOverview({
   headerActions,
   librarySlot,
   activitySlot,
+  playthroughsSlot,
   hideActivityTab = false,
 }: ProfileOverviewProps) {
   // Never expose an email-shaped `name` — see README "Display-name privacy".
@@ -224,6 +225,13 @@ export function ProfileOverview({
                     </Link>
                   ))}
                 </div>
+              </section>
+            ) : null}
+
+            {playthroughsSlot !== undefined ? (
+              <section data-testid="overview-playthroughs">
+                <h2 className="heading-md mb-4 tracking-tight">Playthroughs</h2>
+                {playthroughsSlot}
               </section>
             ) : null}
           </div>
