@@ -8,7 +8,7 @@ Companion design handoff lives in ./design-handoff/ (DATA_MODEL.md, COMPONENTS.m
 
 - **Functional Specification:** [`functional-spec.md`](./functional-spec.md)
 - **Design handoff:** [`design-handoff/`](./design-handoff/) — `README.md`, `DATA_MODEL.md`, `COMPONENTS.md`, `prototype/`
-- **Status:** Draft
+- **Status:** Completed
 - **Author(s):** Nail Badiullin
 
 > **Supersedes the May 2026 pre-migration tech spec** (which targeted the retired Next.js

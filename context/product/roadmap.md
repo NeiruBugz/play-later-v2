@@ -50,7 +50,7 @@ _Everything we can ship on our own data + IGDB, with no AWS / external platform 
 
 ### Ordered Backlog
 
-1. [ ] **Per-Playthrough Logs** — multiple playthroughs per library entry, each with start/end dates, rating, platform, optional notes. Playthrough timeline on game detail. Journal/review entries can attach to a specific playthrough. _Data primitive — unblocks Reviews and Aggregate Game Stats._
+1. [x] **Per-Playthrough Logs** — multiple playthroughs per library entry, each with start/end dates, rating, platform, optional notes. Playthrough timeline on game detail. Journal/review entries can attach to a specific playthrough. _Data primitive — unblocks Reviews and Aggregate Game Stats._ **Shipped (spec 016, 2026-06-11):** run-derived library status with manual-override-that-sticks; per-run journal + full-width run-aware feed; library-card quick-add; public-profile timeline. Live chrome-MCP verifies deferred (IGDB/Twitch OAuth unreachable in sandbox); verified via unit+integration+component gate. Known follow-up: library-level rating editing was dropped from the game-detail page (superseded by per-run ratings) — revisit if a library-rating control on game-detail is still wanted._
 
 2. [ ] **Reviews** — short-form, public, rated takes on a game; distinct from private long-form Journal. Public review feed on game detail; personal review history on profile; visibility setting (public/private/followers). _Depends on Per-Playthrough Logs._
 
