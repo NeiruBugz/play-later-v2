@@ -105,6 +105,10 @@ const elements = {
   getLifecycleText: () =>
     screen.getByTestId("lifecycle-strip").textContent ?? "",
   queryUnrated: () => screen.queryByText("unrated"),
+  queryAddPlaythroughButton: () =>
+    screen.queryByRole("button", { name: "Add playthrough" }),
+  getAddPlaythroughButton: () =>
+    screen.getByRole("button", { name: "Add playthrough" }),
 };
 
 describe("LibraryItemCard", () => {
@@ -483,6 +487,44 @@ describe("LibraryItemCard", () => {
 
       it("shows a Physical chip", () => {
         expect(elements.queryAcquisitionChip("Physical")).not.toBeNull();
+      });
+    });
+  });
+
+  // 2.13 — "Add playthrough" quick-add entry point (spec 016).
+  // The control must appear ONLY when the host supplies `onAddPlaythrough` so
+  // the public-profile read-only grid stays clean.
+  describe('"Add playthrough" quick-add control (spec 016 §2.13)', () => {
+    describe("given onAddPlaythrough is provided", () => {
+      const onAddPlaythrough = vi.fn();
+
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            item={buildItem({ id: 7 })}
+            onAddPlaythrough={onAddPlaythrough}
+          />
+        );
+      });
+
+      it("renders the Add playthrough control", () => {
+        expect(elements.queryAddPlaythroughButton()).not.toBeNull();
+      });
+
+      it("calls onAddPlaythrough with the library item id when clicked", async () => {
+        const userEvent = (await import("@testing-library/user-event")).default;
+        await userEvent.click(elements.getAddPlaythroughButton());
+        expect(onAddPlaythrough).toHaveBeenCalledWith(7);
+      });
+    });
+
+    describe("given onAddPlaythrough is NOT provided", () => {
+      beforeEach(() => {
+        render(<LibraryItemCard item={buildItem({ id: 7 })} />);
+      });
+
+      it("does not render the Add playthrough control", () => {
+        expect(elements.queryAddPlaythroughButton()).toBeNull();
       });
     });
   });

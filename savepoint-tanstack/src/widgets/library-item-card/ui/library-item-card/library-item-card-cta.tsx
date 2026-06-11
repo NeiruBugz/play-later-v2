@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import { useState, type MouseEvent, type SyntheticEvent } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
@@ -28,6 +28,7 @@ const stop = (event: SyntheticEvent) => {
 
 export type LibraryItemCardCtaProps = {
   item: LibraryItemWithGame;
+  onAddPlaythrough?: (libraryItemId: number) => void;
 };
 
 /**
@@ -40,7 +41,10 @@ export type LibraryItemCardCtaProps = {
  * not as a descendant — same structural pattern as `LibraryCardMenu` so
  * the link-bubble bug cannot resurface.
  */
-export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
+export function LibraryItemCardCta({
+  item,
+  onAddPlaythrough,
+}: LibraryItemCardCtaProps) {
   const { pending: isPending, run } = useMutationAction();
   const [logSessionOpen, setLogSessionOpen] = useState(false);
 
@@ -101,6 +105,24 @@ export function LibraryItemCardCta({ item }: LibraryItemCardCtaProps) {
           </>
         )}
       </Button>
+
+      {onAddPlaythrough !== undefined ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="mt-1 w-full text-xs font-medium"
+          onClick={(event) => {
+            stop(event);
+            onAddPlaythrough(item.id);
+          }}
+          onMouseDown={stop}
+          aria-label="Add playthrough"
+        >
+          <PlusCircle aria-hidden />
+          Add playthrough
+        </Button>
+      ) : null}
 
       {action.kind === "logSession" ? (
         <ComposeJournalEntryDialog
