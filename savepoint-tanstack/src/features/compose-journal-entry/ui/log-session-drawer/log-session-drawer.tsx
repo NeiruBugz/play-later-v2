@@ -46,15 +46,17 @@ export function LogSessionDrawer({
   const [hours, setHours] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const parsedHours = parseFloat(hours);
+  const hasPositiveHours = Number.isFinite(parsedHours) && parsedHours > 0;
+  const canSubmit = thoughts.trim().length > 0 || hasPositiveHours;
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const parsedHours = parseFloat(hours);
-      const playedMinutes =
-        Number.isFinite(parsedHours) && parsedHours > 0
-          ? Math.round(parsedHours * 60)
-          : undefined;
+      const playedMinutes = hasPositiveHours
+        ? Math.round(parsedHours * 60)
+        : undefined;
 
       await createJournalEntryFn({
         data: {
@@ -173,7 +175,7 @@ export function LogSessionDrawer({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || !canSubmit}>
               Log session
             </Button>
           </SheetFooter>

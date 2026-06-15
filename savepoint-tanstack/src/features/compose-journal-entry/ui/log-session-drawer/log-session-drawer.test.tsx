@@ -413,6 +413,59 @@ describe("LogSessionDrawer", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Finding 9 — submit disabled when neither thoughts nor hours are present
+  // -------------------------------------------------------------------------
+
+  describe("given the drawer is open with empty thoughts and blank hours", () => {
+    beforeEach(() => {
+      render(<LogSessionDrawer {...baseProps} />);
+    });
+
+    it("disables the Log session button", () => {
+      expect(elements.getLogSessionButton()).toBeDisabled();
+    });
+
+    it("does not call createJournalEntryFn when the disabled button is clicked", async () => {
+      await actions.submit();
+      expect(vi.mocked(createJournalEntryFn)).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given the user types whitespace-only thoughts and leaves hours blank", () => {
+    beforeEach(async () => {
+      render(<LogSessionDrawer {...baseProps} />);
+      await actions.typeThoughts("   ");
+    });
+
+    it("keeps the Log session button disabled (whitespace does not count)", () => {
+      expect(elements.getLogSessionButton()).toBeDisabled();
+    });
+  });
+
+  describe("given the user types a thought (non-empty)", () => {
+    beforeEach(async () => {
+      render(<LogSessionDrawer {...baseProps} />);
+      await actions.typeThoughts("Good session");
+    });
+
+    it("enables the Log session button", () => {
+      expect(elements.getLogSessionButton()).toBeEnabled();
+    });
+  });
+
+  describe("given the user enters positive hours and leaves thoughts empty", () => {
+    beforeEach(async () => {
+      render(<LogSessionDrawer {...baseProps} />);
+      await actions.clearHours();
+      await actions.typeHours("1");
+    });
+
+    it("enables the Log session button", () => {
+      expect(elements.getLogSessionButton()).toBeEnabled();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Success path: closes drawer and invalidates router
   // -------------------------------------------------------------------------
 
