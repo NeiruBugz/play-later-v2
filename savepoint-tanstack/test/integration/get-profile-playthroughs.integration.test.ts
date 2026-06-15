@@ -1,23 +1,19 @@
 /**
- * RED integration test for getProfilePlaythroughs (Spec 016 Slice 8 — public-profile
+ * Integration tests for getProfilePlaythroughs (Spec 016 Slice 8 — public-profile
  * playthroughs timeline).
- *
- * This test is intentionally failing: `@/entities/playthrough/api/get-profile-playthroughs.server`
- * does not exist yet. The import fails at module-resolution — that is the canonical RED state.
- * Do not implement production code in this file.
  *
  * Real Prisma against the isolated test DB for all assertions.
  *
  * ============================================================
- * CONTRACT (locked here; GREEN agent must not deviate without
- * updating this comment block)
+ * CONTRACT (locked here; changes require updating this block)
  * ============================================================
  *
  * Function signature:
  *   getProfilePlaythroughs(
- *     username: string,
+ *     ownerId: string,         // already-resolved profile owner ID
+ *     isPublicProfile: boolean,
  *     viewerId?: string,
- *     limit?: number,   // default 12
+ *     limit?: number,          // default 12
  *   ): Promise<ProfilePlaythrough[]>
  *
  * Return shape (ProfilePlaythrough):
@@ -37,21 +33,22 @@
  *     };
  *   }
  *
- * Privacy rule:
- *   - public profile + any viewer (anonymous or authenticated) → returns runs newest-first
- *   - private profile + non-owner viewer (or anonymous) → returns []
- *   - private profile + owner viewer → returns runs newest-first
- *   - unknown username → returns []
+ * Privacy rule (single-source: lives only in this query):
+ *   - isPublicProfile=true  + any viewer (anonymous or authenticated) → returns runs newest-first
+ *   - isPublicProfile=false + non-owner viewer (or anonymous)         → returns []
+ *   - isPublicProfile=false + owner viewer (viewerId === ownerId)     → returns runs newest-first
  *
- * Ordering: newest first (by createdAt DESC — proxy for run start; consistent with
- * how the rest of the timeline renders).
+ * The caller (getPublicProfilePageDataFn) is responsible for resolving ownerId
+ * + isPublicProfile from getPublicProfile, which throws NotFoundError for
+ * missing/denied. That throw is the 404 gate; this query's [] return is the
+ * section-visibility gate. Two distinct gates, no duplication.
  *
+ * Ordering: newest first (by createdAt DESC).
  * Limit: defaults to 12; honours an explicit limit argument.
  */
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-// RED import — this module does not exist until the GREEN step.
 import { getProfilePlaythroughs } from "@/entities/playthrough/api/get-profile-playthroughs.server";
 
 import {
@@ -116,6 +113,12 @@ function makeGame(
 // Teardown: deleted in afterAll via db.teardown().
 // ---------------------------------------------------------------------------
 
+// Resolved IDs and flags — mirrors what getPublicProfile would return
+const PUBLIC_OWNER_ID = "gpp-user-public";
+const PRIVATE_OWNER_ID = "gpp-user-private";
+const PUBLIC_IS_PUBLIC = true;
+const PRIVATE_IS_PUBLIC = false;
+
 beforeAll(async () => {
   // --- public user ---
   await db.prisma.user.create({
@@ -125,7 +128,7 @@ beforeAll(async () => {
   await db.prisma.libraryItem.create({
     data: {
       id: 70001,
-      userId: "gpp-user-public",
+      userId: PUBLIC_OWNER_ID,
       gameId: "gpp-game-pub1",
       status: "PLAYED",
     },
@@ -173,7 +176,7 @@ beforeAll(async () => {
   await db.prisma.libraryItem.create({
     data: {
       id: 70002,
-      userId: "gpp-user-private",
+      userId: PRIVATE_OWNER_ID,
       gameId: "gpp-game-prv1",
       status: "PLAYING",
     },
@@ -225,7 +228,10 @@ describe("getProfilePlaythroughs", () => {
 
   describe("given a public profile and an anonymous viewer", () => {
     it("returns the runs newest-first", async () => {
-      const runs = await getProfilePlaythroughs("gpp-public");
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC
+      );
 
       expect(runs.length).toBe(2);
       expect(runs[0]!.id).toBe("gpp-run-pub-newer");
@@ -233,7 +239,10 @@ describe("getProfilePlaythroughs", () => {
     });
 
     it("includes game title, slug, and coverImage on each run", async () => {
-      const runs = await getProfilePlaythroughs("gpp-public");
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC
+      );
 
       for (const run of runs) {
         expect(run.game.title).toBe("GPP Game pub1");
@@ -243,7 +252,10 @@ describe("getProfilePlaythroughs", () => {
     });
 
     it("includes kind, status, platform, startedAt, finishedAt, rating, notes", async () => {
-      const runs = await getProfilePlaythroughs("gpp-public");
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC
+      );
       const newer = runs[0]!;
 
       expect(newer.kind).toBe("REPLAY");
@@ -256,11 +268,31 @@ describe("getProfilePlaythroughs", () => {
     });
 
     it("exposes null finishedAt on a PLAYING run", async () => {
-      const runs = await getProfilePlaythroughs("gpp-public");
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC
+      );
       const older = runs[1]!;
 
       expect(older.status).toBe("PLAYING");
       expect(older.finishedAt).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Public profile — authenticated non-owner viewer
+  // -------------------------------------------------------------------------
+
+  describe("given a public profile and an authenticated non-owner viewer", () => {
+    it("returns the runs newest-first", async () => {
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC,
+        PRIVATE_OWNER_ID
+      );
+
+      expect(runs.length).toBe(2);
+      expect(runs[0]!.id).toBe("gpp-run-pub-newer");
     });
   });
 
@@ -271,15 +303,19 @@ describe("getProfilePlaythroughs", () => {
   describe("given a private profile and a non-owner viewer", () => {
     it("returns an empty array", async () => {
       const runs = await getProfilePlaythroughs(
-        "gpp-private",
-        "gpp-user-public"
+        PRIVATE_OWNER_ID,
+        PRIVATE_IS_PUBLIC,
+        PUBLIC_OWNER_ID
       );
 
       expect(runs).toEqual([]);
     });
 
     it("returns an empty array for an anonymous viewer too", async () => {
-      const runs = await getProfilePlaythroughs("gpp-private");
+      const runs = await getProfilePlaythroughs(
+        PRIVATE_OWNER_ID,
+        PRIVATE_IS_PUBLIC
+      );
 
       expect(runs).toEqual([]);
     });
@@ -292,8 +328,9 @@ describe("getProfilePlaythroughs", () => {
   describe("given a private profile and the owner as viewer", () => {
     it("returns the runs newest-first", async () => {
       const runs = await getProfilePlaythroughs(
-        "gpp-private",
-        "gpp-user-private"
+        PRIVATE_OWNER_ID,
+        PRIVATE_IS_PUBLIC,
+        PRIVATE_OWNER_ID
       );
 
       expect(runs.length).toBe(2);
@@ -304,8 +341,9 @@ describe("getProfilePlaythroughs", () => {
 
     it("includes game data on each run", async () => {
       const runs = await getProfilePlaythroughs(
-        "gpp-private",
-        "gpp-user-private"
+        PRIVATE_OWNER_ID,
+        PRIVATE_IS_PUBLIC,
+        PRIVATE_OWNER_ID
       );
 
       for (const run of runs) {
@@ -316,24 +354,17 @@ describe("getProfilePlaythroughs", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Unknown username → empty array (no throw)
-  // -------------------------------------------------------------------------
-
-  describe("given an unknown username", () => {
-    it("returns an empty array", async () => {
-      const runs = await getProfilePlaythroughs("gpp-does-not-exist");
-
-      expect(runs).toEqual([]);
-    });
-  });
-
-  // -------------------------------------------------------------------------
   // Limit
   // -------------------------------------------------------------------------
 
   describe("given a limit smaller than the total run count", () => {
     it("returns at most limit runs", async () => {
-      const runs = await getProfilePlaythroughs("gpp-public", undefined, 1);
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC,
+        undefined,
+        1
+      );
 
       expect(runs.length).toBe(1);
       // newest-first, so the FINISHED run comes first

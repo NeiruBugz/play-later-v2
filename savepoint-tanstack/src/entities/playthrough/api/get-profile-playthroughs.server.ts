@@ -21,41 +21,38 @@ export type ProfilePlaythrough = {
  * Recent playthroughs for a user's public profile.
  *
  * Privacy invariant (owner-bypass):
- * - Missing user → `[]` (profile route already 404s upstream; this section
- *   just stays hidden).
  * - `!isPublicProfile` AND viewer is not the owner → `[]` (section hidden).
  * - Owner viewing their own profile → allowed regardless of `isPublicProfile`.
  *
+ * The caller is responsible for resolving `ownerId` and `isPublicProfile` from
+ * the profile record — typically from `getPublicProfile`, which already owns the
+ * primary privacy gate (throws `NotFoundError` for missing/denied). Accepting
+ * `ownerId` + `isPublicProfile` directly avoids a redundant user-by-username
+ * lookup and ensures privacy semantics are encoded in exactly one place.
+ *
  * Privacy lives here on the entity, not on the feature handler or route.
  * See CONTEXT.md "Privacy invariant". Unlike `getPublicProfile` (which throws
- * NotFoundError for denied), this query returns `[]` because the profile route
- * already owns the 404 decision; this section silently hides on a denied read.
+ * `NotFoundError` for denied), this query returns `[]` because the profile
+ * route already owns the 404 decision; this section silently hides on a
+ * denied read.
  *
  * Results are ordered newest-first by `createdAt` (recent activity).
  */
 export async function getProfilePlaythroughs(
-  username: string,
+  ownerId: string,
+  isPublicProfile: boolean,
   viewerId?: string,
   limit = 12
 ): Promise<ProfilePlaythrough[]> {
-  const targetUser = await prisma.user.findFirst({
-    where: { usernameNormalized: username.toLowerCase().trim() },
-    select: { id: true, isPublicProfile: true },
-  });
+  const isOwner = viewerId !== undefined && viewerId === ownerId;
 
-  if (!targetUser) {
-    return [];
-  }
-
-  const isOwner = viewerId !== undefined && viewerId === targetUser.id;
-
-  if (!targetUser.isPublicProfile && !isOwner) {
+  if (!isPublicProfile && !isOwner) {
     return [];
   }
 
   const rows = await prisma.playthrough.findMany({
     where: {
-      libraryItem: { userId: targetUser.id },
+      libraryItem: { userId: ownerId },
     },
     select: {
       id: true,

@@ -83,9 +83,17 @@ export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
       viewerId && viewerId !== profile.id
         ? isFollowing(viewerId, profile.id)
         : Promise.resolve(false),
-      // Privacy gate is owned by the entity query: returns [] for private
-      // profiles viewed by non-owners; owner always gets their runs back.
-      getProfilePlaythroughs(username, viewerId ?? undefined),
+      // `getPublicProfile` already enforced the primary privacy invariant
+      // (throws NotFoundError for missing/private-non-owner). We pass the
+      // resolved ownerId + isPublicProfile so `getProfilePlaythroughs` can
+      // apply its own owner-bypass rule without a second user-by-username
+      // lookup. Single-source privacy: getPublicProfile gates the 404;
+      // getProfilePlaythroughs gates the section visibility.
+      getProfilePlaythroughs(
+        profile.id,
+        profile.isPublicProfile,
+        viewerId ?? undefined
+      ),
     ]);
 
     const libraryItems: PublicLibraryGridItem[] = library.items.map((item) => ({
