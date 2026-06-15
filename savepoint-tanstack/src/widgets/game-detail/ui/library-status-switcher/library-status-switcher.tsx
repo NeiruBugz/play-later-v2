@@ -35,7 +35,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import type {
   LibraryItem,
   LibraryItemStatus,
-} from "../../../../../shared/lib/prisma/client.ts";
+} from "../../../../../shared/lib/prisma/client";
 import type { LibraryStatusSwitcherProps } from "./library-status-switcher.type";
 import { useMediaQuery } from "./use-media-query";
 
@@ -121,6 +121,10 @@ export function LibraryStatusSwitcher({
   const [optimisticEntry, setOptimisticEntry] = useState<LibraryItem | null>(
     entry
   );
+  // Tracks the displayed status in States 2 and 3 before the loader reloads.
+  // State 2 starts at derivedStatus; State 3 starts at the pinned entry status.
+  const [optimisticPillStatus, setOptimisticPillStatus] =
+    useState<LibraryItemStatus>(entry?.status ?? derivedStatus);
   const [pending, setPending] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -163,13 +167,21 @@ export function LibraryStatusSwitcher({
   const handleSetManualStatus = async (status: LibraryItemStatus) => {
     setPickerOpen(false);
     if (pending || itemId === null) return;
+    const previousEntry = optimisticEntry;
+    const previousPillStatus = optimisticPillStatus;
     setPending(true);
+    setOptimisticEntry(
+      previousEntry !== null ? { ...previousEntry, status } : previousEntry
+    );
+    setOptimisticPillStatus(status);
     try {
       await setLibraryStatusManualFn({
         data: { libraryItemId: itemId, status },
       });
       await router.invalidate();
     } catch (err: unknown) {
+      setOptimisticEntry(previousEntry);
+      setOptimisticPillStatus(previousPillStatus);
       toast.error(getErrorMessage(err, "Something went wrong"));
     } finally {
       setPending(false);
@@ -179,11 +191,22 @@ export function LibraryStatusSwitcher({
   // State 3 (runs + statusIsManual): revert to run-derived status.
   const handleClearManualStatus = async () => {
     if (pending || itemId === null) return;
+    const previousEntry = optimisticEntry;
+    const previousPillStatus = optimisticPillStatus;
     setPending(true);
+    // Reflect the derived status optimistically so the pill updates immediately.
+    setOptimisticEntry(
+      previousEntry !== null
+        ? { ...previousEntry, status: derivedStatus }
+        : previousEntry
+    );
+    setOptimisticPillStatus(derivedStatus);
     try {
       await clearLibraryStatusManualFn({ data: { libraryItemId: itemId } });
       await router.invalidate();
     } catch (err: unknown) {
+      setOptimisticEntry(previousEntry);
+      setOptimisticPillStatus(previousPillStatus);
       toast.error(getErrorMessage(err, "Something went wrong"));
     } finally {
       setPending(false);
@@ -303,7 +326,7 @@ export function LibraryStatusSwitcher({
   const renderDerivedState = () => (
     <>
       <div className="gap-xs flex flex-wrap items-center">
-        {renderDerivedPill(derivedStatus)}
+        {renderDerivedPill(optimisticPillStatus)}
         <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
           <GitBranch className="h-3 w-3" aria-hidden="true" />
           Follows your playthroughs
@@ -336,8 +359,7 @@ export function LibraryStatusSwitcher({
   const renderManualState = () => (
     <>
       <div className="gap-xs flex flex-wrap items-center">
-        {/* currentStatus is the pinned value; render it as the pill */}
-        {currentStatus !== null ? renderDerivedPill(currentStatus) : null}
+        {renderDerivedPill(optimisticPillStatus)}
         {/* Plain span — NOT a button. Avoids role collision with "Set manually" action. */}
         <span className="text-muted-foreground text-xs">Set manually</span>
       </div>

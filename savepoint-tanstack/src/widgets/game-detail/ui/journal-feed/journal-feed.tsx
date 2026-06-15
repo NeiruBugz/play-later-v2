@@ -1,6 +1,8 @@
+import { useMemo } from "react";
+
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
 
-import type { JournalEntry } from "../../../../../shared/lib/prisma/client.ts";
+import type { JournalEntry } from "../../../../../shared/lib/prisma/client";
 import type { JournalFeedProps } from "./journal-feed.type";
 
 const KIND_LABEL: Record<string, string> = {
@@ -43,9 +45,7 @@ function flattenEntries(
   }));
 
   return [...fromRuns, ...fromLegacy].sort(
-    (a, b) =>
-      new Date(b.entry.createdAt).getTime() -
-      new Date(a.entry.createdAt).getTime()
+    (a, b) => b.entry.createdAt.getTime() - a.entry.createdAt.getTime()
   );
 }
 
@@ -53,13 +53,12 @@ export function JournalFeed({
   playthroughs,
   legacyEntries = [],
 }: JournalFeedProps) {
-  if (playthroughs.length === 0) {
-    return null;
-  }
+  const flat = useMemo(
+    () => flattenEntries(playthroughs, legacyEntries),
+    [playthroughs, legacyEntries]
+  );
 
-  const flat = flattenEntries(playthroughs, legacyEntries);
-
-  if (flat.length === 0) {
+  if (playthroughs.length === 0 || flat.length === 0) {
     return null;
   }
 

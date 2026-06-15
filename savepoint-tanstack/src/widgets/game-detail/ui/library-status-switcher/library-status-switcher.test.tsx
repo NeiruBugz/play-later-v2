@@ -450,6 +450,27 @@ describe("LibraryStatusSwitcher", () => {
             });
           });
         });
+
+        it("optimistically reflects the chosen status in the derived pill before the server responds", async () => {
+          await waitFor(() => {
+            expect(elements.getDerivedPill().textContent).toContain("Played");
+          });
+        });
+      });
+
+      describe("and the server rejects the status change", () => {
+        beforeEach(async () => {
+          vi.mocked(setLibraryStatusManualFn).mockRejectedValue(
+            new Error("server error")
+          );
+          await actions.selectStatus("Played");
+        });
+
+        it("reverts the pill to the original status on error", async () => {
+          await waitFor(() => {
+            expect(elements.getDerivedPill().textContent).toContain("Playing");
+          });
+        });
       });
     });
   });
@@ -534,6 +555,27 @@ describe("LibraryStatusSwitcher", () => {
           expect(vi.mocked(clearLibraryStatusManualFn)).toHaveBeenCalledWith({
             data: { libraryItemId: 42 },
           });
+        });
+      });
+
+      it("optimistically shows the derived status (PLAYING) in the pill before the server responds", async () => {
+        await waitFor(() => {
+          expect(elements.getDerivedPill().textContent).toContain("Playing");
+        });
+      });
+    });
+
+    describe("when 'Follow my playthroughs' is clicked and the server rejects", () => {
+      beforeEach(async () => {
+        vi.mocked(clearLibraryStatusManualFn).mockRejectedValue(
+          new Error("server error")
+        );
+        await actions.clickFollowMyPlaythroughs();
+      });
+
+      it("reverts the pill back to the pinned status (PLAYED) on error", async () => {
+        await waitFor(() => {
+          expect(elements.getDerivedPill().textContent).toContain("Played");
         });
       });
     });
