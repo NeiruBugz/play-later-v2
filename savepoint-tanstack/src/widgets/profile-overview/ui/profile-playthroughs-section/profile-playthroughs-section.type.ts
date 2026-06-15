@@ -1,4 +1,4 @@
-import type { ProfilePlaythrough } from "@/entities/playthrough/api/get-profile-playthroughs.server";
+import type { ProfilePlaythrough } from "@/entities/playthrough/model";
 
 export type ProfilePlaythroughsSectionProps = {
   playthroughs: ProfilePlaythrough[];
