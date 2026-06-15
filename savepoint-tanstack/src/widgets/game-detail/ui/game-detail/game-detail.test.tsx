@@ -1,7 +1,10 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
+import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
+import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
@@ -880,6 +883,113 @@ describe("GameDetail", () => {
       // (playthroughId: null) must NOT produce a second one.
       const labelsInFeed = within(feed).queryAllByText("First playthrough");
       expect(labelsInFeed).toHaveLength(1);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Edit-playthrough routing — Finding 1 + Finding 2
+  // ---------------------------------------------------------------------------
+
+  describe("given a signed-in viewer with two existing runs", () => {
+    const runA: PlaythroughWithEntries = {
+      id: "pt-run-a",
+      ordinal: 1,
+      kind: "FIRST",
+      status: "FINISHED",
+      platform: "PC",
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 120,
+      rating: null,
+      completion: null,
+      notes: "Run A notes",
+      journalEntries: [],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    };
+
+    const runB: PlaythroughWithEntries = {
+      id: "pt-run-b",
+      ordinal: 2,
+      kind: "REPLAY",
+      status: "PLAYING",
+      platform: "PlayStation 5",
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 60,
+      rating: null,
+      completion: null,
+      notes: "Run B notes",
+      journalEntries: [],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-06-01"),
+      updatedAt: new Date("2024-06-01"),
+    };
+
+    beforeEach(() => {
+      vi.mocked(createPlaythroughFn).mockReset();
+      vi.mocked(createPlaythroughFn).mockResolvedValue(undefined as never);
+      vi.mocked(updatePlaythroughFn).mockReset();
+      vi.mocked(updatePlaythroughFn).mockResolvedValue(undefined as never);
+    });
+
+    describe("when the user clicks Edit on run A and submits the drawer", () => {
+      beforeEach(async () => {
+        render(
+          <GameDetail
+            data={{
+              ...buildData(buildLibraryEntry()),
+              playthroughs: [runA, runB],
+            }}
+            viewerUserId="user-1"
+          />
+        );
+        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
+        await userEvent.click(editRunA!);
+        await userEvent.click(
+          screen.getByRole("button", { name: "Save changes" })
+        );
+      });
+
+      it("calls updatePlaythroughFn with run A's id — not createPlaythroughFn", async () => {
+        await waitFor(() => {
+          expect(vi.mocked(updatePlaythroughFn)).toHaveBeenCalledWith(
+            expect.objectContaining({
+              data: expect.objectContaining({ id: "pt-run-a" }),
+            })
+          );
+        });
+        expect(vi.mocked(createPlaythroughFn)).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("when the user opens the drawer for run A then closes and opens for run B", () => {
+      beforeEach(async () => {
+        render(
+          <GameDetail
+            data={{
+              ...buildData(buildLibraryEntry()),
+              playthroughs: [runA, runB],
+            }}
+            viewerUserId="user-1"
+          />
+        );
+        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
+        await userEvent.click(editRunA!);
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        const editButtons = screen.getAllByRole("button", { name: "Edit" });
+        await userEvent.click(editButtons[1]!);
+      });
+
+      it("shows run B's notes in the Notes field — not run A's stale values", async () => {
+        const notesField = screen.getByLabelText(
+          "Notes"
+        ) as HTMLTextAreaElement;
+        expect(notesField.value).toBe("Run B notes");
+      });
     });
   });
 });

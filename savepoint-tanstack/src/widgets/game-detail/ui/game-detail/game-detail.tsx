@@ -49,7 +49,12 @@ export function GameDetail({
   type DrawerState =
     | { open: false }
     | { open: true; mode: "add" }
-    | { open: true; mode: "edit"; prefill: PlaythroughFormValues };
+    | {
+        open: true;
+        mode: "edit";
+        playthroughId: string;
+        prefill: PlaythroughFormValues;
+      };
 
   const [drawerState, setDrawerState] = useState<DrawerState>({ open: false });
 
@@ -250,7 +255,6 @@ export function GameDetail({
               <PlaythroughsPanel
                 libraryItemId={String(libraryEntry?.id ?? "")}
                 playthroughs={playthroughs}
-                framing="journey"
                 onAddPlaythrough={() =>
                   setDrawerState({ open: true, mode: "add" })
                 }
@@ -258,6 +262,7 @@ export function GameDetail({
                   setDrawerState({
                     open: true,
                     mode: "edit",
+                    playthroughId: pt.id,
                     prefill: mapPlaythroughToFormValues(pt),
                   })
                 }
@@ -364,6 +369,11 @@ export function GameDetail({
             mode={drawerState.open ? drawerState.mode : "add"}
             libraryItemId={libraryEntry.id}
             existingPlaythroughCount={playthroughs.length}
+            playthroughId={
+              drawerState.open && drawerState.mode === "edit"
+                ? drawerState.playthroughId
+                : undefined
+            }
             playthrough={
               drawerState.open && drawerState.mode === "edit"
                 ? drawerState.prefill

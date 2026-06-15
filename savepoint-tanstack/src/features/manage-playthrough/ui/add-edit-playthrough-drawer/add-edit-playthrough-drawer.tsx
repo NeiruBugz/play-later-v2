@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -74,13 +75,17 @@ export function AddEditPlaythroughDrawer({
 }: AddEditPlaythroughDrawerProps) {
   const router = useRouter();
 
-  const { register, handleSubmit, watch, setValue, formState } =
+  const { register, handleSubmit, watch, setValue, reset, formState } =
     useForm<PlaythroughFormValues>({
       resolver: zodResolver(
         playthroughFormSchema
       ) as Resolver<PlaythroughFormValues>,
       defaultValues: buildDefaultValues(existingPlaythroughCount, playthrough),
     });
+
+  useEffect(() => {
+    if (open) reset(buildDefaultValues(existingPlaythroughCount, playthrough));
+  }, [open, playthrough, existingPlaythroughCount, reset]);
 
   const status = watch("status");
   const kind = watch("kind");

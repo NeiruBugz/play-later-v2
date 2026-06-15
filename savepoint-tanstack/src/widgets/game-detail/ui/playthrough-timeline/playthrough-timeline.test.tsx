@@ -71,7 +71,6 @@ const RUN_ID = "run-del-confirm-001";
 
 const defaultProps = {
   playthroughs: [makePlaythrough({ id: RUN_ID, status: "FINISHED" })],
-  framing: "journey" as const,
   onAddPlaythrough: vi.fn(),
   onEditPlaythrough: vi.fn(),
   onLogSession: vi.fn(),

@@ -127,7 +127,6 @@ describe("PlaythroughsPanel", () => {
         <PlaythroughsPanel
           libraryItemId="lib-1"
           playthroughs={[]}
-          framing="journey"
           onAddPlaythrough={onAddPlaythrough}
           onEditPlaythrough={onEditPlaythrough}
           onLogSession={onLogSession}
@@ -155,7 +154,6 @@ describe("PlaythroughsPanel", () => {
         <PlaythroughsPanel
           libraryItemId="lib-1"
           playthroughs={[SECOND_RUN, FIRST_RUN]}
-          framing="journey"
           onAddPlaythrough={onAddPlaythrough}
           onEditPlaythrough={onEditPlaythrough}
           onLogSession={onLogSession}

@@ -76,7 +76,6 @@ function PlaythroughsEmpty({
 
 export function PlaythroughsPanel({
   playthroughs,
-  framing,
   onAddPlaythrough,
   onEditPlaythrough,
   onLogSession,
@@ -94,7 +93,6 @@ export function PlaythroughsPanel({
       <AggregateBand playthroughs={playthroughs} />
       <PlaythroughTimeline
         playthroughs={playthroughs}
-        framing={framing}
         onAddPlaythrough={onAddPlaythrough}
         onEditPlaythrough={onEditPlaythrough}
         onLogSession={onLogSession}
