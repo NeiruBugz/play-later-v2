@@ -6,7 +6,7 @@ import {
   MoreHorizontal,
   Plus,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -130,6 +130,16 @@ export function LibraryStatusSwitcher({
   const [editOpen, setEditOpen] = useState(false);
   // Reveals the status picker inline when user clicks "Set manually" in State 2.
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  // Adopt authoritative props whenever the loader refreshes them — including
+  // refreshes triggered outside this component (e.g. the add/edit-playthrough
+  // drawer calls router.invalidate()). Prop changes only ever originate from the
+  // loader, so local optimistic updates (which happen between prop changes) are
+  // not disturbed; only a genuine server-truth refresh resyncs the pill.
+  useEffect(() => {
+    setOptimisticEntry(entry);
+    setOptimisticPillStatus(entry?.status ?? derivedStatus);
+  }, [entry, derivedStatus]);
 
   const currentStatus = optimisticEntry?.status ?? null;
   const hasBeenPlayed = optimisticEntry?.hasBeenPlayed ?? false;
