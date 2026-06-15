@@ -70,7 +70,7 @@ async function createJournalEntryWithPlaythrough(
     return await prisma.$transaction(async (tx) => {
       const run = await tx.playthrough.findUnique({
         where: { id: playthroughId },
-        include: { libraryItem: { select: { userId: true } } },
+        include: { libraryItem: { select: { userId: true, gameId: true } } },
       });
 
       if (!run || run.libraryItem.userId !== userId) {
@@ -82,7 +82,7 @@ async function createJournalEntryWithPlaythrough(
           userId,
           content: input.content,
           kind: input.kind ?? "QUICK",
-          gameId: input.gameId ?? null,
+          gameId: run.libraryItem.gameId,
           playedMinutes: input.playedMinutes ?? null,
           playthroughId,
         },
@@ -117,6 +117,12 @@ function mapJournalEntryPrismaError(
     // meta.driverAdapterError.cause.constraint.index; older shapes use
     // meta.field_name / meta.constraint. Probe the whole blob to cover both.
     const probe = JSON.stringify(error.meta ?? {}).toLowerCase();
+
+    if (probe.includes("playthrough")) {
+      throw new NotFoundError("Playthrough not found", {
+        playthroughId: input.playthroughId ?? null,
+      });
+    }
 
     if (probe.includes("game")) {
       throw new NotFoundError("Referenced game does not exist", {
