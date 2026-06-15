@@ -60,7 +60,7 @@ export function JournalFeed({
     [playthroughs, legacyEntries]
   );
 
-  if (playthroughs.length === 0 || flat.length === 0) {
+  if (flat.length === 0) {
     return null;
   }
 
