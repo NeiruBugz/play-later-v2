@@ -42,7 +42,6 @@ export type PlaythroughFormValues = z.infer<typeof playthroughFormSchema>;
 export const updatePlaythroughSchema = z
   .object({
     id: z.string().min(1),
-    libraryItemId: z.number().int().optional(),
     kind: z.enum(["FIRST", "REPLAY"]).optional(),
     platform: z.string().nullish(),
     status: z.enum(["PLAYING", "FINISHED", "ABANDONED"]).optional(),

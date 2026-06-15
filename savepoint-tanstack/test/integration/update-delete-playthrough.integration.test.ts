@@ -13,13 +13,15 @@
  *   falls back to stored manual status, hasBeenPlayed false).
  * - ownership: updatePlaythrough / deletePlaythrough with a different
  *   user's run → NotFoundError.
+ * - Rating guard: updatePlaythrough rejects out-of-range ratings (0, 11,
+ *   negative) with ValidationError; accepts boundary values 1 and 10.
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { deletePlaythrough } from "@/entities/playthrough/api/delete-playthrough.server";
 import { updatePlaythrough } from "@/entities/playthrough/api/update-playthrough.server";
-import { NotFoundError } from "@/shared/lib/errors";
+import { NotFoundError, ValidationError } from "@/shared/lib/errors";
 
 import {
   setupIsolatedDatabase,
@@ -334,4 +336,156 @@ describe("deletePlaythrough", () => {
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
+
+  describe("given deleting the FINAL run of a non-manual item whose stored status is PLAYED", () => {
+    let libraryItemId: number;
+    let runId: string;
+
+    beforeEach(async () => {
+      await seedBaseData();
+
+      // Item was previously PLAYED (stale derived status); statusIsManual=false.
+      const item = await db.prisma.libraryItem.create({
+        data: {
+          userId: USER_ID,
+          gameId: "game-upd-del-pt-001",
+          status: "PLAYED",
+          statusIsManual: false,
+          hasBeenPlayed: true,
+          acquisitionType: "DIGITAL",
+        },
+      });
+      libraryItemId = item.id;
+
+      // One FINISHED run — the only run. Deleting it leaves zero runs.
+      const run = await db.prisma.playthrough.create({
+        data: {
+          libraryItemId,
+          ordinal: 1,
+          kind: "FIRST",
+          status: "FINISHED",
+          playtimeMinutes: 120,
+        },
+      });
+      runId = run.id;
+    });
+
+    it("resets status to SHELF (not stuck at stale PLAYED)", async () => {
+      await deletePlaythrough(USER_ID, runId);
+
+      const item = await db.prisma.libraryItem.findUniqueOrThrow({
+        where: { id: libraryItemId },
+      });
+      expect(item.status).toBe("SHELF");
+    });
+
+    it("resets hasBeenPlayed to false when no runs remain", async () => {
+      await deletePlaythrough(USER_ID, runId);
+
+      const item = await db.prisma.libraryItem.findUniqueOrThrow({
+        where: { id: libraryItemId },
+      });
+      expect(item.hasBeenPlayed).toBe(false);
+    });
+  });
+
+  describe("given deleting the FINAL run of a manual-override item whose status is PLAYED", () => {
+    let libraryItemId: number;
+    let runId: string;
+
+    beforeEach(async () => {
+      await seedBaseData();
+
+      // Item has a manually-pinned PLAYED status; statusIsManual=true.
+      const item = await db.prisma.libraryItem.create({
+        data: {
+          userId: USER_ID,
+          gameId: "game-upd-del-pt-001",
+          status: "PLAYED",
+          statusIsManual: true,
+          hasBeenPlayed: true,
+          acquisitionType: "DIGITAL",
+        },
+      });
+      libraryItemId = item.id;
+
+      const run = await db.prisma.playthrough.create({
+        data: {
+          libraryItemId,
+          ordinal: 1,
+          kind: "FIRST",
+          status: "FINISHED",
+          playtimeMinutes: 60,
+        },
+      });
+      runId = run.id;
+    });
+
+    it("keeps the manually-pinned PLAYED status untouched (manual override is not overwritten)", async () => {
+      await deletePlaythrough(USER_ID, runId);
+
+      const item = await db.prisma.libraryItem.findUniqueOrThrow({
+        where: { id: libraryItemId },
+      });
+      expect(item.status).toBe("PLAYED");
+      expect(item.statusIsManual).toBe(true);
+    });
+
+    it("still resets hasBeenPlayed to false (fact about runs, always recomputed)", async () => {
+      await deletePlaythrough(USER_ID, runId);
+
+      const item = await db.prisma.libraryItem.findUniqueOrThrow({
+        where: { id: libraryItemId },
+      });
+      expect(item.hasBeenPlayed).toBe(false);
+    });
+  });
+});
+
+describe("updatePlaythrough — rating range guard", () => {
+  let runId: string;
+
+  beforeEach(async () => {
+    await seedBaseData();
+
+    const item = await db.prisma.libraryItem.create({
+      data: {
+        userId: USER_ID,
+        gameId: "game-upd-del-pt-001",
+        status: "PLAYING",
+        statusIsManual: false,
+        hasBeenPlayed: false,
+        acquisitionType: "DIGITAL",
+      },
+    });
+
+    const run = await db.prisma.playthrough.create({
+      data: {
+        libraryItemId: item.id,
+        ordinal: 1,
+        kind: "FIRST",
+        status: "PLAYING",
+        playtimeMinutes: 0,
+      },
+    });
+    runId = run.id;
+  });
+
+  it.each([0, -1, 11])(
+    "rejects out-of-range rating %i with ValidationError",
+    async (rating) => {
+      await expect(
+        updatePlaythrough(USER_ID, { id: runId, rating })
+      ).rejects.toBeInstanceOf(ValidationError);
+    }
+  );
+
+  it.each([1, 10])(
+    "accepts boundary rating %i without error",
+    async (rating) => {
+      await expect(
+        updatePlaythrough(USER_ID, { id: runId, rating })
+      ).resolves.toMatchObject({ rating });
+    }
+  );
 });

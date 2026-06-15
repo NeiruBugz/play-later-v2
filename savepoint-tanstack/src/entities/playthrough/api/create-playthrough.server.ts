@@ -1,5 +1,5 @@
 import { prisma } from "@/shared/lib/db.server";
-import { NotFoundError } from "@/shared/lib/errors";
+import { NotFoundError, ValidationError } from "@/shared/lib/errors";
 
 import type {
   Playthrough,
@@ -40,6 +40,16 @@ export async function createPlaythrough(
   userId: string,
   input: CreatePlaythroughInput
 ): Promise<Playthrough> {
+  if (
+    input.rating !== undefined &&
+    input.rating !== null &&
+    (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 10)
+  ) {
+    throw new ValidationError("Rating must be an integer between 1 and 10", {
+      rating: input.rating,
+    });
+  }
+
   const item = await prisma.libraryItem.findUnique({
     where: { id: input.libraryItemId },
   });

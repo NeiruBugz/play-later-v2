@@ -10,12 +10,15 @@
  *   converted from hours (×60), LibraryItem.status flipped to PLAYING,
  *   hasBeenPlayed remains false.
  * - Unauthorized path: userId undefined → rejects UnauthorizedError.
+ * - Rating guard: entity createPlaythrough rejects out-of-range ratings (0,
+ *   11, negative) with ValidationError; accepts boundary values 1 and 10.
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { createPlaythrough } from "@/entities/playthrough/api/create-playthrough.server";
 import { createPlaythroughWorker } from "@/features/manage-playthrough/api/create-playthrough-fn.worker";
-import { UnauthorizedError } from "@/shared/lib/errors";
+import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
 
 import {
   setupIsolatedDatabase,
@@ -150,5 +153,42 @@ describe("createPlaythroughWorker", () => {
         })
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
+  });
+
+  describe("rating range guard on createPlaythrough entity query", () => {
+    let libraryItemId: number;
+
+    beforeEach(async () => {
+      const item = await db.prisma.libraryItem.findFirstOrThrow({
+        where: { userId: USER_ID, gameId: "game-create-pt-001" },
+      });
+      libraryItemId = item.id;
+    });
+
+    it.each([0, -1, 11])(
+      "rejects out-of-range rating %i with ValidationError",
+      async (rating) => {
+        await expect(
+          createPlaythrough(USER_ID, {
+            libraryItemId,
+            status: "PLAYING",
+            rating,
+          })
+        ).rejects.toBeInstanceOf(ValidationError);
+      }
+    );
+
+    it.each([1, 10])(
+      "accepts boundary rating %i without error",
+      async (rating) => {
+        await expect(
+          createPlaythrough(USER_ID, {
+            libraryItemId,
+            status: "PLAYING",
+            rating,
+          })
+        ).resolves.toMatchObject({ rating });
+      }
+    );
   });
 });

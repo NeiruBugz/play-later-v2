@@ -1,5 +1,9 @@
 import { prisma } from "@/shared/lib/db.server";
-import { ConflictError, NotFoundError } from "@/shared/lib/errors";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@/shared/lib/errors";
 
 import type {
   Playthrough,
@@ -61,6 +65,18 @@ export async function updatePlaythrough(
   input: UpdatePlaythroughInput
 ): Promise<Playthrough> {
   const { id, ...fields } = input;
+
+  if (
+    fields.rating !== undefined &&
+    fields.rating !== null &&
+    (!Number.isInteger(fields.rating) ||
+      fields.rating < 1 ||
+      fields.rating > 10)
+  ) {
+    throw new ValidationError("Rating must be an integer between 1 and 10", {
+      rating: fields.rating,
+    });
+  }
 
   try {
     return await prisma.$transaction(async (tx) => {
