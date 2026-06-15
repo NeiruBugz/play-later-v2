@@ -46,6 +46,18 @@ export async function createPlaythrough(
   input: CreatePlaythroughInput
 ): Promise<Playthrough> {
   if (
+    input.playtimeMinutes !== undefined &&
+    (!Number.isInteger(input.playtimeMinutes) || input.playtimeMinutes < 0)
+  ) {
+    throw new ValidationError(
+      "Playtime minutes must be a non-negative integer",
+      {
+        playtimeMinutes: input.playtimeMinutes,
+      }
+    );
+  }
+
+  if (
     input.rating !== undefined &&
     input.rating !== null &&
     (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 10)
