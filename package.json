@@ -20,7 +20,8 @@
       "path-to-regexp": "8.4.2",
       "brace-expansion": "2.0.2",
       "smol-toml": "1.6.1",
-      "yaml": "2.8.3"
+      "yaml": "2.8.3",
+      "esbuild": "0.28.1"
     },
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",

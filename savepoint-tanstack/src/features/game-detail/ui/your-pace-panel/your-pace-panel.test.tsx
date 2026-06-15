@@ -118,4 +118,28 @@ describe("YourPacePanel", () => {
       ).toBeDefined();
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Bug #2 — total > 0 with sessions === 0 must not render Infinity/NaN
+  // (e.g. a run that has playtime from hours field but zero journal sessions)
+  // -------------------------------------------------------------------------
+
+  describe("given playtime total is set but session count is zero", () => {
+    beforeEach(() => {
+      render(
+        <YourPacePanel
+          journalCount={1}
+          playtimeTotalMinutes={600}
+          playtimeSessionCount={0}
+          recentSessionMinutes={[]}
+        />
+      );
+    });
+
+    it("shows 0h for avg session instead of Infinity or NaN", () => {
+      expect(
+        within(elements.getStat("Avg session")).getByText("0h")
+      ).toBeDefined();
+    });
+  });
 });

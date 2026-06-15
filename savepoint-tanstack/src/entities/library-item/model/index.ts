@@ -21,6 +21,7 @@ export type {
   AcquisitionType,
 } from "./acquisition";
 export type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
+export { deriveHasBeenPlayed, deriveLibraryStatus } from "./derive-status";
 export type {
   GetLibraryFilters,
   GetLibraryResult,

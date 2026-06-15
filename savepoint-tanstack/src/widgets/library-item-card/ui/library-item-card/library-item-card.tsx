@@ -17,7 +17,11 @@ import { LibraryItemCardCta } from "./library-item-card-cta";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { getStatusCoverAccent } from "./library-item-card.utility";
 
-export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
+export function LibraryItemCard({
+  item,
+  menu,
+  onAddPlaythrough,
+}: LibraryItemCardProps) {
   const hasPlatform =
     typeof item.platform === "string" && item.platform.trim().length > 0;
   // F04: a started-then-shelved game reads differently from one never touched.
@@ -129,7 +133,7 @@ export function LibraryItemCard({ item, menu }: LibraryItemCardProps) {
           )}
         </div>
 
-        <LibraryItemCardCta item={item} />
+        <LibraryItemCardCta item={item} onAddPlaythrough={onAddPlaythrough} />
       </div>
     </div>
   );

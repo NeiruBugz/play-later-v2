@@ -81,6 +81,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await db.prisma.journalEntry.deleteMany();
+  await db.prisma.playthrough.deleteMany();
   await db.prisma.libraryItem.deleteMany();
   await db.prisma.game.deleteMany();
   await db.prisma.user.deleteMany();
@@ -404,14 +405,13 @@ describe("getGameDetails", () => {
       expect(result.journalCount).toBeGreaterThan(result.journalTeaser.length);
     });
 
-    it("sums playedMinutes across all entries, ignoring nulls", async () => {
+    it("reports zero playtimeTotalMinutes when there are no playthroughs (source is runs, not journal entries)", async () => {
+      // Spec 016 (decision #3): playtimeTotalMinutes = Σ playthroughs.playtimeMinutes.
+      // Dave has journal entries with playedMinutes but NO library entry / runs, so the
+      // run sum is 0 regardless of what the journals contain.
       const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
 
-      const expectedSum = MINUTES_BY_INDEX.reduce<number>(
-        (acc, m) => acc + (m ?? 0),
-        0
-      );
-      expect(result.playtimeTotalMinutes).toBe(expectedSum);
+      expect(result.playtimeTotalMinutes).toBe(0);
     });
 
     it("counts only entries with logged minutes, not every journal entry", async () => {
@@ -592,6 +592,527 @@ describe("getGameDetails", () => {
         where: { slug: GAME_SLUG },
       });
       expect(rows).toHaveLength(1);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Spec 016 — Per-Playthrough Logs
+  // New fields: playthroughs, derivedStatus, statusIsManual, hasBeenPlayed.
+  // playtimeTotalMinutes source changed to Σ playthroughs.playtimeMinutes.
+  // -------------------------------------------------------------------------
+
+  // Helper: seed a user + game + library entry; returns { gameId, libraryItemId }.
+  async function seedUserAndLibrary(
+    userSuffix: string,
+    status: "SHELF" | "PLAYING" | "PLAYED" | "UP_NEXT" | "WISHLIST" = "SHELF",
+    statusIsManual = false
+  ) {
+    await db.prisma.user.create({ data: makeUser(userSuffix) });
+    await db.prisma.game.create({
+      data: {
+        igdbId: IGDB_ID,
+        title: MOCK_IGDB_GAME.name,
+        slug: GAME_SLUG,
+        createdAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+      },
+    });
+    const game = await db.prisma.game.findUniqueOrThrow({
+      where: { slug: GAME_SLUG },
+    });
+    const libraryItem = await db.prisma.libraryItem.create({
+      data: {
+        userId: `ggd-user-${userSuffix}`,
+        gameId: game.id,
+        status,
+        statusIsManual,
+        acquisitionType: "DIGITAL",
+      },
+    });
+    return { gameId: game.id, libraryItemId: libraryItem.id };
+  }
+
+  describe("Spec 016 — playthroughs and derived fields", () => {
+    // Anonymous viewer
+    describe("anonymous viewer", () => {
+      it("returns empty playthroughs, zero playtimeTotalMinutes, SHELF derivedStatus, false flags", async () => {
+        const result = await getGameDetails({ slug: GAME_SLUG });
+
+        expect(result.playthroughs).toEqual([]);
+        expect(result.playtimeTotalMinutes).toBe(0);
+        expect(result.derivedStatus).toBe("SHELF");
+        expect(result.statusIsManual).toBe(false);
+        expect(result.hasBeenPlayed).toBe(false);
+      });
+
+      it("still populates journal-derived fields from zero entries for anonymous viewer", async () => {
+        const result = await getGameDetails({ slug: GAME_SLUG });
+
+        expect(result.journalCount).toBe(0);
+        expect(result.playtimeSessionCount).toBe(0);
+        expect(result.recentSessionMinutes).toEqual([]);
+      });
+    });
+
+    // Authed — no library entry
+    describe("authed viewer with no library entry", () => {
+      beforeEach(async () => {
+        await db.prisma.user.create({ data: makeUser("pt-noentry") });
+        await db.prisma.game.create({
+          data: {
+            igdbId: IGDB_ID,
+            title: MOCK_IGDB_GAME.name,
+            slug: GAME_SLUG,
+            createdAt: new Date("2024-01-01T00:00:00.000Z"),
+            updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+          },
+        });
+      });
+
+      it("returns empty playthroughs, zero playtime, SHELF derivedStatus, false flags", async () => {
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-noentry",
+        });
+
+        expect(result.playthroughs).toEqual([]);
+        expect(result.playtimeTotalMinutes).toBe(0);
+        expect(result.derivedStatus).toBe("SHELF");
+        expect(result.statusIsManual).toBe(false);
+        expect(result.hasBeenPlayed).toBe(false);
+      });
+    });
+
+    // Authed — library entry exists but no runs
+    describe("authed viewer with library entry and no playthroughs", () => {
+      it("returns empty playthroughs, reflects entry status and statusIsManual, hasBeenPlayed false", async () => {
+        await seedUserAndLibrary("pt-noruns", "UP_NEXT", true);
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-noruns",
+        });
+
+        expect(result.playthroughs).toEqual([]);
+        expect(result.playtimeTotalMinutes).toBe(0);
+        // derivedStatus falls back to entry status when no playthroughs
+        expect(result.derivedStatus).toBe("UP_NEXT");
+        expect(result.statusIsManual).toBe(true);
+        expect(result.hasBeenPlayed).toBe(false);
+      });
+    });
+
+    // Authed — one PLAYING run
+    describe("authed viewer with one PLAYING playthrough (90 min)", () => {
+      it("returns one run, playtimeTotalMinutes = 90, derivedStatus PLAYING, hasBeenPlayed false", async () => {
+        const { libraryItemId } = await seedUserAndLibrary(
+          "pt-playing",
+          "PLAYING",
+          false
+        );
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "PLAYING",
+            playtimeMinutes: 90,
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-playing",
+        });
+
+        expect(result.playthroughs).toHaveLength(1);
+        expect(result.playtimeTotalMinutes).toBe(90);
+        expect(result.derivedStatus).toBe("PLAYING");
+        expect(result.statusIsManual).toBe(false);
+        expect(result.hasBeenPlayed).toBe(false);
+      });
+    });
+
+    // Authed — one FINISHED run
+    describe("authed viewer with one FINISHED playthrough (600 min)", () => {
+      it("returns one run, playtimeTotalMinutes = 600, derivedStatus PLAYED, hasBeenPlayed true", async () => {
+        const { libraryItemId } = await seedUserAndLibrary(
+          "pt-finished",
+          "PLAYED",
+          false
+        );
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "FINISHED",
+            playtimeMinutes: 600,
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-finished",
+        });
+
+        expect(result.playthroughs).toHaveLength(1);
+        expect(result.playtimeTotalMinutes).toBe(600);
+        expect(result.derivedStatus).toBe("PLAYED");
+        expect(result.statusIsManual).toBe(false);
+        expect(result.hasBeenPlayed).toBe(true);
+      });
+    });
+
+    // Authed — FINISHED + ABANDONED runs
+    describe("authed viewer with FINISHED and ABANDONED playthroughs", () => {
+      it("sums both runs, derivedStatus PLAYED, hasBeenPlayed true", async () => {
+        const { libraryItemId } = await seedUserAndLibrary(
+          "pt-multi",
+          "PLAYED",
+          false
+        );
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "FINISHED",
+            playtimeMinutes: 400,
+          },
+        });
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 2,
+            status: "ABANDONED",
+            playtimeMinutes: 150,
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-multi",
+        });
+
+        expect(result.playthroughs).toHaveLength(2);
+        expect(result.playtimeTotalMinutes).toBe(550);
+        expect(result.derivedStatus).toBe("PLAYED");
+        expect(result.statusIsManual).toBe(false);
+        expect(result.hasBeenPlayed).toBe(true);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // REGRESSION: playtime-source change (decision #3)
+    // The journal sum DIFFERS from the run sum — assert we read from runs.
+    // -----------------------------------------------------------------------
+    describe("playtime-source regression guard — run sum vs journal sum", () => {
+      it("uses Σ playthroughs.playtimeMinutes, NOT Σ journal.playedMinutes", async () => {
+        const { libraryItemId, gameId } = await seedUserAndLibrary(
+          "pt-source",
+          "PLAYED",
+          false
+        );
+
+        // Create a playthrough with playtimeMinutes = 300.
+        const playthrough = await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "FINISHED",
+            playtimeMinutes: 300,
+          },
+        });
+
+        // Journal entries attached to this run with a DIFFERENT total (50+50 = 100).
+        // This difference is deliberate — the test verifies which source wins.
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-source",
+            gameId,
+            playthroughId: playthrough.id,
+            content: "Session 1",
+            kind: "QUICK",
+            playedMinutes: 50,
+          },
+        });
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-source",
+            gameId,
+            playthroughId: playthrough.id,
+            content: "Session 2",
+            kind: "QUICK",
+            playedMinutes: 50,
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-source",
+        });
+
+        // Journal sum = 100; run sum = 300. Assert the run sum wins.
+        const journalSum = 100;
+        const runSum = 300;
+        expect(result.playtimeTotalMinutes).not.toBe(journalSum);
+        expect(result.playtimeTotalMinutes).toBe(runSum);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Playthroughs ordering — ordinal desc
+    // -----------------------------------------------------------------------
+    describe("playthroughs ordering", () => {
+      it("returns playthroughs ordered by ordinal descending", async () => {
+        const { libraryItemId } = await seedUserAndLibrary(
+          "pt-order",
+          "PLAYED",
+          false
+        );
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "FINISHED",
+            playtimeMinutes: 100,
+          },
+        });
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 2,
+            status: "FINISHED",
+            playtimeMinutes: 200,
+          },
+        });
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 3,
+            status: "ABANDONED",
+            playtimeMinutes: 50,
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-order",
+        });
+
+        expect(result.playthroughs).toHaveLength(3);
+        expect(result.playthroughs[0]!.ordinal).toBe(3);
+        expect(result.playthroughs[1]!.ordinal).toBe(2);
+        expect(result.playthroughs[2]!.ordinal).toBe(1);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Playthroughs carry their journalEntries
+    // -----------------------------------------------------------------------
+    describe("playthroughs include their journalEntries", () => {
+      it("each playthrough carries its journalEntries ordered by createdAt desc", async () => {
+        const { libraryItemId, gameId } = await seedUserAndLibrary(
+          "pt-entries",
+          "PLAYING",
+          false
+        );
+        const playthrough = await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "PLAYING",
+            playtimeMinutes: 120,
+          },
+        });
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-entries",
+            gameId,
+            playthroughId: playthrough.id,
+            content: "Earlier entry",
+            kind: "QUICK",
+            createdAt: new Date("2024-02-01T00:00:00.000Z"),
+            updatedAt: new Date("2024-02-01T00:00:00.000Z"),
+          },
+        });
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-entries",
+            gameId,
+            playthroughId: playthrough.id,
+            content: "Later entry",
+            kind: "QUICK",
+            createdAt: new Date("2024-02-10T00:00:00.000Z"),
+            updatedAt: new Date("2024-02-10T00:00:00.000Z"),
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-entries",
+        });
+
+        const run = result.playthroughs[0]!;
+        expect(run.journalEntries).toHaveLength(2);
+        // Ordered createdAt desc — most recent first
+        expect(run.journalEntries[0]!.content).toBe("Later entry");
+        expect(run.journalEntries[1]!.content).toBe("Earlier entry");
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Spec-016 blocker #4 — unattached (null-playthroughId) journal entries
+    // §2.7: entries detached after run deletion; §2.10: legacy pre-spec entries.
+    // §2.11: feed hidden when game has no runs — unattachedJournalEntries
+    //        must be [] when playthroughs is empty, even if null-run entries exist.
+    // -----------------------------------------------------------------------
+    describe("unattachedJournalEntries — entries with null playthroughId", () => {
+      it("returns null-playthroughId entries in unattachedJournalEntries when the game has runs", async () => {
+        const { libraryItemId, gameId } = await seedUserAndLibrary(
+          "pt-detached",
+          "PLAYING",
+          false
+        );
+        // One run with one attached entry
+        const playthrough = await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "PLAYING",
+            playtimeMinutes: 60,
+          },
+        });
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-detached",
+            gameId,
+            playthroughId: playthrough.id,
+            content: "Attached entry",
+            kind: "QUICK",
+            createdAt: new Date("2024-03-01T00:00:00.000Z"),
+            updatedAt: new Date("2024-03-01T00:00:00.000Z"),
+          },
+        });
+        // One unattached (null playthroughId) entry — simulates legacy or detached
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-detached",
+            gameId,
+            playthroughId: null,
+            content: "Unattached entry",
+            kind: "QUICK",
+            createdAt: new Date("2024-03-05T00:00:00.000Z"),
+            updatedAt: new Date("2024-03-05T00:00:00.000Z"),
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-detached",
+        });
+
+        // Unattached entry appears in the dedicated field
+        expect(result.unattachedJournalEntries).toHaveLength(1);
+        expect(result.unattachedJournalEntries[0]!.content).toBe(
+          "Unattached entry"
+        );
+
+        // The attached entry is NOT in unattachedJournalEntries
+        const unattachedContents = result.unattachedJournalEntries.map(
+          (e) => e.content
+        );
+        expect(unattachedContents).not.toContain("Attached entry");
+
+        // The run's journalEntries only has the attached entry
+        expect(result.playthroughs[0]!.journalEntries).toHaveLength(1);
+        expect(result.playthroughs[0]!.journalEntries[0]!.content).toBe(
+          "Attached entry"
+        );
+      });
+
+      it("returns unattachedJournalEntries ordered by createdAt desc", async () => {
+        const { libraryItemId, gameId } = await seedUserAndLibrary(
+          "pt-detached-order",
+          "PLAYING",
+          false
+        );
+        await db.prisma.playthrough.create({
+          data: {
+            libraryItemId,
+            ordinal: 1,
+            status: "PLAYING",
+            playtimeMinutes: 30,
+          },
+        });
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-detached-order",
+            gameId,
+            playthroughId: null,
+            content: "Older unattached",
+            kind: "QUICK",
+            createdAt: new Date("2024-04-01T00:00:00.000Z"),
+            updatedAt: new Date("2024-04-01T00:00:00.000Z"),
+          },
+        });
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-detached-order",
+            gameId,
+            playthroughId: null,
+            content: "Newer unattached",
+            kind: "QUICK",
+            createdAt: new Date("2024-04-10T00:00:00.000Z"),
+            updatedAt: new Date("2024-04-10T00:00:00.000Z"),
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-detached-order",
+        });
+
+        expect(result.unattachedJournalEntries).toHaveLength(2);
+        // Most recent first
+        expect(result.unattachedJournalEntries[0]!.content).toBe(
+          "Newer unattached"
+        );
+        expect(result.unattachedJournalEntries[1]!.content).toBe(
+          "Older unattached"
+        );
+      });
+
+      it("returns [] for unattachedJournalEntries when the game has NO runs — preserving §2.11 feed-hidden contract", async () => {
+        const { gameId } = await seedUserAndLibrary(
+          "pt-no-runs-detached",
+          "SHELF",
+          false
+        );
+        // Null-playthroughId entry exists but NO playthroughs — feed must stay hidden
+        await db.prisma.journalEntry.create({
+          data: {
+            userId: "ggd-user-pt-no-runs-detached",
+            gameId,
+            playthroughId: null,
+            content: "Legacy entry, no run",
+            kind: "QUICK",
+          },
+        });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-no-runs-detached",
+        });
+
+        // No runs → feed hidden → unattached entries not returned
+        expect(result.playthroughs).toHaveLength(0);
+        expect(result.unattachedJournalEntries).toEqual([]);
+      });
+
+      it("returns [] for anonymous viewers regardless of null-playthroughId entries", async () => {
+        const result = await getGameDetails({ slug: GAME_SLUG });
+
+        expect(result.unattachedJournalEntries).toEqual([]);
+      });
     });
   });
 });

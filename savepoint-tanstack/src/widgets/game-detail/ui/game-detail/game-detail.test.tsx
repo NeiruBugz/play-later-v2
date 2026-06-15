@@ -1,10 +1,15 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { PlaythroughWithEntries } from "@/entities/playthrough";
+import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
+import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
   Game,
+  JournalEntry,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client";
 import { GameDetail } from "./game-detail";
@@ -44,6 +49,32 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
 vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
+
+vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
+  createPlaythroughFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
+  updatePlaythroughFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
+  deletePlaythroughFn: vi.fn(),
+}));
+
+vi.mock(
+  "@/features/manage-playthrough/api/set-library-status-manual-fn",
+  () => ({
+    setLibraryStatusManualFn: vi.fn(),
+  })
+);
+
+vi.mock(
+  "@/features/manage-playthrough/api/clear-library-status-manual-fn",
+  () => ({
+    clearLibraryStatusManualFn: vi.fn(),
+  })
+);
 
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
@@ -87,6 +118,7 @@ const buildLibraryEntry = (): LibraryItem => ({
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusIsManual: false,
   rating: null,
 });
 
@@ -115,7 +147,6 @@ const elements = {
   queryAddToLibrary: () =>
     screen.queryByRole("button", { name: "Add to library" }),
   queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
-  queryRatingSliders: () => screen.queryAllByRole("slider"),
   queryMoreMenuTrigger: () =>
     screen.queryByRole("button", { name: "More library actions" }),
   queryAllTablists: () => screen.queryAllByRole("tablist"),
@@ -139,7 +170,7 @@ const elements = {
   queryLegacyCatalogCard: () =>
     screen.queryByTestId("game-detail-catalog-card"),
   queryEyebrow: () => screen.queryByLabelText("Release metadata"),
-  queryYourRecord: () => screen.queryByTestId("your-record-panel"),
+  queryYourRecord: () => screen.queryByTestId("playthroughs-panel"),
   queryThemesLabel: () => screen.queryByText("// THEMES"),
   queryEmDash: () => screen.queryByText("—"),
   queryScreenshotsRegion: () =>
@@ -274,8 +305,7 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders exactly one rating slider (single-sourced in Your Record), overflow menu, and Journal panel", () => {
-      expect(elements.queryRatingSliders()).toHaveLength(1);
+    it("renders the overflow menu and Journal panel", () => {
       expect(elements.queryMoreMenuTrigger()).not.toBeNull();
       expect(elements.queryJournalHeading()).not.toBeNull();
     });
@@ -758,7 +788,208 @@ describe("GameDetail", () => {
     it("does not preserve the previous game's library status across navigation", () => {
       expect(elements.queryStatusPill()).toBeNull();
       expect(elements.queryAddToLibrary()).not.toBeNull();
-      expect(elements.queryRatingSliders()).toHaveLength(0);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RED: unattachedJournalEntries wiring (spec 016 §2.7 / §2.10)
+  // ---------------------------------------------------------------------------
+  // GameDetail must pass data.unattachedJournalEntries as legacyEntries to
+  // JournalFeed so that detached / legacy entries appear in the feed when the
+  // game has runs. The test fails (RED) until GameDetailData carries the field
+  // and game-detail.tsx wires it through.
+  // ---------------------------------------------------------------------------
+
+  describe("given a game with runs and unattached journal entries (spec 016 §2.7 / §2.10)", () => {
+    const legacyEntry: JournalEntry = {
+      id: "entry-legacy-gd-001",
+      kind: "QUICK",
+      title: null,
+      content: "Old note before runs existed",
+      playedMinutes: null,
+      tags: [],
+      mood: null,
+      playSession: null,
+      visibility: "PRIVATE",
+      userId: "user-1",
+      gameId: "game-1",
+      libraryItemId: 42,
+      playthroughId: null,
+      createdAt: new Date("2023-05-01T10:00:00Z"),
+      updatedAt: new Date("2023-05-01T10:00:00Z"),
+      publishedAt: null,
+    };
+
+    const runEntry: JournalEntry = {
+      id: "entry-run-gd-001",
+      kind: "QUICK",
+      title: null,
+      content: "First run note",
+      playedMinutes: 60,
+      tags: [],
+      mood: null,
+      playSession: null,
+      visibility: "PRIVATE",
+      userId: "user-1",
+      gameId: "game-1",
+      libraryItemId: 42,
+      playthroughId: "pt-gd-001",
+      createdAt: new Date("2024-01-10T10:00:00Z"),
+      updatedAt: new Date("2024-01-10T10:00:00Z"),
+      publishedAt: null,
+    };
+
+    const firstRun: PlaythroughWithEntries = {
+      id: "pt-gd-001",
+      ordinal: 1,
+      kind: "FIRST",
+      status: "FINISHED",
+      platform: null,
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 60,
+      rating: null,
+      completion: null,
+      notes: null,
+      journalEntries: [runEntry],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    };
+
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={{
+            ...buildData(buildLibraryEntry()),
+            playthroughs: [firstRun],
+            unattachedJournalEntries: [legacyEntry],
+          }}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("renders the legacy entry content in the journal feed", () => {
+      expect(screen.queryByText("Old note before runs existed")).not.toBeNull();
+    });
+
+    it("renders the legacy entry with no run label inside the journal feed", () => {
+      // Scope to the JournalFeed section to avoid matching "First playthrough"
+      // rendered elsewhere in the widget (e.g. PlaythroughTimeline).
+      const feed = screen.getByRole("region", { name: "Journal feed" });
+      // The run entry carries a "First playthrough" label; the legacy entry
+      // (playthroughId: null) must NOT produce a second one.
+      const labelsInFeed = within(feed).queryAllByText("First playthrough");
+      expect(labelsInFeed).toHaveLength(1);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Edit-playthrough routing — Finding 1 + Finding 2
+  // ---------------------------------------------------------------------------
+
+  describe("given a signed-in viewer with two existing runs", () => {
+    const runA: PlaythroughWithEntries = {
+      id: "pt-run-a",
+      ordinal: 1,
+      kind: "FIRST",
+      status: "FINISHED",
+      platform: "PC",
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 120,
+      rating: null,
+      completion: null,
+      notes: "Run A notes",
+      journalEntries: [],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    };
+
+    const runB: PlaythroughWithEntries = {
+      id: "pt-run-b",
+      ordinal: 2,
+      kind: "REPLAY",
+      status: "PLAYING",
+      platform: "PlayStation 5",
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 60,
+      rating: null,
+      completion: null,
+      notes: "Run B notes",
+      journalEntries: [],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-06-01"),
+      updatedAt: new Date("2024-06-01"),
+    };
+
+    beforeEach(() => {
+      vi.mocked(createPlaythroughFn).mockReset();
+      vi.mocked(createPlaythroughFn).mockResolvedValue(undefined as never);
+      vi.mocked(updatePlaythroughFn).mockReset();
+      vi.mocked(updatePlaythroughFn).mockResolvedValue(undefined as never);
+    });
+
+    describe("when the user clicks Edit on run A and submits the drawer", () => {
+      beforeEach(async () => {
+        render(
+          <GameDetail
+            data={{
+              ...buildData(buildLibraryEntry()),
+              playthroughs: [runA, runB],
+            }}
+            viewerUserId="user-1"
+          />
+        );
+        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
+        await userEvent.click(editRunA!);
+        await userEvent.click(
+          screen.getByRole("button", { name: "Save changes" })
+        );
+      });
+
+      it("calls updatePlaythroughFn with run A's id — not createPlaythroughFn", async () => {
+        await waitFor(() => {
+          expect(vi.mocked(updatePlaythroughFn)).toHaveBeenCalledWith(
+            expect.objectContaining({
+              data: expect.objectContaining({ id: "pt-run-a" }),
+            })
+          );
+        });
+        expect(vi.mocked(createPlaythroughFn)).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("when the user opens the drawer for run A then closes and opens for run B", () => {
+      beforeEach(async () => {
+        render(
+          <GameDetail
+            data={{
+              ...buildData(buildLibraryEntry()),
+              playthroughs: [runA, runB],
+            }}
+            viewerUserId="user-1"
+          />
+        );
+        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
+        await userEvent.click(editRunA!);
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        const editButtons = screen.getAllByRole("button", { name: "Edit" });
+        await userEvent.click(editButtons[1]!);
+      });
+
+      it("shows run B's notes in the Notes field — not run A's stale values", async () => {
+        const notesField = screen.getByLabelText(
+          "Notes"
+        ) as HTMLTextAreaElement;
+        expect(notesField.value).toBe("Run B notes");
+      });
     });
   });
 });

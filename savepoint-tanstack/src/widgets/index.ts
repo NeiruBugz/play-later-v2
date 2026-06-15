@@ -17,6 +17,8 @@ export type { ImportedGamesPageProps } from "./imported-games-page";
 export { ProfileActivityTab } from "./profile-activity-tab";
 export type { ProfileActivityTabProps } from "./profile-activity-tab";
 export { ProfileOverview } from "./profile-overview";
+export { ProfilePlaythroughsSection } from "./profile-overview";
+export type { ProfilePlaythroughsSectionProps } from "./profile-overview";
 export { SettingsRail } from "./settings-rail";
 export type { SettingsRailProps } from "./settings-rail";
 export { UserList } from "./user-list";

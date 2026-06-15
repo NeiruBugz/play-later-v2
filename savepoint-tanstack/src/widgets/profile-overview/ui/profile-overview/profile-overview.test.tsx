@@ -68,6 +68,9 @@ const elements = {
   queryLibraryEmpty: () => screen.queryByTestId("profile-library-empty"),
   queryLibrarySlot: () => screen.queryByTestId("profile-library-slot"),
   queryActivityEmpty: () => screen.queryByTestId("profile-activity-empty"),
+  queryPlaythroughsSection: () => screen.queryByTestId("overview-playthroughs"),
+  queryPlaythroughsSlot: () =>
+    screen.queryByTestId("profile-playthroughs-slot"),
   getHeroBanner: () => screen.getByTestId("profile-hero-banner"),
   getStatsBar: () => screen.getByTestId("profile-stats-bar"),
 };
@@ -190,6 +193,35 @@ describe("ProfileOverview", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
       await actions.clickActivityTab();
       expect(elements.queryActivityEmpty()).not.toBeNull();
+    });
+  });
+
+  describe("given no playthroughsSlot is supplied", () => {
+    it("does not render the Playthroughs section", () => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+      expect(elements.queryPlaythroughsSection()).toBeNull();
+    });
+  });
+
+  describe("given a playthroughsSlot is supplied", () => {
+    beforeEach(() => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          playthroughsSlot={
+            <div data-testid="profile-playthroughs-slot">Playthroughs</div>
+          }
+        />
+      );
+    });
+
+    it("renders the Playthroughs section wrapper on the overview tab", () => {
+      expect(elements.queryPlaythroughsSection()).not.toBeNull();
+    });
+
+    it("renders the injected slot content inside the section", () => {
+      expect(elements.queryPlaythroughsSlot()).not.toBeNull();
     });
   });
 });

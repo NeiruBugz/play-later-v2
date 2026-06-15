@@ -2,7 +2,15 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { CriticScoreRing, GameCover } from "@/entities/game";
-import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
+import type { PlaythroughWithEntries } from "@/entities/playthrough";
+import {
+  ComposeJournalEntryDialog,
+  LogSessionDrawer,
+} from "@/features/compose-journal-entry";
+import {
+  AddEditPlaythroughDrawer,
+  type PlaythroughFormValues,
+} from "@/features/manage-playthrough";
 import {
   buildCoverImageUrl,
   buildScreenshotUrl,
@@ -11,12 +19,13 @@ import { Card } from "@/shared/ui/card";
 
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
+import { JournalFeed } from "../journal-feed";
 import { JournalPanel } from "../journal-panel";
 import { LibraryStatusSwitcher } from "../library-status-switcher";
+import { PlaythroughsPanel } from "../playthroughs-panel";
 import { RelatedPanel } from "../related-panel";
 import { ScreenshotsPanel } from "../screenshots-panel";
 import { ThemesTagsPanel } from "../themes-tags-panel";
-import { YourRecordPanel } from "../your-record-panel";
 import type { GameDetailProps } from "./game-detail.type";
 
 export function GameDetail({
@@ -30,10 +39,49 @@ export function GameDetail({
     igdbDetails,
     libraryEntry,
     journalTeaser,
-    journalCount,
-    playtimeTotalMinutes,
+    playthroughs = [],
+    derivedStatus,
+    statusIsManual = false,
+    unattachedJournalEntries = [],
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
+
+  type DrawerState =
+    | { open: false }
+    | { open: true; mode: "add" }
+    | {
+        open: true;
+        mode: "edit";
+        playthroughId: string;
+        prefill: PlaythroughFormValues;
+      };
+
+  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false });
+
+  type LogSessionState =
+    | { open: false }
+    | { open: true; preselectedPlaythroughId: string };
+
+  const [logSessionState, setLogSessionState] = useState<LogSessionState>({
+    open: false,
+  });
+
+  function mapPlaythroughToFormValues(
+    pt: PlaythroughWithEntries
+  ): PlaythroughFormValues {
+    return {
+      libraryItemId: pt.libraryItemId,
+      kind: pt.kind ?? undefined,
+      platform: pt.platform ?? null,
+      status: pt.status as PlaythroughFormValues["status"],
+      startedAt: pt.startedAt ?? null,
+      finishedAt: pt.finishedAt ?? null,
+      playtimeHours: pt.playtimeMinutes / 60,
+      rating: pt.rating ?? null,
+      completion: pt.completion ?? null,
+      notes: pt.notes ?? null,
+    };
+  }
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
   const releaseYear = game.releaseDate
@@ -181,6 +229,9 @@ export function GameDetail({
                 igdbId={game.igdbId}
                 gameTitle={game.title}
                 entry={libraryEntry}
+                playthroughCount={playthroughs.length}
+                derivedStatus={derivedStatus ?? libraryEntry?.status ?? "SHELF"}
+                statusIsManual={statusIsManual}
               />
             ) : null}
           </div>
@@ -201,13 +252,26 @@ export function GameDetail({
         >
           {showPersonalPanels ? (
             <Card variant="flat" className="gap-md p-xl flex flex-col">
-              <YourRecordPanel
-                itemId={libraryEntry?.id ?? null}
-                rating={libraryEntry?.rating ?? null}
-                playtimeTotalMinutes={playtimeTotalMinutes}
-                journalCount={journalCount}
-                gameTitle={game.title}
-                onLogSession={() => setComposeOpen(true)}
+              <PlaythroughsPanel
+                libraryItemId={String(libraryEntry?.id ?? "")}
+                playthroughs={playthroughs}
+                onAddPlaythrough={() =>
+                  setDrawerState({ open: true, mode: "add" })
+                }
+                onEditPlaythrough={(pt) =>
+                  setDrawerState({
+                    open: true,
+                    mode: "edit",
+                    playthroughId: pt.id,
+                    prefill: mapPlaythroughToFormValues(pt),
+                  })
+                }
+                onLogSession={(pt) =>
+                  setLogSessionState({
+                    open: true,
+                    preselectedPlaythroughId: pt.id,
+                  })
+                }
               />
             </Card>
           ) : null}
@@ -271,11 +335,53 @@ export function GameDetail({
           ) : null}
         </div>
 
+        <JournalFeed
+          playthroughs={playthroughs}
+          legacyEntries={unattachedJournalEntries}
+        />
+
         {viewerUserId ? (
           <ComposeJournalEntryDialog
             open={composeOpen}
             onOpenChange={setComposeOpen}
             defaultGameId={game.id}
+          />
+        ) : null}
+
+        {showPersonalPanels &&
+        libraryEntry &&
+        logSessionState.open &&
+        playthroughs.length > 0 ? (
+          <LogSessionDrawer
+            open={logSessionState.open}
+            onOpenChange={(open) => {
+              if (!open) setLogSessionState({ open: false });
+            }}
+            playthroughs={playthroughs}
+            preselectedPlaythroughId={logSessionState.preselectedPlaythroughId}
+            gameId={game.id}
+          />
+        ) : null}
+
+        {showPersonalPanels && libraryEntry ? (
+          <AddEditPlaythroughDrawer
+            open={drawerState.open}
+            mode={drawerState.open ? drawerState.mode : "add"}
+            libraryItemId={libraryEntry.id}
+            existingPlaythroughCount={playthroughs.length}
+            playthroughId={
+              drawerState.open && drawerState.mode === "edit"
+                ? drawerState.playthroughId
+                : undefined
+            }
+            playthrough={
+              drawerState.open && drawerState.mode === "edit"
+                ? drawerState.prefill
+                : undefined
+            }
+            onOpenChange={(open) => {
+              if (!open) setDrawerState({ open: false });
+            }}
           />
         ) : null}
       </div>

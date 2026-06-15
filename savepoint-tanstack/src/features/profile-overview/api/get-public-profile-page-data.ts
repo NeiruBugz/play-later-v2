@@ -10,6 +10,10 @@ import {
   type LibraryStats,
 } from "@/entities/library-item/api/get-library-stats.server";
 import { getLibrary } from "@/entities/library-item/api/get-library.server";
+import {
+  getProfilePlaythroughs,
+  type ProfilePlaythrough,
+} from "@/entities/playthrough/api/get-profile-playthroughs.server";
 import { getPublicProfile } from "@/entities/profile/api/get-public-profile.server";
 import type { Profile } from "@/entities/profile/model/types";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
@@ -46,6 +50,13 @@ export type PublicProfilePageView = {
    * library items. Empty array when the owner has no games.
    */
   libraryItems: PublicLibraryGridItem[];
+  /**
+   * Recent playthroughs for the profile owner, gated on `isPublicProfile`
+   * (owner-bypass: owner always sees their own). Empty array when the profile
+   * is private for a non-owner, or the user has no runs. The profile UI
+   * section hides itself when this is empty.
+   */
+  playthroughs: ProfilePlaythrough[];
 };
 
 export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
@@ -54,19 +65,36 @@ export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
     const { username } = inputSchema.parse(data);
     const viewerId = await getServerUserId(getRequest());
     const profile = await getPublicProfile(username, viewerId ?? undefined);
-    const [stats, library, followerCount, followingCount, followingFlag] =
-      await Promise.all([
-        getLibraryStats(profile.id),
-        // `getPublicProfile` already enforced the public-profile privacy
-        // invariant (throws NotFound for missing/private), so reading the
-        // owner's library here is safe.
-        getLibrary(profile.id, {}),
-        countFollowers(profile.id),
-        countFollowing(profile.id),
-        viewerId && viewerId !== profile.id
-          ? isFollowing(viewerId, profile.id)
-          : Promise.resolve(false),
-      ]);
+    const [
+      stats,
+      library,
+      followerCount,
+      followingCount,
+      followingFlag,
+      playthroughs,
+    ] = await Promise.all([
+      getLibraryStats(profile.id),
+      // `getPublicProfile` already enforced the public-profile privacy
+      // invariant (throws NotFound for missing/private), so reading the
+      // owner's library here is safe.
+      getLibrary(profile.id, {}),
+      countFollowers(profile.id),
+      countFollowing(profile.id),
+      viewerId && viewerId !== profile.id
+        ? isFollowing(viewerId, profile.id)
+        : Promise.resolve(false),
+      // `getPublicProfile` already enforced the primary privacy invariant
+      // (throws NotFoundError for missing/private-non-owner). We pass the
+      // resolved ownerId + isPublicProfile so `getProfilePlaythroughs` can
+      // apply its own owner-bypass rule without a second user-by-username
+      // lookup. Single-source privacy: getPublicProfile gates the 404;
+      // getProfilePlaythroughs gates the section visibility.
+      getProfilePlaythroughs(
+        profile.id,
+        profile.isPublicProfile,
+        viewerId ?? undefined
+      ),
+    ]);
 
     const libraryItems: PublicLibraryGridItem[] = library.items.map((item) => ({
       gameId: item.game.slug,
@@ -81,5 +109,6 @@ export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
       followingCount,
       isFollowing: viewerId ? followingFlag : null,
       libraryItems,
+      playthroughs,
     };
   });

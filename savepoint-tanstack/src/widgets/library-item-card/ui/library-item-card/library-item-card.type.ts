@@ -13,4 +13,10 @@ export type LibraryItemCardProps = {
    * shape; see LibraryCardMenu).
    */
   menu?: ReactNode;
+  /**
+   * When provided, an "Add playthrough" icon button is rendered below the
+   * primary CTA. Omitting it hides the action entirely — use this to keep
+   * the card action-free in read-only contexts (e.g. public-profile grid).
+   */
+  onAddPlaythrough?: (libraryItemId: number) => void;
 };

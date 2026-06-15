@@ -46,6 +46,13 @@ export type ProfileOverviewProps = {
    */
   activitySlot?: ReactNode;
   /**
+   * Playthroughs section slot. When supplied, renders a "Playthroughs" section
+   * in the Overview tab (spec 016 §2.14 — newest-first recent runs). When
+   * omitted or when the component returns null for an empty array, the section
+   * is invisible — no extra empty-state needed.
+   */
+  playthroughsSlot?: ReactNode;
+  /**
    * Hide the Activity tab entirely. Used for anonymous viewers per locked
    * decision in spec 021 slice 20: anonymous viewers don't see the activity
    * tab on public profiles.

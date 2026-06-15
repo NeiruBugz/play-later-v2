@@ -10,6 +10,7 @@ import {
   type LibraryStatusCounts,
 } from "@/features/filter-library";
 import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
+import { AddEditPlaythroughDrawer } from "@/features/manage-playthrough";
 import { EmptyLibraryHero } from "@/features/onboarding-first-time";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
@@ -61,6 +62,11 @@ export function LibraryPage(props: LibraryPageProps) {
   // One modal at the page level — see README "Host-owned modal state".
   const [selectedEntry, setSelectedEntry] =
     useState<LibraryItemWithGame | null>(null);
+
+  // One add-playthrough drawer at the page level so we render a single
+  // drawer instance regardless of how many cards are in the grid.
+  const [addPlaythroughLibraryItemId, setAddPlaythroughLibraryItemId] =
+    useState<number | null>(null);
 
   const navigate = useNavigate();
 
@@ -233,6 +239,7 @@ export function LibraryPage(props: LibraryPageProps) {
                         onEdit={() => setSelectedEntry(item)}
                       />
                     }
+                    onAddPlaythrough={setAddPlaythroughLibraryItemId}
                   />
                 </li>
               ))}
@@ -251,6 +258,18 @@ export function LibraryPage(props: LibraryPageProps) {
           open={true}
           onOpenChange={(nextOpen) => {
             if (!nextOpen) setSelectedEntry(null);
+          }}
+        />
+      ) : null}
+
+      {addPlaythroughLibraryItemId !== null ? (
+        <AddEditPlaythroughDrawer
+          open={true}
+          mode="add"
+          libraryItemId={addPlaythroughLibraryItemId}
+          existingPlaythroughCount={0}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setAddPlaythroughLibraryItemId(null);
           }}
         />
       ) : null}

@@ -1,0 +1,41 @@
+/** Abbreviation map aligned with entities/game/ui/platform-badges. */
+const ABBREVIATIONS: Record<string, string> = {
+  "playstation 5": "PS5",
+  "playstation 4": "PS4",
+  "playstation 3": "PS3",
+  "playstation 2": "PS2",
+  playstation: "PS1",
+  "playstation vita": "Vita",
+  "playstation portable": "PSP",
+  "xbox series x|s": "XSX",
+  "xbox series": "XSX",
+  "xbox one": "XB1",
+  "xbox 360": "X360",
+  xbox: "Xbox",
+  "nintendo switch": "Switch",
+  switch: "Switch",
+  "wii u": "Wii U",
+  wii: "Wii",
+  "nintendo gamecube": "GCN",
+  gamecube: "GCN",
+  "nintendo 64": "N64",
+  "super nintendo entertainment system": "SNES",
+  "nintendo entertainment system": "NES",
+  "game boy advance": "GBA",
+  "game boy color": "GBC",
+  "game boy": "GB",
+  "nintendo 3ds": "3DS",
+  "new nintendo 3ds": "N3DS",
+  "nintendo ds": "DS",
+  "pc (microsoft windows)": "PC",
+  "pc windows": "PC",
+  windows: "PC",
+  mac: "Mac",
+  macos: "Mac",
+  linux: "Linux",
+  "steam deck": "Deck",
+};
+
+export function abbreviatePlatform(name: string): string {
+  return ABBREVIATIONS[name.toLowerCase()] ?? name;
+}

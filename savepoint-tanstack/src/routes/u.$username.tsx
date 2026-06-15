@@ -11,7 +11,11 @@ import {
 } from "@/features/view-activity-feed/api";
 import { NotFoundError } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
-import { ProfileActivityTab, ProfileOverview } from "@/widgets";
+import {
+  ProfileActivityTab,
+  ProfileOverview,
+  ProfilePlaythroughsSection,
+} from "@/widgets";
 
 /**
  * Public profile route.
@@ -70,6 +74,7 @@ function PublicProfilePage() {
     isFollowing,
     libraryItems = [],
     activity,
+    playthroughs = [],
   } = Route.useLoaderData();
   const isOwnProfile = viewerId != null && viewerId === profile.id;
 
@@ -130,6 +135,9 @@ function PublicProfilePage() {
         headerActions={headerActions}
         librarySlot={librarySlot}
         activitySlot={activitySlot}
+        playthroughsSlot={
+          <ProfilePlaythroughsSection playthroughs={playthroughs} />
+        }
         hideActivityTab={viewerId === null}
       />
     </main>
