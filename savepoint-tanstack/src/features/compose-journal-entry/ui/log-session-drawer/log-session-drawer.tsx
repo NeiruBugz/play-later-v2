@@ -1,5 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
@@ -45,6 +45,10 @@ export function LogSessionDrawer({
   const [thoughts, setThoughts] = useState("");
   const [hours, setHours] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) setSelectedId(preselectedPlaythroughId);
+  }, [open, preselectedPlaythroughId]);
 
   const parsedHours = parseFloat(hours);
   const hasPositiveHours = Number.isFinite(parsedHours) && parsedHours > 0;
