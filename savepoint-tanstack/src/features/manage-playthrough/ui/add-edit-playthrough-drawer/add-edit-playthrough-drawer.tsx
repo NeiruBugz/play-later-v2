@@ -94,7 +94,10 @@ export function AddEditPlaythroughDrawer({
 
   const onSubmit = async (values: PlaythroughFormValues) => {
     try {
-      if (mode === "edit" && playthroughId) {
+      if (mode === "edit") {
+        if (!playthroughId) {
+          throw new Error("Cannot edit a playthrough without an id");
+        }
         await updatePlaythroughFn({
           data: {
             id: playthroughId,
