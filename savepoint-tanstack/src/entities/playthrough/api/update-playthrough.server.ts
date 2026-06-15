@@ -10,6 +10,7 @@ import type {
   PlaythroughKind,
   PlaythroughStatus,
 } from "../../../../shared/lib/prisma/client.ts";
+import { isOrdinalUniqueConflict } from "../model/ordinal-conflict";
 import { syncLibraryStatusFromRuns } from "./sync-library-status.server";
 
 export type UpdatePlaythroughInput = {
@@ -25,27 +26,6 @@ export type UpdatePlaythroughInput = {
   completion?: string | null;
   notes?: string | null;
 };
-
-function isOrdinalUniqueConflict(error: unknown): boolean {
-  if (
-    typeof error !== "object" ||
-    error === null ||
-    !("code" in error) ||
-    (error as { code: unknown }).code !== "P2002"
-  ) {
-    return false;
-  }
-  const meta = (error as { meta?: unknown }).meta;
-  if (typeof meta !== "object" || meta === null || !("target" in meta)) {
-    return false;
-  }
-  const target = (meta as { target: unknown }).target;
-  return (
-    Array.isArray(target) &&
-    (target as string[]).includes("ordinal") &&
-    (target as string[]).includes("libraryItemId")
-  );
-}
 
 /**
  * Partially updates a playthrough by id.

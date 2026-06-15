@@ -1,11 +1,16 @@
 import { prisma } from "@/shared/lib/db.server";
-import { NotFoundError, ValidationError } from "@/shared/lib/errors";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@/shared/lib/errors";
 
 import type {
   Playthrough,
   PlaythroughKind,
   PlaythroughStatus,
 } from "../../../../shared/lib/prisma/client.ts";
+import { isOrdinalUniqueConflict } from "../model/ordinal-conflict";
 import { syncLibraryStatusFromRuns } from "./sync-library-status.server";
 
 export type CreatePlaythroughInput = {
@@ -60,37 +65,48 @@ export async function createPlaythrough(
     });
   }
 
-  return prisma.$transaction(async (tx) => {
-    const existing = await tx.playthrough.findMany({
-      where: { libraryItemId: input.libraryItemId },
-      select: { ordinal: true },
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const existing = await tx.playthrough.findMany({
+        where: { libraryItemId: input.libraryItemId },
+        select: { ordinal: true },
+      });
+
+      const isFirst = existing.length === 0;
+      const maxOrdinal = isFirst
+        ? 0
+        : Math.max(...existing.map((r) => r.ordinal));
+      const ordinal = maxOrdinal + 1;
+      const kind: PlaythroughKind = isFirst ? "FIRST" : "REPLAY";
+
+      const run = await tx.playthrough.create({
+        data: {
+          libraryItemId: input.libraryItemId,
+          ordinal,
+          kind,
+          status: input.status,
+          platform: input.platform ?? null,
+          startedAt: input.startedAt ?? null,
+          finishedAt: input.finishedAt ?? null,
+          playtimeMinutes: input.playtimeMinutes ?? 0,
+          rating: input.rating ?? null,
+          completion: input.completion ?? null,
+          notes: input.notes ?? null,
+        },
+      });
+
+      await syncLibraryStatusFromRuns(tx, input.libraryItemId);
+
+      return run;
     });
-
-    const isFirst = existing.length === 0;
-    const maxOrdinal = isFirst
-      ? 0
-      : Math.max(...existing.map((r) => r.ordinal));
-    const ordinal = maxOrdinal + 1;
-    const kind: PlaythroughKind = isFirst ? "FIRST" : "REPLAY";
-
-    const run = await tx.playthrough.create({
-      data: {
-        libraryItemId: input.libraryItemId,
-        ordinal,
-        kind,
-        status: input.status,
-        platform: input.platform ?? null,
-        startedAt: input.startedAt ?? null,
-        finishedAt: input.finishedAt ?? null,
-        playtimeMinutes: input.playtimeMinutes ?? 0,
-        rating: input.rating ?? null,
-        completion: input.completion ?? null,
-        notes: input.notes ?? null,
-      },
-    });
-
-    await syncLibraryStatusFromRuns(tx, input.libraryItemId);
-
-    return run;
-  });
+  } catch (error) {
+    if (error instanceof NotFoundError) throw error;
+    if (isOrdinalUniqueConflict(error)) {
+      throw new ConflictError(
+        "A playthrough with this ordinal already exists for this library item",
+        { libraryItemId: input.libraryItemId }
+      );
+    }
+    throw error;
+  }
 }

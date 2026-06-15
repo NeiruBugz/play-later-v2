@@ -18,7 +18,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/shared/lib/db.server";
-import { NotFoundError } from "@/shared/lib/errors";
+import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
 import { createPlaythrough } from "./create-playthrough.server";
 
@@ -220,6 +220,33 @@ describe("createPlaythrough", () => {
       ).rejects.toBeInstanceOf(NotFoundError);
 
       expect(mockedTransaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given Prisma raises a unique-constraint error on [libraryItemId, ordinal]", () => {
+    beforeEach(() => {
+      mockedFindUnique.mockResolvedValue(STUB_ITEM as never);
+
+      const tx = makeMockTx();
+      tx.playthrough.findMany.mockResolvedValue([{ ordinal: 1 }]);
+
+      const prismaUniqueError = Object.assign(new Error("Unique constraint"), {
+        code: "P2002",
+        meta: { target: ["libraryItemId", "ordinal"] },
+      });
+      tx.playthrough.create.mockRejectedValue(prismaUniqueError);
+
+      mockedTransaction.mockImplementation(((cb: (tx: unknown) => unknown) =>
+        cb(tx)) as never);
+    });
+
+    it("maps the Prisma error to ConflictError", async () => {
+      await expect(
+        createPlaythrough(OWNER_ID, {
+          libraryItemId: ITEM_ID,
+          status: "PLAYING",
+        })
+      ).rejects.toBeInstanceOf(ConflictError);
     });
   });
 
