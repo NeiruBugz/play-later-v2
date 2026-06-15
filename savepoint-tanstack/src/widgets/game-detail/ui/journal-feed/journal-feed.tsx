@@ -10,6 +10,8 @@ const KIND_LABEL: Record<string, string> = {
   REPLAY: "Replay",
 };
 
+const EMPTY_LEGACY_ENTRIES: JournalEntry[] = [];
+
 type FlatEntry = {
   entry: JournalEntry;
   runLabel: string | null;
@@ -51,7 +53,7 @@ function flattenEntries(
 
 export function JournalFeed({
   playthroughs,
-  legacyEntries = [],
+  legacyEntries = EMPTY_LEGACY_ENTRIES,
 }: JournalFeedProps) {
   const flat = useMemo(
     () => flattenEntries(playthroughs, legacyEntries),
