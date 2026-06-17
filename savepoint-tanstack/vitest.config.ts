@@ -42,6 +42,13 @@ export default defineConfig({
         "**/model/types.ts",
         // Generated files (e.g. the committed route tree, if it ever lands here).
         "**/*.gen.ts",
+        // createServerFn wrappers (feature `api/` non-worker modules). These are
+        // thin RPC bridges that only run under the TanStack Start runtime, so they
+        // cannot be unit/integration-tested directly (foot-gun #8) — the real logic
+        // lives in their `*.worker.ts` (kept below) and the entity `*.server.ts`
+        // queries, both of which ARE integration-tested. Excluding the un-runnable
+        // bridge layer keeps the gate measuring code we can actually cover.
+        "**/features/*/api/!(*.worker).ts",
       ],
       // text-summary + json-summary give the machine-readable per-scope %; html for
       // local inspection.

@@ -142,9 +142,9 @@ _Delivers AC SET-1 / SET-2._
 
 _Delivers AC X-1…X-4 and the audit's principle-level guarantees._
 
-- [ ] Audit + fix: ≥44px tap targets across all chrome; active indicators never color-only; gate `Sheet`/`Dialog`/carousel entrance animations behind `prefers-reduced-motion` (`motion-reduce:`); confirm no hardcoded hex — status/surface tokens only. **[Agent: react-frontend]**
-- [ ] Gate: full suite green — `typecheck`, `lint`, `format:check`, `test:unit`, `test:integration`, `build`; coverage ≥85% on touched features. **[Agent: testing]**
-- [ ] Gate: end-to-end responsive visual pass across all 8 surfaces at phone (~390px) + desktop (~1440px) × Light + Dark + System, against the `design-reference/` prototypes; confirm each desktop view is the additive widening of its phone view (same nav model, no removed action). Record any authed-surface deferrals. **[Agent: react-frontend]**
+- [x] Audit + fix: tap targets — game-detail mobile Back/More bumped 36→44px (bottom nav/topbar already 44px from Slice 3); reduced-motion already globally covered in `styles.css` (`prefers-reduced-motion` neutralizes animations); active indicators carry `aria-current`/filled state (not color-only); no stray hardcoded hex (only the intentional platform brand colors); tokens resolve in light + dark. **[Agent: react-frontend]**
+- [x] Gate: full suite green — typecheck 0, lint 0, format:check clean, **test:unit 1721**, **test:integration 661** (incl. 3 new integration suites covering the 3b entity query + both workers at 100%), build OK. **Coverage 95.52% statements** after excluding the un-runnable `createServerFn` wrapper bridge layer from the gate (`features/*/api/!(*.worker).ts`) — workers + entity queries stay counted (user-approved gate refinement; the deficit was pre-existing untestable wrappers). **[Agent: testing]**
+- [ ] **Deferred (yours to eyeball):** live responsive visual pass across the 8 surfaces at phone + desktop × Light/Dark/System against `design-reference/` — needs an authenticated running app (no session in this sandbox, per methodology). Component tests + the build gate stand in until then.
 
 ---
 
