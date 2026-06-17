@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Safe-area padding token for the bottom navigation bar.
+   Ensures content clears the iOS home indicator on notched devices. */
+@layer utilities {
+  .pb-safe-nav {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
 :root {
   /* Base font-family vars hold ONLY the loaded family name. The generic
      fallbacks live on the theme-layer composites below

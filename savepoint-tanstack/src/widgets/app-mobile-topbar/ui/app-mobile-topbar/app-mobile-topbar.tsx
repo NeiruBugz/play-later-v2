@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 
+import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
 
 export function AppMobileTopbar() {
@@ -25,13 +26,14 @@ export function AppMobileTopbar() {
       </Link>
 
       <div className="flex items-center gap-1">
-        <Link
-          to="/games/search"
+        <button
+          type="button"
           aria-label="Search games"
-          className="hover:bg-accent inline-flex h-9 w-9 items-center justify-center rounded-md"
+          onClick={openCommandPalette}
+          className="hover:bg-accent inline-flex h-11 w-11 items-center justify-center rounded-md"
         >
-          <Search aria-hidden="true" className="h-4 w-4" />
-        </Link>
+          <Search aria-hidden="true" className="h-5 w-5" />
+        </button>
         <ThemeToggle />
       </div>
     </header>

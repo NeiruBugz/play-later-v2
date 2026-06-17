@@ -9,6 +9,7 @@ import { AppSidebar } from "./app-sidebar";
 let currentPath = "/library";
 
 const mockRouterInvalidate = vi.fn();
+const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, activeProps, children, ...rest }: any) => {
@@ -21,6 +22,7 @@ vi.mock("@tanstack/react-router", () => ({
     );
   },
   useRouter: () => ({ invalidate: mockRouterInvalidate }),
+  useNavigate: () => mockNavigate,
 }));
 
 vi.mock("@/shared/api/auth-client", () => ({
@@ -29,10 +31,6 @@ vi.mock("@/shared/api/auth-client", () => ({
   },
 }));
 
-// The sidebar only needs the `openCommandPalette` event helper. Mock the
-// command-palette barrel so its real CommandPalette UI (which statically
-// chains to authed server fns → auth.server's module-level env read) is not
-// loaded into this jsdom test graph.
 vi.mock("@/features/command-palette", () => ({
   openCommandPalette: vi.fn(),
 }));
@@ -50,9 +48,13 @@ const stubUser = {
 
 const elements = {
   getNavLink: (name: string) => screen.getByRole("link", { name }),
+  queryNavLink: (name: string) => screen.queryByRole("link", { name }),
   getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
   getSearchTrigger: () =>
     screen.getByRole("button", { name: "Open command palette" }),
+  getLogSessionCta: () => screen.getByRole("button", { name: "Log a session" }),
+  queryLogSessionCta: () =>
+    screen.queryByRole("button", { name: "Log a session" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
   getUserMenuTrigger: () =>
     screen.getByRole("button", { name: "Open user menu" }),
@@ -70,9 +72,16 @@ const actions = {
   clickSignOut: async () => {
     await userEvent.click(elements.getSignOutItem());
   },
+  clickLogSession: async () => {
+    await userEvent.click(elements.getLogSessionCta());
+  },
 };
 
 describe("AppSidebar", () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+  });
+
   describe("given the sidebar is rendered", () => {
     beforeEach(() => {
       currentPath = "/profile";
@@ -85,6 +94,13 @@ describe("AppSidebar", () => {
 
     it("renders the search trigger button", () => {
       elements.getSearchTrigger();
+    });
+
+    it("renders a Home/Dashboard nav link with href /dashboard", () => {
+      expect(elements.getNavLink("Dashboard")).toHaveAttribute(
+        "href",
+        "/dashboard"
+      );
     });
 
     it("renders a Library link with href /library", () => {
@@ -115,6 +131,10 @@ describe("AppSidebar", () => {
       );
     });
 
+    it("renders a prominent Log a session CTA button", () => {
+      expect(elements.getLogSessionCta()).toBeDefined();
+    });
+
     it("renders the theme toggle", () => {
       elements.getThemeToggle();
     });
@@ -123,10 +143,7 @@ describe("AppSidebar", () => {
       expect(screen.getByText("Ada")).toBeDefined();
     });
 
-    it("renders an initial-avatar fallback (Phase 3 visual-parity push)", () => {
-      // The Radix Avatar primitive renders the fallback span once the
-      // image fails to load; in the test environment no <img> resolves,
-      // so the fallback is mounted immediately.
+    it("renders an initial-avatar fallback", () => {
       expect(screen.getByLabelText("Ada")).toBeDefined();
     });
 
@@ -165,6 +182,12 @@ describe("AppSidebar", () => {
         "aria-current"
       );
     });
+
+    it("does not mark the Dashboard link as the current page", () => {
+      expect(elements.getNavLink("Dashboard")).not.toHaveAttribute(
+        "aria-current"
+      );
+    });
   });
 
   describe("given the current path is /profile", () => {
@@ -187,6 +210,23 @@ describe("AppSidebar", () => {
     });
   });
 
+  describe("given the user clicks the Log a session CTA", () => {
+    beforeEach(async () => {
+      currentPath = "/library";
+      render(<AppSidebar user={stubUser} />);
+      await actions.clickLogSession();
+    });
+
+    it("calls navigate with a search updater that sets action to log-session", () => {
+      expect(mockNavigate).toHaveBeenCalledOnce();
+      const [callArg] = mockNavigate.mock.calls[0];
+      const updater = callArg.search;
+      expect(typeof updater).toBe("function");
+      const result = updater({});
+      expect(result).toMatchObject({ action: "log-session" });
+    });
+  });
+
   describe("given the user opens the user menu", () => {
     beforeEach(async () => {
       currentPath = "/library";
@@ -200,8 +240,6 @@ describe("AppSidebar", () => {
     });
 
     it("reveals the Profile settings menu item linking to /settings/profile", () => {
-      // DropdownMenuItem with asChild renders the Link as the menuitem; the
-      // mocked Link forwards `to` as `href` on the underlying <a>.
       expect(elements.getProfileSettingsItem()).toHaveAttribute(
         "href",
         "/settings/profile"

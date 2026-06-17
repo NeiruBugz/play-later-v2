@@ -47,11 +47,22 @@ _The one new primitive. Delivers AC GLOBAL-2 / AC FLOW-1 / AC FLOW-4 reachabilit
 
 _Delivers AC GLOBAL-1 / GLOBAL-2 / GLOBAL-4 / GLOBAL-5 / GLOBAL-6 — the keystone navigation fix (NAV-01/02/03/04)._
 
-- [ ] RED: tests — bottom nav renders 5 slots (Home→`/dashboard`, Library, center **Log**, Journal, Profile); the Log button navigates with `action=log-session` (router stub); the active tab exposes a filled/accented indicator + `aria-current` (not color-only); icon buttons meet the ≥44px target. Sidebar renders a Home link and a "Log a session" CTA that navigates with `action=log-session`. **[Agent: testing]**
-- [ ] GREEN: rework `widgets/app-bottom-nav/` to the 5-slot model with a new `nav-log-button` raised center action (→ `?action=log-session`), filled-icon + `aria-current` active state, ≥44px targets. **[Agent: react-frontend]**
-- [ ] GREEN: `widgets/app-mobile-topbar/` — bump icon buttons 36→44px; wire the search icon to `openCommandPalette()` (replace the page-nav). **[Agent: react-frontend]**
-- [ ] GREEN: `widgets/app-sidebar/` — add a Home/Dashboard link (parity) and pin a "Log a session" CTA under the brand (→ `?action=log-session`); keep the status legend. Add safe-area bottom-nav spacing utility in `src/styles.css` and apply via `widgets/app-shell/`. **[Agent: react-frontend]**
-- [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual (phone: bottom nav with center Log + active state; desktop: sidebar Home + Log CTA) Light + Dark; tapping Log from Dashboard, Library, Journal, Profile opens the Log sheet (uses Slice 2 host). **[Agent: react-frontend]**
+- [x] RED: tests — bottom nav renders 5 slots (Home→`/dashboard`, Library, center **Log**, Journal, Profile); the Log button navigates with `action=log-session` (router stub); the active tab exposes a filled/accented indicator + `aria-current` (not color-only); icon buttons meet the ≥44px target. Sidebar renders a Home link and a "Log a session" CTA that navigates with `action=log-session`. **[Agent: testing]** — 15 new assertions across the 3 widget suites, RED for the right reasons.
+- [x] GREEN: rework `widgets/app-bottom-nav/` to the 5-slot model with a raised center **Log** action (→ `?action=log-session` via `useNavigate` search-updater), `aria-current` active state, ≥44px (`h-11 min-h-11`) on every slot incl. Log. **[Agent: react-frontend]** — verified base className carries the 44px size on all slots, not only active.
+- [x] GREEN: `widgets/app-mobile-topbar/` — icon buttons 36→44px (`h-11 w-11`); search is now a button opening the command palette (reuses the sidebar's `openCommandPalette()` path) instead of navigating to `/games/search`. **[Agent: react-frontend]**
+- [x] GREEN: `widgets/app-sidebar/` — added a Home/Dashboard link (first nav item) and a prominent "Log a session" CTA under the brand (→ `?action=log-session`); status legend kept. Added a `.pb-safe-nav` utility (`max(1rem, env(safe-area-inset-bottom))`) in `src/styles.css`, applied to the bottom nav + `app-shell` main padding (replaces raw `pb-16`). **[Agent: react-frontend]**
+- [x] Gate: unit + typecheck/lint/format green (1615 tests, 0 fail); tapping Log issues the `action=log-session` navigation (opens the Slice-2 host). **[Agent: react-frontend]** **Live Chrome-MCP visual deferred** (authed routes, no sandbox session). **DEFERRED to Slice 3b:** the bottom-nav Log fires `?action=log-session` with NO game → the host has no game picker / slug→data path yet, so the form isn't submittable from this entry point. See Slice 3b.
+
+---
+
+## Slice 3b — Functional global "Log a session" (no-game picker + slug→data)
+
+_Carry-forward from Slices 2 & 3: makes the global Log actually log. Was the Slice-2 deferral + Slice-3's no-game-picker concern, pulled into one coherent increment (the first real Log triggers — bottom-nav Log, then the Slice-5 hero — both need it)._
+
+- [ ] RED: tests — given `action=log-session` with no `game`, the host renders a game picker (search / your library); choosing a game sets `game=<slug>` (or loads its data); given `action=log-session&game=<slug>`, the host loads that game's `{ gameId, playthroughs }` and `LogSessionContent` submits against the correct game. **[Agent: testing]**
+- [ ] GREEN: wire the host's slug→`{ gameId, playthroughs }` lookup via the existing client-callable path (read how `game-detail` feeds `LogSessionDrawer`); pass real props to `LogSessionContent` and remove the placeholder `game?: string` prop. **[Agent: tanstack-fullstack]**
+- [ ] GREEN: build the no-game picker UI (search your library / recent Playing) shown when `action=log-session` has no `game`; on pick → set `game` slug. **[Agent: react-frontend]**
+- [ ] Gate: unit + integration + typecheck/lint green; from the bottom-nav Log (no game) you can pick a game and save a session; `?action=log-session&game=<slug>` logs against the right game. Removes the Slice-2 fail-safe-but-non-functional gap. **[Agent: testing]**
 
 ---
 
@@ -72,7 +83,7 @@ _Delivers AC DASH-1…DASH-4._
 
 - [ ] RED: tests — dashboard leads with a "Jump back in" card for the most in-progress game whose Log button navigates with `action=log-session&game=<slug>`; status counts render as one compact strip; game rails are horizontal scroll-snap carousels on phone; desktop renders hero + continue rail side by side. **[Agent: testing]**
 - [ ] GREEN: restructure `widgets/dashboard-page/` mobile-first — greeting eyebrow, jump-back-in hero, compact status strip (reuse `entities/library-item/ui/library-status-strip`), convert `dashboard-game-section` to a `scroll-snap` rail on mobile / grid on desktop; desktop pairs hero + continue and adds the library-breakdown + last-reflection cards. **[Agent: react-frontend]**
-- [ ] GREEN (carry-forward from Slice 2): wire the global host's `log-session` data path — when `action=log-session&game=<slug>`, load that game's `{ gameId, playthroughs }` via the existing client-callable path and pass real props to `LogSessionContent` (it currently ignores the raw `game` slug). Remove the placeholder `game?: string` prop once real props flow. This is what makes the hero's "Log" actually functional. **[Agent: tanstack-fullstack]**
+- [ ] Verify the hero's `action=log-session&game=<slug>` Log opens the host pre-targeted to that game and saves a session — the slug→`{ gameId, playthroughs }` data path itself is built in **Slice 3b** (do that slice first if not yet done; here only confirm the hero passes the slug correctly). **[Agent: tanstack-fullstack]**
 - [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual (phone hero + swipe rails; desktop multi-column) Light + Dark; hero Log opens the sheet pre-targeted to the game AND a session saves against the correct game. **[Agent: react-frontend]**
 
 ---

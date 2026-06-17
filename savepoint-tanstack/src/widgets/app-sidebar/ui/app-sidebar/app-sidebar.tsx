@@ -1,9 +1,10 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import {
   BookMarked,
   BookOpen,
+  House,
   LogOut,
-  Search,
+  PlusCircle,
   Settings,
   User,
   UserCog,
@@ -33,8 +34,8 @@ export interface AppSidebarProps {
 }
 
 const NAV_ITEMS = [
+  { label: "Dashboard", to: "/dashboard", icon: House },
   { label: "Library", to: "/library", icon: BookMarked },
-  { label: "Search games", to: "/games/search", icon: Search },
   { label: "Journal", to: "/journal", icon: BookOpen },
   { label: "Profile", to: "/profile", icon: User },
   { label: "Settings", to: "/settings/profile", icon: Settings },
@@ -42,6 +43,13 @@ const NAV_ITEMS = [
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
+  const navigate = useNavigate({ from: "/" });
+
+  const openLogSession = () => {
+    void navigate({
+      search: (prev) => ({ ...prev, action: "log-session" as const }),
+    });
+  };
 
   // Never display the email — see README "Display-name privacy".
   const nonEmailName = user.name && !user.name.includes("@") ? user.name : null;
@@ -92,6 +100,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <kbd className="text-muted-foreground rounded border px-1.5 py-0.5 text-xs font-semibold">
             ⌘K
           </kbd>
+        </button>
+
+        <button
+          type="button"
+          aria-label="Log a session"
+          onClick={openLogSession}
+          className="bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold"
+        >
+          <PlusCircle size={16} aria-hidden="true" />
+          Log a session
         </button>
       </div>
 
