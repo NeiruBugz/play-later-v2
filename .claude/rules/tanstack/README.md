@@ -40,6 +40,7 @@ are prescriptive.
 
 | File | Auto-loads when |
 | --- | --- |
+| [`components.md`](./components.md) | Touching `app/`, `widgets/`, `features/`, or `entities/` (component sidecar convention) |
 | [`server-fns.md`](./server-fns.md) | Touching `features/*/api/`, `entities/*/api/`, or any route file |
 | [`testing.md`](./testing.md) | Touching `*.test.{ts,tsx}` or `test/**/*` |
 | [`errors.md`](./errors.md) | Touching any `.ts`/`.tsx` under `src/` or `test/` |
