@@ -151,12 +151,14 @@ describe("AppBottomNav", () => {
       ).toBe(true);
     });
 
-    it("the Log button carries a 44px min-height utility (h-11 or min-h-11)", () => {
+    it("the Log button is a ≥44px circular FAB", () => {
       const logButton = elements.getLogButton();
+      // The Log FAB is a 56px circle (size-14) — a true square, satisfying the ≥44px tap-target requirement.
       expect(
-        logButton.className.includes("h-11") ||
-          logButton.className.includes("min-h-11")
+        logButton.className.includes("size-14") ||
+          logButton.className.includes("h-14")
       ).toBe(true);
+      expect(logButton.className.includes("rounded-full")).toBe(true);
     });
   });
 });

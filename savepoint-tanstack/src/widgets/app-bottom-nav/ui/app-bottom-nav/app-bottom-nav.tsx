@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { BookOpen, House, Library, PlusCircle, User } from "lucide-react";
+import { BookOpen, House, Library, Plus, User } from "lucide-react";
 
 const DEST_ITEMS_LEFT = [
   { label: "Home", to: "/dashboard", icon: House },
@@ -24,7 +24,7 @@ export function AppBottomNav() {
     <nav
       data-testid="app-bottom-nav"
       aria-label="Primary mobile tab navigation"
-      className="bg-background pb-safe-nav fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t md:hidden"
+      className="bg-background pb-safe-nav fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch overflow-visible border-t md:hidden"
     >
       {DEST_ITEMS_LEFT.map(({ label, to, icon: Icon }) => (
         <Link
@@ -42,15 +42,19 @@ export function AppBottomNav() {
         </Link>
       ))}
 
-      <button
-        type="button"
-        aria-label="Log a session"
-        onClick={openLogSession}
-        className="bg-primary text-primary-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 rounded-t-xl text-[11px] font-semibold"
-      >
-        <PlusCircle size={22} aria-hidden="true" />
-        Log
-      </button>
+      <div className="flex flex-1 flex-col items-center justify-end pb-1">
+        <button
+          type="button"
+          aria-label="Log a session"
+          onClick={openLogSession}
+          className="bg-primary text-primary-foreground flex aspect-square size-14 shrink-0 -translate-y-3 items-center justify-center rounded-full shadow-lg"
+        >
+          <Plus size={26} aria-hidden="true" />
+        </button>
+        <span className="text-muted-foreground -mt-1 text-[11px] font-medium">
+          Log
+        </span>
+      </div>
 
       {DEST_ITEMS_RIGHT.map(({ label, to, icon: Icon }) => (
         <Link
