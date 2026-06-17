@@ -65,8 +65,22 @@ export const Route = createRootRoute({
         content: "A library, not a backlog. For patient gamers.",
       },
       { name: "twitter:image", content: "/og-image.png" },
+      {
+        name: "theme-color",
+        content: "#f6f1e7",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        name: "theme-color",
+        content: "#120f0c",
+        media: "(prefers-color-scheme: dark)",
+      },
     ],
     links: [
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
       {
         rel: "icon",
         type: "image/svg+xml",

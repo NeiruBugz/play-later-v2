@@ -21,6 +21,7 @@ import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-
 import { clearLibraryStatusManualFn } from "@/features/manage-playthrough/api/clear-library-status-manual-fn";
 import { setLibraryStatusManualFn } from "@/features/manage-playthrough/api/set-library-status-manual-fn";
 import { getErrorMessage } from "@/shared/lib/errors";
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
@@ -37,9 +38,6 @@ import type {
   LibraryItemStatus,
 } from "../../../../../shared/lib/prisma/client";
 import type { LibraryStatusSwitcherProps } from "./library-status-switcher.type";
-import { useMediaQuery } from "./use-media-query";
-
-const DESKTOP_QUERY = "(min-width: 768px)";
 
 function labelForStatus(
   status: LibraryItemStatus,
@@ -117,7 +115,7 @@ export function LibraryStatusSwitcher({
   statusIsManual,
 }: LibraryStatusSwitcherProps) {
   const router = useRouter();
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const isDesktop = useIsDesktop();
   const [optimisticEntry, setOptimisticEntry] = useState<LibraryItem | null>(
     entry
   );

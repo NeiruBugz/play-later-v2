@@ -85,7 +85,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   );
 
   return (
-    <div className="mb-md xl:hidden" aria-label="Mobile library filters">
+    <div className="mb-md md:hidden" aria-label="Mobile library filters">
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetTrigger asChild>
           <Button
