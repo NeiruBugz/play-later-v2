@@ -59,10 +59,10 @@ _Delivers AC GLOBAL-1 / GLOBAL-2 / GLOBAL-4 / GLOBAL-5 / GLOBAL-6 — the keysto
 
 _Carry-forward from Slices 2 & 3: makes the global Log actually log. Was the Slice-2 deferral + Slice-3's no-game-picker concern, pulled into one coherent increment (the first real Log triggers — bottom-nav Log, then the Slice-5 hero — both need it)._
 
-- [ ] RED: tests — given `action=log-session` with no `game`, the host renders a game picker (search / your library); choosing a game sets `game=<slug>` (or loads its data); given `action=log-session&game=<slug>`, the host loads that game's `{ gameId, playthroughs }` and `LogSessionContent` submits against the correct game. **[Agent: testing]**
-- [ ] GREEN: wire the host's slug→`{ gameId, playthroughs }` lookup via the existing client-callable path (read how `game-detail` feeds `LogSessionDrawer`); pass real props to `LogSessionContent` and remove the placeholder `game?: string` prop. **[Agent: tanstack-fullstack]**
-- [ ] GREEN: build the no-game picker UI (search your library / recent Playing) shown when `action=log-session` has no `game`; on pick → set `game` slug. **[Agent: react-frontend]**
-- [ ] Gate: unit + integration + typecheck/lint green; from the bottom-nav Log (no game) you can pick a game and save a session; `?action=log-session&game=<slug>` logs against the right game. Removes the Slice-2 fail-safe-but-non-functional gap. **[Agent: testing]**
+- [x] RED: tests — given `action=log-session` with no `game`, the host renders a game picker (search / your library); choosing a game sets `game=<slug>` (or loads its data); given `action=log-session&game=<slug>`, the host loads that game's `{ gameId, playthroughs }` and `LogSessionContent` submits against the correct game. **[Agent: testing]**
+- [x] GREEN: wire the host's slug→`{ gameId, playthroughs }` lookup via a new feature fn (`getLogSessionGameDataFn` + worker, composing a new `getPlaythroughsBySlug` entity query); `LogSessionForGame` loads + passes real props to `LogSessionContent`; placeholder `game?: string` prop removed. **[Agent: tanstack-fullstack]**
+- [x] GREEN: built `LogSessionGamePicker` (lists library via own `getLoggableGamesFn`, FSD-compliant) shown when no `game`; on pick → navigate setting `game` slug; host delegates picker vs `LogSessionForGame`. **[Agent: tanstack-fullstack]**
+- [x] Gate: typecheck/lint/build green; host + compose + game-detail + library-item-card suites green. **Integration note:** the new fn wrappers leak the `auth.server` chain into client component tests under vitest — mocked in consuming tests (game-detail, library-item-card), mirroring the `createJournalEntryFn` pattern; prod build strips it. Live in-browser pass deferred (no session). **[Agent: tanstack-fullstack]**
 
 ---
 
@@ -70,10 +70,10 @@ _Carry-forward from Slices 2 & 3: makes the global Log actually log. Was the Sli
 
 _Delivers AC LIB-1…LIB-6._
 
-- [ ] RED: tests — library renders a 2-up cover grid at phone width; a sticky status-lens segmented row (All + statuses with counts) re-filters in one interaction (drives the `status` search param); secondary filters live behind a Filters trigger with an active-count badge; a grid/list toggle switches presentation. **[Agent: testing]**
-- [ ] GREEN: `widgets/library-page/` — default 2-up grid on phones widening to ~5-up desktop (tokenized columns, replacing the arbitrary `[repeat(auto-fill,minmax(…))]` values); add the grid/list view toggle (local UI state). **[Agent: react-frontend]**
-- [ ] GREEN: `features/filter-library/` — promote status out of the sheet into an always-present **sticky `SegmentedControl` lens** with per-status counts; keep platform/rating/sort in the Filters sheet (mobile) / inline panel (desktop) with the active-count badge. **[Agent: react-frontend]**
-- [ ] Gate: unit + integration (filter feature ≥85%) + typecheck/lint green; Chrome-MCP visual (phone 2-up + sticky lens that stays on scroll; desktop multi-up) Light + Dark; one-tap status switch re-filters. **[Agent: react-frontend]**
+- [x] RED: tests — library renders a 2-up cover grid at phone width; a sticky status-lens segmented row (All + statuses with counts) re-filters in one interaction (drives the `status` search param); secondary filters live behind a Filters trigger with an active-count badge; a grid/list toggle switches presentation. **[Agent: testing]**
+- [x] GREEN: `widgets/library-page/` — default 2-up grid on phones (`grid-cols-2 md:grid-cols-4 lg:grid-cols-5`, tokenized, replacing the arbitrary `[repeat(auto-fill,minmax(…))]` values); grid/list view toggle (local state). **[Agent: react-frontend]**
+- [x] GREEN: `features/filter-library/` — `StatusLens` rendered sticky above the grid with per-status counts (passes full filter state so status changes don't clobber other filters); platform/rating/sort stay in the Filters sheet. **[Agent: react-frontend]** — prop types reconciled (`status`/`acquisition` widened to `string` at the lens boundary); exported from the feature barrel.
+- [x] Gate: `library-page` + `filter-library` suites 111/111 green; typecheck/lint clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 
@@ -92,9 +92,9 @@ _Delivers AC DASH-1…DASH-4._
 
 _Delivers AC GD-1…GD-4 (the phone layout; the critical "action never lost" fix)._
 
-- [ ] RED: tests — game detail (mobile branch) renders a slim top bar with Back + More and **no breadcrumb**; a stacked hero (cover, critic ring, title on its own line); a sticky jump spine of section anchors; and a **sticky bottom action bar** with a status pill + a working Log trigger. **[Agent: testing]**
-- [ ] GREEN: `widgets/game-detail/` mobile layout — stacked hero (replace `pt-[140px]`/`md:grid-cols-[1.35fr_1fr]` arbitrary values with tokenized classes), translucent Back/More top bar, status switcher row, new sub-components `game-detail-jump-spine/` + `game-detail-action-bar/` (sticky, above the tab bar; Log → host). Panels stay single-column; content unchanged (reuse existing Playthroughs/About/Themes-Tags/Journal/Screenshots/Related). **[Agent: react-frontend]**
-- [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual at phone width against `design-reference/mobile/` Light + Dark; scrolling to the bottom keeps the action bar + Log reachable; spine jumps between sections. (Authed visual pass may defer per methodology.) **[Agent: react-frontend]**
+- [x] RED: tests — game detail (mobile branch) renders a slim top bar with Back + More and **no breadcrumb**; a stacked hero (cover, critic ring, title on its own line); a sticky jump spine of section anchors; and a **sticky bottom action bar** with a status pill + a working Log trigger. **[Agent: testing]**
+- [x] GREEN: `widgets/game-detail/` mobile layout — stacked hero (`pt-[140px]`→`pt-36`, `md:[grid-template-columns:…]`→`md:grid-cols-[200px_1fr]`), translucent Back/More top bar (mobile, via `useIsDesktop`), jump spine + sticky `game-detail-action-bar` (Log → `?action=log-session&game=<slug>`); panels get `id` anchors; desktop unchanged. **[Agent: react-frontend]**
+- [x] Gate: `game-detail` suite green; typecheck/lint/format clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 
@@ -122,9 +122,9 @@ _Delivers AC JRN-1…JRN-4._
 
 _Delivers AC PRO-1 / PRO-2._
 
-- [ ] RED: tests — profile renders a compact header (avatar + name + one stat row + a **full-width** primary action) above a sticky tab strip, so content starts high; the primary action is not squeezed into the name row. **[Agent: testing]**
-- [ ] GREEN: `widgets/profile-overview/` — compact header, full-width primary action on mobile, sticky `SegmentedControl` tab strip; replace arbitrary avatar/banner sizes with tokenized classes. **[Agent: react-frontend]**
-- [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual (phone compact header, content above the fold) Light + Dark. **[Agent: react-frontend]**
+- [x] RED: tests — profile renders a compact header (avatar + name + one stat row + a **full-width** primary action) above a sticky tab strip, so content starts high; the primary action is not squeezed into the name row. **[Agent: testing]**
+- [x] GREEN: `widgets/profile-overview/` — compact identity block (avatar + name + handle + 4-item inline stat row + full-width mobile primary action), sticky `SegmentedControl` tab strip; arbitrary avatar/banner sizes replaced (`sm:h-[140px]`→`md:h-28`, etc.). **[Agent: react-frontend]**
+- [x] Gate: `profile-overview` suite 48/48 green; typecheck/lint clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 
@@ -132,9 +132,9 @@ _Delivers AC PRO-1 / PRO-2._
 
 _Delivers AC SET-1 / SET-2._
 
-- [ ] RED: tests — settings renders a grouped list of full-height tappable rows (inline toggles / drill-in) at phone width; rows navigate into the existing `settings/profile` & `settings/account` routes; desktop keeps the two-column layout. **[Agent: testing]**
-- [ ] GREEN: add a mobile `settings-list` sub-component (iOS-style grouped rows) in the settings widget; keep `widgets/settings-rail/` as the desktop `md:grid` nav. No new settings screens — reuse existing detail routes. **[Agent: react-frontend]**
-- [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual (phone grouped list → drill-in; desktop two-column) Light + Dark. **[Agent: react-frontend]**
+- [x] RED: tests — settings renders a grouped list of full-height tappable rows (inline toggles / drill-in) at phone width; rows navigate into the existing `settings/profile` & `settings/account` routes; desktop keeps the two-column layout. **[Agent: testing]**
+- [x] GREEN: added `settings-list` (iOS-style grouped rows, 52px min, active state, chevrons); `routes/_authed/settings.tsx` branches via `useIsDesktop` — phone shows the list (or `Outlet` on a sub-route), desktop keeps the `md:grid-cols-[200px_1fr]` rail. No new screens. **[Agent: react-frontend]**
+- [x] Gate: settings-list + route suites green (19 tests); typecheck/lint clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 

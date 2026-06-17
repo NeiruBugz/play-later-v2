@@ -1,11 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import {
-  BookOpen,
-  CircleCheck,
-  Gamepad2,
-  Notebook,
-  Trophy,
-} from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { AvatarUpload } from "@/features/upload-avatar";
@@ -42,150 +35,138 @@ export function ProfileOverview({
     (sum, count) => sum + (count ?? 0),
     0
   );
-  const playing = stats.statusCounts.PLAYING ?? 0;
-  // "Played" and "Completed" are different things and must not be conflated.
-  // PLAYED is a status (started, then set aside or finished — includes dropped
-  // games). Completion is a timestamp (`completedAt IS NOT NULL`). There is no
-  // COMPLETED status enum, so the old `statusCounts.COMPLETED` read was a
-  // phantom that always fell through to PLAYED and mislabeled it "Completed".
   const played = stats.statusCounts.PLAYED ?? 0;
-  const completed = stats.completedCount ?? 0;
 
-  const statCards: ReadonlyArray<{
-    label: string;
-    value: number;
-    icon: typeof BookOpen;
-  }> = [
-    { label: "In Library", value: gameCount, icon: BookOpen },
-    { label: "Playing", value: playing, icon: Gamepad2 },
-    { label: "Played", value: played, icon: CircleCheck },
-    { label: "Completed", value: completed, icon: Trophy },
-    {
-      label: "Journal Entries",
-      value: stats.journalCount ?? 0,
-      icon: Notebook,
-    },
-  ];
+  // Compact stat row: 4 key numbers inline (design ref sp-screens-c.jsx ProfileScreen).
+  const inlineStats = [
+    { label: "in library", value: gameCount },
+    { label: "played", value: played },
+    { label: "completed", value: stats.completedCount ?? 0 },
+    { label: "entries", value: stats.journalCount ?? 0 },
+  ] as const;
+
+  // Primary action renders below the identity block as a full-width button (AC PRO-2).
+  const hasPrimaryAction = isOwnProfile || headerActions !== undefined;
 
   return (
-    <div className="space-y-8">
+    <div>
       <header data-testid="profile-hero">
+        {/* Banner: tokenized height — no arbitrary [120px]/[140px] values */}
         <div
           data-testid="profile-hero-banner"
           aria-hidden="true"
-          className="relative h-20 w-full rounded-lg sm:h-[120px]"
+          className="relative h-20 w-full md:h-36"
           style={{ background: deriveBannerGradient(usernameSlug) }}
         />
-        <div className="relative px-4 sm:px-6">
-          <div className="-mt-12 flex flex-col gap-4 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-end gap-4">
-              <div className="relative inline-block">
-                <img
-                  src={avatarSrc}
-                  alt={displayName}
-                  width={140}
-                  height={140}
-                  className="ring-background h-20 w-20 rounded-lg object-cover ring-4 sm:h-[140px] sm:w-[140px]"
-                />
-                {isOwnProfile ? (
-                  <div className="absolute inset-x-0 bottom-0 rounded-b-lg bg-black/60 px-2 py-1 text-center text-xs text-white">
-                    <AvatarUpload label="Change avatar" />
-                  </div>
-                ) : null}
-              </div>
-              <div className="space-y-1 pb-1">
-                <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">
-                  {displayName}
-                </h1>
-                {profile.username ? (
-                  <p className="text-caption text-muted-foreground">
-                    @{profile.username}
-                  </p>
-                ) : null}
-                {/* Follower / following counts. Slice 20: links to
-                    `/u/$username/followers` and `/u/$username/following`
-                    when a username is present; degrade to plain text
-                    otherwise. Counts are optional — when omitted, the row
-                    is hidden entirely (tests, mocks). */}
-                {profile.username &&
-                followerCount !== undefined &&
-                followingCount !== undefined ? (
-                  <p
-                    className="text-muted-foreground mt-1 text-sm"
-                    data-testid="profile-social-counts"
-                  >
-                    <Link
-                      to="/u/$username/followers"
-                      params={{ username: profile.username }}
-                      className="hover:text-foreground transition-colors"
-                    >
-                      <span className="text-foreground font-medium tabular-nums">
-                        {followerCount}
-                      </span>{" "}
-                      Followers
-                    </Link>
-                    <span aria-hidden="true" className="mx-1">
-                      ·
-                    </span>
-                    <Link
-                      to="/u/$username/following"
-                      params={{ username: profile.username }}
-                      className="hover:text-foreground transition-colors"
-                    >
-                      <span className="text-foreground font-medium tabular-nums">
-                        {followingCount}
-                      </span>{" "}
-                      Following
-                    </Link>
-                  </p>
-                ) : null}
-              </div>
+
+        {/* Identity block: avatar + name + handle + stat row + primary action */}
+        <div data-testid="profile-identity-block" className="px-4 pb-4 md:px-6">
+          {/* Avatar row — negative margin pulls it up over the banner */}
+          <div className="-mt-10 mb-3 flex items-end justify-between md:-mt-14">
+            <div className="relative inline-block">
+              <img
+                src={avatarSrc}
+                alt={displayName}
+                width={80}
+                height={80}
+                className="ring-background h-20 w-20 rounded-full object-cover ring-4 md:h-28 md:w-28"
+              />
+              {isOwnProfile ? (
+                <div className="absolute inset-x-0 bottom-0 rounded-b-full bg-black/60 px-2 py-1 text-center text-xs text-white">
+                  <AvatarUpload label="Change avatar" />
+                </div>
+              ) : null}
             </div>
-            {headerActions !== undefined ? (
-              <div className="shrink-0" data-testid="profile-header-actions">
-                {headerActions}
-              </div>
-            ) : isOwnProfile ? (
-              <div className="shrink-0">
-                <Button asChild variant="outline">
-                  <Link to="/settings/profile">Edit Profile</Link>
-                </Button>
+
+            {/* Desktop: primary action floated to the right of the avatar */}
+            {hasPrimaryAction ? (
+              <div className="hidden shrink-0 md:block">
+                <PrimaryActionContent
+                  isOwnProfile={isOwnProfile}
+                  headerActions={headerActions}
+                  className=""
+                />
               </div>
             ) : null}
           </div>
+
+          {/* Name + handle */}
+          <h1 className="font-serif text-2xl tracking-tight md:text-4xl">
+            {displayName}
+          </h1>
+          {profile.username ? (
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              @{profile.username}
+            </p>
+          ) : null}
+
+          {/* Follower / following counts */}
+          {profile.username &&
+          followerCount !== undefined &&
+          followingCount !== undefined ? (
+            <p
+              className="text-muted-foreground mt-1 text-sm"
+              data-testid="profile-social-counts"
+            >
+              <Link
+                to="/u/$username/followers"
+                params={{ username: profile.username }}
+                className="hover:text-foreground transition-colors"
+              >
+                <span className="text-foreground font-medium tabular-nums">
+                  {followerCount}
+                </span>{" "}
+                Followers
+              </Link>
+              <span aria-hidden="true" className="mx-1">
+                ·
+              </span>
+              <Link
+                to="/u/$username/following"
+                params={{ username: profile.username }}
+                className="hover:text-foreground transition-colors"
+              >
+                <span className="text-foreground font-medium tabular-nums">
+                  {followingCount}
+                </span>{" "}
+                Following
+              </Link>
+            </p>
+          ) : null}
+
+          {/* Compact inline stat row (AC PRO-1) */}
+          <div data-testid="profile-stat-row" className="mt-3 flex gap-5">
+            {inlineStats.map(({ label, value }) => (
+              <div key={label} data-testid="profile-stat-item">
+                <span className="text-foreground text-base font-bold tabular-nums">
+                  {value}
+                </span>
+                <p className="text-muted-foreground text-xs">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Full-width primary action below identity block (AC PRO-2) — mobile only */}
+          {hasPrimaryAction ? (
+            <div
+              data-testid="profile-primary-action"
+              className="mt-4 w-full md:hidden"
+            >
+              <PrimaryActionContent
+                isOwnProfile={isOwnProfile}
+                headerActions={headerActions}
+                className="w-full"
+              />
+            </div>
+          ) : null}
         </div>
       </header>
 
-      {/* Sub-tabs — SegmentedControl driving conditional content per Slice 22
-          drift-fix (canonical uses SegmentedControl, not a Radix Tabs strip).
-          SegmentedControl is built on @radix-ui/react-tabs so triggers expose
-          role="tab" and the active panel reads as a Radix TabsContent. */}
+      {/* Sticky tab strip directly above content (AC PRO-1) */}
       <ProfileOverviewTabs
         hideActivityTab={hideActivityTab}
         overview={
           <div className="space-y-8">
-            <div
-              className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
-              data-testid="profile-stats-bar"
-            >
-              {statCards.map(({ label, value, icon: Icon }) => (
-                <div
-                  key={label}
-                  className="bg-card text-card-foreground rounded-lg border p-4"
-                  data-testid="profile-stats-bar-item"
-                >
-                  <Icon
-                    aria-hidden="true"
-                    className="text-muted-foreground mb-2 h-5 w-5"
-                  />
-                  <p className="text-2xl font-semibold tabular-nums">{value}</p>
-                  <p className="text-muted-foreground mt-0.5 text-xs font-medium">
-                    {label}
-                  </p>
-                </div>
-              ))}
-            </div>
-
             {stats.recentGames.length > 0 ? (
               <section data-testid="overview-recently-played">
                 <h2 className="heading-md mb-4 tracking-tight">
@@ -209,7 +190,6 @@ export function ProfileOverview({
                       ) : (
                         <div className="bg-muted aspect-[3/4] w-full" />
                       )}
-                      {/* Gradient mask for legibility */}
                       <div
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
@@ -237,10 +217,6 @@ export function ProfileOverview({
           </div>
         }
         library={
-          // Slice 22: render the owner's read-only library grid (canonical
-          // `/u/[username]/library` renders `LibraryGrid`). The route injects
-          // the resolved grid via `librarySlot`; fall back to an empty state
-          // when omitted (tests/mocks) or when the owner has no games.
           librarySlot !== undefined ? (
             librarySlot
           ) : (
@@ -265,6 +241,30 @@ export function ProfileOverview({
       />
     </div>
   );
+}
+
+interface PrimaryActionContentProps {
+  isOwnProfile: boolean;
+  headerActions: ReactNode | undefined;
+  className: string;
+}
+
+function PrimaryActionContent({
+  isOwnProfile,
+  headerActions,
+  className,
+}: PrimaryActionContentProps) {
+  if (headerActions !== undefined) {
+    return <div className={className}>{headerActions}</div>;
+  }
+  if (isOwnProfile) {
+    return (
+      <Button asChild variant="outline" className={className}>
+        <Link to="/settings/profile">Edit Profile</Link>
+      </Button>
+    );
+  }
+  return null;
 }
 
 type ProfileTabValue = "overview" | "library" | "activity";
@@ -297,16 +297,22 @@ function ProfileOverviewTabs({
         ];
 
   return (
-    <div className="space-y-6">
-      <SegmentedControl<ProfileTabValue>
-        value={value}
-        onValueChange={setValue}
-        options={options}
-        size="md"
-        scrollable
-        ariaLabel="Profile sections"
-      />
-      <div role="tabpanel">
+    <div>
+      {/* Sticky tab strip sits directly above content (AC PRO-1) */}
+      <div
+        data-testid="profile-tab-strip"
+        className="bg-background/90 sticky top-0 z-10 px-4 py-2 backdrop-blur-sm md:px-6"
+      >
+        <SegmentedControl<ProfileTabValue>
+          value={value}
+          onValueChange={setValue}
+          options={options}
+          size="md"
+          scrollable
+          ariaLabel="Profile sections"
+        />
+      </div>
+      <div role="tabpanel" className="px-4 py-4 md:px-6">
         {value === "overview" ? overview : null}
         {value === "library" ? library : null}
         {value === "activity" && !hideActivityTab ? activity : null}

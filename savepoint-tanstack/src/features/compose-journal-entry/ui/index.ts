@@ -6,3 +6,7 @@ export { LogSessionContent } from "./log-session-content";
 export type { LogSessionContentProps } from "./log-session-content";
 export { LogSessionDrawer } from "./log-session-drawer";
 export type { LogSessionDrawerProps } from "./log-session-drawer";
+export { LogSessionForGame } from "./log-session-for-game";
+export type { LogSessionForGameProps } from "./log-session-for-game";
+export { LogSessionGamePicker } from "./log-session-game-picker";
+export type { LogSessionGamePickerProps } from "./log-session-game-picker";

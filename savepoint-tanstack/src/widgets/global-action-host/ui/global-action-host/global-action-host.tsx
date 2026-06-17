@@ -1,7 +1,10 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { AddGameContent } from "@/features/add-game";
-import { LogSessionContent } from "@/features/compose-journal-entry";
+import {
+  LogSessionForGame,
+  LogSessionGamePicker,
+} from "@/features/compose-journal-entry";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
   Dialog,
@@ -24,10 +27,6 @@ export function GlobalActionHost() {
   const isDesktop = useIsDesktop();
 
   function handleClose() {
-    // Remove action + game from the URL; preserve all other search params
-    // child routes may carry. Object.fromEntries omits the keys entirely
-    // (rather than setting them to undefined) so router validators don't see
-    // stale enum values on the next render.
     void navigate({
       search: (prev) => {
         const entries = Object.entries(prev as Record<string, unknown>).filter(
@@ -35,6 +34,15 @@ export function GlobalActionHost() {
         );
         return Object.fromEntries(entries) as typeof prev;
       },
+    });
+  }
+
+  function handlePickerSelect(slug: string) {
+    void navigate({
+      search: (prev) => ({
+        ...(prev as Record<string, unknown>),
+        game: slug,
+      }),
     });
   }
 
@@ -46,9 +54,10 @@ export function GlobalActionHost() {
     }
 
     if (action === "log-session") {
-      // game may be undefined when opened from the bottom-nav Log button.
-      // Slice 3: add a game-picker here when game is absent (bottom-nav Log flow).
-      return <LogSessionContent game={game} onClose={handleClose} />;
+      if (game) {
+        return <LogSessionForGame game={game} onClose={handleClose} />;
+      }
+      return <LogSessionGamePicker onSelect={handlePickerSelect} />;
     }
 
     return null;

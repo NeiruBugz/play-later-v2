@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
 import { CriticScoreRing, GameCover } from "@/entities/game";
@@ -15,10 +16,13 @@ import {
   buildCoverImageUrl,
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { Card } from "@/shared/ui/card";
 
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
+import { GameDetailActionBar } from "../game-detail-action-bar";
+import { GameDetailJumpSpine } from "../game-detail-jump-spine";
 import { JournalFeed } from "../journal-feed";
 import { JournalPanel } from "../journal-panel";
 import { LibraryStatusSwitcher } from "../library-status-switcher";
@@ -31,6 +35,7 @@ import type { GameDetailProps } from "./game-detail.type";
 export function GameDetail({
   data,
   viewerUserId,
+  gameSlug,
   relatedGamesSlot,
   timesToBeatSlot,
 }: GameDetailProps) {
@@ -45,6 +50,7 @@ export function GameDetail({
     unattachedJournalEntries = [],
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
+  const isDesktop = useIsDesktop();
 
   type DrawerState =
     | { open: false }
@@ -127,6 +133,15 @@ export function GameDetail({
     timesToBeatSlot !== null &&
     timesToBeatSlot !== undefined;
 
+  const jumpSections = [
+    showPersonalPanels && { id: "playthroughs", label: "Playthroughs" },
+    hasAboutData && { id: "about", label: "About" },
+    hasThemesTagsData && { id: "themes", label: "Themes" },
+    showJournalPanel && { id: "journal", label: "Journal" },
+    showScreenshotsPanel && { id: "screenshots", label: "Screenshots" },
+    showRelatedPanel && { id: "related", label: "Related" },
+  ].filter((s): s is { id: string; label: string } => Boolean(s));
+
   return (
     <main className="relative flex flex-col">
       <div
@@ -163,32 +178,54 @@ export function GameDetail({
       </div>
 
       <div className="relative px-6 pb-16 md:px-12">
-        <nav
-          aria-label="Breadcrumb"
-          className="text-caption text-muted-foreground relative z-10 flex items-center gap-1.5 pt-3.5"
-        >
-          <Link
-            to="/library"
-            className="hover:text-foreground transition-colors"
+        {/* Mobile top bar: Back + title + More */}
+        {!isDesktop ? (
+          <div className="relative z-10 flex items-center justify-between pt-3.5">
+            <Link
+              to="/library"
+              aria-label="Back"
+              className="text-foreground hover:text-muted-foreground flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+            >
+              <ArrowLeft size={20} aria-hidden="true" />
+            </Link>
+            <button
+              type="button"
+              aria-label="More"
+              className="text-foreground hover:text-muted-foreground flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+            >
+              <MoreHorizontal size={20} aria-hidden="true" />
+            </button>
+          </div>
+        ) : (
+          /* Desktop breadcrumb */
+          <nav
+            aria-label="Breadcrumb"
+            className="text-caption text-muted-foreground relative z-10 flex items-center gap-1.5 pt-3.5"
           >
-            Library
-          </Link>
-          <span className="opacity-50">/</span>
-          <Link
-            to="/library"
-            className="hover:text-foreground transition-colors"
-          >
-            Games
-          </Link>
-          <span className="opacity-50">/</span>
-          <span className="text-foreground max-w-[280px] truncate font-medium">
-            {game.title}
-          </span>
-        </nav>
+            <Link
+              to="/library"
+              className="hover:text-foreground transition-colors"
+            >
+              Library
+            </Link>
+            <span className="opacity-50">/</span>
+            <Link
+              to="/library"
+              className="hover:text-foreground transition-colors"
+            >
+              Games
+            </Link>
+            <span className="opacity-50">/</span>
+            <span className="text-foreground max-w-[280px] truncate font-medium">
+              {game.title}
+            </span>
+          </nav>
+        )}
 
+        {/* Stacked hero: cover first (mobile) / side-by-side (desktop) */}
         <section
           id="hero"
-          className="grid grid-cols-1 items-end gap-7 pt-[140px] md:[grid-template-columns:200px_1fr]"
+          className="grid grid-cols-1 items-end gap-7 pt-36 md:grid-cols-[200px_1fr] md:pt-44"
         >
           <div className="w-32 md:w-[200px]">
             <GameCover src={coverUrl} alt={`Cover for ${game.title}`} />
@@ -237,8 +274,19 @@ export function GameDetail({
           </div>
         </section>
 
+        {/* Jump spine: sticky section anchors — mobile only (hidden on desktop) */}
+        {!isDesktop && jumpSections.length > 0 ? (
+          <div className="mt-4 md:hidden">
+            <GameDetailJumpSpine sections={jumpSections} />
+          </div>
+        ) : null}
+
         {showScreenshotsPanel ? (
-          <Card variant="flat" className="gap-md p-xl mt-8 flex flex-col">
+          <Card
+            id="screenshots"
+            variant="flat"
+            className="gap-md p-xl mt-8 flex flex-col"
+          >
             <ScreenshotsPanel
               screenshots={igdbDetails.screenshots}
               gameTitle={game.title}
@@ -251,7 +299,11 @@ export function GameDetail({
           className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
         >
           {showPersonalPanels ? (
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
+            <Card
+              id="playthroughs"
+              variant="flat"
+              className="gap-md p-xl flex flex-col"
+            >
               <PlaythroughsPanel
                 libraryItemId={String(libraryEntry?.id ?? "")}
                 playthroughs={playthroughs}
@@ -294,6 +346,7 @@ export function GameDetail({
 
           {hasAboutData ? (
             <Card
+              id="about"
               variant="flat"
               data-testid="game-detail-about-card"
               className="gap-lg p-xl flex flex-col"
@@ -309,6 +362,7 @@ export function GameDetail({
 
           {hasThemesTagsData ? (
             <Card
+              id="themes"
               variant="flat"
               data-testid="game-detail-themes-tags-card"
               className="gap-lg p-xl flex flex-col"
@@ -322,7 +376,11 @@ export function GameDetail({
           ) : null}
 
           {showJournalPanel ? (
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
+            <Card
+              id="journal"
+              variant="flat"
+              className="gap-md p-xl flex flex-col"
+            >
               <JournalPanel
                 entries={journalTeaser}
                 onAddEntryClick={() => setComposeOpen(true)}
@@ -331,7 +389,9 @@ export function GameDetail({
           ) : null}
 
           {showRelatedPanel ? (
-            <RelatedPanel>{relatedGamesSlot}</RelatedPanel>
+            <div id="related">
+              <RelatedPanel>{relatedGamesSlot}</RelatedPanel>
+            </div>
           ) : null}
         </div>
 
@@ -385,6 +445,15 @@ export function GameDetail({
           />
         ) : null}
       </div>
+
+      {/* Sticky bottom action bar — mobile only; pinned above the bottom nav */}
+      {gameSlug ? (
+        <GameDetailActionBar
+          gameSlug={gameSlug}
+          gameStatus={derivedStatus ?? libraryEntry?.status ?? null}
+          viewerUserId={viewerUserId}
+        />
+      ) : null}
     </main>
   );
 }

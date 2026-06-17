@@ -4,6 +4,13 @@ export { AddToTrackInvite } from "./add-to-track-invite";
 export type { AddToTrackInviteProps } from "./add-to-track-invite";
 export { GameDetail } from "./game-detail";
 export type { GameDetailData, GameDetailProps } from "./game-detail";
+export { GameDetailActionBar } from "./game-detail-action-bar";
+export type { GameDetailActionBarProps } from "./game-detail-action-bar";
+export { GameDetailJumpSpine } from "./game-detail-jump-spine";
+export type {
+  GameDetailJumpSpineProps,
+  GameDetailJumpSpineSection,
+} from "./game-detail-jump-spine";
 export { JournalFeed } from "./journal-feed";
 export type { JournalFeedProps } from "./journal-feed";
 export { JournalPanel } from "./journal-panel";

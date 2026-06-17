@@ -6,6 +6,7 @@ import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
 import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 
 import type {
   Game,
@@ -15,13 +16,20 @@ import type {
 import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
+const mockNavigate = vi.fn();
+
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn() }),
+  useNavigate: () => mockNavigate,
   Link: ({ to, children, ...rest }: any) => (
     <a href={to} {...rest}>
       {children}
     </a>
   ),
+}));
+
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: vi.fn(() => true), // default: desktop; individual describes override via mockReturnValue
 }));
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
@@ -48,6 +56,17 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
 
 vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
+}));
+
+vi.mock(
+  "@/features/compose-journal-entry/api/get-log-session-game-data",
+  () => ({
+    getLogSessionGameDataFn: vi.fn(),
+  })
+);
+
+vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
+  getLoggableGamesFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
@@ -989,6 +1008,75 @@ describe("GameDetail", () => {
           "Notes"
         ) as HTMLTextAreaElement;
         expect(notesField.value).toBe("Run B notes");
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Slice 6 — mobile layout (AC GD-1…GD-4)
+  // RED: GameDetail does not yet accept gameSlug, hide breadcrumb on mobile,
+  // or render a Back / More top bar. These assertions drive the implementation.
+  // ---------------------------------------------------------------------------
+
+  describe("Slice 6 — mobile layout (AC GD-1…GD-4)", () => {
+    describe("given mobile viewport (useIsDesktop returns false)", () => {
+      beforeEach(() => {
+        vi.mocked(useIsDesktop).mockReturnValue(false);
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry())}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      // GD-4: breadcrumb must be absent on mobile
+      it("hides the breadcrumb nav on mobile", () => {
+        expect(elements.queryBreadcrumbLibrary()).toBeNull();
+        expect(elements.queryBreadcrumbGames()).toBeNull();
+      });
+
+      // GD-4: mobile top bar must expose Back + More affordances
+      it("shows a Back link in the mobile top bar", () => {
+        expect(screen.queryByRole("link", { name: "Back" })).not.toBeNull();
+      });
+
+      it("shows a More button in the mobile top bar", () => {
+        expect(screen.queryByRole("button", { name: "More" })).not.toBeNull();
+      });
+
+      // GD-3: cover renders above title in the DOM (stacked hero, no grid collision)
+      it("renders the game cover image above the title heading in the DOM", () => {
+        const cover = screen.queryByRole("img", {
+          name: "Cover for Hollow Knight",
+        });
+        const title = elements.getTitle();
+        expect(cover).not.toBeNull();
+        expect(
+          Boolean(
+            title.compareDocumentPosition(cover!) &
+            Node.DOCUMENT_POSITION_PRECEDING
+          )
+        ).toBe(true);
+      });
+    });
+
+    describe("given desktop viewport (useIsDesktop returns true)", () => {
+      beforeEach(() => {
+        vi.mocked(useIsDesktop).mockReturnValue(true);
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry())}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("renders the breadcrumb nav on desktop", () => {
+        expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
+        expect(elements.queryBreadcrumbGames()).not.toBeNull();
       });
     });
   });

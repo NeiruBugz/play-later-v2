@@ -1,4 +1,6 @@
 export { LibraryFilters } from "./library-filters";
+export { StatusLens } from "./status-lens";
+export type { StatusLensProps } from "./status-lens";
 export type {
   LibraryFiltersProps,
   LibraryStatus,
