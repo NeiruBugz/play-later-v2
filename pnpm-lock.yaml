@@ -230,6 +230,9 @@ importers:
       eslint-plugin-react-hooks:
         specifier: 6.1.1
         version: 6.1.1(eslint@9.39.1(jiti@2.7.0))
+      eslint-plugin-react-refresh:
+        specifier: 0.5.3
+        version: 0.5.3(eslint@9.39.1(jiti@2.7.0))
       eslint-plugin-testing-library:
         specifier: 7.13.6
         version: 7.13.6(eslint@9.39.1(jiti@2.7.0))(typescript@6.0.3)
@@ -3816,6 +3819,11 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
+
+  eslint-plugin-react-refresh@0.5.3:
+    resolution: {integrity: sha512-5EMmLCV98Pi4o/f/3DP/v/tNqLHMIc9I8LKClNDWhZ9JTho89/kQcitCXQBMG7sAfVRK0Ie3T2EDOzp1YXYiVA==}
+    peerDependencies:
+      eslint: ^9 || ^10
 
   eslint-plugin-testing-library@7.13.6:
     resolution: {integrity: sha512-90h3bGIK6QEvxkE8WWFiCXhYLG/Q1BZuf7snUSO/Ma7g7AnyTfKGFfjHl23o6nmg6a/lv0VX3VNyBv06m6cOcw==}
@@ -10067,6 +10075,10 @@ snapshots:
       zod-validation-error: 4.0.2(zod@4.1.13)
     transitivePeerDependencies:
       - supports-color
+
+  eslint-plugin-react-refresh@0.5.3(eslint@9.39.1(jiti@2.7.0)):
+    dependencies:
+      eslint: 9.39.1(jiti@2.7.0)
 
   eslint-plugin-testing-library@7.13.6(eslint@9.39.1(jiti@2.7.0))(typescript@6.0.3):
     dependencies:

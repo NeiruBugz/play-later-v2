@@ -9,7 +9,6 @@ import {
 import type { ThemeProviderProps } from "./theme-provider.type";
 import {
   applyThemeToHtml,
-  getSystemPreference,
   readStoredTheme,
   resolveTheme,
 } from "./theme-provider.utility";
@@ -99,7 +98,3 @@ export function SavepointThemeProvider({
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
-
-// Re-exported so tests / utilities can probe the OS preference without
-// reaching into the utility module directly.
-export { getSystemPreference };
