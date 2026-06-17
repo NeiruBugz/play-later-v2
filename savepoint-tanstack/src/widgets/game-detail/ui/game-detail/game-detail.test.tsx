@@ -1013,6 +1013,134 @@ describe("GameDetail", () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Slice 7 — desktop layout (AC GD-5)
+  // RED: GameDetail does not yet render a sticky right rail on desktop, nor
+  // suppress the mobile action bar on desktop. These assertions drive the impl.
+  // ---------------------------------------------------------------------------
+
+  describe("Slice 7 — desktop layout (AC GD-5)", () => {
+    describe("given desktop viewport (useIsDesktop returns true) with a library entry", () => {
+      beforeEach(() => {
+        vi.mocked(useIsDesktop).mockReturnValue(true);
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry(), {
+              aggregated_rating: 88,
+            })}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("renders the sticky detail rail on desktop", () => {
+        expect(screen.queryByTestId("game-detail-detail-rail")).not.toBeNull();
+      });
+
+      it("does NOT render the mobile action bar on desktop", () => {
+        expect(screen.queryByTestId("game-detail-action-bar")).toBeNull();
+      });
+
+      it("renders the status switcher inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        const switcher = within(rail).queryByTestId("library-status-switcher");
+        expect(switcher).not.toBeNull();
+      });
+
+      it("renders a Log a session CTA inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        const logBtn = within(rail).queryByRole("button", {
+          name: "Log a session",
+        });
+        expect(logBtn).not.toBeNull();
+      });
+
+      it("renders the critic score ring inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        const ring = within(rail).queryByLabelText("Critic score");
+        expect(ring).not.toBeNull();
+      });
+
+      it("renders a Your time summary section inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByText("Your time")).not.toBeNull();
+      });
+
+      it("renders the jump spine in the desktop content column", () => {
+        expect(screen.queryByTestId("game-detail-jump-spine")).not.toBeNull();
+      });
+    });
+
+    describe("given mobile viewport (useIsDesktop returns false) with a library entry", () => {
+      beforeEach(() => {
+        vi.mocked(useIsDesktop).mockReturnValue(false);
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry())}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("renders the mobile action bar on mobile", () => {
+        expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
+      });
+
+      it("does NOT render the sticky detail rail on mobile", () => {
+        expect(screen.queryByTestId("game-detail-detail-rail")).toBeNull();
+      });
+    });
+
+    describe("given desktop viewport with no critic score", () => {
+      beforeEach(() => {
+        vi.mocked(useIsDesktop).mockReturnValue(true);
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry(), {
+              aggregated_rating: undefined,
+            })}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("does not render the critic ring inside the detail rail when no score exists", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByLabelText("Critic score")).toBeNull();
+      });
+    });
+
+    describe("given desktop viewport with playtime data", () => {
+      beforeEach(() => {
+        vi.mocked(useIsDesktop).mockReturnValue(true);
+        render(
+          <GameDetail
+            data={{
+              ...buildData(buildLibraryEntry()),
+              playtimeTotalMinutes: 360,
+              playtimeSessionCount: 4,
+            }}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("shows total played time in the Your time section", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByText("Total played")).not.toBeNull();
+      });
+
+      it("shows sessions count in the Your time section", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByText("Sessions")).not.toBeNull();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Slice 6 — mobile layout (AC GD-1…GD-4)
   // RED: GameDetail does not yet accept gameSlug, hide breadcrumb on mobile,
   // or render a Back / More top bar. These assertions drive the implementation.

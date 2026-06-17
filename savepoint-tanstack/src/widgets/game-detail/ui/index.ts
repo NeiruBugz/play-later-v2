@@ -6,6 +6,8 @@ export { GameDetail } from "./game-detail";
 export type { GameDetailData, GameDetailProps } from "./game-detail";
 export { GameDetailActionBar } from "./game-detail-action-bar";
 export type { GameDetailActionBarProps } from "./game-detail-action-bar";
+export { GameDetailDetailRail } from "./game-detail-detail-rail";
+export type { GameDetailDetailRailProps } from "./game-detail-detail-rail";
 export { GameDetailJumpSpine } from "./game-detail-jump-spine";
 export type {
   GameDetailJumpSpineProps,

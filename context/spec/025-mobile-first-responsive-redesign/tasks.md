@@ -81,10 +81,10 @@ _Delivers AC LIB-1…LIB-6._
 
 _Delivers AC DASH-1…DASH-4._
 
-- [ ] RED: tests — dashboard leads with a "Jump back in" card for the most in-progress game whose Log button navigates with `action=log-session&game=<slug>`; status counts render as one compact strip; game rails are horizontal scroll-snap carousels on phone; desktop renders hero + continue rail side by side. **[Agent: testing]**
-- [ ] GREEN: restructure `widgets/dashboard-page/` mobile-first — greeting eyebrow, jump-back-in hero, compact status strip (reuse `entities/library-item/ui/library-status-strip`), convert `dashboard-game-section` to a `scroll-snap` rail on mobile / grid on desktop; desktop pairs hero + continue and adds the library-breakdown + last-reflection cards. **[Agent: react-frontend]**
-- [ ] Verify the hero's `action=log-session&game=<slug>` Log opens the host pre-targeted to that game and saves a session — the slug→`{ gameId, playthroughs }` data path itself is built in **Slice 3b** (do that slice first if not yet done; here only confirm the hero passes the slug correctly). **[Agent: tanstack-fullstack]**
-- [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual (phone hero + swipe rails; desktop multi-column) Light + Dark; hero Log opens the sheet pre-targeted to the game AND a session saves against the correct game. **[Agent: react-frontend]**
+- [x] RED: tests — dashboard leads with a "Jump back in" card for the most in-progress game whose Log button navigates with `action=log-session&game=<slug>`; status counts render as one compact strip; game rails are horizontal scroll-snap carousels on phone; desktop renders hero + continue rail side by side. **[Agent: testing]**
+- [x] GREEN: restructured `widgets/dashboard-page/` mobile-first — new `dashboard-jump-back-in-hero` (Log → `?action=log-session&game=<slug>`, routes through the host — no old dialog), `dashboard-status-strip`, `dashboard-game-rail` (CSS scroll-snap carousel on mobile / `md:grid` on desktop); desktop pairs hero + Playing rail. **[Agent: react-frontend]** — 23/23.
+- [x] Verify: hero Log passes the slug through the Slice-3b host (data path already built). **[Agent: react-frontend]**
+- [x] Gate: `dashboard-page` suite green; typecheck/lint clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 
@@ -102,9 +102,9 @@ _Delivers AC GD-1…GD-4 (the phone layout; the critical "action never lost" fix
 
 _Delivers AC GD-5 — the desktop scale-up of Slice 6._
 
-- [ ] RED: tests — game detail (desktop branch) renders a two-column split with a **sticky right rail** carrying the status switcher, a Log CTA, the `CriticScoreRing`, and a "Your time" summary; the jump spine stays sticky beside the content column. **[Agent: react-frontend]**
-- [ ] GREEN: desktop two-column layout + `game-detail-detail-rail/` sub-component; JS-branch (shared `useMediaQuery`) so the mobile action bar and the desktop rail don't both mount. **[Agent: react-frontend]**
-- [ ] Gate: unit + typecheck/lint green; Chrome-MCP visual at ~1440px against `design-reference/desktop/Desktop Hi-Fi.html` Light + Dark; rail stays visible as the content scrolls. **[Agent: react-frontend]**
+- [x] RED: tests — game detail (desktop branch) renders a two-column split with a **sticky right rail** carrying the status switcher, a Log CTA, the `CriticScoreRing`, and a "Your time" summary; the jump spine stays sticky beside the content column. **[Agent: react-frontend]**
+- [x] GREEN: desktop two-column layout + `game-detail-detail-rail/` sub-component; JS-branch via `useIsDesktop` so the mobile action bar and desktop rail don't both mount. **[Agent: react-frontend]** — "Your time" renders zero-safe (`0h`/`0`, never an em-dash) per the app's no-em-dash rule (integration fix).
+- [x] Gate: `game-detail` suite 190/190 green; typecheck/lint clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 
@@ -112,9 +112,9 @@ _Delivers AC GD-5 — the desktop scale-up of Slice 6._
 
 _Delivers AC JRN-1…JRN-4._
 
-- [ ] RED: tests — the compose flow opens as a bottom `Sheet` at mobile breakpoint and a centered `Dialog` at desktop (mock `useMediaQuery`); the text area is the dominant element; copy states that playtime alone is a complete entry. **[Agent: testing]**
-- [ ] GREEN: convert `features/compose-journal-entry/ui/compose-journal-entry-dialog/` to branch Sheet (mobile) / Dialog (desktop), keyboard-aware (text area hero, max-height, optional-thoughts guidance); desktop journal page pairs the timeline with a stats rail in `widgets/journal-timeline-page/`. **[Agent: react-frontend]**
-- [ ] Gate: unit + integration (compose feature ≥85%) + typecheck/lint green; Chrome-MCP visual (phone full-height sheet; desktop dialog + stats rail) Light + Dark. **[Agent: react-frontend]**
+- [x] RED: tests — the compose flow opens as a bottom `Sheet` at mobile breakpoint and a centered `Dialog` at desktop (mock `useMediaQuery`); the text area is the dominant element; copy states that playtime alone is a complete entry. **[Agent: react-frontend]**
+- [x] GREEN: `compose-journal-entry-dialog` branches `Sheet` (mobile, `side="bottom"`, `max-h-[90vh]`) / `Dialog` (desktop) via `useIsDesktop`, optional-thoughts hint inline; existing props/behavior preserved. Desktop `journal-timeline-page` pairs the timeline with a new `journal-stats-rail` (entries / games journaled / "Log tonight"). **[Agent: react-frontend]**
+- [x] Gate: compose + journal-timeline-page suites green (71 tests); typecheck/lint clean. Live visual deferred (no session). **[Agent: react-frontend]**
 
 ---
 

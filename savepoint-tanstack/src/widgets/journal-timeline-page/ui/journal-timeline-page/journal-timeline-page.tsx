@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { Button } from "@/shared/ui/button";
 import { JournalTimeline } from "@/widgets/journal-timeline";
 
+import { JournalStatsRail } from "../journal-stats-rail";
 import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
 
 /**
@@ -10,6 +12,7 @@ import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
  *
  * - A header "Compose entry" link navigates to `/journal/new`.
  * - Each entry card is clickable — navigates to `/journal/$id`.
+ * - On desktop, pairs the timeline with a `JournalStatsRail` (AC JRN-4).
  *
  * Slice 23 (blocker remediation #1): this widget previously owned compose /
  * detail / edit / delete *dialogs*. The product decision reversed that
@@ -23,12 +26,13 @@ import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
  */
 export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
   const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
 
   const openDetail = (entryId: string) => {
     void navigate({ to: "/journal/$id", params: { id: entryId } });
   };
 
-  return (
+  const timeline = (
     <>
       <div className="gap-md mb-lg flex items-center justify-between">
         <h1 className="text-h1">Journal</h1>
@@ -39,5 +43,16 @@ export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
 
       <JournalTimeline entries={entries} onEntrySelect={openDetail} />
     </>
+  );
+
+  if (!isDesktop) {
+    return timeline;
+  }
+
+  return (
+    <div className="gap-xl grid grid-cols-[1fr_280px] items-start">
+      <div>{timeline}</div>
+      <JournalStatsRail entries={entries} />
+    </div>
   );
 }

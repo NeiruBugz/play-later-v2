@@ -2,9 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 import type { JournalTimelineEntry } from "@/widgets/journal-timeline";
 
 import { JournalTimelinePage } from "./journal-timeline-page";
+
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: vi.fn(() => false),
+}));
 
 const navigateMock = vi.fn();
 
@@ -91,6 +96,49 @@ describe("JournalTimelinePage", () => {
         to: "/journal/$id",
         params: { id: "entry-card-click" },
       });
+    });
+  });
+
+  describe("given a desktop viewport and multiple entries", () => {
+    const entries = [
+      makeEntry({ id: "e1", content: "First session." }),
+      makeEntry({
+        id: "e2",
+        content: "Second session.",
+        game: {
+          id: "game-2",
+          title: "Celeste",
+          slug: "celeste",
+          coverImage: null,
+        },
+      }),
+    ];
+
+    beforeEach(() => {
+      vi.mocked(useIsDesktop).mockReturnValue(true);
+      render(<JournalTimelinePage entries={entries} />);
+    });
+
+    it("renders the stats rail with an entries count", () => {
+      const rail = screen.getByRole("complementary", {
+        name: "Journaling stats",
+      });
+      expect(rail).toBeDefined();
+    });
+
+    it("renders a 'log tonight' prompt in the stats rail", () => {
+      expect(screen.getByRole("link", { name: /log tonight/i })).toBeDefined();
+    });
+  });
+
+  describe("given a mobile viewport", () => {
+    beforeEach(() => {
+      vi.mocked(useIsDesktop).mockReturnValue(false);
+      render(<JournalTimelinePage entries={[makeEntry()]} />);
+    });
+
+    it("does not render the stats rail", () => {
+      expect(screen.queryByRole("complementary")).toBeNull();
     });
   });
 });

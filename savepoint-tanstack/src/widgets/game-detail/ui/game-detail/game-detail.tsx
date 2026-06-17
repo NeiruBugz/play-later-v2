@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
@@ -22,6 +22,7 @@ import { Card } from "@/shared/ui/card";
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
 import { GameDetailActionBar } from "../game-detail-action-bar";
+import { GameDetailDetailRail } from "../game-detail-detail-rail";
 import { GameDetailJumpSpine } from "../game-detail-jump-spine";
 import { JournalFeed } from "../journal-feed";
 import { JournalPanel } from "../journal-panel";
@@ -48,9 +49,12 @@ export function GameDetail({
     derivedStatus,
     statusIsManual = false,
     unattachedJournalEntries = [],
+    playtimeTotalMinutes,
+    playtimeSessionCount,
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
   const isDesktop = useIsDesktop();
+  const navigate = useNavigate({ from: "/" });
 
   type DrawerState =
     | { open: false }
@@ -71,6 +75,16 @@ export function GameDetail({
   const [logSessionState, setLogSessionState] = useState<LogSessionState>({
     open: false,
   });
+
+  function openLogSession() {
+    void navigate({
+      search: (prev) => ({
+        ...(prev as Record<string, unknown>),
+        action: "log-session" as const,
+        game: gameSlug,
+      }),
+    });
+  }
 
   function mapPlaythroughToFormValues(
     pt: PlaythroughWithEntries
@@ -141,6 +155,141 @@ export function GameDetail({
     showScreenshotsPanel && { id: "screenshots", label: "Screenshots" },
     showRelatedPanel && { id: "related", label: "Related" },
   ].filter((s): s is { id: string; label: string } => Boolean(s));
+
+  const statusSwitcherProps =
+    viewerUserId !== null
+      ? {
+          igdbId: game.igdbId,
+          gameTitle: game.title,
+          entry: libraryEntry,
+          playthroughCount: playthroughs.length,
+          derivedStatus: derivedStatus ?? libraryEntry?.status ?? "SHELF",
+          statusIsManual,
+        }
+      : null;
+
+  const panelContent = (
+    <>
+      {showScreenshotsPanel ? (
+        <Card
+          id="screenshots"
+          variant="flat"
+          className="gap-md p-xl mt-8 flex flex-col"
+        >
+          <ScreenshotsPanel
+            screenshots={igdbDetails.screenshots}
+            gameTitle={game.title}
+          />
+        </Card>
+      ) : null}
+
+      <div
+        data-testid="game-detail-bento-grid"
+        className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
+      >
+        {showPersonalPanels ? (
+          <Card
+            id="playthroughs"
+            variant="flat"
+            className="gap-md p-xl flex flex-col"
+          >
+            <PlaythroughsPanel
+              libraryItemId={String(libraryEntry?.id ?? "")}
+              playthroughs={playthroughs}
+              onAddPlaythrough={() =>
+                setDrawerState({ open: true, mode: "add" })
+              }
+              onEditPlaythrough={(pt) =>
+                setDrawerState({
+                  open: true,
+                  mode: "edit",
+                  playthroughId: pt.id,
+                  prefill: mapPlaythroughToFormValues(pt),
+                })
+              }
+              onLogSession={(pt) =>
+                setLogSessionState({
+                  open: true,
+                  preselectedPlaythroughId: pt.id,
+                })
+              }
+            />
+          </Card>
+        ) : null}
+
+        {showTrackInvite ? (
+          <Card variant="flat" className="flex flex-col">
+            <AddToTrackInvite
+              igdbId={game.igdbId}
+              gameTitle={game.title}
+              isSignedIn={viewerUserId !== null}
+            />
+          </Card>
+        ) : null}
+
+        {showTimesToBeatPanel ? (
+          <Card variant="flat" className="gap-md p-xl flex flex-col">
+            {timesToBeatSlot}
+          </Card>
+        ) : null}
+
+        {hasAboutData ? (
+          <Card
+            id="about"
+            variant="flat"
+            data-testid="game-detail-about-card"
+            className="gap-lg p-xl flex flex-col"
+          >
+            <AboutPanel
+              summary={summary}
+              releaseYear={releaseYear}
+              developer={developer}
+              publisher={publisher}
+            />
+          </Card>
+        ) : null}
+
+        {hasThemesTagsData ? (
+          <Card
+            id="themes"
+            variant="flat"
+            data-testid="game-detail-themes-tags-card"
+            className="gap-lg p-xl flex flex-col"
+          >
+            <ThemesTagsPanel
+              themes={themes}
+              genres={genres}
+              platforms={platforms}
+            />
+          </Card>
+        ) : null}
+
+        {showJournalPanel ? (
+          <Card
+            id="journal"
+            variant="flat"
+            className="gap-md p-xl flex flex-col"
+          >
+            <JournalPanel
+              entries={journalTeaser}
+              onAddEntryClick={() => setComposeOpen(true)}
+            />
+          </Card>
+        ) : null}
+
+        {showRelatedPanel ? (
+          <div id="related">
+            <RelatedPanel>{relatedGamesSlot}</RelatedPanel>
+          </div>
+        ) : null}
+      </div>
+
+      <JournalFeed
+        playthroughs={playthroughs}
+        legacyEntries={unattachedJournalEntries}
+      />
+    </>
+  );
 
   return (
     <main className="relative flex flex-col">
@@ -257,10 +406,11 @@ export function GameDetail({
                 </h1>
               </div>
 
-              <CriticScoreRing value={criticScore} />
+              {/* Critic ring shown in hero on mobile; on desktop it moves to the rail */}
+              {!isDesktop ? <CriticScoreRing value={criticScore} /> : null}
             </div>
 
-            {viewerUserId !== null ? (
+            {viewerUserId !== null && !isDesktop ? (
               <LibraryStatusSwitcher
                 key={game.igdbId}
                 igdbId={game.igdbId}
@@ -274,131 +424,41 @@ export function GameDetail({
           </div>
         </section>
 
-        {/* Jump spine: sticky section anchors — mobile only (hidden on desktop) */}
-        {!isDesktop && jumpSections.length > 0 ? (
+        {/* Jump spine: sticky section anchors */}
+        {isDesktop /* Desktop: spine sits in the content column, rendered below in two-col layout */ ? null : jumpSections.length >
+          0 ? (
           <div className="mt-4 md:hidden">
             <GameDetailJumpSpine sections={jumpSections} />
           </div>
         ) : null}
 
-        {showScreenshotsPanel ? (
-          <Card
-            id="screenshots"
-            variant="flat"
-            className="gap-md p-xl mt-8 flex flex-col"
-          >
-            <ScreenshotsPanel
-              screenshots={igdbDetails.screenshots}
-              gameTitle={game.title}
-            />
-          </Card>
-        ) : null}
-
-        <div
-          data-testid="game-detail-bento-grid"
-          className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
-        >
-          {showPersonalPanels ? (
-            <Card
-              id="playthroughs"
-              variant="flat"
-              className="gap-md p-xl flex flex-col"
-            >
-              <PlaythroughsPanel
-                libraryItemId={String(libraryEntry?.id ?? "")}
-                playthroughs={playthroughs}
-                onAddPlaythrough={() =>
-                  setDrawerState({ open: true, mode: "add" })
-                }
-                onEditPlaythrough={(pt) =>
-                  setDrawerState({
-                    open: true,
-                    mode: "edit",
-                    playthroughId: pt.id,
-                    prefill: mapPlaythroughToFormValues(pt),
-                  })
-                }
-                onLogSession={(pt) =>
-                  setLogSessionState({
-                    open: true,
-                    preselectedPlaythroughId: pt.id,
-                  })
-                }
-              />
-            </Card>
-          ) : null}
-
-          {showTrackInvite ? (
-            <Card variant="flat" className="flex flex-col">
-              <AddToTrackInvite
-                igdbId={game.igdbId}
-                gameTitle={game.title}
-                isSignedIn={viewerUserId !== null}
-              />
-            </Card>
-          ) : null}
-
-          {showTimesToBeatPanel ? (
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
-              {timesToBeatSlot}
-            </Card>
-          ) : null}
-
-          {hasAboutData ? (
-            <Card
-              id="about"
-              variant="flat"
-              data-testid="game-detail-about-card"
-              className="gap-lg p-xl flex flex-col"
-            >
-              <AboutPanel
-                summary={summary}
-                releaseYear={releaseYear}
-                developer={developer}
-                publisher={publisher}
-              />
-            </Card>
-          ) : null}
-
-          {hasThemesTagsData ? (
-            <Card
-              id="themes"
-              variant="flat"
-              data-testid="game-detail-themes-tags-card"
-              className="gap-lg p-xl flex flex-col"
-            >
-              <ThemesTagsPanel
-                themes={themes}
-                genres={genres}
-                platforms={platforms}
-              />
-            </Card>
-          ) : null}
-
-          {showJournalPanel ? (
-            <Card
-              id="journal"
-              variant="flat"
-              className="gap-md p-xl flex flex-col"
-            >
-              <JournalPanel
-                entries={journalTeaser}
-                onAddEntryClick={() => setComposeOpen(true)}
-              />
-            </Card>
-          ) : null}
-
-          {showRelatedPanel ? (
-            <div id="related">
-              <RelatedPanel>{relatedGamesSlot}</RelatedPanel>
+        {/* Desktop: two-column layout — scrolling content + sticky detail rail */}
+        {isDesktop ? (
+          <div className="mt-8 grid grid-cols-[1fr_320px] items-start gap-7">
+            {/* Content column */}
+            <div className="min-w-0">
+              {/* Jump spine sticky at top of content column */}
+              {jumpSections.length > 0 ? (
+                <GameDetailJumpSpine sections={jumpSections} />
+              ) : null}
+              {panelContent}
             </div>
-          ) : null}
-        </div>
 
-        <JournalFeed
-          playthroughs={playthroughs}
-          legacyEntries={unattachedJournalEntries}
-        />
+            {/* Sticky detail rail */}
+            <GameDetailDetailRail
+              statusSwitcherProps={statusSwitcherProps}
+              statusSwitcherKey={String(game.igdbId)}
+              onLogSession={openLogSession}
+              criticScore={criticScore}
+              playtimeTotalMinutes={playtimeTotalMinutes}
+              playtimeSessionCount={playtimeSessionCount}
+              lastSessionDate={null}
+              derivedStatus={derivedStatus ?? libraryEntry?.status ?? null}
+            />
+          </div>
+        ) : (
+          panelContent
+        )}
 
         {viewerUserId ? (
           <ComposeJournalEntryDialog
@@ -447,7 +507,7 @@ export function GameDetail({
       </div>
 
       {/* Sticky bottom action bar — mobile only; pinned above the bottom nav */}
-      {gameSlug ? (
+      {gameSlug && !isDesktop ? (
         <GameDetailActionBar
           gameSlug={gameSlug}
           gameStatus={derivedStatus ?? libraryEntry?.status ?? null}
