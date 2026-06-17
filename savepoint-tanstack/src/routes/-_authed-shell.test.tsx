@@ -21,6 +21,12 @@ vi.mock("@/features/command-palette", () => ({
   openCommandPalette: vi.fn(),
 }));
 
+// RootShell mounts <GlobalActionHost/> when authed. Stub so its transitive
+// server-fn imports (→ auth.server env reads) are not loaded in jsdom.
+vi.mock("@/widgets/global-action-host", () => ({
+  GlobalActionHost: () => null,
+}));
+
 vi.mock("@/widgets/app-shell", () => ({
   AppShell: ({
     sidebar,
