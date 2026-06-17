@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en" data-accent="sage">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SavePoint — Mobile UX Audit</title>
+<link rel="stylesheet" href="mobile/savepoint-tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground-body);
+    font-family: var(--font-runtime-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.6;
+  }
+  .page { max-width: 920px; margin: 0 auto; padding: 0 24px 120px; }
+
+  /* ---- cover ---- */
+  .cover { padding: 88px 0 40px; border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+  .brand .name { font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; letter-spacing: -0.01em; color: var(--foreground); }
+  .eyebrow { font-family: var(--font-runtime-mono); text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.75rem; color: var(--primary); font-weight: 600; }
+  h1.title { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.4rem, 6vw, 3.4rem); line-height: 1.04; letter-spacing: -0.025em; color: var(--foreground); margin: 16px 0 18px; max-width: 16ch; }
+  .lede { font-size: 1.18rem; line-height: 1.55; max-width: 60ch; color: var(--foreground-body); }
+  .meta { display: flex; flex-wrap: wrap; gap: 36px; margin-top: 40px; }
+  .meta .k { font-family: var(--font-runtime-mono); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.7rem; color: var(--muted-foreground); margin-bottom: 5px; }
+  .meta .v { font-size: 0.95rem; color: var(--foreground); font-weight: 500; }
+
+  /* ---- section ---- */
+  section.block { padding-top: 56px; }
+  .terminal { font-family: var(--font-runtime-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; color: var(--muted-foreground); margin-bottom: 14px; }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; letter-spacing: -0.02em; color: var(--foreground); margin: 0 0 10px; line-height: 1.15; }
+  h2 + .section-lede { font-size: 1.05rem; color: var(--foreground-body); max-width: 64ch; margin: 0 0 8px; }
+  p { margin: 0 0 14px; }
+  a { color: var(--primary); text-decoration: none; }
+
+  /* ---- severity legend ---- */
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 24px; }
+  .legend .item { background: var(--card); border: 1px solid color-mix(in oklch, var(--border) 60%, transparent); border-radius: var(--radius-card); padding: 14px 16px; box-shadow: var(--shadow-1); }
+  .legend .item .sev { margin-bottom: 8px; }
+  .legend .item p { font-size: 0.85rem; color: var(--muted-foreground); margin: 0; }
+
+  /* severity chip */
+  .sev { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-runtime-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.66rem; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); line-height: 1; }
+  .sev::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .sev.critical { background: color-mix(in oklch, var(--destructive) 14%, transparent); color: var(--destructive); }
+  .sev.high { background: color-mix(in oklch, var(--status-upNext) 20%, transparent); color: oklch(0.46 0.13 70); }
+  .sev.medium { background: color-mix(in oklch, var(--info) 14%, transparent); color: var(--info); }
+  .sev.low { background: var(--muted); color: var(--muted-foreground); }
+
+  /* ---- summary table ---- */
+  .summary { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 0.92rem; }
+  .summary th { text-align: left; font-family: var(--font-runtime-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.68rem; color: var(--muted-foreground); font-weight: 600; padding: 0 14px 10px 0; border-bottom: 1px solid var(--border); }
+  .summary th.num, .summary td.num { text-align: center; width: 56px; padding-right: 0; }
+  .summary td { padding: 13px 14px 13px 0; border-bottom: 1px solid color-mix(in oklch, var(--border) 55%, transparent); vertical-align: middle; }
+  .summary td.screen { font-weight: 600; color: var(--foreground); }
+  .summary .count { display: inline-flex; min-width: 22px; height: 22px; align-items: center; justify-content: center; padding: 0 6px; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .summary .count.c { background: color-mix(in oklch, var(--destructive) 14%, transparent); color: var(--destructive); }
+  .summary .count.h { background: color-mix(in oklch, var(--status-upNext) 22%, transparent); color: oklch(0.46 0.13 70); }
+  .summary .count.m { background: color-mix(in oklch, var(--info) 14%, transparent); color: var(--info); }
+  .summary .count.z { color: color-mix(in oklch, var(--muted-foreground) 50%, transparent); }
+
+  /* ---- finding card ---- */
+  .finding { background: var(--card); border: 1px solid color-mix(in oklch, var(--border) 55%, transparent); border-radius: var(--radius-card); padding: 22px 24px; margin-top: 16px; box-shadow: var(--shadow-1); border-left: 3px solid var(--border); }
+  .finding.critical { border-left-color: var(--destructive); }
+  .finding.high { border-left-color: var(--status-upNext); }
+  .finding.medium { border-left-color: var(--info); }
+  .finding.low { border-left-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent); }
+  .finding .head { display: flex; align-items: flex-start; gap: 14px; justify-content: space-between; margin-bottom: 12px; }
+  .finding h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.18rem; letter-spacing: -0.01em; color: var(--foreground); margin: 0; line-height: 1.3; }
+  .finding .fid { font-family: var(--font-runtime-mono); font-size: 0.7rem; color: var(--muted-foreground); margin-bottom: 3px; letter-spacing: 0.04em; }
+  .finding .rows { display: grid; grid-template-columns: 76px 1fr; gap: 6px 16px; margin-top: 14px; }
+  .finding .rows dt { font-family: var(--font-runtime-mono); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.66rem; color: var(--muted-foreground); padding-top: 3px; }
+  .finding .rows dd { margin: 0; font-size: 0.94rem; color: var(--foreground-body); }
+  .finding .rows dd.fix { color: var(--foreground); font-weight: 500; }
+  code { font-family: var(--font-runtime-mono); font-size: 0.82em; background: var(--muted); padding: 1px 6px; border-radius: var(--radius-sm); color: var(--foreground); }
+
+  /* ---- nav mock illustration ---- */
+  .mock-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+  .mock { flex: 1; min-width: 230px; }
+  .mock .cap { font-family: var(--font-runtime-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .navbar { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 6px; box-shadow: var(--shadow-2); }
+  .navbar .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--muted-foreground); font-size: 0.62rem; font-weight: 500; }
+  .navbar .tab.active { color: var(--foreground); }
+  .navbar .tab.active svg { color: var(--primary); }
+  .navbar .tab svg { width: 21px; height: 21px; }
+  .navbar .tab.fab { flex: 0 0 auto; }
+  .navbar .tab.fab .pad { width: 46px; height: 46px; border-radius: 50%; background: var(--primary); color: var(--primary-foreground); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-2); margin-top: -22px; }
+  .navbar .tab.fab .pad svg { color: var(--primary-foreground); width: 24px; height: 24px; }
+  .gap-note { font-size: 0.8rem; color: var(--destructive); margin-top: 9px; display: flex; align-items: center; gap: 6px; }
+  .gap-note.good { color: var(--success); }
+
+  .principle { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid color-mix(in oklch, var(--border) 55%, transparent); }
+  .principle .n { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; color: var(--primary); flex: 0 0 38px; line-height: 1.2; }
+  .principle .b h4 { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--foreground); margin: 2px 0 5px; }
+  .principle .b p { font-size: 0.92rem; color: var(--foreground-body); margin: 0; }
+
+  .callout { background: color-mix(in oklch, var(--primary) 7%, var(--card)); border: 1px solid color-mix(in oklch, var(--primary) 25%, transparent); border-radius: var(--radius-card); padding: 22px 26px; margin-top: 28px; }
+  .callout h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; color: var(--foreground); margin: 0 0 8px; }
+  .callout p { margin: 0; color: var(--foreground-body); }
+
+  @media print {
+    .finding, .legend .item { box-shadow: none; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ COVER ============ -->
+  <header class="cover">
+    <div class="brand">
+      <svg viewBox="0 0 48 48" width="30" height="30" fill="none" stroke="var(--primary)" stroke-width="2.6" stroke-linejoin="round">
+        <rect x="13.2" y="13.2" width="21.6" height="21.6" rx="4" transform="rotate(45 24 24)" />
+        <rect x="19.5" y="19.5" width="9" height="9" rx="1.5" transform="rotate(45 24 24)" fill="var(--primary)" stroke="none" />
+      </svg>
+      <span class="name">SavePoint</span>
+    </div>
+    <div class="eyebrow">// MOBILE UX AUDIT</div>
+    <h1 class="title">Respecting the player on a small screen.</h1>
+    <p class="lede">SavePoint is PWA-ready, which means the phone is no longer a courtesy view — it's a first-class home for the library. This audit walks every core surface as a patient gamer would hold it one-handed, names where the desktop layout was simply shrunk rather than rethought, and sets the principles for a mobile-first rebuild we can then scale back up to desktop.</p>
+    <div class="meta">
+      <div><div class="k">Scope</div><div class="v">8 core surfaces · phone widths (390–430px)</div></div>
+      <div><div class="k">Source</div><div class="v">savepoint-tanstack · FSD widgets</div></div>
+      <div><div class="k">Severity</div><div class="v">19 findings · 2 critical · 6 high</div></div>
+      <div><div class="k">Prepared</div><div class="v">June 2026</div></div>
+    </div>
+  </header>
+
+  <!-- ============ METHOD + LEGEND ============ -->
+  <section class="block">
+    <div class="terminal">// METHOD &amp; SEVERITY</div>
+    <h2>How we read each screen</h2>
+    <p class="section-lede">Findings come from the shipped widget code, not guesses — every issue cites the component it lives in. Each is rated by how much it blocks a patient gamer from doing the one thing the app is for: curating a collection and logging what a game meant.</p>
+    <div class="legend">
+      <div class="item"><span class="sev critical">Critical</span><p>A primary task is unreachable or broken on a phone. Fix before PWA launch.</p></div>
+      <div class="item"><span class="sev high">High</span><p>The task works but fights the user — wasted space, lost actions, friction.</p></div>
+      <div class="item"><span class="sev medium">Medium</span><p>Noticeable rough edge that erodes the cozy, unhurried feel of the product.</p></div>
+      <div class="item"><span class="sev low">Low</span><p>Polish — small tap targets, vestigial desktop affordances, visual nits.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ SUMMARY ============ -->
+  <section class="block">
+    <div class="terminal">// FINDINGS AT A GLANCE</div>
+    <h2>Where the misses cluster</h2>
+    <p class="section-lede">Navigation and game detail carry the heaviest load. The good news: the team already shipped real mobile chrome — a bottom tab bar, a mobile top bar, and a bottom-sheet filter. The misses are mostly about <em>what those patterns expose</em>, not their absence.</p>
+    <table class="summary">
+      <thead>
+        <tr><th>Surface</th><th class="num">Crit</th><th class="num">High</th><th class="num">Med</th><th class="num">Low</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="screen">Global navigation</td><td class="num"><span class="count c">1</span></td><td class="num"><span class="count h">1</span></td><td class="num"><span class="count m">1</span></td><td class="num"><span class="count z">2</span></td></tr>
+        <tr><td class="screen">Dashboard</td><td class="num"><span class="count z">—</span></td><td class="num"><span class="count h">1</span></td><td class="num"><span class="count m">1</span></td><td class="num"><span class="count z">—</span></td></tr>
+        <tr><td class="screen">Library</td><td class="num"><span class="count z">—</span></td><td class="num"><span class="count h">1</span></td><td class="num"><span class="count m">2</span></td><td class="num"><span class="count z">1</span></td></tr>
+        <tr><td class="screen">Game detail</td><td class="num"><span class="count c">1</span></td><td class="num"><span class="count h">1</span></td><td class="num"><span class="count m">1</span></td><td class="num"><span class="count z">1</span></td></tr>
+        <tr><td class="screen">Journal</td><td class="num"><span class="count z">—</span></td><td class="num"><span class="count h">1</span></td><td class="num"><span class="count m">1</span></td><td class="num"><span class="count z">—</span></td></tr>
+        <tr><td class="screen">Profile &amp; Settings</td><td class="num"><span class="count z">—</span></td><td class="num"><span class="count z">—</span></td><td class="num"><span class="count m">2</span></td><td class="num"><span class="count z">1</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ NAVIGATION ============ -->
+  <section class="block">
+    <div class="terminal">// 01 · GLOBAL NAVIGATION</div>
+    <h2>The tab bar shows three of five rooms</h2>
+    <p class="section-lede">The desktop sidebar lists Library, Search, Journal, Profile, and Settings, plus a command palette and an add-game button. The mobile bottom nav (<code>app-bottom-nav.tsx</code>) carries only Library, Journal, and Profile — and the app's single most important verb, "log a session," has no home in the chrome at all.</p>
+
+    <div class="mock-row">
+      <div class="mock">
+        <div class="cap">Current — app-bottom-nav.tsx</div>
+        <div class="navbar">
+          <div class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Library</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Journal</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+        </div>
+        <div class="gap-note">⚠ No Dashboard · no Search · no Log</div>
+      </div>
+      <div class="mock">
+        <div class="cap">Proposed — 4 tabs + center Log</div>
+        <div class="navbar">
+          <div class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Home</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Library</div>
+          <div class="tab fab"><div class="pad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></div></div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Journal</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+        </div>
+        <div class="gap-note good">✓ Home returns · Log always one thumb-tap away</div>
+      </div>
+    </div>
+
+    <div class="finding critical">
+      <div class="head"><div><div class="fid">NAV-01</div><h3>Dashboard is the post-login home, but unreachable from the tab bar</h3></div><span class="sev critical">Critical</span></div>
+      <p>Sign-in lands the user on <code>/dashboard</code> — the quick-log hero, "Playing," and "Up Next." Yet the bottom nav has no Home tab, so once a user taps Library or Journal there is no way back to the dashboard except the browser. In a standalone PWA there is no browser chrome to fall back on.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/app-bottom-nav</code> — <code>NAV_ITEMS</code> = Library, Journal, Profile</dd>
+        <dt>Impact</dt><dd>The app's landing surface becomes a dead end after first navigation.</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Add a Home tab as the first item. Reserve the tab bar for the five true destinations.</dd>
+      </dl>
+    </div>
+
+    <div class="finding high">
+      <div class="head"><div><div class="fid">NAV-02</div><h3>"Log a session" — the core verb — has no global entry point</h3></div><span class="sev high">High</span></div>
+      <p>The product's tagline is "Log tonight's session." But logging only exists inside a game-detail playthrough (<code>LogSessionDrawer</code>) and adding a game is a FAB that lives <em>only</em> on the Library page. From the dashboard, journal, or profile there is no one-tap way to capture a session.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd>FAB scoped to <code>widgets/library-page</code>; log buried in <code>widgets/game-detail</code></dd>
+        <dt>Impact</dt><dd>The reflective habit the app is built around takes 3–4 taps from most screens.</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Promote a center "Log" action into the tab bar (or a persistent FAB) that opens the log sheet from anywhere.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">NAV-03</div><h3>Top-bar icon buttons are below the 44px touch minimum</h3></div><span class="sev medium">Medium</span></div>
+      <p>Search and theme-toggle in the mobile top bar are rendered at <code>h-9 w-9</code> (36px). Apple's HIG and WCAG target a 44px minimum; 36px is a frequent mis-tap on the move.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/app-mobile-topbar</code> — <code>h-9 w-9</code> hit areas</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Bump tappable chrome to 44px; keep the 20px glyph centered inside.</dd>
+      </dl>
+    </div>
+
+    <div class="finding low">
+      <div class="head"><div><div class="fid">NAV-04</div><h3>Active tab signalled by color alone</h3></div><span class="sev low">Low</span></div>
+      <p>The active tab only swaps text color to <code>text-foreground</code>. There's no filled icon or indicator, so the "you are here" read is weak — and color-only states are an accessibility risk.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Fill the active icon and/or add a small accent dot or pill behind it.</dd>
+      </dl>
+    </div>
+
+    <div class="finding low">
+      <div class="head"><div><div class="fid">NAV-05</div><h3>Global search collapses to a single icon; no command palette equivalent</h3></div><span class="sev low">Low</span></div>
+      <p>Desktop's ⌘K command palette is the fast path to any game. On mobile it degrades to a search icon → full page. Acceptable, but the rich "jump to anything" affordance is lost rather than reimagined.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Let the Search tab open an inline search sheet with recents, not a cold page nav.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="block">
+    <div class="terminal">// 02 · DASHBOARD</div>
+    <h2>A two-column desk, stacked into a long scroll</h2>
+    <p class="section-lede">The dashboard's <code>lg:grid-cols-[1fr_1fr]</code> collapses cleanly to one column on a phone — but nothing re-prioritizes. Stats, "Playing," "Up Next," and "Recently added" all stack at equal weight, so the thing a returning player wants most (continue a session) competes with everything else.</p>
+
+    <div class="finding high">
+      <div class="head"><div><div class="fid">DASH-01</div><h3>No mobile hierarchy — every section weighs the same</h3></div><span class="sev high">High</span></div>
+      <p>On desktop the eye can scan two columns at once. Stacked on a phone, the quick-log hero, a stats card, and three game rails become a uniform vertical list. The primary "continue playing" intent is four scroll-lengths from secondary stats.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/dashboard-page</code> — flat stack below the hero</dd>
+        <dt>Impact</dt><dd>Returning players scroll past their most-wanted action.</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Lead with a compact "Jump back in" card; demote stats to a single inline strip; make rails horizontally scrollable so each costs one screen height, not three.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">DASH-02</div><h3>Game rails wrap into tall grids instead of swiping</h3></div><span class="sev medium">Medium</span></div>
+      <p>Each <code>DashboardGameSection</code> renders a grid that, narrowed to one or two columns, becomes a tall block. Four sections of tall blocks is a very long dashboard.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Convert rails to horizontal snap-scroll carousels — a native, space-efficient mobile pattern that also signals "there's more."</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ LIBRARY ============ -->
+  <section class="block">
+    <div class="terminal">// 03 · LIBRARY</div>
+    <h2>One game per row wastes the whole screen</h2>
+    <p class="section-lede">The library grid is <code>grid-cols-1</code> below the <code>md</code> breakpoint — a single fat card per row on a phone. For an app whose whole pitch is "a library, not a backlog," browsing the collection is the marquee activity, and one-up makes a 30-game shelf feel endless. The filter sheet itself is solid; the density and a few vestigial desktop affordances are the misses.</p>
+
+    <div class="finding high">
+      <div class="head"><div><div class="fid">LIB-01</div><h3>Single-column grid on phones</h3></div><span class="sev high">High</span></div>
+      <p>Cover art is the library's visual language. At one column, a phone shows ~2 games per screen; at two columns it shows 6+, matching how every console and storefront presents a library.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/library-page</code> — <code>grid-cols-1 md:grid-cols-[…]</code></dd>
+        <dt>Impact</dt><dd>Browsing feels like an infinite scroll instead of a glanceable shelf.</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Default to a 2-up cover grid on phones; offer a list-density toggle for those who want metadata-forward rows.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">LIB-02</div><h3>Status filter lives behind a sheet, with no at-a-glance switch</h3></div><span class="sev medium">Medium</span></div>
+      <p>Status (Playing / Up Next / Shelf / Played / Wishlist) is the primary lens on a library, yet on mobile it's one of many controls inside the filter Sheet. Switching "what am I playing?" → "what's up next?" is a multi-tap round trip.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>features/filter-library</code> — <code>MobileFilterBar</code> Sheet</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Surface status as a sticky, horizontally-scrollable segmented row above the grid; keep secondary filters (platform, rating, sort) in the sheet.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">LIB-03</div><h3>Filter breakpoint (<code>xl</code>) disagrees with chrome breakpoint (<code>md</code>)</h3></div><span class="sev medium">Medium</span></div>
+      <p>The bottom nav / top bar switch at <code>md</code> (768px), but the filter sidebar↔sheet switch at <code>xl</code> (1280px). Between those widths a user gets desktop chrome but the mobile filter sheet — an inconsistent, untested middle state.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Pick one responsive breakpoint system and apply it across chrome and filters.</dd>
+      </dl>
+    </div>
+
+    <div class="finding low">
+      <div class="head"><div><div class="fid">LIB-04</div><h3>Keyboard-only affordances ship to touch devices</h3></div><span class="sev low">Low</span></div>
+      <p>The title-filter input shows a <code>/</code> keyboard-shortcut hint and the "Imported games" link is a small inline text target — both are desktop habits that add clutter or mis-taps on a phone.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Hide the <code>/</code> kbd hint on touch; give "Imported games" a full-height tappable row in an overflow menu.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ GAME DETAIL ============ -->
+  <section class="block">
+    <div class="terminal">// 04 · GAME DETAIL</div>
+    <h2>A bento grid becomes an endless ribbon</h2>
+    <p class="section-lede">Game detail is the densest screen in the app: a screenshot hero, status switcher, playthroughs, about, themes &amp; tags, journal, related games, screenshots, times-to-beat. On desktop these tile into a <code>1.35fr / 1fr</code> bento. On a phone every card collapses into a single tall column with no way to jump between sections — and the primary action scrolls away.</p>
+
+    <div class="finding critical">
+      <div class="head"><div><div class="fid">GD-01</div><h3>The primary action scrolls off and never comes back</h3></div><span class="sev critical">Critical</span></div>
+      <p>The <code>LibraryStatusSwitcher</code> and log/track CTAs live inline in the hero. Once a user scrolls past the fold to read the about panel or journal, the one action they came to take — change status, log a session — is gone, with no sticky bar to recall it.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/game-detail</code> — actions inside <code>#hero</code> section</dd>
+        <dt>Impact</dt><dd>On the longest scroll in the app, the main verb is only reachable at the very top.</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Pin a slim action bar to the bottom (above the tab bar) with the status pill + "Log session," persistent through scroll.</dd>
+      </dl>
+    </div>
+
+    <div class="finding high">
+      <div class="head"><div><div class="fid">GD-02</div><h3>Seven+ stacked panels with no in-page navigation</h3></div><span class="sev high">High</span></div>
+      <p>Collapsed to one column, the bento becomes a 7–9 card ribbon. There's no section index, no tabs, no jump — finding "Related games" means scrolling past everything else every time.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>game-detail-bento-grid</code> — <code>md:grid-cols-[1.35fr_1fr]</code> → single column</dd>
+        <dt class="fix">Fix</dt><dd class="fix">Group panels under a sticky segmented control (Overview · Playthroughs · Journal · About) or collapsible accordions so the page has a navigable spine.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">GD-03</div><h3>Hero crowds the title against the critic-score ring</h3></div><span class="sev medium">Medium</span></div>
+      <p>The hero lays the <code>text-h1</code> title and <code>CriticScoreRing</code> in a <code>justify-between</code> row with a fixed <code>pt-[140px]</code>. On a 390px screen a long title wraps awkwardly beside the ring, and the fixed top padding is tuned for desktop backdrop height.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Stack hero elements vertically on mobile: cover, then title, then a metadata row that carries the score as a chip.</dd>
+      </dl>
+    </div>
+
+    <div class="finding low">
+      <div class="head"><div><div class="fid">GD-04</div><h3>Breadcrumb consumes a row of little value</h3></div><span class="sev low">Low</span></div>
+      <p>"Library / Games / Title" is a desktop wayfinding convention; on mobile the back gesture and tab bar already cover it, so it mostly steals vertical space at the top of the densest page.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Replace with a single back affordance in the top bar.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ JOURNAL ============ -->
+  <section class="block">
+    <div class="terminal">// 05 · JOURNAL</div>
+    <h2>Reflection deserves a sheet, not a centered modal</h2>
+    <p class="section-lede">The timeline list reads well on mobile. The friction is in composing: "reflect, don't review" is the heart of the app, but the compose flow uses a centered <code>Dialog</code> — a desktop modal — which on a phone fights the keyboard and crops the writing area.</p>
+
+    <div class="finding high">
+      <div class="head"><div><div class="fid">JRN-01</div><h3>Compose uses a centered Dialog, not a full-height sheet</h3></div><span class="sev high">High</span></div>
+      <p><code>ComposeJournalEntryDialog</code> is a centered modal. When the keyboard opens on a phone it covers most of the dialog, leaving a small textarea boxed in the middle — the opposite of an inviting space to reflect. (Log session already uses a Drawer; compose should match.)</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>features/compose-journal-entry</code> — <code>Dialog</code></dd>
+        <dt class="fix">Fix</dt><dd class="fix">Use a full-height bottom sheet that grows with the keyboard, with the text area as the hero and "playtime is enough, thoughts optional" guidance inline.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">JRN-02</div><h3>Entries don't group by game on mobile</h3></div><span class="sev medium">Medium</span></div>
+      <p>The timeline is a flat chronological list (a documented divergence). On a small screen, a per-game grouping with a cover thumbnail would give the scroll rhythm and let a player relive one world at a time.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Optionally cluster consecutive same-game entries under a slim cover header.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ PROFILE + SETTINGS ============ -->
+  <section class="block">
+    <div class="terminal">// 06 · PROFILE &amp; SETTINGS</div>
+    <h2>Desktop rails that should become native lists</h2>
+    <p class="section-lede">Profile and Settings both lean on side-by-side layouts — a settings rail beside content, a tabbed profile beside stats. They collapse without breaking, but they don't feel like a phone.</p>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">SET-01</div><h3>Settings rail stacks above content instead of becoming a list</h3></div><span class="sev medium">Medium</span></div>
+      <p>The <code>settings-rail</code> is a vertical category nav meant to sit beside a content pane. Stacked on mobile, you scroll past the whole nav to reach the form. Phones expect a grouped list → drill-in detail pattern.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/settings-rail</code></dd>
+        <dt class="fix">Fix</dt><dd class="fix">Adopt an iOS-style grouped settings list (Profile, Account, Appearance, Imports) that pushes into each detail screen.</dd>
+      </dl>
+    </div>
+
+    <div class="finding medium">
+      <div class="head"><div><div class="fid">PRO-01</div><h3>Profile tabs + stats compete for the fold</h3></div><span class="sev medium">Medium</span></div>
+      <p>Banner, avatar, follow/edit action, stat counts, and Overview/Library/Activity tabs all sit in the header region. On a phone this pushes the actual content (the library or activity) well below the fold.</p>
+      <dl class="rows">
+        <dt>Where</dt><dd><code>widgets/profile-overview</code></dd>
+        <dt class="fix">Fix</dt><dd class="fix">Compress the header to avatar + name + one stat row + a sticky tab strip; let content start higher.</dd>
+      </dl>
+    </div>
+
+    <div class="finding low">
+      <div class="head"><div><div class="fid">PRO-02</div><h3>Header actions may overflow a narrow row</h3></div><span class="sev low">Low</span></div>
+      <p>Edit-profile / follow buttons injected via <code>headerActions</code> share a row with the name and stats; on the narrowest screens this risks truncation or wrapping.</p>
+      <dl class="rows">
+        <dt class="fix">Fix</dt><dd class="fix">Give the primary action a full-width button below the identity block on mobile.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ PRINCIPLES ============ -->
+  <section class="block">
+    <div class="terminal">// THE REBUILD</div>
+    <h2>Five principles for the mobile-first pass</h2>
+    <p class="section-lede">Every redesigned screen in the companion file follows these. They're chosen so that scaling back up to desktop is additive — more columns, more room — never a different product.</p>
+
+    <div class="principle"><div class="n">01</div><div class="b"><h4>The thumb owns the bottom third</h4><p>Primary navigation and the core "Log" verb live in the bottom chrome, reachable one-handed. Nothing critical hides at the top of a long scroll.</p></div></div>
+    <div class="principle"><div class="n">02</div><div class="b"><h4>Cover art is the interface</h4><p>The library reads as a shelf, not a feed — at least two covers wide — because browsing the collection is the point of the product.</p></div></div>
+    <div class="principle"><div class="n">03</div><div class="b"><h4>Dense screens get a spine</h4><p>Game detail and profile use sticky segmented controls or carousels so a long page is always navigable, never an undifferentiated ribbon.</p></div></div>
+    <div class="principle"><div class="n">04</div><div class="b"><h4>Sheets, not modals</h4><p>Logging and reflecting happen in bottom sheets that rise with the keyboard — calm, full-width, and native to the platform.</p></div></div>
+    <div class="principle"><div class="n">05</div><div class="b"><h4>Cozy is a constraint, not decoration</h4><p>Warm cream surfaces, generous line-height, sentence-case copy, 44px targets. The mobile build should feel as unhurried as the desktop one.</p></div></div>
+
+    <div class="callout">
+      <h3>Next: the redesigned screens</h3>
+      <p>The companion file lays out mid-fidelity mobile mockups for each surface above — in iPhone frames, on a canvas you can pan and compare — with live tweaks for bottom-nav style and content density so we can settle the open questions together before scaling to desktop.</p>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
