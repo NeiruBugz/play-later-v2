@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authClient } from "@/shared/api/auth-client";
 
@@ -63,6 +63,9 @@ const elements = {
     screen.getByRole("menuitem", { name: /Profile settings/ }),
   querySignOutItem: () => screen.queryByRole("menuitem", { name: /Sign out/ }),
   queryAccountItem: () => screen.queryByRole("menuitem", { name: /Account/ }),
+  getCollapseToggle: () =>
+    screen.getByRole("button", { name: /Collapse sidebar|Expand sidebar/ }),
+  getSidebar: () => screen.getByTestId("app-sidebar"),
 };
 
 const actions = {
@@ -75,11 +78,19 @@ const actions = {
   clickLogSession: async () => {
     await userEvent.click(elements.getLogSessionCta());
   },
+  clickCollapseToggle: async () => {
+    await userEvent.click(elements.getCollapseToggle());
+  },
 };
 
 describe("AppSidebar", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
+    window.localStorage.removeItem("sp:sidebar-collapsed");
+  });
+
+  afterEach(() => {
+    window.localStorage.removeItem("sp:sidebar-collapsed");
   });
 
   describe("given the sidebar is rendered", () => {
@@ -261,6 +272,73 @@ describe("AppSidebar", () => {
     it("closes the menu when Escape is pressed", async () => {
       await userEvent.keyboard("{Escape}");
       expect(elements.querySignOutItem()).toBeNull();
+    });
+  });
+
+  describe("given the sidebar is expanded (default state)", () => {
+    beforeEach(() => {
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+    });
+
+    it("renders a Collapse sidebar toggle button", () => {
+      expect(
+        screen.getByRole("button", { name: "Collapse sidebar" })
+      ).toBeDefined();
+    });
+
+    it("renders the sidebar at expanded width (w-64 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-64/);
+    });
+
+    it("renders nav link labels as visible text", () => {
+      expect(screen.getByText("Dashboard")).toBeDefined();
+      expect(screen.getByText("Library")).toBeDefined();
+    });
+  });
+
+  describe("given the user clicks Collapse sidebar", () => {
+    beforeEach(async () => {
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+      await actions.clickCollapseToggle();
+    });
+
+    it("switches the toggle label to Expand sidebar", () => {
+      expect(
+        screen.getByRole("button", { name: "Expand sidebar" })
+      ).toBeDefined();
+    });
+
+    it("switches the sidebar to collapsed width (w-16 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-16/);
+    });
+
+    it("nav links carry aria-label in collapsed mode so the destination is still announced", () => {
+      expect(elements.getNavLink("Dashboard")).toBeDefined();
+      expect(elements.getNavLink("Library")).toBeDefined();
+    });
+
+    it("persists collapsed=true to localStorage", () => {
+      expect(window.localStorage.getItem("sp:sidebar-collapsed")).toBe("true");
+    });
+  });
+
+  describe("given localStorage has sidebar-collapsed=true on mount", () => {
+    beforeEach(() => {
+      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+    });
+
+    it("mounts in collapsed state (w-16 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-16/);
+    });
+
+    it("shows the Expand sidebar toggle", () => {
+      expect(
+        screen.getByRole("button", { name: "Expand sidebar" })
+      ).toBeDefined();
     });
   });
 });

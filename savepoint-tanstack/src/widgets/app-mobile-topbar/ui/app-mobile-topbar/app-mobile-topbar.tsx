@@ -9,7 +9,7 @@ export function AppMobileTopbar() {
     <header
       data-testid="app-mobile-topbar"
       aria-label="Primary mobile navigation"
-      className="bg-background sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b px-3 md:hidden"
+      className="bg-background/85 sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b px-3 backdrop-blur-md md:hidden"
     >
       <Link
         to="/"
@@ -22,7 +22,6 @@ export function AppMobileTopbar() {
           aria-hidden="true"
           className="h-7 w-7 shrink-0"
         />
-        <span className="text-h3">SavePoint</span>
       </Link>
 
       <div className="flex items-center gap-1">

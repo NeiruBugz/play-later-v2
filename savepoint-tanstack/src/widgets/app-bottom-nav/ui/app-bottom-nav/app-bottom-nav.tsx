@@ -12,10 +12,11 @@ const DEST_ITEMS_RIGHT = [
 ] as const;
 
 export function AppBottomNav() {
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate();
 
   const openLogSession = () => {
     void navigate({
+      to: ".",
       search: (prev) => ({ ...prev, action: "log-session" as const }),
     });
   };
@@ -24,7 +25,7 @@ export function AppBottomNav() {
     <nav
       data-testid="app-bottom-nav"
       aria-label="Primary mobile tab navigation"
-      className="bg-background pb-safe-nav fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch overflow-visible border-t md:hidden"
+      className="bg-card/85 pb-safe-nav fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch overflow-visible border-t backdrop-blur-md md:hidden"
     >
       {DEST_ITEMS_LEFT.map(({ label, to, icon: Icon }) => (
         <Link

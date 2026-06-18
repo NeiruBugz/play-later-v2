@@ -23,11 +23,12 @@ import {
 
 export function GlobalActionHost() {
   const { action, game } = useSearch({ from: "__root__" });
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate();
   const isDesktop = useIsDesktop();
 
   function handleClose() {
     void navigate({
+      to: ".",
       search: (prev) => {
         const entries = Object.entries(prev as Record<string, unknown>).filter(
           ([k]) => k !== "action" && k !== "game"
@@ -39,6 +40,7 @@ export function GlobalActionHost() {
 
   function handlePickerSelect(slug: string) {
     void navigate({
+      to: ".",
       search: (prev) => ({
         ...(prev as Record<string, unknown>),
         game: slug,
