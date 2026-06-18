@@ -4,17 +4,14 @@ import { Button } from "@/shared/ui/button";
 
 import type { JournalStatsRailProps } from "./journal-stats-rail.type";
 
-/** Derives per-game unique count and total minutes from the entries list. */
 function deriveStats(entries: JournalStatsRailProps["entries"]) {
   const gameIds = new Set(
     entries.flatMap((e) => (e.game !== null ? [e.game.id] : []))
   );
-  const totalMinutes = entries.reduce((sum) => sum, 0);
 
   return {
     entryCount: entries.length,
     gamesJournaled: gameIds.size,
-    hoursReflected: Math.round(totalMinutes / 60),
   };
 }
 
@@ -31,30 +28,44 @@ export function JournalStatsRail({ entries }: JournalStatsRailProps) {
   const { entryCount, gamesJournaled } = deriveStats(entries);
 
   return (
-    <aside
-      aria-label="Journaling stats"
-      className="bg-card text-card-foreground border-border flex flex-col gap-6 rounded-xl border p-6"
-    >
-      <h2 className="text-sm font-semibold tracking-wide uppercase opacity-60">
-        Your journal
-      </h2>
+    <aside aria-label="Journaling stats" className="flex flex-col gap-4">
+      <div className="bg-card text-card-foreground border-border rounded-xl border p-5">
+        <div className="terminal-label mb-4">// THIS MONTH</div>
 
-      <dl className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <dt className="text-muted-foreground text-sm">Entries</dt>
-          <dd className="text-foreground text-lg font-bold">{entryCount}</dd>
-        </div>
-        <div className="flex items-center justify-between">
-          <dt className="text-muted-foreground text-sm">Games journaled</dt>
-          <dd className="text-foreground text-lg font-bold">
-            {gamesJournaled}
-          </dd>
-        </div>
-      </dl>
+        <dl className="flex flex-col gap-4">
+          <div>
+            <dd className="text-foreground font-display text-[1.8rem] leading-none font-bold tabular-nums">
+              {entryCount}
+            </dd>
+            <dt className="text-muted-foreground mt-1 text-sm">Entries</dt>
+          </div>
+          <div>
+            <dd className="text-foreground font-display text-[1.8rem] leading-none font-bold tabular-nums">
+              {gamesJournaled}
+            </dd>
+            <dt className="text-muted-foreground mt-1 text-sm">
+              Games journaled
+            </dt>
+          </div>
+        </dl>
+      </div>
 
-      <Button asChild className="mt-auto w-full">
-        <Link to="/journal/new">Log tonight</Link>
-      </Button>
+      <div
+        className="border-primary/22 bg-card rounded-xl border p-[18px]"
+        style={{
+          background: "color-mix(in oklch, var(--primary) 6%, var(--card))",
+          borderColor: "color-mix(in oklch, var(--primary) 22%, transparent)",
+        }}
+      >
+        <div className="terminal-label mb-2">// LOG TONIGHT</div>
+        <p className="text-foreground-body mb-4 text-sm leading-relaxed">
+          Playtime is enough — thoughts are optional. Reflections can come
+          later.
+        </p>
+        <Button asChild className="w-full">
+          <Link to="/journal/new">Log a session</Link>
+        </Button>
+      </div>
     </aside>
   );
 }

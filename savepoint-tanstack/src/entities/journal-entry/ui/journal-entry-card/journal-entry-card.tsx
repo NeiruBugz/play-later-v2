@@ -2,13 +2,16 @@ import { Link } from "@tanstack/react-router";
 
 import { formatJournalDate } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
-import { Card, CardContent, CardDescription } from "@/shared/ui/card";
+import { Card, CardContent } from "@/shared/ui/card";
 
 import type { JournalEntryCardProps } from "./journal-entry-card.type";
 
 /**
- * Display-only journal entry card. Renders the entry's content, kind badge,
- * timestamp, and a link to the associated game when present.
+ * Display-only journal entry card — timeline design.
+ *
+ * Header row: game title (prominent heading) on the left, formatted date on
+ * the right. Body: entry content clamped to 3 lines. Footer: kind badge so
+ * the entry type is still scannable without dominating the card.
  *
  * Entity layer: no mutations. The optional `onSelect` callback lets a
  * composing widget react to clicks (e.g., open a detail dialog) without the
@@ -16,63 +19,60 @@ import type { JournalEntryCardProps } from "./journal-entry-card.type";
  */
 // TODO(021-S16): include playedMinutes/mood/tags when CRUD lands.
 export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
-  const title = entry.title?.trim() || null;
   const content = entry.content.trim();
   const kindLabel = entry.kind === "QUICK" ? "Quick note" : "Reflection";
   const interactive = typeof onSelect === "function";
 
-  const body = (
-    <CardContent className="p-lg gap-md flex flex-col">
-      <header className="gap-xs flex flex-col">
-        {/* CardDescription holds the entry meta sub-line (kind label + date),
-            matching canonical's typographic hierarchy: title + description. */}
-        <CardDescription className="flex items-center justify-between gap-2 !text-xs">
-          <span className="text-caption text-primary/70 tracking-widest uppercase">
-            {kindLabel}
-          </span>
-          <time
-            dateTime={new Date(entry.updatedAt).toISOString()}
-            className="text-muted-foreground font-mono text-xs"
-          >
-            {formatJournalDate(entry.updatedAt)}
-          </time>
-        </CardDescription>
-        {title ? (
-          <h3
-            id={`journal-entry-${entry.id}-heading`}
-            className="text-base leading-snug font-semibold"
-          >
-            {title}
-          </h3>
-        ) : (
-          <h3 id={`journal-entry-${entry.id}-heading`} className="sr-only">
-            {kindLabel} from {formatJournalDate(entry.updatedAt)}
-          </h3>
-        )}
-      </header>
+  const headingId = `journal-entry-${entry.id}-heading`;
 
-      <p className="text-body text-muted-foreground line-clamp-4 leading-relaxed whitespace-pre-wrap">
+  const cardHeading = entry.game?.title ?? entry.title ?? kindLabel;
+
+  const body = (
+    <CardContent className="p-lg gap-sm flex flex-col">
+      {/* Header: game title (prominent) + date */}
+      <div className="flex items-baseline justify-between gap-2">
+        <h3
+          id={headingId}
+          className="md:font-display text-sm leading-snug font-semibold md:text-base"
+        >
+          {cardHeading}
+        </h3>
+        <time
+          dateTime={new Date(entry.updatedAt).toISOString()}
+          className="text-caption text-muted-foreground shrink-0 font-mono tracking-widest uppercase"
+        >
+          {formatJournalDate(entry.updatedAt)}
+        </time>
+      </div>
+
+      {/* Body: 3-line clamp; italic with curly quotes on desktop */}
+      <p className="text-body text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-wrap md:italic">
+        <span className="hidden md:inline">&ldquo;</span>
         {content}
+        <span className="hidden md:inline">&rdquo;</span>
       </p>
 
-      {entry.game ? (
-        <Link
-          to="/games/$slug"
-          params={{ slug: entry.game.slug }}
-          className="hover:text-primary text-caption text-muted-foreground inline-flex items-center gap-2 self-start transition-colors"
-          // Stop the click from bubbling up to the surrounding interactive
-          // surface (the "open detail" button) — the game link is its own
-          // navigation target.
-          onClick={(event) => event.stopPropagation()}
-        >
-          <span className="font-medium">{entry.game.title}</span>
-        </Link>
-      ) : null}
+      {/* Footer: kind badge + game link (when game present) */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-caption text-primary/70 tracking-widest uppercase">
+          {kindLabel}
+        </span>
+        {entry.game ? (
+          <Link
+            to="/games/$slug"
+            params={{ slug: entry.game.slug }}
+            className="hover:text-primary text-caption text-muted-foreground inline-flex items-center gap-1 transition-colors"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span className="font-medium">{entry.game.title}</span>
+          </Link>
+        ) : null}
+      </div>
     </CardContent>
   );
 
   return (
-    <article aria-labelledby={`journal-entry-${entry.id}-heading`}>
+    <article aria-labelledby={headingId}>
       <Card className="transition-colors">
         {interactive ? (
           <button

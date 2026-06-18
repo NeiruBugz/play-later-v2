@@ -12,7 +12,12 @@ type Status = "loading" | "ready" | "error";
  * Given a game slug, fetches the game's DB id + the user's playthroughs, then
  * delegates to LogSessionContent with real data.
  */
-export function LogSessionForGame({ game, onClose }: LogSessionForGameProps) {
+export function LogSessionForGame({
+  game,
+  gameTitle,
+  coverImage,
+  onClose,
+}: LogSessionForGameProps) {
   const [status, setStatus] = useState<Status>("loading");
   const [gameData, setGameData] = useState<GetLogSessionGameDataResult | null>(
     null
@@ -51,6 +56,8 @@ export function LogSessionForGame({ game, onClose }: LogSessionForGameProps) {
   return (
     <LogSessionContent
       gameId={gameData.gameId}
+      gameTitle={gameTitle}
+      coverImage={coverImage}
       playthroughs={gameData.playthroughs}
       preselectedPlaythroughId={gameData.preselectedPlaythroughId}
       onClose={onClose}

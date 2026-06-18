@@ -1,3 +1,4 @@
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
   Sheet,
   SheetContent,
@@ -15,10 +16,14 @@ export function LogSessionDrawer({
   playthroughs,
   preselectedPlaythroughId,
   gameId,
+  gameTitle,
+  coverImage,
 }: LogSessionDrawerProps) {
+  const isDesktop = useIsDesktop();
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right">
+      <SheetContent side={isDesktop ? "right" : "bottom"}>
         <SheetHeader>
           <SheetTitle>Log session</SheetTitle>
           <SheetDescription>
@@ -29,6 +34,8 @@ export function LogSessionDrawer({
           playthroughs={playthroughs}
           preselectedPlaythroughId={preselectedPlaythroughId}
           gameId={gameId}
+          gameTitle={gameTitle}
+          coverImage={coverImage}
           onClose={() => onOpenChange(false)}
         />
       </SheetContent>

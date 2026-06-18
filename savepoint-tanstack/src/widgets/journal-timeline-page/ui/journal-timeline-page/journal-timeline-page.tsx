@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import { useIsDesktop } from "@/shared/lib/use-media-query";
+import { PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/button";
 import { JournalTimeline } from "@/widgets/journal-timeline";
 
@@ -32,14 +33,22 @@ export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
     void navigate({ to: "/journal/$id", params: { id: entryId } });
   };
 
+  const entryCount = entries.length;
+  const entryWord = entryCount === 1 ? "entry" : "entries";
+  const subtitle = `Reflect, don't review. ${entryCount} ${entryWord} across your library.`;
+
   const timeline = (
     <>
-      <div className="gap-md mb-lg flex items-center justify-between">
-        <h1 className="text-h1">Journal</h1>
-        <Button asChild>
-          <Link to="/journal/new">Compose entry</Link>
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="// JOURNAL"
+        title="Journal"
+        sub={subtitle}
+        actions={
+          <Button asChild>
+            <Link to="/journal/new">Compose entry</Link>
+          </Button>
+        }
+      />
 
       <JournalTimeline entries={entries} onEntrySelect={openDetail} />
     </>

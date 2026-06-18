@@ -41,6 +41,10 @@ const elements = {
   getGameTitle: (title: string) => screen.getByText(title),
   getAllEntries: () => screen.getAllByRole("article"),
   queryAllEntries: () => screen.queryAllByRole("article"),
+  getTimeline: () => screen.getByRole("list", { hidden: true }),
+  queryTimeline: () => screen.queryByRole("list", { hidden: true }),
+  getGameHeading: (title: string) =>
+    screen.getByRole("heading", { name: title }),
 };
 
 describe("JournalTimeline", () => {
@@ -80,8 +84,8 @@ describe("JournalTimeline", () => {
       ).toBeDefined();
     });
 
-    it("renders the game title", () => {
-      expect(elements.getGameTitle("Hollow Knight")).toBeDefined();
+    it("renders the game title as a card heading", () => {
+      expect(elements.getGameHeading("Hollow Knight")).toBeDefined();
     });
 
     it("does not render the empty-state message", () => {
@@ -156,14 +160,25 @@ describe("JournalTimeline", () => {
     });
 
     it("does not render a broken image element for the missing cover", () => {
-      // An img rendered for the (null) cover must carry a non-empty src.
-      // query via RTL; if none is present the assertion is vacuously satisfied —
-      // we only guard against an img with an empty/null src attribute.
       const imgs = screen.queryAllByRole("img");
       for (const img of imgs) {
         expect(img).toHaveAttribute("src");
         expect((img as HTMLImageElement).src).toBeTruthy();
       }
+    });
+  });
+
+  describe("given entries with the aria-label on the timeline container", () => {
+    const entry = makeEntry({ id: "aria-test" });
+
+    beforeEach(() => {
+      render(<JournalTimeline entries={[entry]} />);
+    });
+
+    it("has aria-label Journal timeline on the container", () => {
+      expect(
+        screen.getByRole("list", { name: "Journal timeline" })
+      ).toBeDefined();
     });
   });
 });

@@ -138,6 +138,26 @@ describe("LogSessionForGame", () => {
       });
     });
 
+    describe("once game data resolves and gameTitle prop is provided", () => {
+      beforeEach(async () => {
+        mockGetLogSessionGameData.mockResolvedValue(MOCK_GAME_DATA);
+        render(
+          <LogSessionForGame
+            game="hollow-knight"
+            gameTitle="Hollow Knight"
+            onClose={vi.fn()}
+          />
+        );
+        await waitFor(() => {
+          expect(elements.queryLogSessionContent()).not.toBeNull();
+        });
+      });
+
+      it("forwards gameTitle to LogSessionContent", () => {
+        expect(capturedLogSessionContentProps.gameTitle).toBe("Hollow Knight");
+      });
+    });
+
     describe("once game data resolves with no playthroughs", () => {
       beforeEach(async () => {
         mockGetLogSessionGameData.mockResolvedValue({
