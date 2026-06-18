@@ -15,13 +15,20 @@ import type {
 import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
+const mockNavigate = vi.fn();
+
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn() }),
+  useNavigate: () => mockNavigate,
   Link: ({ to, children, ...rest }: any) => (
     <a href={to} {...rest}>
       {children}
     </a>
   ),
+}));
+
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: vi.fn(() => true),
 }));
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
@@ -48,6 +55,17 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
 
 vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
+}));
+
+vi.mock(
+  "@/features/compose-journal-entry/api/get-log-session-game-data",
+  () => ({
+    getLogSessionGameDataFn: vi.fn(),
+  })
+);
+
+vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
+  getLoggableGamesFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
@@ -142,28 +160,38 @@ const elements = {
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
   queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
   queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
+  // Both the hero (md:hidden) and the desktop rail render a LibraryStatusSwitcher
+  // when a viewer is signed in, so these use queryAll and return the first match.
   queryStatusPill: () =>
-    screen.queryByRole("button", { name: /^Change library status:/ }),
+    screen.queryAllByRole("button", { name: /^Change library status:/ })[0] ??
+    null,
   queryAddToLibrary: () =>
-    screen.queryByRole("button", { name: "Add to library" }),
-  queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
+    screen.queryAllByRole("button", { name: "Add to library" })[0] ?? null,
+  queryStatusSwitcher: () =>
+    screen.queryAllByTestId("library-status-switcher")[0] ?? null,
   queryMoreMenuTrigger: () =>
-    screen.queryByRole("button", { name: "More library actions" }),
+    screen.queryAllByRole("button", { name: "More library actions" })[0] ??
+    null,
   queryAllTablists: () => screen.queryAllByRole("tablist"),
   queryAllTabpanels: () => screen.queryAllByRole("tabpanel"),
   queryOverviewTab: () => screen.queryByRole("tab", { name: "Overview" }),
-  queryJournalHeading: () => screen.queryByRole("heading", { name: "Journal" }),
+  queryJournalHeading: () =>
+    screen.queryByRole("heading", { name: "// JOURNAL" }),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
   querySummary: () => screen.queryByLabelText("Game summary"),
-  queryGameDetailLabel: () => screen.queryByText("// GAME.DETAIL"),
+  queryGameDetailLabel: () => screen.queryByText("// ABOUT"),
   queryGenresLabel: () => screen.queryByText("// GENRES"),
   queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
-  queryCriticScoreRing: () => screen.queryByLabelText("Critic score"),
-  queryRoundedScore: (rounded: string) => screen.queryByText(rounded),
+  // The critic ring appears in both the hero (md:hidden) and the rail, so use queryAll
+  queryCriticScoreRing: () =>
+    screen.queryAllByLabelText("Critic score")[0] ?? null,
+  // Two critic rings in DOM (hero md:hidden + rail), so use queryAll
+  queryRoundedScore: (rounded: string) =>
+    screen.queryAllByText(rounded)[0] ?? null,
   queryAboutCard: () => screen.queryByTestId("game-detail-about-card"),
   queryThemesTagsCard: () =>
     screen.queryByTestId("game-detail-themes-tags-card"),
@@ -989,6 +1017,166 @@ describe("GameDetail", () => {
           "Notes"
         ) as HTMLTextAreaElement;
         expect(notesField.value).toBe("Run B notes");
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Slice 7 — desktop layout (AC GD-5)
+  // Layout is CSS-driven: both the detail rail and the action bar are always in
+  // the DOM; Tailwind hidden/md:block classes control visibility. No JS branching
+  // on viewport means no useIsDesktop mock needed here.
+  // ---------------------------------------------------------------------------
+
+  describe("Slice 7 — desktop layout (AC GD-5)", () => {
+    describe("given a library entry with a critic score and gameSlug", () => {
+      beforeEach(() => {
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry(), {
+              aggregated_rating: 88,
+            })}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("renders the sticky detail rail in the DOM", () => {
+        expect(screen.queryByTestId("game-detail-detail-rail")).not.toBeNull();
+      });
+
+      it("renders the mobile action bar in the DOM (CSS hides it on desktop)", () => {
+        expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
+      });
+
+      it("renders the status switcher inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        const switcher = within(rail).queryByTestId("library-status-switcher");
+        expect(switcher).not.toBeNull();
+      });
+
+      it("renders a Log a session CTA inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        const logBtn = within(rail).queryByRole("button", {
+          name: "Log a session",
+        });
+        expect(logBtn).not.toBeNull();
+      });
+
+      it("renders the critic score ring inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        const ring = within(rail).queryByLabelText("Critic score");
+        expect(ring).not.toBeNull();
+      });
+
+      it("renders a Your time summary section inside the detail rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByText("Your time")).not.toBeNull();
+      });
+
+      it("renders the jump spine in the DOM (both mobile and desktop variants)", () => {
+        // Two instances: md:hidden (mobile) + hidden md:block (desktop)
+        expect(
+          screen.queryAllByTestId("game-detail-jump-spine").length
+        ).toBeGreaterThan(0);
+      });
+    });
+
+    describe("given a library entry with gameSlug but no critic score", () => {
+      beforeEach(() => {
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry(), {
+              aggregated_rating: undefined,
+            })}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("does not render the critic ring inside the detail rail when no score exists", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByLabelText("Critic score")).toBeNull();
+      });
+    });
+
+    describe("given a library entry with playtime data", () => {
+      beforeEach(() => {
+        render(
+          <GameDetail
+            data={{
+              ...buildData(buildLibraryEntry()),
+              playtimeTotalMinutes: 360,
+              playtimeSessionCount: 4,
+            }}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      it("shows total played time in the Your time section inside the rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByText("Total played")).not.toBeNull();
+      });
+
+      it("shows sessions count in the Your time section inside the rail", () => {
+        const rail = screen.getByTestId("game-detail-detail-rail");
+        expect(within(rail).queryByText("Sessions")).not.toBeNull();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Slice 6 — mobile layout (AC GD-1…GD-4)
+  // Both the mobile top bar and the desktop breadcrumb are always in the DOM;
+  // Tailwind md:hidden / hidden md:flex classes gate their visibility. No
+  // useIsDesktop mock needed.
+  // ---------------------------------------------------------------------------
+
+  describe("Slice 6 — mobile layout (AC GD-1…GD-4)", () => {
+    describe("given a library entry with gameSlug", () => {
+      beforeEach(() => {
+        render(
+          <GameDetail
+            data={buildData(buildLibraryEntry())}
+            viewerUserId="user-1"
+            gameSlug="hollow-knight"
+          />
+        );
+      });
+
+      // Both nav variants are always present in the DOM (CSS-gated)
+      it("renders both the mobile top bar and the breadcrumb nav in the DOM", () => {
+        expect(screen.queryByRole("link", { name: "Back" })).not.toBeNull();
+        expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
+        expect(elements.queryBreadcrumbGames()).not.toBeNull();
+      });
+
+      // GD-4: mobile top bar must expose Back + More affordances
+      it("shows a Back link in the mobile top bar", () => {
+        expect(screen.queryByRole("link", { name: "Back" })).not.toBeNull();
+      });
+
+      it("shows a More button in the mobile top bar", () => {
+        expect(screen.queryByRole("button", { name: "More" })).not.toBeNull();
+      });
+
+      // GD-3: cover renders above title in the DOM (stacked hero, no grid collision)
+      it("renders the game cover image above the title heading in the DOM", () => {
+        const cover = screen.queryByRole("img", {
+          name: "Cover for Hollow Knight",
+        });
+        const title = elements.getTitle();
+        expect(cover).not.toBeNull();
+        expect(
+          Boolean(
+            title.compareDocumentPosition(cover!) &
+            Node.DOCUMENT_POSITION_PRECEDING
+          )
+        ).toBe(true);
       });
     });
   });

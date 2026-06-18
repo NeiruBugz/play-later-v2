@@ -5,9 +5,11 @@ import type { DashboardPageData } from "@/features/dashboard";
 
 import { DashboardPage } from "./dashboard-page";
 
-// Link-rendering composition — mock the router to a plain anchor so the page
-// can render without a RouterProvider. Drop `params` / `search` before
-// spreading so React doesn't warn about unknown DOM attrs.
+const mockNavigate = vi.fn();
+
+// Link-rendering composition — mock the router to a plain anchor.
+// Drop `params` / `search` before spreading so React doesn't warn about
+// unknown DOM attrs.
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children, ...rest }: any) => {
     delete rest.params;
@@ -18,25 +20,39 @@ vi.mock("@tanstack/react-router", () => ({
       </a>
     );
   },
+  useNavigate: () => mockNavigate,
 }));
 
-// Stub the child widgets — this suite verifies composition logic
-// (greeting, empty-library branch, stats threshold, section presence),
-// not the children's internals which are covered elsewhere.
-vi.mock("../dashboard-quick-log-hero", () => ({
-  DashboardQuickLogHero: ({ username }: { username: string }) => (
-    <div data-testid="quick-log-hero">{`hero:${username}`}</div>
+// Stub child widgets — this suite verifies composition and structural
+// layout, not each child's internals.
+vi.mock("../dashboard-jump-back-in-hero", () => ({
+  DashboardJumpBackInHero: ({
+    mostInProgressGame,
+  }: {
+    mostInProgressGame: { slug: string } | null;
+  }) => (
+    <div data-testid="jump-back-in-hero">
+      {`hero:${mostInProgressGame?.slug ?? "none"}`}
+    </div>
+  ),
+}));
+
+vi.mock("../dashboard-continue-list", () => ({
+  DashboardContinueList: () => <div data-testid="continue-list" />,
+}));
+
+vi.mock("../dashboard-status-strip", () => ({
+  DashboardStatusStrip: () => <div data-testid="status-strip" />,
+}));
+
+vi.mock("../dashboard-game-rail", () => ({
+  DashboardGameRail: ({ title }: { title: string }) => (
+    <section data-testid="game-rail">{title}</section>
   ),
 }));
 
 vi.mock("../dashboard-stats-card", () => ({
   DashboardStatsCard: () => <div data-testid="stats-card" />,
-}));
-
-vi.mock("../dashboard-game-section", () => ({
-  DashboardGameSection: ({ title }: { title: string }) => (
-    <section data-testid="game-section">{title}</section>
-  ),
 }));
 
 function makeData(
@@ -62,22 +78,27 @@ function makeData(
 }
 
 const elements = {
-  getQuickLogHero: () => screen.getByTestId("quick-log-hero"),
+  getJumpBackInHero: () => screen.getByTestId("jump-back-in-hero"),
+  getStatusStrip: () => screen.queryByTestId("status-strip"),
+  getGameRails: () => screen.queryAllByTestId("game-rail"),
   getStatsCard: () => screen.queryByTestId("stats-card"),
-  getGameSections: () => screen.queryAllByTestId("game-section"),
   getEmptyLibraryHeading: () => screen.queryByText("Your library is empty"),
   getBrowseLibraryLink: () =>
     screen.queryByRole("link", { name: "Browse Library" }),
 };
 
 describe("DashboardPage", () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+  });
+
   describe("given the library is empty", () => {
     beforeEach(() => {
       render(<DashboardPage data={makeData()} />);
     });
 
-    it("renders the quick-log hero with the username threaded in", () => {
-      expect(elements.getQuickLogHero().textContent).toBe("hero:Ada");
+    it("renders the jump-back-in hero with no game threaded in", () => {
+      expect(elements.getJumpBackInHero().textContent).toBe("hero:none");
     });
 
     it("renders the empty-library fallback heading", () => {
@@ -91,8 +112,8 @@ describe("DashboardPage", () => {
       );
     });
 
-    it("does not render any game sections in the empty-library branch", () => {
-      expect(elements.getGameSections()).toHaveLength(0);
+    it("does not render any game rails in the empty-library branch", () => {
+      expect(elements.getGameRails()).toHaveLength(0);
     });
 
     it("does not render the stats card when showStats is false", () => {
@@ -100,35 +121,61 @@ describe("DashboardPage", () => {
     });
   });
 
-  describe("given the library has games but stats are below threshold", () => {
+  describe("given the library has games", () => {
     beforeEach(() => {
       render(
         <DashboardPage
           data={makeData({
             hasEmptyLibrary: false,
             showStats: false,
+            quickLogGames: [
+              {
+                id: "g1",
+                igdbId: 1,
+                title: "Elden Ring",
+                slug: "elden-ring",
+                coverImage: null,
+                platform: null,
+              },
+            ],
             statusCounts: {
               WISHLIST: 0,
               SHELF: 0,
-              UP_NEXT: 0,
-              PLAYING: 2,
-              PLAYED: 0,
+              UP_NEXT: 2,
+              PLAYING: 3,
+              PLAYED: 1,
             },
+            continuePlaying: {
+              items: [],
+              total: 3,
+            },
+            upNext: { items: [], total: 2 },
+            recentlyAdded: { items: [] },
           })}
         />
       );
     });
 
-    it("renders all three game sections (Playing / Up Next / Recently Added)", () => {
-      const titles = elements.getGameSections().map((el) => el.textContent);
-      expect(titles).toEqual(["Playing", "Up Next", "Recently Added"]);
+    it("renders the jump-back-in hero with the first quickLogGame's slug", () => {
+      expect(elements.getJumpBackInHero().textContent).toBe("hero:elden-ring");
+    });
+
+    it("renders the compact status strip", () => {
+      expect(elements.getStatusStrip()).not.toBeNull();
+    });
+
+    it("renders the three game rails (Playing, Up next, Recently played)", () => {
+      const titles = elements.getGameRails().map((el) => el.textContent);
+      expect(titles).toEqual(
+        expect.arrayContaining(["Playing", "Up next", "Recently played"])
+      );
     });
 
     it("does not render the empty-library fallback", () => {
       expect(elements.getEmptyLibraryHeading()).toBeNull();
     });
 
-    it("does not render the stats card when below threshold", () => {
+    it("does not render the stats card when showStats is false", () => {
       expect(elements.getStatsCard()).toBeNull();
     });
   });
@@ -156,8 +203,12 @@ describe("DashboardPage", () => {
       expect(elements.getStatsCard()).not.toBeNull();
     });
 
-    it("still renders the three game sections", () => {
-      expect(elements.getGameSections()).toHaveLength(3);
+    it("renders three game rails (the desktop Playing slot is the continue list)", () => {
+      expect(elements.getGameRails()).toHaveLength(3);
+    });
+
+    it("renders the desktop continue list beside the hero", () => {
+      expect(screen.getByTestId("continue-list")).not.toBeNull();
     });
   });
 });

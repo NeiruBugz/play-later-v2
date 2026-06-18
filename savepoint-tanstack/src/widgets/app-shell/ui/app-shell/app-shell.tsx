@@ -26,7 +26,7 @@ export function AppShell({
         <main
           className={
             hasMobileBottomNav
-              ? "min-w-0 flex-1 pb-16 md:pb-0"
+              ? "pb-bottom-nav min-w-0 flex-1"
               : "min-w-0 flex-1"
           }
         >

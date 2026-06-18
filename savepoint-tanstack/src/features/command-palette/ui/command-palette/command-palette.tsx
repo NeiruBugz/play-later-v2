@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useRef } from "react";
 
+import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
   Command,
   CommandGroup,
@@ -23,7 +24,6 @@ import {
 
 import { useCommandPalette } from "../../hooks/use-command-palette";
 import { useDebouncedGameSearch } from "../../hooks/use-debounced-game-search";
-import { useMediaQuery } from "../../hooks/use-media-query";
 import { GameResultItem } from "../game-result-item";
 import { PaletteNavigationGroup } from "../palette-navigation-group";
 import { PaletteQuickActionsGroup } from "../palette-quick-actions-group";
@@ -40,7 +40,7 @@ export function CommandPalette({
   const isOpen = isControlled ? openProp : internal.isOpen;
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useIsDesktop();
 
   const { query, setQuery, results, isLoading, error, shouldSearch } =
     useDebouncedGameSearch({ isOpen });

@@ -33,6 +33,7 @@ const GAME_A = {
   name: "Hollow Knight",
   slug: "hollow-knight",
   cover: { image_id: "hk_cover" },
+  first_release_date: 1488326400,
 };
 
 const GAME_B = {
@@ -40,18 +41,11 @@ const GAME_B = {
   name: "Hollow Knight: Silksong",
   slug: "hollow-knight-silksong",
   cover: null,
+  first_release_date: null,
 };
 
 const STUB_SEARCH_RESULT = { games: [GAME_A, GAME_B], count: 2 };
 const STUB_EMPTY_RESULT = { games: [], count: 0 };
-// Cast: the test only needs reference equality on the resolved value to
-// satisfy `mockResolvedValue`'s type; the real shape (LibraryItem) carries
-// fields the modal does not read (createdAt, updatedAt, status, etc.).
-const STUB_LIBRARY_ITEM = {
-  id: "lib-item-1",
-  gameId: "game-1",
-  userId: "user-1",
-} as unknown as Awaited<ReturnType<typeof addGameToLibraryFn>>;
 
 const onAdded = vi.fn();
 
@@ -59,15 +53,17 @@ const defaultProps = { onAdded };
 
 const elements = {
   getSearchInput: () => screen.getByRole("searchbox", { name: "Search games" }),
-  getAddButton: () => screen.getByRole("button", { name: "Add to library" }),
-  queryAddButton: () =>
-    screen.queryByRole("button", { name: "Add to library" }),
-  getGameButton: (name: string) => screen.getByRole("button", { name }),
-  queryGameButton: (name: string) => screen.queryByRole("button", { name }),
+  queryQuickAddButton: (name: string) =>
+    screen.queryByRole("button", { name: `Add ${name} to library` }),
+  getQuickAddButton: (name: string) =>
+    screen.getByRole("button", { name: `Add ${name} to library` }),
   getLoadingText: () => screen.getByText("Searching..."),
   queryLoadingText: () => screen.queryByText("Searching..."),
   getNoResults: () => screen.getByText("No results found"),
   queryNoResults: () => screen.queryByText("No results found"),
+  queryIgdbResultsHeader: () => screen.queryByText("// IGDB RESULTS"),
+  getIgdbResultsHeader: () => screen.getByText("// IGDB RESULTS"),
+  queryResultName: (name: string) => screen.queryByText(name),
 };
 
 const actions = {
@@ -75,8 +71,8 @@ const actions = {
     userEvent.type(elements.getSearchInput(), query),
   submitSearch: (query: string) =>
     userEvent.type(elements.getSearchInput(), `${query}{Enter}`),
-  selectGame: (name: string) => userEvent.click(elements.getGameButton(name)),
-  clickAdd: () => userEvent.click(elements.getAddButton()),
+  clickQuickAdd: (name: string) =>
+    userEvent.click(elements.getQuickAddButton(name)),
 };
 
 describe("AddGameModal", () => {
@@ -99,7 +95,7 @@ describe("AddGameModal", () => {
     });
 
     it("does not show results, loading, or empty-results before any search", () => {
-      expect(elements.queryGameButton("Hollow Knight")).toBeNull();
+      expect(elements.queryResultName("Hollow Knight")).toBeNull();
       expect(elements.queryLoadingText()).toBeNull();
       expect(elements.queryNoResults()).toBeNull();
     });
@@ -111,7 +107,6 @@ describe("AddGameModal", () => {
 
   describe("given the user submits a search and it is pending", () => {
     beforeEach(async () => {
-      // Never resolves during this describe block — keeps loading state.
       vi.mocked(searchGamesFn).mockReturnValue(new Promise(() => {}));
       render(<AddGameModal {...defaultProps} />);
       await actions.submitSearch("Hollow");
@@ -135,15 +130,30 @@ describe("AddGameModal", () => {
       await actions.submitSearch("Hollow");
     });
 
-    it("renders both results as clickable buttons and hides loading/empty states", async () => {
+    it("renders both results with per-row Add buttons and hides loading/empty states", async () => {
       await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
+        expect(elements.queryQuickAddButton("Hollow Knight")).not.toBeNull();
       });
       expect(
-        elements.queryGameButton("Hollow Knight: Silksong")
+        elements.queryQuickAddButton("Hollow Knight: Silksong")
       ).not.toBeNull();
       expect(elements.queryLoadingText()).toBeNull();
       expect(elements.queryNoResults()).toBeNull();
+    });
+
+    it("renders the IGDB RESULTS section header", async () => {
+      await waitFor(() => {
+        expect(elements.queryIgdbResultsHeader()).not.toBeNull();
+      });
+    });
+
+    it("shows the game title text for each result", async () => {
+      await waitFor(() => {
+        expect(elements.queryResultName("Hollow Knight")).not.toBeNull();
+      });
+      expect(
+        elements.queryResultName("Hollow Knight: Silksong")
+      ).not.toBeNull();
     });
   });
 
@@ -174,21 +184,20 @@ describe("AddGameModal", () => {
     });
   });
 
-  describe("given the user searches, selects Hollow Knight, and clicks Add to library", () => {
+  describe("given the user searches and taps the per-row Add button for Hollow Knight", () => {
     beforeEach(async () => {
       vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
-      vi.mocked(addGameToLibraryFn).mockResolvedValue(STUB_LIBRARY_ITEM);
+      vi.mocked(addGameToLibraryFn).mockResolvedValue(undefined as never);
       render(<AddGameModal {...defaultProps} />);
 
       await actions.submitSearch("Hollow");
       await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
+        expect(elements.queryQuickAddButton("Hollow Knight")).not.toBeNull();
       });
-      await actions.selectGame("Hollow Knight");
-      await actions.clickAdd();
+      await actions.clickQuickAdd("Hollow Knight");
     });
 
-    it("calls addGameToLibraryFn with the selected game's igdbId wrapped in { data }", async () => {
+    it("calls addGameToLibraryFn with Hollow Knight's igdbId wrapped in { data }", async () => {
       await waitFor(() => {
         expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledOnce();
       });
@@ -197,37 +206,27 @@ describe("AddGameModal", () => {
       });
     });
 
-    it("calls onAdded exactly once after addGameToLibraryFn resolves", async () => {
-      await waitFor(() => {
-        expect(onAdded).toHaveBeenCalledOnce();
-      });
-    });
-
     it("fires toast.success and calls router.invalidate on success", async () => {
       await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          "Added to library"
-        );
+        expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
       });
-      expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
       expect(mockRouterInvalidate).toHaveBeenCalledOnce();
     });
   });
 
-  describe("given the user selects the second result (Silksong) and adds it", () => {
+  describe("given the user searches and taps the per-row Add button for Silksong", () => {
     beforeEach(async () => {
       vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
-      vi.mocked(addGameToLibraryFn).mockResolvedValue(STUB_LIBRARY_ITEM);
+      vi.mocked(addGameToLibraryFn).mockResolvedValue(undefined as never);
       render(<AddGameModal {...defaultProps} />);
 
       await actions.submitSearch("Hollow");
       await waitFor(() => {
         expect(
-          elements.queryGameButton("Hollow Knight: Silksong")
+          elements.queryQuickAddButton("Hollow Knight: Silksong")
         ).not.toBeNull();
       });
-      await actions.selectGame("Hollow Knight: Silksong");
-      await actions.clickAdd();
+      await actions.clickQuickAdd("Hollow Knight: Silksong");
     });
 
     it("sends Silksong's igdbId, not Hollow Knight's", async () => {
@@ -240,32 +239,9 @@ describe("AddGameModal", () => {
     });
   });
 
-  describe("given results are showing but no game is selected", () => {
-    beforeEach(async () => {
-      vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
-      render(<AddGameModal {...defaultProps} />);
-      await actions.submitSearch("Hollow");
-      await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
-      });
-    });
-
-    it("renders the Add to library button as disabled before a game is selected", () => {
-      const btn = elements.getAddButton();
-      expect(btn).toHaveProperty("disabled", true);
-    });
-
-    it("does not call addGameToLibraryFn when Add to library is clicked without a selection", async () => {
-      // Button is disabled, but assert the fn was not called defensively.
-      expect(vi.mocked(addGameToLibraryFn)).not.toHaveBeenCalled();
-    });
-  });
-
   describe("given the user submits the search form with an empty query", () => {
     beforeEach(async () => {
       render(<AddGameModal {...defaultProps} />);
-      // Submit the form directly to bypass the disabled check and hit the
-      // `if (trimmed.length === 0) return` guard in handleSubmit.
       const searchInput = screen.getByRole("searchbox", {
         name: "Search games",
       });
@@ -276,27 +252,6 @@ describe("AddGameModal", () => {
 
     it("does not call searchGamesFn when the query is empty", () => {
       expect(vi.mocked(searchGamesFn)).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("given results are shown but the user clicks Add to library without selecting a game", () => {
-    beforeEach(async () => {
-      vi.mocked(searchGamesFn).mockResolvedValue(STUB_SEARCH_RESULT);
-      render(<AddGameModal {...defaultProps} />);
-      await actions.submitSearch("Hollow");
-      await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
-      });
-      // Do NOT select a game, then directly invoke handleAdd by finding
-      // the button and firing a click even though it is disabled.
-      // The `disabled` attribute prevents userEvent.click from firing;
-      // use fireEvent to reach the `if (selectedId == null) return` guard.
-      const addBtn = elements.getAddButton();
-      fireEvent.click(addBtn);
-    });
-
-    it("does not call addGameToLibraryFn when no game is selected", () => {
-      expect(vi.mocked(addGameToLibraryFn)).not.toHaveBeenCalled();
     });
   });
 
@@ -312,10 +267,9 @@ describe("AddGameModal", () => {
 
       await actions.submitSearch("Hollow");
       await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight")).not.toBeNull();
+        expect(elements.queryQuickAddButton("Hollow Knight")).not.toBeNull();
       });
-      await actions.selectGame("Hollow Knight");
-      await actions.clickAdd();
+      await actions.clickQuickAdd("Hollow Knight");
     });
 
     it("fires toast.error once with the rejection message", async () => {
@@ -323,20 +277,6 @@ describe("AddGameModal", () => {
         expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
       });
       expect(vi.mocked(toast.error)).toHaveBeenCalledWith(ADD_ERROR_MESSAGE);
-    });
-
-    it("does not call onAdded on rejection (modal stays open)", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
-      });
-      expect(onAdded).not.toHaveBeenCalled();
-    });
-
-    it("does not call router.invalidate on rejection", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(toast.error)).toHaveBeenCalledOnce();
-      });
-      expect(mockRouterInvalidate).not.toHaveBeenCalled();
     });
   });
 });

@@ -49,6 +49,12 @@ const elements = {
       name: `Open journal entry from ${formattedDate}`,
     }),
   getContent: () => screen.getByText("Some content here."),
+  queryGameHeading: (title: string) =>
+    screen.queryByRole("heading", { name: title }),
+  getGameHeading: (title: string) =>
+    screen.getByRole("heading", { name: title }),
+  queryDate: (text: string) => screen.queryByText(text),
+  getDate: (text: string) => screen.getByText(text),
 };
 
 describe("JournalEntryCard", () => {
@@ -70,10 +76,26 @@ describe("JournalEntryCard", () => {
     });
   });
 
-  describe("given an entry with a non-null title", () => {
+  describe("given an entry with a game", () => {
+    beforeEach(() => {
+      render(<JournalEntryCard entry={entry} />);
+    });
+
+    it("renders the game title as the card heading", () => {
+      expect(elements.getGameHeading("Hollow Knight")).toBeDefined();
+    });
+
+    it("renders the formatted date", () => {
+      expect(elements.getDate(formattedDate)).toBeDefined();
+    });
+  });
+
+  describe("given an entry with a non-null title and no game (title is the heading fallback)", () => {
     beforeEach(() => {
       render(
-        <JournalEntryCard entry={{ ...entry, title: "My Reflection Title" }} />
+        <JournalEntryCard
+          entry={{ ...entry, title: "My Reflection Title", game: null }}
+        />
       );
     });
 
@@ -99,6 +121,10 @@ describe("JournalEntryCard", () => {
 
     it("does not render a game link", () => {
       expect(screen.queryByRole("link")).toBeNull();
+    });
+
+    it("renders the formatted date even without a game", () => {
+      expect(elements.getDate(formattedDate)).toBeDefined();
     });
   });
 

@@ -71,6 +71,10 @@ vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
 
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: vi.fn(() => false),
+}));
+
 vi.mock("@tanstack/react-router", () => ({
   useRouter: vi.fn(() => ({ invalidate: vi.fn() })),
 }));
@@ -129,18 +133,23 @@ const GAME_ID = "game-ls-001";
 // ---------------------------------------------------------------------------
 
 const elements = {
-  getThoughtsField: () => screen.getByRole("textbox", { name: "Thoughts" }),
-  queryThoughtsField: () => screen.queryByRole("textbox", { name: "Thoughts" }),
+  getThoughtsField: () => screen.getByRole("textbox", { name: "Reflection" }),
+  queryThoughtsField: () =>
+    screen.queryByRole("textbox", { name: "Reflection" }),
   getHoursField: () => screen.getByRole("spinbutton", { name: "Hours played" }),
   queryHoursField: () =>
     screen.queryByRole("spinbutton", { name: "Hours played" }),
+  getIncreaseHoursButton: () =>
+    screen.getByRole("button", { name: "Increase playtime by 0.5 hours" }),
+  getDecreaseHoursButton: () =>
+    screen.getByRole("button", { name: "Decrease playtime by 0.5 hours" }),
   getLogSessionButton: () =>
     screen.getByRole("button", { name: "Log session" }),
   getCancelButton: () => screen.getByRole("button", { name: "Cancel" }),
   getHelperText: () =>
-    screen.getByText("Logging playtime alone is a complete entry."),
+    screen.getByText("Optional — playtime alone is a complete log."),
   queryHelperText: () =>
-    screen.queryByText("Logging playtime alone is a complete entry."),
+    screen.queryByText("Optional — playtime alone is a complete log."),
   // Run picker options — identified by their label text
   getRunOption: (label: string) => screen.getByRole("radio", { name: label }),
   queryRunOption: (label: string) =>
@@ -154,8 +163,14 @@ const elements = {
 const actions = {
   typeThoughts: (text: string) =>
     userEvent.type(elements.getThoughtsField(), text),
-  typeHours: (value: string) => userEvent.type(elements.getHoursField(), value),
-  clearHours: () => userEvent.clear(elements.getHoursField()),
+  // The playtime control is a +/- stepper starting at 0, moving in 0.5h steps.
+  // Setting N hours means clicking the increase button N / 0.5 times.
+  setHours: async (hours: number) => {
+    const clicks = Math.round(hours / 0.5);
+    for (let i = 0; i < clicks; i++) {
+      await userEvent.click(elements.getIncreaseHoursButton());
+    }
+  },
   selectRun: (label: string) => userEvent.click(elements.getRunOption(label)),
   submit: () => userEvent.click(elements.getLogSessionButton()),
   cancel: () => userEvent.click(elements.getCancelButton()),
@@ -271,8 +286,7 @@ describe("LogSessionDrawer", () => {
     beforeEach(async () => {
       render(<LogSessionDrawer {...baseProps} />);
       await actions.typeThoughts("Great session tonight");
-      await actions.clearHours();
-      await actions.typeHours("2");
+      await actions.setHours(2);
       await actions.submit();
     });
 
@@ -297,8 +311,7 @@ describe("LogSessionDrawer", () => {
   describe("given the user enters hours but leaves thoughts empty, then submits", () => {
     beforeEach(async () => {
       render(<LogSessionDrawer {...baseProps} />);
-      await actions.clearHours();
-      await actions.typeHours("1");
+      await actions.setHours(1);
       // Thoughts deliberately left empty
       await actions.submit();
     });
@@ -324,8 +337,7 @@ describe("LogSessionDrawer", () => {
     beforeEach(async () => {
       render(<LogSessionDrawer {...baseProps} />);
       await actions.selectRun("Replay · PC (Microsoft Windows)");
-      await actions.clearHours();
-      await actions.typeHours("3");
+      await actions.setHours(3);
       await actions.submit();
     });
 
@@ -456,8 +468,7 @@ describe("LogSessionDrawer", () => {
   describe("given the user enters positive hours and leaves thoughts empty", () => {
     beforeEach(async () => {
       render(<LogSessionDrawer {...baseProps} />);
-      await actions.clearHours();
-      await actions.typeHours("1");
+      await actions.setHours(1);
     });
 
     it("enables the Log session button", () => {
@@ -480,8 +491,7 @@ describe("LogSessionDrawer", () => {
 
       render(<LogSessionDrawer {...baseProps} onOpenChange={onOpenChange} />);
 
-      await actions.clearHours();
-      await actions.typeHours("1");
+      await actions.setHours(1);
       await actions.submit();
     });
 

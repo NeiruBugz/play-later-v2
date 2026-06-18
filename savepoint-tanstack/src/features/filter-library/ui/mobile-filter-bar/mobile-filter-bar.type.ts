@@ -26,4 +26,15 @@ export type MobileFilterBarProps = {
    * the sidebar.
    */
   platforms?: ReadonlyArray<string>;
+  /**
+   * Current grid/list view mode. When provided, the component renders the
+   * Grid/List view toggle buttons in the same row as the Filters trigger
+   * (Finding #15 — single-row controls layout).
+   */
+  viewMode?: "grid" | "list";
+  /**
+   * Callback invoked when the user selects a view mode from the inline toggle.
+   * Required when `viewMode` is provided.
+   */
+  onViewModeChange?: (mode: "grid" | "list") => void;
 };

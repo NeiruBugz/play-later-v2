@@ -68,6 +68,19 @@ vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
 
+// Spec 025 Slice 3b: new server fns added to compose-journal-entry api barrel
+// must be mocked to prevent server-env access during component tests.
+vi.mock(
+  "@/features/compose-journal-entry/api/get-log-session-game-data",
+  () => ({
+    getLogSessionGameDataFn: vi.fn(),
+  })
+);
+
+vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
+  getLoggableGamesFn: vi.fn(),
+}));
+
 // Spec 016 §2.13 — mock the manage-playthrough feature so the drawer renders
 // as a dialog in the DOM without needing the full feature runtime.
 vi.mock("@/features/manage-playthrough", () => ({
@@ -377,6 +390,175 @@ describe("LibraryPage", () => {
     });
   });
 
+  // Spec 025 Slice 4 — LIB-1…LIB-6: 2-up grid, status lens, view toggle.
+  describe("Spec 025 Slice 4 — Library redesign (LIB-1…LIB-6)", () => {
+    describe("given the library has items", () => {
+      beforeEach(() => {
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+          buildItem({ id: 3, gameTitle: "Hades" }),
+        ];
+        render(
+          <LibraryPage
+            items={items}
+            total={3}
+            {...defaultViewProps}
+            statusCounts={{
+              PLAYING: 3,
+              PLAYED: 0,
+              UP_NEXT: 0,
+              SHELF: 0,
+              WISHLIST: 0,
+            }}
+          />
+        );
+      });
+
+      // LIB-1: 2-up grid at phone width — grid has `grid-cols-2`
+      it("renders the library list with grid-cols-2 class (LIB-1)", () => {
+        const list = elements.getLibraryList();
+        expect(list.className).toMatch(/grid-cols-2/);
+      });
+
+      // LIB-5: view toggle is present
+      it("renders the grid/list view toggle buttons (LIB-5)", () => {
+        expect(screen.getByRole("button", { name: "List view" })).toBeDefined();
+        expect(screen.getByRole("button", { name: "Grid view" })).toBeDefined();
+      });
+
+      // LIB-2/LIB-3: status lens renders with All + status tabs
+      it("renders the sticky status lens with All tab (LIB-2/LIB-3)", () => {
+        expect(
+          screen.getByRole("tablist", { name: "Filter by status" })
+        ).toBeDefined();
+        expect(screen.getByRole("tab", { name: /All/ })).toBeDefined();
+      });
+
+      it("renders the status lens with a Playing tab showing count (LIB-2)", () => {
+        const playingTab = screen.getByRole("tab", { name: /Playing/ });
+        expect(playingTab.textContent).toContain("3");
+      });
+    });
+
+    describe("given the user taps List view toggle", () => {
+      beforeEach(async () => {
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+        ];
+        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+        const userEvent = (await import("@testing-library/user-event")).default;
+        await userEvent.click(
+          screen.getByRole("button", { name: "List view" })
+        );
+      });
+
+      // LIB-5: switching to list view changes the presentation
+      it("switches to list view — the grid list no longer has grid-cols-2 (LIB-5)", () => {
+        const list = elements.getLibraryList();
+        expect(list.className).not.toMatch(/grid-cols-2/);
+      });
+    });
+
+    describe("given the user taps Grid view after switching to list", () => {
+      beforeEach(async () => {
+        const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+        render(<LibraryPage items={items} total={1} {...defaultViewProps} />);
+        const userEvent = (await import("@testing-library/user-event")).default;
+        await userEvent.click(
+          screen.getByRole("button", { name: "List view" })
+        );
+        await userEvent.click(
+          screen.getByRole("button", { name: "Grid view" })
+        );
+      });
+
+      it("returns to grid view with grid-cols-2 (LIB-5)", () => {
+        const list = elements.getLibraryList();
+        expect(list.className).toMatch(/grid-cols-2/);
+      });
+    });
+
+    // LIB-4: secondary Filters trigger still exists
+    describe("given filters are active (platform set)", () => {
+      beforeEach(() => {
+        const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+        render(
+          <LibraryPage
+            items={items}
+            total={1}
+            {...defaultViewProps}
+            platform="PC"
+          />
+        );
+      });
+
+      it("shows the Filters trigger button (LIB-4)", () => {
+        expect(
+          screen.getByRole("button", { name: "Open filters" })
+        ).toBeDefined();
+      });
+    });
+
+    describe("given the library has items (single-row controls)", () => {
+      beforeEach(() => {
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+        ];
+        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+      });
+
+      it("renders the Filters, Grid view, and List view controls together", () => {
+        expect(
+          screen.getByRole("button", { name: "Open filters" })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "Grid view" })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "List view" })
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe("given filters are active (status + platform = 2 active filters)", () => {
+      beforeEach(() => {
+        const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+        render(
+          <LibraryPage
+            items={items}
+            total={1}
+            {...defaultViewProps}
+            status="PLAYING"
+            platform="PC"
+          />
+        );
+      });
+
+      it("shows a count badge of 2 on the Filters button", () => {
+        const filtersBtn = screen.getByRole("button", { name: "Open filters" });
+        expect(filtersBtn.textContent).toContain("2");
+      });
+    });
+
+    describe("given no filters are active", () => {
+      beforeEach(() => {
+        const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+        render(<LibraryPage items={items} total={1} {...defaultViewProps} />);
+      });
+
+      it("does not show any numeric count badge on the Filters button when no filters active", () => {
+        const filtersBtn = screen.getByRole("button", { name: "Open filters" });
+        // Text should only be "Filters" with no numeric suffix (no count badge)
+        expect(filtersBtn.textContent?.replace(/\s+/g, " ").trim()).toMatch(
+          /^Filters$/
+        );
+      });
+    });
+  });
+
   // Spec 016 §2.13 — Library-card "Add playthrough" quick-add entry point.
   // The page lifts a single drawer state; each card's "Add playthrough" control
   // opens ONE AddEditPlaythroughDrawer (mode="add") over the library.
@@ -403,6 +585,12 @@ describe("LibraryPage", () => {
         ];
         render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
         const userEvent = (await import("@testing-library/user-event")).default;
+        // Spec 025: inline quick-actions (incl. "Add playthrough") live in the
+        // list view; the default grid shows clean cover tiles. Switch to list
+        // first, then exercise the quick-add.
+        await userEvent.click(
+          screen.getByRole("button", { name: "List view" })
+        );
         // Click the first "Add playthrough" button (Hollow Knight, id=1).
         // Two cards each have an "Add playthrough" button — getAllByRole gives
         // us both; index 0 is Hollow Knight (rendered first).

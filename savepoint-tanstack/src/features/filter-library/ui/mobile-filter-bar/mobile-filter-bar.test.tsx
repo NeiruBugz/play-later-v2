@@ -333,4 +333,104 @@ describe("MobileFilterBar", () => {
       );
     });
   });
+
+  // Finding #15 — single-row controls: Filters trigger + grid/list view toggle
+  describe("given viewMode and onViewModeChange props are provided", () => {
+    const onViewModeChange = vi.fn();
+
+    beforeEach(() => {
+      render(
+        <MobileFilterBar
+          {...defaultProps}
+          viewMode="grid"
+          onViewModeChange={onViewModeChange}
+        />
+      );
+    });
+
+    it("renders both view-mode buttons alongside the Filters button", () => {
+      expect(elements.getOpenFiltersButton()).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Grid view" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "List view" })
+      ).toBeInTheDocument();
+    });
+
+    it("calls onViewModeChange with 'list' when List view is clicked", async () => {
+      await userEvent.click(screen.getByRole("button", { name: "List view" }));
+      expect(onViewModeChange).toHaveBeenCalledWith("list");
+    });
+  });
+
+  describe("given viewMode is 'list' and onViewModeChange is provided", () => {
+    const onViewModeChange = vi.fn();
+
+    beforeEach(() => {
+      render(
+        <MobileFilterBar
+          {...defaultProps}
+          viewMode="list"
+          onViewModeChange={onViewModeChange}
+        />
+      );
+    });
+
+    it("calls onViewModeChange with 'grid' when Grid view is clicked", async () => {
+      await userEvent.click(screen.getByRole("button", { name: "Grid view" }));
+      expect(onViewModeChange).toHaveBeenCalledWith("grid");
+    });
+  });
+
+  describe("given no filters are active", () => {
+    beforeEach(() => {
+      render(
+        <MobileFilterBar
+          {...defaultProps}
+          viewMode="grid"
+          onViewModeChange={vi.fn()}
+        />
+      );
+    });
+
+    it("does not render the active-filter count badge", () => {
+      expect(screen.queryByLabelText(/active filter/)).toBeNull();
+    });
+  });
+
+  describe("given 2 filters are active (platform + status)", () => {
+    beforeEach(() => {
+      render(
+        <MobileFilterBar
+          {...defaultProps}
+          status="PLAYING"
+          platform="PC"
+          viewMode="grid"
+          onViewModeChange={vi.fn()}
+        />
+      );
+    });
+
+    it("shows the count badge with the value 2 on the Filters button", () => {
+      expect(screen.getByLabelText("2 active filters")).toBeInTheDocument();
+    });
+  });
+
+  describe("given 1 filter is active (status only)", () => {
+    beforeEach(() => {
+      render(
+        <MobileFilterBar
+          {...defaultProps}
+          status="PLAYING"
+          viewMode="grid"
+          onViewModeChange={vi.fn()}
+        />
+      );
+    });
+
+    it("shows the count badge with the value 1", () => {
+      expect(screen.getByLabelText("1 active filter")).toBeInTheDocument();
+    });
+  });
 });

@@ -1,13 +1,17 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import {
-  BookMarked,
   BookOpen,
+  House,
+  Library,
   LogOut,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   Settings,
   User,
   UserCog,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
@@ -32,23 +36,41 @@ export interface AppSidebarProps {
   user: AppSidebarUser;
 }
 
+const SIDEBAR_COLLAPSED_KEY = "sp:sidebar-collapsed";
+
 const NAV_ITEMS = [
-  { label: "Library", to: "/library", icon: BookMarked },
-  { label: "Search games", to: "/games/search", icon: Search },
+  { label: "Dashboard", to: "/dashboard", icon: House },
+  { label: "Library", to: "/library", icon: Library },
   { label: "Journal", to: "/journal", icon: BookOpen },
   { label: "Profile", to: "/profile", icon: User },
   { label: "Settings", to: "/settings/profile", icon: Settings },
 ] as const;
 
+function readCollapsedFromStorage(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+}
+
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(readCollapsedFromStorage);
 
-  // Never display the email — see README "Display-name privacy".
+  useEffect(() => {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  }, [collapsed]);
+
+  const toggleCollapsed = () => setCollapsed((prev) => !prev);
+
+  const openLogSession = () => {
+    void navigate({
+      to: ".",
+      search: (prev) => ({ ...prev, action: "log-session" as const }),
+    });
+  };
+
   const nonEmailName = user.name && !user.name.includes("@") ? user.name : null;
   const displayName = nonEmailName ?? user.username ?? "Account";
-  // Initial-avatar fallback. Canonical renders the first character of the
-  // display name, not the stock cartoon image — see audit
-  // `context/audits/2026-05-18/visual-parity.md` § Library global chrome.
   const firstChar = (displayName.trim().charAt(0) || "?").toUpperCase();
 
   const handleSignOut = () => {
@@ -61,66 +83,106 @@ export function AppSidebar({ user }: AppSidebarProps) {
     });
   };
 
+  const CollapseIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
+  const collapseLabel = collapsed ? "Expand sidebar" : "Collapse sidebar";
+
   return (
     <aside
       data-testid="app-sidebar"
       aria-label="Primary navigation"
-      className="bg-background sticky top-0 hidden h-screen w-64 shrink-0 flex-col self-start border-r md:flex"
+      data-collapsed={collapsed ? "true" : undefined}
+      className={`bg-background sticky top-0 hidden h-screen shrink-0 flex-col self-start border-r transition-[width] duration-200 md:flex ${collapsed ? "w-16" : "w-64"}`}
     >
-      <div className="space-y-3 px-4 pt-4">
-        <Link
-          to="/dashboard"
-          className="flex items-center gap-2 rounded-md px-1 py-1"
-          aria-label="SavePoint"
-        >
-          <img
-            src="/logo.svg"
-            alt=""
-            aria-hidden="true"
-            className="h-8 w-8 shrink-0"
-          />
-          <span className="text-h3">SavePoint</span>
-        </Link>
+      <div className={`space-y-3 pt-4 ${collapsed ? "px-2" : "px-4"}`}>
+        <div className="flex items-center justify-between">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 rounded-md px-1 py-1"
+            aria-label="SavePoint"
+          >
+            <img
+              src="/logo.svg"
+              alt=""
+              aria-hidden="true"
+              className="h-8 w-8 shrink-0"
+            />
+            {!collapsed && <span className="text-h3">SavePoint</span>}
+          </Link>
+
+          <button
+            type="button"
+            aria-label={collapseLabel}
+            onClick={toggleCollapsed}
+            className="text-muted-foreground hover:bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+          >
+            <CollapseIcon size={16} aria-hidden="true" />
+          </button>
+        </div>
+
+        {!collapsed && (
+          <button
+            type="button"
+            aria-label="Open command palette"
+            onClick={openCommandPalette}
+            className="border-border text-muted-foreground flex w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm"
+          >
+            <span>Search</span>
+            <kbd className="text-muted-foreground rounded border px-1.5 py-0.5 text-xs font-semibold">
+              ⌘K
+            </kbd>
+          </button>
+        )}
+
+        {collapsed ? (
+          <button
+            type="button"
+            aria-label="Open command palette"
+            onClick={openCommandPalette}
+            className="text-muted-foreground hover:bg-accent flex w-full items-center justify-center rounded-md py-2"
+          >
+            <Search size={16} aria-hidden="true" />
+          </button>
+        ) : null}
 
         <button
           type="button"
-          aria-label="Open command palette"
-          onClick={openCommandPalette}
-          className="border-border text-muted-foreground flex w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm"
+          aria-label="Log a session"
+          onClick={openLogSession}
+          className={`bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
         >
-          <span>Search</span>
-          <kbd className="text-muted-foreground rounded border px-1.5 py-0.5 text-xs font-semibold">
-            ⌘K
-          </kbd>
+          <BookOpen size={16} aria-hidden="true" />
+          {!collapsed && "Log a session"}
         </button>
       </div>
 
-      {/* flex-1 pushes the bottom cluster down */}
       <nav className="mt-4 flex-1 overflow-y-auto px-2">
         {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
           <Link
             key={to}
             to={to}
+            aria-label={collapsed ? label : undefined}
             activeProps={{
               "aria-current": "page" as const,
               className: "bg-muted text-foreground",
             }}
-            className="hover:bg-accent flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
+            className={`hover:bg-accent flex items-center rounded-md py-2 text-sm font-medium ${collapsed ? "justify-center px-2" : "gap-2 px-3"}`}
           >
-            <Icon size={16} aria-hidden="true" />
-            {label}
+            <Icon size={16} aria-hidden={!collapsed} />
+            {!collapsed && label}
           </Link>
         ))}
       </nav>
 
-      <div className="mt-2 space-y-2 border-t px-3 pt-3 pb-4">
-        <ThemeToggle />
+      <div
+        className={`mt-2 space-y-2 border-t pt-3 pb-4 ${collapsed ? "px-2" : "px-3"}`}
+      >
+        {!collapsed && <ThemeToggle />}
 
         <DropdownMenu>
           <DropdownMenuTrigger
             type="button"
             aria-label="Open user menu"
-            className="hover:bg-accent data-[state=open]:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+            className={`hover:bg-accent data-[state=open]:bg-accent flex w-full items-center rounded-md py-1.5 text-sm ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
           >
             <Avatar className="h-7 w-7">
               {user.image ? (
@@ -133,7 +195,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 {firstChar}
               </AvatarFallback>
             </Avatar>
-            <span className="truncate">{displayName}</span>
+            {!collapsed && <span className="truncate">{displayName}</span>}
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-56">
             <DropdownMenuItem asChild>

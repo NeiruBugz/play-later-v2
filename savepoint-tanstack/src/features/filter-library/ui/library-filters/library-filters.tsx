@@ -99,7 +99,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
 
   return (
     <aside
-      className="hidden w-56 shrink-0 flex-col gap-6 pt-1 xl:flex"
+      className="hidden w-56 shrink-0 flex-col gap-6 pt-1 md:flex"
       aria-label="Library filters"
     >
       <section>

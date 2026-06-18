@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 
+import { PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/button";
 import { JournalTimeline } from "@/widgets/journal-timeline";
 
+import { JournalStatsRail } from "../journal-stats-rail";
 import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
 
 /**
@@ -10,6 +12,7 @@ import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
  *
  * - A header "Compose entry" link navigates to `/journal/new`.
  * - Each entry card is clickable — navigates to `/journal/$id`.
+ * - On desktop, pairs the timeline with a `JournalStatsRail` (AC JRN-4).
  *
  * Slice 23 (blocker remediation #1): this widget previously owned compose /
  * detail / edit / delete *dialogs*. The product decision reversed that
@@ -17,6 +20,11 @@ import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
  * timeline now navigates to the dedicated pages instead. The compose/edit/
  * delete dialog components are unchanged and still used by the game-detail,
  * library-item-card, and dashboard quick-compose surfaces.
+ *
+ * Layout: both the timeline column and the stats rail are always in the DOM
+ * (SSR-safe). Below `md` the grid collapses to a single column and the rail
+ * is hidden via `hidden md:block`; above `md` the two-column layout is applied
+ * via responsive Tailwind classes — no post-hydration layout swap.
  *
  * FSD: widget layer — composes shared/ui + the entity-backed `JournalTimeline`
  * widget. The route stays thin: it loads data and renders this widget.
@@ -28,16 +36,30 @@ export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
     void navigate({ to: "/journal/$id", params: { id: entryId } });
   };
 
+  const entryCount = entries.length;
+  const entryWord = entryCount === 1 ? "entry" : "entries";
+  const subtitle = `Reflect, don't review. ${entryCount} ${entryWord} across your library.`;
+
   return (
-    <>
-      <div className="gap-md mb-lg flex items-center justify-between">
-        <h1 className="text-h1">Journal</h1>
-        <Button asChild>
-          <Link to="/journal/new">Compose entry</Link>
-        </Button>
+    <div className="md:grid md:grid-cols-[1fr_280px] md:items-start md:gap-8">
+      <div>
+        <PageHeader
+          eyebrow="// JOURNAL"
+          title="Journal"
+          sub={subtitle}
+          actions={
+            <Button asChild>
+              <Link to="/journal/new">Compose entry</Link>
+            </Button>
+          }
+        />
+
+        <JournalTimeline entries={entries} onEntrySelect={openDetail} />
       </div>
 
-      <JournalTimeline entries={entries} onEntrySelect={openDetail} />
-    </>
+      <div className="hidden md:block">
+        <JournalStatsRail entries={entries} />
+      </div>
+    </div>
   );
 }

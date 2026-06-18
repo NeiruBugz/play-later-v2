@@ -85,3 +85,17 @@ export function formatRelativeTime(date: Date, now: Date = new Date()): string {
 
   return RELATIVE_TIME_FORMATTER.format(-diffDays, "day");
 }
+
+/**
+ * Human-readable playtime for a positive minute count: `6h 30m`, `45m`, `6h`.
+ * Callers own the zero/empty case — different surfaces want different copy
+ * (`—` on the game-detail rail, `Never played` on the steam-import card) — so
+ * this helper assumes `totalMinutes > 0`.
+ */
+export function formatPlaytimeMinutes(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}

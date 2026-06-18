@@ -47,6 +47,17 @@ vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
   createJournalEntryFn: vi.fn(),
 }));
 
+vi.mock(
+  "@/features/compose-journal-entry/api/get-log-session-game-data",
+  () => ({
+    getLogSessionGameDataFn: vi.fn(),
+  })
+);
+
+vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
+  getLoggableGamesFn: vi.fn(),
+}));
+
 // The platform chip renders the abbreviation/icon inside a Badge <div> that
 // carries the variant classes. Walking to the nearest classed ancestor reaches
 // the Badge — mirrors the helper in entities/game/ui/platform-badges.test.tsx.

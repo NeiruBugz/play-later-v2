@@ -19,7 +19,8 @@ import { CommandPalette } from "@/features/command-palette/ui/command-palette";
 // Default to desktop (true); override to false in mobile-specific describe blocks.
 let mockIsDesktop = true;
 
-vi.mock("../../hooks/use-media-query", () => ({
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: () => mockIsDesktop,
   useMediaQuery: () => mockIsDesktop,
 }));
 

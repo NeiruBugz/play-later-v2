@@ -27,7 +27,7 @@ export function GameCard({
   ...props
 }: GameCardProps) {
   const { slug, title, coverImageId, releaseYear, platforms = [] } = game;
-  const coverUrl = buildCoverImageUrl(coverImageId);
+  const coverUrl = buildCoverImageUrl(coverImageId, "t_720p");
   const showMeta =
     density === "detailed" &&
     ((releaseYear ?? null) !== null || platforms.length > 0);

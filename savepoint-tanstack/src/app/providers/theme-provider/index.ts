@@ -1,4 +1,5 @@
-export { SavepointThemeProvider, getSystemPreference } from "./theme-provider";
+export { SavepointThemeProvider } from "./theme-provider";
+export { getSystemPreference } from "./theme-provider.utility";
 export type { ThemeProviderProps } from "./theme-provider.type";
 // Theme, ResolvedTheme, ThemeContextValue, and useTheme now live in
 // @/shared/lib/theme — re-exported here for backward-compat (e.g. tests that

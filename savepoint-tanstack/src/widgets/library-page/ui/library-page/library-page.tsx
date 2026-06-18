@@ -1,22 +1,103 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Download, Library, SearchX } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
+import { isTouched, LibraryStatusBadge } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddGameTrigger } from "@/features/add-game";
 import {
   LibraryFilters,
   MobileFilterBar,
+  StatusLens,
   type LibraryStatusCounts,
 } from "@/features/filter-library";
 import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
 import { AddEditPlaythroughDrawer } from "@/features/manage-playthrough";
 import { EmptyLibraryHero } from "@/features/onboarding-first-time";
+import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
+import { PageHeader } from "@/shared/ui/page-header";
+import { RatingInput } from "@/shared/ui/rating-input";
 import { LibraryItemCard } from "@/widgets/library-item-card";
 
 import type { LibraryPageProps } from "./library-page.type";
+
+/**
+ * Grid-view tile: a vertical cover (status badge + per-card menu overlaid),
+ * one-line title, platform, and rating beneath. The rich `LibraryItemCard`
+ * (with inline quick-actions) is reserved for the list view, where its
+ * full-width row has room — cramming it into a 2-up grid cell collapses it.
+ */
+function LibraryGridTile({
+  item,
+  menu,
+}: {
+  item: LibraryItemWithGame;
+  menu: ReactNode;
+}) {
+  const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_720p");
+  const alt = `Cover for ${item.game.title}`;
+
+  return (
+    <div className="relative" data-testid="library-grid-tile">
+      <Link
+        to="/games/$slug"
+        params={{ slug: item.game.slug }}
+        aria-label={`View ${item.game.title}`}
+        className="group block"
+      >
+        <div className="relative">
+          {coverUrl ? (
+            <img
+              src={coverUrl}
+              alt={alt}
+              loading="lazy"
+              className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
+            />
+          ) : (
+            <div
+              role="img"
+              aria-label={alt}
+              className="bg-muted shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)]"
+            />
+          )}
+          <div className="absolute top-2 left-2">
+            <LibraryStatusBadge
+              status={item.status}
+              hasBeenPlayed={isTouched(item)}
+              className="uppercase"
+            />
+          </div>
+        </div>
+        <h3 className="mt-2 line-clamp-1 text-sm leading-tight font-medium group-hover:underline">
+          {item.game.title}
+        </h3>
+        {item.platform ? (
+          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+            {item.platform}
+          </p>
+        ) : null}
+      </Link>
+      <div
+        className="mt-1 flex h-4 items-center"
+        onClickCapture={(event) => event.stopPropagation()}
+      >
+        {item.rating === null ? (
+          <span className="text-muted-foreground text-xs italic">unrated</span>
+        ) : (
+          <RatingInput
+            value={item.rating}
+            size="sm"
+            readOnly
+            aria-label={`Rating: ${item.rating / 2} out of 5 stars`}
+          />
+        )}
+      </div>
+      <div className="absolute top-2 right-2 z-10">{menu}</div>
+    </div>
+  );
+}
 
 /**
  * Fallback per-status counts derived from the loaded items. Used ONLY when the
@@ -128,6 +209,10 @@ export function LibraryPage(props: LibraryPageProps) {
   // status update consumed elsewhere if needed; current header omits it.
   void total;
 
+  // Local view-mode toggle: "grid" (default, 2-up cover tiles) or "list"
+  // (metadata rows). State lives here so the toggle is instant with no URL round-trip.
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
   // Flat discriminant for the grid region, replacing a triple-nested ternary.
   // "onboarding"/"empty" are the first-run branch (library genuinely empty,
   // no active server filters); "no-results" is the filtered-out branch (items
@@ -144,17 +229,20 @@ export function LibraryPage(props: LibraryPageProps) {
 
   return (
     <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
-      <header className="gap-md flex items-baseline justify-between">
-        <h1 className="heading-lg">Library</h1>
-        <Link
-          to="/steam/games"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
-          aria-label="View imported Steam games"
-        >
-          <Download className="h-4 w-4" aria-hidden />
-          Imported games
-        </Link>
-      </header>
+      <PageHeader
+        eyebrow="// LIBRARY"
+        title="Library"
+        actions={
+          <Link
+            to="/steam/games"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
+            aria-label="View imported Steam games"
+          >
+            <Download className="h-4 w-4" aria-hidden />
+            Imported games
+          </Link>
+        }
+      />
 
       <div className="relative w-full">
         <Input
@@ -174,6 +262,21 @@ export function LibraryPage(props: LibraryPageProps) {
         </kbd>
       </div>
 
+      {/* Sticky status lens (LIB-2/LIB-3) — always visible above the grid so
+          one tap re-filters without opening any overlay. Secondary filters
+          (platform, sort, rating) remain in the MobileFilterBar sheet / sidebar. */}
+      <StatusLens
+        status={status}
+        counts={statusCounts}
+        platform={platform}
+        acquisition={acquisition}
+        startedOnly={startedOnly}
+        minRating={minRating}
+        unratedOnly={unratedOnly}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+
       <MobileFilterBar
         status={status}
         platform={platform}
@@ -184,6 +287,8 @@ export function LibraryPage(props: LibraryPageProps) {
         sortBy={sortBy}
         sortOrder={sortOrder}
         platforms={platforms}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
       <div className="flex gap-6">
@@ -227,20 +332,36 @@ export function LibraryPage(props: LibraryPageProps) {
           ) : (
             <ul
               aria-label="Library items"
-              className="grid grid-cols-1 gap-3 md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
+              className={
+                viewMode === "grid"
+                  ? "grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5"
+                  : "flex flex-col gap-2"
+              }
             >
               {filteredItems.map((item) => (
                 <li key={item.id}>
-                  <LibraryItemCard
-                    item={item}
-                    menu={
-                      <LibraryCardMenu
-                        item={item}
-                        onEdit={() => setSelectedEntry(item)}
-                      />
-                    }
-                    onAddPlaythrough={setAddPlaythroughLibraryItemId}
-                  />
+                  {viewMode === "grid" ? (
+                    <LibraryGridTile
+                      item={item}
+                      menu={
+                        <LibraryCardMenu
+                          item={item}
+                          onEdit={() => setSelectedEntry(item)}
+                        />
+                      }
+                    />
+                  ) : (
+                    <LibraryItemCard
+                      item={item}
+                      menu={
+                        <LibraryCardMenu
+                          item={item}
+                          onEdit={() => setSelectedEntry(item)}
+                        />
+                      }
+                      onAddPlaythrough={setAddPlaythroughLibraryItemId}
+                    />
+                  )}
                 </li>
               ))}
             </ul>

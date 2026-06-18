@@ -53,6 +53,8 @@ const elements = {
   getComposeLink: () => screen.getByRole("link", { name: "Compose entry" }),
   getEntryOpener: (date: string) =>
     screen.getByRole("button", { name: `Open journal entry from ${date}` }),
+  getSubtitle: () => screen.getByText(/Reflect, don't review\./),
+  querySubtitle: () => screen.queryByText(/Reflect, don't review\./),
 };
 
 const actions = {
@@ -73,6 +75,44 @@ describe("JournalTimelinePage", () => {
     it("renders a Compose entry link to the /journal/new page", () => {
       expect(elements.getComposeLink()).toHaveAttribute("href", "/journal/new");
     });
+
+    it("renders the subtitle with 0 entries", () => {
+      expect(
+        screen.getByText(
+          "Reflect, don't review. 0 entries across your library."
+        )
+      ).toBeDefined();
+    });
+  });
+
+  describe("given a timeline with one entry", () => {
+    beforeEach(() => {
+      render(<JournalTimelinePage entries={[makeEntry()]} />);
+    });
+
+    it("renders the subtitle with 1 entry (singular)", () => {
+      expect(
+        screen.getByText("Reflect, don't review. 1 entry across your library.")
+      ).toBeDefined();
+    });
+  });
+
+  describe("given a timeline with two entries", () => {
+    beforeEach(() => {
+      render(
+        <JournalTimelinePage
+          entries={[makeEntry({ id: "e1" }), makeEntry({ id: "e2" })]}
+        />
+      );
+    });
+
+    it("renders the subtitle with the correct count", () => {
+      expect(
+        screen.getByText(
+          "Reflect, don't review. 2 entries across your library."
+        )
+      ).toBeDefined();
+    });
   });
 
   describe("given a timeline with one entry and the user clicks the card", () => {
@@ -91,6 +131,49 @@ describe("JournalTimelinePage", () => {
         to: "/journal/$id",
         params: { id: "entry-card-click" },
       });
+    });
+  });
+
+  describe("given multiple entries", () => {
+    const entries = [
+      makeEntry({ id: "e1", content: "First session." }),
+      makeEntry({
+        id: "e2",
+        content: "Second session.",
+        game: {
+          id: "game-2",
+          title: "Celeste",
+          slug: "celeste",
+          coverImage: null,
+        },
+      }),
+    ];
+
+    beforeEach(() => {
+      render(<JournalTimelinePage entries={entries} />);
+    });
+
+    it("renders the stats rail in the DOM", () => {
+      const rail = screen.getByRole("complementary", {
+        name: "Journaling stats",
+      });
+      expect(rail).toBeDefined();
+    });
+
+    it("renders a 'log a session' CTA link in the stats rail", () => {
+      expect(screen.getByRole("link", { name: "Log a session" })).toBeDefined();
+    });
+  });
+
+  describe("given a single entry", () => {
+    beforeEach(() => {
+      render(<JournalTimelinePage entries={[makeEntry()]} />);
+    });
+
+    it("renders both the timeline column and the stats rail container", () => {
+      expect(
+        screen.getByRole("complementary", { name: "Journaling stats" })
+      ).toBeDefined();
     });
   });
 });

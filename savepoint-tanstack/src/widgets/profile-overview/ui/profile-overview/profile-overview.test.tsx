@@ -72,7 +72,11 @@ const elements = {
   queryPlaythroughsSlot: () =>
     screen.queryByTestId("profile-playthroughs-slot"),
   getHeroBanner: () => screen.getByTestId("profile-hero-banner"),
-  getStatsBar: () => screen.getByTestId("profile-stats-bar"),
+  getStatRow: () => screen.getByTestId("profile-stat-row"),
+  getPrimaryAction: () => screen.getByTestId("profile-primary-action"),
+  queryPrimaryAction: () => screen.queryByTestId("profile-primary-action"),
+  getTabStrip: () => screen.getByTestId("profile-tab-strip"),
+  getIdentityBlock: () => screen.getByTestId("profile-identity-block"),
 };
 
 const actions = {
@@ -93,10 +97,12 @@ describe("ProfileOverview", () => {
       render(
         <ProfileOverview profile={stubProfile} stats={stubStats} isOwnProfile />
       );
-      expect(elements.getEditProfileLink()).toHaveAttribute(
-        "href",
-        "/settings/profile"
-      );
+      // Renders once for mobile (full-width) and once for desktop — both point to the same route.
+      const links = screen.getAllByRole("link", { name: "Edit Profile" });
+      expect(links.length).toBeGreaterThan(0);
+      for (const link of links) {
+        expect(link).toHaveAttribute("href", "/settings/profile");
+      }
     });
   });
 
@@ -136,26 +142,26 @@ describe("ProfileOverview", () => {
       expect(style).toContain("linear-gradient");
     });
 
-    it("renders five stat cards on the overview tab", () => {
+    it("renders four inline stat items in the compact header stat row", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      expect(screen.getAllByTestId("profile-stats-bar-item").length).toBe(5);
+      expect(screen.getAllByTestId("profile-stat-item").length).toBe(4);
     });
 
-    it("shows Played and Completed as distinct stats (no phantom COMPLETED fallback)", () => {
+    it("shows played and completed as distinct stat items (no phantom COMPLETED fallback)", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      const cards = screen.getAllByTestId("profile-stats-bar-item");
-      const playedCard = cards.find(
-        (card) => within(card).queryByText("Played") !== null
+      const items = screen.getAllByTestId("profile-stat-item");
+      const playedItem = items.find(
+        (item) => within(item).queryByText("played") !== null
       );
-      const completedCard = cards.find(
-        (card) => within(card).queryByText("Completed") !== null
+      const completedItem = items.find(
+        (item) => within(item).queryByText("completed") !== null
       );
       // PLAYED status count (5) and real completions (2) are different numbers
-      // rendered in their own cards — proving the two metrics aren't conflated.
-      expect(playedCard).toBeDefined();
-      expect(completedCard).toBeDefined();
-      expect(within(playedCard!).getByText("5")).toBeInTheDocument();
-      expect(within(completedCard!).getByText("2")).toBeInTheDocument();
+      // rendered in their own stat items — proving the two metrics aren't conflated.
+      expect(playedItem).toBeDefined();
+      expect(completedItem).toBeDefined();
+      expect(within(playedItem!).getByText("5")).toBeInTheDocument();
+      expect(within(completedItem!).getByText("2")).toBeInTheDocument();
     });
   });
 
@@ -222,6 +228,102 @@ describe("ProfileOverview", () => {
 
     it("renders the injected slot content inside the section", () => {
       expect(elements.queryPlaythroughsSlot()).not.toBeNull();
+    });
+  });
+
+  // AC PRO-1: compact header — content starts high with a sticky tab strip
+  describe("given any viewer (AC PRO-1 compact header)", () => {
+    beforeEach(() => {
+      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
+    });
+
+    it("renders a compact horizontal stat row inside the identity block", () => {
+      expect(elements.getStatRow()).toBeDefined();
+    });
+
+    it("stat row contains exactly 4 inline stat items (in library / played / completed / entries)", () => {
+      const row = elements.getStatRow();
+      const items = within(row).getAllByTestId("profile-stat-item");
+      expect(items.length).toBe(4);
+    });
+
+    it("stat row is inside the identity block", () => {
+      const identityBlock = elements.getIdentityBlock();
+      const row = within(identityBlock).getByTestId("profile-stat-row");
+      expect(row).toBeDefined();
+    });
+
+    it("renders the sticky tab strip with a sticky position class", () => {
+      const tabStrip = elements.getTabStrip();
+      expect(tabStrip.className).toContain("sticky");
+    });
+
+    it("tab strip contains the Overview, Library and Activity tabs", () => {
+      const tabStrip = elements.getTabStrip();
+      expect(
+        within(tabStrip).getByRole("tab", { name: "Overview" })
+      ).toBeDefined();
+      expect(
+        within(tabStrip).getByRole("tab", { name: "Library" })
+      ).toBeDefined();
+      expect(
+        within(tabStrip).getByRole("tab", { name: "Activity" })
+      ).toBeDefined();
+    });
+  });
+
+  // AC PRO-2: primary action is full-width and below the identity block (not squeezed into the name row)
+  describe("given isOwnProfile is true (AC PRO-2 full-width primary action)", () => {
+    beforeEach(() => {
+      render(
+        <ProfileOverview profile={stubProfile} stats={stubStats} isOwnProfile />
+      );
+    });
+
+    it("renders the primary action with data-testid profile-primary-action", () => {
+      expect(elements.getPrimaryAction()).toBeDefined();
+    });
+
+    it("primary action has a full-width class (w-full)", () => {
+      expect(elements.getPrimaryAction().className).toContain("w-full");
+    });
+
+    it("primary action is NOT an ancestor of the h1 heading — action comes after name, not around it", () => {
+      // AC PRO-2: the action must not wrap or contain the name heading.
+      // Being siblings in the identity block is fine; the action must simply
+      // come after the name block rather than being jammed inline with it.
+      const heading = screen.getByRole("heading", { level: 1 });
+      const primaryAction = elements.getPrimaryAction();
+      expect(primaryAction.contains(heading)).toBe(false);
+    });
+  });
+
+  describe("given isOwnProfile is false (AC PRO-2 no primary action for visitor)", () => {
+    it("does not render a primary action when no headerActions slot is provided", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      expect(elements.queryPrimaryAction()).toBeNull();
+    });
+  });
+
+  describe("given a headerActions slot is provided (AC PRO-2 custom primary action)", () => {
+    it("renders the slot as the primary action with full-width wrapper", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          headerActions={<button data-testid="custom-action">Follow</button>}
+        />
+      );
+      const primaryAction = elements.getPrimaryAction();
+      expect(primaryAction).toBeDefined();
+      expect(primaryAction.className).toContain("w-full");
+      expect(within(primaryAction).getByTestId("custom-action")).toBeDefined();
     });
   });
 });

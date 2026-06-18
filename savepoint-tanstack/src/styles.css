@@ -1,6 +1,27 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Bottom-nav spacing utilities. */
+@layer utilities {
+  /* Home-indicator inset for FIXED bottom bars (bottom nav, game-detail action
+     bar) — pads their own content up off the iOS home indicator. */
+  .pb-safe-nav {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Content clearance for the scrolling page so its last rows aren't hidden
+     behind the fixed bottom nav (~4rem tall). Reset to 0 on desktop where the
+     nav is replaced by the sidebar. Applied to <main> by AppShell. */
+  .pb-bottom-nav {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 48rem) {
+    .pb-bottom-nav {
+      padding-bottom: 0;
+    }
+  }
+}
+
 :root {
   /* Base font-family vars hold ONLY the loaded family name. The generic
      fallbacks live on the theme-layer composites below
@@ -597,6 +618,13 @@
     letter-spacing: var(--font-letter-spacing-overline);
     font-weight: var(--font-weight-caption);
     text-transform: uppercase;
+  }
+  .terminal-label {
+    font-family: var(--font-runtime-mono);
+    font-size: var(--font-size-body-xs);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
   }
   /* Semantic type-scale aliases — map onto existing tokens (see shared/lib/typescale/typescale.md) */
   .text-display {

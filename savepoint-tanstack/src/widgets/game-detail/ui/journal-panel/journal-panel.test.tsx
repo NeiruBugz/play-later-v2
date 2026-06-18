@@ -29,7 +29,7 @@ function makeEntry(): JournalEntry {
 const onAddEntryClick = vi.fn();
 
 const elements = {
-  queryHeading: () => screen.queryByRole("heading", { name: "Journal" }),
+  queryHeading: () => screen.queryByRole("heading", { name: "// JOURNAL" }),
   queryEntryContent: () => screen.queryByText("Played for an hour."),
   queryEmpty: () => screen.queryByText("No journal entries yet."),
   getAddButton: () => screen.getByRole("button", { name: "Add entry" }),

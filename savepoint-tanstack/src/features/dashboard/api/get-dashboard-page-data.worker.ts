@@ -22,6 +22,7 @@ export type DashboardQuickLogGame = {
   title: string;
   slug: string;
   coverImage: string | null;
+  platform: string | null;
 };
 
 export type DashboardPageData = {
@@ -97,6 +98,7 @@ export async function getDashboardPageDataWorker(
       title: item.game.title,
       slug: item.game.slug,
       coverImage: item.game.coverImage,
+      platform: item.platform,
     }));
 
   // Legacy accounts seed `name = email`; filter those out before using it.

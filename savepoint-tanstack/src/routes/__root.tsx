@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { useState } from "react";
+import { z } from "zod";
 
 import { ErrorBoundary } from "@/app";
 
@@ -22,6 +23,7 @@ import { AppBottomNav } from "@/widgets/app-bottom-nav";
 import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
 import { AppShell } from "@/widgets/app-shell";
 import { AppSidebar } from "@/widgets/app-sidebar";
+import { GlobalActionHost } from "@/widgets/global-action-host";
 
 import appCss from "../styles.css?url";
 
@@ -33,7 +35,13 @@ import appCss from "../styles.css?url";
 // for why this lives inline instead of inside `next-themes`.
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var validThemes=['light','dark','system'];var mode=validThemes.indexOf(stored)!==-1?stored:'system';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var classMap={light:'',dark:'dark'};var resolved=mode==='system'?(prefersDark?'dark':'light'):mode;var nextClass=classMap[resolved];var root=document.documentElement;root.classList.remove('dark');if(nextClass){root.classList.add(nextClass)}if(mode==='system'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=(resolved==='dark')?'dark':'light';}catch(e){}})();`;
 
+const rootSearchSchema = z.object({
+  action: z.enum(["log-session", "add-game"]).optional(),
+  game: z.string().min(1).optional(),
+});
+
 export const Route = createRootRoute({
+  validateSearch: rootSearchSchema,
   head: () => ({
     meta: [
       {
@@ -65,8 +73,22 @@ export const Route = createRootRoute({
         content: "A library, not a backlog. For patient gamers.",
       },
       { name: "twitter:image", content: "/og-image.png" },
+      {
+        name: "theme-color",
+        content: "#f6f1e7",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        name: "theme-color",
+        content: "#120f0c",
+        media: "(prefers-color-scheme: dark)",
+      },
     ],
     links: [
+      {
+        rel: "manifest",
+        href: "/manifest.json",
+      },
       {
         rel: "icon",
         type: "image/svg+xml",
@@ -127,6 +149,7 @@ export function RootShell() {
           <Outlet />
         </AppShell>
         {user ? <CommandPalette /> : null}
+        {user ? <GlobalActionHost /> : null}
         {user ? <WhatsNewModal /> : null}
         <Toaster />
         <TanStackDevtools

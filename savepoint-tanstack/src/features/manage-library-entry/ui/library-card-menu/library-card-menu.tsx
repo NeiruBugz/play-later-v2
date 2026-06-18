@@ -79,7 +79,6 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
             <Link
               to="/games/$slug"
               params={{ slug: item.game.slug }}
-              search={{ page: 1 }}
               onClick={stopProp}
             >
               <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />

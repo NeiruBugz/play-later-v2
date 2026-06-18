@@ -1,4 +1,4 @@
-import { Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/shared/lib/utils";
@@ -34,7 +34,7 @@ export function AddGameTrigger({ variant = "button" }: AddGameTriggerProps) {
               "[&_svg]:size-5"
             )}
           >
-            <Pencil aria-hidden="true" />
+            <Plus aria-hidden="true" />
           </Button>
         ) : (
           <Button>Add game</Button>

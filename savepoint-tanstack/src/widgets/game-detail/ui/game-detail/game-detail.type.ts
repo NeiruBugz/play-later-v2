@@ -58,6 +58,11 @@ export type GameDetailProps = {
   /** Authenticated viewer's user id, or `null` for anonymous viewers. */
   viewerUserId: string | null;
   /**
+   * URL slug for this game — used by the sticky action bar to navigate to
+   * `?action=log-session&game=<slug>` without requiring a server round-trip.
+   */
+  gameSlug?: string;
+  /**
    * Optional Suspense-wrapped related-games slot. Rendered as-is below the
    * journal teaser. The route owns the Suspense + Await + error boundary
    * plumbing; the widget stays prop-driven and unit-testable.

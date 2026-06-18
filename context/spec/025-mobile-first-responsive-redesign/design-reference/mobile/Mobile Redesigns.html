@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" data-accent="sage">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SavePoint — Mobile Redesigns</title>
+<link rel="stylesheet" href="savepoint-tokens.css" />
+<link rel="stylesheet" href="savepoint-kit.css" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9; }
+  /* keep SavePoint card/badge/button classes scoped working inside artboards */
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="sp-kit.jsx"></script>
+<script type="text/babel" src="sp-screens-a.jsx"></script>
+<script type="text/babel" src="sp-screens-b.jsx"></script>
+<script type="text/babel" src="sp-screens-c.jsx"></script>
+
+<script type="text/babel">
+const { useEffect } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "navCenter": true,
+  "navLabels": true,
+  "density": "cozy",
+  "dark": false
+}/*EDITMODE-END*/;
+
+const W = 402, H = 874;
+
+function Phone({ t, children }) {
+  return <IOSDevice width={W} height={H} dark={t.dark}>{children}</IOSDevice>;
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", !!t.dark);
+  }, [t.dark]);
+
+  return (
+    <React.Fragment>
+      <DesignCanvas>
+
+        <DCSection id="nav" title="Global navigation" subtitle="NAV-01/02 — bring Home + the core Log verb into reach. Tune all three live via Tweaks.">
+          <DCArtboard id="nav-a" label="A · 4 tabs + center Log  (recommended)" width={300} height={214}>
+            <NavBarDemo labels={true} center={true} title="// HOME · LIBRARY · ＋ · JOURNAL · PROFILE" caption="Raised center action logs a session from anywhere. Home returns to the dashboard." />
+          </DCArtboard>
+          <DCArtboard id="nav-b" label="B · 5 tabs, search inline" width={300} height={214}>
+            <NavBarDemo labels={true} center={false} title="// HOME · LIBRARY · SEARCH · JOURNAL · PROFILE" caption="Search promoted to a tab; Log lives as a FAB on content screens instead." />
+          </DCArtboard>
+          <DCArtboard id="nav-c" label="C · Icon-only (labels off)" width={300} height={214}>
+            <NavBarDemo labels={false} center={true} title="// COMPACT" caption="Labels off, active pill indicator. Densest, but relies on icon literacy." />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="dashboard" title="Dashboard" subtitle="DASH-01/02 — re-prioritize for the thumb; rails swipe instead of stacking.">
+          <DCArtboard id="dash-feed" label="A · Jump back in  (recommended)" width={W} height={H}>
+            <Phone t={t}><DashboardScreen t={t} variant="feed" /></Phone>
+          </DCArtboard>
+          <DCArtboard id="dash-tonight" label="B · Tonight — reflection-forward" width={W} height={H}>
+            <Phone t={t}><DashboardScreen t={t} variant="tonight" /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="library" title="Library" subtitle="LIB-01/02 — a shelf, not a feed. Sticky status lens + filter sheet.">
+          <DCArtboard id="lib-grid" label="A · 2-up cover grid  (recommended)" width={W} height={H}>
+            <Phone t={t}><LibraryScreen t={t} variant="grid" /></Phone>
+          </DCArtboard>
+          <DCArtboard id="lib-list" label="B · Metadata list density" width={W} height={H}>
+            <Phone t={t}><LibraryScreen t={t} variant="list" /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="detail" title="Game detail" subtitle="GD-01/02 — sticky action bar keeps Log in reach; a spine makes the long page navigable.">
+          <DCArtboard id="gd-stacked" label="A · Stacked + jump spine  (recommended)" width={W} height={H}>
+            <Phone t={t}><GameDetailScreen t={t} variant="stacked" /></Phone>
+          </DCArtboard>
+          <DCArtboard id="gd-tabbed" label="B · Tabbed sections" width={W} height={H}>
+            <Phone t={t}><GameDetailScreen t={t} variant="tabbed" /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="journal" title="Journal" subtitle="JRN-01 — compose in a full-height sheet that rises with the keyboard.">
+          <DCArtboard id="jrn-timeline" label="A · Timeline" width={W} height={H}>
+            <Phone t={t}><JournalScreen t={t} compose={false} /></Phone>
+          </DCArtboard>
+          <DCArtboard id="jrn-compose" label="B · Compose sheet" width={W} height={H}>
+            <Phone t={t}><JournalScreen t={t} compose={true} /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="profile" title="Profile &amp; Settings" subtitle="PRO-01 / SET-01 — compact identity header; settings become a native grouped list.">
+          <DCArtboard id="prof" label="Profile" width={W} height={H}>
+            <Phone t={t}><ProfileScreen t={t} /></Phone>
+          </DCArtboard>
+          <DCArtboard id="settings" label="Settings — grouped list" width={W} height={H}>
+            <Phone t={t}><SettingsScreen t={t} /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="flows" title="Core flows" subtitle="The two verbs the app is built on — now reachable globally, in calm bottom sheets.">
+          <DCArtboard id="flow-log" label="Log a session" width={W} height={H}>
+            <Phone t={t}><LogSessionScreen t={t} /></Phone>
+          </DCArtboard>
+          <DCArtboard id="flow-add" label="Add a game" width={W} height={H}>
+            <Phone t={t}><AddGameScreen t={t} /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+      </DesignCanvas>
+
+      <TweaksPanel>
+        <TweakSection label="Bottom navigation" />
+        <TweakToggle label="Center Log action" value={t.navCenter} onChange={(v) => setTweak("navCenter", v)} />
+        <TweakToggle label="Tab labels" value={t.navLabels} onChange={(v) => setTweak("navLabels", v)} />
+        <TweakSection label="Content" />
+        <TweakRadio label="Density" value={t.density} options={["cozy", "compact"]} onChange={(v) => setTweak("density", v)} />
+        <TweakSection label="Surface" />
+        <TweakToggle label="Dark mode" value={t.dark} onChange={(v) => setTweak("dark", v)} />
+      </TweaksPanel>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

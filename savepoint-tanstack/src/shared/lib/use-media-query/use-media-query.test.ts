@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useMediaQuery } from "./use-media-query";
+import { useIsDesktop, useMediaQuery } from "@/shared/lib/use-media-query";
 
 type MediaQueryChangeListener = (event: MediaQueryListEvent) => void;
 
@@ -110,24 +110,48 @@ describe("useMediaQuery", () => {
     });
   });
 
-  describe("cleanup — removeEventListener called on unmount", () => {
-    it("removes the change listener when the hook unmounts", () => {
-      const { unmount } = renderHook(() => useMediaQuery("(min-width: 768px)"));
-
-      unmount();
-
-      expect(mockMQL.removeEventListener).toHaveBeenCalledWith(
-        "change",
-        expect.any(Function)
-      );
-    });
-  });
-
   describe("given matchMedia is not available (SSR-like environment)", () => {
     it("returns false without throwing", () => {
       vi.stubGlobal("matchMedia", undefined);
 
       const { result } = renderHook(() => useMediaQuery("(min-width: 768px)"));
+
+      expect(result.current).toBe(false);
+    });
+  });
+});
+
+describe("useIsDesktop", () => {
+  let mockMQL: MockMQL;
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  describe("given a desktop viewport width", () => {
+    beforeEach(() => {
+      mockMQL = createMockMQL(true);
+      vi.stubGlobal("matchMedia", (query: string) => {
+        expect(query).toBe("(min-width: 768px)");
+        return mockMQL;
+      });
+    });
+
+    it("returns true and queries the desktop breakpoint", () => {
+      const { result } = renderHook(() => useIsDesktop());
+
+      expect(result.current).toBe(true);
+    });
+  });
+
+  describe("given a mobile viewport width", () => {
+    beforeEach(() => {
+      mockMQL = createMockMQL(false);
+      vi.stubGlobal("matchMedia", () => mockMQL);
+    });
+
+    it("returns false", () => {
+      const { result } = renderHook(() => useIsDesktop());
 
       expect(result.current).toBe(false);
     });

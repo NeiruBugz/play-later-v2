@@ -36,6 +36,7 @@ function GameDetailRoute() {
     <GameDetail
       data={data}
       viewerUserId={viewerUserId}
+      gameSlug={data.game.slug}
       timesToBeatSlot={
         <SectionErrorBoundary
           fallback={

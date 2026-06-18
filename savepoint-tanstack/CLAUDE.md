@@ -70,6 +70,8 @@ Folder layout, where `<name>` is the kebab-case component name:
 
 **Migrating from a flat shape:** if you encounter `<name>.tsx` + `<name>.type.ts` as siblings inside `ui/`, move them into a `<name>/` folder and add the barrel. Tests come along unchanged — the relative `./<name>` import resolves to the sibling `.tsx` file inside the new folder.
 
+**Lint-enforced.** Rule 1 ("`.tsx` exports components only") is enforced by `react-refresh/only-export-components` (`allowConstantExport: false`) in `eslint.config.mjs` — exporting a non-component value from a `.tsx` is an error. Two framework-canonical shapes are exempt: `shared/ui/**` (shadcn `Component + variants` primitives) and `routes/**` (TanStack `export const Route` + local thin component). The rule only sees the _export_ surface; the fuller convention (non-exported internals, the type/utility split) is prescribed in [`.claude/rules/tanstack/components.md`](../.claude/rules/tanstack/components.md).
+
 ## FSD layer map
 
 Top → bottom. Lower may not import upper.

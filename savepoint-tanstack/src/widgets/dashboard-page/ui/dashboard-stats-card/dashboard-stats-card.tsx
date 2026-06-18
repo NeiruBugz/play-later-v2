@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Library } from "lucide-react";
 
 import { STATUS_ENTRIES } from "@/entities/library-item/model/status";
 
@@ -14,11 +13,8 @@ export function DashboardStatsCard({
       to="/library"
       className="bg-card text-card-foreground gap-lg p-xl flex flex-col overflow-hidden rounded-lg border"
     >
-      <header className="flex items-center gap-3">
-        <Library className="text-muted-foreground h-5 w-5" aria-hidden="true" />
-        <span className="text-muted-foreground text-sm font-medium tracking-wider uppercase">
-          {"// LIBRARY"}
-        </span>
+      <header>
+        <span className="terminal-label">{"// LIBRARY"}</span>
       </header>
 
       <div>

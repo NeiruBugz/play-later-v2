@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authClient } from "@/shared/api/auth-client";
 
@@ -9,6 +9,7 @@ import { AppSidebar } from "./app-sidebar";
 let currentPath = "/library";
 
 const mockRouterInvalidate = vi.fn();
+const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, activeProps, children, ...rest }: any) => {
@@ -21,6 +22,7 @@ vi.mock("@tanstack/react-router", () => ({
     );
   },
   useRouter: () => ({ invalidate: mockRouterInvalidate }),
+  useNavigate: () => mockNavigate,
 }));
 
 vi.mock("@/shared/api/auth-client", () => ({
@@ -29,10 +31,6 @@ vi.mock("@/shared/api/auth-client", () => ({
   },
 }));
 
-// The sidebar only needs the `openCommandPalette` event helper. Mock the
-// command-palette barrel so its real CommandPalette UI (which statically
-// chains to authed server fns → auth.server's module-level env read) is not
-// loaded into this jsdom test graph.
 vi.mock("@/features/command-palette", () => ({
   openCommandPalette: vi.fn(),
 }));
@@ -50,9 +48,13 @@ const stubUser = {
 
 const elements = {
   getNavLink: (name: string) => screen.getByRole("link", { name }),
+  queryNavLink: (name: string) => screen.queryByRole("link", { name }),
   getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
   getSearchTrigger: () =>
     screen.getByRole("button", { name: "Open command palette" }),
+  getLogSessionCta: () => screen.getByRole("button", { name: "Log a session" }),
+  queryLogSessionCta: () =>
+    screen.queryByRole("button", { name: "Log a session" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
   getUserMenuTrigger: () =>
     screen.getByRole("button", { name: "Open user menu" }),
@@ -61,6 +63,9 @@ const elements = {
     screen.getByRole("menuitem", { name: /Profile settings/ }),
   querySignOutItem: () => screen.queryByRole("menuitem", { name: /Sign out/ }),
   queryAccountItem: () => screen.queryByRole("menuitem", { name: /Account/ }),
+  getCollapseToggle: () =>
+    screen.getByRole("button", { name: /Collapse sidebar|Expand sidebar/ }),
+  getSidebar: () => screen.getByTestId("app-sidebar"),
 };
 
 const actions = {
@@ -70,9 +75,24 @@ const actions = {
   clickSignOut: async () => {
     await userEvent.click(elements.getSignOutItem());
   },
+  clickLogSession: async () => {
+    await userEvent.click(elements.getLogSessionCta());
+  },
+  clickCollapseToggle: async () => {
+    await userEvent.click(elements.getCollapseToggle());
+  },
 };
 
 describe("AppSidebar", () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    window.localStorage.removeItem("sp:sidebar-collapsed");
+  });
+
+  afterEach(() => {
+    window.localStorage.removeItem("sp:sidebar-collapsed");
+  });
+
   describe("given the sidebar is rendered", () => {
     beforeEach(() => {
       currentPath = "/profile";
@@ -85,6 +105,13 @@ describe("AppSidebar", () => {
 
     it("renders the search trigger button", () => {
       elements.getSearchTrigger();
+    });
+
+    it("renders a Home/Dashboard nav link with href /dashboard", () => {
+      expect(elements.getNavLink("Dashboard")).toHaveAttribute(
+        "href",
+        "/dashboard"
+      );
     });
 
     it("renders a Library link with href /library", () => {
@@ -115,6 +142,10 @@ describe("AppSidebar", () => {
       );
     });
 
+    it("renders a prominent Log a session CTA button", () => {
+      expect(elements.getLogSessionCta()).toBeDefined();
+    });
+
     it("renders the theme toggle", () => {
       elements.getThemeToggle();
     });
@@ -123,10 +154,7 @@ describe("AppSidebar", () => {
       expect(screen.getByText("Ada")).toBeDefined();
     });
 
-    it("renders an initial-avatar fallback (Phase 3 visual-parity push)", () => {
-      // The Radix Avatar primitive renders the fallback span once the
-      // image fails to load; in the test environment no <img> resolves,
-      // so the fallback is mounted immediately.
+    it("renders an initial-avatar fallback", () => {
       expect(screen.getByLabelText("Ada")).toBeDefined();
     });
 
@@ -165,6 +193,12 @@ describe("AppSidebar", () => {
         "aria-current"
       );
     });
+
+    it("does not mark the Dashboard link as the current page", () => {
+      expect(elements.getNavLink("Dashboard")).not.toHaveAttribute(
+        "aria-current"
+      );
+    });
   });
 
   describe("given the current path is /profile", () => {
@@ -187,6 +221,23 @@ describe("AppSidebar", () => {
     });
   });
 
+  describe("given the user clicks the Log a session CTA", () => {
+    beforeEach(async () => {
+      currentPath = "/library";
+      render(<AppSidebar user={stubUser} />);
+      await actions.clickLogSession();
+    });
+
+    it("calls navigate with a search updater that sets action to log-session", () => {
+      expect(mockNavigate).toHaveBeenCalledOnce();
+      const [callArg] = mockNavigate.mock.calls[0];
+      const updater = callArg.search;
+      expect(typeof updater).toBe("function");
+      const result = updater({});
+      expect(result).toMatchObject({ action: "log-session" });
+    });
+  });
+
   describe("given the user opens the user menu", () => {
     beforeEach(async () => {
       currentPath = "/library";
@@ -200,8 +251,6 @@ describe("AppSidebar", () => {
     });
 
     it("reveals the Profile settings menu item linking to /settings/profile", () => {
-      // DropdownMenuItem with asChild renders the Link as the menuitem; the
-      // mocked Link forwards `to` as `href` on the underlying <a>.
       expect(elements.getProfileSettingsItem()).toHaveAttribute(
         "href",
         "/settings/profile"
@@ -223,6 +272,73 @@ describe("AppSidebar", () => {
     it("closes the menu when Escape is pressed", async () => {
       await userEvent.keyboard("{Escape}");
       expect(elements.querySignOutItem()).toBeNull();
+    });
+  });
+
+  describe("given the sidebar is expanded (default state)", () => {
+    beforeEach(() => {
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+    });
+
+    it("renders a Collapse sidebar toggle button", () => {
+      expect(
+        screen.getByRole("button", { name: "Collapse sidebar" })
+      ).toBeDefined();
+    });
+
+    it("renders the sidebar at expanded width (w-64 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-64/);
+    });
+
+    it("renders nav link labels as visible text", () => {
+      expect(screen.getByText("Dashboard")).toBeDefined();
+      expect(screen.getByText("Library")).toBeDefined();
+    });
+  });
+
+  describe("given the user clicks Collapse sidebar", () => {
+    beforeEach(async () => {
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+      await actions.clickCollapseToggle();
+    });
+
+    it("switches the toggle label to Expand sidebar", () => {
+      expect(
+        screen.getByRole("button", { name: "Expand sidebar" })
+      ).toBeDefined();
+    });
+
+    it("switches the sidebar to collapsed width (w-16 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-16/);
+    });
+
+    it("nav links carry aria-label in collapsed mode so the destination is still announced", () => {
+      expect(elements.getNavLink("Dashboard")).toBeDefined();
+      expect(elements.getNavLink("Library")).toBeDefined();
+    });
+
+    it("persists collapsed=true to localStorage", () => {
+      expect(window.localStorage.getItem("sp:sidebar-collapsed")).toBe("true");
+    });
+  });
+
+  describe("given localStorage has sidebar-collapsed=true on mount", () => {
+    beforeEach(() => {
+      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+    });
+
+    it("mounts in collapsed state (w-16 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-16/);
+    });
+
+    it("shows the Expand sidebar toggle", () => {
+      expect(
+        screen.getByRole("button", { name: "Expand sidebar" })
+      ).toBeDefined();
     });
   });
 });

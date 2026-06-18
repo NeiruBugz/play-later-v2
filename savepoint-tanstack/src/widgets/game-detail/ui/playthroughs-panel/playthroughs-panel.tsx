@@ -83,6 +83,7 @@ export function PlaythroughsPanel({
   if (playthroughs.length === 0) {
     return (
       <div data-testid="playthroughs-panel" className="gap-md flex flex-col">
+        <h2 className="terminal-label">// PLAYTHROUGHS</h2>
         <PlaythroughsEmpty onAddPlaythrough={onAddPlaythrough} />
       </div>
     );
@@ -90,6 +91,7 @@ export function PlaythroughsPanel({
 
   return (
     <div data-testid="playthroughs-panel" className="gap-md flex flex-col">
+      <h2 className="terminal-label">// PLAYTHROUGHS</h2>
       <AggregateBand playthroughs={playthroughs} />
       <PlaythroughTimeline
         playthroughs={playthroughs}

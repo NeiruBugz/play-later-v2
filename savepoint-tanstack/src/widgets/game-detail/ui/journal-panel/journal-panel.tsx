@@ -5,8 +5,8 @@ import type { JournalPanelProps } from "./journal-panel.type";
 export function JournalPanel({ entries, onAddEntryClick }: JournalPanelProps) {
   return (
     <>
-      <h2 id="journal-teaser-heading" className="text-h3">
-        Journal
+      <h2 id="journal-teaser-heading" className="terminal-label">
+        // JOURNAL
       </h2>
       <JournalTeaser entries={entries} onAddEntryClick={onAddEntryClick} />
     </>

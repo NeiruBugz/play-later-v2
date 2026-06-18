@@ -1,9 +1,13 @@
+import { PageHeader } from "@/shared/ui";
 import { EmptyState } from "@/shared/ui/empty-state";
 
-import { DashboardGameSection } from "../dashboard-game-section";
-import { DashboardQuickLogHero } from "../dashboard-quick-log-hero";
+import { DashboardContinueList } from "../dashboard-continue-list";
+import { DashboardGameRail } from "../dashboard-game-rail";
+import { DashboardJumpBackInHero } from "../dashboard-jump-back-in-hero";
 import { DashboardStatsCard } from "../dashboard-stats-card";
+import { DashboardStatusStrip } from "../dashboard-status-strip";
 import type { DashboardPageProps } from "./dashboard-page.type";
+import { buildEyebrowDate, buildGreeting } from "./dashboard-page.utility";
 
 export function DashboardPage({ data }: DashboardPageProps) {
   const total =
@@ -13,77 +17,82 @@ export function DashboardPage({ data }: DashboardPageProps) {
     data.statusCounts.PLAYING +
     data.statusCounts.PLAYED;
 
+  const mostInProgressGame = data.quickLogGames[0] ?? null;
+  const now = new Date();
+
   return (
-    <main className="container mx-auto px-4 py-6">
-      <DashboardQuickLogHero
-        username={data.username}
-        playingGames={data.quickLogGames}
+    <main className="container mx-auto px-4 py-4 md:py-6">
+      <PageHeader
+        eyebrow={buildEyebrowDate(now)}
+        title={buildGreeting(now, data.username)}
       />
 
+      <div className="md:grid md:grid-cols-[1.5fr_1fr] md:items-stretch md:gap-6">
+        <DashboardJumpBackInHero mostInProgressGame={mostInProgressGame} />
+
+        {!data.hasEmptyLibrary ? (
+          <div className="hidden md:block">
+            <DashboardContinueList
+              items={data.continuePlaying.items.slice(1)}
+            />
+          </div>
+        ) : null}
+      </div>
+
       {/* TODO(slice-B): port `GettingStartedChecklist` from canonical
-          `features/onboarding`. Until then, this slot is intentionally empty
-          to keep the page from drifting toward a phantom "Empty" feel. */}
+          `features/onboarding`. Until then, this slot is intentionally empty. */}
 
       {data.hasEmptyLibrary ? (
         <EmptyLibraryFallback />
       ) : (
         <>
-          <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
-            <div className="flex flex-col gap-2">
-              {data.showStats ? (
-                <DashboardStatsCard
-                  statusCounts={data.statusCounts}
-                  total={total}
-                />
-              ) : null}
+          <DashboardStatusStrip
+            statusCounts={data.statusCounts}
+            total={total}
+          />
 
-              {/* TODO(slice-C): port `ActivityFeed` from canonical
-                  `features/social`. Until then, this slot is intentionally
-                  empty. */}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <DashboardGameSection
+          <div className="flex flex-col gap-4">
+            <div className="md:hidden">
+              <DashboardGameRail
                 title="Playing"
                 items={data.continuePlaying.items}
-                totalCount={data.continuePlaying.total}
                 viewAll={{ status: "PLAYING" }}
                 viewAllLabel="View All Playing"
-                emptyMessage="No games in progress. Start exploring something new!"
-                variant="hero"
-              />
-
-              <DashboardGameSection
-                title="Up Next"
-                items={data.upNext.items}
-                totalCount={data.upNext.total}
-                viewAll={{ status: "UP_NEXT" }}
-                viewAllLabel="View All Up Next"
-                emptyMessage="No games queued up"
+                emptyMessage="No games in progress. Start something new!"
               />
             </div>
-          </div>
 
-          <div className="mt-2">
-            <DashboardGameSection
-              title="Recently Added"
+            <DashboardGameRail
+              title="Up next"
+              items={data.upNext.items}
+              viewAll={{ status: "UP_NEXT" }}
+              viewAllLabel="View All Up Next"
+              emptyMessage="No games queued up"
+            />
+
+            <DashboardGameRail
+              title="Recently played"
               items={data.recentlyAdded.items}
               viewAll={{ sortBy: "createdAt", sortOrder: "desc" }}
               viewAllLabel="View Library"
               emptyMessage="Your library is empty. Add some games to get started!"
             />
           </div>
+
+          {data.showStats ? (
+            <div className="mt-4">
+              <DashboardStatsCard
+                statusCounts={data.statusCounts}
+                total={total}
+              />
+            </div>
+          ) : null}
         </>
       )}
     </main>
   );
 }
 
-/**
- * Placeholder for canonical's `EmptyLibraryHero` (lives in the `onboarding`
- * feature, not ported yet). Keeps the empty-state surface meaningful until
- * Slice B replaces this with the real widget.
- */
 function EmptyLibraryFallback() {
   return (
     <EmptyState

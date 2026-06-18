@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatPlaytime, getSteamIconUrl } from "./imported-game-card.utility";
+import { getSteamIconUrl } from "./imported-game-card.utility";
 
 describe("getSteamIconUrl", () => {
   it("returns null when imgIconUrl is null", () => {
@@ -20,27 +20,5 @@ describe("getSteamIconUrl", () => {
     expect(url).toBe(
       "https://media.steampowered.com/steamcommunity/public/images/apps/220/abc123.jpg"
     );
-  });
-});
-
-describe("formatPlaytime", () => {
-  it("returns 'Never played' for null", () => {
-    expect(formatPlaytime(null)).toBe("Never played");
-  });
-
-  it("returns 'Never played' for 0 minutes", () => {
-    expect(formatPlaytime(0)).toBe("Never played");
-  });
-
-  it("returns minutes-only format when playtime is under one hour", () => {
-    expect(formatPlaytime(45)).toBe("45m");
-  });
-
-  it("returns hours-only format when playtime is an exact multiple of 60", () => {
-    expect(formatPlaytime(120)).toBe("2h");
-  });
-
-  it("returns combined hours and minutes format for mixed durations", () => {
-    expect(formatPlaytime(135)).toBe("2h 15m");
   });
 });

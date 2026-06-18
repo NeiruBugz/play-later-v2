@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" data-accent="sage">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SavePoint — Mobile Prototype</title>
+<link rel="stylesheet" href="savepoint-tokens.css" />
+<link rel="stylesheet" href="savepoint-kit.css" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body { background: #15171c; overflow: hidden; }
+  #root { height: 100vh; }
+  /* hide scrollbars inside the phone */
+  .sp-scroll::-webkit-scrollbar { width: 0; height: 0; }
+  .sp-scroll { scrollbar-width: none; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="sp-kit.jsx"></script>
+<script type="text/babel" src="sp-screens-a.jsx"></script>
+<script type="text/babel" src="sp-screens-b.jsx"></script>
+<script type="text/babel" src="sp-screens-c.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const W = 402, H = 874, SAFE_TOP = 54;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "navCenter": true,
+  "navLabels": true,
+  "density": "cozy",
+  "dark": false,
+  "accent": "sage"
+}/*EDITMODE-END*/;
+
+const ACCENTS = [["sage", "var(--primary)"], ["indigo", "oklch(0.5 0.15 274)"], ["clay", "oklch(0.55 0.13 42)"], ["plum", "oklch(0.5 0.13 330)"]];
+
+/* ---- Log a session sheet ---- */
+function LogSheet({ gameId = "hk", onClose }) {
+  const [hours, setHours] = useState(2.5);
+  const [when, setWhen] = useState("Today");
+  const g = byId(gameId);
+  return (
+    <Sheet title="Log a session" height="82%" onClose={onClose}
+      footer={<Button onClick={onClose} style={{ width: "100%", height: 48 }}>Save session</Button>}>
+      <Field label="Game">
+        <div style={{ display: "flex", alignItems: "center", gap: 11, padding: 10, border: "1px solid var(--border)", borderRadius: "var(--radius-btn)", background: "var(--card)" }}>
+          <div style={{ flex: "0 0 38px" }}><GameCover game={g} radius="5px" monoSize="0.7rem" /></div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--foreground)" }}>{g.title}</div>
+            <div style={{ fontSize: "0.74rem", color: "var(--muted-foreground)" }}>Main playthrough</div>
+          </div>
+          <Icon name="ChevronDown" size={18} style={{ color: "var(--muted-foreground)" }} />
+        </div>
+      </Field>
+      <Field label="Playtime">
+        <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center", padding: "8px 0" }}>
+          <button onClick={() => setHours((h) => Math.max(0.5, +(h - 0.5).toFixed(1)))} style={{ width: 46, height: 46, borderRadius: 9999, border: "1px solid var(--border)", background: "var(--card)", color: "var(--foreground)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="Minus" size={20} /></button>
+          <div style={{ textAlign: "center", minWidth: 96 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "2.2rem", color: "var(--foreground)" }}>{hours}</span>
+            <span style={{ fontSize: "1rem", color: "var(--muted-foreground)", marginLeft: 4 }}>hrs</span>
+          </div>
+          <button onClick={() => setHours((h) => +(h + 0.5).toFixed(1))} style={{ width: 46, height: 46, borderRadius: 9999, border: "1px solid transparent", background: "var(--primary)", color: "var(--primary-foreground)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="Plus" size={20} /></button>
+        </div>
+      </Field>
+      <Field label="When">
+        <div style={{ display: "flex", gap: 8 }}>
+          {["Today", "Yesterday", "Pick date"].map((x) => {
+            const on = when === x;
+            return <button key={x} onClick={() => setWhen(x)} style={{ flex: 1, height: 40, borderRadius: "var(--radius-btn)", border: on ? "1px solid transparent" : "1px solid var(--border)", background: on ? "var(--primary)" : "var(--card)", color: on ? "var(--primary-foreground)" : "var(--foreground-body)", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>{x}</button>;
+          })}
+        </div>
+      </Field>
+      <Field label="Reflection" hint="Optional — playtime alone is a complete log.">
+        <textarea placeholder="What stayed with you?" rows={3} style={{ width: "100%", border: "1px solid var(--border)", borderRadius: "var(--radius-btn)", background: "var(--card)", padding: 12, color: "var(--foreground)", fontSize: "0.9rem", lineHeight: 1.6, fontFamily: "var(--font-runtime-sans)", resize: "none", outline: "none", boxSizing: "border-box" }} />
+      </Field>
+    </Sheet>
+  );
+}
+
+/* ---- Add a game sheet ---- */
+function AddSheet({ onClose }) {
+  const [q, setQ] = useState("outer");
+  const results = GAMES.filter((g) => ["ow", "tun", "pen", "sdv", "ins"].includes(g.id));
+  return (
+    <Sheet title="Add a game" height="86%" onClose={onClose}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 12px", height: 46, border: "1px solid var(--border)", borderRadius: 9999, background: "var(--card)", marginBottom: 16 }}>
+        <Icon name="Search" size={18} style={{ color: "var(--muted-foreground)" }} />
+        <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search IGDB…" style={{ flex: 1, border: "none", background: "transparent", outline: "none", color: "var(--foreground)", fontSize: "0.95rem", fontFamily: "var(--font-runtime-sans)" }} />
+      </div>
+      <div className="terminal-label" style={{ marginBottom: 10 }}>// IGDB RESULTS</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {results.map((g) => (
+          <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ flex: "0 0 40px" }}><GameCover game={g} radius="5px" monoSize="0.7rem" /></div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--foreground)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{g.title}</div>
+              <div style={{ fontSize: "0.74rem", color: "var(--muted-foreground)" }}>{g.dev} · {g.year}</div>
+            </div>
+            <button aria-label="Add" onClick={onClose} style={{ width: 38, height: 38, borderRadius: 9999, border: "1px solid var(--border)", background: "var(--card)", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}><Icon name="Plus" size={19} /></button>
+          </div>
+        ))}
+      </div>
+    </Sheet>
+  );
+}
+
+/* ---- device stage: scale 402×874 to fit the viewport ---- */
+function Stage({ children }) {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const fit = () => setScale(Math.min(1, (window.innerHeight - 48) / H, (window.innerWidth - 48) / W));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  return (
+    <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", background: "radial-gradient(120% 100% at 50% 0%, #20242c, #15171c 70%)" }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: "center" }}>{children}</div>
+    </div>
+  );
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [view, setView] = useState({ screen: "home" });
+  const [sheet, setSheet] = useState(null);
+  const viewRef = useRef(view); viewRef.current = view;
+  const histRef = useRef([]);
+
+  useEffect(() => { document.documentElement.classList.toggle("dark", !!t.dark); }, [t.dark]);
+  useEffect(() => { document.documentElement.setAttribute("data-accent", t.accent || "sage"); }, [t.accent]);
+
+  useEffect(() => {
+    window.__MNAV = {
+      setTab(key) { histRef.current = []; setSheet(null); setView({ screen: key }); },
+      go(screen) { histRef.current.push(viewRef.current); setSheet(null); setView({ screen }); },
+      openGame(id) { histRef.current.push(viewRef.current); setSheet(null); setView({ screen: "detail", gameId: id }); },
+      back() { const h = histRef.current; setSheet(null); setView(h.length ? h.pop() : { screen: "home" }); },
+      openSheet(k) { setSheet(k); },
+      closeSheet() { setSheet(null); },
+    };
+    return () => { delete window.__MNAV; };
+  }, []);
+
+  const s = view.screen;
+  let screen;
+  if (s === "home") screen = <DashboardScreen t={t} variant="feed" />;
+  else if (s === "library") screen = <LibraryScreen t={t} variant="grid" />;
+  else if (s === "detail") screen = <GameDetailScreen t={t} variant="stacked" gameId={view.gameId} />;
+  else if (s === "journal") screen = <JournalScreen t={t} compose={false} />;
+  else if (s === "profile") screen = <ProfileScreen t={t} />;
+  else if (s === "settings") screen = <SettingsScreen t={t} />;
+
+  // immersive screens bleed their hero under the status bar; flat screens sit below it
+  const immersive = s === "detail" || s === "profile";
+
+  return (
+    <React.Fragment>
+      <Stage>
+        <IOSDevice width={W} height={H} dark={t.dark}>
+          <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+            <div className="sp-scroll" key={s + (view.gameId || "")} style={{ position: "absolute", top: immersive ? 0 : SAFE_TOP, left: 0, right: 0, bottom: 0, overflowY: "auto", background: "var(--background)" }}>
+              {screen}
+            </div>
+            {sheet === "log" && <LogSheet gameId={s === "detail" ? view.gameId : "hk"} onClose={() => setSheet(null)} />}
+            {sheet === "add" && <AddSheet onClose={() => setSheet(null)} />}
+          </div>
+        </IOSDevice>
+      </Stage>
+
+      <TweaksPanel>
+        <TweakSection label="Bottom navigation" />
+        <TweakToggle label="Center Log action" value={t.navCenter} onChange={(v) => setTweak("navCenter", v)} />
+        <TweakToggle label="Tab labels" value={t.navLabels} onChange={(v) => setTweak("navLabels", v)} />
+        <TweakSection label="Content" />
+        <TweakRadio label="Density" value={t.density} options={["cozy", "compact"]} onChange={(v) => setTweak("density", v)} />
+        <TweakSection label="Surface" />
+        <TweakToggle label="Dark mode" value={t.dark} onChange={(v) => setTweak("dark", v)} />
+        <TweakRow label="Accent">
+          <div style={{ display: "flex", gap: 8 }}>
+            {ACCENTS.map(([key, cc]) => (
+              <button key={key} type="button" title={key} onClick={() => setTweak("accent", key)}
+                style={{ width: 26, height: 26, borderRadius: 9999, background: cc, cursor: "pointer", padding: 0,
+                  border: (t.accent || "sage") === key ? "2px solid #29261b" : "2px solid rgba(0,0,0,.15)" }} />
+            ))}
+          </div>
+        </TweakRow>
+      </TweaksPanel>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

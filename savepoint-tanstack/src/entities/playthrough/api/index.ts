@@ -1,5 +1,9 @@
 export { clearLibraryStatusManual } from "./clear-library-status-manual.server";
 export {
+  getPlaythroughsBySlug,
+  type PlaythroughsBySlugResult,
+} from "./get-playthroughs-by-slug.server";
+export {
   getProfilePlaythroughs,
   type ProfilePlaythrough,
 } from "./get-profile-playthroughs.server";

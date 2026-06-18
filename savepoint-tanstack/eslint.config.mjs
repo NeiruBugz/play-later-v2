@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
 import jestDom from "eslint-plugin-jest-dom";
 import testingLibrary from "eslint-plugin-testing-library";
 import boundaries from "eslint-plugin-boundaries";
@@ -46,6 +47,49 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+    },
+  },
+  // Component sidecar convention enforcement.
+  //
+  // `.tsx` files export components only; component-unique value exports
+  // (helpers, constants, objects) live in a `<name>.utility.ts` sidecar and
+  // types in `<name>.type.ts`. `allowConstantExport: false` makes the rule
+  // flag every non-component value export, not just functions — that is the
+  // mechanical half of the convention. The other half (non-exported internals
+  // + types, which react-refresh cannot see) is prescribed in
+  // .claude/rules/tanstack/components.md.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: {
+      "react-refresh": reactRefresh,
+    },
+    rules: {
+      "react-refresh/only-export-components": [
+        "error",
+        { allowConstantExport: false, allowExportNames: [] },
+      ],
+    },
+  },
+  // TanStack file-based routes are framework-canonical: each route file
+  // exports `const Route = createFileRoute(...)({ component: LocalComponent })`
+  // and defines its thin route component locally. react-refresh cannot fast-
+  // refresh that shape (the file's only export is the non-component `Route`),
+  // and the shape is mandated by the router's file-based codegen + the thin-
+  // route convention (routes.md) — so it is exempt, like shadcn primitives.
+  {
+    files: ["src/routes/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  // `src/shared/ui/**` is shadcn-derived primitives only (see shared.md). Those
+  // primitives canonically export a `Component + variants` pair
+  // (`Button`/`buttonVariants`, …); flagging that would force divergence from
+  // the shadcn registry / CLI re-add workflow. Exempt the layer.
+  {
+    files: ["src/shared/ui/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
   {
