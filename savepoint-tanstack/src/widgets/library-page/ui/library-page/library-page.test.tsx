@@ -500,6 +500,63 @@ describe("LibraryPage", () => {
         ).toBeDefined();
       });
     });
+
+    describe("given the library has items (single-row controls)", () => {
+      beforeEach(() => {
+        const items = [
+          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+          buildItem({ id: 2, gameTitle: "Celeste" }),
+        ];
+        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+      });
+
+      it("renders the Filters, Grid view, and List view controls together", () => {
+        expect(
+          screen.getByRole("button", { name: "Open filters" })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "Grid view" })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "List view" })
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe("given filters are active (status + platform = 2 active filters)", () => {
+      beforeEach(() => {
+        const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+        render(
+          <LibraryPage
+            items={items}
+            total={1}
+            {...defaultViewProps}
+            status="PLAYING"
+            platform="PC"
+          />
+        );
+      });
+
+      it("shows a count badge of 2 on the Filters button", () => {
+        const filtersBtn = screen.getByRole("button", { name: "Open filters" });
+        expect(filtersBtn.textContent).toContain("2");
+      });
+    });
+
+    describe("given no filters are active", () => {
+      beforeEach(() => {
+        const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+        render(<LibraryPage items={items} total={1} {...defaultViewProps} />);
+      });
+
+      it("does not show any numeric count badge on the Filters button when no filters active", () => {
+        const filtersBtn = screen.getByRole("button", { name: "Open filters" });
+        // Text should only be "Filters" with no numeric suffix (no count badge)
+        expect(filtersBtn.textContent?.replace(/\s+/g, " ").trim()).toMatch(
+          /^Filters$/
+        );
+      });
+    });
   });
 
   // Spec 016 §2.13 — Library-card "Add playthrough" quick-add entry point.
@@ -528,6 +585,12 @@ describe("LibraryPage", () => {
         ];
         render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
         const userEvent = (await import("@testing-library/user-event")).default;
+        // Spec 025: inline quick-actions (incl. "Add playthrough") live in the
+        // list view; the default grid shows clean cover tiles. Switch to list
+        // first, then exercise the quick-add.
+        await userEvent.click(
+          screen.getByRole("button", { name: "List view" })
+        );
         // Click the first "Add playthrough" button (Hollow Knight, id=1).
         // Two cards each have an "Add playthrough" button — getAllByRole gives
         // us both; index 0 is Hollow Knight (rendered first).

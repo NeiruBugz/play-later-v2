@@ -1,22 +1,64 @@
+import { Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import type { SearchResponseItem } from "@/shared/api/igdb";
-import { useMutationAction } from "@/shared/lib/use-mutation-action";
+import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 
-import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
 import { searchGamesFn } from "../../api/search-games-fn";
+import { QuickAddButton } from "../quick-add-button";
 import type { AddGameContentProps } from "./add-game-content.type";
 
+function SearchResultRow({ game }: { game: SearchResponseItem }) {
+  const coverUrl = buildCoverImageUrl(
+    game.cover?.image_id ?? null,
+    "t_cover_small"
+  );
+  const releaseYear = game.first_release_date
+    ? new Date(game.first_release_date * 1000).getFullYear()
+    : null;
+
+  return (
+    <li className="flex items-center gap-3">
+      <div className="shrink-0">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={`Cover for ${game.name}`}
+            loading="lazy"
+            className="shadow-paper aspect-[3/4] w-10 rounded object-cover"
+          />
+        ) : (
+          <div
+            role="img"
+            aria-label={`Cover for ${game.name}`}
+            className="bg-muted shadow-paper aspect-[3/4] w-10 rounded"
+          />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{game.name}</p>
+        {releaseYear !== null ? (
+          <p className="text-muted-foreground text-xs tabular-nums">
+            {releaseYear}
+          </p>
+        ) : null}
+      </div>
+      <div className="shrink-0">
+        <QuickAddButton igdbId={game.id} gameTitle={game.name} />
+      </div>
+    </li>
+  );
+}
+
 export function AddGameContent({ onAdded }: AddGameContentProps) {
-  const { pending: isAdding, run } = useMutationAction();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResponseItem[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  void onAdded;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -25,7 +67,6 @@ export function AddGameContent({ onAdded }: AddGameContentProps) {
 
     setIsSearching(true);
     setSearched(true);
-    setSelectedId(null);
 
     try {
       const result = await searchGamesFn({ data: { name: trimmed } });
@@ -35,29 +76,24 @@ export function AddGameContent({ onAdded }: AddGameContentProps) {
     }
   };
 
-  const handleAdd = async () => {
-    if (selectedId == null) return;
-    await run(() => addGameToLibraryFn({ data: { igdbId: selectedId } }), {
-      successMessage: "Added to library",
-      errorFallback: "Could not add game to library",
-      onSuccess: onAdded,
-    });
-  };
-
   const showEmpty =
     !isSearching && searched && results !== null && results.length === 0;
   const showResults = !isSearching && results !== null && results.length > 0;
 
   return (
     <div className="gap-lg flex flex-col">
-      <form onSubmit={handleSubmit} className="gap-md flex">
+      <form onSubmit={handleSubmit} className="relative flex items-center">
+        <Search
+          aria-hidden="true"
+          className="text-muted-foreground pointer-events-none absolute left-3 h-4 w-4"
+        />
         <Input
           type="search"
           aria-label="Search games"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search games"
-          className="flex-1"
+          className={cn("flex-1 rounded-full pl-9")}
         />
       </form>
 
@@ -76,37 +112,15 @@ export function AddGameContent({ onAdded }: AddGameContentProps) {
       ) : null}
 
       {showResults ? (
-        <ul className="gap-sm flex flex-col">
-          {results!.map((game) => {
-            const isSelected = selectedId === game.id;
-            return (
-              <li key={game.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(game.id)}
-                  aria-pressed={isSelected}
-                  className={cn(
-                    "border-border px-md py-sm w-full rounded-md border text-left text-sm transition-colors",
-                    isSelected
-                      ? "border-primary bg-primary/10 ring-primary ring-1"
-                      : "hover:bg-surface-hover"
-                  )}
-                >
-                  {game.name}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <section aria-label="IGDB results">
+          <p className="terminal-label mb-3">// IGDB RESULTS</p>
+          <ul className="gap-sm flex flex-col">
+            {results!.map((game) => (
+              <SearchResultRow key={game.id} game={game} />
+            ))}
+          </ul>
+        </section>
       ) : null}
-
-      <Button
-        type="button"
-        onClick={handleAdd}
-        disabled={selectedId === null || isAdding}
-      >
-        Add to library
-      </Button>
     </div>
   );
 }

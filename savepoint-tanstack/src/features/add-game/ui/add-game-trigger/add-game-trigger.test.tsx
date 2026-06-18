@@ -2,6 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
+import { searchGamesFn } from "@/features/add-game/api/search-games-fn";
+
 import { AddGameTrigger } from "./add-game-trigger";
 
 // Mock the server fns the modal calls so the rendered dialog body never
@@ -73,12 +76,8 @@ describe("AddGameTrigger", () => {
     });
   });
 
-  describe("given the AddGameModal calls onAdded (e.g. after a successful add)", () => {
+  describe("given the user searches and taps the per-row Add button inside the open dialog", () => {
     beforeEach(async () => {
-      const { addGameToLibraryFn } =
-        await import("@/features/add-game/api/add-game-to-library-fn");
-      const { searchGamesFn } =
-        await import("@/features/add-game/api/search-games-fn");
       vi.mocked(addGameToLibraryFn).mockResolvedValue(undefined as never);
       vi.mocked(searchGamesFn).mockResolvedValue({
         games: [{ id: 1234, name: "Half-Life 2" }],
@@ -94,19 +93,25 @@ describe("AddGameTrigger", () => {
       await userEvent.type(searchInput, "half{Enter}");
 
       await waitFor(() => {
-        expect(screen.queryByText("Half-Life 2")).not.toBeNull();
+        expect(
+          screen.queryByRole("button", { name: "Add Half-Life 2 to library" })
+        ).not.toBeNull();
       });
-      await userEvent.click(screen.getByText("Half-Life 2"));
-
       await userEvent.click(
-        screen.getByRole("button", { name: "Add to library" })
+        screen.getByRole("button", { name: "Add Half-Life 2 to library" })
       );
     });
 
-    it("closes the dialog after onAdded fires (dialog disappears)", async () => {
+    it("calls addGameToLibraryFn with the game's igdbId", async () => {
       await waitFor(() => {
-        expect(elements.queryDialog()).toBeNull();
+        expect(vi.mocked(addGameToLibraryFn)).toHaveBeenCalledWith({
+          data: { igdbId: 1234 },
+        });
       });
+    });
+
+    it("dialog remains open after the per-row add (users may add multiple games)", () => {
+      expect(elements.queryDialog()).not.toBeNull();
     });
   });
 

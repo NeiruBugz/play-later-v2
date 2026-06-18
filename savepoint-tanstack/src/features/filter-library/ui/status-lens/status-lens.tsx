@@ -6,23 +6,29 @@ import {
   type LibrarySortOrder,
   type LibraryStatus,
 } from "@/features/filter-library/lib";
-import { SegmentedControl } from "@/shared/ui/segmented-control";
+import { cn } from "@/shared/lib/utils";
 
 import type { StatusLensProps } from "./status-lens.type";
 
+type StatusChip = {
+  value: string;
+  label: string;
+  count: number | undefined;
+  /** Status token key for the colored dot; absent for the "All" chip. */
+  dotVariant?: string;
+};
+
 /**
- * StatusLens — sticky segmented-control row for the library.
+ * StatusLens — the library's primary status filter, surfaced as an
+ * always-visible row of segmented PILL chips (not the Filters sheet). One tap
+ * re-filters (AC LIB-2); the parent keeps the row sticky (AC LIB-3). Each
+ * status chip carries a colored dot keyed to its status token, the active chip
+ * fills with the accent. Horizontally scrollable so it stays compact on phones
+ * and widens naturally on desktop (AC LIB-6).
  *
- * Promotes status filtering out of the Filters sheet into an always-visible,
- * sticky pill row. One tap re-filters without opening any overlay (AC LIB-2).
- * The row stays pinned while scrolling (AC LIB-3 — `sticky` applied by the
- * parent layout; component is scroll-aware-neutral).
+ * Keeps `role="tablist"`/`role="tab"` semantics (selection-driven filter).
  *
- * Uses `SegmentedControl` with `scrollable` so the row stays compact on
- * narrow phones while widening naturally on desktop (AC LIB-6).
- *
- * FSD: lives in `features/filter-library/ui/` — a user-intent feature
- * (filtering is a user action, not a domain entity).
+ * FSD: lives in `features/filter-library/ui/` — filtering is a user intent.
  */
 export function StatusLens({
   status,
@@ -55,62 +61,70 @@ export function StatusLens({
       )
     : undefined;
 
-  const allOption = {
-    value: "__all__" as const,
-    label: (
-      <>
-        All
-        {totalCount !== undefined ? (
-          <span className="ml-1 text-xs tabular-nums opacity-70">
-            {totalCount}
-          </span>
-        ) : null}
-      </>
-    ),
-    ariaLabel: totalCount !== undefined ? `All · ${totalCount}` : "All",
-  };
-
-  const statusOptions = STATUS_ENTRIES.map((entry) => {
-    const count = counts?.[entry.value as LibraryStatus];
-    return {
+  const chips: StatusChip[] = [
+    { value: "__all__", label: "All", count: totalCount },
+    ...STATUS_ENTRIES.map((entry) => ({
       value: entry.value,
-      label: (
-        <>
-          {entry.label}
-          {count !== undefined ? (
-            <span className="ml-1 text-xs tabular-nums opacity-70">
-              {count}
-            </span>
-          ) : null}
-        </>
-      ),
-      ariaLabel:
-        count !== undefined ? `${entry.label} · ${count}` : entry.label,
-    };
-  });
-
-  const options = [allOption, ...statusOptions] as Parameters<
-    typeof SegmentedControl
-  >[0]["options"];
+      label: entry.label,
+      count: counts?.[entry.value as LibraryStatus],
+      dotVariant: entry.badgeVariant,
+    })),
+  ];
 
   const currentValue = status ?? "__all__";
 
-  const handleValueChange = (next: string) => {
-    if (next === "__all__") {
+  const handlePick = (value: string) => {
+    if (value === "__all__") {
       onStatusAll();
     } else {
-      onStatusPick(next as LibraryStatus);
+      onStatusPick(value as LibraryStatus);
     }
   };
 
   return (
-    <SegmentedControl
-      value={currentValue}
-      onValueChange={handleValueChange}
-      options={options}
-      size="sm"
-      scrollable
-      ariaLabel="Filter by status"
-    />
+    <div
+      role="tablist"
+      aria-label="Filter by status"
+      className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {chips.map((chip) => {
+        const active = currentValue === chip.value;
+        return (
+          <button
+            key={chip.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            data-state={active ? "active" : "inactive"}
+            onClick={() => handlePick(chip.value)}
+            className={cn(
+              "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium whitespace-nowrap transition-colors",
+              active
+                ? "bg-primary text-primary-foreground border-transparent"
+                : "bg-card text-foreground border-border hover:bg-muted"
+            )}
+          >
+            {chip.dotVariant && !active ? (
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: `var(--status-${chip.dotVariant})` }}
+              />
+            ) : null}
+            {chip.label}
+            {chip.count !== undefined ? (
+              <span
+                className={cn(
+                  "tabular-nums",
+                  active ? "opacity-80" : "text-muted-foreground"
+                )}
+              >
+                {chip.count}
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
   );
 }
