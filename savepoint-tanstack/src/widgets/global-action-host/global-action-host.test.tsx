@@ -243,8 +243,10 @@ describe("GlobalActionHost", () => {
         game: "slug",
         other: "keep",
       });
-      expect(result).not.toHaveProperty("action");
-      expect(result).not.toHaveProperty("game");
+      // closeGlobalAction sets action/game to undefined so TanStack Router
+      // drops them from the URL; the raw search object carries undefined values.
+      expect(result.action).toBeUndefined();
+      expect(result.game).toBeUndefined();
       expect(result).toHaveProperty("other", "keep");
     });
   });

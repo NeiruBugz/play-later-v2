@@ -16,6 +16,8 @@ export { ImageLightbox } from "./image-lightbox";
 export type { ImageLightboxProps, LightboxImage } from "./image-lightbox";
 export { PageHeader } from "./page-header";
 export type { PageHeaderProps } from "./page-header";
+export { ResponsiveModal } from "./responsive-modal";
+export type { ResponsiveModalProps } from "./responsive-modal";
 export { SegmentedControl } from "./segmented-control";
 export type {
   SegmentedControlOption,

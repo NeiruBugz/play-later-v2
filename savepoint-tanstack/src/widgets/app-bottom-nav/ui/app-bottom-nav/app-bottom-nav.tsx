@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { BookOpen, House, Library, Plus, User } from "lucide-react";
 
+import { openGlobalAction } from "@/shared/lib/global-action";
+
 const DEST_ITEMS_LEFT = [
   { label: "Home", to: "/dashboard", icon: House },
   { label: "Library", to: "/library", icon: Library },
@@ -15,10 +17,7 @@ export function AppBottomNav() {
   const navigate = useNavigate();
 
   const openLogSession = () => {
-    void navigate({
-      to: ".",
-      search: (prev) => ({ ...prev, action: "log-session" as const }),
-    });
+    openGlobalAction(navigate, "log-session");
   };
 
   return (

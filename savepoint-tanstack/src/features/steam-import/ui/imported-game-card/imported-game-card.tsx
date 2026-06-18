@@ -1,5 +1,6 @@
 import { Plus, X } from "lucide-react";
 
+import { formatPlaytimeMinutes } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -8,7 +9,6 @@ import { calculateSmartStatus } from "../../lib/calculate-smart-status";
 import type { ImportedGameCardProps } from "./imported-game-card.type";
 import {
   formatLastPlayed,
-  formatPlaytime,
   getSteamIconUrl,
 } from "./imported-game-card.utility";
 
@@ -77,7 +77,11 @@ export function ImportedGameCard({
             </Badge>
           </div>
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
-            <span>{formatPlaytime(game.playtime)}</span>
+            <span>
+              {game.playtime
+                ? formatPlaytimeMinutes(game.playtime)
+                : "Never played"}
+            </span>
             {lastPlayedLabel ? (
               <>
                 <span aria-hidden="true">·</span>

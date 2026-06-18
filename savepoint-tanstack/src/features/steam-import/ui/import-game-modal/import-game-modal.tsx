@@ -8,8 +8,7 @@ import {
 } from "@/entities/library-item/model";
 import { importGameToLibraryFn } from "@/features/steam-import/api/import-game-to-library";
 import { calculateSmartStatus } from "@/features/steam-import/lib/calculate-smart-status";
-import { formatPlaytime } from "@/features/steam-import/ui/imported-game-card/imported-game-card.utility";
-import { formatAbsoluteDate } from "@/shared/lib/date";
+import { formatAbsoluteDate, formatPlaytimeMinutes } from "@/shared/lib/date";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
@@ -134,7 +133,9 @@ export function ImportGameModal({
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Playtime</span>
                 <span className="font-medium">
-                  {formatPlaytime(game.playtime)}
+                  {game.playtime
+                    ? formatPlaytimeMinutes(game.playtime)
+                    : "Never played"}
                 </span>
               </div>
               <div className="flex items-center justify-between">

@@ -5,47 +5,22 @@ import {
   LogSessionForGame,
   LogSessionGamePicker,
 } from "@/features/compose-journal-entry";
-import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/shared/ui/sheet";
+  closeGlobalAction,
+  setGlobalActionGame,
+} from "@/shared/lib/global-action";
+import { ResponsiveModal } from "@/shared/ui";
 
 export function GlobalActionHost() {
   const { action, game } = useSearch({ from: "__root__" });
   const navigate = useNavigate();
-  const isDesktop = useIsDesktop();
 
   function handleClose() {
-    void navigate({
-      to: ".",
-      search: (prev) => {
-        const entries = Object.entries(prev as Record<string, unknown>).filter(
-          ([k]) => k !== "action" && k !== "game"
-        );
-        return Object.fromEntries(entries) as typeof prev;
-      },
-    });
+    closeGlobalAction(navigate);
   }
 
   function handlePickerSelect(slug: string) {
-    void navigate({
-      to: ".",
-      search: (prev) => ({
-        ...(prev as Record<string, unknown>),
-        game: slug,
-      }),
-    });
+    setGlobalActionGame(navigate, slug);
   }
 
   if (!action) return null;
@@ -68,41 +43,22 @@ export function GlobalActionHost() {
   const content = renderContent();
   if (!content) return null;
 
-  if (isDesktop) {
-    return (
-      <Dialog open onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent data-testid="global-action-dialog">
-          <DialogHeader>
-            <DialogTitle>
-              {action === "log-session" ? "Log session" : "Add a game"}
-            </DialogTitle>
-            <DialogDescription>
-              {action === "log-session"
-                ? "Record a play session."
-                : "Search and add a game to your library."}
-            </DialogDescription>
-          </DialogHeader>
-          {content}
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const title = action === "log-session" ? "Log session" : "Add a game";
+  const description =
+    action === "log-session"
+      ? "Record a play session."
+      : "Search and add a game to your library.";
 
   return (
-    <Sheet open onOpenChange={(open) => !open && handleClose()}>
-      <SheetContent side="bottom" data-testid="global-action-sheet">
-        <SheetHeader>
-          <SheetTitle>
-            {action === "log-session" ? "Log session" : "Add a game"}
-          </SheetTitle>
-          <SheetDescription>
-            {action === "log-session"
-              ? "Record a play session."
-              : "Search and add a game to your library."}
-          </SheetDescription>
-        </SheetHeader>
-        {content}
-      </SheetContent>
-    </Sheet>
+    <ResponsiveModal
+      open
+      onOpenChange={(open) => !open && handleClose()}
+      title={title}
+      description={description}
+      dialogTestId="global-action-dialog"
+      sheetTestId="global-action-sheet"
+    >
+      {content}
+    </ResponsiveModal>
   );
 }

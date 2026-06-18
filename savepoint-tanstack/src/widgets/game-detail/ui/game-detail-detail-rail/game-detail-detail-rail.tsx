@@ -1,10 +1,10 @@
 import { CriticScoreRing } from "@/entities/game";
+import { formatPlaytimeMinutes } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
 
 import { LibraryStatusSwitcher } from "../library-status-switcher";
 import type { GameDetailDetailRailProps } from "./game-detail-detail-rail.type";
-import { formatPlaytime } from "./game-detail-detail-rail.utility";
 
 export function GameDetailDetailRail({
   statusSwitcherProps,
@@ -51,7 +51,7 @@ export function GameDetailDetailRail({
               <dt className="text-muted-foreground">Total played</dt>
               <dd className="font-semibold tabular-nums">
                 {playtimeTotalMinutes > 0
-                  ? formatPlaytime(playtimeTotalMinutes)
+                  ? formatPlaytimeMinutes(playtimeTotalMinutes)
                   : "0h"}
               </dd>
             </div>

@@ -6,23 +6,10 @@ import { createJournalEntryFn } from "@/features/compose-journal-entry/api/creat
 import { getErrorMessage } from "@/shared/lib/errors";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { Button } from "@/shared/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+import { DialogFooter } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/shared/ui/sheet";
+import { ResponsiveModal } from "@/shared/ui/responsive-modal";
+import { SheetFooter } from "@/shared/ui/sheet";
 import { Textarea } from "@/shared/ui/textarea";
 
 import type { ComposeJournalEntryDialogProps } from "./compose-journal-entry-dialog.type";
@@ -150,33 +137,15 @@ export function ComposeJournalEntryDialog({
     </form>
   );
 
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New journal entry</DialogTitle>
-            <DialogDescription>
-              Log a quick note about what you played.
-            </DialogDescription>
-          </DialogHeader>
-          {formBody}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="flex max-h-[90vh] flex-col">
-        <SheetHeader>
-          <SheetTitle>New journal entry</SheetTitle>
-          <SheetDescription>
-            Log a quick note about what you played.
-          </SheetDescription>
-        </SheetHeader>
-        {formBody}
-      </SheetContent>
-    </Sheet>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="New journal entry"
+      description="Log a quick note about what you played."
+      contentClassName="flex max-h-[90vh] flex-col"
+    >
+      {formBody}
+    </ResponsiveModal>
   );
 }
