@@ -56,7 +56,6 @@ export function DashboardPage({ data }: DashboardPageProps) {
               <DashboardGameRail
                 title="Playing"
                 items={data.continuePlaying.items}
-                totalCount={data.continuePlaying.total}
                 viewAll={{ status: "PLAYING" }}
                 viewAllLabel="View All Playing"
                 emptyMessage="No games in progress. Start something new!"
@@ -66,7 +65,6 @@ export function DashboardPage({ data }: DashboardPageProps) {
             <DashboardGameRail
               title="Up next"
               items={data.upNext.items}
-              totalCount={data.upNext.total}
               viewAll={{ status: "UP_NEXT" }}
               viewAllLabel="View All Up Next"
               emptyMessage="No games queued up"

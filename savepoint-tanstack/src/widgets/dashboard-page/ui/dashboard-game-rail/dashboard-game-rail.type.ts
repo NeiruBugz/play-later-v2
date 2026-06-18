@@ -5,7 +5,6 @@ import type { DashboardGameSectionViewAll } from "../dashboard-game-section/dash
 export type DashboardGameRailProps = {
   title: string;
   items: LibraryItemWithGame[];
-  totalCount?: number;
   viewAll: DashboardGameSectionViewAll;
   viewAllLabel?: string;
   emptyMessage?: string;

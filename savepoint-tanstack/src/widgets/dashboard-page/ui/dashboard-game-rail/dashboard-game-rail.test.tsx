@@ -63,13 +63,12 @@ const elements = {
 };
 
 describe("DashboardGameRail", () => {
-  describe("given the rail has items and a totalCount equal to items.length", () => {
+  describe("given the rail has items", () => {
     beforeEach(() => {
       render(
         <DashboardGameRail
           title="Playing"
           items={[makeItem()]}
-          totalCount={1}
           viewAll={{ status: "PLAYING" }}
           viewAllLabel="See all"
         />
@@ -80,12 +79,12 @@ describe("DashboardGameRail", () => {
       expect(elements.getSectionHeading("Playing")).toBeDefined();
     });
 
-    it("renders a see-all link even when items.length equals totalCount", () => {
+    it("renders a see-all link", () => {
       expect(elements.getSeeAllLink()).not.toBeNull();
     });
   });
 
-  describe("given the rail has items and no totalCount provided", () => {
+  describe("given the rail has items and a custom viewAll search", () => {
     beforeEach(() => {
       render(
         <DashboardGameRail
@@ -97,7 +96,7 @@ describe("DashboardGameRail", () => {
       );
     });
 
-    it("renders a see-all link when totalCount is undefined", () => {
+    it("renders a see-all link", () => {
       expect(elements.getSeeAllLink()).not.toBeNull();
     });
 
