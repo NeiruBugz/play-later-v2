@@ -42,6 +42,14 @@ export function LogSessionForGame({
     };
   }, [game]);
 
+  if (status === "error") {
+    return (
+      <div className="text-destructive py-4 text-sm">
+        Could not load your library. Please try again.
+      </div>
+    );
+  }
+
   if (status === "loading" || !gameData) {
     return (
       <div

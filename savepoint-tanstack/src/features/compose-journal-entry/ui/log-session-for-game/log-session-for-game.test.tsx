@@ -83,6 +83,8 @@ const elements = {
   queryLogSessionContent: () =>
     screen.queryByTestId("log-session-content-stub"),
   getLogSessionContent: () => screen.getByTestId("log-session-content-stub"),
+  queryErrorMessage: () =>
+    screen.queryByText("Could not load your library. Please try again."),
 };
 
 // ---------------------------------------------------------------------------
@@ -155,6 +157,28 @@ describe("LogSessionForGame", () => {
 
       it("forwards gameTitle to LogSessionContent", () => {
         expect(capturedLogSessionContentProps.gameTitle).toBe("Hollow Knight");
+      });
+    });
+
+    describe("when the game-data server fn rejects", () => {
+      beforeEach(async () => {
+        mockGetLogSessionGameData.mockRejectedValue(new Error("Network error"));
+        render(<LogSessionForGame game="hollow-knight" onClose={vi.fn()} />);
+        await waitFor(() => {
+          expect(elements.queryErrorMessage()).not.toBeNull();
+        });
+      });
+
+      it("shows the error copy, not Loading…", () => {
+        expect(elements.queryErrorMessage()).not.toBeNull();
+      });
+
+      it("does not render the loading state", () => {
+        expect(elements.queryLoadingState()).toBeNull();
+      });
+
+      it("does not render LogSessionContent", () => {
+        expect(elements.queryLogSessionContent()).toBeNull();
       });
     });
 

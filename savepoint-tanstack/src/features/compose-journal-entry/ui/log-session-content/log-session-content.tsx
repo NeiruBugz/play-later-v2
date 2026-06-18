@@ -72,7 +72,7 @@ export function LogSessionContent({
           content: reflection,
           gameId,
           playedMinutes,
-          playthroughId: selectedId,
+          playthroughId: selectedId || undefined,
         },
       });
       await router.invalidate();

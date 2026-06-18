@@ -18,17 +18,20 @@ vi.mock("@/widgets/game-detail", () => ({
   GameDetail: ({
     data,
     viewerUserId,
+    gameSlug,
     relatedGamesSlot,
     timesToBeatSlot,
   }: {
     data: GameDetailPageView["data"];
     viewerUserId: string | null;
+    gameSlug?: string;
     relatedGamesSlot?: React.ReactNode;
     timesToBeatSlot?: React.ReactNode;
   }) => (
     <div data-testid="game-detail">
       <h1>{data.game.title}</h1>
       <span data-testid="viewer-user-id">{viewerUserId ?? "anon"}</span>
+      <span data-testid="game-slug">{gameSlug ?? "missing"}</span>
       <span data-testid="journal-count">{data.journalTeaser.length}</span>
       <div data-testid="related-games-slot">{relatedGamesSlot}</div>
       <div data-testid="times-to-beat-slot">{timesToBeatSlot}</div>
@@ -121,6 +124,7 @@ const elements = {
   getDetail: () => screen.getByTestId("game-detail"),
   queryDetail: () => screen.queryByTestId("game-detail"),
   getViewerId: () => screen.getByTestId("viewer-user-id"),
+  getGameSlug: () => screen.getByTestId("game-slug"),
   getNotFoundHeading: () =>
     screen.getByRole("heading", { name: "Game not found" }),
   getGenericErrorHeading: () =>
@@ -182,6 +186,10 @@ describe("/games/$slug route", () => {
 
     it("forwards the resolved viewerUserId to the widget", () => {
       expect(elements.getViewerId().textContent).toBe("user-123");
+    });
+
+    it("forwards the game slug to the widget so the mobile action bar CTA targets the correct game", () => {
+      expect(elements.getGameSlug().textContent).toBe("celeste");
     });
   });
 

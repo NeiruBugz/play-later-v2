@@ -16,6 +16,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
+import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
 
 import { LogSessionContent } from "./log-session-content";
 
@@ -317,6 +318,31 @@ describe("LogSessionContent", () => {
     it("returns to 0", () => {
       const display = elements.getPlaytimeDisplay();
       expect(display).toHaveAttribute("aria-valuenow", "0");
+    });
+  });
+
+  describe("given no playthroughs (selectedId is empty string)", () => {
+    beforeEach(async () => {
+      render(
+        <LogSessionContent
+          gameId="game-001"
+          playthroughs={[]}
+          preselectedPlaythroughId=""
+          onClose={vi.fn()}
+        />
+      );
+      await actions.increment();
+      await actions.submit();
+    });
+
+    it("calls createJournalEntryFn with playthroughId undefined, not empty string", () => {
+      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            playthroughId: undefined,
+          }),
+        })
+      );
     });
   });
 });
