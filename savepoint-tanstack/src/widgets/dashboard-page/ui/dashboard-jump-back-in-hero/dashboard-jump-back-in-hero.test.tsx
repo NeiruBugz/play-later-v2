@@ -2,9 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DashboardQuickLogGame } from "@/features/dashboard";
-
 import { DashboardJumpBackInHero } from "./dashboard-jump-back-in-hero";
+import type { DashboardHeroGame } from "./dashboard-jump-back-in-hero.type";
 
 const mockNavigate = vi.fn();
 
@@ -31,22 +30,21 @@ vi.mock("@/shared/lib/igdb-image", () => ({
 }));
 
 function makeGame(
-  overrides: Partial<DashboardQuickLogGame> = {}
-): DashboardQuickLogGame {
+  overrides: Partial<DashboardHeroGame> = {}
+): DashboardHeroGame {
   return {
     id: "game-1",
     igdbId: 1234,
     title: "Elden Ring",
     slug: "elden-ring",
     coverImage: "abc123",
+    platform: null,
     ...overrides,
   };
 }
 
 const elements = {
   getSection: () => screen.getByRole("region", { name: "Jump back in" }),
-  getGreeting: (username: string) =>
-    screen.getByText(new RegExp(username, "i")),
   getGameTitle: (title: string) => screen.getByText(title),
   queryGameTitle: (title: string) => screen.queryByText(title),
   getCoverImage: (title: string) =>
@@ -54,6 +52,8 @@ const elements = {
   getLogButton: () => screen.getByRole("button", { name: "Log session" }),
   queryLogButton: () => screen.queryByRole("button", { name: "Log session" }),
   getEmptyMessage: () => screen.getByText(/nothing in progress/i),
+  queryMetaLine: () => screen.queryByTestId("hero-meta-line"),
+  queryProgressBar: () => screen.queryByRole("progressbar"),
 };
 
 const actions = {
@@ -70,16 +70,12 @@ describe("DashboardJumpBackInHero", () => {
 
     beforeEach(() => {
       render(
-        <DashboardJumpBackInHero username="Ada" mostInProgressGame={game} />
+        <DashboardJumpBackInHero mostInProgressGame={game} />
       );
     });
 
     it("renders the jump-back-in region with its accessible label", () => {
       expect(elements.getSection()).toBeDefined();
-    });
-
-    it("renders a greeting eyebrow that includes the username", () => {
-      expect(elements.getGreeting("Ada")).toBeDefined();
     });
 
     it("renders the game title in the hero card", () => {
@@ -104,7 +100,7 @@ describe("DashboardJumpBackInHero", () => {
 
     beforeEach(async () => {
       render(
-        <DashboardJumpBackInHero username="Ada" mostInProgressGame={game} />
+        <DashboardJumpBackInHero mostInProgressGame={game} />
       );
       await actions.clickLog();
     });
@@ -141,13 +137,75 @@ describe("DashboardJumpBackInHero", () => {
   describe("given the player has no in-progress game", () => {
     beforeEach(() => {
       render(
-        <DashboardJumpBackInHero username="Ada" mostInProgressGame={null} />
+        <DashboardJumpBackInHero mostInProgressGame={null} />
       );
     });
 
     it("renders an empty-state message instead of a Log button", () => {
       expect(elements.getEmptyMessage()).toBeDefined();
       expect(elements.queryLogButton()).toBeNull();
+    });
+  });
+
+  describe("given the game has session count, hours, platform, and progress", () => {
+    const game = makeGame({
+      sessions: 5,
+      hoursPlayed: 12,
+      platform: "PC",
+      progress: 0.6,
+    });
+
+    beforeEach(() => {
+      render(
+        <DashboardJumpBackInHero mostInProgressGame={game} />
+      );
+    });
+
+    it("renders a meta line with session count, hours, and platform", () => {
+      expect(elements.queryMetaLine()).not.toBeNull();
+    });
+
+    it("meta line contains session count", () => {
+      expect(screen.getByTestId("hero-meta-line")).toHaveTextContent(
+        "Session 5"
+      );
+    });
+
+    it("meta line contains hours played", () => {
+      expect(screen.getByTestId("hero-meta-line")).toHaveTextContent("12h");
+    });
+
+    it("meta line contains platform", () => {
+      expect(screen.getByTestId("hero-meta-line")).toHaveTextContent("PC");
+    });
+
+    it("renders a progress bar", () => {
+      expect(elements.queryProgressBar()).not.toBeNull();
+    });
+
+    it("progress bar reflects the progress fraction as aria-valuenow", () => {
+      expect(elements.queryProgressBar()).toHaveAttribute(
+        "aria-valuenow",
+        "60"
+      );
+    });
+  });
+
+  describe("given the game has no session/hours/platform/progress data", () => {
+    const game = makeGame();
+
+    beforeEach(() => {
+      render(
+        <DashboardJumpBackInHero mostInProgressGame={game} />
+      );
+    });
+
+    it("does not render a meta line when no meta data is present", () => {
+      expect(elements.queryMetaLine()).toBeNull();
+    });
+
+    it("does not render a progress bar when progress is absent", () => {
+      expect(elements.queryProgressBar()).toBeNull();
     });
   });
 });

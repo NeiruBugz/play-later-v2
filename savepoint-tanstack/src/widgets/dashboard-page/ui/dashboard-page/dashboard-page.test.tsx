@@ -27,16 +27,18 @@ vi.mock("@tanstack/react-router", () => ({
 // layout, not each child's internals.
 vi.mock("../dashboard-jump-back-in-hero", () => ({
   DashboardJumpBackInHero: ({
-    username,
     mostInProgressGame,
   }: {
-    username: string;
     mostInProgressGame: { slug: string } | null;
   }) => (
     <div data-testid="jump-back-in-hero">
-      {`hero:${username}:${mostInProgressGame?.slug ?? "none"}`}
+      {`hero:${mostInProgressGame?.slug ?? "none"}`}
     </div>
   ),
+}));
+
+vi.mock("../dashboard-continue-list", () => ({
+  DashboardContinueList: () => <div data-testid="continue-list" />,
 }));
 
 vi.mock("../dashboard-status-strip", () => ({
@@ -95,8 +97,8 @@ describe("DashboardPage", () => {
       render(<DashboardPage data={makeData()} />);
     });
 
-    it("renders the jump-back-in hero with username and no game threaded in", () => {
-      expect(elements.getJumpBackInHero().textContent).toBe("hero:Ada:none");
+    it("renders the jump-back-in hero with no game threaded in", () => {
+      expect(elements.getJumpBackInHero().textContent).toBe("hero:none");
     });
 
     it("renders the empty-library fallback heading", () => {
@@ -133,6 +135,7 @@ describe("DashboardPage", () => {
                 title: "Elden Ring",
                 slug: "elden-ring",
                 coverImage: null,
+                platform: null,
               },
             ],
             statusCounts: {
@@ -154,9 +157,7 @@ describe("DashboardPage", () => {
     });
 
     it("renders the jump-back-in hero with the first quickLogGame's slug", () => {
-      expect(elements.getJumpBackInHero().textContent).toBe(
-        "hero:Ada:elden-ring"
-      );
+      expect(elements.getJumpBackInHero().textContent).toBe("hero:elden-ring");
     });
 
     it("renders the compact status strip", () => {
@@ -202,8 +203,12 @@ describe("DashboardPage", () => {
       expect(elements.getStatsCard()).not.toBeNull();
     });
 
-    it("renders four rail instances (Playing appears for both mobile and desktop slots)", () => {
-      expect(elements.getGameRails()).toHaveLength(4);
+    it("renders three game rails (the desktop Playing slot is the continue list)", () => {
+      expect(elements.getGameRails()).toHaveLength(3);
+    });
+
+    it("renders the desktop continue list beside the hero", () => {
+      expect(screen.getByTestId("continue-list")).not.toBeNull();
     });
   });
 });

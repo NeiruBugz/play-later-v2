@@ -1,95 +1,129 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
-import { Button } from "@/shared/ui/button";
+import { isTouched, LibraryStatusBadge } from "@/entities/library-item";
+import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { EmptyState } from "@/shared/ui/empty-state";
-// Widget-to-widget import: dashboard-page extends library-item-card's display
-// shape (the rail IS a row of those cards). Documented in DIVERGENCES.md
-// alongside the library-page → library-item-card carve-out.
-import { LibraryItemCard } from "@/widgets/library-item-card";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
 
 /**
- * Horizontal scroll-snap carousel on mobile; multi-column cover grid on
- * desktop (md+). Satisfies AC DASH-2 (rails swipe) and AC DASH-4
- * (desktop spreads out).
+ * A single fixed-width vertical cover tile: art on top, status badge overlaid,
+ * one-line title + platform beneath. This is the shape a horizontal shelf
+ * wants — NOT the rich horizontal `LibraryItemCard` (which collapses when
+ * forced into a narrow rail slot).
+ */
+function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
+  const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_720p");
+  const alt = `Cover for ${item.game.title}`;
+
+  return (
+    <Link
+      to="/games/$slug"
+      params={{ slug: item.game.slug }}
+      className="group w-32 shrink-0 snap-start md:w-auto"
+    >
+      <div className="relative">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={alt}
+            loading="lazy"
+            className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
+          />
+        ) : (
+          <div
+            role="img"
+            aria-label={alt}
+            className="bg-muted shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)]"
+          />
+        )}
+        <div className="absolute top-1.5 left-1.5">
+          <LibraryStatusBadge
+            status={item.status}
+            hasBeenPlayed={isTouched(item)}
+            className="uppercase"
+          />
+        </div>
+      </div>
+      <p className="mt-2 truncate text-sm leading-tight font-medium group-hover:underline">
+        {item.game.title}
+      </p>
+      {item.platform ? (
+        <p className="text-muted-foreground mt-0.5 truncate text-xs">
+          {item.platform}
+        </p>
+      ) : null}
+    </Link>
+  );
+}
+
+/**
+ * Labeled shelf of cover tiles: a horizontal scroll-snap carousel on mobile
+ * (each tile a fixed-width cover that snaps to the left edge), unwrapping to a
+ * cover grid on desktop (md+). Satisfies AC DASH-2 (rails swipe) and AC
+ * DASH-4 (desktop spreads out). Pure CSS — no JS breakpoint branching.
  */
 export function DashboardGameRail({
   title,
   items,
-  totalCount,
   viewAll,
-  viewAllLabel = "View All",
+  viewAllLabel = "View all",
   emptyMessage = "No games to show",
 }: DashboardGameRailProps) {
   const hasItems = items.length > 0;
-  const showViewAll =
-    hasItems && (totalCount === undefined || totalCount > items.length);
+  // Every rail head gets a "see all" link when there are items — the link
+  // is always useful regardless of whether more items exist beyond the slice.
+  const showViewAll = hasItems;
 
   return (
-    <section className="bg-card text-card-foreground overflow-hidden rounded-xl border">
-      <header className="flex items-center justify-between px-4 pt-3 pb-2">
-        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+    <section>
+      <header className="mb-2 flex items-baseline justify-between">
+        <h3 className="heading-xs">{title}</h3>
         {showViewAll ? (
-          <Button variant="ghost" size="sm" asChild className="h-auto p-0">
-            <Link
-              to="/library"
-              search={viewAll}
-              className="text-muted-foreground hover:text-foreground group text-xs"
-            >
-              {viewAllLabel}
-              <ChevronRight
-                className="ml-1 inline-block h-3 w-3 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
-            </Link>
-          </Button>
+          <Link
+            to="/library"
+            search={viewAll}
+            className="text-muted-foreground hover:text-foreground group inline-flex items-center text-xs font-medium"
+          >
+            {viewAllLabel}
+            <ChevronRight
+              className="ml-0.5 h-3 w-3 transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </Link>
         ) : null}
       </header>
 
       {hasItems ? (
-        /*
-         * Mobile: horizontal scroll-snap carousel — items are fixed-width
-         * covers that snap to the left edge. The outer wrapper clips overflow
-         * and hides the scrollbar.
-         * Desktop (md+): switch to a standard cover grid via CSS.
-         *
-         * No JS breakpoint branching — pure CSS so it works before hydration.
-         */
         <div
           className={[
-            // Mobile: horizontal carousel
-            "flex gap-3 overflow-x-auto px-4 pt-1 pb-3",
+            // Mobile: horizontal scroll-snap carousel; bleed a touch so a
+            // partial next cover hints "there's more".
+            "-mx-1 flex gap-3 overflow-x-auto px-1 pb-1",
             "snap-x snap-mandatory scroll-smooth",
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            // Desktop: unwrap to a grid (auto-fill covers)
-            "md:grid md:flex-none md:grid-cols-4 md:overflow-visible lg:grid-cols-6",
+            // Desktop: unwrap into a cover grid.
+            "md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 lg:grid-cols-6",
           ].join(" ")}
         >
           {items.map((item) => (
-            <div
-              key={item.id}
-              className="w-28 shrink-0 snap-start md:w-auto md:shrink"
-            >
-              <LibraryItemCard item={item} />
-            </div>
+            <RailCoverTile key={item.id} item={item} />
           ))}
         </div>
       ) : (
-        <div className="px-4 pb-3">
-          <EmptyState
-            title={emptyMessage}
-            spacing="compact"
-            action={{
-              label: "Browse Games",
-              to: "/library",
-              search: viewAll as Record<string, unknown>,
-              variant: "outline",
-              size: "sm",
-            }}
-          />
-        </div>
+        <EmptyState
+          title={emptyMessage}
+          spacing="compact"
+          action={{
+            label: "Browse games",
+            to: "/library",
+            search: viewAll as Record<string, unknown>,
+            variant: "outline",
+            size: "sm",
+          }}
+        />
       )}
     </section>
   );
