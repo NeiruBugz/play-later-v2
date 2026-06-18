@@ -1,14 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Settings, UserCircle2 } from "lucide-react";
 
+import { ThemeToggle } from "@/features/toggle-theme";
 import { cn } from "@/shared/lib/utils";
 
 import type { SettingsListProps } from "./settings-list.type";
-
-// iOS-style grouped settings list for mobile. Each row is a full-height
-// tappable Link that drills into the existing settings detail routes.
-// Desktop uses SettingsRail (two-column) instead — the route switches based
-// on useIsDesktop().
 
 interface SettingsGroupProps {
   header?: string;
@@ -88,21 +84,30 @@ function SettingsRowLink({
   );
 }
 
+function AppearanceGroup() {
+  return (
+    <SettingsGroup header="Appearance">
+      <div className="flex min-h-[52px] items-center justify-between gap-3 px-4 py-3">
+        <span className="text-sm font-medium">Theme</span>
+        <ThemeToggle />
+      </div>
+    </SettingsGroup>
+  );
+}
+
 export function SettingsList({ activeSegment }: SettingsListProps) {
   return (
     <nav aria-label="Settings" data-testid="settings-list">
-      <SettingsGroup header="Appearance">
+      <AppearanceGroup />
+
+      <SettingsGroup header="Account">
         <SettingsRowLink
           to="/settings/profile"
           icon={UserCircle2}
           iconBg="var(--primary)"
           label="Profile"
           isActive={activeSegment === "profile"}
-          isLast
         />
-      </SettingsGroup>
-
-      <SettingsGroup header="Account">
         <SettingsRowLink
           to="/settings/account"
           icon={Settings}
@@ -112,6 +117,10 @@ export function SettingsList({ activeSegment }: SettingsListProps) {
           isLast
         />
       </SettingsGroup>
+
+      <footer className="text-muted-foreground mt-8 text-center text-xs">
+        SavePoint · for patient gamers
+      </footer>
     </nav>
   );
 }

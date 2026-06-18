@@ -19,13 +19,18 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),
 }));
 
+vi.mock("@/features/toggle-theme", () => ({
+  ThemeToggle: () => <div data-testid="theme-toggle">Theme Toggle</div>,
+}));
+
 const elements = {
   getProfileRow: () => screen.getByRole("link", { name: "Profile" }),
   getAccountRow: () => screen.getByRole("link", { name: "Account" }),
   getAppearanceHeader: () =>
     screen.getByTestId("settings-group-header-appearance"),
   getAccountHeader: () => screen.getByTestId("settings-group-header-account"),
-  getAllLinks: () => screen.getAllByRole("link"),
+  getThemeToggle: () => screen.getByTestId("theme-toggle"),
+  getFooter: () => screen.getByText("SavePoint · for patient gamers"),
 };
 
 describe("SettingsList", () => {
@@ -48,19 +53,22 @@ describe("SettingsList", () => {
       );
     });
 
-    it("renders at least two grouped sections (Appearance, Account)", () => {
+    it("renders an Appearance group and an Account group", () => {
       expect(elements.getAppearanceHeader()).toBeDefined();
       expect(elements.getAccountHeader()).toBeDefined();
     });
 
-    it("renders rows as full-height tappable elements (min-h-[52px] or h-13)", () => {
-      // rows carry the data-testid="settings-row" attribute for height assertion
-      const settingsRows = screen.getAllByTestId("settings-row");
-      expect(settingsRows.length).toBeGreaterThanOrEqual(2);
+    it("renders the ThemeToggle inside the Appearance group", () => {
+      expect(elements.getThemeToggle()).toBeDefined();
     });
 
-    it("marks Profile row active via data-active when activeSegment is 'profile'", () => {
-      // Re-render with activeSegment — use a fresh render
+    it("renders the version footer tagline", () => {
+      expect(elements.getFooter()).toBeDefined();
+    });
+
+    it("renders Profile and Account rows as full-height tappable elements", () => {
+      const settingsRows = screen.getAllByTestId("settings-row");
+      expect(settingsRows.length).toBeGreaterThanOrEqual(2);
     });
   });
 

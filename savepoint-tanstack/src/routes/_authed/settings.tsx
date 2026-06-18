@@ -7,6 +7,7 @@ import {
 import { ArrowLeft } from "lucide-react";
 
 import { useIsDesktop } from "@/shared/lib/use-media-query";
+import { PageHeader } from "@/shared/ui";
 import { SettingsList, SettingsRail } from "@/widgets/settings-rail";
 
 export const Route = createFileRoute("/_authed/settings")({
@@ -41,9 +42,7 @@ function SettingsLayout() {
     return (
       <main className="container mx-auto px-4 py-6">
         {backLink}
-        <h1 className="text-h1 mb-6">Settings</h1>
-        {/* Phone: grouped list at /settings root; outlet (detail panel) when a
-            sub-route is active (row was tapped). No rail on phone. */}
+        <PageHeader eyebrow="// SETTINGS" title="Settings" />
         {activeSegment === undefined ? <SettingsList /> : <Outlet />}
       </main>
     );
@@ -52,7 +51,7 @@ function SettingsLayout() {
   return (
     <main className="container mx-auto px-4 py-6">
       {backLink}
-      <h1 className="text-h1 mb-6">Settings</h1>
+      <PageHeader eyebrow="// SETTINGS" title="Settings" />
       <div className="grid gap-6 md:grid-cols-[200px_1fr]">
         <aside>
           <SettingsRail activeSegment={activeSegment} />
