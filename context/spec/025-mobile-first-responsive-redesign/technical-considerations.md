@@ -7,7 +7,7 @@ functional-spec.md (same folder) and context/product/architecture.md.
 # Technical Specification: Mobile-First Responsive Redesign
 
 - **Functional Specification:** [`./functional-spec.md`](./functional-spec.md)
-- **Status:** Draft
+- **Status:** Completed
 - **Author(s):** Nail Badiullin
 
 ---

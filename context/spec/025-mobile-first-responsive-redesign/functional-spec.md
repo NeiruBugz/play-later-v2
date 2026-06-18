@@ -1,8 +1,10 @@
 # Functional Specification: Mobile-First Responsive Redesign
 
 - **Roadmap Item:** UX/PWA quality pass — a mobile-first redesign of SavePoint's core surfaces, scaled additively to desktop (follows the prior UX Audit work, Specs 012 & 014).
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Nail Badiullin
+
+> **Verification (2026-06-18):** All 11 slices complete; acceptance criteria across the 8 surfaces verified against the implementation. Gates green — typecheck, lint, format:check, `test:unit` (1721), `test:integration` (661), build. Independent adversarial `/code-review` over the full branch (`main...HEAD` + working tree) surfaced **no correctness or acceptance-criterion blockers** (the one "React array render crash" candidate was refuted — arrays of keyed elements are valid children). The live responsive visual pass across Light/Dark/System at phone + desktop remains **deferred to the author** (needs an authenticated running app; no IGDB/Twitch session in the sandbox — same posture as specs 016/023). Non-blocking follow-up noted: the `StatusLens` keeps `role="tablist"/"tab"` ARIA but lacks arrow-key roving — operable via Tab+Enter, but the ARIA tab idiom expects arrows.
 
 ---
 
