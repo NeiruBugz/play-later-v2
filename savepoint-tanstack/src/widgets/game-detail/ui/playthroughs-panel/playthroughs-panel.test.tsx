@@ -79,6 +79,8 @@ const SECOND_RUN = makePlaythrough({
 // ---------------------------------------------------------------------------
 
 const elements = {
+  querySectionHeading: () =>
+    screen.queryByRole("heading", { name: "// PLAYTHROUGHS" }),
   queryEmptyHeading: () => screen.queryByText("No playthroughs yet"),
   getFirstPlaythroughButton: () =>
     screen.getByRole("button", { name: "Log your first playthrough" }),
@@ -134,6 +136,10 @@ describe("PlaythroughsPanel", () => {
       );
     });
 
+    it("renders the // PLAYTHROUGHS section heading", () => {
+      expect(elements.querySectionHeading()).not.toBeNull();
+    });
+
     it('shows the "No playthroughs yet" heading', () => {
       expect(elements.queryEmptyHeading()).not.toBeNull();
     });
@@ -159,6 +165,10 @@ describe("PlaythroughsPanel", () => {
           onLogSession={onLogSession}
         />
       );
+    });
+
+    it("renders the // PLAYTHROUGHS section heading", () => {
+      expect(elements.querySectionHeading()).not.toBeNull();
     });
 
     it("shows total playtime as 3h in the aggregate band", () => {

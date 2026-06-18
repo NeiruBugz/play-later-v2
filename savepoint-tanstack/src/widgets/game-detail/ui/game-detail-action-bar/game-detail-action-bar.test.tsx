@@ -27,6 +27,9 @@ const actions = {
   clickLogSession: async () => {
     await userEvent.click(elements.queryLogSessionButton()!);
   },
+  clickStatusPill: async () => {
+    await userEvent.click(elements.queryStatusPill()!);
+  },
 };
 
 describe("GameDetailActionBar", () => {
@@ -35,12 +38,15 @@ describe("GameDetailActionBar", () => {
   });
 
   describe("given a signed-in viewer with a library entry (status PLAYING)", () => {
+    const onStatusClick = vi.fn();
+
     beforeEach(() => {
       render(
         <GameDetailActionBar
           gameSlug="hollow-knight"
           gameStatus="PLAYING"
           viewerUserId="user-1"
+          onStatusClick={onStatusClick}
         />
       );
     });
@@ -51,6 +57,11 @@ describe("GameDetailActionBar", () => {
 
     it("renders a Log session button", () => {
       expect(elements.queryLogSessionButton()).not.toBeNull();
+    });
+
+    it("calls onStatusClick when the status pill is tapped", async () => {
+      await actions.clickStatusPill();
+      expect(onStatusClick).toHaveBeenCalledTimes(1);
     });
   });
 

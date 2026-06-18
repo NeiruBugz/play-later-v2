@@ -31,7 +31,7 @@ export function AboutPanel({
 
       {facts.length > 0 ? (
         <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
-          <TerminalLabel>{`// GAME.DETAIL`}</TerminalLabel>
+          <span className="terminal-label">// ABOUT</span>
           <dl className="text-sm">
             {facts.map((fact) => (
               <div key={fact.term} className="flex gap-2">
@@ -43,13 +43,5 @@ export function AboutPanel({
         </div>
       ) : null}
     </>
-  );
-}
-
-function TerminalLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
-      {children}
-    </span>
   );
 }

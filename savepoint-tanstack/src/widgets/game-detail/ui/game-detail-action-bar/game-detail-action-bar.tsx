@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { ChevronDown } from "lucide-react";
 
 import { getStatusEntry, getStatusLabel } from "@/entities/library-item";
 import { Button } from "@/shared/ui/button";
@@ -9,13 +10,15 @@ export function GameDetailActionBar({
   gameSlug,
   gameStatus,
   viewerUserId,
+  onStatusClick,
 }: GameDetailActionBarProps) {
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate();
 
   if (!viewerUserId) return null;
 
   function openLogSession() {
     void navigate({
+      to: ".",
       search: (prev) => ({
         ...(prev as Record<string, unknown>),
         action: "log-session" as const,
@@ -37,6 +40,7 @@ export function GameDetailActionBar({
         <button
           type="button"
           aria-label={`Change library status: ${statusLabel}`}
+          onClick={onStatusClick}
           className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-semibold"
           style={{
             borderColor: `color-mix(in oklch, var(--status-${statusEntry.badgeVariant}) 40%, var(--border))`,
@@ -51,12 +55,16 @@ export function GameDetailActionBar({
             />
           ) : null}
           <span>{statusLabel}</span>
+          <ChevronDown
+            className="text-muted-foreground h-4 w-4"
+            aria-hidden="true"
+          />
         </button>
       ) : (
         <span />
       )}
 
-      <Button size="sm" onClick={openLogSession}>
+      <Button className="h-11 flex-1" onClick={openLogSession}>
         Log session
       </Button>
     </div>

@@ -512,6 +512,11 @@ export function GameDetail({
           gameSlug={gameSlug}
           gameStatus={derivedStatus ?? libraryEntry?.status ?? null}
           viewerUserId={viewerUserId}
+          onStatusClick={() => {
+            document
+              .getElementById("hero")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
         />
       ) : null}
     </main>

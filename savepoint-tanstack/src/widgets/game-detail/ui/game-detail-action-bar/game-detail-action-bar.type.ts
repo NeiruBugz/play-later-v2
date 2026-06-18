@@ -4,4 +4,5 @@ export type GameDetailActionBarProps = {
   gameSlug: string;
   gameStatus: LibraryItemStatus | null;
   viewerUserId: string | null;
+  onStatusClick?: () => void;
 };
