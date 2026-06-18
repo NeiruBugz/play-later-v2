@@ -6,7 +6,6 @@ import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
 import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
-import { useIsDesktop } from "@/shared/lib/use-media-query";
 
 import type {
   Game,
@@ -29,7 +28,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/shared/lib/use-media-query", () => ({
-  useIsDesktop: vi.fn(() => true), // default: desktop; individual describes override via mockReturnValue
+  useIsDesktop: vi.fn(() => true),
 }));
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
@@ -161,13 +160,18 @@ const elements = {
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
   queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
   queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
+  // Both the hero (md:hidden) and the desktop rail render a LibraryStatusSwitcher
+  // when a viewer is signed in, so these use queryAll and return the first match.
   queryStatusPill: () =>
-    screen.queryByRole("button", { name: /^Change library status:/ }),
+    screen.queryAllByRole("button", { name: /^Change library status:/ })[0] ??
+    null,
   queryAddToLibrary: () =>
-    screen.queryByRole("button", { name: "Add to library" }),
-  queryStatusSwitcher: () => screen.queryByTestId("library-status-switcher"),
+    screen.queryAllByRole("button", { name: "Add to library" })[0] ?? null,
+  queryStatusSwitcher: () =>
+    screen.queryAllByTestId("library-status-switcher")[0] ?? null,
   queryMoreMenuTrigger: () =>
-    screen.queryByRole("button", { name: "More library actions" }),
+    screen.queryAllByRole("button", { name: "More library actions" })[0] ??
+    null,
   queryAllTablists: () => screen.queryAllByRole("tablist"),
   queryAllTabpanels: () => screen.queryAllByRole("tabpanel"),
   queryOverviewTab: () => screen.queryByRole("tab", { name: "Overview" }),
@@ -182,8 +186,12 @@ const elements = {
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
-  queryCriticScoreRing: () => screen.queryByLabelText("Critic score"),
-  queryRoundedScore: (rounded: string) => screen.queryByText(rounded),
+  // The critic ring appears in both the hero (md:hidden) and the rail, so use queryAll
+  queryCriticScoreRing: () =>
+    screen.queryAllByLabelText("Critic score")[0] ?? null,
+  // Two critic rings in DOM (hero md:hidden + rail), so use queryAll
+  queryRoundedScore: (rounded: string) =>
+    screen.queryAllByText(rounded)[0] ?? null,
   queryAboutCard: () => screen.queryByTestId("game-detail-about-card"),
   queryThemesTagsCard: () =>
     screen.queryByTestId("game-detail-themes-tags-card"),
@@ -1015,14 +1023,14 @@ describe("GameDetail", () => {
 
   // ---------------------------------------------------------------------------
   // Slice 7 — desktop layout (AC GD-5)
-  // RED: GameDetail does not yet render a sticky right rail on desktop, nor
-  // suppress the mobile action bar on desktop. These assertions drive the impl.
+  // Layout is CSS-driven: both the detail rail and the action bar are always in
+  // the DOM; Tailwind hidden/md:block classes control visibility. No JS branching
+  // on viewport means no useIsDesktop mock needed here.
   // ---------------------------------------------------------------------------
 
   describe("Slice 7 — desktop layout (AC GD-5)", () => {
-    describe("given desktop viewport (useIsDesktop returns true) with a library entry", () => {
+    describe("given a library entry with a critic score and gameSlug", () => {
       beforeEach(() => {
-        vi.mocked(useIsDesktop).mockReturnValue(true);
         render(
           <GameDetail
             data={buildData(buildLibraryEntry(), {
@@ -1034,12 +1042,12 @@ describe("GameDetail", () => {
         );
       });
 
-      it("renders the sticky detail rail on desktop", () => {
+      it("renders the sticky detail rail in the DOM", () => {
         expect(screen.queryByTestId("game-detail-detail-rail")).not.toBeNull();
       });
 
-      it("does NOT render the mobile action bar on desktop", () => {
-        expect(screen.queryByTestId("game-detail-action-bar")).toBeNull();
+      it("renders the mobile action bar in the DOM (CSS hides it on desktop)", () => {
+        expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
       });
 
       it("renders the status switcher inside the detail rail", () => {
@@ -1067,35 +1075,16 @@ describe("GameDetail", () => {
         expect(within(rail).queryByText("Your time")).not.toBeNull();
       });
 
-      it("renders the jump spine in the desktop content column", () => {
-        expect(screen.queryByTestId("game-detail-jump-spine")).not.toBeNull();
+      it("renders the jump spine in the DOM (both mobile and desktop variants)", () => {
+        // Two instances: md:hidden (mobile) + hidden md:block (desktop)
+        expect(
+          screen.queryAllByTestId("game-detail-jump-spine").length
+        ).toBeGreaterThan(0);
       });
     });
 
-    describe("given mobile viewport (useIsDesktop returns false) with a library entry", () => {
+    describe("given a library entry with gameSlug but no critic score", () => {
       beforeEach(() => {
-        vi.mocked(useIsDesktop).mockReturnValue(false);
-        render(
-          <GameDetail
-            data={buildData(buildLibraryEntry())}
-            viewerUserId="user-1"
-            gameSlug="hollow-knight"
-          />
-        );
-      });
-
-      it("renders the mobile action bar on mobile", () => {
-        expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
-      });
-
-      it("does NOT render the sticky detail rail on mobile", () => {
-        expect(screen.queryByTestId("game-detail-detail-rail")).toBeNull();
-      });
-    });
-
-    describe("given desktop viewport with no critic score", () => {
-      beforeEach(() => {
-        vi.mocked(useIsDesktop).mockReturnValue(true);
         render(
           <GameDetail
             data={buildData(buildLibraryEntry(), {
@@ -1113,9 +1102,8 @@ describe("GameDetail", () => {
       });
     });
 
-    describe("given desktop viewport with playtime data", () => {
+    describe("given a library entry with playtime data", () => {
       beforeEach(() => {
-        vi.mocked(useIsDesktop).mockReturnValue(true);
         render(
           <GameDetail
             data={{
@@ -1129,12 +1117,12 @@ describe("GameDetail", () => {
         );
       });
 
-      it("shows total played time in the Your time section", () => {
+      it("shows total played time in the Your time section inside the rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
         expect(within(rail).queryByText("Total played")).not.toBeNull();
       });
 
-      it("shows sessions count in the Your time section", () => {
+      it("shows sessions count in the Your time section inside the rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
         expect(within(rail).queryByText("Sessions")).not.toBeNull();
       });
@@ -1143,14 +1131,14 @@ describe("GameDetail", () => {
 
   // ---------------------------------------------------------------------------
   // Slice 6 — mobile layout (AC GD-1…GD-4)
-  // RED: GameDetail does not yet accept gameSlug, hide breadcrumb on mobile,
-  // or render a Back / More top bar. These assertions drive the implementation.
+  // Both the mobile top bar and the desktop breadcrumb are always in the DOM;
+  // Tailwind md:hidden / hidden md:flex classes gate their visibility. No
+  // useIsDesktop mock needed.
   // ---------------------------------------------------------------------------
 
   describe("Slice 6 — mobile layout (AC GD-1…GD-4)", () => {
-    describe("given mobile viewport (useIsDesktop returns false)", () => {
+    describe("given a library entry with gameSlug", () => {
       beforeEach(() => {
-        vi.mocked(useIsDesktop).mockReturnValue(false);
         render(
           <GameDetail
             data={buildData(buildLibraryEntry())}
@@ -1160,10 +1148,11 @@ describe("GameDetail", () => {
         );
       });
 
-      // GD-4: breadcrumb must be absent on mobile
-      it("hides the breadcrumb nav on mobile", () => {
-        expect(elements.queryBreadcrumbLibrary()).toBeNull();
-        expect(elements.queryBreadcrumbGames()).toBeNull();
+      // Both nav variants are always present in the DOM (CSS-gated)
+      it("renders both the mobile top bar and the breadcrumb nav in the DOM", () => {
+        expect(screen.queryByRole("link", { name: "Back" })).not.toBeNull();
+        expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
+        expect(elements.queryBreadcrumbGames()).not.toBeNull();
       });
 
       // GD-4: mobile top bar must expose Back + More affordances
@@ -1188,24 +1177,6 @@ describe("GameDetail", () => {
             Node.DOCUMENT_POSITION_PRECEDING
           )
         ).toBe(true);
-      });
-    });
-
-    describe("given desktop viewport (useIsDesktop returns true)", () => {
-      beforeEach(() => {
-        vi.mocked(useIsDesktop).mockReturnValue(true);
-        render(
-          <GameDetail
-            data={buildData(buildLibraryEntry())}
-            viewerUserId="user-1"
-            gameSlug="hollow-knight"
-          />
-        );
-      });
-
-      it("renders the breadcrumb nav on desktop", () => {
-        expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
-        expect(elements.queryBreadcrumbGames()).not.toBeNull();
       });
     });
   });

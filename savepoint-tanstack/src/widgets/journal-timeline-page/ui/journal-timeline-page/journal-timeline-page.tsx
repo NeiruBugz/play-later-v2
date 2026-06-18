@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 
-import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/button";
 import { JournalTimeline } from "@/widgets/journal-timeline";
@@ -22,12 +21,16 @@ import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
  * delete dialog components are unchanged and still used by the game-detail,
  * library-item-card, and dashboard quick-compose surfaces.
  *
+ * Layout: both the timeline column and the stats rail are always in the DOM
+ * (SSR-safe). Below `md` the grid collapses to a single column and the rail
+ * is hidden via `hidden md:block`; above `md` the two-column layout is applied
+ * via responsive Tailwind classes — no post-hydration layout swap.
+ *
  * FSD: widget layer — composes shared/ui + the entity-backed `JournalTimeline`
  * widget. The route stays thin: it loads data and renders this widget.
  */
 export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
   const navigate = useNavigate();
-  const isDesktop = useIsDesktop();
 
   const openDetail = (entryId: string) => {
     void navigate({ to: "/journal/$id", params: { id: entryId } });
@@ -37,31 +40,26 @@ export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
   const entryWord = entryCount === 1 ? "entry" : "entries";
   const subtitle = `Reflect, don't review. ${entryCount} ${entryWord} across your library.`;
 
-  const timeline = (
-    <>
-      <PageHeader
-        eyebrow="// JOURNAL"
-        title="Journal"
-        sub={subtitle}
-        actions={
-          <Button asChild>
-            <Link to="/journal/new">Compose entry</Link>
-          </Button>
-        }
-      />
-
-      <JournalTimeline entries={entries} onEntrySelect={openDetail} />
-    </>
-  );
-
-  if (!isDesktop) {
-    return timeline;
-  }
-
   return (
-    <div className="gap-xl grid grid-cols-[1fr_280px] items-start">
-      <div>{timeline}</div>
-      <JournalStatsRail entries={entries} />
+    <div className="md:grid md:grid-cols-[1fr_280px] md:items-start md:gap-8">
+      <div>
+        <PageHeader
+          eyebrow="// JOURNAL"
+          title="Journal"
+          sub={subtitle}
+          actions={
+            <Button asChild>
+              <Link to="/journal/new">Compose entry</Link>
+            </Button>
+          }
+        />
+
+        <JournalTimeline entries={entries} onEntrySelect={openDetail} />
+      </div>
+
+      <div className="hidden md:block">
+        <JournalStatsRail entries={entries} />
+      </div>
     </div>
   );
 }

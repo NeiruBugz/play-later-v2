@@ -12,11 +12,11 @@ import {
   AddEditPlaythroughDrawer,
   type PlaythroughFormValues,
 } from "@/features/manage-playthrough";
+import { openGlobalAction } from "@/shared/lib/global-action";
 import {
   buildCoverImageUrl,
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
-import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { Card } from "@/shared/ui/card";
 
 import { AboutPanel } from "../about-panel";
@@ -53,7 +53,6 @@ export function GameDetail({
     playtimeSessionCount,
   } = data;
   const [composeOpen, setComposeOpen] = useState(false);
-  const isDesktop = useIsDesktop();
   const navigate = useNavigate({ from: "/" });
 
   type DrawerState =
@@ -77,13 +76,7 @@ export function GameDetail({
   });
 
   function openLogSession() {
-    void navigate({
-      search: (prev) => ({
-        ...(prev as Record<string, unknown>),
-        action: "log-session" as const,
-        game: gameSlug,
-      }),
-    });
+    openGlobalAction(navigate, "log-session", gameSlug);
   }
 
   function mapPlaythroughToFormValues(
@@ -327,49 +320,47 @@ export function GameDetail({
       </div>
 
       <div className="relative px-6 pb-16 md:px-12">
-        {/* Mobile top bar: Back + title + More */}
-        {!isDesktop ? (
-          <div className="relative z-10 flex items-center justify-between pt-3.5">
-            <Link
-              to="/library"
-              aria-label="Back"
-              className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
-            >
-              <ArrowLeft size={20} aria-hidden="true" />
-            </Link>
-            <button
-              type="button"
-              aria-label="More"
-              className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
-            >
-              <MoreHorizontal size={20} aria-hidden="true" />
-            </button>
-          </div>
-        ) : (
-          /* Desktop breadcrumb */
-          <nav
-            aria-label="Breadcrumb"
-            className="text-caption text-muted-foreground relative z-10 flex items-center gap-1.5 pt-3.5"
+        {/* Mobile top bar: Back + More — visible below md breakpoint */}
+        <div className="relative z-10 flex items-center justify-between pt-3.5 md:hidden">
+          <Link
+            to="/library"
+            aria-label="Back"
+            className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
           >
-            <Link
-              to="/library"
-              className="hover:text-foreground transition-colors"
-            >
-              Library
-            </Link>
-            <span className="opacity-50">/</span>
-            <Link
-              to="/library"
-              className="hover:text-foreground transition-colors"
-            >
-              Games
-            </Link>
-            <span className="opacity-50">/</span>
-            <span className="text-foreground max-w-[280px] truncate font-medium">
-              {game.title}
-            </span>
-          </nav>
-        )}
+            <ArrowLeft size={20} aria-hidden="true" />
+          </Link>
+          <button
+            type="button"
+            aria-label="More"
+            className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
+          >
+            <MoreHorizontal size={20} aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Desktop breadcrumb — visible at md and above */}
+        <nav
+          aria-label="Breadcrumb"
+          className="text-caption text-muted-foreground relative z-10 hidden items-center gap-1.5 pt-3.5 md:flex"
+        >
+          <Link
+            to="/library"
+            className="hover:text-foreground transition-colors"
+          >
+            Library
+          </Link>
+          <span className="opacity-50">/</span>
+          <Link
+            to="/library"
+            className="hover:text-foreground transition-colors"
+          >
+            Games
+          </Link>
+          <span className="opacity-50">/</span>
+          <span className="text-foreground max-w-[280px] truncate font-medium">
+            {game.title}
+          </span>
+        </nav>
 
         {/* Stacked hero: cover first (mobile) / side-by-side (desktop) */}
         <section
@@ -406,45 +397,57 @@ export function GameDetail({
                 </h1>
               </div>
 
-              {/* Critic ring shown in hero on mobile; on desktop it moves to the rail */}
-              {!isDesktop ? <CriticScoreRing value={criticScore} /> : null}
+              {/* Critic ring shown in hero on mobile; on desktop it lives in the rail */}
+              {criticScore !== null ? (
+                <div className="md:hidden">
+                  <CriticScoreRing value={criticScore} />
+                </div>
+              ) : null}
             </div>
 
-            {viewerUserId !== null && !isDesktop ? (
-              <LibraryStatusSwitcher
-                key={game.igdbId}
-                igdbId={game.igdbId}
-                gameTitle={game.title}
-                entry={libraryEntry}
-                playthroughCount={playthroughs.length}
-                derivedStatus={derivedStatus ?? libraryEntry?.status ?? "SHELF"}
-                statusIsManual={statusIsManual}
-              />
+            {viewerUserId !== null ? (
+              <div className="md:hidden">
+                <LibraryStatusSwitcher
+                  key={game.igdbId}
+                  igdbId={game.igdbId}
+                  gameTitle={game.title}
+                  entry={libraryEntry}
+                  playthroughCount={playthroughs.length}
+                  derivedStatus={
+                    derivedStatus ?? libraryEntry?.status ?? "SHELF"
+                  }
+                  statusIsManual={statusIsManual}
+                />
+              </div>
             ) : null}
           </div>
         </section>
 
-        {/* Jump spine: sticky section anchors */}
-        {isDesktop /* Desktop: spine sits in the content column, rendered below in two-col layout */ ? null : jumpSections.length >
-          0 ? (
+        {/* Jump spine: mobile — visible below md; desktop version is inside the content column */}
+        {jumpSections.length > 0 ? (
           <div className="mt-4 md:hidden">
             <GameDetailJumpSpine sections={jumpSections} />
           </div>
         ) : null}
 
-        {/* Desktop: two-column layout — scrolling content + sticky detail rail */}
-        {isDesktop ? (
-          <div className="mt-8 grid grid-cols-[1fr_320px] items-start gap-7">
-            {/* Content column */}
-            <div className="min-w-0">
-              {/* Jump spine sticky at top of content column */}
-              {jumpSections.length > 0 ? (
+        {/* Two-column layout on desktop; single column on mobile.
+            The detail rail column uses hidden/md:block so it stays in the DOM
+            on both viewports — avoids a post-hydration remount of the keyed
+            status switcher that useIsDesktop would cause. */}
+        <div className="md:mt-8 md:grid md:grid-cols-[1fr_320px] md:items-start md:gap-7">
+          {/* Content column */}
+          <div className="min-w-0">
+            {/* Jump spine for desktop — hidden on mobile (the separate spine above handles that) */}
+            {jumpSections.length > 0 ? (
+              <div className="hidden md:block">
                 <GameDetailJumpSpine sections={jumpSections} />
-              ) : null}
-              {panelContent}
-            </div>
+              </div>
+            ) : null}
+            {panelContent}
+          </div>
 
-            {/* Sticky detail rail */}
+          {/* Sticky detail rail — desktop only, CSS-hidden on mobile */}
+          <div className="hidden md:block">
             <GameDetailDetailRail
               statusSwitcherProps={statusSwitcherProps}
               statusSwitcherKey={String(game.igdbId)}
@@ -456,9 +459,7 @@ export function GameDetail({
               derivedStatus={derivedStatus ?? libraryEntry?.status ?? null}
             />
           </div>
-        ) : (
-          panelContent
-        )}
+        </div>
 
         {viewerUserId ? (
           <ComposeJournalEntryDialog
@@ -506,8 +507,9 @@ export function GameDetail({
         ) : null}
       </div>
 
-      {/* Sticky bottom action bar — mobile only; pinned above the bottom nav */}
-      {gameSlug && !isDesktop ? (
+      {/* Sticky bottom action bar — present in DOM for SSR; GameDetailActionBar
+          already applies md:hidden on its own root so it disappears on desktop */}
+      {gameSlug ? (
         <GameDetailActionBar
           gameSlug={gameSlug}
           gameStatus={derivedStatus ?? libraryEntry?.status ?? null}

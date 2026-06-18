@@ -2,14 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useIsDesktop } from "@/shared/lib/use-media-query";
 import type { JournalTimelineEntry } from "@/widgets/journal-timeline";
 
 import { JournalTimelinePage } from "./journal-timeline-page";
-
-vi.mock("@/shared/lib/use-media-query", () => ({
-  useIsDesktop: vi.fn(() => false),
-}));
 
 const navigateMock = vi.fn();
 
@@ -139,7 +134,7 @@ describe("JournalTimelinePage", () => {
     });
   });
 
-  describe("given a desktop viewport and multiple entries", () => {
+  describe("given multiple entries", () => {
     const entries = [
       makeEntry({ id: "e1", content: "First session." }),
       makeEntry({
@@ -155,11 +150,10 @@ describe("JournalTimelinePage", () => {
     ];
 
     beforeEach(() => {
-      vi.mocked(useIsDesktop).mockReturnValue(true);
       render(<JournalTimelinePage entries={entries} />);
     });
 
-    it("renders the stats rail with an entries count", () => {
+    it("renders the stats rail in the DOM", () => {
       const rail = screen.getByRole("complementary", {
         name: "Journaling stats",
       });
@@ -171,14 +165,15 @@ describe("JournalTimelinePage", () => {
     });
   });
 
-  describe("given a mobile viewport", () => {
+  describe("given a single entry", () => {
     beforeEach(() => {
-      vi.mocked(useIsDesktop).mockReturnValue(false);
       render(<JournalTimelinePage entries={[makeEntry()]} />);
     });
 
-    it("does not render the stats rail", () => {
-      expect(screen.queryByRole("complementary")).toBeNull();
+    it("renders both the timeline column and the stats rail container", () => {
+      expect(
+        screen.getByRole("complementary", { name: "Journaling stats" })
+      ).toBeDefined();
     });
   });
 });
