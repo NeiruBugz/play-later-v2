@@ -69,9 +69,7 @@ describe("DashboardJumpBackInHero", () => {
     const game = makeGame();
 
     beforeEach(() => {
-      render(
-        <DashboardJumpBackInHero mostInProgressGame={game} />
-      );
+      render(<DashboardJumpBackInHero mostInProgressGame={game} />);
     });
 
     it("renders the jump-back-in region with its accessible label", () => {
@@ -99,9 +97,7 @@ describe("DashboardJumpBackInHero", () => {
     const game = makeGame({ slug: "elden-ring" });
 
     beforeEach(async () => {
-      render(
-        <DashboardJumpBackInHero mostInProgressGame={game} />
-      );
+      render(<DashboardJumpBackInHero mostInProgressGame={game} />);
       await actions.clickLog();
     });
 
@@ -136,9 +132,7 @@ describe("DashboardJumpBackInHero", () => {
 
   describe("given the player has no in-progress game", () => {
     beforeEach(() => {
-      render(
-        <DashboardJumpBackInHero mostInProgressGame={null} />
-      );
+      render(<DashboardJumpBackInHero mostInProgressGame={null} />);
     });
 
     it("renders an empty-state message instead of a Log button", () => {
@@ -156,9 +150,7 @@ describe("DashboardJumpBackInHero", () => {
     });
 
     beforeEach(() => {
-      render(
-        <DashboardJumpBackInHero mostInProgressGame={game} />
-      );
+      render(<DashboardJumpBackInHero mostInProgressGame={game} />);
     });
 
     it("renders a meta line with session count, hours, and platform", () => {
@@ -195,9 +187,7 @@ describe("DashboardJumpBackInHero", () => {
     const game = makeGame();
 
     beforeEach(() => {
-      render(
-        <DashboardJumpBackInHero mostInProgressGame={game} />
-      );
+      render(<DashboardJumpBackInHero mostInProgressGame={game} />);
     });
 
     it("does not render a meta line when no meta data is present", () => {
