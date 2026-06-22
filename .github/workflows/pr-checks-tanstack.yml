@@ -18,7 +18,7 @@ jobs:
     name: Quality (typecheck, lint, format, coverage)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Coverage runs the merged unit + integration projects, and the
       # integration project needs a real Postgres on :6432 (the isolated-db
@@ -94,7 +94,7 @@ jobs:
     name: Supply Chain Audit (pnpm audit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -118,7 +118,7 @@ jobs:
     name: Dependency Freshness (7-day quarantine)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Need merge-base with target branch so the script can diff package.json files
           fetch-depth: 0
@@ -137,7 +137,7 @@ jobs:
     name: Validate Database Migrations
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
