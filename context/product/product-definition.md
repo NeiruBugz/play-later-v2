@@ -1,7 +1,7 @@
 # Product Definition: SavePoint
 
-- **Version:** 2.0
-- **Status:** Revised Vision
+- **Version:** 3.0
+- **Status:** Revised Vision (2026-10-29 vision interview)
 
 ---
 
@@ -9,29 +9,32 @@
 
 ### 1.1. Project Vision & Purpose
 
-To help patient gamers curate their personal gaming libraries and journal their experiences—ensuring every gaming journey is intentional, memorable, and ready when the moment is right. Games are not chores to complete but worlds to explore and remember.
+SavePoint is a tool for mindful gaming: choose your next game deliberately, play it at your own pace, and remember what it gave you. It is not an achievement tracker or a race to finish — games are worlds to live in, not a pile to clear.
+
+Choosing (before) and reflecting (after) carry equal weight and form one loop: a deliberate choice → unhurried play → a free note → which informs the next choice.
 
 ### 1.2. Target Audience
 
-Patient gamers who view their game collections as opportunities rather than obligations. These are thoughtful players across all demographics who have accumulated libraries through various platforms and want to be intentional about their gaming experiences while preserving memories of their journeys through different worlds.
+Gamers who own more games than they will ever play — across stores, subscriptions, and consoles — and who want to play fewer games, better. The primary user is the author: success is measured by whether he uses SavePoint every week.
 
 ### 1.3. User Personas
 
-- **Persona 1: "Sam the Patient Gamer"**
-  - **Background:** Works full-time, games intentionally during evenings and weekends
-  - **Gaming Collection:** 200+ games across Steam, Game Pass, GOG, and other platforms
-  - **Philosophy:** Games are worlds waiting for the right season of life, not tasks to complete
-  - **Goal:** Be intentional about which games to experience, remember and reflect on completed journeys, discover new worlds when curiosity strikes
-  - **Frustration:** Forgets great gaming experiences over time, struggles to recall what each game was about or why they wanted to play something, can't track which worlds truly resonated
+- **Persona 1: The Author (primary, dogfooding)**
+  - **Role:** Developer with a large multi-platform library; already logs games and ratings in Backloggd.
+  - **Goal:** Open the app, see what to play next from games he already owns, and keep a light record of what each game meant.
+  - **Frustration:** Choice paralysis in a flat backlog; tools that don't know what he owns; buying more than he plays; hopping between games; feeling pushed to finish fast so he can move on.
+- **Persona 2: "Sam the Patient Gamer"** _(secondary)_
+  - **Role:** Works full-time, plays evenings and weekends, 200+ games across Steam, Game Pass, and consoles.
+  - **Goal:** Have one or two games "on the go" and a short, trusted queue of what comes next.
+  - **Frustration:** The backlog feels like a debt instead of a collection of opportunities.
 
 ### 1.4. Success Metrics
 
-- **Meaningful gaming experiences journaled:** Users regularly write reflections about their play sessions
-- **Intentional gaming:** Users feel more purposeful about gaming time rather than overwhelmed
-- **Community engagement:** Users actively share reflections and create themed collections
-- **Discovery moments:** Users successfully find "the right game for right now" through curation
-- **Memory preservation:** Users return to read their past gaming reflections and relive experiences
-- **User satisfaction:** Users feel their gaming library is a curated collection, not a burden
+- **Weekly dogfooding:** within 3 months, the author opens SavePoint at least once a week to choose or note a game.
+- **Fewer at once:** the number of games in "Playing" at the same time stays small (≤ 3) without feeling forced.
+- **Decisions, not paralysis:** when sitting down to play, the next game is picked from the Up Next queue or a suggestion rather than by browsing the whole library.
+- **Memory preserved:** finished or dropped games carry a note the author returns to read.
+- **Anti-metrics (never optimized, never displayed):** games finished per year, speed of completion, pace compared with other players.
 
 ---
 
@@ -39,29 +42,24 @@ Patient gamers who view their game collections as opportunities rather than obli
 
 ### 2.1. Core Features
 
-- **Personal Gaming Library:** Curate your collection across platforms—organize games by intent. Platform tracking is optional; focus is on what you want to play, not cataloging everything you own.
-- **Gaming Journal:** Capture thoughts and memories about your gaming experiences. Quick, frictionless entries during or after play—no formal structure required.
-- **Journey Tracking:** Mark your relationship with each game using four intuitive statuses: Want to Play, Owned, Playing, Played.
-- **Curated Collections:** Create themed collections that reflect your gaming taste ("Cozy Winter Games," "Games That Made Me Think," "Worlds to Revisit")
-- **Platform Integration:** Import libraries from Steam and other services to bring awareness to your collection
-- **Discovery & Exploration:** Find similar games and new worlds to explore through IGDB integration and community collections
-- **Gaming Memories Timeline:** View your gaming journey chronologically through journal entries and experiences
-- **Community Reflections:** Read how others experienced the same worlds and share your own perspectives
+- **Simple Game Model:** three statuses — **Want** (not started, owned or not), **Playing**, **Done** (finished _or_ let go — dropping is fine). Any Want game can be flagged **Up Next** and ordered into a short queue.
+- **"What's Next" Home:** the home screen is the Up Next queue plus a few suggestions from the owned backlog. Suggestions draw on game length (shown as "about N evenings", never as a benchmark), the author's taste (genres, ratings, notes), mild urgency (e.g. leaving a subscription — shown as information on queued games, never as a "hurry" push), and what friends are playing or praising.
+- **Know What I Own:** library fills itself from where games actually live — Steam first, then subscriptions (Game Pass, PS+), then consoles (PlayStation, Xbox, Switch). Manual add stays instant: search → tap → done.
+- **Free, Simple Journal:** free-form notes on a game — no entry kinds, no moods, no playthrough bookkeeping. Gentle prompts at the key moments ("why do I want this?" on add, "what stayed with me?" on Done), always optional.
+- **Friends as a Signal:** following friends and seeing what they play and rate feeds suggestions; it is not a social network to perform on.
 
 ### 2.2. User Journey
 
-A patient gamer signs up for SavePoint and imports their Steam library, curating which games to track. They mark a few games as "Want to Play," start one and mark it as "Playing," and jot down quick thoughts during or after sessions. When they finish or move on, they mark it "Played." They discover their next game through similar game suggestions or community collections, read others' reflections, create themed collections, and return to revisit past journal entries and relive cherished gaming memories.
+The author connects Steam and his library fills in. He flags three games as Up Next and orders them. On a free evening he opens SavePoint: the home screen shows his queue and two suggestions — a short game that fits a weekend and one a friend just loved. He starts the top game, which moves to Playing. If he tries to start a fourth game while three are in progress, SavePoint gently asks whether to put one aside. Weeks later he marks the game Done — finished or let go, both are fine — and jots a line about what stayed with him. That note and rating shape what SavePoint suggests next. Before buying a new game on sale, his wishlist reminds him how much is already waiting ("4 games in the queue, about 20 evenings").
 
-### 2.3. UX Principles
+### 2.3. Product Principles
 
-SavePoint follows a "Letterboxd for games" philosophy: the core action should be instant, with progressive enhancement for those who want more detail.
-
-**Simplification decisions:**
-
-- **4 statuses, not 6:** Want to Play, Owned, Playing, Played. Simple, obvious, no decision paralysis. See [spec](../spec/002-status-simplification/functional-spec.md).
-- **Platform is optional:** Just say "I'm playing Zelda"—platform is metadata, not identity. See [spec](../spec/003-optional-platform/functional-spec.md).
-- **Frictionless journaling:** Plain text, optional titles, "save thought" framing. Capture memories in under 10 seconds. See [spec](../spec/004-journal-friction-reduction/functional-spec.md).
-- **Intentional library:** Your library reflects games you intend to experience, not everything you own. Steam import is curation, not bulk transfer.
+- **Not a competition.** No yearly counters, completion challenges, or pace-vs-benchmark comparisons.
+- **Few at once.** A soft limit on Playing nudges against hopping. _(Assumption: limit of 3, soft — a question, not a block; to be validated in use.)_
+- **Dropping is fine.** "Let go" is a normal ending, worded neutrally, with no guilt mechanics.
+- **Pause before buying.** Wishlist shows the size of what's already waiting.
+- **Fewer concepts, faster actions.** Every surface should make the main thing — what to play next — obvious; logging a status change takes one tap.
+- **Own path.** SavePoint does not chase Backloggd feature parity and does not import from it; it starts fresh with what the author owns and plays from now on.
 
 ---
 
@@ -69,32 +67,25 @@ SavePoint follows a "Letterboxd for games" philosophy: the core action should be
 
 ### 3.1. What's In-Scope for this Version
 
-- Personal gaming library management across platforms (curate what matters)
-- Journey status tracking (Want to Play, Owned, Playing, Played)
-- Gaming journal system for writing reflections and memories
-- Curated collections creation (themed, personal, shareable)
-- Steam integration for library import
-- Similar games discovery via IGDB integration
-- Basic user authentication and profiles
-- Game metadata from IGDB (covers, descriptions, release dates)
-- Timeline view of your gaming journey
+- **Simplification first:** move to the Want / Playing / Done model with the Up Next queue; simplify the journal to free notes; hide playthrough bookkeeping; make add/mark instant.
+- "What's Next" home screen with the Up Next queue.
+- Soft limit on concurrent Playing games.
+- Steam library import (to fill the library automatically).
+- Rule-based suggestions from length, taste, urgency, and friends.
+- Wishlist "already waiting" context.
+- Existing foundations: accounts, profiles, IGDB game data, game detail pages, following friends.
 
 ### 3.2. What's Out-of-Scope (Non-Goals)
 
-**Next Priority Features:**
+**Next:**
 
-- Social features (following users, reflection likes, activity feeds) - inspired by Goodreads and Letterboxd's community engagement models
-- Additional platform integrations (Xbox, PlayStation, Epic Games, GOG API, etc.)
-- Mood-based game recommendations ("I want something cozy tonight")
-- Mobile application for journaling on-the-go
-- Photo/screenshot uploads to journal entries
+- Subscription catalog awareness (Game Pass, PS+), including "leaving soon" information.
+- Console library imports (PlayStation, Xbox, Switch).
 
-**Future Considerations:**
+**Not pursuing (conflicts with the vision):**
 
-- Achievement and progress sync from platforms
-- Game time tracking integrations
-- Multiplayer session coordination for friends
-- Reading challenges equivalent ("Complete 12 games this year" type goals for those who want them)
-- Advanced recommendation algorithms based on journal sentiment
-- Streaming/content creation features
-- Advanced analytics and insights into gaming patterns
+- Yearly stats cards, "N games this year" challenges, year-in-review counters.
+- Pace-vs-benchmark comparisons ("your pace", "faster than X% of players").
+- Public reviews, community reflection feeds, aggregate community stats, and public collections — SavePoint is personal-first, not a review platform.
+- Importing history from or matching features with Backloggd.
+- LLM free-text recommendations.

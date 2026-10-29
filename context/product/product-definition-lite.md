@@ -2,31 +2,36 @@
 
 ## Project Name
 
-**SavePoint** - Your Personal Gaming Library and Journal
+**SavePoint** - Mindful gaming: choose deliberately, play at your own pace, remember what it gave you
 
 ## Vision
 
-Help patient gamers curate their personal gaming libraries and journal their experiences—ensuring every gaming journey is intentional, memorable, and ready when the moment is right. Games are not chores to complete but worlds to explore and remember.
+A tool for mindful gaming. Choose your next game deliberately from what you already own, play it at your own pace, and remember what it gave you. Not an achievement tracker or a race to finish. Choosing (before) and reflecting (after) form one loop.
 
 ## Target Audience
 
-Patient gamers who view their game collections as opportunities rather than obligations. Thoughtful players who have accumulated libraries across platforms and want to be intentional about their gaming experiences while preserving memories of their journeys.
+Gamers who own more games than they will play, across stores, subscriptions, and consoles, and want to play fewer games, better. Primary user: the author (weekly dogfooding).
 
 ## Core Features
 
-- **Personal Gaming Library** - Curate your collection across multiple platforms
-- **Gaming Journal** - Write reflections and memories about your gaming experiences
-- **Journey Tracking** - Mark where you are in each world (Curious About, Currently Exploring, Experienced, etc.)
-- **Curated Collections** - Create themed collections ("Cozy Winter Games," "Games That Made Me Think")
-- **Platform Integration** - Import libraries from Steam and other services
-- **Discovery & Exploration** - Find similar games through IGDB integration
-- **Gaming Memories Timeline** - View your gaming journey chronologically
-- **Community Reflections** - Read and share perspectives on games
+- **Simple Game Model** - Want / Playing / Done (finished or let go) + ordered Up Next queue
+- **"What's Next" Home** - Up Next queue + suggestions from length (in evenings), taste, mild urgency, friends
+- **Know What I Own** - Steam import first, then subscriptions, then consoles; instant manual add
+- **Free, Simple Journal** - free-form notes, optional prompts on add and on Done
+- **Friends as a Signal** - what friends play and rate feeds suggestions
+
+## Principles
+
+- Not a competition: no yearly counters, challenges, or pace benchmarks
+- Few at once: soft limit on Playing
+- Dropping is fine
+- Pause before buying: wishlist shows what's already waiting
+- Own path: no Backloggd parity or import
 
 ## Key Success Metrics
 
-- Users regularly journal meaningful gaming experiences
-- Users feel intentional and purposeful about gaming time
-- Community actively shares reflections and themed collections
-- Users successfully discover "the right game for right now"
-- Users return to relive cherished gaming memories through past entries
+- The author uses SavePoint weekly within 3 months
+- Few games in Playing at once (≤ 3)
+- Next game is picked from the queue or a suggestion, not by browsing
+- Done games carry notes the author returns to
+- Anti-metrics, never shown: games per year, completion speed
