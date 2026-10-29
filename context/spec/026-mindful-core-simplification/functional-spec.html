@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mindful Core Simplification</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  @media (prefers-color-scheme: dark) {
+    :root {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  }
+  :root[data-theme='dark'] {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  :root[data-theme='light'] {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 36px 28px 80px; }
+  @media (max-width: 700px) { main { padding: 20px 16px 60px; } }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 42px 0 12px; }
+  h4 { margin: 14px 0 6px; font-size: 14px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 4px; }
+  .statusbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
+  .status-chip { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--warn); color: var(--chip-ink); }
+  .progress { font-size: 13px; color: var(--muted); }
+  .bar { display: inline-block; width: 140px; height: 7px; border-radius: 4px; background: var(--line); vertical-align: middle; margin: 0 6px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--ok); }
+  .src { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; color: var(--chip-ink); white-space: nowrap; }
+  .src.interview { background: var(--src-interview); }
+  .src.code { background: var(--src-code); }
+  .src.web { background: var(--src-web); }
+  .src.kb { background: var(--src-kb); }
+  .glance { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin-top: 14px; }
+  .glance ul { margin: 8px 0 0; padding-left: 20px; }
+  .glance li { margin: 6px 0; }
+  table.decisions { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  table.decisions th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line); }
+  table.decisions td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.decisions td:first-child { font-weight: 600; width: 26%; }
+  .why { color: var(--muted); font-size: 13px; display: block; margin-top: 2px; }
+  .diagram-wrap { overflow-x: auto; margin-top: 12px; }
+  .diagram-note { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .diagram-wrap svg { max-width: 100%; height: auto; display: block; }
+  .d-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .d-label { fill: var(--ink); font-size: 13px; font-weight: 600; }
+  .d-sublabel { fill: var(--muted); font-size: 11.5px; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .d-arrow.dashed { stroke-dasharray: 5 4; }
+  .d-head { fill: var(--muted); }
+  .tabs { margin-top: 12px; }
+  .tabbar { display: flex; gap: 4px; border-bottom: 2px solid var(--line); }
+  .tabbar button { appearance: none; border: none; background: none; color: var(--muted); font: 600 14px/1.4 inherit; padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tabbar button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tabbar button .count { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+  .tabpanel { display: none; padding: 6px 2px 0; }
+  .tabpanel.active { display: block; }
+  ul.findings { list-style: none; margin: 10px 0 0; padding: 0; }
+  ul.findings li { margin: 0; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  ul.findings li:last-child { border-bottom: none; }
+  .impact { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .impact a { color: var(--accent); text-decoration: none; }
+  .impact a:hover { text-decoration: underline; }
+  .empty { color: var(--muted); font-size: 14px; padding: 16px 4px; }
+  .req { border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .req h3 { margin: 0 0 4px; font-size: 16.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+  .req h3 .provrow { display: flex; gap: 5px; }
+  .req .oneliner { margin: 2px 0 6px; }
+  .req .prose { color: var(--muted); font-size: 14px; margin: 0 0 4px; }
+  details.ac { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.ac summary { cursor: pointer; font-size: 13.5px; color: var(--accent); font-weight: 600; }
+  details.ac ul { list-style: none; padding-left: 4px; margin: 10px 0 2px; }
+  details.ac li { margin: 10px 0; padding-left: 26px; position: relative; font-size: 14.5px; }
+  details.ac li::before { content: "☐"; position: absolute; left: 2px; top: 0; color: var(--pending); font-size: 15px; }
+  details.ac li.done::before { content: "☑"; color: var(--ok); }
+  details.ac li b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  .cols h4 { margin: 0 0 6px; }
+  .cols ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .cols li { margin: 5px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  code { background: var(--panel); border-radius: 4px; padding: 1px 5px; font-size: .92em; }
+  .tablewrap { overflow-x: auto; margin: 12px 0; }
+  table.md { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+  table.md th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  table.md td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.md tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<main>
+<h1>Mindful Core Simplification</h1>
+<div class="meta">Topic: Replace the five-status model and playthrough bookkeeping with three statuses (Want / Playing / Done) plus an ordered Up Next queue; simplify the journal to plain notes with optional prompts; make adding a game and changing its status instant. &nbsp;·&nbsp; Author: Nail Badiullin</div>
+<div class="statusbar">
+  <span class="status-chip">Draft</span>
+  <span class="progress">Verification: <span class="bar"><i style="width:0%"></i></span> 0 of 90 criteria verified</span>
+</div>
+<h2 id="glance">At a glance</h2>
+<div class="glance"><ul><li>Every game has one of three statuses: Want (not started, owned or not), Playing, or Done (finished or let go).</li>
+<li>Up Next is a short, ordered queue of up to 5 Want or Done games; a Done game in the queue reads 'Replay'.</li>
+<li>A status only changes when the user changes it — one tap for the natural next step, two taps for any status, always undoable.</li>
+<li>Adding a game is the same everywhere: one tap adds it as Want, with 'Put in Up Next', Undo and an optional 'why' prompt.</li>
+<li>Journal entries become plain private notes; playthroughs are replaced by a read-only History, and existing libraries convert automatically.</li></ul></div>
+<h2 id="decisions">Decisions to approve</h2>
+<p class="meta">These are the judgment calls in this spec — the things a reviewer might want to challenge. Everything else follows from them.</p>
+<table class="decisions">
+  <tr><th>Decision</th><th>Choice</th><th>Source</th></tr>
+<tr>
+    <td>Status model</td>
+    <td>Want / Playing / Done, with Up Next as a marker, not a status<span class="why">Too many concepts was the top pain; Done formalises what Played already meant</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Finished vs let go</td>
+    <td>Optional private sub-type on Done, never counted or shown to friends<span class="why">Keeps the signal without turning dropping into a stat (anti-performative)</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Up Next size</td>
+    <td>At most 5, manual order<span class="why">Few at once; StoryGraph's 5-item queue is the only precedent found</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Who changes status</td>
+    <td>Only the user; logging time on a non-Playing game offers 'Mark as Playing'<span class="why">Silent status overwrites were the main source of unpredictability</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Ownership</td>
+    <td>Owned/not-owned marker on every game, default owned; 'Not owned' shown on Want<span class="why">Wishlist and Shelf merge into Want, but 'pause before buying' still needs not-owned</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Playthroughs</td>
+    <td>Removed from the main flow; read-only History of ended plays, dates recorded automatically<span class="why">Playthrough bookkeeping added concepts without serving the choose-play-reflect loop</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Ratings</td>
+    <td>One rating per game<span class="why">Two ratings (game and per-run) confused where the rating lives</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Prompts</td>
+    <td>'Why do you want to play this?' on add, 'What stayed with you?' on Done — optional, answerable later<span class="why">Before and after matter equally; comparable apps keep prompts skippable</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Existing data</td>
+    <td>Convert everyone at release by meaning; nothing deleted; one-time explanation for existing users<span class="why">Comparable migrations map by meaning and keep history</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span> <span class="src code">Codebase</span></td>
+  </tr>
+</table>
+<h2 id="lifecycle">Statuses and the Up Next queue</h2>
+<div class="diagram-wrap"><svg viewBox="0 0 880 300" role="img" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="d-head" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 0 0 L 8 4 L 0 8 z" class="d-head"/></marker></defs>
+<rect class="d-box" x="200" y="20" width="480" height="56" rx="8"/><text class="d-label" x="440" y="45" text-anchor="middle">Up Next queue (max 5)</text><text class="d-sublabel" x="440" y="62" text-anchor="middle">Want shows 'Up Next' · Done shows 'Replay'</text>
+<rect class="d-box" x="40" y="130" width="180" height="70" rx="8"/><text class="d-label" x="130" y="162" text-anchor="middle">Want</text><text class="d-sublabel" x="130" y="179" text-anchor="middle">owned or not</text>
+<rect class="d-box" x="350" y="130" width="180" height="70" rx="8"/><text class="d-label" x="440" y="162" text-anchor="middle">Playing</text><text class="d-sublabel" x="440" y="179" text-anchor="middle">never in Up Next</text>
+<rect class="d-box" x="660" y="130" width="180" height="70" rx="8"/><text class="d-label" x="750" y="162" text-anchor="middle">Done</text><text class="d-sublabel" x="750" y="179" text-anchor="middle">finished or let go</text>
+<path class="d-arrow" d="M 220 155 L 350 155" marker-end="url(#d-head)"/><text class="d-sublabel" x="285" y="149" text-anchor="middle">Start playing</text>
+<path class="d-arrow" d="M 530 155 L 660 155" marker-end="url(#d-head)"/><text class="d-sublabel" x="595" y="149" text-anchor="middle">Mark done</text>
+<path class="d-arrow dashed" d="M 660 185 Q 595 225 530 185" marker-end="url(#d-head)"/><text class="d-sublabel" x="595" y="199" text-anchor="middle">Play again</text>
+<path class="d-arrow dashed" d="M 330 76 L 130 130" marker-end="url(#d-head)"/>
+<path class="d-arrow dashed" d="M 560 76 L 750 130" marker-end="url(#d-head)"/>
+<text class="d-label" x="250" y="280">Starting a game removes it from Up Next · every change can be undone</text>
+</svg></div>
+<div class="diagram-note">Illustrative only — the acceptance criteria remain the contract.</div>
+<h2 id="findings">Findings that shaped this spec</h2>
+<p class="meta">What the research phase discovered and where it landed. The technical detail behind each finding lives in <code>research-notes.md</code>.</p>
+<div class="tabs">
+  <div class="tabbar" role="tablist">
+<button class="active" role="tab" onclick="tab(0, this)">Codebase exploration <span class="count">· 7</span></button>
+<button class="" role="tab" onclick="tab(1, this)">Web research <span class="count">· 4</span></button>
+<button class="" role="tab" onclick="tab(2, this)">Knowledge base <span class="count">· 0</span></button>
+  </div>
+<div class="tabpanel active"><ul class="findings"><li>A status set from the library is silently overwritten when a playthrough changes<span class="impact">→ <a href="#r22">Status changes only when the user changes it</a></span></li>
+<li>Up Next has no order; editing any game reshuffles it<span class="impact">→ <a href="#r24">Ordered queue with manual reordering</a></span></li>
+<li>Add paths disagree: some add as Shelf, the command palette as Up Next; the add dialog stays open silently<span class="impact">→ <a href="#r26">One add behaviour, always Want</a></span></li>
+<li>Ownership exists only as Wishlist vs Shelf<span class="impact">→ <a href="#r25">Separate owned / not-owned marker</a></span></li>
+<li>Logging time alone fails for games without a playthrough<span class="impact">→ <a href="#r29">Time-only notes work for every game</a></span></li>
+<li>Two ratings: game-level and per-playthrough 'Best rating'<span class="impact">→ <a href="#r211">One rating per game</a></span></li>
+<li>Older dropped games were recorded as finished when playthroughs were introduced<span class="impact">→ <a href="#r212">Converted Played games get 'Let go' only when every playthrough was abandoned</a></span></li></ul></div>
+<div class="tabpanel "><ul class="findings"><li>Backloggd keeps one Played state plus an optional sub-type (Completed / Shelved / Abandoned / nothing specific)<span class="impact">→ <a href="#r27">Done with optional private Finished / Let go</a></span></li>
+<li>StoryGraph's Up Next is the only ordered queue found: max 5, drag to reorder<span class="impact">→ <a href="#r24">Queue cap of 5 with reordering</a></span></li>
+<li>Reflection prompts in StoryGraph, Day One and Letterboxd are optional and answerable later<span class="impact">→ <a href="#r28">Skippable prompts, answerable from the game page</a></span></li>
+<li>Goodreads mapped old 'dnf/abandoned' shelves into the new DNF shelf by meaning, keeping history<span class="impact">→ <a href="#r212">Meaning-based conversion of existing libraries</a></span></li></ul></div>
+<div class="tabpanel "><div class="empty">Not configured — no knowledge sources are recorded for this project; skipped for this spec.</div></div>
+</div>
+<h2>Requirements</h2>
+<section class="req" id="r-terms-used-below">
+  <h3><span>Terms used below</span><span class="provrow"></span></h3>
+  
+  <p class="prose"><strong>Library</strong> — the user's list of games, with a status filter at the top (All, Up Next, Want, Playing, Done).</p>
+<p class="prose"><strong>Library card</strong> — one game in the library, shown either as a cover tile (grid view) or as a row (list view). Every card shows the game's status label and a &quot;⋯&quot; menu.</p>
+<p class="prose"><strong>Game page</strong> — the page of one game. On phones it has a sticky bottom bar with the game's status.</p>
+<p class="prose"><strong>Status control</strong> — the status label on a library card, the status pill on the game page, or the status pill in the phone bottom bar. Tapping it opens the <strong>status picker</strong>.</p>
+<p class="prose"><strong>Play</strong> — one period of playing a game. A play starts when the game becomes Playing. It ends when the game leaves Playing, either to Done or back to Want. A game has been <strong>played before</strong> when it has at least one ended play.</p>
+<p class="prose"><strong>Note</strong> — a piece of free text about a game, optionally with time played.</p>
+<p class="prose"><strong>Log sheet</strong> — opens from the center &quot;Log&quot; button in the phone navigation or the &quot;Log a session&quot; button in the desktop sidebar. You pick a game, enter time played, and optionally write a note.</p>
+<p class="prose"><strong>Journal</strong> — the &quot;Journal&quot; section in the navigation, listing all of the user's notes, newest first. Opening one note shows its <strong>note view</strong>.</p>
+<p class="prose"><strong>Phone / desktop</strong> — screens narrower / wider than 768 pixels.</p>
+  
+</section>
+<section class="req" id="r21">
+  <h3><span>2.1. Three statuses</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Only Want, Playing and Done exist anywhere in the app.</p>
+  <p class="prose">Every game in a person's library has exactly one of three statuses: <strong>Want</strong>, <strong>Playing</strong>, or <strong>Done</strong>. No other status exists anywhere in the app.</p>
+  <details class="ac"><summary>Acceptance criteria — 3 (0 verified)</summary><ul>
+<li class=""><b>Pickers offer three</b>When the user opens any status picker in the app (library card, game page, phone bottom bar, Steam import), then they see exactly three options: Want, Playing, Done.</li>
+<li class=""><b>Filter choices</b>When the user views the library status filter, then the choices are All, Up Next, Want, Playing, Done, and no Wishlist, Shelf, or Played choice appears.</li>
+<li class=""><b>No other labels</b>When the user views any card, game page, dashboard, or profile, then the only status labels shown are Want, Playing, and Done, plus the queue markers &quot;Up Next&quot; and &quot;Replay&quot; (2.4).</li>
+</ul></details>
+</section>
+<section class="req" id="r22">
+  <h3><span>2.2. A status only changes when the user changes it</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Nothing but the user changes a status; logging offers 'Mark as Playing'.</p>
+  <p class="prose">The status shown is always the last one the user chose. Logging time, writing notes, and editing details never change it on their own. When the user logs time for a game that isn't Playing, the confirmation offers a one-tap &quot;Mark as Playing&quot;, and the user decides.</p>
+  <details class="ac"><summary>Acceptance criteria — 5 (0 verified)</summary><ul>
+<li class=""><b>Log keeps Playing</b>Given a game is Playing, when the user logs time for it in the Log sheet, then the status still reads Playing.</li>
+<li class=""><b>Log on Want offers Playing</b>Given a game is Want, when the user logs time for it in the Log sheet, then the status still reads Want and the confirmation &quot;Logged {time} for {Game}&quot; shows a &quot;Mark as Playing&quot; button.</li>
+<li class=""><b>Mark as Playing</b>Given that confirmation is showing, when the user taps &quot;Mark as Playing&quot;, then the game shows Playing and leaves Up Next if it was queued; when the user ignores it, then the game stays Want.</li>
+<li class=""><b>Card and page agree</b>Given a game is Done, when the user edits its rating or writes a note, then the status still reads Done.</li>
+<li class="">When the user sets a status on a library card, then the game page shows the same status in the page header and in the phone bottom bar.</li>
+</ul></details>
+</section>
+<section class="req" id="r23">
+  <h3><span>2.3. One-tap status change, with undo</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">One tap to the next status, two taps to any, undo for 5 seconds.</p>
+  <p class="prose">The user can move a game to its natural next status with one tap. The next-step button appears on library cards in both grid and list views, and on the game page:</p>
+<div class="tablewrap"><table class="md"><thead><tr><th>Current status</th><th>One-tap button</th></tr></thead><tbody>
+<tr><td>Want</td><td>Start playing</td></tr>
+<tr><td>Playing</td><td>Mark done</td></tr>
+<tr><td>Done</td><td>Play again</td></tr>
+</tbody></table></div>
+<p class="prose">Any status can be reached in two taps: tap the status control, then tap a status in the picker. Every status change shows a confirmation with <strong>Undo</strong> for 5 seconds. Marking a game Done is the exception — it follows 2.7.</p>
+  <details class="ac"><summary>Acceptance criteria — 7 (0 verified)</summary><ul>
+<li class=""><b>Start playing</b>Given a game is Want, when the user taps &quot;Start playing&quot; on its library card, then the card shows Playing and a confirmation &quot;{Game} is now Playing&quot; with &quot;Undo&quot; appears for 5 seconds.</li>
+<li class=""><b>Play again</b>Given a game is Done, when the user taps &quot;Play again&quot;, then the game shows Playing.</li>
+<li class=""><b>Picker opens directly</b>When the user taps the status control on a grid tile, a list row, the game page, or the phone bottom bar, then the status picker opens directly, without scrolling the page or opening a menu first.</li>
+<li class=""><b>No extra confirmation</b>When the user taps a status in the picker, then the new status is shown immediately, without any further confirmation step.</li>
+<li class=""><b>Undo restores</b>When the user taps &quot;Undo&quot; within 5 seconds of a status change, then the game returns to its previous status and its previous Up Next place.</li>
+<li class=""><b>Undo removes new play</b>Given the user undoes &quot;Start playing&quot; or &quot;Play again&quot;, when they expand History on the game page, then no new play has been added.</li>
+<li class=""><b>Undo with full queue</b>Given the game's previous Up Next place was taken by another game within those 5 seconds and the queue is now full, when the user taps &quot;Undo&quot;, then the game returns to its previous status outside the queue and the user sees: &quot;Up Next is full, so {Game} wasn't put back in the queue.&quot;</li>
+</ul></details>
+</section>
+<section class="req" id="r24">
+  <h3><span>2.4. Up Next queue</span><span class="provrow"><span class="src interview">Interview</span> <span class="src web">Web</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">An ordered Up Next queue of up to 5 Want or Done games.</p>
+  <p class="prose">Up Next is an ordered list of up to <strong>5</strong> games the user intends to play next. It marks a game on top of its status; it is not a status itself.</p>
+<p class="prose">Want and Done games can be in Up Next. A Done game in Up Next is labelled <strong>Replay</strong>; a Want game is labelled <strong>Up Next</strong>.</p>
+<p class="prose">Changing a queued game between Want and Done keeps its place and switches its label.</p>
+<p class="prose">A game that becomes Playing leaves the queue.</p>
+<p class="prose">&quot;Put in Up Next&quot; and &quot;Remove from Up Next&quot; are in the &quot;⋯&quot; menu of every library card and on the game page. They are hidden for Playing games.</p>
+<p class="prose">On the library with the Up Next filter selected, each queued game shows its place number and &quot;Move up&quot; / &quot;Move down&quot; buttons. &quot;Move up&quot; is hidden on the first game and &quot;Move down&quot; on the last. On desktop, games can also be dragged into a new order.</p>
+  <details class="ac"><summary>Acceptance criteria — 13 (0 verified)</summary><ul>
+<li class=""><b>Put in Up Next</b>Given a game is Want or Done and the queue holds fewer than 5 games, when the user taps &quot;Put in Up Next&quot;, then the game appears at the bottom of the queue.</li>
+<li class=""><b>Queue full</b>Given the queue already holds 5 games, when the user taps &quot;Put in Up Next&quot; on another game, then the game is not added and the user sees: &quot;Up Next holds 5 games. Remove one to add this.&quot;</li>
+<li class=""><b>Hidden for Playing</b>Given a game is Playing, when the user opens its &quot;⋯&quot; menu or its game page, then no &quot;Put in Up Next&quot; action is shown.</li>
+<li class=""><b>Numbered order</b>When the user selects the Up Next filter in the library, then the queued games are listed in the user's chosen order, numbered from 1 up to the number of queued games.</li>
+<li class=""><b>Move up/down</b>When the user taps &quot;Move up&quot; or &quot;Move down&quot; on a queued game, then it swaps places with its neighbour, and the new order is still shown after reloading the page.</li>
+<li class=""><b>No move at edges</b>When the user views the first game in the queue, then it has no &quot;Move up&quot; button; when they view the last game, then it has no &quot;Move down&quot; button.</li>
+<li class=""><b>Drag on desktop</b>Given the user is on desktop, when they drag a queued game to a new position, then the queue shows the new order and keeps it after reloading the page.</li>
+<li class=""><b>Edits keep order</b>When the user edits any other detail of a queued game (rating, note, ownership), then the queue order does not change.</li>
+<li class=""><b>Remove from queue</b>When the user taps &quot;Remove from Up Next&quot;, then the game leaves the queue with its status unchanged, and the games below it each move up one place.</li>
+<li class=""><b>Starting leaves queue</b>Given a game is in Up Next, when the user starts playing it, then it shows Playing and is no longer in the queue.</li>
+<li class=""><b>Up Next to Replay</b>Given a Want game is in Up Next, when the user changes it to Done, then it keeps its place and its label changes from &quot;Up Next&quot; to &quot;Replay&quot;.</li>
+<li class=""><b>Dashboard top 3</b>When the user views the dashboard, then the first 3 queued games appear in queue order with a &quot;See all&quot; link, and tapping the link opens the library with the Up Next filter selected.</li>
+<li class=""><b>Empty dashboard</b>Given the queue is empty, when the user views the dashboard, then they see: &quot;Nothing queued yet — put up to 5 games in Up Next.&quot;</li>
+</ul></details>
+</section>
+<section class="req" id="r25">
+  <h3><span>2.5. Owned or not</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">An owned / not-owned marker replaces Wishlist vs Shelf.</p>
+  <p class="prose">Every game carries an &quot;I own it / I don't own it yet&quot; marker. It replaces the old difference between Wishlist and Shelf. The marker stays the same when the status changes. The &quot;Not owned&quot; tag is shown only on Want games, where it matters for deciding what to play or buy. The user changes it from the card's &quot;⋯&quot; menu or the game page.</p>
+  <details class="ac"><summary>Acceptance criteria — 5 (0 verified)</summary><ul>
+<li class=""><b>Owned by default</b>When the user adds a game, then it is marked as owned.</li>
+<li class=""><b>Not owned tag</b>When the user chooses &quot;I don't own it yet&quot; on a Want game, then the game shows a &quot;Not owned&quot; tag on its card and game page.</li>
+<li class=""><b>Marker survives status</b>Given a Want game is marked as not owned, when the user changes it to Playing and later back to Want, then it still shows the &quot;Not owned&quot; tag.</li>
+<li class=""><b>Not owned only toggle</b>Given the Want filter is selected in the library, when the user turns on the &quot;Not owned only&quot; toggle that appears next to the filter, then only Want games marked as not owned are listed.</li>
+<li class=""><b>Private to friends</b>When a friend views the user's profile or activity, then no ownership information is shown.</li>
+</ul></details>
+</section>
+<section class="req" id="r26">
+  <h3><span>2.6. Instant add</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span> <span class="src web">Web</span></span></h3>
+  <p class="oneliner">Four add paths, one behaviour: add as Want, confirm, undo, keep searching.</p>
+  <p class="prose">There are four ways to add a game:</p>
+<p class="prose">the search page;</p>
+<p class="prose">the add dialog, opened by the &quot;Add game&quot; button on the dashboard and in the library;</p>
+<p class="prose">the command palette (⌘K / Ctrl+K);</p>
+<p class="prose">the &quot;Add to library&quot; button on the page of a game the user doesn't have yet.</p>
+<p class="prose">All four behave the same:</p>
+<p class="prose">One tap adds the game as <strong>Want</strong>.</p>
+<p class="prose">A confirmation then shows &quot;Added {Game} to Want&quot;, with &quot;Put in Up Next&quot;, &quot;Undo&quot;, and the optional &quot;why&quot; field of 2.8.</p>
+<p class="prose">The confirmation stays for 8 seconds. It stays longer while the user is typing in the &quot;why&quot; field.</p>
+<p class="prose">Search results appear as the user types.</p>
+<p class="prose">The search stays open after adding, so several games can be added in a row.</p>
+<p class="prose">Steam import is a separate, reviewed flow (2.13) and is not covered here.</p>
+  <details class="ac"><summary>Acceptance criteria — 9 (0 verified)</summary><ul>
+<li class=""><b>Add from search</b>When the user taps &quot;+&quot; next to a search result on the search page, in the add dialog, or in the command palette, then the game is added as Want and the confirmation &quot;Added {Game} to Want&quot; appears with &quot;Put in Up Next&quot; and &quot;Undo&quot;.</li>
+<li class=""><b>Add from game page</b>When the user taps &quot;Add to library&quot; on the page of a game they don't have, then the game is added as Want, the same confirmation appears, and the page shows the game's status control.</li>
+<li class=""><b>Queue from confirmation</b>When the user taps &quot;Put in Up Next&quot; in the confirmation, then the game joins the queue under the rules of 2.4.</li>
+<li class=""><b>Undo add</b>When the user taps &quot;Undo&quot; while the confirmation is visible, then the game is no longer in their library, its queue place is freed, and any &quot;why&quot; answer given in that confirmation is gone.</li>
+<li class=""><b>Confirmation timeout</b>Given the user has not touched the confirmation, when 8 seconds pass, then the confirmation disappears and the game stays in the library.</li>
+<li class=""><b>Live search</b>When the user types a game name in the add dialog, the search page, or the command palette and stops typing, then results appear within 1 second without pressing Enter.</li>
+<li class=""><b>Stays open</b>Given the add dialog or the command palette is open, when the user adds a game, then it stays open, the added result shows &quot;In library&quot;, and the user can add another game.</li>
+<li class=""><b>Already in library</b>Given a game is already in the library, when it appears in search results, then it shows its status (and &quot;Up Next #n&quot; or &quot;Replay&quot; if queued) instead of &quot;+&quot;, and tapping it opens the game page.</li>
+<li class=""><b>Add fails</b>Given the add cannot be saved, when the user taps &quot;+&quot;, then the game is not added and the user sees: &quot;Couldn't add {Game}. Try again.&quot;</li>
+</ul></details>
+</section>
+<section class="req" id="r27">
+  <h3><span>2.7. Done follow-up</span><span class="provrow"><span class="src interview">Interview</span> <span class="src web">Web</span></span></h3>
+  <p class="oneliner">Done applies at once; an optional private follow-up asks how it ended, rating, and what stayed.</p>
+  <p class="prose">Marking a game Done applies immediately and opens a small follow-up with three optional fields:</p>
+<p class="prose">how it ended — <strong>Finished</strong> or <strong>Let go</strong>, neither selected by default;</p>
+<p class="prose">a rating, pre-filled with the game's current rating if it has one;</p>
+<p class="prose">&quot;What stayed with you?&quot;.</p>
+<p class="prose">The follow-up has &quot;Save&quot;, &quot;Skip&quot;, and &quot;Undo&quot;. Closing it (the × button, tapping outside it, or the Escape key) counts as &quot;Skip&quot;. After Save or Skip, the status stays Done. Changing it again uses the normal status control.</p>
+<p class="prose">&quot;How it ended&quot; is private. It is never counted, totalled, or shown to anyone else. The user can change it later from the game page.</p>
+  <details class="ac"><summary>Acceptance criteria — 10 (0 verified)</summary><ul>
+<li class=""><b>Follow-up fields</b>When the user marks a game Done, then the follow-up appears with &quot;Finished&quot; / &quot;Let go&quot; (neither selected), a rating, a &quot;What stayed with you?&quot; field, and &quot;Save&quot;, &quot;Skip&quot; and &quot;Undo&quot; buttons.</li>
+<li class=""><b>Rating pre-filled</b>Given the game already has a rating, when the follow-up opens, then that rating is pre-filled; when the user changes it and taps &quot;Save&quot;, then the new rating replaces the old one everywhere.</li>
+<li class=""><b>Skip and close</b>When the user taps &quot;Skip&quot;, the ×, outside the follow-up, or presses Escape, then the game stays Done and nothing else is recorded.</li>
+<li class=""><b>Undo Done</b>When the user taps &quot;Undo&quot; in the follow-up, then the game returns to its previous status and nothing entered in the follow-up is kept.</li>
+<li class=""><b>What stayed note</b>When the user writes &quot;What stayed with you?&quot; and taps &quot;Save&quot;, then the text appears as a note on the game page under the heading &quot;What stayed with you?&quot;.</li>
+<li class=""><b>How it ended shown</b>When the user picks &quot;Finished&quot; or &quot;Let go&quot; and saves, then the user's own game page shows &quot;Done · Finished&quot; or &quot;Done · Let go&quot;.</li>
+<li class=""><b>Change how it ended</b>Given a game shows &quot;Done · Let go&quot;, when the user changes how it ended to &quot;Finished&quot; on the game page, then the page shows &quot;Done · Finished&quot;.</li>
+<li class=""><b>Hidden from friends</b>When a friend views the user's profile or activity, then they see &quot;Done&quot; without &quot;Finished&quot; or &quot;Let go&quot;.</li>
+<li class=""><b>No counts</b>When the user views their own profile, library, or dashboard, then no count or total of finished or let-go games appears anywhere.</li>
+<li class=""><b>Save fails</b>Given the follow-up cannot be saved, when the user taps &quot;Save&quot;, then the follow-up stays open with what they entered and they see: &quot;Couldn't save. Try again.&quot;</li>
+</ul></details>
+</section>
+<section class="req" id="r28">
+  <h3><span>2.8. Optional prompts</span><span class="provrow"><span class="src interview">Interview</span> <span class="src web">Web</span></span></h3>
+  <p class="oneliner">Two optional prompts at add and Done, answerable later or dismissed.</p>
+  <p class="prose">Two one-line prompts invite reflection at the key moments. Both can be ignored, dismissed, or answered later.</p>
+<p class="prose"><strong>&quot;Why do you want to play this?&quot;</strong> — in the add confirmation, and on the game page of a Want game until it is answered or dismissed.</p>
+<p class="prose"><strong>&quot;What stayed with you?&quot;</strong> — in the Done follow-up, and on the game page of a Done game until it is answered or dismissed for that Done.</p>
+<p class="prose">Each prompt has a &quot;Save&quot; button; pressing Enter also saves. Dismissing a prompt (the × button) hides it for that game. An answer becomes a note headed by its question. Playing games show no prompt.</p>
+  <details class="ac"><summary>Acceptance criteria — 7 (0 verified)</summary><ul>
+<li class=""><b>Why field on add</b>When the user adds a game, then the confirmation shows an optional &quot;Why do you want to play this?&quot; field with a &quot;Save&quot; button.</li>
+<li class=""><b>Ignore leaves no note</b>When the user ignores the field and the confirmation disappears, then the game is in the library with no note.</li>
+<li class=""><b>Answer becomes note</b>When the user types an answer and presses Enter or taps &quot;Save&quot;, then the answer appears as a note on the game page under the heading &quot;Why do you want to play this?&quot;.</li>
+<li class=""><b>Why on Want page</b>Given a Want game has no &quot;why&quot; answer and the prompt was not dismissed, when the user opens its game page, then they see the &quot;Why do you want to play this?&quot; field and can answer it there.</li>
+<li class=""><b>What stayed on Done page</b>Given a Done game has no &quot;What stayed with you?&quot; answer since it last became Done and the prompt was not dismissed, when the user opens its game page, then they see that field and can answer it there.</li>
+<li class=""><b>Dismiss prompt</b>When the user taps × on a prompt on the game page, then the prompt disappears and does not return for that game.</li>
+<li class=""><b>No prompt while Playing</b>When the user opens the game page of a Playing game, then no prompt is shown.</li>
+</ul></details>
+</section>
+<section class="req" id="r29">
+  <h3><span>2.9. Plain notes</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Journal entries are plain private notes with optional time.</p>
+  <p class="prose">All journal entries are plain notes. A note has text and, optionally, time played, entered in hours in half-hour steps. It has no type label, mood, tags, or title, and it is not tied to a playthrough. Logging a session means writing a note with time played in the Log sheet. Notes are private.</p>
+  <details class="ac"><summary>Acceptance criteria — 5 (0 verified)</summary><ul>
+<li class=""><b>No labels or moods</b>When the user views any note on the game page, in the Journal, or in the note view, then no &quot;Quick note&quot; or &quot;Reflection&quot; label, mood, or tag is shown.</li>
+<li class=""><b>Simple compose</b>When the user writes a note from the Log sheet, the &quot;New note&quot; button on a game page, or the Journal, then they see only a text field and an optional time field, with no type, mood, title, or playthrough choice.</li>
+<li class=""><b>Time-only save</b>When the user enters time played without any text, then &quot;Save&quot; is enabled and the note is saved, for any game in the library.</li>
+<li class=""><b>Empty disabled</b>When the user has entered neither text nor time, then &quot;Save&quot; stays disabled.</li>
+<li class=""><b>Private to friends</b>When a friend views the user's profile, then none of the user's notes are visible.</li>
+</ul></details>
+</section>
+<section class="req" id="r210">
+  <h3><span>2.10. Play history instead of playthroughs</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Playthroughs give way to an automatic, read-only play History.</p>
+  <p class="prose">Playthroughs disappear from the main flow. The game page has no Playthroughs panel, timeline, or &quot;add playthrough&quot; form. A collapsed, read-only <strong>History</strong> section lists the game's ended plays, newest first, each with its start date and end date. The play in progress is not listed. Notes stay in the game's notes list, each with its date. Nothing the user recorded before is lost.</p>
+<p class="prose">Play dates are recorded automatically: a play starts on the day the game becomes Playing and ends on the day it leaves Playing. The game's details no longer have separate &quot;started&quot; and &quot;completed&quot; date fields.</p>
+  <details class="ac"><summary>Acceptance criteria — 8 (0 verified)</summary><ul>
+<li class=""><b>No playthrough panel</b>When the user opens a game page, then no Playthroughs panel, playthrough timeline, or &quot;Start a new playthrough&quot; button is shown.</li>
+<li class=""><b>No add playthrough</b>When the user opens a library card's &quot;⋯&quot; menu, then no &quot;Add playthrough&quot; action is shown.</li>
+<li class=""><b>History lists plays</b>Given a game has been played before, when the user expands &quot;History&quot; on its game page, then each ended play is listed with its start and end date, newest first.</li>
+<li class=""><b>No History when unplayed</b>Given a game has no ended plays, when the user opens its game page, then no History section is shown.</li>
+<li class=""><b>Two plays after replay</b>Given a game is Done after one play, when the user taps &quot;Play again&quot; and later marks it Done again, then History lists two plays.</li>
+<li class=""><b>No run picker in Log</b>When the user opens the Log sheet for a game, then no playthrough picker is shown.</li>
+<li class=""><b>Automatic dates</b>Given the user started playing a game on 3 March and marked it Done on 20 March, when they expand History, then that play shows 3 March – 20 March.</li>
+<li class=""><b>No date fields</b>When the user opens a game's details for editing, then there are no &quot;started&quot; or &quot;completed&quot; date fields.</li>
+</ul></details>
+</section>
+<section class="req" id="r211">
+  <h3><span>2.11. One rating per game</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">One rating per game, five stars in half steps.</p>
+  <p class="prose">Each game has at most one rating, shown as up to 5 stars in half-star steps (1 = half a star, 10 = five stars). The user sets it in the Done follow-up or on the game page.</p>
+  <details class="ac"><summary>Acceptance criteria — 3 (0 verified)</summary><ul>
+<li class=""><b>Single rating</b>When the user views a game page, then at most one rating is shown and no &quot;Best rating&quot; label appears.</li>
+<li class=""><b>Half-star display</b>Given the user rates a game 7, when they view its card, then it shows three and a half stars.</li>
+<li class=""><b>Filter uses rating</b>Given the user changes a game's rating on the game page, when they use the library's &quot;Minimum rating&quot; filter (which shows only games rated at or above the chosen stars), then the game is included or excluded according to the new rating.</li>
+</ul></details>
+</section>
+<section class="req" id="r212">
+  <h3><span>2.12. Existing libraries move to the new model</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span> <span class="src web">Web</span></span></h3>
+  <p class="oneliner">Existing libraries convert at release by meaning; nothing is deleted.</p>
+  <p class="prose">When this change is released, every existing library is converted at once. Nothing is deleted.</p>
+<div class="tablewrap"><table class="md"><thead><tr><th>Before</th><th>After</th></tr></thead><tbody>
+<tr><td>Wishlist</td><td>Want, not owned</td></tr>
+<tr><td>Shelf</td><td>Want, owned</td></tr>
+<tr><td>Up Next, never played before</td><td>Want, owned, in Up Next</td></tr>
+<tr><td>Up Next, played before (shown as &quot;Replay&quot;)</td><td>Done, owned, in Up Next (shown as &quot;Replay&quot;)</td></tr>
+<tr><td>Playing</td><td>Playing, owned</td></tr>
+<tr><td>Played</td><td>Done, owned — &quot;Let go&quot; if every earlier playthrough was marked abandoned, otherwise unset</td></tr>
+</tbody></table></div>
+<p class="prose"><strong>Up Next.</strong> Existing Up Next games enter the queue with the most recently edited first. Only the first 5 are queued; the rest keep their new status outside the queue.</p>
+<p class="prose"><strong>Ratings.</strong> Each game keeps its game rating. A game without one takes the highest rating from its earlier playthroughs.</p>
+<p class="prose"><strong>Playthroughs.</strong> Earlier finished or abandoned playthroughs appear as ended plays in History (2.10). An in-progress playthrough becomes the current play of a Playing game.</p>
+<p class="prose"><strong>Notes.</strong> Earlier notes appear as plain notes (2.9).</p>
+<p class="prose"><strong>Explanation.</strong> Existing users see a one-time message explaining Want, Playing, Done and Up Next. Users who sign up after the change do not see it.</p>
+  <details class="ac"><summary>Acceptance criteria — 9 (0 verified)</summary><ul>
+<li class=""><b>Wishlist to Want</b>Given a game was on the Wishlist, when the user opens the library after the change, then it shows Want with the &quot;Not owned&quot; tag.</li>
+<li class=""><b>Shelf to Want</b>Given a game was on the Shelf, when the user opens the library after the change, then it shows Want without the &quot;Not owned&quot; tag.</li>
+<li class=""><b>Played to Done</b>Given a game was Played, when the user opens the library after the change, then it shows Done.</li>
+<li class=""><b>Replay kept</b>Given a game showed &quot;Replay&quot;, when the user opens the Up Next queue after the change, then it is queued and shows &quot;Replay&quot;.</li>
+<li class=""><b>Queue of 7 becomes 5</b>Given 7 games were Up Next, when the user opens the Up Next queue after the change, then the 5 most recently edited are queued in that order (most recent first), and the other 2 show Want or Done outside the queue.</li>
+<li class=""><b>Rating carried</b>Given a game had no game rating but a rated earlier playthrough, when the user opens its page after the change, then it shows the highest such rating as the game's rating.</li>
+<li class=""><b>Playthroughs to History</b>Given a game had two finished playthroughs, when the user expands History after the change, then two ended plays are listed.</li>
+<li class=""><b>One-time message</b>Given an existing user opens the app for the first time after the change, when the page loads, then they see a one-time message explaining Want, Playing, Done and Up Next with a &quot;Got it&quot; button; when they tap &quot;Got it&quot;, then the message does not appear again on any device.</li>
+<li class=""><b>No message for new users</b>When a user who signed up after the change opens the app, then the one-time message does not appear.</li>
+</ul></details>
+</section>
+<section class="req" id="r213">
+  <h3><span>2.13. Other places that show a status</span><span class="provrow"><span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Steam import, activity, search and profile speak the new labels.</p>
+  <p class="prose">Steam import, friends' activity, search results and the profile use the new labels.</p>
+<p class="prose"><strong>Steam import.</strong> The user reviews each imported game and confirms it with a status picker. Picking Done there does not open the follow-up.</p>
+<p class="prose"><strong>Friends' activity.</strong> It shows each game at most once, describing its current status.</p>
+  <details class="ac"><summary>Acceptance criteria — 5 (0 verified)</summary><ul>
+<li class=""><b>Steam picker</b>When the user opens an imported Steam game to add it, then the status picker offers Want, Playing, Done, pre-selected with Playing if Steam reports it was last played within the 7 days before the import, and Want otherwise.</li>
+<li class=""><b>Readable import badge</b>When the user views an imported Steam game card, then its suggested status is shown as a readable label such as &quot;Want&quot;, never in capitals or code form.</li>
+<li class=""><b>Activity lines</b>When a friend views the user's activity, then each line reads &quot;{name} wants to play {Game}&quot;, &quot;{name} is playing {Game}&quot;, or &quot;{name} is done with {Game}&quot;, matching the game's current status.</li>
+<li class=""><b>Undo reflected</b>Given the user undoes a status change, when a friend views the user's activity, then the line shows the restored status.</li>
+<li class=""><b>Profile counts</b>When the user views a profile, then it shows how many games are Want, Playing, and Done, and no &quot;played&quot; or &quot;completed&quot; counts.</li>
+</ul></details>
+</section>
+<section class="req" id="r214">
+  <h3><span>2.14. Failed changes</span><span class="provrow"><span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">A failed change restores the previous state and says so.</p>
+  <p class="prose">Any change that cannot be saved leaves things as they were and says so.</p>
+  <details class="ac"><summary>Acceptance criteria — 1 (0 verified)</summary><ul>
+<li class=""><b>Offline change</b>Given there is no connection, when the user changes a status, puts a game in or out of Up Next, reorders the queue, or changes ownership, then the previous state is shown again and the user sees: &quot;Couldn't save. Try again.&quot;</li>
+</ul></details>
+</section>
+<h2 id="scope">3. Scope and Boundaries</h2>
+<div class="cols"><div><h4>In-Scope</h4><ul><li>The three-status model (Want / Playing / Done) everywhere a status appears.</li>
+<li>Statuses change only when the user chooses; nothing changes them automatically.</li>
+<li>One-tap next-step buttons and undoable status changes on library cards (grid and list), the game page, and the phone bottom bar.</li>
+<li>The ordered Up Next queue (at most 5 games), with reordering, the &quot;Replay&quot; marker, and the top 3 on the dashboard.</li>
+<li>The owned / not-owned marker and the &quot;Not owned only&quot; toggle.</li>
+<li>One add behaviour across the four add paths: add as Want, live search, a confirmation with &quot;Put in Up Next&quot; and Undo, and the search staying open. Plus &quot;Add game&quot; buttons on the dashboard and the library.</li>
+<li>The Done follow-up (private Finished / Let go, rating, &quot;What stayed with you?&quot;) and the &quot;Why do you want to play this?&quot; prompt.</li>
+<li>Plain notes, with time-only logs working for every game.</li>
+<li>A read-only play History replacing playthrough panels, timelines, and forms.</li>
+<li>One rating per game.</li>
+<li>Converting existing libraries, with a one-time explanation.</li>
+<li>New labels in Steam import, friends' activity, search results, and the profile.</li></ul></div>
+<div><h4>Out-of-Scope</h4><ul><li>The &quot;What's Next&quot; home screen beyond the dashboard's top 3 (roadmap Phase 3 #4).</li>
+<li>A soft limit on how many games can be Playing (roadmap #5).</li>
+<li>Reframing Times to Beat and removing &quot;Your Pace&quot; comparisons (roadmap #6).</li>
+<li>Smarter Steam import suggestions beyond the label change and the 7-day rule (roadmap #7).</li>
+<li>Suggestions of what to play next (roadmap #8).</li>
+<li>Wishlist &quot;already waiting&quot; context before buying (roadmap #9).</li>
+<li>Editing or deleting plays in History.</li>
+<li>Sharing notes publicly or with friends; moods, tags, or note titles.</li>
+<li>Ownership from subscriptions and consoles (roadmap Phase 4).</li>
+<li>A welcome tour for new users (spec 013, parked).</li></ul></div></div>
+<h2>Change Log</h2>
+<p>[YYYY-MM-DD] — [source reference] — [what behavior changed and why]</p>
+<footer>
+  This page is a <strong>review lens</strong> — the canonical, normative contract is <code>functional-spec.md</code> in this directory; approvals bind to it, and the technical detail behind the findings lives in <code>research-notes.md</code>.<br>
+  Generated 2026-10-29 from functional-spec.md (89392849c951), status <em>Draft</em> — 90 criteria, 0 verified. Rendered by AWOS (/awos:spec).
+</footer>
+</main>
+<script>
+  function tab(i, el) {
+    document.querySelectorAll('.tabbar button').forEach(function (b, j) { b.classList.toggle('active', j === i); });
+    document.querySelectorAll('.tabpanel').forEach(function (p, j) { p.classList.toggle('active', j === i); });
+  }
+</script>
+</body>
+</html>
