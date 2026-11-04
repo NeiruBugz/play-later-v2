@@ -37,13 +37,3 @@ export class SteamRateLimitError extends UpstreamError {
     this.name = "SteamRateLimitError";
   }
 }
-
-export class SteamProfileNotFoundError extends UpstreamError {
-  constructor(
-    message = "Steam profile not found.",
-    context?: Record<string, unknown>
-  ) {
-    super(message, context);
-    this.name = "SteamProfileNotFoundError";
-  }
-}

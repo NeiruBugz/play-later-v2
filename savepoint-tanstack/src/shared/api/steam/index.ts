@@ -6,16 +6,12 @@
  */
 export {
   fetchOwnedGames,
-  fetchPlayerSummary,
   OwnedGameSchema,
-  PlayerSummarySchemaPublic,
   type OwnedGame,
-  type PlayerSummary,
 } from "./steam-fetch";
 export { verifyOpenIdResponse } from "./openid";
 export {
   SteamApiUnavailableError,
-  SteamProfileNotFoundError,
   SteamProfilePrivateError,
   SteamRateLimitError,
 } from "./errors";

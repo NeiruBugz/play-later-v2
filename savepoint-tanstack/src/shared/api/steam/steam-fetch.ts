@@ -2,17 +2,14 @@
  * Low-level Steam Web API client.
  *
  * Public surface:
- *   - fetchPlayerSummary(steamId64) — GetPlayerSummaries/v2
- *   - fetchOwnedGames(steamId64)    — GetOwnedGames/v1
+ *   - fetchOwnedGames(steamId64) — GetOwnedGames/v1
  *
- * Error mapping (each function):
+ * Error mapping:
  *   - 401 / 403 / other 4xx (not 429)        → UpstreamError (generic — bad key or unknown 4xx)
  *   - 429                                     → SteamRateLimitError
  *   - 5xx / network failure                   → SteamApiUnavailableError
  *   - Zod parse failure                       → UpstreamError (schema drift)
- *   - GetPlayerSummaries: empty players       → SteamProfileNotFoundError
- *   - GetPlayerSummaries: visibility !== 3    → SteamProfilePrivateError
- *   - GetOwnedGames: game_count>0 && no games → SteamProfilePrivateError
+ *   - game_count>0 && no games                → SteamProfilePrivateError
  *
  * Uses `globalThis.fetch` so tests can `vi.stubGlobal("fetch", ...)` — same
  * convention as `shared/api/igdb/fetch.ts`.
@@ -25,7 +22,6 @@ import { UpstreamError } from "@/shared/lib/errors";
 
 import {
   SteamApiUnavailableError,
-  SteamProfileNotFoundError,
   SteamProfilePrivateError,
   SteamRateLimitError,
 } from "./errors";
@@ -33,23 +29,6 @@ import {
 const logger = createLogger({ service: "steam-fetch" });
 
 const STEAM_BASE_URL = "https://api.steampowered.com";
-
-const PlayerSummarySchema = z.object({
-  steamid: z.string(),
-  personaname: z.string(),
-  profileurl: z.string(),
-  avatarfull: z.string(),
-  communityvisibilitystate: z.number(),
-  profilestate: z.number().optional(),
-  lastlogoff: z.number().optional(),
-  commentpermission: z.number().optional(),
-});
-
-const PlayerSummariesResponseSchema = z.object({
-  response: z.object({
-    players: z.array(PlayerSummarySchema),
-  }),
-});
 
 const OwnedGameRawSchema = z.object({
   appid: z.number(),
@@ -82,16 +61,7 @@ export const OwnedGameSchema = z.object({
   rtimeLastPlayed: z.number().nullable(),
 });
 
-export const PlayerSummarySchemaPublic = z.object({
-  steamId64: z.string(),
-  displayName: z.string(),
-  profileUrl: z.string(),
-  avatarUrl: z.string(),
-  isPublic: z.boolean(),
-});
-
 export type OwnedGame = z.infer<typeof OwnedGameSchema>;
-export type PlayerSummary = z.infer<typeof PlayerSummarySchemaPublic>;
 
 /**
  * Map an HTTP non-2xx (or network failure) to the appropriate AppError
@@ -134,52 +104,6 @@ async function safeFetch(url: string, resource: string): Promise<Response> {
   } catch (err) {
     throwHttpError(resource, { cause: (err as Error)?.message });
   }
-}
-
-export async function fetchPlayerSummary(
-  steamId64: string
-): Promise<PlayerSummary> {
-  const resource = "/ISteamUser/GetPlayerSummaries/v2/";
-  const url = new URL(`${STEAM_BASE_URL}${resource}`);
-  url.searchParams.set("key", env.STEAM_API_KEY);
-  url.searchParams.set("steamids", steamId64);
-
-  const res = await safeFetch(url.toString(), resource);
-  if (!res.ok) {
-    throwHttpError(resource, { steamId64 }, res.status);
-  }
-
-  const json = await res.json();
-  const parsed = PlayerSummariesResponseSchema.safeParse(json);
-  if (!parsed.success) {
-    logger.error(
-      { resource, steamId64, issues: parsed.error.issues },
-      "Steam response schema mismatch"
-    );
-    throw new UpstreamError("Steam response schema mismatch", {
-      resource,
-      steamId64,
-    });
-  }
-
-  const players = parsed.data.response.players;
-  if (players.length === 0) {
-    throw new SteamProfileNotFoundError(undefined, { steamId64 });
-  }
-
-  const player = players[0];
-  const isPublic = player.communityvisibilitystate === 3;
-  if (!isPublic) {
-    throw new SteamProfilePrivateError(undefined, { steamId64 });
-  }
-
-  return {
-    steamId64: player.steamid,
-    displayName: player.personaname,
-    profileUrl: player.profileurl,
-    avatarUrl: player.avatarfull,
-    isPublic,
-  };
 }
 
 export async function fetchOwnedGames(steamId64: string): Promise<OwnedGame[]> {
