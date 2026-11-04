@@ -1,7 +1,10 @@
+import type { NotePrompt } from "../prompt-question";
+
 export type JournalEntryCardEntry = {
   id: string;
   content: string;
   playedMinutes: number | null;
+  prompt?: NotePrompt | null;
   createdAt: Date;
   game: {
     id: string;

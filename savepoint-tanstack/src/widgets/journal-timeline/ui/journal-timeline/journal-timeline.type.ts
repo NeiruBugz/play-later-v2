@@ -1,7 +1,10 @@
+import type { NotePrompt } from "@/entities/journal-entry";
+
 export type JournalTimelineEntry = {
   id: string;
   content: string;
   playedMinutes: number | null;
+  prompt?: NotePrompt | null;
   createdAt: Date;
   game: {
     id: string;

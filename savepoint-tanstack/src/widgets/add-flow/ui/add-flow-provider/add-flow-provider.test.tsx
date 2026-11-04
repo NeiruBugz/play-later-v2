@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   setStatusFn: vi.fn(),
   undoStatusFn: vi.fn(),
   addToUpNextFn: vi.fn(),
+  answerPromptFn: vi.fn(),
   invalidate: vi.fn(),
 }));
 
@@ -73,6 +74,9 @@ vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
 }));
 vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
   undoStatusFn: mocks.undoStatusFn,
+}));
+vi.mock("@/features/library-prompts/api/answer-prompt-fn", () => ({
+  answerPromptFn: mocks.answerPromptFn,
 }));
 vi.mock("@/features/up-next/api/add-to-up-next-fn", () => ({
   addToUpNextFn: mocks.addToUpNextFn,
@@ -188,6 +192,7 @@ describe("AddFlowProvider", () => {
       queueRestored: true,
     });
     mocks.addToUpNextFn.mockResolvedValue({ position: 1 });
+    mocks.answerPromptFn.mockResolvedValue({ noteId: "n1" });
   });
 
   describe.each(entryPoints)("from $name", (entryPoint) => {
@@ -223,6 +228,24 @@ describe("AddFlowProvider", () => {
       await actions.tap("Put in Up Next");
       expect(mocks.addToUpNextFn).toHaveBeenCalledWith({ data: { id: 11 } });
       expect(await elements.findText("Up Next #1")).toBeDefined();
+    });
+
+    it("saves the why answer as a WHY note for the added item", async () => {
+      await userEvent.type(
+        await screen.findByLabelText("Why do you want to play this?"),
+        "Heard it is great{Enter}"
+      );
+      expect(mocks.answerPromptFn).toHaveBeenCalledWith({
+        data: { id: 11, kind: "WHY", text: "Heard it is great" },
+      });
+      await waitFor(() =>
+        expect(elements.queryText("Added Hades to Want")).toBeNull()
+      );
+    });
+
+    it("saves nothing when the why field is ignored", async () => {
+      await elements.findText("Added Hades to Want");
+      expect(mocks.answerPromptFn).not.toHaveBeenCalled();
     });
 
     it("undoes the add", async () => {

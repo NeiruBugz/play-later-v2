@@ -137,4 +137,20 @@ describe("GameNotesList", () => {
       expect(onNewNote).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("given a note that answers a prompt", () => {
+    it.each([
+      ["WHY", "Why do you want to play this?"],
+      ["STAYED", "What stayed with you?"],
+    ] as const)("heads a %s answer with its question", (prompt, question) => {
+      render(
+        <GameNotesList
+          onNewNote={onNewNote}
+          notes={[makeNote({ id: "p", content: "My answer", prompt })]}
+        />
+      );
+      expect(screen.getByText(question)).toBeDefined();
+      expect(screen.getByText("My answer")).toBeDefined();
+    });
+  });
 });

@@ -35,6 +35,7 @@ function JournalEntryDetailRoute() {
           id: entry.id,
           content: entry.content,
           playedMinutes: entry.playedMinutes,
+          prompt: entry.prompt,
           createdAt: entry.createdAt,
           game: entry.game
             ? {

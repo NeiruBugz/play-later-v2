@@ -178,3 +178,16 @@ describe("JournalTimeline", () => {
     });
   });
 });
+
+describe("JournalTimeline with a prompt answer", () => {
+  it("heads the note card with its question", () => {
+    render(
+      <JournalTimeline
+        entries={[makeEntry({ content: "Heard it is great", prompt: "WHY" })]}
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "Why do you want to play this?" })
+    ).toBeDefined();
+  });
+});

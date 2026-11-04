@@ -98,3 +98,18 @@ describe("JournalEntryPage with time and no text", () => {
     expect(screen.getByText("1.5 h played")).toBeDefined();
   });
 });
+
+describe("JournalEntryPage with a prompt answer", () => {
+  it.each([
+    ["WHY", "Why do you want to play this?"],
+    ["STAYED", "What stayed with you?"],
+  ] as const)("heads a %s answer with its question", (prompt, question) => {
+    render(<JournalEntryPage entry={{ ...entry, prompt }} />);
+    expect(screen.getByRole("heading", { name: question })).toBeDefined();
+  });
+
+  it("shows no question heading on a plain note", () => {
+    render(<JournalEntryPage entry={{ ...entry, prompt: null }} />);
+    expect(screen.queryByText("What stayed with you?")).toBeNull();
+  });
+});

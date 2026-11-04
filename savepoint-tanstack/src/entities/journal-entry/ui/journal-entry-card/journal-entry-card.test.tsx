@@ -168,4 +168,19 @@ describe("JournalEntryCard", () => {
       expect(onSelect).not.toHaveBeenCalled();
     });
   });
+
+  describe("given a note that answers a prompt", () => {
+    it.each([
+      ["WHY", "Why do you want to play this?"],
+      ["STAYED", "What stayed with you?"],
+    ] as const)("heads a %s answer with its question", (prompt, question) => {
+      render(<JournalEntryCard entry={{ ...entry, prompt }} />);
+      expect(screen.getByRole("heading", { name: question })).toBeDefined();
+    });
+
+    it("shows no question heading on a plain note", () => {
+      render(<JournalEntryCard entry={{ ...entry, prompt: null }} />);
+      expect(screen.queryByText("Why do you want to play this?")).toBeNull();
+    });
+  });
 });

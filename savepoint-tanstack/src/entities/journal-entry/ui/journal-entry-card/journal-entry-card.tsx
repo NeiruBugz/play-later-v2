@@ -4,6 +4,7 @@ import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/card";
 
+import { PROMPT_QUESTION } from "../prompt-question";
 import type { JournalEntryCardProps } from "./journal-entry-card.type";
 
 /**
@@ -48,6 +49,10 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           {writtenOn}
         </time>
       </div>
+
+      {entry.prompt ? (
+        <h4 className="text-sm font-medium">{PROMPT_QUESTION[entry.prompt]}</h4>
+      ) : null}
 
       {content ? (
         <p className="text-body text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-wrap md:italic">

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
@@ -50,6 +51,10 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
           {formatJournalDate(entry.createdAt)}
         </time>
       </p>
+
+      {entry.prompt ? (
+        <h2 className="text-h3">{PROMPT_QUESTION[entry.prompt]}</h2>
+      ) : null}
 
       {timePlayed ? (
         <p className="text-h3 font-mono">{timePlayed} played</p>

@@ -74,6 +74,9 @@ export function useAddGame({
               ? () => followUps.putInUpNext(item, applyChange)
               : undefined
           }
+          onSaveWhy={
+            followUps ? (text) => followUps.saveWhy(item, text) : undefined
+          }
           onUndo={created ? () => undo(item.libraryItemId) : undefined}
           onDismiss={() => toast.dismiss(toastId)}
         />

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -55,6 +56,11 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
                     <span>{formatHours(note.playedMinutes)}</span>
                   ) : null}
                 </span>
+                {note.prompt ? (
+                  <span className="text-sm font-medium">
+                    {PROMPT_QUESTION[note.prompt]}
+                  </span>
+                ) : null}
                 <span className="line-clamp-2 text-sm leading-snug">
                   {noteText(note)}
                 </span>

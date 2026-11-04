@@ -21,6 +21,8 @@ export type AddFollowUps = {
     item: AddedItem,
     applyChange: ApplyLibraryChange
   ) => Promise<boolean>;
+  /** Saves the optional "why" answer as a note; resolves false when it failed. */
+  saveWhy: (item: AddedItem, text: string) => Promise<boolean>;
 };
 
 export type AddableGame = {

@@ -24,6 +24,7 @@ vi.mock("../../api/undo-add-game-fn", () => ({
 const followUps: AddFollowUps = {
   startPlaying: vi.fn(),
   putInUpNext: vi.fn(),
+  saveWhy: vi.fn(),
 };
 
 const elements = {

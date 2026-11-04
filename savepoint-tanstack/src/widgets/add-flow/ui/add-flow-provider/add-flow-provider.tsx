@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { AddFollowUpsProvider } from "@/features/add-game/model/add-follow-ups-context";
 import type { AddFollowUps } from "@/features/add-game/model/add-game.type";
+import { answerPromptFn } from "@/features/library-prompts/api/answer-prompt-fn";
 import { changeStatusWithUndo } from "@/features/manage-library-entry/model/change-status-with-undo";
 import { addToUpNextFn } from "@/features/up-next/api/add-to-up-next-fn";
 import { getUserFacingErrorMessage } from "@/shared/lib/user-facing-error";
@@ -12,7 +13,8 @@ import type { AddFlowProviderProps } from "./add-flow-provider.type";
 
 /**
  * Wires the add confirmation's follow-ups to manage-library-entry (status
- * change with its own 5 s Undo, spec 2.3) and up-next (queue rules, spec 2.4).
+ * change with its own 5 s Undo, spec 2.3), up-next (queue rules, spec 2.4) and
+ * library-prompts (the optional "why" answer, spec 2.8).
  * The add-game feature cannot import either sibling feature, so the wiring
  * lives here and is mounted once at the root.
  */
@@ -46,6 +48,18 @@ export function AddFlowProvider({ children }: AddFlowProviderProps) {
           });
           applyChange({ upNextPosition: result.position });
           toast(`${item.gameTitle} is in Up Next`);
+          void router.invalidate();
+          return true;
+        } catch (error) {
+          toast.error(getUserFacingErrorMessage(error));
+          return false;
+        }
+      },
+      saveWhy: async (item, text) => {
+        try {
+          await answerPromptFn({
+            data: { id: item.libraryItemId, kind: "WHY", text },
+          });
           void router.invalidate();
           return true;
         } catch (error) {
