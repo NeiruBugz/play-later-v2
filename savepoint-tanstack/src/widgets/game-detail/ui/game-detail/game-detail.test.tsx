@@ -1,8 +1,10 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
+import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
 import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
 import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
@@ -30,6 +32,10 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("@/shared/lib/use-media-query", () => ({
   useIsDesktop: vi.fn(() => true),
+}));
+
+vi.mock("@/features/add-game/api/search-games-fn", () => ({
+  searchGamesFn: vi.fn(),
 }));
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
@@ -85,6 +91,22 @@ vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
   setStatusFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
+  undoStatusFn: vi.fn(),
+}));
+
+vi.mock("@/features/up-next/api/add-to-up-next-fn", () => ({
+  addToUpNextFn: vi.fn(),
+}));
+
+vi.mock("@/features/up-next/api/remove-from-up-next-fn", () => ({
+  removeFromUpNextFn: vi.fn(),
+}));
+
+vi.mock("sonner", () => ({
+  toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn() }),
+}));
+
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
   igdbId: 1234,
@@ -137,15 +159,29 @@ const elements = {
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
   queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
   queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
-  // Both the hero (md:hidden) and the desktop rail render a LibraryStatusSwitcher
-  // when a viewer is signed in, so these use queryAll and return the first match.
+  // The hero (md:hidden), the desktop rail and the phone action bar each render
+  // a status pill when a viewer is signed in, so these use queryAll.
   queryStatusPill: () =>
-    screen.queryAllByRole("button", { name: /^Change library status:/ })[0] ??
+    screen.queryAllByRole("button", { name: /^Status: .*\. Change$/ })[0] ??
     null,
+  queryStatusPillsNamed: (label: string) =>
+    screen.queryAllByRole("button", { name: `Status: ${label}. Change` }),
+  getHeaderStatusPill: (label: string) =>
+    within(screen.getByRole("main")).getAllByRole("button", {
+      name: `Status: ${label}. Change`,
+    })[0]!,
+  getActionBarStatusPill: (label: string) =>
+    within(screen.getByTestId("game-detail-action-bar")).getByRole("button", {
+      name: `Status: ${label}. Change`,
+    }),
+  getStatusRadio: (label: string) => screen.getByRole("radio", { name: label }),
+  getStatusRadios: () => screen.getAllByRole("radio"),
+  getNextStepButton: (label: string) =>
+    screen.getAllByRole("button", { name: label })[0]!,
   queryAddToLibrary: () =>
     screen.queryAllByRole("button", { name: "Add to library" })[0] ?? null,
   queryStatusSwitcher: () =>
-    screen.queryAllByTestId("library-status-switcher")[0] ?? null,
+    screen.queryAllByTestId("game-library-controls")[0] ?? null,
   queryMoreMenuTrigger: () =>
     screen.queryAllByRole("button", { name: "More library actions" })[0] ??
     null,
@@ -190,6 +226,46 @@ const PRECEDING = Node.DOCUMENT_POSITION_PRECEDING;
 const precedes = (first: Element, second: Element): boolean =>
   Boolean(second.compareDocumentPosition(first) & PRECEDING);
 
+describe("GameDetail Up Next", () => {
+  const renderWith = (overrides: Partial<LibraryItem>) =>
+    render(
+      <GameDetail
+        data={buildData(
+          buildLibraryItem({ id: 42, platform: "PC", ...overrides })
+        )}
+        viewerUserId="user-1"
+      />
+    );
+
+  const getPutIn = () =>
+    screen.queryAllByRole("button", { name: "Put in Up Next" })[0] ?? null;
+  const getRemoveFrom = () =>
+    screen.queryAllByRole("button", { name: "Remove from Up Next" })[0] ?? null;
+
+  it("offers Put in Up Next for a Want game", () => {
+    renderWith({ status: "WANT" });
+    expect(getPutIn()).not.toBeNull();
+  });
+
+  it("shows the Up Next marker and Remove for a queued Want game", () => {
+    renderWith({ status: "WANT", upNextPosition: 2 });
+    expect(screen.getAllByText("Up Next #2").length).toBeGreaterThan(0);
+    expect(getRemoveFrom()).not.toBeNull();
+  });
+
+  it("shows Replay for a queued Done game", () => {
+    renderWith({ status: "DONE", upNextPosition: 1 });
+    expect(screen.getAllByText("Replay").length).toBeGreaterThan(0);
+  });
+
+  it("offers no Up Next action and no marker for a Playing game", () => {
+    renderWith({ status: "PLAYING", upNextPosition: null });
+    expect(getPutIn()).toBeNull();
+    expect(getRemoveFrom()).toBeNull();
+    expect(screen.queryByTestId("queue-marker")).toBeNull();
+  });
+});
+
 describe("GameDetail", () => {
   describe("given an anonymous viewer with no slots", () => {
     beforeEach(() => {
@@ -214,7 +290,7 @@ describe("GameDetail", () => {
       expect(elements.queryPlatformsLabel()).toBeNull();
     });
 
-    it("does not render the status switcher or Journal panel for anonymous viewers", () => {
+    it("does not render the library controls or Journal panel for anonymous viewers", () => {
       expect(elements.queryStatusSwitcher()).toBeNull();
       expect(elements.queryJournalHeading()).toBeNull();
     });
@@ -306,7 +382,7 @@ describe("GameDetail", () => {
 
     it("shows a status pill reflecting the current status", () => {
       expect(elements.queryStatusPill()).toHaveAccessibleName(
-        "Change library status: Playing"
+        "Status: Playing. Change"
       );
     });
 
@@ -1029,9 +1105,9 @@ describe("GameDetail", () => {
         expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
       });
 
-      it("renders the status switcher inside the detail rail", () => {
+      it("renders the library controls inside the detail rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
-        const switcher = within(rail).queryByTestId("library-status-switcher");
+        const switcher = within(rail).queryByTestId("game-library-controls");
         expect(switcher).not.toBeNull();
       });
 
@@ -1156,6 +1232,118 @@ describe("GameDetail", () => {
             Node.DOCUMENT_POSITION_PRECEDING
           )
         ).toBe(true);
+      });
+    });
+  });
+
+  describe("given a signed-in viewer with a played game (earlier plays)", () => {
+    const earlierRun: PlaythroughWithEntries = {
+      id: "pt-earlier",
+      ordinal: 1,
+      kind: "FIRST",
+      status: "FINISHED",
+      platform: null,
+      startedAt: null,
+      finishedAt: null,
+      playtimeMinutes: 600,
+      rating: null,
+      completion: null,
+      notes: null,
+      journalEntries: [],
+      libraryItemId: 42,
+      libraryItem: undefined as never,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    };
+
+    const renderGame = (status: "WANT" | "PLAYING") =>
+      render(
+        <GameDetail
+          data={{
+            ...buildData(buildLibraryItem({ id: 42, status })),
+            playthroughs: [earlierRun],
+          }}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+
+    beforeEach(() => {
+      vi.mocked(setStatusFn).mockReset();
+      vi.mocked(toast.error).mockReset();
+    });
+
+    describe("when the header pill is tapped", () => {
+      beforeEach(async () => {
+        renderGame("PLAYING");
+        await userEvent.click(elements.getHeaderStatusPill("Playing"));
+      });
+
+      it("opens a picker with Want, Playing and Done", () => {
+        expect(
+          elements.getStatusRadios().map((radio) => radio.textContent)
+        ).toEqual(["Want", "Playing", "Done"]);
+      });
+
+      describe("and Done is picked", () => {
+        beforeEach(async () => {
+          vi.mocked(setStatusFn).mockResolvedValue({
+            status: "DONE",
+            upNextPosition: null,
+            undo: {} as never,
+          });
+          await userEvent.click(elements.getStatusRadio("Done"));
+        });
+
+        it("shows Done in the header pill", async () => {
+          await waitFor(() => {
+            expect(elements.getHeaderStatusPill("Done")).toBeDefined();
+          });
+        });
+
+        it("shows Done in the phone action bar pill", async () => {
+          await waitFor(() => {
+            expect(elements.getActionBarStatusPill("Done")).toBeDefined();
+          });
+        });
+      });
+    });
+
+    describe("when Start playing is tapped on a Want game", () => {
+      beforeEach(async () => {
+        vi.mocked(setStatusFn).mockResolvedValue({
+          status: "PLAYING",
+          upNextPosition: null,
+          undo: {} as never,
+        });
+        renderGame("WANT");
+        await userEvent.click(elements.getNextStepButton("Start playing"));
+      });
+
+      it("shows Playing in the header and the phone action bar", async () => {
+        await waitFor(() => {
+          expect(elements.getHeaderStatusPill("Playing")).toBeDefined();
+          expect(elements.getActionBarStatusPill("Playing")).toBeDefined();
+        });
+      });
+    });
+
+    describe("when saving the status fails", () => {
+      beforeEach(async () => {
+        vi.mocked(setStatusFn).mockRejectedValue(new Error("boom"));
+        renderGame("PLAYING");
+        await userEvent.click(elements.getHeaderStatusPill("Playing"));
+        await userEvent.click(elements.getStatusRadio("Done"));
+      });
+
+      it("keeps the previous status in the header and the phone bar", async () => {
+        await waitFor(() => {
+          expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
+            "Couldn't save. Try again."
+          );
+        });
+        expect(elements.getHeaderStatusPill("Playing")).toBeDefined();
+        expect(elements.getActionBarStatusPill("Playing")).toBeDefined();
       });
     });
   });

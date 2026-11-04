@@ -1,7 +1,8 @@
 import { Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import type { SearchResponseItem } from "@/shared/api/igdb";
+import { QueueMarker } from "@/entities/library-item";
+import type { LibraryAwareSearchItem as SearchResultGame } from "@/entities/library-item/api/search-library-aware-games.worker";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
@@ -10,7 +11,7 @@ import { searchGamesFn } from "../../api/search-games-fn";
 import { QuickAddButton } from "../quick-add-button";
 import type { AddGameContentProps } from "./add-game-content.type";
 
-function SearchResultRow({ game }: { game: SearchResponseItem }) {
+function SearchResultRow({ game }: { game: SearchResultGame }) {
   const coverUrl = buildCoverImageUrl(
     game.cover?.image_id ?? null,
     "t_cover_small"
@@ -39,6 +40,12 @@ function SearchResultRow({ game }: { game: SearchResponseItem }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{game.name}</p>
+        {game.library ? (
+          <QueueMarker
+            status={game.library.status}
+            upNextPosition={game.library.upNextPosition}
+          />
+        ) : null}
         {releaseYear !== null ? (
           <p className="text-muted-foreground text-xs tabular-nums">
             {releaseYear}
@@ -54,7 +61,7 @@ function SearchResultRow({ game }: { game: SearchResponseItem }) {
 
 export function AddGameContent({ onAdded }: AddGameContentProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResponseItem[] | null>(null);
+  const [results, setResults] = useState<SearchResultGame[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searched, setSearched] = useState(false);
 

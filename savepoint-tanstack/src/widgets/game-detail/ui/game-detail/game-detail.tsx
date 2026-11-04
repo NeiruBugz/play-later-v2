@@ -8,6 +8,7 @@ import {
   ComposeJournalEntryDialog,
   LogSessionDrawer,
 } from "@/features/compose-journal-entry";
+import { useSetStatus } from "@/features/manage-library-entry";
 import {
   AddEditPlaythroughDrawer,
   type PlaythroughFormValues,
@@ -24,9 +25,9 @@ import { AddToTrackInvite } from "../add-to-track-invite";
 import { GameDetailActionBar } from "../game-detail-action-bar";
 import { GameDetailDetailRail } from "../game-detail-detail-rail";
 import { GameDetailJumpSpine } from "../game-detail-jump-spine";
+import { GameLibraryControls } from "../game-library-controls";
 import { JournalFeed } from "../journal-feed";
 import { JournalPanel } from "../journal-panel";
-import { LibraryStatusSwitcher } from "../library-status-switcher";
 import { PlaythroughsPanel } from "../playthroughs-panel";
 import { RelatedPanel } from "../related-panel";
 import { ScreenshotsPanel } from "../screenshots-panel";
@@ -147,12 +148,21 @@ export function GameDetail({
     showRelatedPanel && { id: "related", label: "Related" },
   ].filter((s): s is { id: string; label: string } => Boolean(s));
 
-  const statusSwitcherProps =
+  const libraryStatus = useSetStatus({
+    id: libraryEntry?.id ?? 0,
+    gameTitle: game.title,
+    status: libraryEntry?.status ?? "WANT",
+    upNextPosition: libraryEntry?.upNextPosition ?? null,
+  });
+  const sharedLibraryStatus = isInLibrary ? libraryStatus : null;
+
+  const libraryControlsProps =
     viewerUserId !== null
       ? {
           igdbId: game.igdbId,
           gameTitle: game.title,
           entry: libraryEntry,
+          libraryStatus: sharedLibraryStatus,
         }
       : null;
 
@@ -400,13 +410,11 @@ export function GameDetail({
               ) : null}
             </div>
 
-            {viewerUserId !== null ? (
+            {libraryControlsProps !== null ? (
               <div className="md:hidden">
-                <LibraryStatusSwitcher
+                <GameLibraryControls
                   key={game.igdbId}
-                  igdbId={game.igdbId}
-                  gameTitle={game.title}
-                  entry={libraryEntry}
+                  {...libraryControlsProps}
                 />
               </div>
             ) : null}
@@ -439,8 +447,8 @@ export function GameDetail({
           {/* Sticky detail rail — desktop only, CSS-hidden on mobile */}
           <div className="hidden md:block">
             <GameDetailDetailRail
-              statusSwitcherProps={statusSwitcherProps}
-              statusSwitcherKey={String(game.igdbId)}
+              libraryControlsProps={libraryControlsProps}
+              libraryControlsKey={String(game.igdbId)}
               onLogSession={openLogSession}
               criticScore={criticScore}
               playtimeTotalMinutes={playtimeTotalMinutes}
@@ -501,13 +509,8 @@ export function GameDetail({
       {gameSlug ? (
         <GameDetailActionBar
           gameSlug={gameSlug}
-          gameStatus={libraryEntry?.status ?? null}
+          libraryStatus={sharedLibraryStatus}
           viewerUserId={viewerUserId}
-          onStatusClick={() => {
-            document
-              .getElementById("hero")
-              ?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
         />
       ) : null}
     </main>

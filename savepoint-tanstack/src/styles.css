@@ -1,19 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  /* Single source for the phone bottom nav's total height; the nav sizes
+     itself with it and the game-detail action bar sits on top of it. */
+  --bottom-nav-height: calc(4rem + env(safe-area-inset-bottom));
+}
+
 /* Bottom-nav spacing utilities. */
 @layer utilities {
-  /* Home-indicator inset for FIXED bottom bars (bottom nav, game-detail action
-     bar) — pads their own content up off the iOS home indicator. */
-  .pb-safe-nav {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-
   /* Content clearance for the scrolling page so its last rows aren't hidden
      behind the fixed bottom nav (~4rem tall). Reset to 0 on desktop where the
      nav is replaced by the sidebar. Applied to <main> by AppShell. */
   .pb-bottom-nav {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--bottom-nav-height) + 0.5rem);
   }
   @media (min-width: 48rem) {
     .pb-bottom-nav {

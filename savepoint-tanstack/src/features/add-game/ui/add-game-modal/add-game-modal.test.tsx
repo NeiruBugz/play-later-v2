@@ -34,6 +34,7 @@ const GAME_A = {
   slug: "hollow-knight",
   cover: { image_id: "hk_cover" },
   first_release_date: 1488326400,
+  library: null,
 };
 
 const GAME_B = {
@@ -42,10 +43,11 @@ const GAME_B = {
   slug: "hollow-knight-silksong",
   cover: null,
   first_release_date: null,
+  library: null,
 };
 
-const STUB_SEARCH_RESULT = { games: [GAME_A, GAME_B], count: 2 };
-const STUB_EMPTY_RESULT = { games: [], count: 0 };
+const STUB_SEARCH_RESULT = { games: [GAME_A, GAME_B], count: 2, ownedCount: 0 };
+const STUB_EMPTY_RESULT = { games: [], count: 0, ownedCount: 0 };
 
 const onAdded = vi.fn();
 

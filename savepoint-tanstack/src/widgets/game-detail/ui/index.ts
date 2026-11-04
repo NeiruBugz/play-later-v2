@@ -17,8 +17,11 @@ export { JournalFeed } from "./journal-feed";
 export type { JournalFeedProps } from "./journal-feed";
 export { JournalPanel } from "./journal-panel";
 export type { JournalPanelProps } from "./journal-panel";
-export { LibraryStatusSwitcher } from "./library-status-switcher";
-export type { LibraryStatusSwitcherProps } from "./library-status-switcher";
+export { GameLibraryControls } from "./game-library-controls";
+export type {
+  GameLibraryControlsProps,
+  LibraryStatusState,
+} from "./game-library-controls";
 export { PlaythroughsPanel } from "./playthroughs-panel";
 export type { PlaythroughsPanelProps } from "./playthroughs-panel";
 export { RelatedPanel } from "./related-panel";

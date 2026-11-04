@@ -1,10 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { Toaster } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
+import type { SetStatusResult } from "@/features/manage-library-entry/api/set-status-fn.worker";
+import { DropdownMenu, DropdownMenuContent } from "@/shared/ui/dropdown-menu";
 
 import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { LibraryItemCard } from "./library-item-card";
@@ -43,8 +46,33 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
-  setStatusFn: vi.fn().mockResolvedValue({}),
+  setStatusFn: vi.fn(),
 }));
+
+vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
+  undoStatusFn: vi.fn(),
+}));
+
+vi.mock("@/features/up-next/api/add-to-up-next-fn", () => ({
+  addToUpNextFn: vi.fn(),
+}));
+vi.mock("@/features/up-next/api/remove-from-up-next-fn", () => ({
+  removeFromUpNextFn: vi.fn(),
+}));
+
+vi.mock("@/shared/lib/use-media-query", () => ({ useIsDesktop: () => true }));
+
+const statusResult = (
+  status: "WANT" | "PLAYING" | "DONE"
+): SetStatusResult => ({
+  status,
+  upNextPosition: null,
+  undo: {
+    snapshot: {},
+    createdPlayId: null,
+    closedPlayId: null,
+  } as unknown as SetStatusResult["undo"],
+});
 
 // The platform chip renders the abbreviation/icon inside a Badge <div> that
 // carries the variant classes. Walking to the nearest classed ancestor reaches
@@ -83,7 +111,11 @@ const elements = {
     screen.queryByAltText(`Cover for ${title}`),
   queryCoverPlaceholder: (title: string) =>
     screen.queryByRole("img", { name: `Cover for ${title}` }),
-  getStatusText: (label: string) => screen.getByText(label),
+  getStatusBadge: (label: string) => screen.getByLabelText(`Status: ${label}`),
+  getStatusControl: (label: string) =>
+    screen.getByRole("button", { name: `Status: ${label}. Change` }),
+  getNextStep: (name: string) => screen.getByRole("button", { name }),
+  getPickerOption: (name: string) => screen.getByRole("radio", { name }),
   queryMenuButton: () => screen.queryByRole("button", { name: "menu-trigger" }),
   queryAcquisitionChip: (label: string) => screen.queryByText(label),
   queryLifecycleTrack: () => screen.queryByTestId("lifecycle-strip-track"),
@@ -162,7 +194,7 @@ describe("LibraryItemCard", () => {
       "renders %s as the human label %s (overlaid on the cover)",
       (status, label) => {
         render(<LibraryItemCard item={buildItem({ status })} />);
-        expect(elements.getStatusText(label)).toBeDefined();
+        expect(elements.getStatusBadge(label)).toBeDefined();
       }
     );
   });
@@ -251,19 +283,102 @@ describe("LibraryItemCard", () => {
       });
     });
 
-    describe("when the next-step CTA is clicked on a WANT item", () => {
+    describe("when the next-step button is tapped on a WANT item", () => {
       beforeEach(async () => {
-        vi.mocked(setStatusFn).mockClear();
-        render(<LibraryItemCard item={buildItem({ id: 9, status: "WANT" })} />);
-        await userEvent.click(
-          screen.getByRole("button", { name: "Start playing" })
+        vi.mocked(setStatusFn).mockReset();
+        vi.mocked(setStatusFn).mockResolvedValue(statusResult("PLAYING"));
+        render(
+          <>
+            <LibraryItemCard item={buildItem({ id: 9, status: "WANT" })} />
+            <Toaster />
+          </>
         );
+        await userEvent.click(elements.getNextStep("Start playing"));
       });
 
-      it("moves the game to Playing through setStatusFn", () => {
+      it("calls setStatusFn with the card id and the Playing target", () => {
         expect(setStatusFn).toHaveBeenCalledWith({
           data: { id: 9, to: "PLAYING" },
         });
+      });
+
+      it("shows Playing on the card badge, the status control and the button", async () => {
+        expect(
+          await screen.findByText("Hollow Knight is now Playing")
+        ).toBeDefined();
+        expect(elements.getStatusBadge("Playing")).toBeDefined();
+        expect(elements.getStatusControl("Playing")).toBeDefined();
+        expect(elements.getNextStep("Mark done")).toBeDefined();
+      });
+    });
+
+    describe("when the user taps the status pill and picks Done", () => {
+      beforeEach(async () => {
+        vi.mocked(setStatusFn).mockReset();
+        vi.mocked(setStatusFn).mockResolvedValue(statusResult("DONE"));
+        render(
+          <LibraryItemCard item={buildItem({ id: 4, status: "PLAYING" })} />
+        );
+        await userEvent.click(elements.getStatusControl("Playing"));
+      });
+
+      it("opens the picker with three radios", () => {
+        expect(screen.getAllByRole("radio")).toHaveLength(3);
+      });
+
+      it("updates the card to Done and saves the choice", async () => {
+        await userEvent.click(elements.getPickerOption("Done"));
+        expect(setStatusFn).toHaveBeenCalledWith({
+          data: { id: 4, to: "DONE" },
+        });
+        await waitFor(() =>
+          expect(elements.getStatusBadge("Done")).toBeDefined()
+        );
+        expect(elements.getNextStep("Play again")).toBeDefined();
+      });
+    });
+
+    describe("when saving the status fails", () => {
+      beforeEach(async () => {
+        vi.mocked(setStatusFn).mockReset();
+        vi.mocked(setStatusFn).mockRejectedValue(new Error("boom"));
+        render(
+          <>
+            <LibraryItemCard item={buildItem({ id: 5, status: "WANT" })} />
+            <Toaster />
+          </>
+        );
+        await userEvent.click(elements.getNextStep("Start playing"));
+      });
+
+      it("shows the save-failed message", async () => {
+        expect(
+          await screen.findByText("Couldn't save. Try again.")
+        ).toBeDefined();
+      });
+
+      it("reverts the card to Want", async () => {
+        await screen.findByText("Couldn't save. Try again.");
+        expect(elements.getStatusBadge("Want")).toBeDefined();
+        expect(elements.getNextStep("Start playing")).toBeDefined();
+      });
+    });
+
+    describe('given layout="row" (library list view)', () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard item={buildItem({ status: "WANT" })} layout="row" />
+        );
+      });
+
+      it("shows the next-step button and status control in the row", () => {
+        expect(elements.getNextStep("Start playing")).toBeDefined();
+        expect(elements.getStatusControl("Want")).toBeDefined();
+      });
+
+      it("stays a row at md and up", () => {
+        const root = screen.getByTestId("library-item-card-root");
+        expect(root.className).not.toMatch(/md:flex-col/);
       });
     });
 
@@ -473,6 +588,66 @@ describe("LibraryItemCard", () => {
       it("renders the lifecycle strip", () => {
         expect(elements.queryLifecycleTrack()).not.toBeNull();
       });
+    });
+  });
+  describe("queue marker", () => {
+    it("reads 'Up Next #2' on a queued Want game", () => {
+      render(
+        <LibraryItemCard
+          item={buildItem({ status: "WANT", upNextPosition: 2 })}
+        />
+      );
+      expect(screen.getByText("Up Next #2")).toBeDefined();
+    });
+
+    it("reads 'Replay' on a queued Done game", () => {
+      render(
+        <LibraryItemCard
+          item={buildItem({ status: "DONE", upNextPosition: 1 })}
+        />
+      );
+      expect(screen.getByText("Replay")).toBeDefined();
+    });
+
+    it("shows no marker for a game that is not queued", () => {
+      render(<LibraryItemCard item={buildItem({ status: "WANT" })} />);
+      expect(screen.queryByTestId("queue-marker")).toBeNull();
+    });
+  });
+
+  describe("menu composition", () => {
+    const menu = (upNext: ReactNode) => (
+      <DropdownMenu open>
+        <DropdownMenuContent>{upNext}</DropdownMenuContent>
+      </DropdownMenu>
+    );
+
+    it("offers Put in Up Next in the menu of a Want game", () => {
+      render(
+        <LibraryItemCard item={buildItem({ status: "WANT" })} menu={menu} />
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "Put in Up Next" })
+      ).toBeDefined();
+    });
+
+    it("offers Remove from Up Next for a queued game", () => {
+      render(
+        <LibraryItemCard
+          item={buildItem({ status: "WANT", upNextPosition: 1 })}
+          menu={menu}
+        />
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "Remove from Up Next" })
+      ).toBeDefined();
+    });
+
+    it("offers no Up Next action for a Playing game", () => {
+      render(
+        <LibraryItemCard item={buildItem({ status: "PLAYING" })} menu={menu} />
+      );
+      expect(screen.queryByRole("menuitem")).toBeNull();
     });
   });
 });

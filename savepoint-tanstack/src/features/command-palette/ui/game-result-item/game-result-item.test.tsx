@@ -7,6 +7,7 @@ import { Command, CommandList } from "@/shared/ui/command";
 import { quickAddToLibraryFn } from "../../api/quick-add-to-library-fn";
 import { removeLibraryItemFn } from "../../api/remove-library-item-fn";
 import { GameResultItem } from "./game-result-item";
+import type { GameResultItemProps } from "./game-result-item.type";
 
 const invalidate = vi.fn();
 
@@ -83,6 +84,7 @@ type Overrides = {
   name?: string;
   slug?: string;
   releaseYear?: number | null;
+  library?: GameResultItemProps["library"];
 };
 
 function renderRow(overrides: Overrides = {}) {
@@ -105,6 +107,7 @@ function renderRow(overrides: Overrides = {}) {
           name={props.name}
           slug={props.slug}
           releaseYear={props.releaseYear}
+          library={overrides.library}
           onAfterSelect={onAfterSelect}
         />
       </CommandList>
@@ -120,6 +123,23 @@ beforeEach(() => {
 });
 
 describe("GameResultItem", () => {
+  describe("given a game queued in Up Next", () => {
+    it("shows 'Up Next #3' for a Want game", () => {
+      renderRow({ library: { status: "WANT", upNextPosition: 3 } });
+      expect(screen.getByText("Up Next #3")).toBeDefined();
+    });
+
+    it("shows 'Replay' for a Done game", () => {
+      renderRow({ library: { status: "DONE", upNextPosition: 1 } });
+      expect(screen.getByText("Replay")).toBeDefined();
+    });
+
+    it("shows no marker for a game outside the queue", () => {
+      renderRow({ library: { status: "WANT", upNextPosition: null } });
+      expect(screen.queryByTestId("queue-marker")).toBeNull();
+    });
+  });
+
   describe("given a game with cover, name, slug, and release year", () => {
     beforeEach(() => {
       renderRow();

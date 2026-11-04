@@ -6,6 +6,8 @@
  * the "Add" quick-add affordance (canonical `showAddHint` +
  * `useQuickAddFromPalette`).
  */
+import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.ts";
+
 export type GameResultItemProps = {
   /** IGDB game id — used by the "Add" quick-add mutation. */
   igdbId: number;
@@ -17,6 +19,8 @@ export type GameResultItemProps = {
   slug: string;
   /** Optional 4-digit release year. */
   releaseYear: number | null;
+  /** The viewer's library state for this game; null/absent when not in the library. */
+  library?: { status: LibraryItemStatus; upNextPosition: number | null } | null;
   /** Called after the user activates the row, so the palette can close. */
   onAfterSelect: () => void;
 };

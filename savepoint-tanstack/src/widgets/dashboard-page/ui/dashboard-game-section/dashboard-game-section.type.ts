@@ -11,8 +11,8 @@ export type DashboardGameSectionVariant = "default" | "hero";
  * without needing the full search type here.
  */
 export type DashboardGameSectionViewAll = {
-  /** Library status filter to apply. Omit for "all statuses". */
-  status?: LibraryItemStatus;
+  /** Library status (or "UP_NEXT" queue) filter to apply. Omit for "all statuses". */
+  status?: LibraryItemStatus | "UP_NEXT";
   sortBy?: "title" | "createdAt" | "updatedAt";
   sortOrder?: "asc" | "desc";
 };

@@ -3,6 +3,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useState, type MouseEvent } from "react";
 import { toast } from "sonner";
 
+import { QueueMarker } from "@/entities/library-item";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
@@ -28,6 +29,7 @@ export function GameResultItem({
   name,
   slug,
   releaseYear,
+  library,
   onAfterSelect,
 }: GameResultItemProps) {
   const coverUrl = buildCoverImageUrl(coverImageId, "t_cover_small");
@@ -89,6 +91,12 @@ export function GameResultItem({
         )}
         <div className="min-w-0 flex-1 text-left">
           <p className="truncate text-sm font-medium">{name}</p>
+          {library ? (
+            <QueueMarker
+              status={library.status}
+              upNextPosition={library.upNextPosition}
+            />
+          ) : null}
           {releaseYear !== null && (
             <p className="text-muted-foreground text-xs">{releaseYear}</p>
           )}

@@ -1,4 +1,4 @@
-import type { SearchResponseItem } from "@/shared/api/igdb";
+import type { LibraryAwareSearchItem } from "@/entities/library-item/api/search-library-aware-games.worker";
 
 export interface CommandPaletteProps {
   /**
@@ -19,4 +19,4 @@ export interface PaletteResultItem {
   platforms: string[];
 }
 
-export type PaletteSearchResponseItem = SearchResponseItem;
+export type PaletteSearchResponseItem = LibraryAwareSearchItem;

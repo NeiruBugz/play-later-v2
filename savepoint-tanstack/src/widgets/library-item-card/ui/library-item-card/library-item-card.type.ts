@@ -10,12 +10,18 @@ export type LibraryItemCardProps = {
    * The card body is a TanStack Link to /games/$slug — the host MUST stop
    * event propagation on menu interactions so they don't trigger that
    * outer navigation (preventDefault on the trigger button is the standard
-   * shape; see LibraryCardMenu).
+   * shape; see LibraryCardMenu). A function receives the Up Next menu
+   * items (hidden for Playing) to pass on as the menu's `extraItems`.
    */
-  menu?: ReactNode;
+  menu?: ReactNode | ((upNextActions: ReactNode) => ReactNode);
+  /**
+   * "responsive" (default) is a row on phones and a vertical tile from md up;
+   * "row" stays a row at every width (library list view).
+   */
+  layout?: "responsive" | "row";
   /**
    * When provided, an "Add playthrough" icon button is rendered below the
-   * primary CTA. Omitting it hides the action entirely — use this to keep
+   * status actions. Omitting it hides the action entirely — use this to keep
    * the card action-free in read-only contexts (e.g. public-profile grid).
    */
   onAddPlaythrough?: (libraryItemId: number) => void;

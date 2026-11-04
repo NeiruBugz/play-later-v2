@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
-import { LibraryStatusBadge } from "@/entities/library-item";
+import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -46,6 +46,11 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
       <p className="mt-2 truncate text-sm leading-tight font-medium group-hover:underline">
         {item.game.title}
       </p>
+      <QueueMarker
+        status={item.status}
+        upNextPosition={item.upNextPosition}
+        className="mt-1"
+      />
       {item.platform ? (
         <p className="text-muted-foreground mt-0.5 truncate text-xs">
           {item.platform}

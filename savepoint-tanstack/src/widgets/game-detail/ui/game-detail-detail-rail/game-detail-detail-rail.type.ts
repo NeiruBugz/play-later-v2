@@ -1,10 +1,10 @@
-import type { LibraryStatusSwitcherProps } from "../library-status-switcher/library-status-switcher.type";
+import type { GameLibraryControlsProps } from "../game-library-controls";
 
 export type GameDetailDetailRailProps = {
-  /** Props forwarded directly to the embedded LibraryStatusSwitcher. */
-  statusSwitcherProps: LibraryStatusSwitcherProps | null;
-  /** React key to pass to LibraryStatusSwitcher so it resets when the game changes. */
-  statusSwitcherKey: string;
+  /** Props forwarded directly to the embedded GameLibraryControls. */
+  libraryControlsProps: GameLibraryControlsProps | null;
+  /** React key to pass to GameLibraryControls so it resets when the game changes. */
+  libraryControlsKey: string;
   /** Navigates to ?action=log-session&game=<slug>. */
   onLogSession: () => void;
   /** Aggregated rating from IGDB — null when absent. */

@@ -12,6 +12,10 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
+vi.mock("@/features/add-game/api/search-games-fn", () => ({
+  searchGamesFn: vi.fn(),
+}));
+
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
 }));

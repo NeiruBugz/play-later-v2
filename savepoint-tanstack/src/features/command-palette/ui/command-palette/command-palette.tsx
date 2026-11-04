@@ -105,6 +105,7 @@ export function CommandPalette({
                     ? new Date(game.first_release_date * 1000).getFullYear()
                     : null
                 }
+                library={game.library}
                 onAfterSelect={closeAndReset}
               />
             ))}

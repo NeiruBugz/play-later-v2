@@ -43,7 +43,11 @@ function makeIgdbGame(
   opts: {
     coverImageId?: string;
     firstReleaseDate?: number;
-    library?: { status: string; rating: number | null } | null;
+    library?: {
+      status: string;
+      rating: number | null;
+      upNextPosition?: number | null;
+    } | null;
   } = {}
 ) {
   return {
@@ -55,7 +59,7 @@ function makeIgdbGame(
     // `library` MUST default to null (not undefined) — the card's owned check
     // is `game.library !== null`, and `undefined !== null` would mis-read every
     // unowned result as owned.
-    library: opts.library ?? null,
+    library: opts.library ? { upNextPosition: null, ...opts.library } : null,
   };
 }
 
@@ -333,6 +337,36 @@ describe("SearchGamesResults", () => {
 
     it("omits the owned summary when nothing is owned", () => {
       expect(screen.queryByText(/in your library/)).toBeNull();
+    });
+  });
+
+  describe("given results that are queued in Up Next", () => {
+    beforeEach(async () => {
+      mockSearchGamesFn.mockResolvedValue({
+        games: [
+          makeIgdbGame(1, "Hades", "hades", {
+            library: { status: "WANT", rating: null, upNextPosition: 2 },
+          }),
+          makeIgdbGame(2, "Celeste", "celeste", {
+            library: { status: "DONE", rating: null, upNextPosition: 1 },
+          }),
+          makeIgdbGame(3, "Hollow Knight", "hollow-knight", {
+            library: { status: "WANT", rating: null },
+          }),
+        ],
+        ownedCount: 3,
+      });
+      render(<SearchGamesResults query="game" />);
+      await act(async () => {});
+    });
+
+    it("shows 'Up Next #2' for the queued Want game and 'Replay' for the queued Done game", () => {
+      expect(screen.getByText("Up Next #2")).toBeDefined();
+      expect(screen.getByText("Replay")).toBeDefined();
+    });
+
+    it("shows no marker for the game that is not queued", () => {
+      expect(screen.getAllByTestId("queue-marker")).toHaveLength(2);
     });
   });
 });

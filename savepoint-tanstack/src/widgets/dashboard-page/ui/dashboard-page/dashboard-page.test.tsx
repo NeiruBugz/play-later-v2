@@ -46,8 +46,28 @@ vi.mock("../dashboard-status-strip", () => ({
 }));
 
 vi.mock("../dashboard-game-rail", () => ({
-  DashboardGameRail: ({ title }: { title: string }) => (
-    <section data-testid="game-rail">{title}</section>
+  DashboardGameRail: ({
+    title,
+    items,
+    viewAll,
+    viewAllLabel,
+    emptyMessage,
+  }: {
+    title: string;
+    items: unknown[];
+    viewAll: { status?: string };
+    viewAllLabel?: string;
+    emptyMessage?: string;
+  }) => (
+    <section
+      data-testid="game-rail"
+      data-count={items.length}
+      data-view-all-status={viewAll.status}
+      data-view-all-label={viewAllLabel}
+      data-empty={emptyMessage}
+    >
+      {title}
+    </section>
   ),
 }));
 
@@ -163,7 +183,7 @@ describe("DashboardPage", () => {
     it("renders the three game rails (Playing, Up next, Recently played)", () => {
       const titles = elements.getGameRails().map((el) => el.textContent);
       expect(titles).toEqual(
-        expect.arrayContaining(["Playing", "Up next", "Recently played"])
+        expect.arrayContaining(["Playing", "Up Next", "Recently played"])
       );
     });
 
@@ -203,6 +223,37 @@ describe("DashboardPage", () => {
 
     it("renders the desktop continue list beside the hero", () => {
       expect(screen.getByTestId("continue-list")).not.toBeNull();
+    });
+  });
+
+  describe("given more than 3 games are queued", () => {
+    beforeEach(() => {
+      const queued = [1, 2, 3, 4, 5].map((n) => ({ id: n }));
+      render(
+        <DashboardPage
+          data={makeData({
+            hasEmptyLibrary: false,
+            statusCounts: { WANT: 5, PLAYING: 0, DONE: 0 },
+            upNext: {
+              items: queued as unknown as DashboardPageData["upNext"]["items"],
+              total: 5,
+            },
+          })}
+        />
+      );
+    });
+
+    it("shows only the first 3 in the Up Next rail, with See all to the Up Next filter and the empty copy ready", () => {
+      const rail = elements
+        .getGameRails()
+        .find((el) => el.textContent === "Up Next")!;
+      expect(rail).toHaveAttribute("data-count", "3");
+      expect(rail).toHaveAttribute("data-view-all-status", "UP_NEXT");
+      expect(rail).toHaveAttribute("data-view-all-label", "See all");
+      expect(rail).toHaveAttribute(
+        "data-empty",
+        "Nothing queued yet — put up to 5 games in Up Next."
+      );
     });
   });
 });

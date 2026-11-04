@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { LibraryStatusBadge } from "@/entities/library-item";
+import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import { searchLibraryAwareGamesFn } from "@/features/search-games/api/search-library-aware-games";
 import type { LibraryAwareSearchResult } from "@/features/search-games/api/search-library-aware-games.worker";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
@@ -174,6 +174,12 @@ export function SearchGamesResults({
                   ) : null}
                 </div>
                 <p className="truncate text-sm font-medium">{game.name}</p>
+                {game.library !== null ? (
+                  <QueueMarker
+                    status={game.library.status}
+                    upNextPosition={game.library.upNextPosition}
+                  />
+                ) : null}
                 <div className="flex h-4 items-center gap-1">
                   {releaseYear !== null && (
                     <span className="text-muted-foreground text-xs tabular-nums">

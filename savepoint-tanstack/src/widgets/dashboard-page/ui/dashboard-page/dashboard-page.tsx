@@ -9,6 +9,8 @@ import { DashboardStatusStrip } from "../dashboard-status-strip";
 import type { DashboardPageProps } from "./dashboard-page.type";
 import { buildEyebrowDate, buildGreeting } from "./dashboard-page.utility";
 
+const UP_NEXT_RAIL_LIMIT = 3;
+
 export function DashboardPage({ data }: DashboardPageProps) {
   const total =
     data.statusCounts.WANT + data.statusCounts.PLAYING + data.statusCounts.DONE;
@@ -59,11 +61,11 @@ export function DashboardPage({ data }: DashboardPageProps) {
             </div>
 
             <DashboardGameRail
-              title="Up next"
-              items={data.upNext.items}
-              viewAll={{ status: "WANT" }}
-              viewAllLabel="View All Want"
-              emptyMessage="No games queued up"
+              title="Up Next"
+              items={data.upNext.items.slice(0, UP_NEXT_RAIL_LIMIT)}
+              viewAll={{ status: "UP_NEXT" }}
+              viewAllLabel="See all"
+              emptyMessage="Nothing queued yet — put up to 5 games in Up Next."
             />
 
             <DashboardGameRail
