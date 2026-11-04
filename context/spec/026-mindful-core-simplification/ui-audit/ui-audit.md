@@ -1,6 +1,6 @@
 # UI Audit: intuitiveness and overload (spec 026 input)
 
-- **Status:** Baseline run done 2026-11-04 (steps 1, 2, 4 + heuristic synthesis). Think-aloud with Nail (step 5) pending.
+- **Status:** Baseline run done 2026-11-04 (steps 1, 2, 4 + heuristic synthesis). Think-aloud done: [think-aloud.md](./think-aloud.md) (takeaways T1–T7).
 - **Goal:** find where the current UI is unclear or overloaded, beyond the status-model quirks already in [feature-brief.md §5](../feature-brief.md). Every finding is tagged: covered by 026 / new 026 requirement / separate spec.
 - **Baseline:** pre-026 code (five statuses, playthroughs). The same run is repeated after 026 ships to compare numbers.
 

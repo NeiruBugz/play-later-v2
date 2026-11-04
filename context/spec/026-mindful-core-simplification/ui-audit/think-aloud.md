@@ -20,3 +20,23 @@
 | 6a. Mark FF VII Rebirth finished | Game page | Set Played via **Edit details** (not the status pill) | Went to a form to mark a game done (unconfirmed why; likely the pill is read-only on a game with runs: "Follows your playthroughs"). "Finished" itself is not expressible: only "Played" | "Rebirth поставил Played через Edit Details" |
 | 6b. Mark RE2 dropped | Looked for a "dropped" option | **Not expressible.** Settled for Played, same as finished | Confirms §2.7 (Done + optional Let go) from the user side | "для RE2 нет варианта «бросил» - оставил Played" |
 | 7. Find the "one big RPG at a time" note (~12 days old, no game attached) | Journal | Found it in the Journal list | Hard to identify the right card. Run partly on in-progress code: a parallel session was fixing U1–U5 (journal routes) in the same tree, so whether the note view opened says nothing about the baseline | "нашел заметку, но тяжело было идентифицировать ее" |
+| 7 (follow-up) | — | Read it in the list, did not click | Cause: the note has no game and all notes share one timeline; no way to narrow down. Wants a filter by game, including "no game" | "Она без привязки, и было сложно, все заметки в одном таймлайне" |
+
+Task 8 (first run) skipped: blocked by U1.
+
+## Debrief
+
+- **Most annoying:** finding notes with no way to filter; wants a pre-filter or filter, at least "notes without a game".
+- **One change for weekly use:** "Сделать трекинг и добавление ужасно простым и понятным".
+
+## Takeaways for spec 026
+
+| # | Takeaway | Evidence | Where |
+|---|---|---|---|
+| T1 | The add confirmation (and ⌘K) must offer **Start playing**, not only "Put in Up Next": "heard of it, playing tonight" is a real path | Task 2 | §2.6 (change) |
+| T2 | Time-only logging must work for any game, including one made Playing by status alone (no run). Today this blocks the loop on the second evening | Task 5 | §2.9 (raise priority) |
+| T3 | The status control on the game page must work for every game; the user fell back to Edit details to mark one done | Task 6a (cause unconfirmed) | §2.2 / §2.3 |
+| T4 | Journal needs a filter by game, including "no game" | Task 7, debrief | new-026 (§2.9) |
+| T5 | Dashboard counters / status strip were not noticed in a 5-second look: removing them costs nothing | Task 0 | supports N14 |
+| T6 | "What fits tonight's mood / weight" (light vs big) is the real decision when "Jump back in" doesn't fit; library browsing by cover is the only tool | Task 1b | separate: "what next" suggestions (length vs time) |
+| T7 | North star from the participant: tracking and adding must be dead simple | Debrief | 026 overall |
