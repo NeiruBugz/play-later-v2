@@ -280,12 +280,12 @@ Verify-task conventions:
     - A `rg` sweep finds none of the vocabulary "Never" variants in UI strings.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 11: One-time "new statuses" notice**
+- [x] **Slice 11: One-time "new statuses" notice**
 
   > Spec §2.12 explanation.
   - [x] Server: the root loader exposes `statusModelNoticePending`, and add an idempotent `acknowledgeNoticeFn`. **[Agent: tanstack-fullstack]**
   - [x] UI: a server-driven one-time dialog with "Got it", separate from the localStorage announcements. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - An existing user sees it once, across two browser contexts.
     - A new sign-up never sees it.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
