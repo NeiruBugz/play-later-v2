@@ -1,5 +1,5 @@
 /**
- * Integration test for getAvatarPresignedUrl (Slice 6 — Avatar Upload).
+ * Integration test for getAvatarPresignedUrlWorker (Slice 6 — Avatar Upload).
  *
  * Presigning is a local SigV4 computation — `getSignedUrl` never opens a
  * network connection — so this suite needs no running S3. It exercises the
@@ -7,23 +7,10 @@
  * static AWS credentials, which makes it deterministic in every environment
  * (local with or without LocalStack, and the Postgres-only PR-quality CI job).
  */
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { getServerUserId } from "@/entities/session/api/get-session.server";
-// RED import — this module does not exist until the GREEN step.
-import { getAvatarPresignedUrl } from "@/features/upload-avatar/api/get-avatar-presigned-url.server";
-import { ValidationError } from "@/shared/lib/errors";
-
-// ---------------------------------------------------------------------------
-// Mock getServerUserId — the server fn resolves the caller via requireUserId()
-// which internally calls getServerUserId(). We must supply it so the handler
-// can authenticate the request.
-// ---------------------------------------------------------------------------
-vi.mock("@/entities/session/api/get-session.server", () => ({
-  getServerUserId: vi.fn(),
-}));
-
-const mockGetServerUserId = vi.mocked(getServerUserId);
+import { getAvatarPresignedUrlWorker } from "@/features/upload-avatar/api/get-avatar-presigned-url.worker";
+import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
 
 // ---------------------------------------------------------------------------
 // Constants — mirrored exactly from savepoint-app/shared/lib/storage/avatar-storage.ts
@@ -43,21 +30,24 @@ const ALLOWED_MIME_TYPES = [
 const ONE_MB = 1 * 1024 * 1024;
 const TEST_USER_ID = "avatar-presign-integration-user-001";
 
-beforeAll(() => {
-  mockGetServerUserId.mockResolvedValue(TEST_USER_ID);
-});
-
-afterAll(() => {
-  vi.resetAllMocks();
-});
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
-describe("getAvatarPresignedUrl", () => {
+describe("getAvatarPresignedUrlWorker", () => {
+  describe("given no signed-in user", () => {
+    it("rejects with UnauthorizedError", async () => {
+      await expect(
+        getAvatarPresignedUrlWorker(undefined, {
+          contentType: "image/png",
+          contentLength: ONE_MB,
+        })
+      ).rejects.toBeInstanceOf(UnauthorizedError);
+    });
+  });
+
   describe("given a valid image/png payload within the size limit", () => {
     it("returns an object with uploadUrl and publicUrl", async () => {
-      const result = await getAvatarPresignedUrl({
+      const result = await getAvatarPresignedUrlWorker(TEST_USER_ID, {
         contentType: "image/png",
         contentLength: ONE_MB,
       });
@@ -92,7 +82,7 @@ describe("getAvatarPresignedUrl", () => {
   describe("given a contentLength that exceeds the 10 MB cap", () => {
     it("rejects with ValidationError", async () => {
       await expect(
-        getAvatarPresignedUrl({
+        getAvatarPresignedUrlWorker(TEST_USER_ID, {
           contentType: "image/png",
           contentLength: MAX_AVATAR_SIZE_BYTES + 1,
         })
@@ -103,7 +93,7 @@ describe("getAvatarPresignedUrl", () => {
   describe("given a disallowed MIME type", () => {
     it("rejects with ValidationError for application/pdf", async () => {
       await expect(
-        getAvatarPresignedUrl({
+        getAvatarPresignedUrlWorker(TEST_USER_ID, {
           contentType: "application/pdf",
           contentLength: ONE_MB,
         })
@@ -112,7 +102,7 @@ describe("getAvatarPresignedUrl", () => {
 
     it("rejects with ValidationError for text/plain", async () => {
       await expect(
-        getAvatarPresignedUrl({
+        getAvatarPresignedUrlWorker(TEST_USER_ID, {
           contentType: "text/plain",
           contentLength: ONE_MB,
         })
@@ -125,7 +115,10 @@ describe("getAvatarPresignedUrl", () => {
       "accepts %s without throwing",
       async (contentType) => {
         await expect(
-          getAvatarPresignedUrl({ contentType, contentLength: ONE_MB })
+          getAvatarPresignedUrlWorker(TEST_USER_ID, {
+            contentType,
+            contentLength: ONE_MB,
+          })
         ).resolves.toMatchObject({ uploadUrl: expect.any(String) });
       }
     );
