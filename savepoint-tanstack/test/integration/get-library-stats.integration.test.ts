@@ -49,9 +49,8 @@ function makeLibraryItem(
   suffix: string,
   userId: string,
   gameId: string,
-  status: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED",
-  updatedAt?: Date,
-  completedAt?: Date
+  status: "WANT" | "PLAYING" | "DONE",
+  updatedAt?: Date
 ) {
   return {
     id: parseInt(suffix, 10),
@@ -61,7 +60,6 @@ function makeLibraryItem(
     acquisitionType: "DIGITAL" as const,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: updatedAt ?? new Date("2024-01-01T00:00:00.000Z"),
-    completedAt: completedAt ?? null,
   };
 }
 
@@ -74,8 +72,9 @@ describe("getLibraryStats", () => {
     it("returns zeroed stats", async () => {
       const stats = await getLibraryStats("stats-user-001");
 
-      expect(stats.statusCounts).toEqual({});
-      expect(stats.completedCount).toBe(0);
+      expect(stats.want).toBe(0);
+      expect(stats.playing).toBe(0);
+      expect(stats.done).toBe(0);
       expect(stats.recentGames).toEqual([]);
       expect(stats.journalCount).toBe(0);
     });
@@ -90,36 +89,28 @@ describe("getLibraryStats", () => {
         db.prisma.game.create({ data: makeGame("c", 10003) }),
         db.prisma.game.create({ data: makeGame("d", 10004) }),
         db.prisma.game.create({ data: makeGame("e", 10005) }),
-        db.prisma.game.create({ data: makeGame("f", 10006) }),
       ]);
       await db.prisma.libraryItem.createMany({
         data: [
           makeLibraryItem("1001", "stats-user-002", "stats-game-a", "PLAYING"),
           makeLibraryItem("1002", "stats-user-002", "stats-game-b", "PLAYING"),
-          makeLibraryItem("1003", "stats-user-002", "stats-game-c", "PLAYED"),
-          makeLibraryItem("1004", "stats-user-002", "stats-game-d", "SHELF"),
-          makeLibraryItem("1005", "stats-user-002", "stats-game-e", "WISHLIST"),
-          makeLibraryItem("1006", "stats-user-002", "stats-game-f", "UP_NEXT"),
+          makeLibraryItem("1003", "stats-user-002", "stats-game-c", "DONE"),
+          makeLibraryItem("1004", "stats-user-002", "stats-game-d", "WANT"),
+          makeLibraryItem("1005", "stats-user-002", "stats-game-e", "WANT"),
         ],
       });
     });
 
-    it("counts each status correctly and totals match", async () => {
+    it("counts each status correctly", async () => {
       const stats = await getLibraryStats("stats-user-002");
 
-      expect(stats.statusCounts["PLAYING"]).toBe(2);
-      expect(stats.statusCounts["PLAYED"]).toBe(1);
-      expect(stats.statusCounts["SHELF"]).toBe(1);
-      expect(stats.statusCounts["WISHLIST"]).toBe(1);
-      expect(stats.statusCounts["UP_NEXT"]).toBe(1);
-
-      const counts = stats.statusCounts as Record<string, number>;
-      const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
-      expect(total).toBe(6);
+      expect(stats.playing).toBe(2);
+      expect(stats.done).toBe(1);
+      expect(stats.want).toBe(2);
     });
   });
 
-  describe("given completion is a timestamp, not a status", () => {
+  describe("given several playing games touched at different times", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("005") });
       await Promise.all([
@@ -127,40 +118,40 @@ describe("getLibraryStats", () => {
         db.prisma.game.create({ data: makeGame("i", 10009) }),
         db.prisma.game.create({ data: makeGame("j", 10010) }),
       ]);
-      const completedOn = new Date("2024-03-01T00:00:00.000Z");
       await db.prisma.libraryItem.createMany({
         data: [
-          // PLAYED but never marked complete (a dropped game).
-          makeLibraryItem("1008", "stats-user-005", "stats-game-h", "PLAYED"),
-          // PLAYED and completed.
+          makeLibraryItem(
+            "1008",
+            "stats-user-005",
+            "stats-game-h",
+            "PLAYING",
+            new Date("2024-03-01T00:00:00.000Z")
+          ),
           makeLibraryItem(
             "1009",
             "stats-user-005",
             "stats-game-i",
-            "PLAYED",
-            undefined,
-            completedOn
+            "PLAYING",
+            new Date("2024-05-01T00:00:00.000Z")
           ),
-          // SHELF but completed (e.g. completed, then archived to the shelf).
           makeLibraryItem(
             "1010",
             "stats-user-005",
             "stats-game-j",
-            "SHELF",
-            undefined,
-            completedOn
+            "DONE",
+            new Date("2024-06-01T00:00:00.000Z")
           ),
         ],
       });
     });
 
-    it("counts completedAt-not-null rows independently of the PLAYED status", async () => {
+    it("lists only playing games as recent, most recently touched first", async () => {
       const stats = await getLibraryStats("stats-user-005");
 
-      // 2 games are PLAYED, but only 2 have a completedAt — and one of those
-      // is SHELF, not PLAYED. The two metrics are not the same set.
-      expect(stats.statusCounts["PLAYED"]).toBe(2);
-      expect(stats.completedCount).toBe(2);
+      expect(stats.recentGames.map((game) => game.gameId)).toEqual([
+        "stats-game-i",
+        "stats-game-h",
+      ]);
     });
   });
 
@@ -182,7 +173,7 @@ describe("getLibraryStats", () => {
     it("excludes other users items from the count", async () => {
       const stats = await getLibraryStats("stats-user-003");
 
-      expect(stats.statusCounts).toEqual({});
+      expect(stats.playing).toBe(0);
       expect(stats.recentGames).toEqual([]);
     });
   });

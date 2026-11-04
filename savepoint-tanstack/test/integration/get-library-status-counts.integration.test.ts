@@ -49,7 +49,7 @@ function makeLibraryItem(
   id: number,
   userId: string,
   gameId: string,
-  status: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED"
+  status: "WANT" | "PLAYING" | "DONE"
 ) {
   return {
     id,
@@ -72,11 +72,9 @@ describe("getLibraryStatusCounts", () => {
       const counts = await getLibraryStatusCounts("counts-user-001");
 
       expect(counts).toEqual({
-        WISHLIST: 0,
-        SHELF: 0,
-        UP_NEXT: 0,
+        WANT: 0,
         PLAYING: 0,
-        PLAYED: 0,
+        DONE: 0,
       });
     });
   });
@@ -93,9 +91,9 @@ describe("getLibraryStatusCounts", () => {
       await db.prisma.libraryItem.createMany({
         data: [
           makeLibraryItem(2001, "counts-user-002", "counts-game-a", "PLAYING"),
-          makeLibraryItem(2002, "counts-user-002", "counts-game-b", "PLAYED"),
-          makeLibraryItem(2003, "counts-user-002", "counts-game-c", "PLAYED"),
-          makeLibraryItem(2004, "counts-user-002", "counts-game-d", "SHELF"),
+          makeLibraryItem(2002, "counts-user-002", "counts-game-b", "DONE"),
+          makeLibraryItem(2003, "counts-user-002", "counts-game-c", "DONE"),
+          makeLibraryItem(2004, "counts-user-002", "counts-game-d", "WANT"),
         ],
       });
     });
@@ -104,11 +102,8 @@ describe("getLibraryStatusCounts", () => {
       const counts = await getLibraryStatusCounts("counts-user-002");
 
       expect(counts.PLAYING).toBe(1);
-      expect(counts.PLAYED).toBe(2);
-      expect(counts.SHELF).toBe(1);
-      // Statuses with no items are still present and zeroed.
-      expect(counts.WISHLIST).toBe(0);
-      expect(counts.UP_NEXT).toBe(0);
+      expect(counts.DONE).toBe(2);
+      expect(counts.WANT).toBe(1);
     });
   });
 
@@ -118,18 +113,13 @@ describe("getLibraryStatusCounts", () => {
       await db.prisma.user.create({ data: makeUser("004") });
       await db.prisma.game.create({ data: makeGame("e", 20005) });
       await db.prisma.libraryItem.create({
-        data: makeLibraryItem(
-          2005,
-          "counts-user-004",
-          "counts-game-e",
-          "PLAYED"
-        ),
+        data: makeLibraryItem(2005, "counts-user-004", "counts-game-e", "DONE"),
       });
     });
 
     it("does not leak another user's counts", async () => {
       const counts = await getLibraryStatusCounts("counts-user-003");
-      expect(counts.PLAYED).toBe(0);
+      expect(counts.DONE).toBe(0);
     });
   });
 });

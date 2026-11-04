@@ -109,7 +109,7 @@ function makeLibraryItem(userId: string, gameId: string, id: number = ITEM_ID) {
     id,
     userId,
     gameId,
-    status: "SHELF" as const,
+    status: "WANT" as const,
     acquisitionType: "DIGITAL" as const,
     platform: null,
     rating: null,

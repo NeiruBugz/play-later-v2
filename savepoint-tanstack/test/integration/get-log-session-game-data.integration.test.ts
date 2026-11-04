@@ -98,8 +98,6 @@ async function seedLibraryItem(): Promise<number> {
       userId: USER_ID,
       gameId: GAME_ID,
       status: "PLAYING",
-      statusIsManual: false,
-      hasBeenPlayed: false,
       acquisitionType: "DIGITAL",
     },
   });

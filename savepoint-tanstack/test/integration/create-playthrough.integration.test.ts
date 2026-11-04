@@ -7,8 +7,7 @@
  *
  * Covers:
  * - Happy path: PLAYING run → ordinal 1, kind FIRST, playtimeMinutes
- *   converted from hours (×60), LibraryItem.status flipped to PLAYING,
- *   hasBeenPlayed remains false.
+ *   converted from hours (×60), LibraryItem.status left untouched.
  * - Unauthorized path: userId undefined → rejects UnauthorizedError.
  * - Rating guard: entity createPlaythrough rejects out-of-range ratings (0,
  *   11, negative) with ValidationError; accepts boundary values 1 and 10.
@@ -73,9 +72,7 @@ beforeEach(async () => {
     data: {
       userId: USER_ID,
       gameId: "game-create-pt-001",
-      status: "SHELF",
-      statusIsManual: false,
-      hasBeenPlayed: false,
+      status: "WANT",
       acquisitionType: "DIGITAL",
     },
   });
@@ -122,20 +119,12 @@ describe("createPlaythroughWorker", () => {
       expect(run.playtimeMinutes).toBe(120);
     });
 
-    it("flips the library item status to PLAYING", async () => {
+    it("leaves the library item status alone (only setLibraryItemStatus changes it)", async () => {
       const item = await db.prisma.libraryItem.findUniqueOrThrow({
         where: { id: libraryItemId },
       });
 
-      expect(item.status).toBe("PLAYING");
-    });
-
-    it("leaves hasBeenPlayed false (PLAYING run does not count as having played)", async () => {
-      const item = await db.prisma.libraryItem.findUniqueOrThrow({
-        where: { id: libraryItemId },
-      });
-
-      expect(item.hasBeenPlayed).toBe(false);
+      expect(item.status).toBe("WANT");
     });
   });
 

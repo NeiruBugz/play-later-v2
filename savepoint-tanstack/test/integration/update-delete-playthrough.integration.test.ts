@@ -6,11 +6,9 @@
  * See FOOT-GUNS.md foot-gun #8.
  *
  * Covers:
- * - update: PLAYING run → FINISHED; library status re-syncs to PLAYED,
- *   hasBeenPlayed becomes true.
+ * - update: PLAYING run → FINISHED; the library item status is untouched.
  * - delete + detach: run with 2 journal entries deleted; entries survive
- *   with playthroughId === null; library status re-syncs (zero runs →
- *   falls back to stored manual status, hasBeenPlayed false).
+ *   with playthroughId === null; the library item status is untouched.
  * - ownership: updatePlaythrough / deletePlaythrough with a different
  *   user's run → NotFoundError.
  * - Rating guard: updatePlaythrough rejects out-of-range ratings (0, 11,
@@ -100,8 +98,6 @@ describe("updatePlaythrough", () => {
           userId: USER_ID,
           gameId: "game-upd-del-pt-001",
           status: "PLAYING",
-          statusIsManual: false,
-          hasBeenPlayed: false,
           acquisitionType: "DIGITAL",
         },
       });
@@ -128,22 +124,13 @@ describe("updatePlaythrough", () => {
       expect(run.status).toBe("FINISHED");
     });
 
-    it("re-syncs the library item status to PLAYED", async () => {
+    it("leaves the library item status alone (only setLibraryItemStatus changes it)", async () => {
       await updatePlaythrough(USER_ID, { id: runId, status: "FINISHED" });
 
       const item = await db.prisma.libraryItem.findUniqueOrThrow({
         where: { id: libraryItemId },
       });
-      expect(item.status).toBe("PLAYED");
-    });
-
-    it("sets hasBeenPlayed to true on the library item", async () => {
-      await updatePlaythrough(USER_ID, { id: runId, status: "FINISHED" });
-
-      const item = await db.prisma.libraryItem.findUniqueOrThrow({
-        where: { id: libraryItemId },
-      });
-      expect(item.hasBeenPlayed).toBe(true);
+      expect(item.status).toBe("PLAYING");
     });
 
     it("only updates the provided fields — playtimeMinutes stays unchanged", async () => {
@@ -168,8 +155,6 @@ describe("updatePlaythrough", () => {
           userId: OTHER_USER_ID,
           gameId: "game-upd-del-pt-001",
           status: "PLAYING",
-          statusIsManual: false,
-          hasBeenPlayed: false,
           acquisitionType: "DIGITAL",
         },
       });
@@ -196,7 +181,7 @@ describe("updatePlaythrough", () => {
 });
 
 describe("deletePlaythrough", () => {
-  describe("given a run with 2 journal entries on an item with UP_NEXT status", () => {
+  describe("given a run with 2 journal entries on a queued WANT item", () => {
     let libraryItemId: number;
     let runId: string;
     let entryIds: string[];
@@ -204,14 +189,12 @@ describe("deletePlaythrough", () => {
     beforeEach(async () => {
       await seedBaseData();
 
-      // Item starts with a manual pre-play status (UP_NEXT)
       const item = await db.prisma.libraryItem.create({
         data: {
           userId: USER_ID,
           gameId: "game-upd-del-pt-001",
-          status: "UP_NEXT",
-          statusIsManual: false,
-          hasBeenPlayed: false,
+          status: "WANT",
+          upNextPosition: 1,
           acquisitionType: "DIGITAL",
         },
       });
@@ -281,23 +264,14 @@ describe("deletePlaythrough", () => {
       }
     });
 
-    it("re-syncs the library item status: zero runs → falls back to UP_NEXT (manualPrePlay)", async () => {
+    it("leaves the item's status and queue position untouched", async () => {
       await deletePlaythrough(USER_ID, runId);
 
       const item = await db.prisma.libraryItem.findUniqueOrThrow({
         where: { id: libraryItemId },
       });
-      // deriveLibraryStatus([], "UP_NEXT") → "UP_NEXT"
-      expect(item.status).toBe("UP_NEXT");
-    });
-
-    it("re-syncs hasBeenPlayed to false when no runs remain", async () => {
-      await deletePlaythrough(USER_ID, runId);
-
-      const item = await db.prisma.libraryItem.findUniqueOrThrow({
-        where: { id: libraryItemId },
-      });
-      expect(item.hasBeenPlayed).toBe(false);
+      expect(item.status).toBe("WANT");
+      expect(item.upNextPosition).toBe(1);
     });
   });
 
@@ -312,8 +286,6 @@ describe("deletePlaythrough", () => {
           userId: OTHER_USER_ID,
           gameId: "game-upd-del-pt-001",
           status: "PLAYING",
-          statusIsManual: false,
-          hasBeenPlayed: false,
           acquisitionType: "DIGITAL",
         },
       });
@@ -337,27 +309,23 @@ describe("deletePlaythrough", () => {
     });
   });
 
-  describe("given deleting the FINAL run of a non-manual item whose stored status is PLAYED", () => {
+  describe("given deleting the only run of a DONE item", () => {
     let libraryItemId: number;
     let runId: string;
 
     beforeEach(async () => {
       await seedBaseData();
 
-      // Item was previously PLAYED (stale derived status); statusIsManual=false.
       const item = await db.prisma.libraryItem.create({
         data: {
           userId: USER_ID,
           gameId: "game-upd-del-pt-001",
-          status: "PLAYED",
-          statusIsManual: false,
-          hasBeenPlayed: true,
+          status: "DONE",
           acquisitionType: "DIGITAL",
         },
       });
       libraryItemId = item.id;
 
-      // One FINISHED run — the only run. Deleting it leaves zero runs.
       const run = await db.prisma.playthrough.create({
         data: {
           libraryItemId,
@@ -370,74 +338,13 @@ describe("deletePlaythrough", () => {
       runId = run.id;
     });
 
-    it("resets status to SHELF (not stuck at stale PLAYED)", async () => {
+    it("keeps the item DONE", async () => {
       await deletePlaythrough(USER_ID, runId);
 
       const item = await db.prisma.libraryItem.findUniqueOrThrow({
         where: { id: libraryItemId },
       });
-      expect(item.status).toBe("SHELF");
-    });
-
-    it("resets hasBeenPlayed to false when no runs remain", async () => {
-      await deletePlaythrough(USER_ID, runId);
-
-      const item = await db.prisma.libraryItem.findUniqueOrThrow({
-        where: { id: libraryItemId },
-      });
-      expect(item.hasBeenPlayed).toBe(false);
-    });
-  });
-
-  describe("given deleting the FINAL run of a manual-override item whose status is PLAYED", () => {
-    let libraryItemId: number;
-    let runId: string;
-
-    beforeEach(async () => {
-      await seedBaseData();
-
-      // Item has a manually-pinned PLAYED status; statusIsManual=true.
-      const item = await db.prisma.libraryItem.create({
-        data: {
-          userId: USER_ID,
-          gameId: "game-upd-del-pt-001",
-          status: "PLAYED",
-          statusIsManual: true,
-          hasBeenPlayed: true,
-          acquisitionType: "DIGITAL",
-        },
-      });
-      libraryItemId = item.id;
-
-      const run = await db.prisma.playthrough.create({
-        data: {
-          libraryItemId,
-          ordinal: 1,
-          kind: "FIRST",
-          status: "FINISHED",
-          playtimeMinutes: 60,
-        },
-      });
-      runId = run.id;
-    });
-
-    it("keeps the manually-pinned PLAYED status untouched (manual override is not overwritten)", async () => {
-      await deletePlaythrough(USER_ID, runId);
-
-      const item = await db.prisma.libraryItem.findUniqueOrThrow({
-        where: { id: libraryItemId },
-      });
-      expect(item.status).toBe("PLAYED");
-      expect(item.statusIsManual).toBe(true);
-    });
-
-    it("still resets hasBeenPlayed to false (fact about runs, always recomputed)", async () => {
-      await deletePlaythrough(USER_ID, runId);
-
-      const item = await db.prisma.libraryItem.findUniqueOrThrow({
-        where: { id: libraryItemId },
-      });
-      expect(item.hasBeenPlayed).toBe(false);
+      expect(item.status).toBe("DONE");
     });
   });
 });
@@ -453,8 +360,6 @@ describe("updatePlaythrough — rating range guard", () => {
         userId: USER_ID,
         gameId: "game-upd-del-pt-001",
         status: "PLAYING",
-        statusIsManual: false,
-        hasBeenPlayed: false,
         acquisitionType: "DIGITAL",
       },
     });

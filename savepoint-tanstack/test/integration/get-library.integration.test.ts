@@ -62,7 +62,7 @@ function makeGame(
   };
 }
 
-type Status = "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
+type Status = "WANT" | "PLAYING" | "DONE";
 
 type Acquisition = "DIGITAL" | "SUBSCRIPTION" | "PHYSICAL";
 
@@ -74,7 +74,6 @@ function makeLibraryItem(
     platform?: string;
     rating?: number | null;
     acquisitionType?: Acquisition;
-    hasBeenPlayed?: boolean;
     startedAt?: Date | null;
     completedAt?: Date | null;
     createdAt?: Date;
@@ -85,9 +84,8 @@ function makeLibraryItem(
     id: _itemCounter++,
     userId,
     gameId,
-    status: overrides.status ?? ("SHELF" as Status),
+    status: overrides.status ?? ("WANT" as Status),
     acquisitionType: overrides.acquisitionType ?? ("DIGITAL" as const),
-    hasBeenPlayed: overrides.hasBeenPlayed ?? false,
     startedAt: overrides.startedAt ?? null,
     completedAt: overrides.completedAt ?? null,
     platform: overrides.platform ?? null,
@@ -138,11 +136,11 @@ describe("getLibrary", () => {
             platform: "PC",
           }),
           makeLibraryItem("lib-user-all", "lib-game-a2", {
-            status: "PLAYED",
+            status: "DONE",
             platform: "PlayStation 5",
           }),
           makeLibraryItem("lib-user-all", "lib-game-a3", {
-            status: "WISHLIST",
+            status: "WANT",
           }),
         ],
       });
@@ -164,13 +162,7 @@ describe("getLibrary", () => {
   // -------------------------------------------------------------------------
 
   describe("status filter", () => {
-    const statuses: Status[] = [
-      "WISHLIST",
-      "SHELF",
-      "UP_NEXT",
-      "PLAYING",
-      "PLAYED",
-    ];
+    const statuses: Status[] = ["WANT", "PLAYING", "DONE"];
 
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("status") });
@@ -372,86 +364,6 @@ describe("getLibrary", () => {
 
     it("returns every source when no acquisition filter is applied", async () => {
       const result = await getLibrary("lib-user-acq", {});
-
-      expect(result.total).toBe(4);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // Started-only filter (F04 — derived "touched": status / startedAt / completedAt)
-  // -------------------------------------------------------------------------
-
-  describe("started-only filter (derived touched)", () => {
-    beforeEach(async () => {
-      await db.prisma.user.create({ data: makeUser("started") });
-      await Promise.all([
-        db.prisma.game.create({
-          data: makeGame("st1", { title: "Tried Shelf" }),
-        }),
-        db.prisma.game.create({
-          data: makeGame("st2", { title: "Playing" }),
-        }),
-        db.prisma.game.create({
-          data: makeGame("st3", { title: "Untouched Shelf" }),
-        }),
-        db.prisma.game.create({
-          data: makeGame("st4", { title: "Finished Shelf" }),
-        }),
-      ]);
-      await db.prisma.libraryItem.createMany({
-        data: [
-          // Shelved but started → touched via startedAt.
-          makeLibraryItem("lib-user-started", "lib-game-st1", {
-            status: "SHELF",
-            startedAt: new Date("2024-02-01T00:00:00.000Z"),
-          }),
-          // Currently playing, no dates → touched via status.
-          makeLibraryItem("lib-user-started", "lib-game-st2", {
-            status: "PLAYING",
-          }),
-          // Shelved, never touched → excluded.
-          makeLibraryItem("lib-user-started", "lib-game-st3", {
-            status: "SHELF",
-          }),
-          // Shelved but completed → touched via completedAt.
-          makeLibraryItem("lib-user-started", "lib-game-st4", {
-            status: "SHELF",
-            completedAt: new Date("2024-03-01T00:00:00.000Z"),
-          }),
-        ],
-      });
-    });
-
-    it("returns only touched games (status PLAYING/PLAYED, startedAt, or completedAt)", async () => {
-      const result = await getLibrary("lib-user-started", {
-        startedOnly: true,
-      });
-
-      expect(result.items).toHaveLength(3);
-      expect(
-        result.items.every(
-          (item) =>
-            item.status === "PLAYING" ||
-            item.status === "PLAYED" ||
-            item.startedAt !== null ||
-            item.completedAt !== null
-        )
-      ).toBe(true);
-    });
-
-    it("excludes the untouched shelf item", async () => {
-      const result = await getLibrary("lib-user-started", {
-        startedOnly: true,
-      });
-
-      expect(
-        result.items.some((item) => item.game.title === "Untouched Shelf")
-      ).toBe(false);
-    });
-
-    it("returns every item when startedOnly is not set", async () => {
-      const result = await getLibrary("lib-user-started", {});
-
       expect(result.total).toBe(4);
     });
   });
@@ -596,9 +508,9 @@ describe("getLibrary", () => {
             status: "PLAYING",
             platform: "PlayStation 5",
           }),
-          // PLAYED on PC (different status — should be excluded by status filter)
+          // DONE on PC (different status — should be excluded by status filter)
           makeLibraryItem("lib-user-combo", "lib-game-combo4", {
-            status: "PLAYED",
+            status: "DONE",
             platform: "PC",
           }),
         ],

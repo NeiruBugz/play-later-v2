@@ -521,7 +521,7 @@ describe("getGameDetails", () => {
         data: {
           userId: "ggd-user-userA",
           gameId: game!.id,
-          status: "PLAYED",
+          status: "DONE",
           acquisitionType: "DIGITAL",
         },
       });
@@ -597,15 +597,14 @@ describe("getGameDetails", () => {
 
   // -------------------------------------------------------------------------
   // Spec 016 — Per-Playthrough Logs
-  // New fields: playthroughs, derivedStatus, statusIsManual, hasBeenPlayed.
+  // New fields: playthroughs.
   // playtimeTotalMinutes source changed to Σ playthroughs.playtimeMinutes.
   // -------------------------------------------------------------------------
 
   // Helper: seed a user + game + library entry; returns { gameId, libraryItemId }.
   async function seedUserAndLibrary(
     userSuffix: string,
-    status: "SHELF" | "PLAYING" | "PLAYED" | "UP_NEXT" | "WISHLIST" = "SHELF",
-    statusIsManual = false
+    status: "WANT" | "PLAYING" | "DONE" = "WANT"
   ) {
     await db.prisma.user.create({ data: makeUser(userSuffix) });
     await db.prisma.game.create({
@@ -625,7 +624,6 @@ describe("getGameDetails", () => {
         userId: `ggd-user-${userSuffix}`,
         gameId: game.id,
         status,
-        statusIsManual,
         acquisitionType: "DIGITAL",
       },
     });
@@ -635,14 +633,11 @@ describe("getGameDetails", () => {
   describe("Spec 016 — playthroughs and derived fields", () => {
     // Anonymous viewer
     describe("anonymous viewer", () => {
-      it("returns empty playthroughs, zero playtimeTotalMinutes, SHELF derivedStatus, false flags", async () => {
+      it("returns empty playthroughs, zero playtimeTotalMinutes", async () => {
         const result = await getGameDetails({ slug: GAME_SLUG });
 
         expect(result.playthroughs).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
-        expect(result.derivedStatus).toBe("SHELF");
-        expect(result.statusIsManual).toBe(false);
-        expect(result.hasBeenPlayed).toBe(false);
       });
 
       it("still populates journal-derived fields from zero entries for anonymous viewer", async () => {
@@ -669,7 +664,7 @@ describe("getGameDetails", () => {
         });
       });
 
-      it("returns empty playthroughs, zero playtime, SHELF derivedStatus, false flags", async () => {
+      it("returns empty playthroughs, zero playtime", async () => {
         const result = await getGameDetails({
           slug: GAME_SLUG,
           userId: "ggd-user-pt-noentry",
@@ -677,16 +672,13 @@ describe("getGameDetails", () => {
 
         expect(result.playthroughs).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
-        expect(result.derivedStatus).toBe("SHELF");
-        expect(result.statusIsManual).toBe(false);
-        expect(result.hasBeenPlayed).toBe(false);
       });
     });
 
     // Authed — library entry exists but no runs
     describe("authed viewer with library entry and no playthroughs", () => {
-      it("returns empty playthroughs, reflects entry status and statusIsManual, hasBeenPlayed false", async () => {
-        await seedUserAndLibrary("pt-noruns", "UP_NEXT", true);
+      it("returns empty playthroughs and zero playtime", async () => {
+        await seedUserAndLibrary("pt-noruns", "WANT");
 
         const result = await getGameDetails({
           slug: GAME_SLUG,
@@ -695,20 +687,15 @@ describe("getGameDetails", () => {
 
         expect(result.playthroughs).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
-        // derivedStatus falls back to entry status when no playthroughs
-        expect(result.derivedStatus).toBe("UP_NEXT");
-        expect(result.statusIsManual).toBe(true);
-        expect(result.hasBeenPlayed).toBe(false);
       });
     });
 
     // Authed — one PLAYING run
     describe("authed viewer with one PLAYING playthrough (90 min)", () => {
-      it("returns one run, playtimeTotalMinutes = 90, derivedStatus PLAYING, hasBeenPlayed false", async () => {
+      it("returns one run, playtimeTotalMinutes = 90", async () => {
         const { libraryItemId } = await seedUserAndLibrary(
           "pt-playing",
-          "PLAYING",
-          false
+          "PLAYING"
         );
         await db.prisma.playthrough.create({
           data: {
@@ -726,19 +713,15 @@ describe("getGameDetails", () => {
 
         expect(result.playthroughs).toHaveLength(1);
         expect(result.playtimeTotalMinutes).toBe(90);
-        expect(result.derivedStatus).toBe("PLAYING");
-        expect(result.statusIsManual).toBe(false);
-        expect(result.hasBeenPlayed).toBe(false);
       });
     });
 
     // Authed — one FINISHED run
     describe("authed viewer with one FINISHED playthrough (600 min)", () => {
-      it("returns one run, playtimeTotalMinutes = 600, derivedStatus PLAYED, hasBeenPlayed true", async () => {
+      it("returns one run, playtimeTotalMinutes = 600", async () => {
         const { libraryItemId } = await seedUserAndLibrary(
           "pt-finished",
-          "PLAYED",
-          false
+          "DONE"
         );
         await db.prisma.playthrough.create({
           data: {
@@ -756,20 +739,13 @@ describe("getGameDetails", () => {
 
         expect(result.playthroughs).toHaveLength(1);
         expect(result.playtimeTotalMinutes).toBe(600);
-        expect(result.derivedStatus).toBe("PLAYED");
-        expect(result.statusIsManual).toBe(false);
-        expect(result.hasBeenPlayed).toBe(true);
       });
     });
 
     // Authed — FINISHED + ABANDONED runs
     describe("authed viewer with FINISHED and ABANDONED playthroughs", () => {
-      it("sums both runs, derivedStatus PLAYED, hasBeenPlayed true", async () => {
-        const { libraryItemId } = await seedUserAndLibrary(
-          "pt-multi",
-          "PLAYED",
-          false
-        );
+      it("sums both runs", async () => {
+        const { libraryItemId } = await seedUserAndLibrary("pt-multi", "DONE");
         await db.prisma.playthrough.create({
           data: {
             libraryItemId,
@@ -794,9 +770,6 @@ describe("getGameDetails", () => {
 
         expect(result.playthroughs).toHaveLength(2);
         expect(result.playtimeTotalMinutes).toBe(550);
-        expect(result.derivedStatus).toBe("PLAYED");
-        expect(result.statusIsManual).toBe(false);
-        expect(result.hasBeenPlayed).toBe(true);
       });
     });
 
@@ -808,8 +781,7 @@ describe("getGameDetails", () => {
       it("uses Σ playthroughs.playtimeMinutes, NOT Σ journal.playedMinutes", async () => {
         const { libraryItemId, gameId } = await seedUserAndLibrary(
           "pt-source",
-          "PLAYED",
-          false
+          "DONE"
         );
 
         // Create a playthrough with playtimeMinutes = 300.
@@ -863,11 +835,7 @@ describe("getGameDetails", () => {
     // -----------------------------------------------------------------------
     describe("playthroughs ordering", () => {
       it("returns playthroughs ordered by ordinal descending", async () => {
-        const { libraryItemId } = await seedUserAndLibrary(
-          "pt-order",
-          "PLAYED",
-          false
-        );
+        const { libraryItemId } = await seedUserAndLibrary("pt-order", "DONE");
         await db.prisma.playthrough.create({
           data: {
             libraryItemId,
@@ -912,8 +880,7 @@ describe("getGameDetails", () => {
       it("each playthrough carries its journalEntries ordered by createdAt desc", async () => {
         const { libraryItemId, gameId } = await seedUserAndLibrary(
           "pt-entries",
-          "PLAYING",
-          false
+          "PLAYING"
         );
         const playthrough = await db.prisma.playthrough.create({
           data: {
@@ -969,8 +936,7 @@ describe("getGameDetails", () => {
       it("returns null-playthroughId entries in unattachedJournalEntries when the game has runs", async () => {
         const { libraryItemId, gameId } = await seedUserAndLibrary(
           "pt-detached",
-          "PLAYING",
-          false
+          "PLAYING"
         );
         // One run with one attached entry
         const playthrough = await db.prisma.playthrough.create({
@@ -1032,8 +998,7 @@ describe("getGameDetails", () => {
       it("returns unattachedJournalEntries ordered by createdAt desc", async () => {
         const { libraryItemId, gameId } = await seedUserAndLibrary(
           "pt-detached-order",
-          "PLAYING",
-          false
+          "PLAYING"
         );
         await db.prisma.playthrough.create({
           data: {
@@ -1084,8 +1049,7 @@ describe("getGameDetails", () => {
       it("returns [] for unattachedJournalEntries when the game has NO runs — preserving §2.11 feed-hidden contract", async () => {
         const { gameId } = await seedUserAndLibrary(
           "pt-no-runs-detached",
-          "SHELF",
-          false
+          "WANT"
         );
         // Null-playthroughId entry exists but NO playthroughs — feed must stay hidden
         await db.prisma.journalEntry.create({

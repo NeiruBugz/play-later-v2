@@ -130,7 +130,7 @@ beforeAll(async () => {
       id: 70001,
       userId: PUBLIC_OWNER_ID,
       gameId: "gpp-game-pub1",
-      status: "PLAYED",
+      status: "DONE",
     },
   });
   // Older run — PLAYING, no finishedAt

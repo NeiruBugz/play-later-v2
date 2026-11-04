@@ -128,8 +128,6 @@ async function seedLibraryItemWithRun(
       userId,
       gameId,
       status: "PLAYING",
-      statusIsManual: false,
-      hasBeenPlayed: false,
       acquisitionType: "DIGITAL",
     },
   });
@@ -358,8 +356,6 @@ describe("createJournalEntryWorker — log session against a run", () => {
           userId: OWNER_ID,
           gameId: GAME_ID,
           status: "PLAYING",
-          statusIsManual: true,
-          hasBeenPlayed: false,
           acquisitionType: "DIGITAL",
         },
       });

@@ -90,12 +90,12 @@ describe("addGameToLibrary", () => {
     it("creates and returns a LibraryItem owned by the user", async () => {
       const item = await addGameToLibrary("atl-user-alice", {
         gameId: seededGame.id,
-        status: "WISHLIST",
+        status: "WANT",
         platform: "PC",
       });
 
       expect(item.userId).toBe("atl-user-alice");
-      expect(item.status).toBe("WISHLIST");
+      expect(item.status).toBe("WANT");
       expect(item.platform).toBe("PC");
 
       const dbRow = await db.prisma.libraryItem.findFirst({
@@ -221,13 +221,7 @@ describe("addGameToLibrary", () => {
       await db.prisma.user.create({ data: makeUser("statustest") });
     });
 
-    const statuses = [
-      "WISHLIST",
-      "SHELF",
-      "UP_NEXT",
-      "PLAYING",
-      "PLAYED",
-    ] as const;
+    const statuses = ["WANT", "PLAYING", "DONE"] as const;
 
     for (const status of statuses) {
       it(`creates LibraryItem with status ${status}`, async () => {

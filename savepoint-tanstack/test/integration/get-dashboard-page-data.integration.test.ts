@@ -65,7 +65,8 @@ function makeLibraryItem(
   userId: string,
   gameId: string,
   opts: {
-    status?: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
+    status?: "WANT" | "PLAYING" | "DONE";
+    upNextPosition?: number | null;
     createdAt?: Date;
     updatedAt?: Date;
   } = {}
@@ -74,12 +75,8 @@ function makeLibraryItem(
   return {
     userId,
     gameId,
-    status: (opts.status ?? "SHELF") as
-      | "WISHLIST"
-      | "SHELF"
-      | "UP_NEXT"
-      | "PLAYING"
-      | "PLAYED",
+    status: opts.status ?? ("WANT" as const),
+    upNextPosition: opts.upNextPosition ?? null,
     acquisitionType: "DIGITAL" as const,
     createdAt: ts,
     updatedAt: opts.updatedAt ?? ts,
@@ -129,11 +126,7 @@ describe("getDashboardPageDataWorker", () => {
     it("returns zero status counts for all statuses", async () => {
       const data = await getDashboardPageDataWorker("ddpd-user-empty");
 
-      expect(data.statusCounts.PLAYING).toBe(0);
-      expect(data.statusCounts.PLAYED).toBe(0);
-      expect(data.statusCounts.UP_NEXT).toBe(0);
-      expect(data.statusCounts.SHELF).toBe(0);
-      expect(data.statusCounts.WISHLIST).toBe(0);
+      expect(data.statusCounts).toEqual({ WANT: 0, PLAYING: 0, DONE: 0 });
     });
 
     it("returns empty quickLogGames", async () => {
@@ -287,10 +280,10 @@ describe("getDashboardPageDataWorker", () => {
       await db.prisma.libraryItem.createMany({
         data: [
           makeLibraryItem("ddpd-user-non-playing", "ddpd-game-np-a", {
-            status: "PLAYED",
+            status: "DONE",
           }),
           makeLibraryItem("ddpd-user-non-playing", "ddpd-game-np-b", {
-            status: "SHELF",
+            status: "WANT",
           }),
         ],
       });
@@ -329,19 +322,21 @@ describe("getDashboardPageDataWorker", () => {
             createdAt: new Date("2024-01-02T10:00:00.000Z"),
           }),
           makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-c", {
-            status: "UP_NEXT",
+            status: "WANT",
+            upNextPosition: 2,
             createdAt: new Date("2024-01-03T10:00:00.000Z"),
           }),
           makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-d", {
-            status: "UP_NEXT",
+            status: "WANT",
+            upNextPosition: 1,
             createdAt: new Date("2024-01-04T10:00:00.000Z"),
           }),
           makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-e", {
-            status: "SHELF",
+            status: "WANT",
             createdAt: new Date("2024-01-05T10:00:00.000Z"),
           }),
           makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-f", {
-            status: "PLAYED",
+            status: "DONE",
             createdAt: new Date("2024-01-06T10:00:00.000Z"),
           }),
         ],
@@ -359,16 +354,16 @@ describe("getDashboardPageDataWorker", () => {
       const data = await getDashboardPageDataWorker("ddpd-user-derivations");
 
       expect(data.continuePlaying.total).toBe(2);
+      expect(data.statusCounts).toEqual({ WANT: 3, PLAYING: 2, DONE: 1 });
     });
 
-    it("upNext contains only UP_NEXT items", async () => {
+    it("upNext contains only queued items, ordered by queue position", async () => {
       const data = await getDashboardPageDataWorker("ddpd-user-derivations");
 
-      const statuses = data.upNext.items.map((i) => i.status);
-      expect(statuses.every((s) => s === "UP_NEXT")).toBe(true);
+      expect(data.upNext.items.map((i) => i.upNextPosition)).toEqual([1, 2]);
     });
 
-    it("upNext.total counts all UP_NEXT items", async () => {
+    it("upNext.total counts all queued items", async () => {
       const data = await getDashboardPageDataWorker("ddpd-user-derivations");
 
       expect(data.upNext.total).toBe(2);
