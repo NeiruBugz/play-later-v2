@@ -10,13 +10,18 @@ import { describe, expect, it, vi } from "vitest";
 
 import { routeTree } from "../routeTree.gen";
 
-const { profileLookups, resolves, signedInUser } = vi.hoisted(() => ({
-  profileLookups: { count: 0 },
+const { counts, resolves, signedInUser } = vi.hoisted(() => ({
+  counts: { currentUser: 0, connections: 0, profilePage: 0 },
   resolves:
     <T,>(value: T) =>
     async () =>
       value,
-  signedInUser: { id: "user-1", name: "Test User", email: "t@example.com" },
+  signedInUser: {
+    id: "user-1",
+    name: "Test User",
+    username: null,
+    image: null,
+  },
 }));
 
 vi.mock("@env", () => ({
@@ -33,31 +38,27 @@ vi.mock("@env", () => ({
   ),
 }));
 
-vi.mock("@/entities/session/api/require-user-id-or-redirect", () => ({
-  requireUserIdOrRedirectFn: resolves({ userId: "user-1" }),
-}));
-
 vi.mock("@/entities/session/api/get-current-user", () => ({
-  getCurrentUserFn: resolves({ user: signedInUser }),
-}));
-
-vi.mock("@/entities/session/api", () => ({
-  getCurrentUserFn: resolves({ user: signedInUser }),
+  getCurrentUserFn: async () => {
+    counts.currentUser += 1;
+    return { user: signedInUser, statusModelNoticePending: false };
+  },
 }));
 
 vi.mock("@/features/profile-overview/api", () => ({
-  getProfilePageDataFn: async () => {
-    profileLookups.count += 1;
-    return { profile: { id: "user-1", name: "Test User", username: null } };
+  getPublicProfilePageDataFn: async () => {
+    counts.profilePage += 1;
+    return {
+      profile: { id: "user-2", name: "Other", username: "other", image: null },
+      stats: {},
+      followerCount: 0,
+      followingCount: 0,
+      isFollowing: false,
+      viewerId: null,
+      activity: null,
+      libraryItems: [],
+    };
   },
-  getPublicProfilePageDataFn: resolves({
-    profile: { id: "user-2", name: "Other", username: "other", image: null },
-    stats: {},
-    followerCount: 0,
-    followingCount: 0,
-    isFollowing: false,
-    libraryItems: [],
-  }),
 }));
 
 vi.mock("@/features/view-activity-feed/api", () => ({
@@ -73,8 +74,14 @@ vi.mock("@/features/setup-profile/api/get-profile-setup-status", () => ({
 }));
 
 vi.mock("@/features/social-discovery/api", () => ({
-  listFollowersFn: resolves({ followers: [], total: 0 }),
-  listFollowingFn: resolves({ following: [], total: 0 }),
+  listConnectionsFn: async () => {
+    counts.connections += 1;
+    return {
+      profile: { id: "user-2", name: "Other", username: "other", image: null },
+      entries: [],
+      total: 0,
+    };
+  },
 }));
 
 vi.mock("@/features/journal-timeline", () => ({
@@ -104,8 +111,8 @@ vi.mock("@/widgets/profile-setup-page", () => ({
 }));
 
 vi.mock("@/widgets", () => ({
-  UserList: ({ variant }: { variant: string }) => (
-    <div data-testid={`user-list-${variant}`} />
+  UserConnectionsPage: ({ kind }: { kind: string }) => (
+    <div data-testid={`user-list-${kind}`} />
   ),
   ProfileOverview: () => <div data-testid="profile-overview" />,
   ProfileActivityTab: () => null,
@@ -181,18 +188,6 @@ describe("real route tree", () => {
     expect(screen.queryByTestId("journal-list")).not.toBeInTheDocument();
   });
 
-  it("opens /profile/setup without running the /profile redirect guard", async () => {
-    profileLookups.count = 0;
-
-    const router = await renderAt("/profile/setup");
-
-    await waitFor(() =>
-      expect(screen.getByTestId("profile-setup-form")).toBeInTheDocument()
-    );
-    expect(router.state.location.pathname).toBe("/profile/setup");
-    expect(profileLookups.count).toBe(0);
-  });
-
   it("redirects /profile to /profile/setup once for a user without a username", async () => {
     const router = await renderAt("/profile");
 
@@ -200,5 +195,37 @@ describe("real route tree", () => {
       expect(screen.getByTestId("profile-setup-form")).toBeInTheDocument()
     );
     expect(router.state.location.pathname).toBe("/profile/setup");
+  });
+
+  it("resolves the session once for a followers page: one list request, no profile-page fan-out", async () => {
+    counts.currentUser = 0;
+    counts.connections = 0;
+    counts.profilePage = 0;
+
+    await renderAt("/u/other/followers");
+
+    await waitFor(() =>
+      expect(screen.getByTestId("user-list-followers")).toBeInTheDocument()
+    );
+    expect(counts.connections).toBe(1);
+    expect(counts.profilePage).toBe(0);
+  });
+
+  it("does not re-resolve the session on later navigations or a blanket invalidate", async () => {
+    counts.currentUser = 0;
+    const router = await renderAt("/journal");
+    await waitFor(() =>
+      expect(screen.getByTestId("journal-list")).toBeInTheDocument()
+    );
+
+    await act(async () => {
+      await router.navigate({ to: "/journal/new" });
+    });
+    await act(async () => {
+      await router.invalidate();
+    });
+
+    expect(router.state.location.pathname).toBe("/journal/new");
+    expect(counts.currentUser).toBe(1);
   });
 });

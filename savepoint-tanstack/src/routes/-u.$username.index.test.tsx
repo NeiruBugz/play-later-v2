@@ -2,18 +2,17 @@ import { render, screen } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
 import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
+import {
+  getActivityFeedFn,
+  getActivityForUserFn,
+} from "@/features/view-activity-feed/api";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import { Route } from "./u.$username.index";
 
 vi.mock("@/features/profile-overview/api", () => ({
   getPublicProfilePageDataFn: vi.fn(),
-}));
-
-vi.mock("@/entities/session/api/get-current-user", () => ({
-  getCurrentUserFn: vi.fn(),
 }));
 
 vi.mock("@/features/view-activity-feed/api", () => ({
@@ -132,41 +131,38 @@ const invokeLoader = async (username: string) => {
 };
 
 describe("/u/$username route", () => {
-  describe("given the profile is public and exists", () => {
-    beforeEach(() => {
-      vi.mocked(getPublicProfilePageDataFn).mockResolvedValue({
-        profile: mockLoaderData.profile,
-        stats: mockLoaderData.stats,
-        followerCount: 0,
-        followingCount: 0,
-        isFollowing: null,
-      } as never);
-      vi.mocked(getCurrentUserFn).mockResolvedValue({ user: null } as never);
+  describe("given the page data resolves", () => {
+    const pageData = {
+      profile: mockLoaderData.profile,
+      stats: mockLoaderData.stats,
+      followerCount: 3,
+      followingCount: 4,
+      isFollowing: true,
+      viewerId: "viewer-1",
+      activity: { items: [], nextCursor: null },
+      libraryItems: [],
+    };
+    let result: unknown;
+
+    beforeEach(async () => {
+      vi.clearAllMocks();
+      vi.mocked(getPublicProfilePageDataFn).mockResolvedValue(
+        pageData as never
+      );
+      result = await invokeLoader("targetuser");
     });
 
-    it("returns the public profile page data with viewerId=null when anonymous", async () => {
-      const result = await invokeLoader("targetuser");
-      expect(result).toMatchObject({ viewerId: null });
-    });
-  });
-
-  describe("given the viewer is the profile owner", () => {
-    beforeEach(() => {
-      vi.mocked(getPublicProfilePageDataFn).mockResolvedValue({
-        profile: mockLoaderData.profile,
-        stats: mockLoaderData.stats,
-        followerCount: 0,
-        followingCount: 0,
-        isFollowing: null,
-      } as never);
-      vi.mocked(getCurrentUserFn).mockResolvedValue({
-        user: { id: "user-target", name: "Target", image: null },
-      } as never);
+    it("returns the server-resolved viewer and activity untouched", () => {
+      expect(result).toEqual(pageData);
     });
 
-    it("returns the viewerId matching the profile owner id", async () => {
-      const result = await invokeLoader("targetuser");
-      expect(result).toMatchObject({ viewerId: "user-target" });
+    it("makes a single server call for the whole page", () => {
+      expect(getPublicProfilePageDataFn).toHaveBeenCalledTimes(1);
+      expect(getPublicProfilePageDataFn).toHaveBeenCalledWith({
+        data: { username: "targetuser" },
+      });
+      expect(getActivityFeedFn).not.toHaveBeenCalled();
+      expect(getActivityForUserFn).not.toHaveBeenCalled();
     });
   });
 
@@ -175,7 +171,6 @@ describe("/u/$username route", () => {
       vi.mocked(getPublicProfilePageDataFn).mockRejectedValue(
         new NotFoundError("Profile not found")
       );
-      vi.mocked(getCurrentUserFn).mockResolvedValue({ user: null } as never);
     });
 
     it("throws a notFound() result so the router renders 404", async () => {
