@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
+import { setOwnershipFn } from "@/features/manage-library-entry/api/set-ownership-fn";
 import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
 import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
 import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
@@ -85,6 +86,10 @@ vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
 
 vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
   deletePlaythroughFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
+  setOwnershipFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
@@ -225,6 +230,43 @@ const PRECEDING = Node.DOCUMENT_POSITION_PRECEDING;
 
 const precedes = (first: Element, second: Element): boolean =>
   Boolean(second.compareDocumentPosition(first) & PRECEDING);
+
+describe("GameDetail ownership", () => {
+  const renderWith = (overrides: Partial<LibraryItem>) =>
+    render(
+      <GameDetail
+        data={buildData(
+          buildLibraryItem({ id: 42, platform: "PC", ...overrides })
+        )}
+        viewerUserId="user-1"
+      />
+    );
+
+  it("tags a Want game the user does not own", () => {
+    renderWith({ status: "WANT", isOwned: false });
+    expect(screen.getAllByText("Not owned").length).toBeGreaterThan(0);
+  });
+
+  it("does not tag an owned Want game", () => {
+    renderWith({ status: "WANT", isOwned: true });
+    expect(screen.queryByText("Not owned")).toBeNull();
+  });
+
+  it("lets the user mark an owned game as not owned from More library actions", async () => {
+    vi.mocked(setOwnershipFn).mockResolvedValue({ isOwned: false });
+    renderWith({ status: "WANT", isOwned: true });
+
+    await userEvent.click(elements.queryMoreMenuTrigger()!);
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "I don't own it yet" })
+    );
+
+    expect(setOwnershipFn).toHaveBeenCalledWith({
+      data: { id: 42, isOwned: false },
+    });
+    expect((await screen.findAllByText("Not owned")).length).toBeGreaterThan(0);
+  });
+});
 
 describe("GameDetail Up Next", () => {
   const renderWith = (overrides: Partial<LibraryItem>) =>

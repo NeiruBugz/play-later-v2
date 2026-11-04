@@ -12,9 +12,9 @@ vi.mock("@tanstack/react-router", () => ({
 const defaultInput = {
   status: undefined,
   platform: undefined,
-  acquisition: undefined,
   minRating: undefined,
   unratedOnly: undefined,
+  notOwnedOnly: undefined,
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
 };
@@ -203,41 +203,70 @@ describe("useLibraryFiltersState", () => {
     });
   });
 
-  describe("onAcquisitionPick", () => {
-    it("sets the acquisition filter when none is active", () => {
-      const { result } = renderHook(() => useLibraryFiltersState(defaultInput));
-      act(() => {
-        result.current.onAcquisitionPick("SUBSCRIPTION");
-      });
-      expect(mockNavigate).toHaveBeenCalledWith(
+  describe("onNotOwnedOnlyChange", () => {
+    it("sets and clears notOwnedOnly", () => {
+      const { result } = renderHook(() =>
+        useLibraryFiltersState({ ...defaultInput, status: "WANT" })
+      );
+      act(() => result.current.onNotOwnedOnlyChange(true));
+      expect(mockNavigate).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ acquisition: "SUBSCRIPTION" }),
+          search: expect.objectContaining({ notOwnedOnly: true }),
         })
       );
-    });
-
-    it("toggles the acquisition filter off when re-picking the active value", () => {
-      const { result } = renderHook(() =>
-        useLibraryFiltersState({ ...defaultInput, acquisition: "PHYSICAL" })
-      );
-      act(() => {
-        result.current.onAcquisitionPick("PHYSICAL");
-      });
-      expect(mockNavigate).toHaveBeenCalledWith(
+      act(() => result.current.onNotOwnedOnlyChange(false));
+      expect(mockNavigate).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ acquisition: undefined }),
+          search: expect.objectContaining({ notOwnedOnly: undefined }),
         })
       );
     });
   });
 
-  describe("activeFilterCount with acquisition", () => {
-    it("counts acquisition alongside status", () => {
+  describe("switching status away from Want", () => {
+    it("clears notOwnedOnly", () => {
       const { result } = renderHook(() =>
         useLibraryFiltersState({
           ...defaultInput,
-          status: "PLAYING",
-          acquisition: "SUBSCRIPTION",
+          status: "WANT",
+          notOwnedOnly: true,
+        })
+      );
+      act(() => result.current.onStatusPick("DONE"));
+      expect(mockNavigate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({
+            status: "DONE",
+            notOwnedOnly: undefined,
+          }),
+        })
+      );
+    });
+
+    it("clears notOwnedOnly when showing all statuses", () => {
+      const { result } = renderHook(() =>
+        useLibraryFiltersState({
+          ...defaultInput,
+          status: "WANT",
+          notOwnedOnly: true,
+        })
+      );
+      act(() => result.current.onStatusAll());
+      expect(mockNavigate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ notOwnedOnly: undefined }),
+        })
+      );
+    });
+  });
+
+  describe("activeFilterCount with notOwnedOnly", () => {
+    it("counts it alongside status", () => {
+      const { result } = renderHook(() =>
+        useLibraryFiltersState({
+          ...defaultInput,
+          status: "WANT",
+          notOwnedOnly: true,
         })
       );
       expect(result.current.activeFilterCount).toBe(2);

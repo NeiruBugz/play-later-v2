@@ -14,7 +14,6 @@ vi.mock("@tanstack/react-router", () => ({
 const defaultProps = {
   status: undefined,
   platform: undefined,
-  acquisition: undefined,
   minRating: undefined,
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
@@ -31,8 +30,11 @@ const elements = {
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
   getOption: (name: string) =>
     screen.getByRole("option", { name, hidden: true }),
-  getAcquisitionOption: (label: string) =>
-    screen.getByRole("button", { name: `Filter by ${label}` }),
+  getNotOwnedOnlySwitch: () =>
+    screen.getByRole("switch", { name: "Not owned only" }),
+  queryNotOwnedOnlySwitch: () =>
+    screen.queryByRole("switch", { name: "Not owned only" }),
+  queryAcquisitionHeading: () => screen.queryByText("Acquisition"),
   getClearFiltersButton: () =>
     screen.getByRole("button", { name: "Clear all filters" }),
   queryClearFiltersButton: () =>
@@ -280,7 +282,6 @@ describe("LibraryFilters", () => {
         <LibraryFilters
           status="PLAYING"
           platform="PC"
-          acquisition={undefined}
           minRating={3.5}
           sortBy="title"
           sortOrder="asc"
@@ -304,16 +305,46 @@ describe("LibraryFilters", () => {
     });
   });
 
-  describe("given the user picks the Subscription acquisition", () => {
-    beforeEach(async () => {
+  describe("given the sidebar is rendered without a status", () => {
+    it("has no Acquisition filter", () => {
       render(<LibraryFilters {...defaultProps} />);
-      await userEvent.click(elements.getAcquisitionOption("Subscription"));
+      expect(elements.queryAcquisitionHeading()).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Filter by Physical" })
+      ).toBeNull();
     });
 
-    it("calls navigate with search.acquisition set to SUBSCRIPTION", () => {
+    it("offers no Not owned only toggle", () => {
+      render(<LibraryFilters {...defaultProps} />);
+      expect(elements.queryNotOwnedOnlySwitch()).toBeNull();
+    });
+  });
+
+  describe("given the Want filter is selected", () => {
+    it("offers the Not owned only toggle, which sets notOwnedOnly", async () => {
+      render(<LibraryFilters {...defaultProps} status="WANT" />);
+      await userEvent.click(elements.getNotOwnedOnlySwitch());
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ acquisition: "SUBSCRIPTION" }),
+          search: expect.objectContaining({
+            status: "WANT",
+            notOwnedOnly: true,
+          }),
+        })
+      );
+    });
+  });
+
+  describe("given Not owned only is on and the user switches to Playing", () => {
+    it("clears notOwnedOnly", async () => {
+      render(<LibraryFilters {...defaultProps} status="WANT" notOwnedOnly />);
+      await actions.selectStatus("Filter by Playing");
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({
+            status: "PLAYING",
+            notOwnedOnly: undefined,
+          }),
         })
       );
     });

@@ -2,7 +2,6 @@ import {
   DEFAULT_PLATFORMS,
   getTotalCount,
   useLibraryFiltersState,
-  type LibraryAcquisition,
   type LibrarySortBy,
   type LibrarySortOrder,
   type LibraryStatus,
@@ -10,14 +9,13 @@ import {
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
 
-import { AcquisitionList } from "../acquisition-list";
+import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
 import { SortSelect } from "../sort-select";
 import { StatusList } from "../status-list";
 
 export type {
   LibraryStatus,
-  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,
@@ -26,7 +24,6 @@ export type {
 export type LibraryFiltersProps = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
-  acquisition: LibraryAcquisition | undefined;
   minRating: number | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
@@ -48,39 +45,39 @@ export type LibraryFiltersProps = {
    * does not clobber an active mobile-side toggle.
    */
   unratedOnly?: boolean;
+  notOwnedOnly?: boolean;
 };
 
 export function LibraryFilters(props: LibraryFiltersProps) {
   const {
     status,
     platform,
-    acquisition,
     minRating,
     sortBy,
     sortOrder,
     counts,
     platforms = DEFAULT_PLATFORMS,
     unratedOnly,
+    notOwnedOnly,
   } = props;
 
   const {
     currentStatus,
-    currentAcquisition,
     sortValue,
     platformValue,
     hasActiveFilters,
     onStatusPick,
     onStatusAll,
-    onAcquisitionPick,
+    onNotOwnedOnlyChange,
     onPlatformChange,
     onSortChange,
     onClearAll,
   } = useLibraryFiltersState({
     status,
     platform,
-    acquisition,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
   });
@@ -104,6 +101,14 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           onAll={onStatusAll}
           totalCount={totalCount}
         />
+        <div className="mt-3">
+          <NotOwnedOnlyToggle
+            id="sidebar-not-owned-only"
+            status={status}
+            checked={notOwnedOnly === true}
+            onChange={onNotOwnedOnlyChange}
+          />
+        </div>
       </section>
 
       <section>
@@ -115,17 +120,6 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           platforms={platforms}
           rawPlatform={platform}
           onChange={onPlatformChange}
-        />
-      </section>
-
-      <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
-          Acquisition
-        </p>
-        <AcquisitionList
-          current={currentAcquisition}
-          onPick={onAcquisitionPick}
-          variant="sidebar"
         />
       </section>
 

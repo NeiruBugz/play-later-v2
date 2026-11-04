@@ -8,7 +8,7 @@ import {
   ComposeJournalEntryDialog,
   LogSessionDrawer,
 } from "@/features/compose-journal-entry";
-import { useSetStatus } from "@/features/manage-library-entry";
+import { useSetOwnership, useSetStatus } from "@/features/manage-library-entry";
 import {
   AddEditPlaythroughDrawer,
   type PlaythroughFormValues,
@@ -155,6 +155,12 @@ export function GameDetail({
     upNextPosition: libraryEntry?.upNextPosition ?? null,
   });
   const sharedLibraryStatus = isInLibrary ? libraryStatus : null;
+  const libraryOwnership = useSetOwnership({
+    id: libraryEntry?.id ?? 0,
+    gameTitle: game.title,
+    isOwned: libraryEntry?.isOwned ?? true,
+  });
+  const sharedLibraryOwnership = isInLibrary ? libraryOwnership : null;
 
   const libraryControlsProps =
     viewerUserId !== null
@@ -163,6 +169,7 @@ export function GameDetail({
           gameTitle: game.title,
           entry: libraryEntry,
           libraryStatus: sharedLibraryStatus,
+          libraryOwnership: sharedLibraryOwnership,
         }
       : null;
 

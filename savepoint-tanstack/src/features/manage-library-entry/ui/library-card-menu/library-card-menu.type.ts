@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 
+import type { UseSetOwnershipResult } from "../../model";
+
 export type LibraryCardMenuProps = {
   item: LibraryItemWithGame;
   /**
@@ -10,6 +12,8 @@ export type LibraryCardMenuProps = {
    * modal (the LibraryPage already mounts a single shared modal).
    */
   onEdit: () => void;
+  /** Shared ownership state of the card, so the menu and the tag agree. */
+  ownership: Pick<UseSetOwnershipResult, "isOwned" | "setOwned" | "isPending">;
   /** Dropdown items a host widget composes in (e.g. Up Next actions). */
   extraItems?: ReactNode;
 };

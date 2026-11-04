@@ -4,7 +4,6 @@ export type { StatusLensProps } from "./status-lens";
 export type {
   LibraryFiltersProps,
   LibraryStatus,
-  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,
@@ -17,8 +16,8 @@ export { SortSelect } from "./sort-select";
 export type { SortSelectProps } from "./sort-select";
 export { StatusList } from "./status-list";
 export type { StatusListProps, StatusListVariant } from "./status-list";
-export { AcquisitionList } from "./acquisition-list";
-export type { AcquisitionListProps } from "./acquisition-list";
+export { NotOwnedOnlyToggle } from "./not-owned-only-toggle";
+export type { NotOwnedOnlyToggleProps } from "./not-owned-only-toggle";
 export { RatingControls } from "./rating-controls";
 export type { RatingControlsProps } from "./rating-controls";
 export { ViewModeToggle } from "./view-mode-toggle";

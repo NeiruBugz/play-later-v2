@@ -13,10 +13,8 @@
 import { ListOrdered, type LucideIcon } from "lucide-react";
 
 import {
-  ACQUISITION_FILTER_ENTRIES,
   getStatusEntry,
   STATUS_ENTRIES,
-  type AcquisitionFilterEntry,
   type StatusBadgeVariant,
   type StatusEntry,
 } from "@/entities/library-item";
@@ -28,8 +26,8 @@ import type {
   LibraryStatusCounts,
 } from "./types";
 
-export { STATUS_ENTRIES, getStatusEntry, ACQUISITION_FILTER_ENTRIES };
-export type { StatusBadgeVariant, StatusEntry, AcquisitionFilterEntry };
+export { STATUS_ENTRIES, getStatusEntry };
+export type { StatusBadgeVariant, StatusEntry };
 
 /**
  * Two-tone filter styling — Slice 18A visual-parity push (Phase 3).
@@ -49,8 +47,7 @@ const ACTIVE =
   "bg-primary text-primary-foreground border-transparent hover:bg-primary/90";
 
 /**
- * Shared two-tone toggle styling for any single-select filter button (status,
- * acquisition). Active = primary token; idle = muted. Keeps the rail visually
+ * Shared two-tone toggle styling for any single-select filter button (status). Active = primary token; idle = muted. Keeps the rail visually
  * uniform across sections.
  */
 export const FILTER_TOGGLE_STYLE: { active: string; inactive: string } = {

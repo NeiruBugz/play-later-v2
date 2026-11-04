@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import type { UseSetOwnershipResult } from "@/features/manage-library-entry";
 
 export type LibraryItemCardProps = {
   item: LibraryItemWithGame;
@@ -11,9 +12,15 @@ export type LibraryItemCardProps = {
    * event propagation on menu interactions so they don't trigger that
    * outer navigation (preventDefault on the trigger button is the standard
    * shape; see LibraryCardMenu). A function receives the Up Next menu
-   * items (hidden for Playing) to pass on as the menu's `extraItems`.
+   * items (hidden for Playing) to pass on as the menu's `extraItems`, and the
+   * card's ownership state so the menu and the "Not owned" tag agree.
    */
-  menu?: ReactNode | ((upNextActions: ReactNode) => ReactNode);
+  menu?:
+    | ReactNode
+    | ((
+        upNextActions: ReactNode,
+        ownership: UseSetOwnershipResult
+      ) => ReactNode);
   /**
    * "responsive" (default) is a row on phones and a vertical tile from md up;
    * "row" stays a row at every width (library list view).

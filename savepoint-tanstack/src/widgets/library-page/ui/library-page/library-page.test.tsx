@@ -58,6 +58,10 @@ vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
 }));
 
+vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
+  setOwnershipFn: vi.fn(),
+}));
+
 vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
   setStatusFn: vi.fn(),
 }));
@@ -700,6 +704,53 @@ describe("LibraryPage", () => {
           screen.getByText("Nothing queued yet — put up to 5 games in Up Next.")
         ).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("given Want games with and without ownership", () => {
+    const buildWant = (id: number, title: string, isOwned: boolean) =>
+      buildLibraryItemWithGame(
+        { id, status: "WANT", isOwned },
+        { id: `game-${id}`, title, slug: `game-${id}` }
+      );
+
+    it("tags only the Want game the user does not own", () => {
+      render(
+        <LibraryPage
+          items={[buildWant(1, "Hades", true), buildWant(2, "Celeste", false)]}
+          total={2}
+          {...defaultViewProps}
+          status="WANT"
+        />
+      );
+      expect(screen.getAllByText("Not owned")).toHaveLength(1);
+    });
+
+    it("tags it in the list view too", async () => {
+      render(
+        <LibraryPage
+          items={[buildWant(2, "Celeste", false)]}
+          total={1}
+          {...defaultViewProps}
+        />
+      );
+      await userEvent.click(screen.getByRole("button", { name: /list/i }));
+      expect(screen.getAllByText("Not owned")).toHaveLength(1);
+    });
+
+    it("offers the Not owned only toggle with the Want filter, and no Acquisition filter", () => {
+      render(
+        <LibraryPage
+          items={[buildWant(2, "Celeste", false)]}
+          total={1}
+          {...defaultViewProps}
+          status="WANT"
+        />
+      );
+      expect(
+        screen.getByRole("switch", { name: "Not owned only" })
+      ).toBeDefined();
+      expect(screen.queryByText("Acquisition")).toBeNull();
     });
   });
 

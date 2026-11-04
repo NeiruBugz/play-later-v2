@@ -5,17 +5,17 @@ import {
   LibraryLifecycleStrip,
   LibraryStatusBadge,
   NextStepButton,
+  NotOwnedTag,
   QueueMarker,
-  resolveAcquisitionEmphasis,
-  resolveAcquisitionLabel,
-  shouldShowAcquisitionChip,
   StatusControl,
 } from "@/entities/library-item";
-import { useSetStatus } from "@/features/manage-library-entry/model";
+import {
+  useSetOwnership,
+  useSetStatus,
+} from "@/features/manage-library-entry/model";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { cn } from "@/shared/lib/utils";
-import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { RatingInput } from "@/shared/ui/rating-input";
 import { TooltipProvider } from "@/shared/ui/tooltip";
@@ -37,6 +37,11 @@ export function LibraryItemCard({
     status: item.status,
     upNextPosition: item.upNextPosition,
   });
+  const ownership = useSetOwnership({
+    id: item.id,
+    gameTitle: item.game.title,
+    isOwned: item.isOwned,
+  });
   const membership = useUpNextMembership({
     id: item.id,
     gameTitle: item.game.title,
@@ -44,18 +49,13 @@ export function LibraryItemCard({
   });
   const menuNode =
     typeof menu === "function"
-      ? menu(<UpNextMenuActions status={status} membership={membership} />)
+      ? menu(
+          <UpNextMenuActions status={status} membership={membership} />,
+          ownership
+        )
       : menu;
   const hasPlatform =
     typeof item.platform === "string" && item.platform.trim().length > 0;
-  // F03: the chip flags non-default acquisition (subscription / physical);
-  // the DIGITAL default stays implicit to keep the row clean.
-  const showAcquisitionChip = shouldShowAcquisitionChip(item.acquisitionType);
-  const acquisitionLabel = resolveAcquisitionLabel(
-    item.acquisitionType,
-    item.platform
-  );
-  const acquisitionEmphasis = resolveAcquisitionEmphasis(item.acquisitionType);
 
   return (
     <div
@@ -103,11 +103,13 @@ export function LibraryItemCard({
           {item.game.title}
         </h3>
 
-        <QueueMarker
-          status={status}
-          upNextPosition={membership.upNextPosition}
-          className="mt-1 self-start"
-        />
+        <div className="mt-1 flex flex-wrap items-center gap-1 self-start empty:hidden">
+          <QueueMarker
+            status={status}
+            upNextPosition={membership.upNextPosition}
+          />
+          <NotOwnedTag status={status} isOwned={ownership.isOwned} />
+        </div>
 
         <LibraryLifecycleStrip
           status={status}
@@ -128,20 +130,6 @@ export function LibraryItemCard({
             <TooltipProvider>
               <PlatformBadgeItem name={item.platform!} />
             </TooltipProvider>
-          ) : null}
-          {showAcquisitionChip ? (
-            <Badge
-              variant={
-                acquisitionEmphasis === "subscription" ? "default" : "outline"
-              }
-              className={cn(
-                "h-4 px-1.5 py-0 text-[10px] leading-none font-medium uppercase",
-                acquisitionEmphasis === "subscription" &&
-                  "bg-primary/10 text-primary border-transparent"
-              )}
-            >
-              {acquisitionLabel}
-            </Badge>
           ) : null}
         </div>
 

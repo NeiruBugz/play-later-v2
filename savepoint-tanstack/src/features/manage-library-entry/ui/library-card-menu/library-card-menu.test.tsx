@@ -48,6 +48,10 @@ vi.mock("sonner", () => ({
   },
 }));
 
+function ownedState(isOwned = true, setOwned = vi.fn()) {
+  return { isOwned, setOwned, isPending: false };
+}
+
 function makeItem(): LibraryItemWithGame {
   return buildLibraryItemWithGame(
     { id: 1, status: "PLAYING" },
@@ -101,7 +105,13 @@ describe("LibraryCardMenu", () => {
 
   describe("given the menu trigger is rendered", () => {
     beforeEach(() => {
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState()}
+        />
+      );
     });
 
     it("renders the actions trigger button with game title in accessible name", () => {
@@ -111,7 +121,13 @@ describe("LibraryCardMenu", () => {
 
   describe("given the user opens the dropdown menu", () => {
     beforeEach(async () => {
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState()}
+        />
+      );
       await actions.openMenu();
     });
 
@@ -136,7 +152,13 @@ describe("LibraryCardMenu", () => {
     const mockOnEdit = vi.fn();
 
     beforeEach(async () => {
-      render(<LibraryCardMenu item={makeItem()} onEdit={mockOnEdit} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={mockOnEdit}
+          ownership={ownedState()}
+        />
+      );
       await actions.openMenu();
       await actions.clickEditDetails();
     });
@@ -148,7 +170,13 @@ describe("LibraryCardMenu", () => {
 
   describe("given the user chooses Remove from Library", () => {
     beforeEach(async () => {
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState()}
+        />
+      );
       await actions.openMenu();
       await actions.clickRemove();
     });
@@ -183,7 +211,13 @@ describe("LibraryCardMenu", () => {
     beforeEach(async () => {
       mockDeleteLibraryItemFn.mockResolvedValue(undefined);
 
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState()}
+        />
+      );
       await actions.openMenu();
       await actions.clickRemove();
       await actions.confirmRemove();
@@ -206,7 +240,13 @@ describe("LibraryCardMenu", () => {
     beforeEach(async () => {
       mockDeleteLibraryItemFn.mockRejectedValue(new Error("Server error"));
 
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState()}
+        />
+      );
       await actions.openMenu();
       await actions.clickRemove();
       await actions.confirmRemove();
@@ -226,7 +266,13 @@ describe("LibraryCardMenu", () => {
     beforeEach(async () => {
       mockDeleteLibraryItemFn.mockRejectedValue("unexpected");
 
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState()}
+        />
+      );
       await actions.openMenu();
       await actions.clickRemove();
       await actions.confirmRemove();
@@ -246,6 +292,7 @@ describe("LibraryCardMenu", () => {
         <LibraryCardMenu
           item={makeItem()}
           onEdit={vi.fn()}
+          ownership={ownedState()}
           extraItems={<DropdownMenuItem>Put in Up Next</DropdownMenuItem>}
         />
       );
@@ -256,6 +303,44 @@ describe("LibraryCardMenu", () => {
       expect(
         screen.getByRole("menuitem", { name: "Put in Up Next" })
       ).toBeDefined();
+    });
+  });
+
+  describe("given the game is owned", () => {
+    it("offers 'I don't own it yet' and reports the choice", async () => {
+      const setOwned = vi.fn();
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState(true, setOwned)}
+        />
+      );
+      await actions.openMenu();
+
+      await userEvent.click(
+        screen.getByRole("menuitem", { name: "I don't own it yet" })
+      );
+
+      expect(setOwned).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe("given the game is not owned", () => {
+    it("offers 'I own it' and reports the choice", async () => {
+      const setOwned = vi.fn();
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          ownership={ownedState(false, setOwned)}
+        />
+      );
+      await actions.openMenu();
+
+      await userEvent.click(screen.getByRole("menuitem", { name: "I own it" }));
+
+      expect(setOwned).toHaveBeenCalledWith(true);
     });
   });
 });

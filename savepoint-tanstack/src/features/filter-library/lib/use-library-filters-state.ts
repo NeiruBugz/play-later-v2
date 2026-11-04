@@ -1,38 +1,32 @@
 import { useNavigate } from "@tanstack/react-router";
 
 import { getSortValue, SORT_VALUE_MAP } from "./status-config";
-import type {
-  LibraryAcquisition,
-  LibrarySortBy,
-  LibrarySortOrder,
-  LibraryStatus,
-} from "./types";
+import type { LibrarySortBy, LibrarySortOrder, LibraryStatus } from "./types";
 
 export type LibraryFiltersStateInput = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
-  acquisition: LibraryAcquisition | undefined;
   minRating: number | undefined;
   unratedOnly: boolean | undefined;
+  notOwnedOnly: boolean | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
 };
 
 export type LibraryFiltersState = {
   currentStatus: LibraryStatus | "__all__";
-  currentAcquisition: LibraryAcquisition | undefined;
   sortValue: string;
   platformValue: string;
   hasActiveFilters: boolean;
   activeFilterCount: number;
   onStatusPick: (value: LibraryStatus) => void;
   onStatusAll: () => void;
-  onAcquisitionPick: (value: LibraryAcquisition) => void;
   onPlatformChange: (raw: string) => void;
   onSortChange: (raw: string) => void;
   onMinRatingChange: (next: number | null) => void;
   onClearMinRating: () => void;
   onUnratedOnlyChange: (checked: boolean) => void;
+  onNotOwnedOnlyChange: (checked: boolean) => void;
   onClearAll: (extras?: { onAfterClear?: () => void }) => void;
 };
 
@@ -47,9 +41,9 @@ export function useLibraryFiltersState(
   const {
     status,
     platform,
-    acquisition,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
   } = input;
@@ -59,9 +53,9 @@ export function useLibraryFiltersState(
     patch: Partial<{
       status: LibraryStatus | undefined;
       platform: string | undefined;
-      acquisition: LibraryAcquisition | undefined;
       minRating: number | undefined;
       unratedOnly: boolean | undefined;
+      notOwnedOnly: boolean | undefined;
       sortBy: LibrarySortBy;
       sortOrder: LibrarySortOrder;
     }>
@@ -71,9 +65,9 @@ export function useLibraryFiltersState(
       search: {
         status,
         platform,
-        acquisition,
         minRating,
         unratedOnly,
+        notOwnedOnly,
         sortBy,
         sortOrder,
         ...patch,
@@ -88,20 +82,21 @@ export function useLibraryFiltersState(
   const activeFilterCount =
     (status !== undefined ? 1 : 0) +
     (platform !== undefined ? 1 : 0) +
-    (acquisition !== undefined ? 1 : 0) +
     (minRating !== undefined ? 1 : 0) +
-    (unratedOnly === true ? 1 : 0);
+    (unratedOnly === true ? 1 : 0) +
+    (notOwnedOnly === true ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0;
 
   const onStatusPick = (value: LibraryStatus) => {
-    updateSearch({ status: status === value ? undefined : value });
+    const nextStatus = status === value ? undefined : value;
+    updateSearch({
+      status: nextStatus,
+      notOwnedOnly: nextStatus === "WANT" ? notOwnedOnly : undefined,
+    });
   };
 
-  const onStatusAll = () => updateSearch({ status: undefined });
-
-  const onAcquisitionPick = (value: LibraryAcquisition) => {
-    updateSearch({ acquisition: acquisition === value ? undefined : value });
-  };
+  const onStatusAll = () =>
+    updateSearch({ status: undefined, notOwnedOnly: undefined });
 
   const onPlatformChange = (raw: string) => {
     updateSearch({ platform: raw === "__all__" ? undefined : raw });
@@ -123,13 +118,17 @@ export function useLibraryFiltersState(
     updateSearch({ unratedOnly: checked ? true : undefined });
   };
 
+  const onNotOwnedOnlyChange = (checked: boolean) => {
+    updateSearch({ notOwnedOnly: checked ? true : undefined });
+  };
+
   const onClearAll = (extras?: { onAfterClear?: () => void }) => {
     updateSearch({
       status: undefined,
       platform: undefined,
-      acquisition: undefined,
       minRating: undefined,
       unratedOnly: undefined,
+      notOwnedOnly: undefined,
       sortBy: "updatedAt",
       sortOrder: "desc",
     });
@@ -138,19 +137,18 @@ export function useLibraryFiltersState(
 
   return {
     currentStatus,
-    currentAcquisition: acquisition,
     sortValue,
     platformValue,
     hasActiveFilters,
     activeFilterCount,
     onStatusPick,
     onStatusAll,
-    onAcquisitionPick,
     onPlatformChange,
     onSortChange,
     onMinRatingChange,
     onClearMinRating,
     onUnratedOnlyChange,
+    onNotOwnedOnlyChange,
     onClearAll,
   };
 }

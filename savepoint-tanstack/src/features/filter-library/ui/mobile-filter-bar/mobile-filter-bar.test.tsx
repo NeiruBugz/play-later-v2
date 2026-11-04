@@ -14,7 +14,6 @@ vi.mock("@tanstack/react-router", () => ({
 const defaultProps = {
   status: undefined,
   platform: undefined,
-  acquisition: undefined,
   minRating: undefined,
   unratedOnly: undefined,
   sortBy: "updatedAt" as const,
@@ -38,8 +37,10 @@ const elements = {
     screen.getByRole("slider", { name: "Minimum rating filter" }),
   getUnratedSwitch: () =>
     screen.getByRole("switch", { name: "Show only unrated games" }),
-  getAcquisitionOption: (label: string) =>
-    screen.getByRole("button", { name: `Filter by ${label}` }),
+  getNotOwnedOnlySwitch: () =>
+    screen.getByRole("switch", { name: "Not owned only" }),
+  queryNotOwnedOnlySwitch: () =>
+    screen.queryByRole("switch", { name: "Not owned only" }),
   queryClearAllButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
   getClearAllButton: () =>
@@ -63,8 +64,6 @@ const actions = {
   openSortSelect: () => userEvent.click(elements.getSortTrigger()),
   pickSortOption: (name: string) => userEvent.click(elements.getOption(name)),
   toggleUnrated: () => userEvent.click(elements.getUnratedSwitch()),
-  pickAcquisition: (label: string) =>
-    userEvent.click(elements.getAcquisitionOption(label)),
   clearAll: () => userEvent.click(elements.getClearAllButton()),
   clearMinRating: () => userEvent.click(elements.getClearMinRatingButton()),
 };
@@ -255,7 +254,6 @@ describe("MobileFilterBar", () => {
         <MobileFilterBar
           status="PLAYING"
           platform="PC"
-          acquisition={undefined}
           minRating={7}
           unratedOnly={true}
           sortBy="title"
@@ -293,18 +291,37 @@ describe("MobileFilterBar", () => {
     });
   });
 
-  describe("given the user picks an acquisition inside the sheet", () => {
+  describe("given the sheet is open without a status", () => {
     beforeEach(async () => {
       render(<MobileFilterBar {...defaultProps} />);
       await actions.openSheet();
       await elements.findDialog();
-      await actions.pickAcquisition("Physical");
     });
 
-    it("calls navigate with search.acquisition set to PHYSICAL", () => {
+    it("has no Acquisition filter", () => {
+      expect(screen.queryByText("Acquisition")).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Filter by Physical" })
+      ).toBeNull();
+    });
+
+    it("offers no Not owned only toggle", () => {
+      expect(elements.queryNotOwnedOnlySwitch()).toBeNull();
+    });
+  });
+
+  describe("given the Want filter is selected and the user turns on Not owned only", () => {
+    beforeEach(async () => {
+      render(<MobileFilterBar {...defaultProps} status="WANT" />);
+      await actions.openSheet();
+      await elements.findDialog();
+      await userEvent.click(elements.getNotOwnedOnlySwitch());
+    });
+
+    it("calls navigate with search.notOwnedOnly true", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ acquisition: "PHYSICAL" }),
+          search: expect.objectContaining({ notOwnedOnly: true }),
         })
       );
     });

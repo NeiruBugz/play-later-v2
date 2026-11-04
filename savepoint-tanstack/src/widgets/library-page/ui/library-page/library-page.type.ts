@@ -3,7 +3,6 @@ import type {
   LibraryItemWithGame,
 } from "@/entities/library-item/model";
 import type {
-  LibraryAcquisition,
   LibraryFiltersProps,
   LibrarySortBy,
   LibrarySortOrder,
@@ -23,9 +22,9 @@ export type LibraryPageProps = {
   total: GetLibraryResult["total"];
   status: LibraryStatus | undefined;
   platform: string | undefined;
-  acquisition?: LibraryAcquisition | undefined;
   minRating: number | undefined;
   unratedOnly?: boolean | undefined;
+  notOwnedOnly?: boolean | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
   /**

@@ -25,7 +25,7 @@ const defaultProps = {
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
   platform: undefined as string | undefined,
-  acquisition: undefined as string | undefined,
+  notOwnedOnly: undefined as boolean | undefined,
   minRating: undefined as number | undefined,
   unratedOnly: undefined as boolean | undefined,
 };

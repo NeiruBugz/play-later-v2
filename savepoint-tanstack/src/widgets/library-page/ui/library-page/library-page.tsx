@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LibraryStatusBadge,
   NextStepButton,
+  NotOwnedTag,
   QueueMarker,
   StatusControl,
 } from "@/entities/library-item";
@@ -21,6 +22,7 @@ import {
 import {
   LibraryCardMenu,
   LibraryModal,
+  useSetOwnership,
   useSetStatus,
 } from "@/features/manage-library-entry";
 import { AddEditPlaythroughDrawer } from "@/features/manage-playthrough";
@@ -56,6 +58,11 @@ function LibraryGridTile({
     gameTitle: item.game.title,
     status: item.status,
     upNextPosition: item.upNextPosition,
+  });
+  const ownership = useSetOwnership({
+    id: item.id,
+    gameTitle: item.game.title,
+    isOwned: item.isOwned,
   });
   const membership = useUpNextMembership({
     id: item.id,
@@ -93,10 +100,13 @@ function LibraryGridTile({
         <h3 className="mt-2 line-clamp-1 text-sm leading-tight font-medium group-hover:underline">
           {item.game.title}
         </h3>
-        <QueueMarker
-          status={status}
-          upNextPosition={membership.upNextPosition}
-        />
+        <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
+          <QueueMarker
+            status={status}
+            upNextPosition={membership.upNextPosition}
+          />
+          <NotOwnedTag status={status} isOwned={ownership.isOwned} />
+        </div>
         {item.platform ? (
           <p className="text-muted-foreground mt-0.5 truncate text-xs">
             {item.platform}
@@ -136,6 +146,7 @@ function LibraryGridTile({
         <LibraryCardMenu
           item={item}
           onEdit={onEdit}
+          ownership={ownership}
           extraItems={
             <UpNextMenuActions status={status} membership={membership} />
           }
@@ -173,9 +184,9 @@ export function LibraryPage(props: LibraryPageProps) {
     total,
     status,
     platform,
-    acquisition,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
     platforms,
@@ -205,9 +216,9 @@ export function LibraryPage(props: LibraryPageProps) {
   const serverFiltersActive = Boolean(
     status ||
     platform ||
-    acquisition ||
     minRating !== undefined ||
-    unratedOnly === true
+    unratedOnly === true ||
+    notOwnedOnly === true
   );
   const clearFilters = () => {
     setTitleQuery("");
@@ -321,9 +332,9 @@ export function LibraryPage(props: LibraryPageProps) {
         status={status}
         counts={statusCounts}
         platform={platform}
-        acquisition={acquisition}
         minRating={minRating}
         unratedOnly={unratedOnly}
+        notOwnedOnly={notOwnedOnly}
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
@@ -333,9 +344,9 @@ export function LibraryPage(props: LibraryPageProps) {
           <MobileFilterBar
             status={status}
             platform={platform}
-            acquisition={acquisition}
             minRating={minRating}
             unratedOnly={unratedOnly}
+            notOwnedOnly={notOwnedOnly}
             sortBy={sortBy}
             sortOrder={sortOrder}
             platforms={platforms}
@@ -353,9 +364,9 @@ export function LibraryPage(props: LibraryPageProps) {
         <LibraryFilters
           status={status}
           platform={platform}
-          acquisition={acquisition}
           minRating={minRating}
           unratedOnly={unratedOnly}
+          notOwnedOnly={notOwnedOnly}
           sortBy={sortBy}
           sortOrder={sortOrder}
           counts={statusCounts}
@@ -370,10 +381,11 @@ export function LibraryPage(props: LibraryPageProps) {
                 <LibraryItemCard
                   item={item}
                   layout="row"
-                  menu={(upNext) => (
+                  menu={(upNext, ownership) => (
                     <LibraryCardMenu
                       item={item}
                       onEdit={() => setSelectedEntry(item)}
+                      ownership={ownership}
                       extraItems={upNext}
                     />
                   )}
@@ -430,10 +442,11 @@ export function LibraryPage(props: LibraryPageProps) {
                     <LibraryItemCard
                       item={item}
                       layout="row"
-                      menu={(upNext) => (
+                      menu={(upNext, ownership) => (
                         <LibraryCardMenu
                           item={item}
                           onEdit={() => setSelectedEntry(item)}
+                          ownership={ownership}
                           extraItems={upNext}
                         />
                       )}

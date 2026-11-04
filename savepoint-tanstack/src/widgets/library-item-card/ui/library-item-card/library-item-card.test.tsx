@@ -5,8 +5,10 @@ import { Toaster } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import { setOwnershipFn } from "@/features/manage-library-entry/api/set-ownership-fn";
 import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
 import type { SetStatusResult } from "@/features/manage-library-entry/api/set-status-fn.worker";
+import { LibraryCardMenu } from "@/features/manage-library-entry/ui/library-card-menu";
 import { DropdownMenu, DropdownMenuContent } from "@/shared/ui/dropdown-menu";
 
 import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
@@ -47,6 +49,14 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
   setStatusFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
+  setOwnershipFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
+  deleteLibraryItemFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
@@ -491,51 +501,102 @@ describe("LibraryItemCard", () => {
     });
   });
 
-  // F03 — acquisitionType surfaced as a chip (subscription resolves by platform).
   describe("acquisition chip", () => {
-    describe("given a subscription item on an Xbox platform", () => {
-      beforeEach(() => {
+    it.each([
+      ["SUBSCRIPTION", "Xbox Series X", "Game Pass"],
+      ["PHYSICAL", "Switch", "Physical"],
+    ] as const)(
+      "shows no chip for a %s item",
+      (acquisitionType, platform, label) => {
         render(
-          <LibraryItemCard
-            item={buildItem({
-              acquisitionType: "SUBSCRIPTION",
-              platform: "Xbox Series X",
-            })}
-          />
+          <LibraryItemCard item={buildItem({ acquisitionType, platform })} />
         );
+        expect(elements.queryAcquisitionChip(label)).toBeNull();
+      }
+    );
+  });
+
+  describe("ownership", () => {
+    const withMenu = (item: LibraryItemWithGame) => (
+      <LibraryItemCard
+        item={item}
+        menu={(_upNext, ownership) => (
+          <LibraryCardMenu item={item} onEdit={vi.fn()} ownership={ownership} />
+        )}
+      />
+    );
+    const chooseFromMenu = async (item: LibraryItemWithGame, name: string) => {
+      render(withMenu(item));
+      await userEvent.click(
+        screen.getByRole("button", { name: `Actions for ${item.game.title}` })
+      );
+      await userEvent.click(screen.getByRole("menuitem", { name }));
+    };
+
+    it("tags a Want game the user does not own", () => {
+      render(
+        <LibraryItemCard item={buildItem({ status: "WANT", isOwned: false })} />
+      );
+      expect(screen.getByText("Not owned")).toBeDefined();
+    });
+
+    it("does not tag an owned Want game", () => {
+      render(
+        <LibraryItemCard item={buildItem({ status: "WANT", isOwned: true })} />
+      );
+      expect(screen.queryByText("Not owned")).toBeNull();
+    });
+
+    it("does not tag a not-owned Playing game", () => {
+      render(
+        <LibraryItemCard
+          item={buildItem({ status: "PLAYING", isOwned: false })}
+        />
+      );
+      expect(screen.queryByText("Not owned")).toBeNull();
+    });
+
+    describe("given the user chooses 'I don't own it yet'", () => {
+      it("shows the tag and saves the choice", async () => {
+        vi.mocked(setOwnershipFn).mockResolvedValue({ isOwned: false });
+
+        await chooseFromMenu(
+          buildItem({ status: "WANT", isOwned: true }),
+          "I don't own it yet"
+        );
+
+        expect(await screen.findByText("Not owned")).toBeDefined();
+        expect(setOwnershipFn).toHaveBeenCalledWith({
+          data: { id: 1, isOwned: false },
+        });
       });
 
-      it("reads the subscription brand as Game Pass", () => {
-        expect(elements.queryAcquisitionChip("Game Pass")).not.toBeNull();
+      it("takes the tag back and says so when saving fails", async () => {
+        vi.mocked(setOwnershipFn).mockRejectedValue(new Error("offline"));
+
+        render(<Toaster />);
+        await chooseFromMenu(
+          buildItem({ status: "WANT", isOwned: true }),
+          "I don't own it yet"
+        );
+
+        expect(
+          await screen.findByText("Couldn't save. Try again.")
+        ).toBeDefined();
+        expect(screen.queryByText("Not owned")).toBeNull();
       });
     });
 
-    describe("given an owned (DIGITAL) item", () => {
-      beforeEach(() => {
-        render(
-          <LibraryItemCard item={buildItem({ acquisitionType: "DIGITAL" })} />
+    describe("given a not-owned game", () => {
+      it("offers 'I own it' and removes the tag", async () => {
+        vi.mocked(setOwnershipFn).mockResolvedValue({ isOwned: true });
+
+        await chooseFromMenu(
+          buildItem({ status: "WANT", isOwned: false }),
+          "I own it"
         );
-      });
 
-      it("omits the chip — the default source stays implicit", () => {
-        expect(elements.queryAcquisitionChip("Owned")).toBeNull();
-      });
-    });
-
-    describe("given a physical item", () => {
-      beforeEach(() => {
-        render(
-          <LibraryItemCard
-            item={buildItem({
-              acquisitionType: "PHYSICAL",
-              platform: "Switch",
-            })}
-          />
-        );
-      });
-
-      it("shows a Physical chip", () => {
-        expect(elements.queryAcquisitionChip("Physical")).not.toBeNull();
+        await waitFor(() => expect(screen.queryByText("Not owned")).toBeNull());
       });
     });
   });

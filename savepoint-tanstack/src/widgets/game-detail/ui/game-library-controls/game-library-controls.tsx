@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import {
   NextStepButton,
+  NotOwnedTag,
   QueueMarker,
   StatusControl,
   StatusPicker,
@@ -35,6 +36,7 @@ export function GameLibraryControls({
   gameTitle,
   entry,
   libraryStatus,
+  libraryOwnership,
 }: GameLibraryControlsProps) {
   const router = useRouter();
   const [addPickerOpen, setAddPickerOpen] = useState(false);
@@ -81,7 +83,7 @@ export function GameLibraryControls({
       className="gap-sm flex flex-wrap items-center"
       data-testid="game-library-controls"
     >
-      {entry !== null && libraryStatus !== null ? (
+      {entry !== null && libraryStatus !== null && libraryOwnership !== null ? (
         <>
           <StatusControl
             status={libraryStatus.status}
@@ -91,6 +93,10 @@ export function GameLibraryControls({
           <QueueMarker
             status={libraryStatus.status}
             upNextPosition={membership.upNextPosition}
+          />
+          <NotOwnedTag
+            status={libraryStatus.status}
+            isOwned={libraryOwnership.isOwned}
           />
           <NextStepButton
             status={libraryStatus.status}
@@ -117,6 +123,14 @@ export function GameLibraryControls({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onSelect={() => setEditOpen(true)}>
                 Edit details…
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() =>
+                  void libraryOwnership.setOwned(!libraryOwnership.isOwned)
+                }
+                disabled={libraryOwnership.isPending}
+              >
+                {libraryOwnership.isOwned ? "I don't own it yet" : "I own it"}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => setConfirmingRemove(true)}

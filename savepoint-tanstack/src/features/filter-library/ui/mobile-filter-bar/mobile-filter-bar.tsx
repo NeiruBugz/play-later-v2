@@ -16,7 +16,7 @@ import {
   SheetTrigger,
 } from "@/shared/ui/sheet";
 
-import { AcquisitionList } from "../acquisition-list";
+import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
 import { RatingControls } from "../rating-controls";
 import { SortSelect } from "../sort-select";
@@ -38,9 +38,9 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   const {
     status,
     platform,
-    acquisition,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
     counts,
@@ -51,13 +51,12 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
 
   const {
     currentStatus,
-    currentAcquisition,
     sortValue,
     platformValue,
     hasActiveFilters,
     activeFilterCount,
     onStatusPick,
-    onAcquisitionPick,
+    onNotOwnedOnlyChange,
     onPlatformChange,
     onSortChange,
     onMinRatingChange,
@@ -67,9 +66,9 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   } = useLibraryFiltersState({
     status,
     platform,
-    acquisition,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
   });
@@ -126,6 +125,14 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               onPick={onStatusPick}
               variant="sheet"
             />
+            <div className="mt-sm">
+              <NotOwnedOnlyToggle
+                id="mobile-not-owned-only"
+                status={status}
+                checked={notOwnedOnly === true}
+                onChange={onNotOwnedOnlyChange}
+              />
+            </div>
           </section>
 
           <section>
@@ -137,17 +144,6 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               platforms={platforms}
               rawPlatform={platform}
               onChange={onPlatformChange}
-            />
-          </section>
-
-          <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
-              Acquisition
-            </p>
-            <AcquisitionList
-              current={currentAcquisition}
-              onPick={onAcquisitionPick}
-              variant="sheet"
             />
           </section>
 

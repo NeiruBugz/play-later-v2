@@ -1,5 +1,6 @@
 export {
   LibraryFilters,
+  NotOwnedOnlyToggle,
   MobileFilterBar,
   StatusLens,
   ViewModeToggle,
@@ -8,7 +9,6 @@ export type {
   LibraryFiltersProps,
   StatusLensProps,
   LibraryStatus,
-  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,

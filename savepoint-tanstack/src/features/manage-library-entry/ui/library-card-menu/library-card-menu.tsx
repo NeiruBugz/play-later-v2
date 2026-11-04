@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  BookOpen,
+  MoreVertical,
+  Package,
+  PackageX,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useState, type SyntheticEvent } from "react";
 
 import { useMutationAction } from "@/shared/lib/use-mutation-action";
@@ -33,6 +40,7 @@ const stopProp = (event: SyntheticEvent) => {
 export function LibraryCardMenu({
   item,
   onEdit,
+  ownership,
   extraItems,
 }: LibraryCardMenuProps) {
   const { pending: isPending, run } = useMutationAction();
@@ -79,6 +87,18 @@ export function LibraryCardMenu({
             Edit Library Details
           </DropdownMenuItem>
 
+          <DropdownMenuItem
+            onSelect={() => void ownership.setOwned(!ownership.isOwned)}
+            onClick={stopProp}
+            disabled={ownership.isPending}
+          >
+            {ownership.isOwned ? (
+              <PackageX className="mr-2 h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Package className="mr-2 h-4 w-4" aria-hidden="true" />
+            )}
+            {ownership.isOwned ? "I don't own it yet" : "I own it"}
+          </DropdownMenuItem>
           {extraItems}
 
           <DropdownMenuSeparator />
