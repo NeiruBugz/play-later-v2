@@ -71,7 +71,8 @@ export async function updateProfile(
 //
 // Two meta shapes are supported because Prisma exposes different structures
 // depending on the engine: legacy `meta.target` (`string | string[]`) and the
-// driver-adapter nested `meta.driverAdapterError.cause.constraint.fields`.
+// driver-adapter nested `meta.driverAdapterError.cause.constraint` — `fields`
+// before Prisma 7.10, the index name (e.g. `user_usernameNormalized_key`) after.
 function targetsUsername(meta: unknown): boolean {
   if (!meta || typeof meta !== "object") return false;
   const fields = collectConstraintFields(meta as Record<string, unknown>);
@@ -95,9 +96,17 @@ function collectConstraintFields(meta: Record<string, unknown>): string[] {
     if (cause && typeof cause === "object") {
       const constraint = (cause as Record<string, unknown>).constraint;
       if (constraint && typeof constraint === "object") {
-        const f = (constraint as Record<string, unknown>).fields;
-        if (Array.isArray(f))
-          fields.push(...f.filter((v): v is string => typeof v === "string"));
+        const { fields: constraintFields, index } = constraint as Record<
+          string,
+          unknown
+        >;
+        if (Array.isArray(constraintFields))
+          fields.push(
+            ...constraintFields.filter(
+              (v): v is string => typeof v === "string"
+            )
+          );
+        if (typeof index === "string") fields.push(index);
       }
     }
   }

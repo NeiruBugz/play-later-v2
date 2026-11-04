@@ -2,7 +2,7 @@ import { AppError } from "@/shared/lib/errors";
 
 import type { ErrorView } from "./error-boundary.type";
 
-export function resolveView(error: Error): ErrorView {
+export function resolveView(error: unknown): ErrorView {
   if (!(error instanceof AppError)) {
     return {
       title: "Unexpected error",

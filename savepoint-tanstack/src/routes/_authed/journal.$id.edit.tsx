@@ -1,4 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
 
 import { EditJournalEntryForm } from "@/features/edit-journal-entry";
 import { getJournalEntryPageDataFn } from "@/features/journal-timeline";
@@ -41,7 +45,7 @@ function EditJournalEntryRoute() {
   );
 }
 
-function EditJournalEntryErrorBoundary({ error }: { error: Error }) {
+function EditJournalEntryErrorBoundary({ error }: ErrorComponentProps) {
   const isNotFound = error instanceof AppError && error.code === "NOT_FOUND";
 
   if (isNotFound) {
