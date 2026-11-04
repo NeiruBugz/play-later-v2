@@ -1,8 +1,13 @@
+import { QueryClient } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { CurrentUser } from "@/entities/session/api/get-current-user";
+import { currentUserQueryOptions } from "@/entities/session/api/current-user-query";
+import {
+  getCurrentUserFn,
+  type CurrentUser,
+} from "@/entities/session/api/get-current-user";
 
 import { Route as RootRoute, RootShell } from "./__root";
 import { Route as AuthedRoute } from "./_authed";
@@ -70,22 +75,14 @@ vi.mock("@/widgets/app-shell", () => ({
   ),
 }));
 
-vi.mock("@/entities/session/api/require-user-id-or-redirect", () => ({
-  requireUserIdOrRedirectFn: vi
-    .fn()
-    .mockResolvedValue({ userId: "user-stub-1" }),
+vi.mock("@/entities/session/api/get-current-user", () => ({
+  getCurrentUserFn: vi.fn(),
 }));
 
-vi.mock("@/entities/session/api", () => ({
-  getCurrentUserFn: vi
-    .fn()
-    .mockResolvedValue({ user: null, statusModelNoticePending: false }),
-}));
-
-// useLoaderDataMock is hoisted so the vi.mock factory can close over it,
+// useRouteContextMock is hoisted so the vi.mock factory can close over it,
 // and individual describe blocks can reconfigure it via mockReturnValue.
-const { useLoaderDataMock } = vi.hoisted(() => ({
-  useLoaderDataMock: vi.fn(
+const { useRouteContextMock } = vi.hoisted(() => ({
+  useRouteContextMock: vi.fn(
     (): { user: CurrentUser | null; statusModelNoticePending?: boolean } => ({
       user: null,
     })
@@ -100,7 +97,7 @@ vi.mock("@/features/whats-new", () => ({
 vi.mock("@tanstack/react-router", () => ({
   createRootRouteWithContext: () => (opts: any) => ({
     options: opts,
-    useLoaderData: useLoaderDataMock,
+    useRouteContext: useRouteContextMock,
   }),
   createFileRoute: () => (opts: any) => ({ options: opts }),
   Outlet: () => <div data-testid="outlet" />,
@@ -140,10 +137,52 @@ describe("_authed route", () => {
   });
 });
 
+describe("__root beforeLoad", () => {
+  const signedIn = {
+    user: { id: "u1", name: "Ada", username: "ada", image: null },
+    statusModelNoticePending: true,
+  };
+
+  const runBeforeLoad = (queryClient: QueryClient) =>
+    (RootRoute.options.beforeLoad as (args: unknown) => Promise<unknown>)({
+      context: { queryClient },
+    });
+
+  beforeEach(() => {
+    vi.mocked(getCurrentUserFn).mockReset();
+    vi.mocked(getCurrentUserFn).mockResolvedValue(signedIn);
+  });
+
+  it("puts the current user and notice flag into the route context", async () => {
+    await expect(runBeforeLoad(new QueryClient())).resolves.toEqual(signedIn);
+  });
+
+  it("resolves the session once across repeated navigations", async () => {
+    const queryClient = new QueryClient();
+
+    await runBeforeLoad(queryClient);
+    await runBeforeLoad(queryClient);
+
+    expect(getCurrentUserFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("re-resolves after the cached user is invalidated", async () => {
+    const queryClient = new QueryClient();
+    await runBeforeLoad(queryClient);
+
+    await queryClient.invalidateQueries({
+      queryKey: currentUserQueryOptions.queryKey,
+    });
+    await runBeforeLoad(queryClient);
+
+    expect(getCurrentUserFn).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("__root route shell", () => {
   describe("given user is not authenticated (user: null)", () => {
     beforeEach(() => {
-      useLoaderDataMock.mockReturnValue({ user: null });
+      useRouteContextMock.mockReturnValue({ user: null });
       render(<RootShell />);
     });
 
@@ -154,7 +193,7 @@ describe("__root route shell", () => {
 
   describe("given user is authenticated", () => {
     beforeEach(() => {
-      useLoaderDataMock.mockReturnValue({
+      useRouteContextMock.mockReturnValue({
         user: { id: "u1", name: "Ada", username: "ada", image: null },
       });
       render(<RootShell />);
@@ -167,7 +206,7 @@ describe("__root route shell", () => {
 
   describe("given an authenticated user with the status notice pending", () => {
     beforeEach(() => {
-      useLoaderDataMock.mockReturnValue({
+      useRouteContextMock.mockReturnValue({
         user: { id: "u1", name: "Ada", username: "ada", image: null },
         statusModelNoticePending: true,
       });
@@ -182,7 +221,7 @@ describe("__root route shell", () => {
 
   describe("given an authenticated user with nothing pending", () => {
     beforeEach(() => {
-      useLoaderDataMock.mockReturnValue({
+      useRouteContextMock.mockReturnValue({
         user: { id: "u1", name: "Ada", username: "ada", image: null },
         statusModelNoticePending: false,
       });

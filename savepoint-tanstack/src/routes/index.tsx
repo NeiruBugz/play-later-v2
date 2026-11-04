@@ -1,6 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
-import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
 import {
   LandingFeaturesStrip,
   LandingPreviewCard,
@@ -8,9 +7,8 @@ import {
 import { LandingHero } from "@/widgets/landing-hero";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    const { user } = await getCurrentUserFn();
-    if (user) {
+  beforeLoad: ({ context }) => {
+    if (context.user) {
       throw redirect({ to: "/dashboard" });
     }
   },

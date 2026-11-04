@@ -1,9 +1,11 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Profile } from "@/entities/profile/model/types";
+import { CURRENT_USER_QUERY_KEY } from "@/entities/session/api/invalidate-current-user";
 
 import { checkUsernameFn, updateProfileFn } from "../../api/update-profile";
 import { ProfileSettingsForm } from "./profile-settings-form";
@@ -19,6 +21,23 @@ vi.mock("sonner", () => ({
     error: vi.fn(),
   },
 }));
+
+const queryClient = new QueryClient();
+const currentUserKey = CURRENT_USER_QUERY_KEY;
+
+const renderWithClient = (ui: React.ReactElement) =>
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+
+const isCurrentUserInvalidated = () =>
+  queryClient.getQueryState(currentUserKey)?.isInvalidated === true;
+
+beforeEach(() => {
+  queryClient.clear();
+  queryClient.setQueryData(currentUserKey, {
+    user: { id: "u1", name: "Ada", username: "ada", image: null },
+    statusModelNoticePending: true,
+  });
+});
 
 const stubProfile: Profile = {
   id: "user-stub-1",
@@ -59,7 +78,7 @@ describe("ProfileSettingsForm", () => {
         username: "newuser",
       });
 
-      render(<ProfileSettingsForm profile={stubProfile} />);
+      renderWithClient(<ProfileSettingsForm profile={stubProfile} />);
       await actions.fillForm({ name: "New Name", username: "newuser" });
       await actions.submitForm();
     });
@@ -74,6 +93,10 @@ describe("ProfileSettingsForm", () => {
       });
     });
 
+    it("marks the cached current user stale so the sidebar picks up the change", () => {
+      expect(isCurrentUserInvalidated()).toBe(true);
+    });
+
     it("fires toast.success on resolution", () => {
       expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Profile updated");
     });
@@ -86,7 +109,7 @@ describe("ProfileSettingsForm", () => {
         isPublicProfile: true,
       });
 
-      render(<ProfileSettingsForm profile={stubProfile} />);
+      renderWithClient(<ProfileSettingsForm profile={stubProfile} />);
       await actions.toggleVisibility();
       await actions.submitForm();
     });
@@ -106,7 +129,7 @@ describe("ProfileSettingsForm", () => {
         new Error("Username is already taken")
       );
 
-      render(<ProfileSettingsForm profile={stubProfile} />);
+      renderWithClient(<ProfileSettingsForm profile={stubProfile} />);
       await actions.submitForm();
     });
 
@@ -136,7 +159,7 @@ describe("ProfileSettingsForm", () => {
 
       vi.mocked(checkUsernameFn).mockResolvedValue({ available: true });
 
-      render(<ProfileSettingsForm profile={stubProfile} />);
+      renderWithClient(<ProfileSettingsForm profile={stubProfile} />);
 
       await user.clear(elements.getUsernameInput());
       await user.type(elements.getUsernameInput(), "newusername");

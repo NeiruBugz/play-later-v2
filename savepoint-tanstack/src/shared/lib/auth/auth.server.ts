@@ -1,6 +1,7 @@
 import { env } from "@env";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 import { prisma } from "@/shared/lib/db.server";
 
@@ -67,7 +68,15 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
+    // Trade-off: a session revoked elsewhere stays valid here for up to
+    // maxAge (5 min); sign-out on this device clears the cookie immediately.
+    cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
+
+  // Must stay last. Forwards the cookie-cache refresh Set-Cookie emitted by
+  // `auth.api.getSession` inside server fns; without it the cache is only
+  // populated at sign-in and every request after 5 min hits the DB again.
+  plugins: [tanstackStartCookies()],
 });
 
 export type Auth = typeof auth;

@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { invalidateCurrentUser } from "@/entities/session/api/invalidate-current-user";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -18,6 +20,7 @@ import {
 } from "./profile-settings-form.type";
 
 export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
+  const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -38,6 +41,7 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
     setServerError(null);
     try {
       await updateProfileFn({ data: values });
+      await invalidateCurrentUser(queryClient);
       toast.success("Profile updated");
     } catch (err) {
       const message = getErrorMessage(err, "Update failed");

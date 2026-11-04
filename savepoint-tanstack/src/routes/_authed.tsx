@@ -1,8 +1,10 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-
-import { requireUserIdOrRedirectFn } from "@/entities/session/api/require-user-id-or-redirect";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authed")({
-  beforeLoad: () => requireUserIdOrRedirectFn(),
+  beforeLoad: ({ context }) => {
+    if (!context.user) {
+      throw redirect({ to: "/login" });
+    }
+  },
   component: () => <Outlet />,
 });

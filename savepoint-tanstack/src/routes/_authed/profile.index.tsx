@@ -1,7 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { getProfilePageDataFn } from "@/features/profile-overview/api";
-
 /**
  * `/profile` is the canonical-app shortcut to the signed-in user's public
  * profile. Per the visual-parity audit
@@ -14,9 +12,8 @@ import { getProfilePageDataFn } from "@/features/profile-overview/api";
  * survive the bounce.
  */
 export const Route = createFileRoute("/_authed/profile/")({
-  beforeLoad: async ({ search }) => {
-    const { profile } = await getProfilePageDataFn();
-    const username = profile.username;
+  beforeLoad: ({ context, search }) => {
+    const username = context.user?.username;
 
     if (!username) {
       // Profile has no username yet — route to the first-run setup page.
