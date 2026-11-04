@@ -14,6 +14,7 @@ import { UpstreamError } from "@/shared/lib/errors";
 
 import { igdbContextFromThrown } from "./errors";
 import { igdbFetch } from "./fetch";
+import { escapeIgdbString } from "./query-builder";
 import { SearchResponseItemSchema, type SearchResponseItem } from "./schemas";
 
 const logger = createLogger({ service: "igdb-get-game-by-slug" });
@@ -26,14 +27,10 @@ const GAME_FIELDS = [
   "platforms.name",
 ] as const;
 
-function escapeSlug(slug: string): string {
-  return slug.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
 export async function getGameBySlug(
   slug: string
 ): Promise<SearchResponseItem | null> {
-  const query = `fields ${GAME_FIELDS.join(",")}; where slug = "${escapeSlug(slug)}"; limit 1;`;
+  const query = `fields ${GAME_FIELDS.join(",")}; where slug = "${escapeIgdbString(slug)}"; limit 1;`;
 
   let response: unknown;
   try {
