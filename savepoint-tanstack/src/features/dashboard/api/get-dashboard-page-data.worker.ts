@@ -6,15 +6,17 @@ import {
 import { getProfileById } from "@/entities/profile/api/get-profile.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
-import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
-
 const QUICK_LOG_LIMIT = 3;
 const CONTINUE_PLAYING_LIMIT = 3;
 const UP_NEXT_LIMIT = 4;
 const RECENTLY_ADDED_LIMIT = 6;
 const STATS_MIN_GAMES = 3;
 
-export type DashboardStatusCounts = Record<LibraryItemStatus, number>;
+export type DashboardStatusCounts = {
+  WANT: number;
+  PLAYING: number;
+  DONE: number;
+};
 
 export type DashboardQuickLogGame = {
   id: string;
@@ -28,7 +30,7 @@ export type DashboardQuickLogGame = {
 export type DashboardPageData = {
   /** First-name greeting target. Falls back to "there" when unset. */
   username: string;
-  /** All five status counts (zero-filled). */
+  /** All three status counts (zero-filled). */
   statusCounts: DashboardStatusCounts;
   /** True when the user has no library items at all. */
   hasEmptyLibrary: boolean;
@@ -49,46 +51,33 @@ export type DashboardPageData = {
   };
 };
 
-const ZERO_COUNTS: DashboardStatusCounts = {
-  WISHLIST: 0,
-  SHELF: 0,
-  UP_NEXT: 0,
-  PLAYING: 0,
-  PLAYED: 0,
-};
-
 export async function getDashboardPageDataWorker(
   userId: string | undefined
 ): Promise<DashboardPageData> {
   if (!userId) throw new UnauthorizedError("Sign in required");
 
-  const [stats, playing, upNext, recent, profile] = await Promise.all([
+  const [stats, playing, want, recent, profile] = await Promise.all([
     getLibraryStats(userId),
     getLibrary(userId, {
       status: "PLAYING",
       sortBy: "updatedAt",
       sortOrder: "desc",
     }),
-    getLibrary(userId, {
-      status: "UP_NEXT",
-      sortBy: "updatedAt",
-      sortOrder: "desc",
-    }),
+    getLibrary(userId, { status: "WANT" }),
     getLibrary(userId, { sortBy: "createdAt", sortOrder: "desc" }),
     getProfileById(userId).catch(() => null),
   ]);
 
   const statusCounts: DashboardStatusCounts = {
-    ...ZERO_COUNTS,
-    ...(stats.statusCounts as Partial<DashboardStatusCounts>),
+    WANT: stats.want,
+    PLAYING: stats.playing,
+    DONE: stats.done,
   };
+  const total = statusCounts.WANT + statusCounts.PLAYING + statusCounts.DONE;
 
-  const total =
-    statusCounts.WISHLIST +
-    statusCounts.SHELF +
-    statusCounts.UP_NEXT +
-    statusCounts.PLAYING +
-    statusCounts.PLAYED;
+  const queued = want.items
+    .filter((item) => item.upNextPosition !== null)
+    .sort((a, b) => (a.upNextPosition ?? 0) - (b.upNextPosition ?? 0));
 
   const quickLogGames: DashboardQuickLogGame[] = playing.items
     .slice(0, QUICK_LOG_LIMIT)
@@ -117,8 +106,8 @@ export async function getDashboardPageDataWorker(
       total: playing.total,
     },
     upNext: {
-      items: upNext.items.slice(0, UP_NEXT_LIMIT),
-      total: upNext.total,
+      items: queued.slice(0, UP_NEXT_LIMIT),
+      total: queued.length,
     },
     recentlyAdded: {
       items: recent.items.slice(0, RECENTLY_ADDED_LIMIT),

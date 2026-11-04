@@ -10,6 +10,7 @@ import {
   type GetLibraryResult,
 } from "@/entities/library-item/api/get-library.server";
 import { getUniqueLibraryPlatforms } from "@/entities/library-item/api/get-unique-platforms.server";
+import { libraryItemStatusSchema } from "@/entities/library-item/model";
 import {
   getOnboardingSignals,
   type OnboardingSignals,
@@ -17,13 +18,7 @@ import {
 import { requireUserId } from "@/entities/session/api/require-user-id";
 import { ratingStarsToStorage } from "@/shared/lib/rating";
 
-const libraryStatusSchema = z.enum([
-  "PLAYING",
-  "PLAYED",
-  "UP_NEXT",
-  "SHELF",
-  "WISHLIST",
-]);
+const libraryStatusSchema = libraryItemStatusSchema;
 
 const acquisitionSchema = z.enum(["DIGITAL", "SUBSCRIPTION", "PHYSICAL"]);
 const sortBySchema = z.enum(["title", "createdAt", "updatedAt"]);
@@ -33,7 +28,6 @@ const inputSchema = z.object({
   status: libraryStatusSchema.optional(),
   platform: z.string().min(1).optional(),
   acquisition: acquisitionSchema.optional(),
-  startedOnly: z.boolean().optional(),
   // Stars (0.5–5), the user-facing unit. Converted to the 1–10 storage int
   // before hitting Prisma (see handler).
   minRating: z.number().min(0.5).max(5).multipleOf(0.5).optional(),
@@ -54,7 +48,7 @@ export type GetLibraryPageDataResult = GetLibraryResult & {
   platforms: string[];
   /**
    * Per-status counts across the **entire** library, unscoped by the active
-   * filters — so the status rail always tells the truth ("47 PLAYED games
+   * filters — so the status rail always tells the truth ("47 DONE games
    * exist") even while the grid is filtered to a single status.
    */
   statusCounts: LibraryStatusCountMap;

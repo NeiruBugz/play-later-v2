@@ -39,7 +39,7 @@ describe("searchLibraryAwareGamesWorker", () => {
         count: 2,
       });
       getLibraryItemsByIgdbIds.mockResolvedValue(
-        new Map([[1, { status: "PLAYED", rating: 9 }]])
+        new Map([[1, { status: "DONE", upNextPosition: null, rating: 9 }]])
       );
     });
 
@@ -48,7 +48,11 @@ describe("searchLibraryAwareGamesWorker", () => {
         name: "hades",
       });
 
-      expect(result.games[0]?.library).toEqual({ status: "PLAYED", rating: 9 });
+      expect(result.games[0]?.library).toEqual({
+        status: "DONE",
+        upNextPosition: null,
+        rating: 9,
+      });
       expect(result.games[1]?.library).toBeNull();
     });
 

@@ -5,14 +5,11 @@ import { getLibraryPageDataFn } from "@/features/library-list";
 import { LibraryPage } from "@/widgets/library-page";
 
 const searchSchema = z.object({
-  status: z
-    .enum(["PLAYING", "PLAYED", "UP_NEXT", "SHELF", "WISHLIST"])
-    .optional(),
+  status: z.enum(["WANT", "PLAYING", "DONE"]).optional(),
   platform: z.string().min(1).optional(),
   // F03: acquisition source. SUBSCRIPTION covers Game Pass + PS+ (DB can't
-  // tell them apart). F04: startedOnly gates on hasBeenPlayed.
+  // tell them apart).
   acquisition: z.enum(["DIGITAL", "SUBSCRIPTION", "PHYSICAL"]).optional(),
-  startedOnly: z.boolean().optional(),
   // User-facing unit is stars (0.5–5, half-star precision). The URL reads
   // `?minRating=3.5`, not the raw 1–10 storage int. Conversion to storage
   // happens at the loader/entity seam. See shared/lib/rating.ts.
@@ -31,7 +28,6 @@ export const Route = createFileRoute("/_authed/library")({
     status: search.status,
     platform: search.platform,
     acquisition: search.acquisition,
-    startedOnly: search.startedOnly,
     minRating: search.minRating,
     sortBy: search.sortBy,
     sortOrder: search.sortOrder,
@@ -54,7 +50,6 @@ function LibraryRoute() {
       status={search.status}
       platform={search.platform}
       acquisition={search.acquisition}
-      startedOnly={search.startedOnly}
       minRating={search.minRating}
       unratedOnly={search.unratedOnly}
       sortBy={search.sortBy ?? "updatedAt"}

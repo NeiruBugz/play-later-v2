@@ -6,9 +6,9 @@ import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-librar
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 /**
- * Quick-add a searched IGDB game straight to the user's "Up Next" queue from
+ * Quick-add a searched IGDB game straight to the user's library as WANT from
  * the command palette — mirrors canonical's `quickAddToLibraryAction`
- * (`useQuickAddFromPalette`). The status is fixed to `UP_NEXT`; the palette
+ * (`useQuickAddFromPalette`). The status is fixed to `WANT`; the palette
  * never offers a status picker for this affordance.
  *
  * Returns the created (or pre-existing) library item id so the caller can
@@ -29,7 +29,7 @@ export const quickAddToLibraryFn = createServerFn({ method: "POST" })
 
     const item = await addGameToLibrary(userId, {
       gameId: game.id,
-      status: "UP_NEXT",
+      status: "WANT",
     });
 
     return { id: item.id };
