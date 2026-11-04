@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EmptyLibraryHero } from "./empty-library-hero";
 
@@ -17,12 +17,12 @@ describe("EmptyLibraryHero", () => {
 
   describe("given the component is rendered with all steps incomplete", () => {
     it("renders the hero card with the welcome heading", () => {
-      render(<EmptyLibraryHero {...defaultProps} />);
+      render(<EmptyLibraryHero {...defaultProps} onAddGame={vi.fn()} />);
       expect(screen.getByText("Start your library")).toBeDefined();
     });
 
     it("renders the empty-library-hero test id", () => {
-      render(<EmptyLibraryHero {...defaultProps} />);
+      render(<EmptyLibraryHero {...defaultProps} onAddGame={vi.fn()} />);
       expect(screen.getByTestId("empty-library-hero")).toBeDefined();
     });
   });

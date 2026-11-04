@@ -156,6 +156,45 @@ const elements = {
 };
 
 describe("LibraryPage", () => {
+  describe("given the library is empty and onboarding is shown", () => {
+    const onboarding = {
+      libraryItemCount: 0,
+      journalEntryCount: 0,
+      userImage: null,
+      userSteamId: null,
+    };
+
+    beforeEach(() => {
+      localStorage.clear();
+      mockNavigate.mockClear();
+      render(
+        <LibraryPage
+          items={[]}
+          total={0}
+          onboarding={onboarding}
+          {...defaultViewProps}
+        />
+      );
+    });
+
+    it("offers an Add a game button that opens the add search", async () => {
+      const user = userEvent.setup();
+
+      await user.click(
+        within(screen.getByTestId("empty-library-hero")).getByRole("button", {
+          name: "Add a game",
+        })
+      );
+
+      const searchUpdater = mockNavigate.mock.calls.at(-1)?.[0].search;
+      expect(searchUpdater({})).toMatchObject({ action: "add-game" });
+    });
+
+    it("does not point at a + button", () => {
+      expect(screen.queryByText(/\+ button|button below/i)).toBeNull();
+    });
+  });
+
   describe("given the library is empty", () => {
     beforeEach(() => {
       render(<LibraryPage items={[]} total={0} {...defaultViewProps} />);
@@ -169,10 +208,23 @@ describe("LibraryPage", () => {
       expect(elements.queryEmptyHeading()).not.toBeNull();
     });
 
-    it("offers the first-run dual CTAs (browse + import)", () => {
-      expect(
-        screen.getByRole("link", { name: "Browse games" })
-      ).toBeInTheDocument();
+    it("offers an Add a game button that opens the add search", async () => {
+      const user = userEvent.setup();
+      const emptyLibrary = within(screen.getByLabelText("Empty library"));
+
+      await user.click(
+        emptyLibrary.getByRole("button", { name: "Add a game" })
+      );
+
+      const searchUpdater = mockNavigate.mock.calls.at(-1)?.[0].search;
+      expect(searchUpdater({})).toMatchObject({ action: "add-game" });
+    });
+
+    it("does not point at a + button", () => {
+      expect(screen.queryByText(/\+ button|button below/i)).toBeNull();
+    });
+
+    it("offers the first-run dual CTAs (add + import)", () => {
       expect(
         within(screen.getByLabelText("Empty library")).getByRole("link", {
           name: "Import from Steam",

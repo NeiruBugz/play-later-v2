@@ -199,6 +199,7 @@ export function LibraryPage(props: LibraryPageProps) {
     useState<LibraryItemWithGame | null>(null);
 
   const navigate = useNavigate();
+  const addGame = () => openGlobalAction(navigate, "add-game");
 
   // Client-side title filter, no server roundtrip. The `/` keyboard hint
   // focuses the input when pressed outside any other input.
@@ -300,7 +301,7 @@ export function LibraryPage(props: LibraryPageProps) {
               <Download className="h-4 w-4" aria-hidden />
               Import from Steam
             </Link>
-            <Button onClick={() => openGlobalAction(navigate, "add-game")}>
+            <Button onClick={addGame}>
               <PackagePlus aria-hidden="true" />
               Add game
             </Button>
@@ -398,14 +399,14 @@ export function LibraryPage(props: LibraryPageProps) {
               title="Nothing queued yet — put up to 5 games in Up Next."
             />
           ) : renderState === "onboarding" && onboarding ? (
-            <EmptyLibraryHero {...onboarding} />
+            <EmptyLibraryHero {...onboarding} onAddGame={addGame} />
           ) : renderState === "empty" ? (
             <EmptyState
               aria-label="Empty library"
               icon={Library}
               title="No games yet"
               description="Start your library by adding a game, or import your games from Steam."
-              action={{ label: "Browse games", to: "/games/search" }}
+              action={{ label: "Add a game", onClick: addGame }}
               secondaryAction={{
                 label: "Import from Steam",
                 to: "/steam/games",
