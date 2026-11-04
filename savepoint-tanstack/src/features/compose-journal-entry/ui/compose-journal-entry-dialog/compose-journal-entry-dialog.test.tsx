@@ -143,6 +143,60 @@ describe("ComposeJournalEntryDialog", () => {
     });
   });
 
+  describe("given the user enters time played but no text", () => {
+    beforeEach(async () => {
+      render(
+        <ComposeJournalEntryDialog
+          open={true}
+          onOpenChange={onOpenChange}
+          defaultGameId="game-1"
+        />
+      );
+      await actions.typeMinutes("45");
+    });
+
+    it("enables Save", () => {
+      expect(elements.getSubmitButton()).toBeEnabled();
+    });
+
+    it("submits the time without content", async () => {
+      await actions.submit();
+      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          content: "",
+          gameId: "game-1",
+          playedMinutes: 45,
+        }),
+      });
+    });
+  });
+
+  describe("given neither text nor time is entered", () => {
+    it("keeps Save disabled", () => {
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+      expect(elements.getSubmitButton()).toBeDisabled();
+    });
+  });
+
+  describe("given the server fn rejects with raw validation JSON", () => {
+    it("shows a plain message instead of the JSON", async () => {
+      vi.mocked(createJournalEntryFn).mockRejectedValue(
+        new Error('[{"code":"custom","path":["content"],"message":"x"}]')
+      );
+      render(
+        <ComposeJournalEntryDialog open={true} onOpenChange={onOpenChange} />
+      );
+      await actions.typeMinutes("30");
+      await actions.submit();
+
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.not.stringMatching(/^\s*[[{]/)
+      );
+    });
+  });
+
   describe("given the user submits empty content", () => {
     beforeEach(async () => {
       render(

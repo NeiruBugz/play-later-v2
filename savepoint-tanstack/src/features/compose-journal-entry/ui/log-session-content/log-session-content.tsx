@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
-import { getErrorMessage } from "@/shared/lib/errors";
+import { getSaveErrorMessage } from "@/features/compose-journal-entry/lib/get-save-error-message";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
@@ -78,7 +78,7 @@ export function LogSessionContent({
       await router.invalidate();
       onClose();
     } catch (err: unknown) {
-      toast.error(getErrorMessage(err, "Something went wrong"));
+      toast.error(getSaveErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

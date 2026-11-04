@@ -344,4 +344,76 @@ describe("createJournalEntryWorker — log session against a run", () => {
       expect(runAfter.playtimeMinutes).toBe(runBefore.playtimeMinutes);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Case 4: time-only entries (no text), with and without a run
+  // -------------------------------------------------------------------------
+
+  describe("given a library game with NO playthrough (Playing via status)", () => {
+    beforeEach(async () => {
+      await seedOwnerUser();
+      await seedGame(GAME_ID, "lsar-game-001", 50_001);
+      await db.prisma.libraryItem.create({
+        data: {
+          userId: OWNER_ID,
+          gameId: GAME_ID,
+          status: "PLAYING",
+          statusIsManual: true,
+          hasBeenPlayed: false,
+          acquisitionType: "DIGITAL",
+        },
+      });
+    });
+
+    it("saves a time-only entry and stores the minutes on the entry", async () => {
+      const entry = await createJournalEntryWorker(OWNER_ID, {
+        content: "",
+        playedMinutes: 75,
+        gameId: GAME_ID,
+      });
+
+      const row = await db.prisma.journalEntry.findUniqueOrThrow({
+        where: { id: entry.id },
+      });
+      expect(row.playedMinutes).toBe(75);
+      expect(row.content).toBe("");
+      expect(row.playthroughId).toBeNull();
+      expect(row.gameId).toBe(GAME_ID);
+    });
+
+    it("rejects an entry with neither text nor minutes", async () => {
+      await expect(
+        createJournalEntryWorker(OWNER_ID, {
+          content: "   ",
+          gameId: GAME_ID,
+        })
+      ).rejects.toThrow();
+
+      expect(await db.prisma.journalEntry.count()).toBe(0);
+    });
+  });
+
+  describe("given a library game with an open run", () => {
+    it("still increments the run for a time-only entry", async () => {
+      await seedOwnerUser();
+      await seedGame(GAME_ID, "lsar-game-001", 50_001);
+      const { playthroughId } = await seedLibraryItemWithRun(
+        OWNER_ID,
+        GAME_ID,
+        60
+      );
+
+      await createJournalEntryWorker(OWNER_ID, {
+        content: "",
+        playedMinutes: 30,
+        playthroughId,
+        gameId: GAME_ID,
+      });
+
+      const run = await db.prisma.playthrough.findUniqueOrThrow({
+        where: { id: playthroughId },
+      });
+      expect(run.playtimeMinutes).toBe(90);
+    });
+  });
 });

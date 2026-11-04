@@ -12,8 +12,8 @@ export const CREATE_JOURNAL_ENTRY_INPUT = z
     playedMinutes: z.number().int().positive().optional(),
     playthroughId: z.string().min(1).optional(),
   })
-  .refine((d) => d.content.trim().length > 0 || d.playthroughId != null, {
-    message: "Add a thought, or attach the session to a playthrough",
+  .refine((d) => d.content.trim().length > 0 || d.playedMinutes != null, {
+    message: "Add a thought or the time you played",
     path: ["content"],
   });
 

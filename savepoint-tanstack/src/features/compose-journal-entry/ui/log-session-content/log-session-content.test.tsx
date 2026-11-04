@@ -114,6 +114,44 @@ const actions = {
 // ---------------------------------------------------------------------------
 
 describe("LogSessionContent", () => {
+  describe("given the Log sheet has neither time nor text", () => {
+    it("keeps Log session disabled", () => {
+      render(
+        <LogSessionContent
+          gameId="game-001"
+          playthroughs={[]}
+          onClose={vi.fn()}
+        />
+      );
+      expect(elements.getLogSessionButton()).toBeDisabled();
+    });
+  });
+
+  describe("given time is set with no text and no playthrough", () => {
+    it("enables Log session and submits the minutes", async () => {
+      vi.mocked(createJournalEntryFn).mockClear();
+      render(
+        <LogSessionContent
+          gameId="game-001"
+          playthroughs={[]}
+          onClose={vi.fn()}
+        />
+      );
+      await actions.increment();
+      await actions.increment();
+
+      expect(elements.getLogSessionButton()).toBeEnabled();
+      await actions.submit();
+      expect(vi.mocked(createJournalEntryFn)).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          content: "",
+          gameId: "game-001",
+          playedMinutes: 60,
+        }),
+      });
+    });
+  });
+
   describe("given gameTitle is provided", () => {
     beforeEach(() => {
       render(

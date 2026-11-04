@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
-import { getErrorMessage } from "@/shared/lib/errors";
+import { getSaveErrorMessage } from "@/features/compose-journal-entry/lib/get-save-error-message";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 import { Button } from "@/shared/ui/button";
 import { DialogFooter } from "@/shared/ui/dialog";
@@ -30,13 +30,14 @@ export function ComposeJournalEntryDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const trimmed = content.trim();
-  const isEmpty = trimmed.length === 0;
 
   const parsedMinutes = Number.parseInt(minutes, 10);
   const playedMinutes =
     Number.isInteger(parsedMinutes) && parsedMinutes > 0
       ? parsedMinutes
       : undefined;
+
+  const isEmpty = trimmed.length === 0 && playedMinutes === undefined;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,7 +59,7 @@ export function ComposeJournalEntryDialog({
       await router.invalidate();
       onOpenChange(false);
     } catch (err: unknown) {
-      const message = getErrorMessage(err, "Something went wrong");
+      const message = getSaveErrorMessage(err);
       setError(message);
       toast.error(message);
     } finally {
