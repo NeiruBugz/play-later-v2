@@ -18,20 +18,25 @@ export async function undoAddGame(
       where: { id: libraryItemId, userId },
       select: {
         createdAt: true,
+        gameId: true,
         upNextPosition: true,
         _count: { select: { playthroughs: true } },
-        JournalEntry: { select: { id: true, prompt: true } },
       },
     });
     if (!item) {
       throw new NotFoundError("Library item not found", { libraryItemId });
     }
 
+    const notes = await tx.journalEntry.findMany({
+      where: {
+        userId,
+        OR: [{ libraryItemId }, { gameId: item.gameId }],
+      },
+      select: { prompt: true },
+    });
     const isRecent = Date.now() - item.createdAt.getTime() < UNDO_ADD_WINDOW_MS;
     const hasPlays = item._count.playthroughs > 0;
-    const hasOtherNotes = item.JournalEntry.some(
-      (entry) => entry.prompt !== "WHY"
-    );
+    const hasOtherNotes = notes.some((entry) => entry.prompt !== "WHY");
     if (!isRecent || hasPlays || hasOtherNotes) {
       throw new ConflictError("This add can no longer be undone", {
         code: UNDO_ADD_UNAVAILABLE,
@@ -40,7 +45,11 @@ export async function undoAddGame(
     }
 
     await tx.journalEntry.deleteMany({
-      where: { libraryItemId, prompt: "WHY" },
+      where: {
+        userId,
+        prompt: "WHY",
+        OR: [{ libraryItemId }, { gameId: item.gameId }],
+      },
     });
     await tx.libraryItem.delete({ where: { id: libraryItemId } });
     if (item.upNextPosition !== null) {

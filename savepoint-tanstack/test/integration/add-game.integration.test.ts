@@ -6,6 +6,8 @@ import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-it
 import { undoAddGame } from "@/entities/library-item/api/undo-add-game.server";
 import { addGameWorker } from "@/features/add-game/api/add-game.worker";
 import { undoAddGameWorker } from "@/features/add-game/api/undo-add-game.worker";
+import { logTimeWorker } from "@/features/compose-journal-entry/api/log-time-fn.worker";
+import { answerPromptWorker } from "@/features/library-prompts/api/answer-prompt-fn.worker";
 import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
 import {
@@ -234,5 +236,74 @@ describe(undoAddGameWorker, () => {
 
     expect(result).toEqual({});
     expect(await itemExists(libraryItemId)).toBe(false);
+  });
+});
+
+describe("undo after notes written through the real write path", () => {
+  it("answering WHY then undoing removes the item and the WHY note", async () => {
+    const user = await createUser(db.prisma);
+    const game = await createGame(db.prisma);
+    const { libraryItemId } = await addGameWorker(user.id, {
+      igdbId: game.igdbId,
+    });
+    const { noteId } = await answerPromptWorker(user.id, {
+      id: libraryItemId,
+      kind: "WHY",
+      text: "Heard it is great",
+    });
+    const note = await db.prisma.journalEntry.findUniqueOrThrow({
+      where: { id: noteId },
+    });
+    expect(note.libraryItemId).toBe(libraryItemId);
+
+    await undoAddGameWorker(user.id, { libraryItemId });
+
+    expect(await itemExists(libraryItemId)).toBe(false);
+    expect(await db.prisma.journalEntry.count()).toBe(0);
+  });
+
+  it("refuses undo once time was logged through the Log form and keeps everything", async () => {
+    const user = await createUser(db.prisma);
+    const game = await createGame(db.prisma);
+    const { libraryItemId } = await addGameWorker(user.id, {
+      igdbId: game.igdbId,
+    });
+    const { noteId } = await logTimeWorker(user.id, {
+      gameId: game.id,
+      playedMinutes: 30,
+    });
+    const note = await db.prisma.journalEntry.findUniqueOrThrow({
+      where: { id: noteId },
+    });
+    expect(note.libraryItemId).toBe(libraryItemId);
+
+    await expectUndoUnavailable(user.id, libraryItemId);
+
+    expect(await itemExists(libraryItemId)).toBe(true);
+    expect(await db.prisma.journalEntry.count()).toBe(1);
+  });
+
+  it("covers legacy notes linked only by game, for the guard and the WHY delete", async () => {
+    const user = await createUser(db.prisma);
+    const game = await createGame(db.prisma);
+    const { item } = await addGameToLibrary(user.id, game.id);
+    await createNote(db.prisma, {
+      userId: user.id,
+      gameId: game.id,
+      libraryItemId: null,
+      prompt: "WHY",
+    });
+    await undoAddGame(user.id, item.id);
+    expect(await db.prisma.journalEntry.count()).toBe(0);
+
+    const { item: again } = await addGameToLibrary(user.id, game.id);
+    await createNote(db.prisma, {
+      userId: user.id,
+      gameId: game.id,
+      libraryItemId: null,
+      prompt: null,
+    });
+    await expectUndoUnavailable(user.id, again.id);
+    expect(await itemExists(again.id)).toBe(true);
   });
 });

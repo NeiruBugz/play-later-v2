@@ -20,7 +20,8 @@ export type CreateJournalEntryInput = {
  * Creates a note. Needs non-empty text or `playedMinutes > 0`; minutes need a
  * game; a game must be in the user's library. No run is required: when the
  * game's item has an open play, that play's `playtimeMinutes` is incremented
- * and the note is linked to it.
+ * and the note is linked to it. A game note is always linked to the user's
+ * library item as well as the game.
  */
 export async function createJournalEntry(
   userId: string,
@@ -43,6 +44,7 @@ export async function createJournalEntry(
 
   return prisma.$transaction(async (tx) => {
     let playthroughId: string | null = null;
+    let libraryItemId: number | null = null;
 
     if (gameId) {
       const item = await tx.libraryItem.findFirst({
@@ -52,6 +54,8 @@ export async function createJournalEntry(
       if (!item) {
         throw new NotFoundError("Game is not in your library", { gameId });
       }
+
+      libraryItemId = item.id;
 
       const openPlay = await tx.playthrough.findFirst({
         where: { libraryItemId: item.id, finishedAt: null },
@@ -75,6 +79,7 @@ export async function createJournalEntry(
         userId,
         content,
         gameId,
+        libraryItemId,
         playedMinutes,
         playthroughId,
         ...(input.prompt ? { prompt: input.prompt } : {}),

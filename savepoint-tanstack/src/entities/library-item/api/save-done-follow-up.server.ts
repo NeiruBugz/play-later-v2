@@ -64,6 +64,7 @@ export async function saveDoneFollowUp(
       data: {
         userId,
         gameId: item.gameId,
+        libraryItemId: id,
         content: stayed,
         prompt: "STAYED",
       },
