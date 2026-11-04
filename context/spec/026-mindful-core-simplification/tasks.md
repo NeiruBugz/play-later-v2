@@ -86,19 +86,19 @@ Verify-task conventions:
 - [ ] **Slice 3: One-tap next step, direct picker, undo, desktop parity**
 
   > Spec §2.3, §2.14, plus the undo part of §2.13 (audit N1, N2).
-  - [ ] Add `restoreLibraryItem`:
+  - [x] Add `restoreLibraryItem`:
     - Deletes the created play and reopens the closed one.
     - Restores the snapshot, including `statusChangedAt`.
     - Restores the queue place only if there is room, returning `queueRestored`.
-  - [ ] Add `undoStatusFn`.
-  - [ ] Integration tests. **[Agent: tanstack-fullstack]**
-  - [ ] Add `StatusPicker`, `StatusControl` and `NextStepButton` in `entities/library-item/ui/`. **[Agent: react-frontend]**
-  - [ ] Add `useSetStatus`:
+  - [x] Add `undoStatusFn`.
+  - [x] Integration tests. **[Agent: tanstack-fullstack]**
+  - [x] Add `StatusPicker`, `StatusControl` and `NextStepButton` in `entities/library-item/ui/`. **[Agent: react-frontend]**
+  - [x] Add `useSetStatus`:
     - Optimistic update with rollback.
     - The error message comes from the code → message map only, never raw Zod/Prisma text (§2.14).
     - 5 s undo toast, plus the full-queue undo message.
     - Mutations scoped per game; `router.invalidate()` on settle. **[Agent: react-frontend]**
-  - [ ] Wiring:
+  - [x] Wiring:
     - Put `StatusControl` and `NextStepButton` on the grid tile, the list row, the game-page header and the phone bottom bar.
     - The phone bottom bar sits above the bottom nav at every scroll position (N1).
     - Desktop gets the grid/list toggle and the rich list card with the next-step button (N2).
@@ -114,20 +114,20 @@ Verify-task conventions:
 - [ ] **Slice 4: Up Next queue**
 
   > Spec §2.4.
-  - [ ] Queue operations in entities:
+  - [x] Queue operations in entities:
     - `addToUpNext` (`UP_NEXT_FULL`, `ValidationError` for Playing, idempotent), `removeFromUpNext` and `moveInUpNext`.
     - Each runs under a per-user advisory lock with sequential compaction.
     - Tests include two concurrent adds at 4 → exactly one `UP_NEXT_FULL`. **[Agent: tanstack-fullstack]**
-  - [ ] Add a `features/up-next` slice with its server fns.
+  - [x] Add a `features/up-next` slice with its server fns.
     - The library UP_NEXT view is ordered by position.
     - Home top 3 by position.
     - Search, palette and add-dialog lookups return `upNextPosition`. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - `UpNextQueueList`: numbered 1..N, Move up/down hidden at the ends, labelled, position announced.
     - Card menu and game page: Put in / Remove from Up Next, hidden for Playing.
     - `QueueMarker` on cards, search, palette and the add dialog.
     - Home top-3 rail with "See all" and the empty copy. **[Agent: react-frontend]**
-  - [ ] Desktop drag: add `@dnd-kit/core` and `@dnd-kit/sortable` at exact pinned versions, lazy-loaded, desktop only, calling `moveInUpNextFn`. **[Agent: react-frontend]**
+  - [x] Desktop drag: add `@dnd-kit/core` and `@dnd-kit/sortable` at exact pinned versions, lazy-loaded, desktop only, calling `moveInUpNextFn`. **[Agent: react-frontend]**
   - [ ] Verify:
     - Queue 5: numbered 1–5. A 6th shows the full message.
     - Move and drag reorders persist after reload.
