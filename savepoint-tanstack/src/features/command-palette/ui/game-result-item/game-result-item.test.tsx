@@ -66,8 +66,7 @@ const elements = {
 };
 
 const actions = {
-  clickAdd: (name: string) =>
-    userEvent.click(elements.getAddButton(name)),
+  clickAdd: (name: string) => userEvent.click(elements.getAddButton(name)),
 };
 
 const GAME = {
