@@ -64,8 +64,6 @@ function makeGame(
 
 type Status = "WANT" | "PLAYING" | "DONE";
 
-type Acquisition = "DIGITAL" | "SUBSCRIPTION" | "PHYSICAL";
-
 function makeLibraryItem(
   userId: string,
   gameId: string,
@@ -73,7 +71,6 @@ function makeLibraryItem(
     status?: Status;
     platform?: string;
     rating?: number | null;
-    acquisitionType?: Acquisition;
     startedAt?: Date | null;
     completedAt?: Date | null;
     createdAt?: Date;
@@ -85,7 +82,6 @@ function makeLibraryItem(
     userId,
     gameId,
     status: overrides.status ?? ("WANT" as Status),
-    acquisitionType: overrides.acquisitionType ?? ("DIGITAL" as const),
     startedAt: overrides.startedAt ?? null,
     completedAt: overrides.completedAt ?? null,
     platform: overrides.platform ?? null,
@@ -308,63 +304,67 @@ describe("getLibrary", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Acquisition filter (F03)
+  // Ownership filter
   // -------------------------------------------------------------------------
 
-  describe("acquisition filter", () => {
+  describe("notOwnedOnly filter", () => {
     beforeEach(async () => {
-      await db.prisma.user.create({ data: makeUser("acq") });
-      await Promise.all([
-        db.prisma.game.create({ data: makeGame("acq1", { title: "Owned A" }) }),
-        db.prisma.game.create({ data: makeGame("acq2", { title: "Owned B" }) }),
-        db.prisma.game.create({ data: makeGame("acq3", { title: "Sub A" }) }),
-        db.prisma.game.create({
-          data: makeGame("acq4", { title: "Physical A" }),
-        }),
-      ]);
+      await db.prisma.user.create({ data: makeUser("own") });
+      await Promise.all(
+        ["o1", "o2", "o3", "o4"].map((suffix) =>
+          db.prisma.game.create({ data: makeGame(suffix) })
+        )
+      );
       await db.prisma.libraryItem.createMany({
         data: [
-          makeLibraryItem("lib-user-acq", "lib-game-acq1", {
-            acquisitionType: "DIGITAL",
-          }),
-          makeLibraryItem("lib-user-acq", "lib-game-acq2", {
-            acquisitionType: "DIGITAL",
-          }),
-          makeLibraryItem("lib-user-acq", "lib-game-acq3", {
-            acquisitionType: "SUBSCRIPTION",
-          }),
-          makeLibraryItem("lib-user-acq", "lib-game-acq4", {
-            acquisitionType: "PHYSICAL",
-          }),
+          { ...makeLibraryItem("lib-user-own", "lib-game-o1"), isOwned: true },
+          { ...makeLibraryItem("lib-user-own", "lib-game-o2"), isOwned: false },
+          {
+            ...makeLibraryItem("lib-user-own", "lib-game-o3", {
+              status: "PLAYING",
+            }),
+            isOwned: false,
+          },
+          { ...makeLibraryItem("lib-user-own", "lib-game-o4"), isOwned: false },
         ],
       });
     });
 
-    it("returns only SUBSCRIPTION items when acquisition is SUBSCRIPTION", async () => {
-      const result = await getLibrary("lib-user-acq", {
-        acquisition: "SUBSCRIPTION",
+    it("lists only the not-owned Want games", async () => {
+      const result = await getLibrary("lib-user-own", {
+        status: "WANT",
+        notOwnedOnly: true,
       });
 
-      expect(result.items).toHaveLength(1);
-      expect(
-        result.items.every((item) => item.acquisitionType === "SUBSCRIPTION")
-      ).toBe(true);
+      expect(result.items.map((item) => item.gameId).sort()).toEqual([
+        "lib-game-o2",
+        "lib-game-o4",
+      ]);
+      expect(result.total).toBe(2);
+      expect(result.items.every((item) => item.isOwned === false)).toBe(true);
     });
 
-    it("returns only DIGITAL items when acquisition is DIGITAL", async () => {
-      const result = await getLibrary("lib-user-acq", {
-        acquisition: "DIGITAL",
+    it("is ignored outside the Want status", async () => {
+      const result = await getLibrary("lib-user-own", {
+        status: "PLAYING",
+        notOwnedOnly: true,
       });
 
-      expect(result.items).toHaveLength(2);
-      expect(
-        result.items.every((item) => item.acquisitionType === "DIGITAL")
-      ).toBe(true);
+      expect(result.items.map((item) => item.gameId)).toEqual(["lib-game-o3"]);
     });
 
-    it("returns every source when no acquisition filter is applied", async () => {
-      const result = await getLibrary("lib-user-acq", {});
+    it("is ignored when no status is chosen", async () => {
+      const result = await getLibrary("lib-user-own", { notOwnedOnly: true });
+
       expect(result.total).toBe(4);
+    });
+
+    it("carries isOwned on every item", async () => {
+      const result = await getLibrary("lib-user-own", {});
+
+      expect(
+        result.items.every((item) => typeof item.isOwned === "boolean")
+      ).toBe(true);
     });
   });
 

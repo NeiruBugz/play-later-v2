@@ -9,6 +9,7 @@ export type {
   LibraryStatusCounts,
 } from "./get-library-status-counts.server";
 export type { AddGameToLibraryInput } from "./add-game-to-library.server";
+export type { SetOwnershipResult } from "./set-ownership.server";
 export type { UpdateLibraryItemInput } from "./update-library-item.server";
 export type {
   LibraryItemStatusSnapshot,

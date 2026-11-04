@@ -17,7 +17,7 @@ export async function getLibrary(
     status,
     upNext,
     platform,
-    acquisition,
+    notOwnedOnly,
     minRating,
     sortBy,
     sortOrder = "desc",
@@ -27,7 +27,7 @@ export async function getLibrary(
     userId,
     ...(upNext ? { upNextPosition: { not: null } } : status && { status }),
     ...(platform && { platform }),
-    ...(acquisition && { acquisitionType: acquisition }),
+    ...(notOwnedOnly && status === "WANT" && !upNext && { isOwned: false }),
     ...(minRating !== undefined && { rating: { gte: minRating } }),
   };
 

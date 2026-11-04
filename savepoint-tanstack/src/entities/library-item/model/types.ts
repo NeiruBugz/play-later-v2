@@ -1,5 +1,4 @@
 import type {
-  AcquisitionType,
   LibraryItem,
   LibraryItemStatus,
 } from "../../../../shared/lib/prisma/client.ts";
@@ -13,7 +12,8 @@ export type GetLibraryFilters = {
    */
   upNext?: boolean;
   platform?: string;
-  acquisition?: AcquisitionType;
+  /** Only meaningful with `status: WANT`; ignored for every other view. */
+  notOwnedOnly?: boolean;
   minRating?: number;
   sortBy?: "title" | "createdAt" | "updatedAt";
   sortOrder?: "asc" | "desc";

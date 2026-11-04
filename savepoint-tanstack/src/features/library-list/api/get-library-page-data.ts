@@ -17,14 +17,13 @@ import { ratingStarsToStorage } from "@/shared/lib/rating";
 
 const libraryStatusSchema = libraryItemStatusSchema.or(z.literal("UP_NEXT"));
 
-const acquisitionSchema = z.enum(["DIGITAL", "SUBSCRIPTION", "PHYSICAL"]);
 const sortBySchema = z.enum(["title", "createdAt", "updatedAt"]);
 const sortOrderSchema = z.enum(["asc", "desc"]);
 
 const inputSchema = z.object({
   status: libraryStatusSchema.optional(),
   platform: z.string().min(1).optional(),
-  acquisition: acquisitionSchema.optional(),
+  notOwnedOnly: z.boolean().optional(),
   // Stars (0.5–5), the user-facing unit. Converted to the 1–10 storage int
   // before hitting Prisma (see handler).
   minRating: z.number().min(0.5).max(5).multipleOf(0.5).optional(),

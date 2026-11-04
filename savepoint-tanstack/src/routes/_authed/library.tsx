@@ -7,9 +7,7 @@ import { LibraryPage } from "@/widgets/library-page";
 const searchSchema = z.object({
   status: z.enum(["WANT", "PLAYING", "DONE", "UP_NEXT"]).optional(),
   platform: z.string().min(1).optional(),
-  // F03: acquisition source. SUBSCRIPTION covers Game Pass + PS+ (DB can't
-  // tell them apart).
-  acquisition: z.enum(["DIGITAL", "SUBSCRIPTION", "PHYSICAL"]).optional(),
+  notOwnedOnly: z.boolean().optional(),
   // User-facing unit is stars (0.5–5, half-star precision). The URL reads
   // `?minRating=3.5`, not the raw 1–10 storage int. Conversion to storage
   // happens at the loader/entity seam. See shared/lib/rating.ts.
@@ -27,7 +25,7 @@ export const Route = createFileRoute("/_authed/library")({
   loaderDeps: ({ search }) => ({
     status: search.status,
     platform: search.platform,
-    acquisition: search.acquisition,
+    notOwnedOnly: search.notOwnedOnly,
     minRating: search.minRating,
     sortBy: search.sortBy,
     sortOrder: search.sortOrder,
@@ -49,7 +47,7 @@ function LibraryRoute() {
       statusCounts={statusCounts}
       status={search.status}
       platform={search.platform}
-      acquisition={search.acquisition}
+      notOwnedOnly={search.notOwnedOnly}
       minRating={search.minRating}
       unratedOnly={search.unratedOnly}
       sortBy={search.sortBy ?? "updatedAt"}

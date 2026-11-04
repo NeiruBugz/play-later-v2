@@ -121,6 +121,14 @@ describe("addGameToLibrary", () => {
       expect(item.acquisitionType).toBe("DIGITAL");
     });
 
+    it("creates the item as owned", async () => {
+      const item = await addGameToLibrary("atl-user-alice", {
+        gameId: seededGame.id,
+      });
+
+      expect(item.isOwned).toBe(true);
+    });
+
     it("stores a null platform when none is provided", async () => {
       const item = await addGameToLibrary("atl-user-alice", {
         gameId: seededGame.id,
