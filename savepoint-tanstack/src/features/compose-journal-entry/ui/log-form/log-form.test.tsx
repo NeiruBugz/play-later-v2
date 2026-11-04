@@ -79,7 +79,8 @@ describe("LogForm", () => {
     it("invites an optional note without asking a follow-up question", async () => {
       await renderForm();
       expect(elements.note()).toHaveAttribute(
-        "placeholder", "Add a note (optional)"
+        "placeholder",
+        "Add a note (optional)"
       );
     });
   });
