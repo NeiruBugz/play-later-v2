@@ -86,6 +86,46 @@ describe("RatingInput", () => {
       expect(onChange).toHaveBeenCalledWith(1);
     });
 
+    it("ArrowRight raises the rating by a half star straight away", async () => {
+      actions.focusSlider();
+      await actions.pressKey("{ArrowRight}{ArrowRight}{ArrowRight}");
+      expect(onChange).toHaveBeenLastCalledWith(3);
+      expect(elements.getSlider()).toHaveAttribute("aria-valuenow", "3");
+      expect(elements.getSlider()).toHaveAttribute(
+        "aria-valuetext",
+        "1.5 of 5 stars"
+      );
+    });
+
+    it("ArrowLeft lowers the rating by a half star and stops at the minimum", async () => {
+      actions.focusSlider();
+      await actions.pressKey("{ArrowRight}{ArrowRight}{ArrowLeft}");
+      expect(onChange).toHaveBeenLastCalledWith(1);
+      await actions.pressKey("{ArrowLeft}{ArrowLeft}");
+      expect(onChange).toHaveBeenLastCalledWith(1);
+    });
+
+    it("Home jumps to the lowest rating and End to the highest", async () => {
+      actions.focusSlider();
+      await actions.pressKey("{End}");
+      expect(onChange).toHaveBeenLastCalledWith(10);
+      expect(elements.getSlider()).toHaveAttribute(
+        "aria-valuetext",
+        "5 of 5 stars"
+      );
+      await actions.pressKey("{Home}");
+      expect(onChange).toHaveBeenLastCalledWith(1);
+    });
+
+    it("exposes its range to assistive tech", () => {
+      expect(elements.getSlider()).toHaveAttribute("aria-valuemin", "0");
+      expect(elements.getSlider()).toHaveAttribute("aria-valuemax", "10");
+      expect(elements.getSlider()).toHaveAttribute(
+        "aria-valuetext",
+        "No rating"
+      );
+    });
+
     it("clears the rating on Escape", async () => {
       actions.focusSlider();
       await actions.pressKey("{Escape}");

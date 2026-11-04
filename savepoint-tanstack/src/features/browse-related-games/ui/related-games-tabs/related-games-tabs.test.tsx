@@ -49,6 +49,26 @@ const actions = {
 };
 
 describe("RelatedGamesTabs", () => {
+  describe("given a long franchise breadcrumb", () => {
+    beforeEach(() => {
+      render(
+        <RelatedGamesTabs
+          sections={[
+            makeSection(1, "Final Fantasy VII Compilation of Remakes"),
+            makeSection(2, "Final Fantasy Main Series Collection"),
+            makeSection(3, "Square Enix Role-Playing Franchise Universe"),
+          ]}
+          renderGame={() => null}
+        />
+      );
+    });
+
+    it("keeps the tab row inside its container and scrolls it there, never the page", () => {
+      const tablist = screen.getByRole("tablist");
+      expect(tablist).toHaveClass("max-w-full", "overflow-x-auto");
+    });
+  });
+
   describe("given no sections", () => {
     beforeEach(() => {
       render(<RelatedGamesTabs sections={[]} renderGame={() => null} />);

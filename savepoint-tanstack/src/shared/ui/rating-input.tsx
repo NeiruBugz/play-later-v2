@@ -148,14 +148,29 @@ export function RatingInput({
     commit(next === value ? null : next);
   };
 
+  const stepRating = (next: number) => {
+    const clamped = clampRating(next);
+    setPreview(clamped);
+    if (!interactive || !onChange) return;
+    lastCommitRef.current = Date.now();
+    onChange(clamped);
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!interactive) return;
+    const current = preview ?? 0;
     if (event.key === "ArrowRight" || event.key === "ArrowUp") {
       event.preventDefault();
-      setPreview((prev) => (prev === null ? MIN_VALUE : clampRating(prev + 1)));
+      stepRating(current + 1);
     } else if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
       event.preventDefault();
-      setPreview((prev) => (prev === null ? MIN_VALUE : clampRating(prev - 1)));
+      stepRating(current - 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      stepRating(MIN_VALUE);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      stepRating(MAX_VALUE);
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       if (preview !== null) commit(preview);
@@ -169,9 +184,13 @@ export function RatingInput({
     ? {
         role: "slider",
         tabIndex: 0,
-        "aria-valuemin": MIN_VALUE,
+        "aria-valuemin": 0,
         "aria-valuemax": MAX_VALUE,
         "aria-valuenow": displayValue ?? 0,
+        "aria-valuetext":
+          displayValue === null
+            ? "No rating"
+            : `${displayValue / 2} of 5 stars`,
         "aria-label": computedLabel,
         onMouseLeave: handleMouseLeave,
         onKeyDown: handleKeyDown,
