@@ -1,4 +1,9 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
 
 import { getProfileSetupStatusFn } from "@/features/setup-profile/api/get-profile-setup-status";
 import { AppError } from "@/shared/lib/errors";
@@ -41,7 +46,7 @@ function ProfileSetupRoute() {
   );
 }
 
-function ProfileSetupErrorBoundary({ error }: { error: Error }) {
+function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
   const isUnauthorized =
     error instanceof AppError && error.code === "UNAUTHORIZED";
 

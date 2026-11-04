@@ -1,5 +1,5 @@
 export type ErrorBoundaryProps = {
-  error: Error;
+  error: unknown;
 };
 
 export type ErrorView = {

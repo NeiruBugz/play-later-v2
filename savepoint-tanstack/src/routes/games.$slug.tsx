@@ -1,5 +1,9 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
 import { Component, Suspense, type ReactNode } from "react";
 
 import {
@@ -191,7 +195,7 @@ class SectionErrorBoundary extends Component<
   }
 }
 
-function GameDetailErrorBoundary({ error }: { error: Error }) {
+function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
   const isNotFound = error instanceof AppError && error.code === "NOT_FOUND";
 
   if (isNotFound) {
