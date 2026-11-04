@@ -22,7 +22,7 @@ const sortOrderSchema = z.enum(["asc", "desc"]);
 
 const inputSchema = z.object({
   status: libraryStatusSchema.optional(),
-  platform: z.string().min(1).optional(),
+  platform: z.string().min(1).max(64).optional(),
   notOwnedOnly: z.boolean().optional(),
   // Stars (0.5–5), the user-facing unit. Converted to the 1–10 storage int
   // before hitting Prisma (see handler).

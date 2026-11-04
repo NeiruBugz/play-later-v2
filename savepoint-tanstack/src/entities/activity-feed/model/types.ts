@@ -9,7 +9,7 @@ import { z } from "zod";
  */
 
 export const FeedCursorSchema = z.object({
-  timestamp: z.string(),
+  timestamp: z.iso.datetime(),
   id: z.number().int(),
 });
 
