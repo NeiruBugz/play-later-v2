@@ -9,22 +9,28 @@ Verify-task conventions:
 - If IGDB is unreachable, seed `Game` rows directly in the local DB.
 - At the end of each Verify task, stop the server **by its recorded PID** and delete every screenshot, trace and generated script the task produced.
 
-- [ ] **Slice 1: Broken paths fixed** (spec §2.19, audit U1–U6)
+- [x] **Slice 1: Broken paths fixed** (spec §2.19, audit U1–U6)
 
   > First-run, note pages, followers and profile links work. Removing a game asks once. Done before the model swap so the later Verify tasks can reach these screens.
-  - [ ] Router fixes:
+  - [x] Router fixes:
     - U1: the profile `beforeLoad` no longer runs for profile setup (move setup to a sibling route or guard on the matched child).
     - U2: `<Outlet/>` or flattening for the journal child routes.
     - U3: `<Outlet/>` or flattening for followers/following.
     - Add a router integration test that renders the real route tree with memory history for `/journal/<id>`, `/journal/new`, `/journal/<id>/edit`, `/u/<name>/followers` and `/profile/setup` (user without a username), with no redirect loop. **[Agent: tanstack-fullstack]**
-  - [ ] U4: public profile reads stop returning run notes and ratings for non-owners (`get-profile-playthroughs.server.ts`), with a test. U5: profile tiles link by `Game.slug`. **[Agent: tanstack-fullstack]**
-  - [ ] U6: a single `RemoveFromLibraryDialog` ("Remove {Game} from your library? Its play history and rating will be deleted. Your notes stay in your Journal." with Remove / Cancel, no typed title), used by the card menu, the game page and the details form. Remove the typed-title gate. Add component tests. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] T2 (think-aloud blocker): logging time with no text works for any library game, including a game made Playing by status alone (no run).
+    - `createJournalEntry` validation: content or `playedMinutes`, no run required. It increments the open play if there is one; otherwise it stores `playedMinutes` only.
+    - The Log sheet and compose dialog enable Save with time only.
+    - No raw validation text in the error toast.
+    - Integration + component tests. **[Agent: tanstack-fullstack]**
+  - [x] U4: public profile reads stop returning run notes and ratings for non-owners (`get-profile-playthroughs.server.ts`), with a test. U5: profile tiles link by `Game.slug`. **[Agent: tanstack-fullstack]**
+  - [x] U6: a single `RemoveFromLibraryDialog` ("Remove {Game} from your library? Its play history and rating will be deleted. Your notes stay in your Journal." with Remove / Cancel, no typed title), used by the card menu, the game page and the details form. Remove the typed-title gate. Add component tests. **[Agent: react-frontend]**
+  - [x] Verify:
     - `audit_empty` signs in → profile setup opens once and completes.
     - Open a note, "New note" and "Edit": each screen renders.
     - Followers and following lists render.
     - Signed out, `audit_full`'s profile shows no note text or ratings, and its game tiles open game pages.
     - Remove from library shows the confirmation, and Cancel changes nothing.
+    - Set a game to Playing by status alone, then log 2 h with no text: it saves with no error (T2).
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
 - [ ] **Slice 2: Three statuses everywhere, and a status only changes when the user changes it**
@@ -56,7 +62,7 @@ Verify-task conventions:
     - Integration tests. **[Agent: tanstack-fullstack]**
   - [ ] Server functions and loaders:
     - `setStatusFn` in `features/manage-library-entry`.
-    - Remove the status/date path from `updateLibraryItemFn`. Delete the manual-override fns.
+    - Remove the status/date path from `updateLibraryItemFn`, and the status select from the details form (T3). Delete the manual-override fns.
     - Update the library page data, the Home counts, the game-detail single status, the profile counts and the activity status. **[Agent: tanstack-fullstack]**
   - [ ] UI relabel to 3 statuses using the existing controls:
     - One 3-option picker on the game page. The card menu offers 3 options.
@@ -152,7 +158,7 @@ Verify-task conventions:
     - Delete the palette quick-add, the search quick-add and the remove-as-undo fns.
     - Integration test: undo never deletes a pre-existing item. **[Agent: tanstack-fullstack]**
   - [ ] UI, add flow:
-    - `useAddGame` and `AddConfirmation` ("Added {Game} to Want", Put in Up Next, Undo only when `created`, 8 s) for the search page, the add dialog, the palette and the game page "Add to library".
+    - `useAddGame` and `AddConfirmation` ("Added {Game} to Want", Start playing (T1), Put in Up Next, Undo only when `created`, 8 s) for the search page, the add dialog, the palette and the game page "Add to library".
     - Live search. The dialog and palette stay open; added results show "In library".
     - Already-in-library results show the status and marker in every search (N11).
     - "See all results" → `/games/search?q=` (N3).
@@ -164,7 +170,7 @@ Verify-task conventions:
     - The phone library FAB never overlaps card menus.
     - Palette: delete the "Add game to library" quick action (N21). **[Agent: react-frontend]**
   - [ ] Verify:
-    - Each of the four entry points shows "Added X to Want". Put in Up Next and Undo work.
+    - Each of the four entry points shows "Added X to Want". Start playing (the palette included), Put in Up Next and Undo work.
     - A game already in the library shows its status in the palette and the dialog, with no Undo offered.
     - "See all results" opens the search page with the query.
     - Log and Add icons differ.
@@ -178,7 +184,7 @@ Verify-task conventions:
     - `createJournalEntry` requires content or minutes, needs no run, and increments the open play.
     - `logTimeFn` returns `{ noteId, offerMarkPlaying }`.
     - `updateJournalEntry` accepts content and `playedMinutes` (content or time).
-    - Journal reads sort and date by `createdAt` (N13) and drop kind/title/mood.
+    - Journal reads sort and date by `createdAt` (N13), drop kind/title/mood, and take a game filter `gameId | "none"` (T4). `playedMinutes` requires a game.
     - `getLoggableGames` returns library items only, Playing first then by title (N6, N7).
     - Game detail: time played = the notes total, sessions = notes with time; Times to Beat / Your Pace read the same total (N10).
     - Tests. **[Agent: tanstack-fullstack]**
@@ -194,6 +200,7 @@ Verify-task conventions:
     - Delete `journal-teaser` and the nested per-run note lists.
     - The note card and note view show time; a time-only note reads "{time} played" (N12).
     - The edit form changes text and time.
+    - Journal filter: All / each game with notes / "No game" (T4). A note without time can be saved without a game.
     - One `formatHours` ("1.5 h") everywhere (N10).
     - No Quick note/Reflection labels. **[Agent: react-frontend]**
   - [ ] Verify:
@@ -203,6 +210,7 @@ Verify-task conventions:
     - The game page shows each note once, and notes open.
     - 90 min reads "1.5 h" on the game page, the note and the Journal.
     - Editing an old note keeps its date and place.
+    - The Journal filter "No game" lists only notes without a game.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
 - [ ] **Slice 8: Done follow-up and optional prompts**
