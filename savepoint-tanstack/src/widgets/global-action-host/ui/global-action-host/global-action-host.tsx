@@ -9,6 +9,7 @@ import {
   closeGlobalAction,
   setGlobalActionGame,
 } from "@/shared/lib/global-action";
+import { keepOpenOnToastInteraction } from "@/shared/lib/keep-open-on-toast-interaction";
 import { ResponsiveModal } from "@/shared/ui";
 
 export function GlobalActionHost() {
@@ -57,6 +58,7 @@ export function GlobalActionHost() {
       description={description}
       dialogTestId="global-action-dialog"
       sheetTestId="global-action-sheet"
+      onInteractOutside={keepOpenOnToastInteraction}
     >
       {content}
     </ResponsiveModal>
