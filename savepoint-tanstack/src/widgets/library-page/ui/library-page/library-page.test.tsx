@@ -8,11 +8,13 @@ import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { LibraryPage } from "./library-page";
 
+const mockNavigate = vi.hoisted(() => vi.fn());
+
 // LibraryFilters uses useNavigate from @tanstack/react-router; LibraryItemCard
 // (via GameCard) uses <Link>. Mock the module so we don't need a router
 // context for a pure widget render test.
 vi.mock("@tanstack/react-router", () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mockNavigate,
   useRouter: () => ({ invalidate: vi.fn() }),
   Link: ({
     to,
@@ -52,10 +54,6 @@ vi.mock("@/features/up-next/api/move-in-up-next-fn", () => ({
 
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
-}));
-
-vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
-  addGameToLibraryFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
@@ -220,7 +218,7 @@ describe("LibraryPage", () => {
       expect(elements.queryPlayingFilterButton()).not.toBeNull();
     });
 
-    it("mounts the AddGameTrigger in the page header", () => {
+    it("shows an Add game button in the page header", () => {
       expect(elements.queryAddGameTrigger()).not.toBeNull();
     });
   });
@@ -283,7 +281,7 @@ describe("LibraryPage", () => {
       expect(elements.queryPlayingFilterButton()).not.toBeNull();
     });
 
-    it("mounts the AddGameTrigger in the page header", () => {
+    it("shows an Add game button in the page header", () => {
       expect(elements.queryAddGameTrigger()).not.toBeNull();
     });
 
@@ -327,10 +325,17 @@ describe("LibraryPage", () => {
         expect(elements.queryCountChip()).toBeNull();
       });
 
-      it("mounts the AddGameTrigger as a FAB (still queryable by aria-label)", () => {
-        const trigger = elements.getAddGameTrigger();
-        expect(trigger.className).toMatch(/rounded-full/);
-        expect(trigger.className).toMatch(/fixed/);
+      it("has no floating Add button that could cover a card menu", () => {
+        const addButtons = screen.getAllByRole("button", { name: "Add game" });
+        expect(addButtons).toHaveLength(1);
+        expect(addButtons[0].className).not.toMatch(/fixed|sticky/);
+      });
+
+      it("opens the add search from the header Add game button", async () => {
+        mockNavigate.mockClear();
+        await userEvent.click(elements.getAddGameTrigger());
+        const { search } = mockNavigate.mock.calls[0][0];
+        expect(search({})).toEqual({ action: "add-game", game: undefined });
       });
 
       it("passes per-status counts through to LibraryFilters (rail renders count next to Playing)", () => {

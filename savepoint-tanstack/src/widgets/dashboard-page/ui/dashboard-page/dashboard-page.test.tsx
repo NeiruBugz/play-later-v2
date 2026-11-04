@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DashboardPageData } from "@/features/dashboard";
@@ -108,6 +109,18 @@ const elements = {
 describe("DashboardPage", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
+  });
+
+  describe("given the Home header", () => {
+    beforeEach(() => {
+      render(<DashboardPage data={makeData()} />);
+    });
+
+    it("opens the add search from the Add game button", async () => {
+      await userEvent.click(screen.getByRole("button", { name: "Add game" }));
+      const { search } = mockNavigate.mock.calls[0][0];
+      expect(search({})).toEqual({ action: "add-game", game: undefined });
+    });
   });
 
   describe("given the library is empty", () => {

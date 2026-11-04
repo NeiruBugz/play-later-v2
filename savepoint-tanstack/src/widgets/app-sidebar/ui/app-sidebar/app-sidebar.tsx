@@ -4,6 +4,7 @@ import {
   House,
   Library,
   LogOut,
+  PackagePlus,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
@@ -153,6 +154,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <BookOpen size={16} aria-hidden="true" />
           {!collapsed && "Log a session"}
         </button>
+
+        <Link
+          to="."
+          search={(prev) => ({ ...prev, action: "add-game" as const })}
+          aria-label="Add game"
+          className={`border-border hover:bg-accent flex w-full items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
+        >
+          <PackagePlus size={16} aria-hidden="true" />
+          {!collapsed && "Add game"}
+        </Link>
       </div>
 
       <nav className="mt-4 flex-1 overflow-y-auto px-2">

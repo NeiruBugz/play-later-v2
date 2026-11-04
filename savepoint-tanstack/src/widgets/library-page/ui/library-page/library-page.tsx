@@ -1,5 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Download, Library, ListOrdered, SearchX } from "lucide-react";
+import {
+  Download,
+  Library,
+  ListOrdered,
+  PackagePlus,
+  SearchX,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -10,7 +16,6 @@ import {
   StatusControl,
 } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
-import { AddGameTrigger } from "@/features/add-game";
 import {
   LibraryFilters,
   MobileFilterBar,
@@ -30,7 +35,9 @@ import { EmptyLibraryHero } from "@/features/onboarding-first-time";
 import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
+import { openGlobalAction } from "@/shared/lib/global-action";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
@@ -296,14 +303,20 @@ export function LibraryPage(props: LibraryPageProps) {
         eyebrow="// LIBRARY"
         title="Library"
         actions={
-          <Link
-            to="/steam/games"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
-            aria-label="View imported Steam games"
-          >
-            <Download className="h-4 w-4" aria-hidden />
-            Imported games
-          </Link>
+          <>
+            <Link
+              to="/steam/games"
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
+              aria-label="View imported Steam games"
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Imported games
+            </Link>
+            <Button onClick={() => openGlobalAction(navigate, "add-game")}>
+              <PackagePlus aria-hidden="true" />
+              Add game
+            </Button>
+          </>
         }
       />
 
@@ -459,10 +472,6 @@ export function LibraryPage(props: LibraryPageProps) {
           )}
         </div>
       </div>
-
-      {/* FAB replaces the header `Add game` button — matches canonical
-          bottom-right floating affordance. */}
-      <AddGameTrigger variant="fab" />
 
       {selectedEntry !== null ? (
         <LibraryModal

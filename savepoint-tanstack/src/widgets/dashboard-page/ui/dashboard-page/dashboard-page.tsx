@@ -1,4 +1,9 @@
+import { useNavigate } from "@tanstack/react-router";
+import { PackagePlus } from "lucide-react";
+
+import { openGlobalAction } from "@/shared/lib/global-action";
 import { PageHeader } from "@/shared/ui";
+import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 
 import { DashboardContinueList } from "../dashboard-continue-list";
@@ -17,12 +22,19 @@ export function DashboardPage({ data }: DashboardPageProps) {
 
   const mostInProgressGame = data.quickLogGames[0] ?? null;
   const now = new Date();
+  const navigate = useNavigate();
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-6">
       <PageHeader
         eyebrow={buildEyebrowDate(now)}
         title={buildGreeting(now, data.username)}
+        actions={
+          <Button onClick={() => openGlobalAction(navigate, "add-game")}>
+            <PackagePlus aria-hidden="true" />
+            Add game
+          </Button>
+        }
       />
 
       <div className="md:grid md:grid-cols-[1.5fr_1fr] md:items-stretch md:gap-6">

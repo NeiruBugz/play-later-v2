@@ -53,6 +53,14 @@ describe("AppBottomNav", () => {
       expect(elements.getLogButton()).toBeDefined();
     });
 
+    it("does not use the Add game icon for the Log button", () => {
+      // eslint-disable-next-line testing-library/no-node-access
+      const logIcon = elements.getLogButton().querySelector("svg");
+      expect(logIcon?.getAttribute("class")).not.toContain(
+        "lucide-package-plus"
+      );
+    });
+
     it("renders the Home link with href /dashboard as the first slot", () => {
       expect(elements.getNavLink("Home")).toHaveAttribute("href", "/dashboard");
     });
