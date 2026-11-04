@@ -15,19 +15,30 @@ import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts"
  */
 export type LibraryStatusCountMap = Record<LibraryItemStatus, number>;
 
+export type LibraryStatusCounts = LibraryStatusCountMap & {
+  /** Queued games (any status with a non-null `upNextPosition`). */
+  upNext: number;
+};
+
 export async function getLibraryStatusCounts(
   userId: string
-): Promise<LibraryStatusCountMap> {
-  const grouped = await prisma.libraryItem.groupBy({
-    by: ["status"],
-    where: { userId },
-    _count: true,
-  });
+): Promise<LibraryStatusCounts> {
+  const [grouped, upNext] = await Promise.all([
+    prisma.libraryItem.groupBy({
+      by: ["status"],
+      where: { userId },
+      _count: true,
+    }),
+    prisma.libraryItem.count({
+      where: { userId, upNextPosition: { not: null } },
+    }),
+  ]);
 
-  const counts: LibraryStatusCountMap = {
+  const counts: LibraryStatusCounts = {
     WANT: 0,
     PLAYING: 0,
     DONE: 0,
+    upNext,
   };
   for (const row of grouped) {
     counts[row.status] = row._count;

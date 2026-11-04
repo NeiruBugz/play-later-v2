@@ -103,6 +103,7 @@ describe("library reads on the three statuses", () => {
       WANT: 2,
       PLAYING: 1,
       DONE: 0,
+      upNext: 0,
     });
   });
 

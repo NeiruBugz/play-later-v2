@@ -585,4 +585,51 @@ describe("getLibrary", () => {
       expect(result.items).toHaveLength(0);
     });
   });
+
+  describe("given the upNext filter", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("queue") });
+      await db.prisma.game.createMany({
+        data: ["a", "b", "c", "d"].map((x) => makeGame(`queue-${x}`)),
+      });
+      await db.prisma.libraryItem.createMany({
+        data: [
+          {
+            ...makeLibraryItem("lib-user-queue", "lib-game-queue-a", {
+              status: "WANT",
+              updatedAt: new Date("2024-03-01T00:00:00.000Z"),
+            }),
+            upNextPosition: 2,
+          },
+          {
+            ...makeLibraryItem("lib-user-queue", "lib-game-queue-b", {
+              status: "DONE",
+              updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+            }),
+            upNextPosition: 1,
+          },
+          makeLibraryItem("lib-user-queue", "lib-game-queue-c", {
+            status: "WANT",
+          }),
+          makeLibraryItem("lib-user-queue", "lib-game-queue-d", {
+            status: "PLAYING",
+          }),
+        ],
+      });
+    });
+
+    it("returns queued WANT and DONE games ordered by position, ignoring sort params", async () => {
+      const result = await getLibrary("lib-user-queue", {
+        upNext: true,
+        sortBy: "updatedAt",
+        sortOrder: "desc",
+      });
+
+      expect(result.items.map((i) => [i.game.id, i.upNextPosition])).toEqual([
+        ["lib-game-queue-b", 1],
+        ["lib-game-queue-a", 2],
+      ]);
+      expect(result.total).toBe(2);
+    });
+  });
 });

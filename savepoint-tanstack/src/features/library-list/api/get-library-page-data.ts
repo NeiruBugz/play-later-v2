@@ -1,10 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import {
-  getLibraryStatusCounts,
-  type LibraryStatusCountMap,
-} from "@/entities/library-item/api/get-library-status-counts.server";
+import { getLibraryStatusCounts } from "@/entities/library-item/api/get-library-status-counts.server";
 import {
   getLibrary,
   type GetLibraryResult,
@@ -18,7 +15,7 @@ import {
 import { requireUserId } from "@/entities/session/api/require-user-id";
 import { ratingStarsToStorage } from "@/shared/lib/rating";
 
-const libraryStatusSchema = libraryItemStatusSchema;
+const libraryStatusSchema = libraryItemStatusSchema.or(z.literal("UP_NEXT"));
 
 const acquisitionSchema = z.enum(["DIGITAL", "SUBSCRIPTION", "PHYSICAL"]);
 const sortBySchema = z.enum(["title", "createdAt", "updatedAt"]);
@@ -34,6 +31,11 @@ const inputSchema = z.object({
   sortBy: sortBySchema.optional(),
   sortOrder: sortOrderSchema.optional(),
 });
+
+export type LibraryFilterCounts = Record<
+  "WANT" | "PLAYING" | "DONE" | "UP_NEXT",
+  number
+>;
 
 export type GetLibraryPageDataInput = z.infer<typeof inputSchema>;
 
@@ -51,18 +53,19 @@ export type GetLibraryPageDataResult = GetLibraryResult & {
    * filters — so the status rail always tells the truth ("47 DONE games
    * exist") even while the grid is filtered to a single status.
    */
-  statusCounts: LibraryStatusCountMap;
+  statusCounts: LibraryFilterCounts;
 };
 
 export const getLibraryPageDataFn = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<GetLibraryPageDataResult> => {
-    const filters = inputSchema.parse(data);
+    const { status, ...filters } = inputSchema.parse(data);
     const userId = await requireUserId();
     // The grid query speaks the storage unit; translate the star filter here so
     // the entity stays in DB units and the UI/URL stay in stars.
     const libraryFilters = {
       ...filters,
+      ...(status === "UP_NEXT" ? { upNext: true } : { status }),
       minRating:
         filters.minRating === undefined
           ? undefined
@@ -74,5 +77,11 @@ export const getLibraryPageDataFn = createServerFn({ method: "GET" })
       getUniqueLibraryPlatforms(userId),
       getLibraryStatusCounts(userId),
     ]);
-    return { ...library, onboarding, platforms, statusCounts };
+    const { upNext, ...statusCountsByStatus } = statusCounts;
+    return {
+      ...library,
+      onboarding,
+      platforms,
+      statusCounts: { ...statusCountsByStatus, UP_NEXT: upNext },
+    };
   });

@@ -6,6 +6,12 @@ import type {
 
 export type GetLibraryFilters = {
   status?: LibraryItemStatus;
+  /**
+   * Status-agnostic queue view: every item with a non-null `upNextPosition`
+   * (WANT or DONE), ordered by position ascending. Takes precedence over
+   * `status` and the sort params.
+   */
+  upNext?: boolean;
   platform?: string;
   acquisition?: AcquisitionType;
   minRating?: number;

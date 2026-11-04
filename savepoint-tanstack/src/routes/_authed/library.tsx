@@ -5,7 +5,7 @@ import { getLibraryPageDataFn } from "@/features/library-list";
 import { LibraryPage } from "@/widgets/library-page";
 
 const searchSchema = z.object({
-  status: z.enum(["WANT", "PLAYING", "DONE"]).optional(),
+  status: z.enum(["WANT", "PLAYING", "DONE", "UP_NEXT"]).optional(),
   platform: z.string().min(1).optional(),
   // F03: acquisition source. SUBSCRIPTION covers Game Pass + PS+ (DB can't
   // tell them apart).

@@ -381,4 +381,41 @@ describe("getDashboardPageDataWorker", () => {
       expect(data.hasEmptyLibrary).toBe(false);
     });
   });
+
+  describe("Up Next rail", () => {
+    it("returns the top 3 queued games in queue order, including a queued DONE game, with the full queued total", async () => {
+      await db.prisma.user.create({ data: makeUser("rail") });
+      await db.prisma.game.createMany({
+        data: ["a", "b", "c", "d", "e"].map((x) => makeGame(`rail-${x}`)),
+      });
+      const queue: Array<[string, "WANT" | "DONE", number]> = [
+        ["a", "WANT", 4],
+        ["b", "DONE", 1],
+        ["c", "WANT", 3],
+        ["d", "WANT", 2],
+      ];
+      await db.prisma.libraryItem.createMany({
+        data: [
+          ...queue.map(([x, status, position]) =>
+            makeLibraryItem("ddpd-user-rail", `ddpd-game-rail-${x}`, {
+              status,
+              upNextPosition: position,
+            })
+          ),
+          makeLibraryItem("ddpd-user-rail", "ddpd-game-rail-e"),
+        ],
+      });
+
+      const data = await getDashboardPageDataWorker("ddpd-user-rail");
+
+      expect(
+        data.upNext.items.map((i) => [i.game.id, i.status, i.upNextPosition])
+      ).toEqual([
+        ["ddpd-game-rail-b", "DONE", 1],
+        ["ddpd-game-rail-d", "WANT", 2],
+        ["ddpd-game-rail-c", "WANT", 3],
+      ]);
+      expect(data.upNext.total).toBe(4);
+    });
+  });
 });

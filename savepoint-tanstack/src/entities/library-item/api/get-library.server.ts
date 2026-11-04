@@ -15,6 +15,7 @@ export async function getLibrary(
 ): Promise<GetLibraryResult> {
   const {
     status,
+    upNext,
     platform,
     acquisition,
     minRating,
@@ -24,14 +25,15 @@ export async function getLibrary(
 
   const where: Prisma.LibraryItemWhereInput = {
     userId,
-    ...(status && { status }),
+    ...(upNext ? { upNextPosition: { not: null } } : status && { status }),
     ...(platform && { platform }),
     ...(acquisition && { acquisitionType: acquisition }),
     ...(minRating !== undefined && { rating: { gte: minRating } }),
   };
 
-  const orderBy: Prisma.LibraryItemOrderByWithRelationInput =
-    sortBy === "title"
+  const orderBy: Prisma.LibraryItemOrderByWithRelationInput = upNext
+    ? { upNextPosition: "asc" }
+    : sortBy === "title"
       ? { game: { title: sortOrder } }
       : sortBy === "createdAt"
         ? { createdAt: sortOrder }

@@ -8,7 +8,7 @@ import { UnauthorizedError } from "@/shared/lib/errors";
 
 const QUICK_LOG_LIMIT = 3;
 const CONTINUE_PLAYING_LIMIT = 3;
-const UP_NEXT_LIMIT = 4;
+const UP_NEXT_LIMIT = 3;
 const RECENTLY_ADDED_LIMIT = 6;
 const STATS_MIN_GAMES = 3;
 
@@ -56,14 +56,14 @@ export async function getDashboardPageDataWorker(
 ): Promise<DashboardPageData> {
   if (!userId) throw new UnauthorizedError("Sign in required");
 
-  const [stats, playing, want, recent, profile] = await Promise.all([
+  const [stats, playing, queued, recent, profile] = await Promise.all([
     getLibraryStats(userId),
     getLibrary(userId, {
       status: "PLAYING",
       sortBy: "updatedAt",
       sortOrder: "desc",
     }),
-    getLibrary(userId, { status: "WANT" }),
+    getLibrary(userId, { upNext: true }),
     getLibrary(userId, { sortBy: "createdAt", sortOrder: "desc" }),
     getProfileById(userId).catch(() => null),
   ]);
@@ -74,10 +74,6 @@ export async function getDashboardPageDataWorker(
     DONE: stats.done,
   };
   const total = statusCounts.WANT + statusCounts.PLAYING + statusCounts.DONE;
-
-  const queued = want.items
-    .filter((item) => item.upNextPosition !== null)
-    .sort((a, b) => (a.upNextPosition ?? 0) - (b.upNextPosition ?? 0));
 
   const quickLogGames: DashboardQuickLogGame[] = playing.items
     .slice(0, QUICK_LOG_LIMIT)
@@ -106,8 +102,8 @@ export async function getDashboardPageDataWorker(
       total: playing.total,
     },
     upNext: {
-      items: queued.slice(0, UP_NEXT_LIMIT),
-      total: queued.length,
+      items: queued.items.slice(0, UP_NEXT_LIMIT),
+      total: queued.total,
     },
     recentlyAdded: {
       items: recent.items.slice(0, RECENTLY_ADDED_LIMIT),
