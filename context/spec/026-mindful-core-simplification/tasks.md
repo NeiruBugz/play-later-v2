@@ -1,239 +1,309 @@
 # Tasks: Mindful Core Simplification (spec 026)
 
-Source: [functional-spec.md](./functional-spec.md), [technical-considerations.md](./technical-considerations.md). Paths relative to `savepoint-tanstack/`.
+Source: [functional-spec.md](./functional-spec.md), [technical-considerations.md](./technical-considerations.md), [ui-audit/ui-audit.md](./ui-audit/ui-audit.md). Paths relative to `savepoint-tanstack/`.
 
 Verify-task conventions:
 - Start the dev server (`pnpm --filter savepoint-tanstack dev`, port 6060) in the background and record its PID.
-- Drive the UI with the Playwright MCP plus the `verify-ui` skill.
-- Sign in with the credentials provider (`AUTH_ENABLE_CREDENTIALS=true`).
+- Use the audit seed accounts (`audit_full`, `audit_friend`, `audit_empty`; see the Setup section of `ui-audit/ui-audit.md`). Re-seed when a slice needs a clean state.
+- Drive the UI with the Playwright MCP plus the `verify-ui` skill, at 390 px and 1440 px.
 - If IGDB is unreachable, seed `Game` rows directly in the local DB.
-- At the end of the task, stop the server **by its recorded PID** and delete every screenshot, trace and generated script the task produced.
+- At the end of each Verify task, stop the server **by its recorded PID** and delete every screenshot, trace and generated script the task produced.
 
-- [ ] **Slice 1: Three statuses everywhere, and a status only changes when the user changes it**
+- [ ] **Slice 1: Broken paths fixed** (spec §2.19, audit U1–U6)
 
-  > After this slice the app runs on Want / Playing / Done (spec §2.1, §2.2, §2.12 data conversion, §2.13 labels). Existing controls are reused, with relabelled 3-option pickers.
-  - [ ] Add `libraryItemFactory` and `playFactory` test helpers under `test/` (status, `upNextPosition`, `isOwned`, `doneOutcome`, open/ended plays). **[Agent: testing]**
+  > First-run, note pages, followers and profile links work. Removing a game asks once. Done before the model swap so the later Verify tasks can reach these screens.
+  - [ ] Router fixes:
+    - U1: the profile `beforeLoad` no longer runs for profile setup (move setup to a sibling route or guard on the matched child).
+    - U2: `<Outlet/>` or flattening for the journal child routes.
+    - U3: `<Outlet/>` or flattening for followers/following.
+    - Add a router integration test that renders the real route tree with memory history for `/journal/<id>`, `/journal/new`, `/journal/<id>/edit`, `/u/<name>/followers` and `/profile/setup` (user without a username), with no redirect loop. **[Agent: tanstack-fullstack]**
+  - [ ] U4: public profile reads stop returning run notes and ratings for non-owners (`get-profile-playthroughs.server.ts`), with a test. U5: profile tiles link by `Game.slug`. **[Agent: tanstack-fullstack]**
+  - [ ] U6: a single `RemoveFromLibraryDialog` ("Remove {Game} from your library? Its play history and rating will be deleted. Your notes stay in your Journal." with Remove / Cancel, no typed title), used by the card menu, the game page and the details form. Remove the typed-title gate. Add component tests. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - `audit_empty` signs in → profile setup opens once and completes.
+    - Open a note, "New note" and "Edit": each screen renders.
+    - Followers and following lists render.
+    - Signed out, `audit_full`'s profile shows no note text or ratings, and its game tiles open game pages.
+    - Remove from library shows the confirmation, and Cancel changes nothing.
+    - Stop the server by PID and delete the artifacts. **[Agent: testing]**
+
+- [ ] **Slice 2: Three statuses everywhere, and a status only changes when the user changes it**
+
+  > The app runs on Want / Playing / Done (spec §2.1, §2.2, §2.12 data conversion, §2.13 labels, §2.18 label case). The existing controls are reused, with relabelled 3-option pickers.
+  - [ ] Add `libraryItemFactory`, `playFactory` and `noteFactory` test helpers under `test/`. **[Agent: testing]**
   - [ ] Schema plus migration A `<ts>_mindful_core_model`:
     - The new enum `LibraryItemStatus { WANT, PLAYING, DONE }`, the enums `DoneOutcome` and `JournalPrompt`, and the new columns.
     - `@@unique([userId, upNextPosition])`, the `CHECK` 1..5, and `@@unique([userId, gameId])`.
-    - The 10-step backfill exactly as in technical-considerations §2.2 (queue first, then the remap inside the old enum, then the enum swap).
+    - The backfill exactly as in technical-considerations §2.2, including the step 6 time-played backfill (time-only notes for run minutes not covered by notes).
     - Legacy columns stay in the schema.
     - Run `prisma:generate`. **[Agent: prisma-database]**
   - [ ] Migration test `test/integration/mindful-core-migration.integration.test.ts`:
     - Apply every prior migration, seed legacy rows with raw SQL, then execute the **real** migration A file read from disk.
     - Cover all seed cases from technical-considerations §4.
-    - Assert the invariants: row counts unchanged; ≤5 queued per user with unique positions; open plays = PLAYING items; the `(userId, status)` index exists; the notice flag is set. **[Agent: prisma-database]**
+    - Assert all the invariants, including that time played per game is unchanged. **[Agent: prisma-database]**
   - [ ] Add a pre-deploy section to `docs/cutover-rollback.md`:
     - Create a Neon branch of production.
-    - Run the duplicate `(userId, gameId)` pre-check query.
+    - Run the duplicate `(userId, gameId)` pre-check.
     - Dry-run migration A on the branch.
-    - Rollback = restore the branch; a Vercel revert alone is not enough.
-    - Nothing in this task touches infra. **[Agent: prisma-database]**
+    - Rollback = restore the branch. **[Agent: prisma-database]**
   - [ ] Rewrite `entities/library-item/model/status.ts` as the client-safe single source of truth:
-    - 3 statuses, the Zod schema, label/icon/badge, `NEXT_STEP`, `getQueueMarker`, `getDoneLabel`, `UP_NEXT_MAX`. **[Agent: tanstack-fullstack]**
+    - 3 statuses, the Zod schema, label/icon/badge (title case), `NEXT_STEP`, `getQueueMarker`, `getDoneLabel`, `UP_NEXT_MAX`. **[Agent: tanstack-fullstack]**
   - [ ] Status core in entities:
-    - Add `setLibraryItemStatus`. It runs in one transaction with a row lock: it writes `status` and `statusChangedAt`, opens a play on →PLAYING (leaving the queue and compacting it), closes the open play when leaving PLAYING, and returns the undo payload.
-    - Delete `derive-playthrough-status.ts`, `sync-library-status`, `set/clear-library-status-manual`, and the playthrough create/update/delete status sync.
-    - Update `getLibrary` (3 statuses, drop `startedOnly`/TOUCHED), the counts, `getLibraryStats`, `getLibraryItemsByIgdbIds` (status + `upNextPosition`), and `calculate-smart-status` (PLAYING if played within 7 days, otherwise WANT).
+    - Add `setLibraryItemStatus`. It runs in one transaction with a row lock: it writes `status` and `statusChangedAt`, opens or closes plays, and leaves the queue when the game becomes Playing.
+    - Delete the derived status, the run sync and the manual override.
+    - Update `getLibrary`, the counts, the stats, `getLibraryItemsByIgdbIds` and `calculate-smart-status` (PLAYING within 7 days, otherwise WANT).
     - The Steam import goes through `setLibraryItemStatus`.
-    - Integration tests for play open/close and status stickiness. **[Agent: tanstack-fullstack]**
+    - Integration tests. **[Agent: tanstack-fullstack]**
   - [ ] Server functions and loaders:
-    - `setStatusFn` in `features/manage-library-entry` (worker split, validate-twice).
-    - Remove the status/started/completed path from `updateLibraryItemFn`. Delete `setLibraryStatusManualFn` and `clearLibraryStatusManualFn`.
-    - Update the library page data (status enum ALL/WANT/PLAYING/DONE), the dashboard counts, the game-detail single status (no derived status), the profile counts, and the activity status passthrough. **[Agent: tanstack-fullstack]**
+    - `setStatusFn` in `features/manage-library-entry`.
+    - Remove the status/date path from `updateLibraryItemFn`. Delete the manual-override fns.
+    - Update the library page data, the Home counts, the game-detail single status, the profile counts and the activity status. **[Agent: tanstack-fullstack]**
   - [ ] UI relabel to 3 statuses using the existing controls:
-    - Game-detail switcher becomes one 3-option picker (the three-state manual logic is removed). The card menu "Change Status" offers 3 options.
-    - Filter lens and status list: All/Want/Playing/Done.
-    - Dashboard strip and stats bar: 3 statuses.
-    - Status CSS vars go 5 → 3. The "Tried" chip is deleted.
-    - Steam import picker with readable card badge.
+    - One 3-option picker on the game page. The card menu offers 3 options.
+    - Filter All/Want/Playing/Done.
+    - Home strip: 3 statuses. Status CSS vars go 5 → 3.
+    - Delete the "Tried" chip.
+    - Steam picker with a readable badge.
     - Activity copy: "wants to play / is playing / is done with".
-    - Profile: Want/Playing/Done counts, with no played/completed counts. **[Agent: react-frontend]**
-  - [ ] Update every existing unit, component and integration test that references the old 5 statuses, the manual override or the derived status, using the new factories. The full suite must pass. **[Agent: testing]**
-  - [ ] Verify (gate, then browser):
-    - Run `typecheck`, `lint`, `test:unit`, `test:integration`, `build`.
-    - Start the app and seed a user with a Wishlist, a Shelf, an Up Next and a Played game in legacy shape before migrating (or via the migration test DB).
-    - Confirm that the library shows only Want/Playing/Done with filter All/Want/Playing/Done.
-    - Set Playing on a card and confirm the game page header and the phone-width bottom bar both read Playing.
-    - Confirm the profile shows the 3 counts.
+    - Profile: Want/Playing/Done counts.
+    - Badges in title case, with `whitespace-nowrap` and room reserved before the menu, so they are never cut off at 390 px (N22). **[Agent: react-frontend]**
+  - [ ] Update every existing test that references the 5 statuses, the manual override or the derived status, using the factories. The full suite must pass. **[Agent: testing]**
+  - [ ] Verify:
+    - Run `typecheck`, `lint`, `test:unit`, `test:integration` and `build`.
+    - Re-seed the audit accounts and apply migration A.
+    - The library shows only Want/Playing/Done.
+    - Set Playing on a card: the game page header and the phone bar both read Playing.
+    - At 390 px, the badges are not truncated.
+    - The profile shows 3 counts.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 2: One-tap next step, direct status picker, undo**
+- [ ] **Slice 3: One-tap next step, direct picker, undo, desktop parity**
 
-  > Spec §2.3, plus the undo part of §2.13.
+  > Spec §2.3, §2.14, plus the undo part of §2.13 (audit N1, N2).
   - [ ] Add `restoreLibraryItem`:
-    - Deletes the created play and reopens the closed play.
+    - Deletes the created play and reopens the closed one.
     - Restores the snapshot, including `statusChangedAt`.
-    - Re-inserts into the queue only if there is room, returning `queueRestored`.
-    - Zod-validates the snapshot and clamps the position.
+    - Restores the queue place only if there is room, returning `queueRestored`.
   - [ ] Add `undoStatusFn`.
-  - [ ] Integration tests: undo of Start playing adds no play, plus the full-queue undo. **[Agent: tanstack-fullstack]**
-  - [ ] Add `StatusPicker` (popover ≥768px / sheet below), `StatusControl` (opens the picker directly, aria-label with the current value) and `NextStepButton` (Start playing / Mark done / Play again) in `entities/library-item/ui/`. **[Agent: react-frontend]**
-  - [ ] Add `useSetStatus` in `features/manage-library-entry/model`:
-    - Optimistic patch with rollback, and the "Couldn't save. Try again." toast (spec §2.14).
-    - 5 s undo toast ("{Game} is now Playing") via `showUndoToast`.
-    - The "Up Next is full, so {Game} wasn't put back in the queue." message.
+  - [ ] Integration tests. **[Agent: tanstack-fullstack]**
+  - [ ] Add `StatusPicker`, `StatusControl` and `NextStepButton` in `entities/library-item/ui/`. **[Agent: react-frontend]**
+  - [ ] Add `useSetStatus`:
+    - Optimistic update with rollback.
+    - The error message comes from the code → message map only, never raw Zod/Prisma text (§2.14).
+    - 5 s undo toast, plus the full-queue undo message.
     - Mutations scoped per game; `router.invalidate()` on settle. **[Agent: react-frontend]**
-  - [ ] Wire `StatusControl` and `NextStepButton` into the grid tile, the list row, the game-page header and the phone bottom bar (replacing the scroll-to-hero). Delete `library-item-card-cta` and its utility. Component tests for the next-step targets and undo. **[Agent: react-frontend]**
+  - [ ] Wiring:
+    - Put `StatusControl` and `NextStepButton` on the grid tile, the list row, the game-page header and the phone bottom bar.
+    - The phone bottom bar sits above the bottom nav at every scroll position (N1).
+    - Desktop gets the grid/list toggle and the rich list card with the next-step button (N2).
+    - Delete `library-item-card-cta`.
+    - Component tests. **[Agent: react-frontend]**
   - [ ] Verify:
-    - Tap "Start playing" on a grid tile: Playing shows immediately with an Undo toast. Tap Undo: the game is back to Want, and History has no new play.
-    - At phone width, the bottom-bar pill opens the picker directly.
-    - Simulate offline: the status reverts and the error toast appears.
+    - "Start playing" → Playing plus an Undo toast. Undo → back to Want, and History has no new play.
+    - At 390 px, `elementFromPoint` at the bar's centre returns the bar at top, middle and bottom scroll positions, and tapping its pill opens the picker.
+    - At 1440 px, the grid/list toggle works and list rows show the next-step buttons.
+    - Offline: the status reverts with "Couldn't save. Try again."
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 3: Up Next queue**
+- [ ] **Slice 4: Up Next queue**
 
-  > Spec §2.4, plus the search/palette markers from §2.6.
-  - [ ] Add the queue operations in entities: `addToUpNext` (`ConflictError` `UP_NEXT_FULL`, `ValidationError` for PLAYING, idempotent), `removeFromUpNext` (compact) and `moveInUpNext` (swap or insert-shift, returns the ordered list).
-    - Each runs in a transaction with `pg_advisory_xact_lock(hashtext(userId))` and sequential compaction.
-    - Integration tests, including two concurrent adds at 4 → exactly one `UP_NEXT_FULL`. **[Agent: tanstack-fullstack]**
-  - [ ] Add a new `features/up-next` slice with `addToUpNextFn`, `removeFromUpNextFn` and `moveInUpNextFn`.
-    - The library page data gets an UP_NEXT filter ordered by position, returning `position`.
-    - The dashboard data gets the top 3 by position.
-    - Search and palette data return `upNextPosition`. **[Agent: tanstack-fullstack]**
+  > Spec §2.4.
+  - [ ] Queue operations in entities:
+    - `addToUpNext` (`UP_NEXT_FULL`, `ValidationError` for Playing, idempotent), `removeFromUpNext` and `moveInUpNext`.
+    - Each runs under a per-user advisory lock with sequential compaction.
+    - Tests include two concurrent adds at 4 → exactly one `UP_NEXT_FULL`. **[Agent: tanstack-fullstack]**
+  - [ ] Add a `features/up-next` slice with its server fns.
+    - The library UP_NEXT view is ordered by position.
+    - Home top 3 by position.
+    - Search, palette and add-dialog lookups return `upNextPosition`. **[Agent: tanstack-fullstack]**
   - [ ] UI:
-    - `UpNextQueueList`: numbered 1..N, Move up/down hidden at the ends, labelled buttons, position announced. Shown when the library's Up Next filter is selected.
-    - Card menu and game page: "Put in Up Next" / "Remove from Up Next", hidden for Playing.
-    - `QueueMarker` ("Up Next #n" / "Replay") on cards, search results and palette rows.
-    - Dashboard top-3 rail with "See all" → `/library?status=UP_NEXT`, and the empty-state copy.
-    - The full-queue message is keyed by error code. **[Agent: react-frontend]**
-  - [ ] Desktop drag reorder: add `@dnd-kit/core` and `@dnd-kit/sortable` at exact pinned versions, lazy-loaded, desktop only (≥768px), calling `moveInUpNextFn`. Move buttons stay at every size. **[Agent: react-frontend]**
+    - `UpNextQueueList`: numbered 1..N, Move up/down hidden at the ends, labelled, position announced.
+    - Card menu and game page: Put in / Remove from Up Next, hidden for Playing.
+    - `QueueMarker` on cards, search, palette and the add dialog.
+    - Home top-3 rail with "See all" and the empty copy. **[Agent: react-frontend]**
+  - [ ] Desktop drag: add `@dnd-kit/core` and `@dnd-kit/sortable` at exact pinned versions, lazy-loaded, desktop only, calling `moveInUpNextFn`. **[Agent: react-frontend]**
   - [ ] Verify:
-    - Queue 5 games: numbers 1–5 appear. Adding a 6th shows the full message.
-    - Move #3 up, reload: the order persists. Drag on desktop, reload: it persists.
-    - Start #1: it leaves the queue and the others renumber.
-    - Set a queued Want to Done: it shows "Replay" and keeps its place.
-    - The dashboard shows the top 3 and the empty state.
+    - Queue 5: numbered 1–5. A 6th shows the full message.
+    - Move and drag reorders persist after reload.
+    - Start #1: it leaves the queue and the rest renumber.
+    - Want → Done in the queue: it reads "Replay" and keeps its place.
+    - Home shows the top 3 and the empty state.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 4: Owned or not**
+- [ ] **Slice 5: Owned or not**
 
-  > Spec §2.5.
-  - [ ] Add `setOwnership` and `setOwnershipFn`. `getLibrary` gets `notOwnedOnly`. Friends' reads never expose ownership. Tests included. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
-    - An ownership toggle ("I own it / I don't own it yet") in the card menu and on the game page.
-    - A `NotOwnedTag` on Want games.
-    - A "Not owned only" toggle that appears only with the Want filter. **[Agent: react-frontend]**
+  > Spec §2.5 (audit N8).
+  - [ ] Add `setOwnership` and `setOwnershipFn`, plus `notOwnedOnly` in `getLibrary`. Friends' reads never expose ownership. Remove the acquisition filter from the library query and params. Tests. **[Agent: tanstack-fullstack]**
+  - [ ] UI: the ownership toggle, the `NotOwnedTag`, and the "Not owned only" toggle (Want filter only). Delete the Acquisition filter UI (`filter-library/lib/acquisition.ts`, desktop and mobile). **[Agent: react-frontend]**
   - [ ] Verify:
-    - Mark a Want game as not owned: the tag appears.
-    - Change it to Playing and back to Want: the tag is still there.
-    - Want filter + toggle: only not-owned games are listed.
-    - A friend's profile view shows no ownership.
+    - The not-owned tag survives Playing → Want.
+    - The toggle lists only not-owned Want games.
+    - No Acquisition filter at 390 or 1440 px.
+    - A friend's view shows no ownership.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 5: Instant add, the same everywhere**
+- [ ] **Slice 6: Instant add, the same everywhere**
 
-  > Spec §2.6, without the "why" field, which lands in Slice 7.
-  - [ ] Server changes:
-    - `addGameToLibrary` returns `{ item, created }`: it creates as WANT/owned and maps P2002 to the existing item.
-    - `undoAddGame` is guarded: created < 60 s, no plays, no notes other than WHY; it deletes the WHY note in the same transaction; otherwise `ConflictError`.
-    - Add `addGameFn` and `undoAddGameFn` in `features/add-game`.
-    - Delete the palette `quick-add-to-library-fn`, the search quick-add fn, and the palette `remove-library-item-fn` used as undo.
-    - Integration tests: undo never deletes a pre-existing item. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
-    - `useAddGame` and `AddConfirmation`: a custom sonner toast "Added {Game} to Want" with "Put in Up Next" and Undo (only when `created`), dismissed by a manual 8 s timer.
-    - Used by the search page, the add dialog, the palette, and the game page "Add to library".
-    - Live debounced search with no Enter.
-    - The dialog and palette stay open after adding, and the result shows "In library".
-    - Already-owned results show status + marker and open the game page.
-    - "Add game" buttons on the dashboard and library open `?action=add-game`.
-    - The failure toast "Couldn't add {Game}. Try again." **[Agent: react-frontend]**
+  > Spec §2.6, plus the §2.18 add/icon/palette items (audit N3, N11, N18, N21). The "why" field comes in Slice 8.
+  - [ ] Server:
+    - `addGameToLibrary` returns `{ item, created }` (P2002 → the existing item).
+    - Guarded `undoAddGame`.
+    - `addGameFn` and `undoAddGameFn`.
+    - Delete the palette quick-add, the search quick-add and the remove-as-undo fns.
+    - Integration test: undo never deletes a pre-existing item. **[Agent: tanstack-fullstack]**
+  - [ ] UI, add flow:
+    - `useAddGame` and `AddConfirmation` ("Added {Game} to Want", Put in Up Next, Undo only when `created`, 8 s) for the search page, the add dialog, the palette and the game page "Add to library".
+    - Live search. The dialog and palette stay open; added results show "In library".
+    - Already-in-library results show the status and marker in every search (N11).
+    - "See all results" → `/games/search?q=` (N3).
+    - The failure toast.
+    - Remove "IGDB" from user-facing copy (N23). **[Agent: react-frontend]**
+  - [ ] UI, entry points:
+    - "Add game" on Home, the library header and the desktop sidebar.
+    - Add uses an icon distinct from Log (N18).
+    - The phone library FAB never overlaps card menus.
+    - Palette: delete the "Add game to library" quick action (N21). **[Agent: react-frontend]**
   - [ ] Verify:
-    - Add from each of the four entry points: each shows "Added X to Want".
-    - "Put in Up Next" queues the game. Undo removes it.
-    - Use the palette on a game already in the library: Undo is not offered and the game stays.
-    - The confirmation disappears after 8 s.
+    - Each of the four entry points shows "Added X to Want". Put in Up Next and Undo work.
+    - A game already in the library shows its status in the palette and the dialog, with no Undo offered.
+    - "See all results" opens the search page with the query.
+    - Log and Add icons differ.
+    - At 390 px, every card's "⋯" can be tapped at any scroll position.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 6: Plain notes and the Log sheet**
+- [ ] **Slice 7: One Log form, plain notes, one time-played total**
 
-  > Spec §2.9, plus the "Mark as Playing" offer from §2.2.
-  - [ ] Server changes:
-    - `createJournalEntry` requires content or minutes and no run. It increments the open play's minutes if one exists.
+  > Spec §2.9, §2.15, §2.16, plus the "Mark as Playing" offer from §2.2 (audit N4, N5, N6, N7, N10, N12, N13, N21).
+  - [ ] Server:
+    - `createJournalEntry` requires content or minutes, needs no run, and increments the open play.
     - `logTimeFn` returns `{ noteId, offerMarkPlaying }`.
-    - `updateJournalEntry` takes content only. Reads return `prompt` and drop kind/title/mood.
-    - Integration tests include a time-only log for a game with no play. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
-    - A note composer (text + hours in 0.5 h steps; Save enabled with either one) in the Log sheet, the game page "New note" and the Journal.
-    - Remove the run picker and the Quick note/Reflection labels.
-    - The log confirmation "Logged {time} for {Game}" offers "Mark as Playing" when the game isn't Playing. **[Agent: react-frontend]**
+    - `updateJournalEntry` accepts content and `playedMinutes` (content or time).
+    - Journal reads sort and date by `createdAt` (N13) and drop kind/title/mood.
+    - `getLoggableGames` returns library items only, Playing first then by title (N6, N7).
+    - Game detail: time played = the notes total, sessions = notes with time; Times to Beat / Your Pace read the same total (N10).
+    - Tests. **[Agent: tanstack-fullstack]**
+  - [ ] UI, the Log form (N5):
+    - One Log form (the global action host `log-session`) opened from the nav, the sidebar, the game page "Log time" (owners only, N7), the Journal "New note" and the palette "New note" (N21).
+    - `/journal/new` renders the same content.
+    - Delete the minutes compose dialog and the text-only form.
+    - Picker: search field, scroll container capped to the viewport, chosen game's title and cover in the header (N6).
+    - Confirmation "Logged {time} for {Game}", with "Mark as Playing" when the game isn't Playing.
+    - Remove the run picker. **[Agent: react-frontend]**
+  - [ ] UI, notes and time:
+    - One `GameNotesList` on the game page; each note links to its note view (N4).
+    - Delete `journal-teaser` and the nested per-run note lists.
+    - The note card and note view show time; a time-only note reads "{time} played" (N12).
+    - The edit form changes text and time.
+    - One `formatHours` ("1.5 h") everywhere (N10).
+    - No Quick note/Reflection labels. **[Agent: react-frontend]**
   - [ ] Verify:
-    - Log 1.5 h with no text on a Want game: it saves, the game stays Want, and "Mark as Playing" is offered. Tap it: the game becomes Playing and leaves Up Next.
-    - No kind labels appear anywhere.
-    - Save is disabled when the note is empty.
+    - Every Log entry point opens the same form. Search filters the library games, and the form fits a 900 px-tall desktop viewport.
+    - Log 1.5 h with no text on a Want game: it saves, stays Want, and offers "Mark as Playing".
+    - A not-in-library game page and a signed-out view show no "Log time".
+    - The game page shows each note once, and notes open.
+    - 90 min reads "1.5 h" on the game page, the note and the Journal.
+    - Editing an old note keeps its date and place.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 7: Done follow-up and optional prompts**
+- [ ] **Slice 8: Done follow-up and optional prompts**
 
   > Spec §2.7, §2.8.
-  - [ ] Server changes:
-    - Add `setDoneOutcome`, `setRating` and `dismissPrompt`.
-    - Add `saveDoneFollowUpFn` in `features/done-follow-up`, and `answerPromptFn` / `dismissPromptFn` in `features/library-prompts`.
-    - Game detail returns the `prompts { why, stayed }` flags. `why`: WANT, no WHY note, not dismissed. `stayed`: DONE, no STAYED note since `statusChangedAt`, no dismissal at or after it.
-    - `doneOutcome` is visible to the owner only, and never aggregated.
-    - Tests included. **[Agent: tanstack-fullstack]**
+  - [ ] Server:
+    - `setDoneOutcome`, `setRating` and `dismissPrompt`.
+    - `saveDoneFollowUpFn`, `answerPromptFn` and `dismissPromptFn`.
+    - Game detail `prompts { why, stayed }` flags. `doneOutcome` for the owner only.
+    - Tests. **[Agent: tanstack-fullstack]**
   - [ ] UI:
-    - `DoneFollowUp` (dialog on desktop, sheet on phone), opened by "Mark done" or by picking Done. It has Finished/Let go (none selected), a pre-filled rating and "What stayed with you?". Save / Skip / Undo; closing counts as Skip; it stays open on error.
-    - "Done · Finished/Let go" label, editable on the game page.
-    - `GamePrompts` on the game page: Enter or Save answers, × dismisses, hidden while Playing.
-    - The "Why do you want to play this?" field + Save in the add confirmation, which pauses its timer while focused or typing.
-    - Answers render as notes headed by their question. **[Agent: react-frontend]**
+    - `DoneFollowUp` (dialog/sheet; Finished/Let go; pre-filled rating; "What stayed with you?"; Save/Skip/Undo; close = Skip; stays open on error).
+    - The editable "Done · Finished/Let go" label.
+    - `GamePrompts` (Enter/Save, × dismiss, hidden while Playing).
+    - The "why" field in `AddConfirmation`; its timer pauses while it is focused or being typed in.
+    - Prompt answers are headed by their question. **[Agent: react-frontend]**
   - [ ] Verify:
-    - Mark done: the follow-up appears. Skip: the game is Done with nothing recorded. Mark done again, choose Let go plus a note, Save: the page shows "Done · Let go" and a note headed "What stayed with you?".
-    - A friend's view shows "Done" only.
-    - Dismiss the Want prompt: it doesn't return.
-    - In the add confirmation, type a "why" answer: the toast stays until saved.
+    - Skip → Done with nothing recorded.
+    - Let go plus a note → "Done · Let go" and a note headed "What stayed with you?". A friend sees "Done" only.
+    - A dismissed prompt doesn't return.
+    - Typing a "why" answer keeps the add toast open.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 8: Play History and one rating**
+- [ ] **Slice 9: Play History and one rating**
 
-  > Spec §2.10, §2.11.
-  - [ ] Server changes:
-    - Add `getEndedPlays` (newest first), plus `history` in the game-detail data (omitted when empty).
-    - Remove "Best rating" and per-run rating reads, the profile playthroughs query, and the public playthrough create/update/delete.
+  > Spec §2.10, §2.11 (audit N19).
+  - [ ] Server:
+    - `getEndedPlays` and the game-detail `history`.
+    - Remove "Best rating", the per-run rating reads, the profile playthroughs query and the public playthrough CRUD.
     - Delete `features/manage-playthrough`.
-    - The game-details edit form loses its started/completed fields.
-    - Tests: after Done → Play again → Done, History has 2 plays. **[Agent: tanstack-fullstack]**
+    - The details form loses its date fields.
+    - Test: Done → Play again → Done = 2 plays. **[Agent: tanstack-fullstack]**
   - [ ] UI:
-    - `PlayHistory`: collapsed, read-only, start–end dates.
-    - Delete the Playthroughs panel, the timeline, the add/edit drawer, the jump-spine entry, the card "Add playthrough" action and `profile-playthroughs-section`.
-    - A single rating (5 stars, half steps) on the game page; the "Minimum rating" filter uses it.
+    - `PlayHistory`.
+    - Delete the playthrough panel, timeline, drawer, jump-spine entry, card "Add playthrough" and `profile-playthroughs-section`.
+    - A single 5-star half-step rating on the game page.
+    - Min-rating / unrated filters on desktop, from the shared filter definition (N19).
     - No date fields in the details form. **[Agent: react-frontend]**
   - [ ] Verify:
-    - A game played twice shows 2 plays in History with correct dates.
-    - A never-played game shows no History.
-    - A rating of 7 shows 3.5 stars on the card, and the min-rating filter includes or excludes the game accordingly.
+    - 2 plays appear in History with correct dates. A never-played game has no History.
+    - A rating of 7 shows 3.5 stars.
+    - The min-rating filter works at 1440 px.
     - No playthrough UI remains.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 9: One-time "new statuses" notice**
+- [ ] **Slice 10: Home, library and Journal without duplicates or pressure**
+
+  > Spec §2.17 and the rest of §2.18 (audit N9, N14, N15, N16, N17, N20, N23).
+  - [ ] Server:
+    - Home data returns `{ playing[], upNextTop3[], counts }`. Delete `recentlyPlayed` and the stats-card data (N9, N14).
+    - The Journal stats return no period counts (N20). **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - Home renders each game once, with Up Next visible without scrolling at 390 × 844 when one game is Playing (N15).
+    - A single counts strip; delete the stats card and the distribution bar (N14).
+    - One empty state: "Pick from Up Next" → the Up Next view, or "Add a game" → the add search (N16).
+    - Remove the desktop library sidebar status list; the chips stay (N14).
+    - Delete the lifecycle strip from cards; the rating shows only when set (N17).
+    - Remove the "This month" Journal counts (N20).
+    - Copy sweep against "Words used in the app" across all surfaces (N23). **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Home at 390 × 844 with one Playing game: the game appears once and Up Next is above the fold.
+    - Home has no "Recently played", no stats card and no distribution bar.
+    - Both empty-state branches lead to working screens.
+    - The desktop library has one status filter.
+    - Cards show no age strip and no "unrated".
+    - The Journal has no period counts.
+    - A `rg` sweep finds none of the vocabulary "Never" variants in UI strings.
+    - Stop the server by PID and delete the artifacts. **[Agent: testing]**
+
+- [ ] **Slice 11: One-time "new statuses" notice**
 
   > Spec §2.12 explanation.
-  - [ ] Server: the root loader exposes `statusModelNoticePending`, and add an idempotent `acknowledgeNoticeFn` in `features/whats-new`. **[Agent: tanstack-fullstack]**
-  - [ ] UI: a server-driven one-time dialog explaining Want/Playing/Done/Up Next with "Got it". It is separate from the localStorage announcements. **[Agent: react-frontend]**
+  - [ ] Server: the root loader exposes `statusModelNoticePending`, and add an idempotent `acknowledgeNoticeFn`. **[Agent: tanstack-fullstack]**
+  - [ ] UI: a server-driven one-time dialog with "Got it", separate from the localStorage announcements. **[Agent: react-frontend]**
   - [ ] Verify:
-    - An existing user sees the notice. Tap "Got it", then open a second browser context with the same account: no notice.
-    - A newly signed-up user never sees it.
+    - An existing user sees it once, across two browser contexts.
+    - A new sign-up never sees it.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 10: Contract migration**
+- [ ] **Slice 12: Contract migration**
 
-  > Drops the legacy fields once slices 1–9 are verified in production (technical-considerations §2.2, migration B).
+  > Drops the legacy fields once slices 1–11 are verified in production (technical-considerations §2.2, migration B).
   - [ ] Confirm no code reads the legacy fields:
-    - `statusIsManual`, `hasBeenPlayed`, `startedAt`, `completedAt`.
+    - `statusIsManual`, `hasBeenPlayed`, `startedAt`, `completedAt`, `acquisitionType`.
     - Journal `kind`, `mood`, `tags`, `playSession`, `visibility`, `publishedAt`.
-    - Playthrough `kind`, `status`, `rating`, `completion`, `notes`.
+    - Playthrough `kind`, `status`, `rating`, `completion`, `notes`, `playtimeMinutes`.
   - [ ] Remove them and their enums from the schema.
-  - [ ] Author migration B `<ts>_mindful_core_contract`. Keep `statusModelNoticePending`.
+  - [ ] Author migration B. Keep `statusModelNoticePending`.
   - [ ] Update the rollback doc. **[Agent: prisma-database]**
   - [ ] Verify:
-    - Run `typecheck`, `lint`, `test:unit`, `test:integration` and `build`.
-    - Apply migration B to a fresh DB and to the slice-1 migration-test DB.
-    - The app starts, and the library, game page and journal load without errors.
+    - Run the full gate.
+    - Apply migration B to a fresh DB and to the migration-test DB.
+    - The library, game page and Journal load without errors.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 11: Feature Testing & Regression**
+- [ ] **Slice 13: Feature Testing & Regression**
 
   > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
   - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 026-mindful-core-simplification` and `@regression` if suitable for long-term regression. **[Agent: testing]**
   - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+  - [ ] Re-run the UI audit probe (`ui-audit/measure.js`) on re-seeded audit accounts at 390 and 1440 px.
+    - Add an "after 026" column to the audit's Metrics table.
+    - Mark each N/U finding as resolved or still open in `ui-audit/ui-audit.md`.
+    - Keep the screenshots out of the repo. **[Agent: testing]**
