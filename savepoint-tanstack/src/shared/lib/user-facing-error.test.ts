@@ -41,7 +41,9 @@ describe("getUserFacingErrorMessage", () => {
       const error = new ConflictError("raw: queue at 5", {
         code: "UP_NEXT_FULL",
       });
-      expect(getUserFacingErrorMessage(error)).toBe("Up Next holds 5 games. Remove one to add this.");
+      expect(getUserFacingErrorMessage(error)).toBe(
+        "Up Next holds 5 games. Remove one to add this."
+      );
     });
   });
 

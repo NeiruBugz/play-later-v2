@@ -21,3 +21,5 @@ export { AcquisitionList } from "./acquisition-list";
 export type { AcquisitionListProps } from "./acquisition-list";
 export { RatingControls } from "./rating-controls";
 export type { RatingControlsProps } from "./rating-controls";
+export { ViewModeToggle } from "./view-mode-toggle";
+export type { ViewMode, ViewModeToggleProps } from "./view-mode-toggle";

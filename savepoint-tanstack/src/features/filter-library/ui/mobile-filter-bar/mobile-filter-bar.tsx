@@ -1,11 +1,10 @@
-import { LayoutGrid, LayoutList, SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
 import {
   DEFAULT_PLATFORMS,
-  STATUS_ENTRIES,
+  STATUS_FILTER_ENTRIES,
   useLibraryFiltersState,
-  type LibraryStatus,
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
 import {
@@ -46,8 +45,6 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
     sortOrder,
     counts,
     platforms = DEFAULT_PLATFORMS,
-    viewMode,
-    onViewModeChange,
   } = props;
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -77,14 +74,14 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
     sortOrder,
   });
 
-  const activeStatusEntry = STATUS_ENTRIES.find(
-    (e) => e.value === (status as LibraryStatus | undefined)
+  const activeStatusEntry = STATUS_FILTER_ENTRIES.find(
+    (e) => e.value === status
   );
 
   return (
     <div className="mb-md md:hidden" aria-label="Mobile library filters">
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        {/* Single row: [Filters flex-1 with count badge] [Grid view] [List view] */}
+        {/* Single row: [Filters flex-1 with count badge] */}
         <div className="flex items-center gap-1">
           <SheetTrigger asChild>
             <Button
@@ -110,28 +107,6 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               ) : null}
             </Button>
           </SheetTrigger>
-          {viewMode !== undefined ? (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label="Grid view"
-                aria-pressed={viewMode === "grid"}
-                onClick={() => onViewModeChange?.("grid")}
-              >
-                <LayoutGrid className="h-4 w-4" aria-hidden />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label="List view"
-                aria-pressed={viewMode === "list"}
-                onClick={() => onViewModeChange?.("list")}
-              >
-                <LayoutList className="h-4 w-4" aria-hidden />
-              </Button>
-            </>
-          ) : null}
         </div>
         <SheetContent side="bottom" className="space-y-lg">
           <SheetHeader>

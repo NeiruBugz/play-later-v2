@@ -1,5 +1,6 @@
 import {
-  STATUS_ENTRIES,
+  getTotalCount,
+  STATUS_FILTER_ENTRIES,
   useLibraryFiltersState,
   type LibraryAcquisition,
   type LibrarySortBy,
@@ -52,19 +53,14 @@ export function StatusLens({
     sortOrder: sortOrder as LibrarySortOrder,
   });
 
-  const totalCount = counts
-    ? Object.values(counts).reduce<number>(
-        (sum, n) => sum + (typeof n === "number" ? n : 0),
-        0
-      )
-    : undefined;
+  const totalCount = getTotalCount(counts);
 
   const chips: StatusChip[] = [
     { value: "__all__", label: "All", count: totalCount },
-    ...STATUS_ENTRIES.map((entry) => ({
+    ...STATUS_FILTER_ENTRIES.map((entry) => ({
       value: entry.value,
       label: entry.label,
-      count: counts?.[entry.value as LibraryStatus],
+      count: counts?.[entry.value],
       dotVariant: entry.badgeVariant,
     })),
   ];

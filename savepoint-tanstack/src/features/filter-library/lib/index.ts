@@ -1,5 +1,7 @@
 export {
   STATUS_ENTRIES,
+  STATUS_FILTER_ENTRIES,
+  getTotalCount,
   STATUS_FILTER_STYLES,
   ACQUISITION_FILTER_ENTRIES,
   FILTER_TOGGLE_STYLE,
@@ -10,6 +12,7 @@ export {
 } from "./status-config";
 export type {
   StatusEntry,
+  StatusFilterEntry,
   StatusBadgeVariant,
   AcquisitionFilterEntry,
   SortOption,

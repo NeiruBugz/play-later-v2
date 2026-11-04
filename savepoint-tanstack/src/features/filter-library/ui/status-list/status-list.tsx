@@ -1,7 +1,6 @@
 import {
-  STATUS_ENTRIES,
-  STATUS_FILTER_STYLES,
-  type LibraryStatus,
+  FILTER_TOGGLE_STYLE,
+  STATUS_FILTER_ENTRIES,
 } from "@/features/filter-library/lib";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -41,20 +40,20 @@ export function StatusList({
           </Button>
         </li>
       ) : null}
-      {STATUS_ENTRIES.map((entry) => {
+      {STATUS_FILTER_ENTRIES.map((entry) => {
         const isActive = currentStatus === entry.value;
-        const count = counts?.[entry.value as LibraryStatus];
+        const count = counts?.[entry.value];
         const Icon = entry.icon;
 
         if (variant === "sidebar") {
-          const styles = STATUS_FILTER_STYLES[entry.badgeVariant];
+          const styles = FILTER_TOGGLE_STYLE;
           return (
             <li key={entry.value}>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => onPick(entry.value as LibraryStatus)}
+                onClick={() => onPick(entry.value)}
                 aria-label={`Filter by ${entry.label}`}
                 aria-pressed={isActive}
                 className={cn(
@@ -81,7 +80,7 @@ export function StatusList({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => onPick(entry.value as LibraryStatus)}
+              onClick={() => onPick(entry.value)}
               aria-label={
                 isActive
                   ? `Clear ${entry.label} filter`

@@ -10,6 +10,8 @@
  * not from here.
  */
 
+import { ListOrdered, type LucideIcon } from "lucide-react";
+
 import {
   ACQUISITION_FILTER_ENTRIES,
   getStatusEntry,
@@ -19,7 +21,12 @@ import {
   type StatusEntry,
 } from "@/entities/library-item";
 
-import type { LibrarySortBy, LibrarySortOrder } from "./types";
+import type {
+  LibrarySortBy,
+  LibrarySortOrder,
+  LibraryStatus,
+  LibraryStatusCounts,
+} from "./types";
 
 export { STATUS_ENTRIES, getStatusEntry, ACQUISITION_FILTER_ENTRIES };
 export type { StatusBadgeVariant, StatusEntry, AcquisitionFilterEntry };
@@ -59,6 +66,29 @@ export const STATUS_FILTER_STYLES: Record<
   playing: { active: ACTIVE, inactive: IDLE },
   done: { active: ACTIVE, inactive: IDLE },
 };
+
+export type StatusFilterEntry = {
+  value: LibraryStatus;
+  label: string;
+  icon: LucideIcon;
+  badgeVariant?: StatusBadgeVariant;
+};
+
+export const STATUS_FILTER_ENTRIES: ReadonlyArray<StatusFilterEntry> = [
+  { value: "UP_NEXT", label: "Up Next", icon: ListOrdered },
+  ...STATUS_ENTRIES,
+];
+
+/** Up Next marks games already counted under Want or Done, so it is not summed. */
+export function getTotalCount(
+  counts: LibraryStatusCounts | undefined
+): number | undefined {
+  if (!counts) return undefined;
+  return STATUS_ENTRIES.reduce(
+    (sum, entry) => sum + (counts[entry.value] ?? 0),
+    0
+  );
+}
 
 export type SortOption = {
   value: string;

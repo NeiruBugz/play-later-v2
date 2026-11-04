@@ -12,3 +12,5 @@ export { StatusControl } from "./status-control";
 export type { StatusControlProps } from "./status-control";
 export { NextStepButton } from "./next-step-button";
 export type { NextStepButtonProps } from "./next-step-button";
+export { QueueMarker } from "./queue-marker";
+export type { QueueMarkerProps } from "./queue-marker";

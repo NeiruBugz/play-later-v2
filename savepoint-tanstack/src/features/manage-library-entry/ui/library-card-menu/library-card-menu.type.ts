@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 
 export type LibraryCardMenuProps = {
@@ -8,4 +10,6 @@ export type LibraryCardMenuProps = {
    * modal (the LibraryPage already mounts a single shared modal).
    */
   onEdit: () => void;
+  /** Dropdown items a host widget composes in (e.g. Up Next actions). */
+  extraItems?: ReactNode;
 };

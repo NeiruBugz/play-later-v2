@@ -3,16 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
+import { DropdownMenuItem } from "@/shared/ui/dropdown-menu";
 
 import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { LibraryCardMenu } from "./library-card-menu";
 
-const mockSetStatusFn = vi.fn();
 const mockDeleteLibraryItemFn = vi.fn();
-
-vi.mock("../../api/set-status-fn", () => ({
-  setStatusFn: (...args: unknown[]) => mockSetStatusFn(...args),
-}));
 
 vi.mock("../../api/delete-library-item-fn", () => ({
   deleteLibraryItemFn: (...args: unknown[]) => mockDeleteLibraryItemFn(...args),
@@ -70,10 +66,8 @@ const elements = {
     screen.getByRole("menuitem", { name: "Edit Library Details" }),
   getRemoveItem: () =>
     screen.getByRole("menuitem", { name: "Remove from Library" }),
-  getChangeStatusTrigger: () =>
-    screen.getByRole("menuitem", { name: "Change Status" }),
-  getStatusOption: (label: string) =>
-    screen.getByRole("menuitem", { name: `Change status to ${label}` }),
+  queryChangeStatusItem: () =>
+    screen.queryByRole("menuitem", { name: "Change Status" }),
 };
 
 const actions = {
@@ -100,7 +94,6 @@ const actions = {
 
 describe("LibraryCardMenu", () => {
   beforeEach(() => {
-    mockSetStatusFn.mockReset();
     mockDeleteLibraryItemFn.mockReset();
     mockInvalidate.mockReset();
     mockInvalidate.mockResolvedValue(undefined);
@@ -132,6 +125,10 @@ describe("LibraryCardMenu", () => {
 
     it("shows the Remove from Library item", () => {
       expect(elements.getRemoveItem()).toBeDefined();
+    });
+
+    it("has no Change Status item — the status control on the card replaces it", () => {
+      expect(elements.queryChangeStatusItem()).toBeNull();
     });
   });
 
@@ -243,33 +240,22 @@ describe("LibraryCardMenu", () => {
     });
   });
 
-  describe("given the user opens the Change Status submenu on a Playing game", () => {
+  describe("given the host passes extra items", () => {
     beforeEach(async () => {
-      mockSetStatusFn.mockResolvedValue({});
-      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      render(
+        <LibraryCardMenu
+          item={makeItem()}
+          onEdit={vi.fn()}
+          extraItems={<DropdownMenuItem>Put in Up Next</DropdownMenuItem>}
+        />
+      );
       await actions.openMenu();
-      elements.getChangeStatusTrigger().focus();
-      await userEvent.keyboard("{ArrowRight}");
     });
 
-    it("offers exactly Want, Playing and Done, with the current status disabled", async () => {
-      await screen.findByRole("menuitem", { name: "Change status to Want" });
+    it("shows them in the menu", () => {
       expect(
-        screen.getAllByRole("menuitem", { name: /^Change status to / })
-      ).toHaveLength(3);
-      expect(elements.getStatusOption("Playing")).toHaveAttribute(
-        "aria-disabled",
-        "true"
-      );
-    });
-
-    it("calls setStatusFn with the item id and the chosen status", async () => {
-      await userEvent.click(
-        await screen.findByRole("menuitem", { name: "Change status to Done" })
-      );
-      expect(mockSetStatusFn).toHaveBeenCalledWith({
-        data: { id: 1, to: "DONE" },
-      });
+        screen.getByRole("menuitem", { name: "Put in Up Next" })
+      ).toBeDefined();
     });
   });
 });

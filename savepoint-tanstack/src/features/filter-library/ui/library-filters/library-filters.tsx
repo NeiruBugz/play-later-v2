@@ -1,5 +1,6 @@
 import {
   DEFAULT_PLATFORMS,
+  getTotalCount,
   useLibraryFiltersState,
   type LibraryAcquisition,
   type LibrarySortBy,
@@ -84,12 +85,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     sortOrder,
   });
 
-  const totalCount = counts
-    ? Object.values(counts).reduce<number>(
-        (sum, n) => sum + (typeof n === "number" ? n : 0),
-        0
-      )
-    : undefined;
+  const totalCount = getTotalCount(counts);
 
   return (
     <aside

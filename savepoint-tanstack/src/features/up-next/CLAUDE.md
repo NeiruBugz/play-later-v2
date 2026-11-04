@@ -1,7 +1,7 @@
 # Feature: up-next
 
 Server functions for the Up Next queue (max `UP_NEXT_MAX` = 5 games per user,
-contiguous positions 1..N). UI lands in a later slice.
+contiguous positions 1..N).
 
 ## Structure
 
@@ -26,3 +26,14 @@ Each fn is a thin `createServerFn` wrapper (no `.server` suffix) over a
 - The `(userId, upNextPosition)` unique index forbids transient duplicates:
   swaps null the moved row first, shifts run in the direction that frees a slot.
 - The "queue full" copy is keyed by `error.code` in `shared/lib/user-facing-error`.
+
+## Queue view
+
+- `UpNextQueueList` is presentational: it owns numbering, Move up/down and the
+  position announcement, and takes `renderItem` for the row body. The library
+  page widget supplies `LibraryItemCard` (a feature cannot import widgets or
+  `manage-library-entry`).
+- `useUpNextQueue` serializes moves, replaces the list with the server order,
+  rolls back on failure, and calls `router.invalidate()` only after a success.
+- Desktop (>= 768 px) lazy-loads `sortable-up-next-queue` (`@dnd-kit`); phones
+  never download it.

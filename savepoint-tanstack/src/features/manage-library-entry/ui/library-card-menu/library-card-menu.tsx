@@ -2,21 +2,16 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useState, type SyntheticEvent } from "react";
 
-import { STATUS_ENTRIES } from "@/entities/library-item/model";
 import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
-import { setStatusFn } from "../../api/set-status-fn";
 import { RemoveFromLibraryDialog } from "../remove-from-library-dialog";
 import type { LibraryCardMenuProps } from "./library-card-menu.type";
 
@@ -35,19 +30,13 @@ const stopProp = (event: SyntheticEvent) => {
  * the card's onClick. View-journal item points to `/games/$slug` only — the
  * `#journal-heading` anchor will land in S15.
  */
-export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
+export function LibraryCardMenu({
+  item,
+  onEdit,
+  extraItems,
+}: LibraryCardMenuProps) {
   const { pending: isPending, run } = useMutationAction();
   const [confirmingRemove, setConfirmingRemove] = useState(false);
-
-  const handleStatusChange = async (
-    next: (typeof STATUS_ENTRIES)[number]["value"]
-  ) => {
-    if (next === item.status) return;
-    await run(() => setStatusFn({ data: { id: item.id, to: next } }), {
-      successMessage: "Status updated",
-      errorFallback: "Failed to update status",
-    });
-  };
 
   const handleRemove = async () => {
     await run(() => deleteLibraryItemFn({ data: { itemId: item.id } }), {
@@ -90,31 +79,7 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
             Edit Library Details
           </DropdownMenuItem>
 
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger onClick={stopProp}>
-              Change Status
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent onClick={stopProp} onMouseDown={stopProp}>
-              {STATUS_ENTRIES.map((entry) => {
-                const Icon = entry.icon;
-                const isCurrent = entry.value === item.status;
-                return (
-                  <DropdownMenuItem
-                    key={entry.value}
-                    disabled={isCurrent || isPending}
-                    onSelect={() => {
-                      void handleStatusChange(entry.value);
-                    }}
-                    onClick={stopProp}
-                    aria-label={`Change status to ${entry.label}`}
-                  >
-                    <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {entry.label}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
+          {extraItems}
 
           <DropdownMenuSeparator />
 

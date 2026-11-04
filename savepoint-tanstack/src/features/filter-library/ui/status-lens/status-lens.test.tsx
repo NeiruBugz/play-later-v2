@@ -16,6 +16,7 @@ const defaultCounts: LibraryStatusCounts = {
   WANT: 12,
   PLAYING: 3,
   DONE: 47,
+  UP_NEXT: 4,
 };
 
 const defaultProps = {
@@ -35,10 +36,12 @@ const elements = {
   getPlayingTab: () => screen.getByRole("tab", { name: /Playing/ }),
   getDoneTab: () => screen.getByRole("tab", { name: /Done/ }),
   getWantTab: () => screen.getByRole("tab", { name: /Want/ }),
+  getUpNextTab: () => screen.getByRole("tab", { name: /Up Next/ }),
 };
 
 const actions = {
   clickPlaying: () => userEvent.click(elements.getPlayingTab()),
+  clickUpNext: () => userEvent.click(elements.getUpNextTab()),
   clickAll: () => userEvent.click(elements.getAllTab()),
 };
 
@@ -72,9 +75,14 @@ describe("StatusLens", () => {
       expect(elements.getWantTab().textContent).toContain("12");
     });
 
-    it("renders exactly the All, Want, Playing and Done tabs", () => {
+    it("renders the Up Next tab with its count", () => {
+      expect(elements.getUpNextTab().textContent).toContain("4");
+    });
+
+    it("renders the All, Up Next, Want, Playing and Done tabs in that order, All counting only the three statuses", () => {
       expect(screen.getAllByRole("tab").map((t) => t.textContent)).toEqual([
         "All62",
+        "Up Next4",
         "Want12",
         "Playing3",
         "Done47",
@@ -96,6 +104,21 @@ describe("StatusLens", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ status: "PLAYING" }),
+        })
+      );
+    });
+  });
+
+  describe("given the user taps the Up Next tab", () => {
+    beforeEach(async () => {
+      render(<StatusLens {...defaultProps} />);
+      await actions.clickUpNext();
+    });
+
+    it("calls navigate with status=UP_NEXT", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ status: "UP_NEXT" }),
         })
       );
     });
