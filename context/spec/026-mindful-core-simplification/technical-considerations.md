@@ -84,6 +84,7 @@ There are two migration files.
    - PLAYING items with several open runs: keep the latest open, close the rest.
    - PLAYING items with no open run: insert one open play with `startedAt = COALESCE(item.startedAt, updatedAt)` and `ordinal = max+1`.
    - Non-PLAYING items with no runs but with `startedAt`/`completedAt`: insert one ended play, so those dates survive in History. **Decided (2026-10-29)**, supporting "nothing is lost".
+   - **Time played moves to logs (spec §2.16, 2026-11-04).** For every run whose `playtimeMinutes` exceeds the sum of `JournalEntry.playedMinutes` attached to it, insert one time-only note for the difference. The note is dated `COALESCE(finishedAt, updatedAt)` and carries the run's `gameId` and `playthroughId`. After this step, the sum of a game's notes' `playedMinutes` is the single source of "Time played", and `Playthrough.playtimeMinutes` is dead.
 7. **Remap within the old enum.** `UP_NEXT` that was played before (`hasBeenPlayed` or any ended run) becomes `PLAYED`; any other `UP_NEXT` becomes `SHELF`. This works because `USING` cannot hold subqueries, and the queue column is already set.
 8. **Enum swap**, following the precedent `20260325000001_library_status_data_migration`:
    - rename the type to `_old`;
@@ -101,7 +102,8 @@ There are two migration files.
 
 - `statusIsManual`, `hasBeenPlayed`, `startedAt`, `completedAt`;
 - JournalEntry `kind`, `mood`, `tags`, `playSession`, `visibility`, `publishedAt`, and their enums;
-- Playthrough `kind`, `status`, `rating`, `completion`, `notes`, and their enums;
+- Playthrough `kind`, `status`, `rating`, `completion`, `notes`, `playtimeMinutes`, and their enums;
+- LibraryItem `acquisitionType` and the `AcquisitionType` enum (spec §2.5, audit N8: nothing writes it);
 - `statusModelNoticePending` — **Assumption:** only once the notice is no longer needed, possibly in a later release.
 
 Until migration B lands, those fields stay in `schema.prisma`, unused, so `migrate dev` doesn't propose drops.
@@ -246,6 +248,32 @@ Other entities (activity-feed) receive the status as data and the widget formats
   - Move buttons are labelled "Move {Game} up/down", and the new position is announced.
   - The add toast's input has an explicit label and does not steal focus.
 
+### 2.8. UI Audit Additions (spec §2.3, §2.5, §2.6, §2.9, §2.11, §2.14–§2.19; `ui-audit/ui-audit.md`)
+
+| Audit # | Change | Where |
+|---|---|---|
+| U1 | `_authed/profile.tsx` `beforeLoad` must not run for its child `profile.setup.tsx`. Either guard on the matched child route, or move setup out of the `profile` subtree (preferred: a sibling route `_authed/profile-setup`, keeping the URL via the route path). | `routes/_authed/profile.tsx:17-25` |
+| U2, U3 | Add `<Outlet/>` (or flatten to non-nested file names) so the child routes render: `journal.$id`, `journal.new`, `journal.$id.edit` under `journal.tsx`, and followers/following under `u.$username.tsx`. | `routes/_authed/journal.tsx`, `routes/u.$username.tsx` |
+| U4 | Stop returning run `notes` and `rating` in public profile reads now (slice 0); slice 8 later deletes the section. | `entities/playthrough/api/get-profile-playthroughs.server.ts:51-52`, `widgets/profile-overview/ui/profile-playthroughs-section` |
+| U5 | Profile tiles link by `Game.slug`, not `Game.id`. | `widgets/profile-overview/ui/profile-overview/profile-overview.tsx:180` |
+| U6 | One `RemoveFromLibraryDialog` (confirm, no typed title) in `features/manage-library-entry/ui`, used by the card menu, the game page and the details form. Replaces `delete-confirm.tsx`'s typed-title gate. | `library-card-menu.tsx:53-58`, `library-status-switcher.tsx:224-239`, `delete-confirm.tsx:30` |
+| N1 | The phone game-page action bar is offset above the bottom nav (nav height + safe-area inset) with a z-index above page content. An E2E/DOM check: `elementFromPoint` at the bar centre returns the bar. | `widgets/game-detail/ui/game-detail-action-bar`, `widgets/app-bottom-nav` |
+| N2, N19 | The desktop library gets the grid/list toggle, the rich list card with `NextStepButton`, and the min-rating / unrated filters that today live only in the mobile sheet. Desktop and mobile filter configs come from one shared definition. | `features/filter-library/ui/library-filters.tsx:100-172`, `mobile-filter-bar.tsx:90,118-138,199-205`, `widgets/library-page` |
+| N3 | A "See all results" link in the add dialog and the palette navigates to `/games/search?q=<text>`. The route reads `q` from validated search params. | `features/add-game/ui/add-game-content`, `features/command-palette`, `routes/games.search.tsx` |
+| N4 | One `GameNotesList` in `widgets/game-detail` (notes newest first, each linking to `/journal/$id`). Delete `journal-teaser.tsx` and the nested per-run note lists. | `journal-teaser.tsx:46`, `nested-journal.tsx:42-55`, `journal-feed.tsx:68-83` |
+| N5, N6, N7 | **One Log form** = the global-action-host `log-session` content, opened as `?action=log-session[&game=<slug>]` from the nav, the sidebar, the game page "Log time" and the Journal "New note". `/journal/new` renders the same content full-page. Delete the minutes-based compose dialog and the text-only form. The picker: `getLoggableGames` returns the user's library items (Playing first, then by title) plus a client-side text filter. The list sits in a scroll container capped to the viewport; the header shows the chosen game's title and cover; on success it shows the 2.2 confirmation toast. The game page hides "Log time" unless the viewer owns the library item; `logTimeFn` already throws `NotFoundError` for games outside the library. | `widgets/global-action-host/ui/global-action-host.tsx:35`, `features/compose-journal-entry/*`, `game-detail-detail-rail.tsx:30-32`, `game-detail-action-bar.tsx:67-69` |
+| N8 | Remove the Acquisition filter and its UI. The column is dropped in migration B. | `features/filter-library/lib/acquisition.ts:28-33` |
+| N9, N14, N15, N16 | Home data drops `recentlyPlayed` and the stats card. It returns `{ playing[], upNextTop3[], counts }`, and the widget renders each game once. The empty state picks "Pick from Up Next" (→ `/library?status=UP_NEXT`) or "Add a game" (→ `?action=add-game`). The library desktop sidebar status list is removed; the chips stay. | `features/dashboard/api/get-dashboard-page-data.worker.ts:77`, `widgets/dashboard-page/*`, `library-filters.tsx:105-117` |
+| N10 | **Time played = sum of the game's notes' `playedMinutes`** (after the migration A step 6 backfill). The session count = number of notes with `playedMinutes > 0`. One formatter `formatHours(minutes)` → "1.5 h" / "12 h" (≤1 decimal, trailing ".0" dropped) in `shared/lib/date.ts`, replacing the variants. Times to Beat / Your Pace read the same total. | `get-game-details.server.ts:98-132`, `shared/lib/date.ts:95-101`, `your-pace-panel.tsx:6-8`, `journal-feed.tsx:28-31` |
+| N11 | The palette and add-dialog results use the same `getLibraryItemsByIgdbIds` lookup as the search page, returning `{ status, upNextPosition }`. | `features/command-palette`, `features/add-game` |
+| N12, N13 | Journal reads sort and date by `createdAt`. The card shows `formatHours` and reads "{time} played" when there is no text. `updateJournalEntryFn` accepts `playedMinutes`, with validation "content or time". | `entities/journal-entry/api/get-journal.server.ts:21`, `journal-entry-card.tsx:20,41-53`, `edit-journal-entry-form.tsx:54-82` |
+| N17 | Delete the lifecycle (backlog-age) strip from cards. The rating renders only when non-null. | `lifecycle-strip.utility.ts:91-109`, `library-item-card.tsx:122-125` |
+| N18 | Log keeps its icon; Add uses a distinct icon. The desktop sidebar gains an "Add game" item (`?action=add-game`). The phone library FAB is repositioned or removed so it never overlaps card menus (Add stays reachable from the library header). | `app-bottom-nav.tsx:52`, `app-sidebar`, `library-page.tsx:374` |
+| N20 | Remove the period counts from the Journal stats rail. | `journal-stats-rail.tsx:7-16` |
+| N21 | Palette quick actions: "New note" → `?action=log-session`; delete the "Add game to library" action. | `command-palette.tsx:119-124`, `palette-quick-actions-group.tsx:18-36` |
+| N22, N23 | Status badges use `whitespace-nowrap` with room reserved before the menu, and title case from `status.ts` (no `uppercase` class). A copy sweep applies the spec's "Words used in the app" table. "IGDB" is removed from user-facing strings. | `library-status-badge.tsx:6-10`, `search-games-results.tsx:157`, add dialog headings |
+| §2.14 | User-facing error copy comes only from a code → message map (`getErrorMessage` from the shared primitives). Never render `error.message` from Zod or Prisma. | `shared/lib` error helpers |
+
 ---
 
 ## 3. Impact and Risk Analysis
@@ -260,7 +288,7 @@ Other entities (activity-feed) receive the status as data and the widget formats
 - Steam import;
 - profile;
 - activity feed;
-- Times to Beat / Your Pace (reads play `playtimeMinutes`, which is unchanged).
+- Times to Beat / Your Pace (switches from run `playtimeMinutes` to the notes total, §2.8 N10).
 
 About 17 source sites hard-code the 5 statuses (research notes), and 66 test files mention them. The Prisma enum change turns every stale source site into a compile error, which the typecheck gate catches.
 
@@ -275,6 +303,8 @@ About 17 source sites hard-code the 5 statuses (research notes), and 66 test fil
 | Add toast with an input is awkward on phones (soft keyboard covers the toast) | Prototype on a real device early in the add slice. Fallback: an anchored panel or sheet with the same contract. |
 | Status constants pulled into the client from server code | Constants live in `entities/library-item/model/` (non-`.server`). Never import Prisma enums as values into client code. The CI production build catches leaks. |
 | Activity feed briefly sorted oddly | `statusChangedAt` is not backfilled, so old rows sort by `createdAt` as today. |
+| Routing defects invisible to unit tests (audit: two parents without `<Outlet/>`, a self-redirect loop) | Add a router-level integration test that renders the real route tree with memory history and asserts the child routes render (journal note / new / edit, followers, profile setup), plus the Playwright smoke in each Verify task. |
+| Time-played totals change for games whose run hours were entered without notes | The migration A step 6 backfill creates time-only notes for the difference; the migration test asserts each game's total before = after. |
 | `(userId, status)` index dropped by the type change | An explicit verification step in migration A and an assertion in the migration test. |
 
 ---
@@ -294,19 +324,22 @@ Per-slice TDD, following the architecture doc §7.
     - PLAYING with no runs and with two open runs;
     - a manual-override item;
     - a rating only on a run;
-    - a run-less item with `startedAt`/`completedAt`.
+    - a run-less item with `startedAt`/`completedAt`;
+    - a run with `playtimeMinutes` larger than its notes' minutes.
   - Asserted invariants:
     - row counts are unchanged;
     - ≤5 queued per user, with unique positions;
     - open plays = PLAYING items;
     - the `(userId, status)` index exists;
-    - the notice flag is set for existing users.
+    - the notice flag is set for existing users;
+    - each game's time played (old run minutes vs the new notes total) is unchanged.
 - **Entity integration tests** (real PG), covering:
   - `setLibraryItemStatus` / `restoreLibraryItem`: play open/close, queue leave/restore, the full-queue undo;
   - the queue operations, including concurrent `addToUpNext` calls (two parallel transactions → exactly one `UP_NEXT_FULL`);
   - `addGameToLibrary` `created` semantics and the `undoAddGame` guard;
   - time-only `createJournalEntry` without a play;
   - the prompt-state rules.
+- **Router integration test** (new, audit U1–U3): render the real `routeTree.gen` with memory history at `/journal/<id>`, `/journal/new`, `/journal/<id>/edit`, `/u/<name>/followers` and `/profile/setup` (a user without a username), and assert the child content renders and no redirect loops.
 - **Server-fn worker tests.** Validate-twice, ownership `NotFoundError`, and error codes.
 - **Component tests** (jsdom), covering user-observable behaviour as the acceptance criteria describe:
   - the picker has 3 options;
@@ -322,16 +355,4 @@ Per-slice TDD, following the architecture doc §7.
 - **Gates.** Typecheck (catches stale enum sites), lint (FSD boundaries), the CI production build (bundler boundary), and coverage of statements ≥ 85 on `src/{entities,features}`.
 - **Manual pass.** On a real phone: the bottom-bar picker, the add toast with the soft keyboard, the Done sheet. On desktop: drag reorder. Also the one-time notice across two devices.
 
-**Suggested delivery slices** (dependency order; 4–10 can overlap after 3, but 6 and 8 both touch confirmation toasts, so sequence them or fence their files):
-
-1. Test factories, migration A, status constants, backfill test.
-2. Status core: `setLibraryItemStatus`/`restore`, plays open/close, `setStatusFn`/`undoStatusFn`, 3 labels everywhere, deletion of the derived status and manual override.
-3. Status control, picker, next-step buttons, undo toast, bottom-bar sync.
-4. Up Next: entity ops, `up-next` slice, library filter, dashboard top 3, search/palette markers, drag and drop.
-5. Ownership: marker, toggle, tag.
-6. Unified add: `addGameFn` with `created`, `undoAddGameFn`, the confirmation and its "why" field, four entry points, the "Add game" buttons.
-7. Plain notes and the Log sheet: time-only logs, `offerMarkPlaying`.
-8. Done follow-up and game-page prompts.
-9. History and the single rating; delete `manage-playthrough` and the playthrough UI.
-10. Steam import, activity, profile labels; the one-time notice.
-11. Contract migration B (after production verification).
+**Delivery slices:** see [tasks.md](./tasks.md) — 13 slices, starting with the audit's broken paths (U1–U6) so first-run and note routes work before the model swap.
