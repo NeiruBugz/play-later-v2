@@ -41,9 +41,9 @@ export function formatJournalDate(date: Date | string | number): string {
  * Absolute date display (`Jun 2, 2026`).
  * `{ year: "numeric", month: "short", day: "numeric" }`.
  *
- * - default (no options): `en-US` locale, local time zone — matches
- *   `Intl.DateTimeFormat("en-US", ...)` callers (game-metadata).
- * - `{ utc: true }`: `en-US`, `timeZone: "UTC"` — matches the date-picker.
+ * - default (no options): `en-US` locale, local time zone.
+ * - `{ utc: true }`: `en-US`, `timeZone: "UTC"` — for calendar dates stored
+ *   as UTC midnight.
  * - `{ locale: undefined }` (explicit): forwards `undefined` to
  *   `toLocaleDateString` so the runtime default locale is used — matches the
  *   Steam import modal's `toLocaleDateString(undefined, ...)`.
