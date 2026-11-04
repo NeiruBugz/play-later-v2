@@ -30,7 +30,6 @@ import {
   useSetOwnership,
   useSetStatus,
 } from "@/features/manage-library-entry";
-import { AddEditPlaythroughDrawer } from "@/features/manage-playthrough";
 import { EmptyLibraryHero } from "@/features/onboarding-first-time";
 import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
@@ -128,12 +127,7 @@ function LibraryGridTile({
         {item.rating === null ? (
           <span className="text-muted-foreground text-xs italic">unrated</span>
         ) : (
-          <RatingInput
-            value={item.rating}
-            size="sm"
-            readOnly
-            aria-label={`Rating: ${item.rating / 2} out of 5 stars`}
-          />
+          <RatingInput value={item.rating} size="sm" readOnly />
         )}
       </div>
       <div className="mt-2 flex flex-col items-start gap-2">
@@ -205,11 +199,6 @@ export function LibraryPage(props: LibraryPageProps) {
   // One modal at the page level — see README "Host-owned modal state".
   const [selectedEntry, setSelectedEntry] =
     useState<LibraryItemWithGame | null>(null);
-
-  // One add-playthrough drawer at the page level so we render a single
-  // drawer instance regardless of how many cards are in the grid.
-  const [addPlaythroughLibraryItemId, setAddPlaythroughLibraryItemId] =
-    useState<number | null>(null);
 
   const navigate = useNavigate();
 
@@ -403,7 +392,6 @@ export function LibraryPage(props: LibraryPageProps) {
                       extraItems={upNext}
                     />
                   )}
-                  onAddPlaythrough={setAddPlaythroughLibraryItemId}
                 />
               )}
             />
@@ -464,7 +452,6 @@ export function LibraryPage(props: LibraryPageProps) {
                           extraItems={upNext}
                         />
                       )}
-                      onAddPlaythrough={setAddPlaythroughLibraryItemId}
                     />
                   )}
                 </li>
@@ -480,18 +467,6 @@ export function LibraryPage(props: LibraryPageProps) {
           open={true}
           onOpenChange={(nextOpen) => {
             if (!nextOpen) setSelectedEntry(null);
-          }}
-        />
-      ) : null}
-
-      {addPlaythroughLibraryItemId !== null ? (
-        <AddEditPlaythroughDrawer
-          open={true}
-          mode="add"
-          libraryItemId={addPlaythroughLibraryItemId}
-          existingPlaythroughCount={0}
-          onOpenChange={(nextOpen) => {
-            if (!nextOpen) setAddPlaythroughLibraryItemId(null);
           }}
         />
       ) : null}

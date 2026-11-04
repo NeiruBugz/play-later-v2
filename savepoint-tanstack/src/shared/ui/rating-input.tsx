@@ -113,7 +113,7 @@ export function RatingInput({
       ? "Rating"
       : value === null
         ? "No rating"
-        : `${value / 2} out of 5 stars`);
+        : `Rated ${value / 2} of 5`);
 
   const commit = useCallback(
     (next: number | null) => {

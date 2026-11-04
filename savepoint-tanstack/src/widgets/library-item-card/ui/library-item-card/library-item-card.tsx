@@ -1,5 +1,3 @@
-import { PlusCircle } from "lucide-react";
-
 import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
   LibraryLifecycleStrip,
@@ -16,7 +14,6 @@ import {
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui/button";
 import { RatingInput } from "@/shared/ui/rating-input";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { GameCard } from "@/widgets/game-card";
@@ -28,7 +25,6 @@ export function LibraryItemCard({
   item,
   menu,
   layout = "responsive",
-  onAddPlaythrough,
 }: LibraryItemCardProps) {
   const isRow = layout === "row";
   const { status, setStatus, isPending } = useSetStatus({
@@ -146,12 +142,7 @@ export function LibraryItemCard({
               unrated
             </span>
           ) : (
-            <RatingInput
-              value={item.rating}
-              size="sm"
-              readOnly
-              aria-label={`Rating: ${item.rating / 2} out of 5 stars`}
-            />
+            <RatingInput value={item.rating} size="sm" readOnly />
           )}
         </div>
 
@@ -169,20 +160,6 @@ export function LibraryItemCard({
             className="text-xs font-semibold"
           />
         </div>
-
-        {onAddPlaythrough !== undefined ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="mt-1 w-full text-xs font-medium"
-            onClick={() => onAddPlaythrough(item.id)}
-            aria-label="Add playthrough"
-          >
-            <PlusCircle aria-hidden />
-            Add playthrough
-          </Button>
-        ) : null}
       </div>
     </div>
   );

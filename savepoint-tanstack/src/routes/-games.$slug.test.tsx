@@ -111,7 +111,7 @@ const buildView = (
     playtimeTotalMinutes: 0,
     playtimeSessionCount: 0,
     recentSessionMinutes: [],
-    playthroughs: [],
+    history: [],
   },
   viewerUserId: null,
   ...overrides,

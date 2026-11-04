@@ -94,24 +94,6 @@ vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
 }));
 
-// Spec 016 §2.13 — mock the manage-playthrough feature so the drawer renders
-// as a dialog in the DOM without needing the full feature runtime.
-vi.mock("@/features/manage-playthrough", () => ({
-  AddEditPlaythroughDrawer: ({
-    open,
-    libraryItemId,
-  }: {
-    open: boolean;
-    libraryItemId: number;
-    onOpenChange: (open: boolean) => void;
-  }) =>
-    open ? (
-      <div role="dialog" aria-label="Add playthrough drawer">
-        Add playthrough for {libraryItemId}
-      </div>
-    ) : null,
-}));
-
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;
@@ -162,9 +144,7 @@ const elements = {
     screen.queryByRole("button", { name: `Actions for ${title}` }),
   queryDialog: () => screen.queryByRole("dialog"),
   queryAddPlaythroughButton: () =>
-    screen.queryByRole("button", { name: "Add playthrough" }),
-  queryAddPlaythroughDrawer: () =>
-    screen.queryByRole("dialog", { name: "Add playthrough drawer" }),
+    screen.queryByRole("button", { name: /add playthrough/i }),
   queryFilterInput: () =>
     screen.queryByRole("searchbox", { name: "Filter library by title" }),
   getFilterInput: () =>
@@ -557,54 +537,18 @@ describe("LibraryPage", () => {
     });
   });
 
-  // Spec 016 §2.13 — Library-card "Add playthrough" quick-add entry point.
-  // The page lifts a single drawer state; each card's "Add playthrough" control
-  // opens ONE AddEditPlaythroughDrawer (mode="add") over the library.
-  describe("Add playthrough quick-add — spec 016 §2.13", () => {
-    describe("given a library with items and the user has not clicked Add playthrough", () => {
-      beforeEach(() => {
-        const items = [
-          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
-          buildItem({ id: 2, gameTitle: "Celeste" }),
-        ];
-        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
-      });
-
-      it("does not show the Add playthrough drawer at rest", () => {
-        expect(elements.queryAddPlaythroughDrawer()).toBeNull();
-      });
+  describe("given a library with items in list view", () => {
+    beforeEach(async () => {
+      const items = [
+        buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+        buildItem({ id: 2, gameTitle: "Celeste" }),
+      ];
+      render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+      await userEvent.click(screen.getByRole("button", { name: "List view" }));
     });
 
-    describe("given a library with items and the user clicks Add playthrough on a card", () => {
-      beforeEach(async () => {
-        const items = [
-          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
-          buildItem({ id: 2, gameTitle: "Celeste" }),
-        ];
-        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
-        // Spec 025: inline quick-actions (incl. "Add playthrough") live in the
-        // list view; the default grid shows clean cover tiles. Switch to list
-        // first, then exercise the quick-add.
-        await userEvent.click(
-          screen.getByRole("button", { name: "List view" })
-        );
-        // Click the first "Add playthrough" button (Hollow Knight, id=1).
-        // Two cards each have an "Add playthrough" button — getAllByRole gives
-        // us both; index 0 is Hollow Knight (rendered first).
-        const [firstBtn] = screen.getAllByRole("button", {
-          name: "Add playthrough",
-        });
-        await userEvent.click(firstBtn);
-      });
-
-      it("opens the AddEditPlaythroughDrawer", () => {
-        expect(elements.queryAddPlaythroughDrawer()).not.toBeNull();
-      });
-
-      it("passes the correct library item id to the drawer", () => {
-        const drawer = elements.queryAddPlaythroughDrawer();
-        expect(drawer?.textContent).toContain("1");
-      });
+    it("offers no Add playthrough action on any card", () => {
+      expect(elements.queryAddPlaythroughButton()).toBeNull();
     });
   });
 

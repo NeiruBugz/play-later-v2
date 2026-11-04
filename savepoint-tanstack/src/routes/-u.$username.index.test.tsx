@@ -57,9 +57,6 @@ vi.mock("@/widgets", () => ({
     </div>
   ),
   ProfileActivityTab: () => <div data-testid="activity-tab-mock" />,
-  ProfilePlaythroughsSection: () => (
-    <div data-testid="profile-playthroughs-section-mock" />
-  ),
   UserList: () => <div data-testid="user-list-mock" />,
 }));
 

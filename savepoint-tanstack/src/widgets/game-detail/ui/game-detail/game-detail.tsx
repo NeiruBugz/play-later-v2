@@ -1,14 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
 
 import { CriticScoreRing, GameCover } from "@/entities/game";
-import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import { useSetOwnership, useSetStatus } from "@/features/manage-library-entry";
-import {
-  AddEditPlaythroughDrawer,
-  type PlaythroughFormValues,
-} from "@/features/manage-playthrough";
 import { openGlobalAction } from "@/shared/lib/global-action";
 import {
   buildCoverImageUrl,
@@ -23,7 +17,8 @@ import { GameDetailDetailRail } from "../game-detail-detail-rail";
 import { GameDetailJumpSpine } from "../game-detail-jump-spine";
 import { GameLibraryControls } from "../game-library-controls";
 import { GameNotesList } from "../game-notes-list";
-import { PlaythroughsPanel } from "../playthroughs-panel";
+import { GameRating } from "../game-rating";
+import { PlayHistory } from "../play-history";
 import { RelatedPanel } from "../related-panel";
 import { ScreenshotsPanel } from "../screenshots-panel";
 import { ThemesTagsPanel } from "../themes-tags-panel";
@@ -43,44 +38,16 @@ export function GameDetail({
     doneOutcome,
     prompts,
     notes,
-    playthroughs = [],
+    history = [],
     playtimeTotalMinutes,
     playtimeSessionCount,
   } = data;
   const navigate = useNavigate();
 
-  type DrawerState =
-    | { open: false }
-    | { open: true; mode: "add" }
-    | {
-        open: true;
-        mode: "edit";
-        playthroughId: string;
-        prefill: PlaythroughFormValues;
-      };
-
-  const [drawerState, setDrawerState] = useState<DrawerState>({ open: false });
-
   function openLogSession() {
     openGlobalAction(navigate, "log-session", gameSlug);
   }
 
-  function mapPlaythroughToFormValues(
-    pt: PlaythroughWithEntries
-  ): PlaythroughFormValues {
-    return {
-      libraryItemId: pt.libraryItemId,
-      kind: pt.kind ?? undefined,
-      platform: pt.platform ?? null,
-      status: pt.status as PlaythroughFormValues["status"],
-      startedAt: pt.startedAt ?? null,
-      finishedAt: pt.finishedAt ?? null,
-      playtimeHours: pt.playtimeMinutes / 60,
-      rating: pt.rating ?? null,
-      completion: pt.completion ?? null,
-      notes: pt.notes ?? null,
-    };
-  }
   const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
   const releaseYear = game.releaseDate
@@ -127,7 +94,6 @@ export function GameDetail({
     timesToBeatSlot !== undefined;
 
   const jumpSections = [
-    showPersonalPanels && { id: "playthroughs", label: "Playthroughs" },
     hasAboutData && { id: "about", label: "About" },
     hasThemesTagsData && { id: "themes", label: "Themes" },
     showJournalPanel && { id: "journal", label: "Notes" },
@@ -182,27 +148,17 @@ export function GameDetail({
         data-testid="game-detail-bento-grid"
         className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
       >
-        {showPersonalPanels ? (
+        {showPersonalPanels && libraryEntry ? (
           <Card
-            id="playthroughs"
+            id="rating"
             variant="flat"
             className="gap-md p-xl flex flex-col"
           >
-            <PlaythroughsPanel
-              libraryItemId={String(libraryEntry?.id ?? "")}
-              playthroughs={playthroughs}
-              onAddPlaythrough={() =>
-                setDrawerState({ open: true, mode: "add" })
-              }
-              onEditPlaythrough={(pt) =>
-                setDrawerState({
-                  open: true,
-                  mode: "edit",
-                  playthroughId: pt.id,
-                  prefill: mapPlaythroughToFormValues(pt),
-                })
-              }
+            <GameRating
+              libraryItemId={libraryEntry.id}
+              rating={libraryEntry.rating}
             />
+            <PlayHistory plays={history} />
           </Card>
         ) : null}
 
@@ -441,28 +397,6 @@ export function GameDetail({
             />
           </div>
         </div>
-
-        {showPersonalPanels && libraryEntry ? (
-          <AddEditPlaythroughDrawer
-            open={drawerState.open}
-            mode={drawerState.open ? drawerState.mode : "add"}
-            libraryItemId={libraryEntry.id}
-            existingPlaythroughCount={playthroughs.length}
-            playthroughId={
-              drawerState.open && drawerState.mode === "edit"
-                ? drawerState.playthroughId
-                : undefined
-            }
-            playthrough={
-              drawerState.open && drawerState.mode === "edit"
-                ? drawerState.prefill
-                : undefined
-            }
-            onOpenChange={(open) => {
-              if (!open) setDrawerState({ open: false });
-            }}
-          />
-        ) : null}
       </div>
 
       {/* Sticky bottom action bar — present in DOM for SSR; GameDetailActionBar

@@ -20,8 +20,10 @@ export type {
   GameLibraryControlsProps,
   LibraryStatusState,
 } from "./game-library-controls";
-export { PlaythroughsPanel } from "./playthroughs-panel";
-export type { PlaythroughsPanelProps } from "./playthroughs-panel";
+export { PlayHistory } from "./play-history";
+export type { Play, PlayHistoryProps } from "./play-history";
+export { GameRating } from "./game-rating";
+export type { GameRatingProps } from "./game-rating";
 export { RelatedPanel } from "./related-panel";
 export type { RelatedPanelProps } from "./related-panel";
 export { ScreenshotsPanel } from "./screenshots-panel";

@@ -94,3 +94,18 @@ export function formatHours(minutes: number): string {
   const hours = Math.round((minutes / 60) * 10) / 10;
   return `${hours} h`;
 }
+
+/**
+ * Day-and-month display (`3 Mar`), with the year (`3 Mar 2025`) only when it
+ * differs from the year of `now`.
+ */
+export function formatDayMonth(
+  date: Date | string | number,
+  now: Date = new Date()
+): string {
+  const value = new Date(date);
+  const base = `${value.getDate()} ${value.toLocaleDateString("en-GB", { month: "short" })}`;
+  return value.getFullYear() === now.getFullYear()
+    ? base
+    : `${base} ${value.getFullYear()}`;
+}

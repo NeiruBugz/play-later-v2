@@ -3,11 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import { setOwnershipFn } from "@/features/manage-library-entry/api/set-ownership-fn";
 import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
-import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
-import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
+import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
@@ -86,18 +84,6 @@ vi.mock("@/features/compose-journal-entry/api/log-time-fn", () => ({
 
 vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
-}));
-
-vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
-  createPlaythroughFn: vi.fn(),
-}));
-
-vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
-  updatePlaythroughFn: vi.fn(),
-}));
-
-vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
-  deletePlaythroughFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
@@ -226,7 +212,15 @@ const elements = {
   queryLegacyCatalogCard: () =>
     screen.queryByTestId("game-detail-catalog-card"),
   queryEyebrow: () => screen.queryByLabelText("Release metadata"),
-  queryYourRecord: () => screen.queryByTestId("playthroughs-panel"),
+  queryYourRecord: () => screen.queryByTestId("game-rating"),
+  queryPlaythroughsPanel: () => screen.queryByTestId("playthroughs-panel"),
+  queryPlaythroughTimeline: () => screen.queryByTestId("playthrough-timeline"),
+  queryStartNewPlaythrough: () =>
+    screen.queryByRole("button", { name: /new playthrough|add playthrough/i }),
+  queryPlaythroughsJump: () =>
+    screen.queryByRole("button", { name: "Playthroughs" }),
+  queryHistoryToggle: () => screen.queryByRole("button", { name: "History" }),
+  queryRatingSlider: () => screen.queryByRole("slider", { name: /Rate|Rated/ }),
   queryThemesLabel: () => screen.queryByText("// THEMES"),
   queryEmDash: () => screen.queryByText("—"),
   queryScreenshotsRegion: () =>
@@ -542,7 +536,7 @@ describe("GameDetail", () => {
       ).toBe(true);
     });
 
-    it("orders the bento cells Record, Times, About, Themes, Notes, Related", () => {
+    it("orders the bento cells Rating, Times, About, Themes, Notes, Related", () => {
       const record = elements.queryYourRecord()!;
       const times = elements.queryTimesToBeatSlot()!;
       const about = elements.queryAboutCard()!;
@@ -969,110 +963,96 @@ describe("GameDetail", () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Edit-playthrough routing — Finding 1 + Finding 2
-  // ---------------------------------------------------------------------------
-
-  describe("given a signed-in viewer with two existing runs", () => {
-    const runA: PlaythroughWithEntries = {
-      id: "pt-run-a",
-      ordinal: 1,
-      kind: "FIRST",
-      status: "FINISHED",
-      platform: "PC",
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 120,
-      rating: null,
-      completion: null,
-      notes: "Run A notes",
-      journalEntries: [],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-01-01"),
-      updatedAt: new Date("2024-01-01"),
-    };
-
-    const runB: PlaythroughWithEntries = {
-      id: "pt-run-b",
-      ordinal: 2,
-      kind: "REPLAY",
-      status: "PLAYING",
-      platform: "PlayStation 5",
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 60,
-      rating: null,
-      completion: null,
-      notes: "Run B notes",
-      journalEntries: [],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-06-01"),
-      updatedAt: new Date("2024-06-01"),
-    };
+  describe("given a signed-in viewer with a played game", () => {
+    const history = [
+      {
+        id: "older",
+        startedAt: new Date(2024, 0, 5),
+        finishedAt: new Date(2024, 0, 19),
+      },
+      {
+        id: "newer",
+        startedAt: new Date(2024, 2, 3),
+        finishedAt: new Date(2024, 2, 20),
+      },
+    ];
 
     beforeEach(() => {
-      vi.mocked(createPlaythroughFn).mockReset();
-      vi.mocked(createPlaythroughFn).mockResolvedValue(undefined as never);
-      vi.mocked(updatePlaythroughFn).mockReset();
-      vi.mocked(updatePlaythroughFn).mockResolvedValue(undefined as never);
+      render(
+        <GameDetail
+          data={{ ...buildData(buildLibraryEntry()), history }}
+          viewerUserId="user-1"
+        />
+      );
     });
 
-    describe("when the user clicks Edit on run A and submits the drawer", () => {
-      beforeEach(async () => {
-        render(
-          <GameDetail
-            data={{
-              ...buildData(buildLibraryEntry()),
-              playthroughs: [runA, runB],
-            }}
-            viewerUserId="user-1"
-          />
-        );
-        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
-        await userEvent.click(editRunA!);
-        await userEvent.click(
-          screen.getByRole("button", { name: "Save changes" })
-        );
-      });
-
-      it("calls updatePlaythroughFn with run A's id — not createPlaythroughFn", async () => {
-        await waitFor(() => {
-          expect(vi.mocked(updatePlaythroughFn)).toHaveBeenCalledWith(
-            expect.objectContaining({
-              data: expect.objectContaining({ id: "pt-run-a" }),
-            })
-          );
-        });
-        expect(vi.mocked(createPlaythroughFn)).not.toHaveBeenCalled();
-      });
+    it("shows no playthroughs panel, timeline, jump entry, or new-playthrough button", () => {
+      expect(elements.queryPlaythroughsPanel()).toBeNull();
+      expect(elements.queryPlaythroughTimeline()).toBeNull();
+      expect(elements.queryPlaythroughsJump()).toBeNull();
+      expect(elements.queryStartNewPlaythrough()).toBeNull();
     });
 
-    describe("when the user opens the drawer for run A then closes and opens for run B", () => {
-      beforeEach(async () => {
-        render(
-          <GameDetail
-            data={{
-              ...buildData(buildLibraryEntry()),
-              playthroughs: [runA, runB],
-            }}
-            viewerUserId="user-1"
-          />
-        );
-        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
-        await userEvent.click(editRunA!);
-        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-        const editButtons = screen.getAllByRole("button", { name: "Edit" });
-        await userEvent.click(editButtons[1]!);
-      });
+    it("offers a collapsed History section", () => {
+      expect(elements.queryHistoryToggle()).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      );
+    });
 
-      it("shows run B's notes in the Notes field — not run A's stale values", async () => {
-        const notesField = screen.getByLabelText(
-          "Notes"
-        ) as HTMLTextAreaElement;
-        expect(notesField.value).toBe("Run B notes");
-      });
+    it("lists the plays newest first once History is expanded", async () => {
+      await userEvent.click(elements.queryHistoryToggle()!);
+      const entries = within(screen.getByTestId("play-history"))
+        .getAllByRole("listitem")
+        .map((li) => li.textContent);
+      expect(entries).toEqual([
+        "3 Mar 2024 \u2013 20 Mar 2024",
+        "5 Jan 2024 \u2013 19 Jan 2024",
+      ]);
+    });
+  });
+
+  describe("given a signed-in viewer with no ended plays", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("shows no History section", () => {
+      expect(elements.queryHistoryToggle()).toBeNull();
+    });
+  });
+
+  describe("given a signed-in viewer who rated the game 7", () => {
+    beforeEach(() => {
+      vi.mocked(updateLibraryItemFn).mockReset();
+      vi.mocked(updateLibraryItemFn).mockResolvedValue({} as never);
+      render(
+        <GameDetail
+          data={buildData(buildLibraryItem({ id: 42, rating: 7 }))}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("shows a single rating of three and a half stars and no Best rating", () => {
+      expect(
+        screen.getAllByRole("slider", { name: "Rated 3.5 of 5" })
+      ).toHaveLength(1);
+      expect(screen.queryByText(/best rating/i)).toBeNull();
+    });
+
+    it("saves a changed rating through updateLibraryItemFn", async () => {
+      await userEvent.click(screen.getByTestId("rating-star-5"));
+      await waitFor(() =>
+        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledWith({
+          data: { itemId: 42, rating: 10 },
+        })
+      );
     });
   });
 
@@ -1310,32 +1290,10 @@ describe("GameDetail", () => {
   });
 
   describe("given a signed-in viewer with a played game (earlier plays)", () => {
-    const earlierRun: PlaythroughWithEntries = {
-      id: "pt-earlier",
-      ordinal: 1,
-      kind: "FIRST",
-      status: "FINISHED",
-      platform: null,
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 600,
-      rating: null,
-      completion: null,
-      notes: null,
-      journalEntries: [],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-01-01"),
-      updatedAt: new Date("2024-01-01"),
-    };
-
     const renderGame = (status: "WANT" | "PLAYING") =>
       render(
         <GameDetail
-          data={{
-            ...buildData(buildLibraryItem({ id: 42, status })),
-            playthroughs: [earlierRun],
-          }}
+          data={buildData(buildLibraryItem({ id: 42, status }))}
           viewerUserId="user-1"
           gameSlug="hollow-knight"
         />

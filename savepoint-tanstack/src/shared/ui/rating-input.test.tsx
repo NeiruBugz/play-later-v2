@@ -40,10 +40,10 @@ describe("RatingInput", () => {
       expect(elements.getReadOnly()).toBeDefined();
     });
 
-    it("computes a 'X out of 5 stars' aria-label", () => {
+    it("computes a 'Rated X of 5' aria-label", () => {
       expect(elements.getReadOnly()).toHaveAttribute(
         "aria-label",
-        "3 out of 5 stars"
+        "Rated 3 of 5"
       );
     });
   });

@@ -155,6 +155,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
           </section>
 
           <RatingControls
+            idPrefix="mobile"
             minRating={minRating}
             unratedOnly={unratedOnly}
             onMinRatingChange={onMinRatingChange}

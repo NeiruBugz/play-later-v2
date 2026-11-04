@@ -55,7 +55,6 @@ vi.mock("@/features/profile-overview/api", () => ({
     followingCount: 0,
     isFollowing: false,
     libraryItems: [],
-    playthroughs: [],
   }),
 }));
 
@@ -108,7 +107,6 @@ vi.mock("@/widgets", () => ({
   ),
   ProfileOverview: () => <div data-testid="profile-overview" />,
   ProfileActivityTab: () => null,
-  ProfilePlaythroughsSection: () => null,
 }));
 
 vi.mock("@/widgets/app-shell", () => ({

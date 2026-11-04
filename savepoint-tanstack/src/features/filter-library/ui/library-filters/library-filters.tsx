@@ -11,6 +11,7 @@ import { Button } from "@/shared/ui/button";
 
 import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
+import { RatingControls } from "../rating-controls";
 import { SortSelect } from "../sort-select";
 import { StatusList } from "../status-list";
 
@@ -39,10 +40,8 @@ export type LibraryFiltersProps = {
    */
   platforms?: ReadonlyArray<string>;
   /**
-   * Pass-through for the mobile filter bar's unrated-only toggle. Sidebar
-   * does not render this control (deferred to S18A "More" disclosure parity)
-   * but must preserve the value across navigations so picking a status here
-   * does not clobber an active mobile-side toggle.
+   * Drives the "Unrated only" switch, shared with the mobile filter bar via
+   * `RatingControls` and `useLibraryFiltersState`.
    */
   unratedOnly?: boolean;
   notOwnedOnly?: boolean;
@@ -71,6 +70,9 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     onNotOwnedOnlyChange,
     onPlatformChange,
     onSortChange,
+    onMinRatingChange,
+    onClearMinRating,
+    onUnratedOnlyChange,
     onClearAll,
   } = useLibraryFiltersState({
     status,
@@ -122,6 +124,15 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           onChange={onPlatformChange}
         />
       </section>
+
+      <RatingControls
+        idPrefix="sidebar"
+        minRating={minRating}
+        unratedOnly={unratedOnly}
+        onMinRatingChange={onMinRatingChange}
+        onClearMinRating={onClearMinRating}
+        onUnratedOnlyChange={onUnratedOnlyChange}
+      />
 
       <section>
         <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">

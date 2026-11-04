@@ -360,4 +360,61 @@ describe("LibraryFilters", () => {
       expect(mockNavigate).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("given the desktop filters are rendered", () => {
+    beforeEach(() => {
+      render(<LibraryFilters {...defaultProps} />);
+    });
+
+    it("offers Minimum rating and Unrated only like the phone sheet", () => {
+      expect(
+        screen.getByRole("slider", { name: "Minimum rating filter" })
+      ).toBeDefined();
+      expect(
+        screen.getByRole("switch", { name: "Show only unrated games" })
+      ).toBeDefined();
+    });
+  });
+
+  describe("given the user toggles Unrated only", () => {
+    beforeEach(async () => {
+      render(<LibraryFilters {...defaultProps} />);
+      await userEvent.click(
+        screen.getByRole("switch", { name: "Show only unrated games" })
+      );
+    });
+
+    it("navigates with unratedOnly true, the same param the phone writes", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ unratedOnly: true }),
+        })
+      );
+    });
+  });
+
+  describe("given the user picks a minimum rating", () => {
+    beforeEach(async () => {
+      render(<LibraryFilters {...defaultProps} />);
+      await userEvent.click(screen.getByTestId("rating-star-4"));
+    });
+
+    it("navigates with minRating in stars, the same param the phone writes", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ minRating: 4 }),
+        })
+      );
+    });
+  });
+
+  describe("given a minimum rating is active", () => {
+    beforeEach(() => {
+      render(<LibraryFilters {...defaultProps} minRating={3} />);
+    });
+
+    it("offers Clear all filters", () => {
+      expect(elements.getClearFiltersButton()).toBeDefined();
+    });
+  });
 });

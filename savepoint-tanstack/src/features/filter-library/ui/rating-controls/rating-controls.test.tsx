@@ -27,6 +27,7 @@ const actions = {
 function renderControls(minRating: number | undefined) {
   render(
     <RatingControls
+      idPrefix="test"
       minRating={minRating}
       unratedOnly={undefined}
       onMinRatingChange={onMinRatingChange}

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
@@ -9,6 +8,7 @@ import type {
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client.ts";
 import type { GameNote } from "../game-notes-list";
+import type { Play } from "../play-history";
 
 export type GameDetailData = {
   /** Thin cached Game row — anchor for cross-feature reads. */
@@ -32,8 +32,8 @@ export type GameDetailData = {
   playtimeSessionCount: number;
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
-  /** Playthroughs for the viewer's library entry, newest-first. */
-  playthroughs?: PlaythroughWithEntries[];
+  /** Ended plays of the viewer's library entry; owner only, empty when none. */
+  history?: Play[];
 };
 
 export type GameDetailProps = {

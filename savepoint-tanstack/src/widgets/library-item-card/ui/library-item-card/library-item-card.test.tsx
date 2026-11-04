@@ -134,8 +134,6 @@ const elements = {
   queryUnrated: () => screen.queryByText("unrated"),
   queryAddPlaythroughButton: () =>
     screen.queryByRole("button", { name: "Add playthrough" }),
-  getAddPlaythroughButton: () =>
-    screen.getByRole("button", { name: "Add playthrough" }),
 };
 
 describe("LibraryItemCard", () => {
@@ -425,6 +423,18 @@ describe("LibraryItemCard", () => {
         });
       });
 
+      describe("given an item rated 7", () => {
+        beforeEach(() => {
+          render(<LibraryItemCard item={buildItem({ rating: 7 })} />);
+        });
+
+        it("shows three and a half stars", () => {
+          expect(
+            screen.getByRole("img", { name: "Rated 3.5 of 5" })
+          ).toBeDefined();
+        });
+      });
+
       describe("given a rated item", () => {
         beforeEach(() => {
           render(<LibraryItemCard item={buildItem({ rating: 8 })} />);
@@ -433,7 +443,7 @@ describe("LibraryItemCard", () => {
         it("shows the star rating, not the placeholder", () => {
           expect(elements.queryUnrated()).toBeNull();
           expect(
-            screen.getByRole("img", { name: "Rating: 4 out of 5 stars" })
+            screen.getByRole("img", { name: "Rated 4 of 5" })
           ).toBeDefined();
         });
       });
@@ -601,40 +611,13 @@ describe("LibraryItemCard", () => {
     });
   });
 
-  // 2.13 — "Add playthrough" quick-add entry point (spec 016).
-  // The control must appear ONLY when the host supplies `onAddPlaythrough` so
-  // the public-profile read-only grid stays clean.
-  describe('"Add playthrough" quick-add control (spec 016 §2.13)', () => {
-    describe("given onAddPlaythrough is provided", () => {
-      const onAddPlaythrough = vi.fn();
-
-      beforeEach(() => {
-        render(
-          <LibraryItemCard
-            item={buildItem({ id: 7 })}
-            onAddPlaythrough={onAddPlaythrough}
-          />
-        );
-      });
-
-      it("renders the Add playthrough control", () => {
-        expect(elements.queryAddPlaythroughButton()).not.toBeNull();
-      });
-
-      it("calls onAddPlaythrough with the library item id when clicked", async () => {
-        await userEvent.click(elements.getAddPlaythroughButton());
-        expect(onAddPlaythrough).toHaveBeenCalledWith(7);
-      });
+  describe("given any card", () => {
+    beforeEach(() => {
+      render(<LibraryItemCard item={buildItem({ id: 7 })} />);
     });
 
-    describe("given onAddPlaythrough is NOT provided", () => {
-      beforeEach(() => {
-        render(<LibraryItemCard item={buildItem({ id: 7 })} />);
-      });
-
-      it("does not render the Add playthrough control", () => {
-        expect(elements.queryAddPlaythroughButton()).toBeNull();
-      });
+    it("offers no Add playthrough action", () => {
+      expect(elements.queryAddPlaythroughButton()).toBeNull();
     });
   });
 

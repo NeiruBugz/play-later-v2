@@ -26,10 +26,4 @@ export type LibraryItemCardProps = {
    * "row" stays a row at every width (library list view).
    */
   layout?: "responsive" | "row";
-  /**
-   * When provided, an "Add playthrough" icon button is rendered below the
-   * status actions. Omitting it hides the action entirely — use this to keep
-   * the card action-free in read-only contexts (e.g. public-profile grid).
-   */
-  onAddPlaythrough?: (libraryItemId: number) => void;
 };
