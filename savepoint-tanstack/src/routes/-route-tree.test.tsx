@@ -1,8 +1,10 @@
+import { QueryClient } from "@tanstack/react-query";
 import {
   createMemoryHistory,
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
+import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -130,10 +132,13 @@ vi.mock("@tanstack/react-router-devtools", () => ({
 }));
 
 const renderAt = async (path: string) => {
+  const queryClient = new QueryClient();
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [path] }),
+    context: { queryClient },
   });
+  setupRouterSsrQueryIntegration({ router, queryClient });
   await act(async () => {
     render(<RouterProvider router={router} />);
     await router.load();
