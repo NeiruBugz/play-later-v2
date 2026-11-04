@@ -119,6 +119,11 @@ NOT CONFIGURED — `context/sources/sources.md` absent; user chose "skip for thi
 
 - 2026-10-29 — User accepted all 11 brief assumptions (ownership marker, private optional Done sub-type, playthroughs → read-only History, Up Next max 5, Up Next on Done = Replay, add as Want, data mapping + one-time notice, one rating, optional prompts, plain notes, label-only Steam/activity change). Pain points from the vision interview: too many concepts, slow add/mark, main thing not visible.
 
+## UI audit (2026-11-04)
+
+- Source: [ui-audit/ui-audit.md](./ui-audit/ui-audit.md) — baseline audit by the user (screen inventory at 390/1440, task walkthroughs, code consistency pass). "Findings for 026" N1–N23 and "Bugs to fix regardless of 026" U1–U6 were folded into functional-spec §2.3, §2.5, §2.6, §2.9, §2.11, §2.14–§2.19 (see its Change Log); S1–S9 are Out-of-Scope.
+- User decisions 2026-11-04: include U1–U6 as the first slice; keep `/games/search` via "See all results"; remove Home "Recently played"; time format "1.5 h".
+
 ## Unresolved conflicts
 
 _Both resolved by accepted assumptions 1 and 5 (2026-10-29)._
