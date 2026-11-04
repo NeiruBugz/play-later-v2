@@ -19,6 +19,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { searchGames, type SearchGamesResult } from "@/shared/api/igdb";
+import { enforceSearchRateLimit } from "@/shared/api/search-rate-limit.server";
 
 export const SEARCH_GAMES_INPUT = z.object({
   name: z.string().min(1, "Search query is required").max(200),
@@ -31,5 +32,8 @@ export const searchGamesFn = createServerFn({ method: "POST" })
     // Re-parse server-side: inputValidator runs only on cross-network calls;
     // programmatic callers (other server fns, tests) bypass it.
     const parsed = SEARCH_GAMES_INPUT.parse(data);
+    // Entities cannot import the session entity, so this fn is keyed by client
+    // address for every caller; the session-aware search fns key by user id.
+    await enforceSearchRateLimit(undefined);
     return searchGames({ name: parsed.name, offset: parsed.offset });
   });
