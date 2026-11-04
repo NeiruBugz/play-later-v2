@@ -25,6 +25,10 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("@/shared/lib/igdb-image", () => ({
   buildCoverImageUrl: () => "https://images.igdb.com/cover.jpg",
+  buildCoverImageProps: () => ({
+    src: "https://images.igdb.com/cover.jpg",
+    srcSet: undefined,
+  }),
 }));
 
 function makeItem(id: string, title: string, overrides: object = {}) {

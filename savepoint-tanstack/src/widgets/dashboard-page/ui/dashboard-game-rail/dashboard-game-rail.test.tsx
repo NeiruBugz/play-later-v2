@@ -23,7 +23,10 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/shared/lib/igdb-image", () => ({
-  buildCoverImageUrl: () => "https://images.igdb.com/cover.jpg",
+  buildCoverImageProps: () => ({
+    src: "https://images.igdb.com/cover.jpg",
+    srcSet: undefined,
+  }),
 }));
 
 vi.mock("@/entities/library-item", () => ({

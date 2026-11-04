@@ -7,13 +7,19 @@ import type { GameCoverProps } from "./game-cover.type";
  * otherwise a placeholder element with `role="img"` so assistive tech still
  * announces the alt text.
  */
-export function GameCover({ src, alt, className }: GameCoverProps) {
+export function GameCover({
+  src,
+  alt,
+  className,
+  eager = false,
+}: GameCoverProps) {
   if (src) {
     return (
       <img
         src={src}
         alt={alt}
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
         className={cn(
           "shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-cover)] object-cover",
           className

@@ -60,11 +60,17 @@ describe("GameCard", () => {
       expect(elements.getTitle()).toBeDefined();
     });
 
-    it("renders a cover <img> with a full IGDB URL at t_720p", () => {
+    it("renders a cover <img> sized for a card (t_cover_big)", () => {
       const img = elements.queryCover();
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toBe(
-        "https://images.igdb.com/igdb/image/upload/t_720p/co9wzc.jpg"
+        "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg"
+      );
+    });
+
+    it("offers the t_cover_big_2x candidate for dense displays", () => {
+      expect(elements.queryCover()?.getAttribute("srcset")).toContain(
+        "t_cover_big_2x/co9wzc.jpg 2x"
       );
     });
 

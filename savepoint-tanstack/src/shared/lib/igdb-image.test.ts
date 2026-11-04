@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildCoverImageUrl } from "./igdb-image";
+import {
+  buildCoverImageProps,
+  buildCoverImageUrl,
+  buildScreenshotThumbUrl,
+} from "./igdb-image";
 
 describe("buildCoverImageUrl", () => {
   it("returns null when input is null", () => {
@@ -43,6 +47,35 @@ describe("buildCoverImageUrl", () => {
   it("passes through non-IGDB URLs unchanged", () => {
     expect(buildCoverImageUrl("https://cdn.example.com/foo.jpg")).toBe(
       "https://cdn.example.com/foo.jpg"
+    );
+  });
+});
+
+describe("buildCoverImageProps", () => {
+  it("returns null without a cover", () => {
+    expect(buildCoverImageProps(null)).toBeNull();
+  });
+
+  it("serves t_cover_big with a t_cover_big_2x candidate for dense displays", () => {
+    expect(buildCoverImageProps("co9wzc")).toEqual({
+      src: "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg",
+      srcSet:
+        "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg 1x, https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9wzc.jpg 2x",
+    });
+  });
+
+  it("leaves non-IGDB URLs as a single candidate", () => {
+    expect(buildCoverImageProps("https://cdn.example.com/foo.jpg")).toEqual({
+      src: "https://cdn.example.com/foo.jpg",
+      srcSet: undefined,
+    });
+  });
+});
+
+describe("buildScreenshotThumbUrl", () => {
+  it("serves the medium screenshot size", () => {
+    expect(buildScreenshotThumbUrl("sc1")).toBe(
+      "https://images.igdb.com/igdb/image/upload/t_screenshot_med/sc1.jpg"
     );
   });
 });
