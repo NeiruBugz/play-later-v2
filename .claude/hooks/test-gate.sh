@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Stop hook: gate turn completion on unit tests affected by the current changes.
-# Unit project only (jsdom + mocked Prisma — fast). Integration tests need a real
-# Postgres and run too slowly for a per-turn gate; they stay in CI.
+# Stop hook: gate turn completion on unit tests related to the TS files this
+# session edited. Unit project only (jsdom + mocked Prisma — fast). Integration
+# tests need a real Postgres and run too slowly for a per-turn gate; they stay in CI.
 # Exit 0 = allow stop, Exit 2 = block stop and feed stderr back to Claude.
 
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/savepoint-tanstack"
+HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$HOOKS_DIR/../.." && pwd)}/savepoint-tanstack"
+# shellcheck source-path=SCRIPTDIR source=lib/session-edits.sh
+source "$HOOKS_DIR/lib/session-edits.sh"
 
 input=$(cat)
 
@@ -17,20 +20,16 @@ fi
 
 cd "$PROJECT_DIR" || exit 0
 
-# Skip unless TS/TSX sources changed — vitest --changed would otherwise no-op anyway,
-# but this avoids spinning up vitest at all on doc/config-only turns.
-changed=$(
-  {
-    git diff --name-only HEAD -- '*.ts' '*.tsx'
-    git ls-files --others --exclude-standard -- '*.ts' '*.tsx'
-  } 2>/dev/null
-)
-[ -z "$changed" ] && exit 0
+# Scoped to this session's edits so another session's half-finished work in the
+# same tree does not block this one.
+edited=$(session_edited_ts_files "$input" "$PROJECT_DIR")
+[ -z "$edited" ] && exit 0
 
-# --changed runs only unit tests affected by uncommitted changes; --passWithNoTests
-# keeps the gate green when a change has no associated unit test.
-if ! output=$(pnpm exec vitest run --project=unit --changed --passWithNoTests 2>&1); then
-  echo "Affected unit tests failed — fix them before finishing:" >&2
+# `related` runs the unit tests that import the edited files (and the edited test
+# files themselves); --passWithNoTests keeps the gate green when none exist.
+# shellcheck disable=SC2086
+if ! output=$(pnpm exec vitest related --run --project=unit --passWithNoTests $edited 2>&1); then
+  echo "Unit tests related to this session's edits failed — fix them before finishing:" >&2
   echo "$output" >&2
   exit 2
 fi
