@@ -105,6 +105,8 @@ const buildView = (
       slug: "celeste",
     },
     libraryEntry: null,
+    doneOutcome: null,
+    prompts: { why: false, stayed: false },
     notes: [],
     playtimeTotalMinutes: 0,
     playtimeSessionCount: 0,

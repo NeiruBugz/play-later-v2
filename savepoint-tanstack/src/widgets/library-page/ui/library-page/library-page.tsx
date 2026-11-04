@@ -65,6 +65,7 @@ function LibraryGridTile({
     gameTitle: item.game.title,
     status: item.status,
     upNextPosition: item.upNextPosition,
+    rating: item.rating,
   });
   const ownership = useSetOwnership({
     id: item.id,

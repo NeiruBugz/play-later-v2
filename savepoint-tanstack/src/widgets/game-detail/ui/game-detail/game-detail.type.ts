@@ -4,6 +4,7 @@ import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
+  DoneOutcome,
   Game,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client.ts";
@@ -19,6 +20,10 @@ export type GameDetailData = {
    */
   igdbDetails: GameDetailsResponseItem;
   libraryEntry: LibraryItem | null;
+  /** How a Done game ended; the owner's own game only. */
+  doneOutcome?: DoneOutcome | null;
+  /** Which optional prompts to offer; both false unless the viewer owns the item. */
+  prompts?: { why: boolean; stayed: boolean };
   /** The viewer's notes for this game, newest first. */
   notes: GameNote[];
   /** SUM of the viewer's logged playedMinutes for this game; 0 when none. */

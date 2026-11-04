@@ -25,6 +25,7 @@ import { AppBottomNav } from "@/widgets/app-bottom-nav";
 import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
 import { AppShell } from "@/widgets/app-shell";
 import { AppSidebar } from "@/widgets/app-sidebar";
+import { DoneFlowProvider } from "@/widgets/done-flow";
 import { GlobalActionHost } from "@/widgets/global-action-host";
 
 import appCss from "../styles.css?url";
@@ -144,21 +145,23 @@ export function RootShell() {
     <QueryClientProvider client={queryClient}>
       <SavepointThemeProvider defaultTheme="system">
         <AddFlowProvider>
-          <AppShell
-            sidebar={user ? <AppSidebar user={user} /> : undefined}
-            mobileTopbar={user ? <AppMobileTopbar /> : undefined}
-            mobileBottomNav={user ? <AppBottomNav /> : undefined}
-          >
-            <Outlet />
-          </AppShell>
-          {user ? (
-            <CommandPalette
-              renderAddAction={({ igdbId, name }) => (
-                <AddGameAction game={{ igdbId, name, library: null }} />
-              )}
-            />
-          ) : null}
-          {user ? <GlobalActionHost /> : null}
+          <DoneFlowProvider>
+            <AppShell
+              sidebar={user ? <AppSidebar user={user} /> : undefined}
+              mobileTopbar={user ? <AppMobileTopbar /> : undefined}
+              mobileBottomNav={user ? <AppBottomNav /> : undefined}
+            >
+              <Outlet />
+            </AppShell>
+            {user ? (
+              <CommandPalette
+                renderAddAction={({ igdbId, name }) => (
+                  <AddGameAction game={{ igdbId, name, library: null }} />
+                )}
+              />
+            ) : null}
+            {user ? <GlobalActionHost /> : null}
+          </DoneFlowProvider>
         </AddFlowProvider>
         {user ? <WhatsNewModal /> : null}
         <Toaster />

@@ -19,6 +19,18 @@ const mocks = vi.hoisted(() => ({
   isDesktop: true,
 }));
 
+vi.mock("@/features/done-follow-up/api/save-done-follow-up-fn", () => ({
+  saveDoneFollowUpFn: vi.fn(),
+}));
+vi.mock("@/features/done-follow-up/api/set-done-outcome-fn", () => ({
+  setDoneOutcomeFn: vi.fn(),
+}));
+vi.mock("@/features/library-prompts/api/answer-prompt-fn", () => ({
+  answerPromptFn: vi.fn(),
+}));
+vi.mock("@/features/library-prompts/api/dismiss-prompt-fn", () => ({
+  dismissPromptFn: vi.fn(),
+}));
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),
   useRouter: () => ({ invalidate: vi.fn() }),

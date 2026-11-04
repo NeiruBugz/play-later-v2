@@ -8,7 +8,14 @@ export {
 export { setStatusFn } from "./api/set-status-fn";
 export type { SetStatusResult } from "./api/set-status-fn.worker";
 
-export { changeStatusWithUndo, useSetOwnership, useSetStatus } from "./model";
+export {
+  changeStatusWithUndo,
+  DoneHandlerProvider,
+  useDoneHandler,
+  useSetOwnership,
+  useSetStatus,
+} from "./model";
+export type { DoneHandler, DoneRequest } from "./model";
 export type {
   UseSetOwnershipArgs,
   UseSetOwnershipResult,

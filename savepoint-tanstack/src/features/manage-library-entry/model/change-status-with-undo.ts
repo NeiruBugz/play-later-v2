@@ -8,6 +8,7 @@ import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts"
 import { setStatusFn } from "../api/set-status-fn";
 import type { SetStatusResult } from "../api/set-status-fn.worker";
 import { undoStatusFn } from "../api/undo-status-fn";
+import type { DoneHandler } from "./done-handler-context";
 
 export type DisplayedStatus = {
   status: LibraryItemStatus;
@@ -21,11 +22,14 @@ export type ChangeStatusWithUndoArgs = {
   previous: DisplayedStatus;
   onDisplay: (displayed: DisplayedStatus) => void;
   onPending?: (displayed: DisplayedStatus) => void;
+  /** Receives a successful change to Done instead of the 5 s undo toast. */
+  onDone?: DoneHandler;
+  rating?: number | null;
   runUndo: (task: () => Promise<boolean>) => Promise<void>;
 };
 
 /**
- * Changes a status and offers a 5 s Undo. Resolves true when the server
+ * Changes a status and offers a 5 s Undo (Done hands off to `onDone`). Resolves true when the server
  * changed, so the caller refreshes page data only after success. `runUndo`
  * wraps the undo task (true = server changed) so the caller can serialize it
  * and refresh afterwards.
@@ -37,6 +41,8 @@ export async function changeStatusWithUndo({
   previous,
   onDisplay,
   onPending,
+  onDone,
+  rating = null,
   runUndo,
 }: ChangeStatusWithUndoArgs): Promise<boolean> {
   const undo = (
@@ -74,6 +80,15 @@ export async function changeStatusWithUndo({
       upNextPosition: result.upNextPosition,
     };
     onDisplay(current);
+    if (result.status === "DONE" && onDone) {
+      onDone({
+        id,
+        gameTitle,
+        rating,
+        undo: () => undo(current, result.undo),
+      });
+      return true;
+    }
     showUndoToast({
       message: `${gameTitle} is now ${getStatusLabel(result.status)}`,
       onUndo: () => {

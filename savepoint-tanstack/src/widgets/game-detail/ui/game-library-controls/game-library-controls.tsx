@@ -10,6 +10,7 @@ import {
   StatusControl,
 } from "@/entities/library-item";
 import { AddGameAction } from "@/features/add-game";
+import { GamePrompts } from "@/features/library-prompts/ui/game-prompts";
 import {
   LibraryModal,
   RemoveFromLibraryDialog,
@@ -26,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
+import { DoneOutcomeLabel } from "../done-outcome-label";
 import type { GameLibraryControlsProps } from "./game-library-controls.type";
 
 export function GameLibraryControls({
@@ -34,6 +36,8 @@ export function GameLibraryControls({
   entry,
   libraryStatus,
   libraryOwnership,
+  doneOutcome = null,
+  prompts,
 }: GameLibraryControlsProps) {
   const router = useRouter();
   const [removing, setRemoving] = useState(false);
@@ -71,6 +75,12 @@ export function GameLibraryControls({
             onChange={(to) => void libraryStatus.setStatus(to)}
             disabled={libraryStatus.isPending}
           />
+          {libraryStatus.status === "DONE" ? (
+            <DoneOutcomeLabel
+              libraryItemId={entry.id}
+              doneOutcome={doneOutcome}
+            />
+          ) : null}
           <QueueMarker
             status={libraryStatus.status}
             upNextPosition={membership.upNextPosition}
@@ -121,6 +131,14 @@ export function GameLibraryControls({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {prompts !== undefined ? (
+            <GamePrompts
+              libraryItemId={entry.id}
+              gameTitle={gameTitle}
+              prompts={prompts}
+              status={libraryStatus.status}
+            />
+          ) : null}
         </>
       ) : (
         <AddGameAction

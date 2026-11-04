@@ -6,12 +6,15 @@ import {
   changeStatusWithUndo,
   type DisplayedStatus,
 } from "./change-status-with-undo";
+import { useDoneHandler } from "./done-handler-context";
 
 export type UseSetStatusArgs = {
   id: number;
   gameTitle: string;
   status: LibraryItemStatus;
   upNextPosition: number | null;
+  /** Pre-fills the Done follow-up. */
+  rating?: number | null;
 };
 
 export type UseSetStatusResult = {
@@ -22,7 +25,7 @@ export type UseSetStatusResult = {
 };
 
 /**
- * Optimistic status change with a 5 s Undo toast. Changes for one game are
+ * Optimistic status change with a 5 s Undo toast (Done opens the follow-up when a handler is provided). Changes for one game are
  * serialized: taps while a change (or undo) is in flight are ignored.
  */
 export function useSetStatus({
@@ -30,8 +33,10 @@ export function useSetStatus({
   gameTitle,
   status,
   upNextPosition,
+  rating = null,
 }: UseSetStatusArgs): UseSetStatusResult {
   const router = useRouter();
+  const onDone = useDoneHandler() ?? undefined;
   const [override, setOverride] = useState<DisplayedStatus | null>(null);
   const [isPending, setIsPending] = useState(false);
   const inFlight = useRef(false);
@@ -66,6 +71,8 @@ export function useSetStatus({
         previous: displayed,
         onPending: setOverride,
         onDisplay: setOverride,
+        onDone,
+        rating,
         runUndo: runSerialized,
       });
     });

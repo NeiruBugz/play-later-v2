@@ -40,6 +40,8 @@ export function GameDetail({
     game,
     igdbDetails,
     libraryEntry,
+    doneOutcome,
+    prompts,
     notes,
     playthroughs = [],
     playtimeTotalMinutes,
@@ -138,6 +140,7 @@ export function GameDetail({
     gameTitle: game.title,
     status: libraryEntry?.status ?? "WANT",
     upNextPosition: libraryEntry?.upNextPosition ?? null,
+    rating: libraryEntry?.rating ?? null,
   });
   const sharedLibraryStatus = isInLibrary ? libraryStatus : null;
   const libraryOwnership = useSetOwnership({
@@ -155,6 +158,8 @@ export function GameDetail({
           entry: libraryEntry,
           libraryStatus: sharedLibraryStatus,
           libraryOwnership: sharedLibraryOwnership,
+          doneOutcome,
+          prompts,
         }
       : null;
 

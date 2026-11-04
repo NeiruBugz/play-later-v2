@@ -9,6 +9,18 @@ import { Route as AuthedRoute } from "./_authed";
 
 void RootRoute;
 
+vi.mock("@/features/done-follow-up/api/save-done-follow-up-fn", () => ({
+  saveDoneFollowUpFn: vi.fn(),
+}));
+vi.mock("@/features/done-follow-up/api/set-done-outcome-fn", () => ({
+  setDoneOutcomeFn: vi.fn(),
+}));
+vi.mock("@/features/library-prompts/api/answer-prompt-fn", () => ({
+  answerPromptFn: vi.fn(),
+}));
+vi.mock("@/features/library-prompts/api/dismiss-prompt-fn", () => ({
+  dismissPromptFn: vi.fn(),
+}));
 vi.mock("@/widgets/app-sidebar", () => ({
   AppSidebar: () => <div data-testid="app-sidebar" />,
 }));
@@ -29,6 +41,12 @@ vi.mock("@/features/add-game", () => ({
 
 vi.mock("@/widgets/add-flow", () => ({
   AddFlowProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
+vi.mock("@/widgets/done-flow", () => ({
+  DoneFlowProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
   ),
 }));
