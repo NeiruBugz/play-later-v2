@@ -309,8 +309,8 @@ Verify-task conventions:
 - [ ] **Slice 13: Feature Testing & Regression**
 
   > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
-  - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 026-mindful-core-simplification` and `@regression` if suitable for long-term regression. **[Agent: testing]**
-  - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+  - [x] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 026-mindful-core-simplification` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [x] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
   - [ ] Re-run the UI audit probe (`ui-audit/measure.js`) on re-seeded audit accounts at 390 and 1440 px.
     - Add an "after 026" column to the audit's Metrics table.
     - Mark each N/U finding as resolved or still open in `ui-audit/ui-audit.md`.
