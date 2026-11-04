@@ -31,11 +31,9 @@ vi.mock("sonner", () => ({
 
 const entry: JournalEntryPageEntry = {
   id: "entry-55",
-  kind: "QUICK",
-  title: null,
   content: "I finally cleared the final dungeon.",
+  playedMinutes: 90,
   createdAt: new Date("2024-03-10T12:00:00Z"),
-  updatedAt: new Date("2024-03-10T12:00:00Z"),
   game: {
     id: "game-55",
     title: "Tunic",
@@ -55,8 +53,22 @@ describe("JournalEntryPage", () => {
     render(<JournalEntryPage entry={entry} />);
   });
 
+  describe("given a note with text and 90 minutes", () => {
+    it("shows the time as 1.5 h played", () => {
+      expect(screen.getByText("1.5 h played")).toBeDefined();
+    });
+
+    it("shows the date the note was written", () => {
+      expect(screen.getByText("Mar 10, 2024")).toBeDefined();
+    });
+
+    it("shows no Quick note or Reflection label", () => {
+      expect(screen.queryByText(/quick note|reflection/i)).toBeNull();
+    });
+  });
+
   describe("given an entry tied to a game", () => {
-    it("renders the entry content body", () => {
+    it("renders the note text", () => {
       expect(elements.getBody()).toBeDefined();
     });
 
@@ -74,5 +86,15 @@ describe("JournalEntryPage", () => {
     it("links the game name to the game detail page", () => {
       expect(elements.getGameLink()).toHaveAttribute("href", "/games/tunic");
     });
+  });
+});
+
+describe("JournalEntryPage with time and no text", () => {
+  beforeEach(() => {
+    render(<JournalEntryPage entry={{ ...entry, content: "" }} />);
+  });
+
+  it("shows the time played without an empty text block", () => {
+    expect(screen.getByText("1.5 h played")).toBeDefined();
   });
 });

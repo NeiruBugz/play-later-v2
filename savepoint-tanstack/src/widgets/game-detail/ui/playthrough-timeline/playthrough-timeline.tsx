@@ -2,19 +2,18 @@ import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import type { JournalTimelineEntry } from "@/entities/journal-entry/model/types";
 import {
   PlatformPill,
   RunMarker,
   RunStatusBadge,
 } from "@/entities/playthrough";
 import { deletePlaythroughFn } from "@/features/manage-playthrough/api/delete-playthrough-fn";
+import { formatHours } from "@/shared/lib/date";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { RatingInput } from "@/shared/ui/rating-input";
 
 import type { PlaythroughWithEntries } from "../../../../entities/playthrough/model/types";
-import { NestedJournal } from "./nested-journal";
 import type { PlaythroughTimelineProps } from "./playthrough-timeline.type";
 
 const KIND_LABEL: Record<string, string> = {
@@ -25,11 +24,6 @@ const KIND_LABEL: Record<string, string> = {
 function formatDate(d: Date | null): string {
   if (!d) return "";
   return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
-
-function formatHours(minutes: number): string {
-  if (minutes <= 0) return "";
-  return `${Math.floor(minutes / 60)}h`;
 }
 
 function DeleteConfirmDialog({
@@ -52,7 +46,7 @@ function DeleteConfirmDialog({
     >
       <div className="bg-background border-border w-full max-w-sm rounded-lg border p-6 shadow-lg">
         <p className="text-foreground mb-4 text-sm">
-          Your journal entries will stay but will be detached from this run.
+          Your notes will stay but will be detached from this run.
         </p>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onCancel}>
@@ -70,17 +64,18 @@ function DeleteConfirmDialog({
 function PlaythroughNode({
   playthrough,
   onEdit,
-  onLogSession,
 }: {
   playthrough: PlaythroughWithEntries;
   onEdit: () => void;
-  onLogSession: () => void;
 }) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const kindLabel = KIND_LABEL[playthrough.kind] ?? playthrough.kind;
-  const hours = formatHours(playthrough.playtimeMinutes);
+  const hours =
+    playthrough.playtimeMinutes > 0
+      ? formatHours(playthrough.playtimeMinutes)
+      : "";
   const startedStr = formatDate(playthrough.startedAt);
   const finishedStr = formatDate(playthrough.finishedAt);
 
@@ -159,12 +154,6 @@ function PlaythroughNode({
               </button>
             )}
           </div>
-
-          <NestedJournal
-            playthroughId={playthrough.id}
-            entries={playthrough.journalEntries as JournalTimelineEntry[]}
-            onLogSession={onLogSession}
-          />
         </div>
       </div>
 
@@ -200,7 +189,6 @@ export function PlaythroughTimeline({
   playthroughs,
   onAddPlaythrough,
   onEditPlaythrough,
-  onLogSession,
 }: PlaythroughTimelineProps) {
   return (
     <div className="flex flex-col">
@@ -209,7 +197,6 @@ export function PlaythroughTimeline({
           key={pt.id}
           playthrough={pt}
           onEdit={() => onEditPlaythrough(pt)}
-          onLogSession={() => onLogSession(pt)}
         />
       ))}
       <AddPlaythroughNode onAdd={onAddPlaythrough} />

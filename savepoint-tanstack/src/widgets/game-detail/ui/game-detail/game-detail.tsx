@@ -4,10 +4,6 @@ import { useState } from "react";
 
 import { CriticScoreRing, GameCover } from "@/entities/game";
 import type { PlaythroughWithEntries } from "@/entities/playthrough";
-import {
-  ComposeJournalEntryDialog,
-  LogSessionDrawer,
-} from "@/features/compose-journal-entry";
 import { useSetOwnership, useSetStatus } from "@/features/manage-library-entry";
 import {
   AddEditPlaythroughDrawer,
@@ -26,8 +22,7 @@ import { GameDetailActionBar } from "../game-detail-action-bar";
 import { GameDetailDetailRail } from "../game-detail-detail-rail";
 import { GameDetailJumpSpine } from "../game-detail-jump-spine";
 import { GameLibraryControls } from "../game-library-controls";
-import { JournalFeed } from "../journal-feed";
-import { JournalPanel } from "../journal-panel";
+import { GameNotesList } from "../game-notes-list";
 import { PlaythroughsPanel } from "../playthroughs-panel";
 import { RelatedPanel } from "../related-panel";
 import { ScreenshotsPanel } from "../screenshots-panel";
@@ -45,13 +40,11 @@ export function GameDetail({
     game,
     igdbDetails,
     libraryEntry,
-    journalTeaser,
+    notes,
     playthroughs = [],
-    unattachedJournalEntries = [],
     playtimeTotalMinutes,
     playtimeSessionCount,
   } = data;
-  const [composeOpen, setComposeOpen] = useState(false);
   const navigate = useNavigate({ from: "/" });
 
   type DrawerState =
@@ -65,14 +58,6 @@ export function GameDetail({
       };
 
   const [drawerState, setDrawerState] = useState<DrawerState>({ open: false });
-
-  type LogSessionState =
-    | { open: false }
-    | { open: true; preselectedPlaythroughId: string };
-
-  const [logSessionState, setLogSessionState] = useState<LogSessionState>({
-    open: false,
-  });
 
   function openLogSession() {
     openGlobalAction(navigate, "log-session", gameSlug);
@@ -143,7 +128,7 @@ export function GameDetail({
     showPersonalPanels && { id: "playthroughs", label: "Playthroughs" },
     hasAboutData && { id: "about", label: "About" },
     hasThemesTagsData && { id: "themes", label: "Themes" },
-    showJournalPanel && { id: "journal", label: "Journal" },
+    showJournalPanel && { id: "journal", label: "Notes" },
     showScreenshotsPanel && { id: "screenshots", label: "Screenshots" },
     showRelatedPanel && { id: "related", label: "Related" },
   ].filter((s): s is { id: string; label: string } => Boolean(s));
@@ -212,12 +197,6 @@ export function GameDetail({
                   prefill: mapPlaythroughToFormValues(pt),
                 })
               }
-              onLogSession={(pt) =>
-                setLogSessionState({
-                  open: true,
-                  preselectedPlaythroughId: pt.id,
-                })
-              }
             />
           </Card>
         ) : null}
@@ -275,10 +254,7 @@ export function GameDetail({
             variant="flat"
             className="gap-md p-xl flex flex-col"
           >
-            <JournalPanel
-              entries={journalTeaser}
-              onAddEntryClick={() => setComposeOpen(true)}
-            />
+            <GameNotesList notes={notes} onNewNote={openLogSession} />
           </Card>
         ) : null}
 
@@ -288,11 +264,6 @@ export function GameDetail({
           </div>
         ) : null}
       </div>
-
-      <JournalFeed
-        playthroughs={playthroughs}
-        legacyEntries={unattachedJournalEntries}
-      />
     </>
   );
 
@@ -457,6 +428,7 @@ export function GameDetail({
               libraryControlsProps={libraryControlsProps}
               libraryControlsKey={String(game.igdbId)}
               onLogSession={openLogSession}
+              showLogTime={showPersonalPanels}
               criticScore={criticScore}
               playtimeTotalMinutes={playtimeTotalMinutes}
               playtimeSessionCount={playtimeSessionCount}
@@ -464,29 +436,6 @@ export function GameDetail({
             />
           </div>
         </div>
-
-        {viewerUserId ? (
-          <ComposeJournalEntryDialog
-            open={composeOpen}
-            onOpenChange={setComposeOpen}
-            defaultGameId={game.id}
-          />
-        ) : null}
-
-        {showPersonalPanels &&
-        libraryEntry &&
-        logSessionState.open &&
-        playthroughs.length > 0 ? (
-          <LogSessionDrawer
-            open={logSessionState.open}
-            onOpenChange={(open) => {
-              if (!open) setLogSessionState({ open: false });
-            }}
-            playthroughs={playthroughs}
-            preselectedPlaythroughId={logSessionState.preselectedPlaythroughId}
-            gameId={game.id}
-          />
-        ) : null}
 
         {showPersonalPanels && libraryEntry ? (
           <AddEditPlaythroughDrawer

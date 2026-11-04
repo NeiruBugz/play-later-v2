@@ -10,7 +10,7 @@ import type {
 export type { JournalTimelineEntry };
 
 /**
- * Widget that composes journal entries into a vertical timeline with a
+ * Widget that composes notes into a vertical timeline with a
  * continuous rail line on the left and a circular game-cover node per entry.
  *
  * Layout: a thin vertical bar runs behind the column; each row is
@@ -26,8 +26,8 @@ export function JournalTimeline({
   if (entries.length === 0) {
     return (
       <EmptyState
-        title="Nothing logged yet"
-        description="Log tonight's session — a playtime count or a quick thought is enough. Reflections can come later."
+        title="No notes yet"
+        description="Log time on a game or write a note — either is enough."
       />
     );
   }

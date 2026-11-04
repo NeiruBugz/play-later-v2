@@ -42,8 +42,7 @@ function buildEntry(
   return {
     id: "entry-1",
     userId: "user-1",
-    kind: "QUICK",
-    title: null,
+    playedMinutes: null,
     content: "Loaded content",
     createdAt: new Date("2024-01-01T00:00:00Z"),
     updatedAt: new Date("2024-01-01T00:00:00Z"),
@@ -57,7 +56,7 @@ const elements = {
   getPage: () => screen.getByTestId("journal-entry-page"),
   getEntryId: () => screen.getByTestId("entry-id"),
   getNotFoundHeading: () =>
-    screen.getByRole("heading", { name: "Entry not found" }),
+    screen.getByRole("heading", { name: "Note not found" }),
   getGenericHeading: () =>
     screen.getByRole("heading", { name: "Something went wrong" }),
 };

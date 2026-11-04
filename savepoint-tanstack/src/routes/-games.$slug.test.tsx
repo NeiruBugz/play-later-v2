@@ -32,7 +32,7 @@ vi.mock("@/widgets/game-detail", () => ({
       <h1>{data.game.title}</h1>
       <span data-testid="viewer-user-id">{viewerUserId ?? "anon"}</span>
       <span data-testid="game-slug">{gameSlug ?? "missing"}</span>
-      <span data-testid="journal-count">{data.journalTeaser.length}</span>
+      <span data-testid="note-count">{data.notes.length}</span>
       <div data-testid="related-games-slot">{relatedGamesSlot}</div>
       <div data-testid="times-to-beat-slot">{timesToBeatSlot}</div>
     </div>
@@ -105,13 +105,11 @@ const buildView = (
       slug: "celeste",
     },
     libraryEntry: null,
-    journalTeaser: [],
-    journalCount: 0,
+    notes: [],
     playtimeTotalMinutes: 0,
     playtimeSessionCount: 0,
     recentSessionMinutes: [],
     playthroughs: [],
-    unattachedJournalEntries: [],
   },
   viewerUserId: null,
   ...overrides,

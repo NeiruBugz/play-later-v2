@@ -1,4 +1,5 @@
 import { aggregatePlaythroughs } from "@/entities/playthrough/model";
+import { formatHours } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { RatingInput } from "@/shared/ui/rating-input";
@@ -14,13 +15,11 @@ function AggregateBand({
   const { totalPlaytimeMinutes, count, bestRating, completion } =
     aggregatePlaythroughs(playthroughs);
 
-  const totalHours = Math.floor(totalPlaytimeMinutes / 60);
-
   return (
     <div className="border-border/50 flex flex-wrap items-center gap-4 border-b pb-4">
       <div className="flex items-baseline gap-1.5">
         <span className="text-foreground font-mono text-lg font-bold">
-          {totalHours}h
+          {formatHours(totalPlaytimeMinutes)}
         </span>
         <span className="text-muted-foreground text-xs tracking-wider uppercase">
           Playtime
@@ -78,7 +77,6 @@ export function PlaythroughsPanel({
   playthroughs,
   onAddPlaythrough,
   onEditPlaythrough,
-  onLogSession,
 }: PlaythroughsPanelProps) {
   if (playthroughs.length === 0) {
     return (
@@ -97,7 +95,6 @@ export function PlaythroughsPanel({
         playthroughs={playthroughs}
         onAddPlaythrough={onAddPlaythrough}
         onEditPlaythrough={onEditPlaythrough}
-        onLogSession={onLogSession}
       />
     </div>
   );

@@ -10,7 +10,7 @@ import { Button } from "@/shared/ui/button";
 import { JournalEntryPage } from "@/widgets/journal-entry-page";
 
 /**
- * `/journal/$id` — single journal entry detail page (Slice 23 page restore).
+ * `/journal/$id` — single note view (Slice 23 page restore).
  *
  * The loader reads the entry via the loader-safe `getJournalEntryPageDataFn`
  * (foot-gun #2: route loaders must not import `.server.ts` modules directly).
@@ -33,11 +33,9 @@ function JournalEntryDetailRoute() {
       <JournalEntryPage
         entry={{
           id: entry.id,
-          kind: entry.kind,
-          title: entry.title,
           content: entry.content,
+          playedMinutes: entry.playedMinutes,
           createdAt: entry.createdAt,
-          updatedAt: entry.updatedAt,
           game: entry.game
             ? {
                 id: entry.game.id,
@@ -60,8 +58,8 @@ function JournalEntryErrorBoundary({ error }: ErrorComponentProps) {
         role="alert"
         className="gap-md container mx-auto flex flex-col px-4 py-12"
       >
-        <h1 className="text-h2">Entry not found</h1>
-        <p>We couldn't find a journal entry matching this URL.</p>
+        <h1 className="text-h2">Note not found</h1>
+        <p>We couldn't find a note matching this URL.</p>
         <Button asChild variant="outline">
           <Link to="/journal">Back to journal</Link>
         </Button>
@@ -75,7 +73,7 @@ function JournalEntryErrorBoundary({ error }: ErrorComponentProps) {
       className="gap-md container mx-auto flex flex-col px-4 py-12"
     >
       <h1 className="text-h2">Something went wrong</h1>
-      <p>An error occurred while loading this entry. Please try again.</p>
+      <p>An error occurred while loading this note. Please try again.</p>
       <Button asChild variant="outline">
         <Link to="/journal">Back to journal</Link>
       </Button>

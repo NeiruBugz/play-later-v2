@@ -1,5 +1,5 @@
 import { CriticScoreRing } from "@/entities/game";
-import { formatPlaytimeMinutes } from "@/shared/lib/date";
+import { formatHours } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
 
@@ -10,6 +10,7 @@ export function GameDetailDetailRail({
   libraryControlsProps,
   libraryControlsKey,
   onLogSession,
+  showLogTime,
   criticScore,
   playtimeTotalMinutes,
   playtimeSessionCount,
@@ -27,9 +28,11 @@ export function GameDetailDetailRail({
             {...libraryControlsProps}
           />
         ) : null}
-        <Button type="button" className="w-full" onClick={onLogSession}>
-          Log a session
-        </Button>
+        {showLogTime ? (
+          <Button type="button" className="w-full" onClick={onLogSession}>
+            Log time
+          </Button>
+        ) : null}
       </Card>
 
       {criticScore !== null ? (
@@ -51,8 +54,8 @@ export function GameDetailDetailRail({
               <dt className="text-muted-foreground">Total played</dt>
               <dd className="font-semibold tabular-nums">
                 {playtimeTotalMinutes > 0
-                  ? formatPlaytimeMinutes(playtimeTotalMinutes)
-                  : "0h"}
+                  ? formatHours(playtimeTotalMinutes)
+                  : "0 h"}
               </dd>
             </div>
             <div className="flex items-center justify-between">

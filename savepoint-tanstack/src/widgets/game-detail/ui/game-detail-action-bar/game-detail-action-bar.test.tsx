@@ -24,7 +24,7 @@ const elements = {
     screen.queryByRole("button", { name: /^Status: .*\. Change$/ }),
   queryStatusRadios: () => screen.queryAllByRole("radio"),
   queryLogSessionButton: () =>
-    screen.queryByRole("button", { name: "Log session" }),
+    screen.queryByRole("button", { name: "Log time" }),
   queryContainer: () => screen.queryByTestId("game-detail-action-bar"),
 };
 
@@ -75,7 +75,7 @@ describe("GameDetailActionBar", () => {
       expect(elements.queryStatusPill()).not.toBeNull();
     });
 
-    it("renders a Log session button", () => {
+    it("renders a Log time button", () => {
       expect(elements.queryLogSessionButton()).not.toBeNull();
     });
 
@@ -93,7 +93,7 @@ describe("GameDetailActionBar", () => {
     });
   });
 
-  describe("given the user taps the Log session button with slug hollow-knight", () => {
+  describe("given the user taps the Log time button with slug hollow-knight", () => {
     beforeEach(async () => {
       render(
         <GameDetailActionBar
@@ -138,10 +138,9 @@ describe("GameDetailActionBar", () => {
       );
     });
 
-    it("renders an action affordance (Log session button or similar)", () => {
-      const logButton = elements.queryLogSessionButton();
-      const container = elements.queryContainer();
-      expect(logButton !== null || container !== null).toBe(true);
+    it("shows no Log time button", () => {
+      expect(elements.queryLogSessionButton()).toBeNull();
+      expect(elements.queryContainer()).toBeNull();
     });
   });
 });

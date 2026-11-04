@@ -122,6 +122,10 @@ describe("ImportedGameCard", () => {
     it("surfaces when the game was last played", () => {
       expect(elements.queryLastPlayed()).not.toBeNull();
     });
+
+    it("shows the 300 minutes of playtime as 5 h", () => {
+      expect(screen.getByText("5 h")).toBeDefined();
+    });
   });
 
   describe("given a game with no last-played timestamp", () => {

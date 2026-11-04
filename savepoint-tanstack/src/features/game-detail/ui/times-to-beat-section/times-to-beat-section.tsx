@@ -1,31 +1,25 @@
 import { YourPacePanel } from "@/features/game-detail/ui/your-pace-panel";
+import { formatHours } from "@/shared/lib/date";
 
 import type { TimesToBeatSectionProps } from "./times-to-beat-section.type";
 
-const SECONDS_PER_HOUR = 3600;
-const MINUTES_PER_HOUR = 60;
+const SECONDS_PER_MINUTE = 60;
 
-function secondsToHours(seconds: number): number {
-  return Math.round((seconds / SECONDS_PER_HOUR) * 10) / 10;
+function secondsToMinutes(seconds: number): number {
+  return seconds / SECONDS_PER_MINUTE;
 }
 
-function minutesToHours(minutes: number): number {
-  return Math.round((minutes / MINUTES_PER_HOUR) * 10) / 10;
-}
-
-type BeatTick = { key: string; label: string; hours: number; anchor: string };
+type BeatTick = { key: string; label: string; minutes: number; anchor: string };
 
 export function TimesToBeatSection({
   timesToBeat,
   playtimeTotalMinutes,
-  journalCount,
   playtimeSessionCount,
   recentSessionMinutes,
 }: TimesToBeatSectionProps) {
   if (timesToBeat === null) {
     return (
       <YourPacePanel
-        journalCount={journalCount}
         playtimeTotalMinutes={playtimeTotalMinutes}
         playtimeSessionCount={playtimeSessionCount}
         recentSessionMinutes={recentSessionMinutes}
@@ -33,37 +27,38 @@ export function TimesToBeatSection({
     );
   }
 
-  const youHours = minutesToHours(playtimeTotalMinutes);
-  const mainHours =
+  const youMinutes = playtimeTotalMinutes;
+  const mainMinutes =
     timesToBeat.mainStory === null
       ? null
-      : secondsToHours(timesToBeat.mainStory);
-  const compHours =
+      : secondsToMinutes(timesToBeat.mainStory);
+  const compMinutes =
     timesToBeat.completionist === null
       ? null
-      : secondsToHours(timesToBeat.completionist);
+      : secondsToMinutes(timesToBeat.completionist);
 
   const ticks: BeatTick[] = [];
-  if (mainHours !== null) {
+  if (mainMinutes !== null) {
     ticks.push({
       key: "main",
       label: "Main story",
-      hours: mainHours,
+      minutes: mainMinutes,
       anchor: "-50%",
     });
   }
-  if (compHours !== null) {
+  if (compMinutes !== null) {
     ticks.push({
       key: "completionist",
       label: "100%",
-      hours: compHours,
+      minutes: compMinutes,
       anchor: "-100%",
     });
   }
 
-  const scaleMax = Math.max(youHours, compHours ?? 0, mainHours ?? 0, 1) * 1.1;
-  const percent = (hours: number) =>
-    `${Math.min(100, (hours / scaleMax) * 100)}%`;
+  const scaleMax =
+    Math.max(youMinutes, compMinutes ?? 0, mainMinutes ?? 0, 1) * 1.1;
+  const percent = (minutes: number) =>
+    `${Math.min(100, (minutes / scaleMax) * 100)}%`;
 
   return (
     <section
@@ -78,10 +73,10 @@ export function TimesToBeatSection({
         <div className="relative h-24">
           <div
             className="absolute top-0 z-10 flex -translate-x-1/2 flex-col items-center"
-            style={{ left: percent(youHours) }}
+            style={{ left: percent(youMinutes) }}
           >
             <span className="text-primary text-caption mb-1 tracking-wider whitespace-nowrap uppercase">
-              You · {youHours}h
+              You · {formatHours(youMinutes)}
             </span>
             <span className="bg-primary ring-primary/20 h-3 w-3 rounded-full ring-4" />
           </div>
@@ -89,11 +84,11 @@ export function TimesToBeatSection({
           <div className="bg-muted-foreground/15 absolute top-10 right-0 left-0 h-1.5 rounded-full" />
           <div
             className="bg-primary absolute top-10 left-0 h-1.5 rounded-full"
-            style={{ width: percent(youHours) }}
+            style={{ width: percent(youMinutes) }}
           />
           <div
             className="bg-primary/55 absolute top-6 h-4 w-0.5 -translate-x-1/2"
-            style={{ left: percent(youHours) }}
+            style={{ left: percent(youMinutes) }}
           />
 
           {ticks.map((tick) => (
@@ -101,7 +96,7 @@ export function TimesToBeatSection({
               key={tick.key}
               className="absolute top-8 flex flex-col items-center"
               style={{
-                left: percent(tick.hours),
+                left: percent(tick.minutes),
                 transform: `translateX(${tick.anchor})`,
               }}
             >
@@ -110,7 +105,7 @@ export function TimesToBeatSection({
                 {tick.label}
               </span>
               <span className="text-foreground font-mono text-xs font-semibold">
-                {tick.hours}h
+                {formatHours(tick.minutes)}
               </span>
             </div>
           ))}
@@ -122,9 +117,9 @@ export function TimesToBeatSection({
         className="text-foreground text-sm"
       >
         <BeatContext
-          youHours={youHours}
-          mainHours={mainHours}
-          compHours={compHours}
+          youMinutes={youMinutes}
+          mainMinutes={mainMinutes}
+          compMinutes={compMinutes}
         />
       </p>
     </section>
@@ -132,41 +127,39 @@ export function TimesToBeatSection({
 }
 
 function BeatContext({
-  youHours,
-  mainHours,
-  compHours,
+  youMinutes,
+  mainMinutes,
+  compMinutes,
 }: {
-  youHours: number;
-  mainHours: number | null;
-  compHours: number | null;
+  youMinutes: number;
+  mainMinutes: number | null;
+  compMinutes: number | null;
 }) {
-  if (mainHours !== null) {
-    const delta = Math.round((youHours - mainHours) * 10) / 10;
+  if (mainMinutes !== null) {
+    const delta = youMinutes - mainMinutes;
     const direction = delta >= 0 ? "past" : "from";
     const remaining =
-      compHours === null
-        ? null
-        : Math.max(0, Math.round((compHours - youHours) * 10) / 10);
+      compMinutes === null ? null : Math.max(0, compMinutes - youMinutes);
     return (
       <>
         You're{" "}
         <strong className="text-primary">
-          {Math.abs(delta)}h {direction}
+          {formatHours(Math.abs(delta))} {direction}
         </strong>{" "}
         the main story
         {remaining === null
           ? "."
-          : ` — about ${remaining}h of the long road left to 100%.`}
+          : ` — about ${formatHours(remaining)} of the long road left to 100%.`}
       </>
     );
   }
 
-  if (compHours !== null) {
-    const remaining = Math.max(0, Math.round((compHours - youHours) * 10) / 10);
+  if (compMinutes !== null) {
+    const remaining = Math.max(0, compMinutes - youMinutes);
     return (
       <>
-        About <strong className="text-primary">{remaining}h</strong> left on the
-        road to 100%.
+        About <strong className="text-primary">{formatHours(remaining)}</strong>{" "}
+        left on the road to 100%.
       </>
     );
   }

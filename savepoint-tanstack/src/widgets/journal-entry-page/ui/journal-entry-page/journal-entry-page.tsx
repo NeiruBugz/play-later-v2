@@ -1,37 +1,29 @@
 import { Link } from "@tanstack/react-router";
 
 import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
-import { formatJournalDate } from "@/shared/lib/date";
+import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 
 import type { JournalEntryPageProps } from "./journal-entry-page.type";
 
 /**
- * Full-page journal entry detail (Slice 23 page restore for `/journal/$id`).
+ * Note view for `/journal/$id`: the note's text, time played and the date it
+ * was written, with Edit (navigation only) and the delete-journal-entry
+ * feature button (owns the mutation + post-delete navigation).
  *
- * FSD: widget layer — composes the entity-shaped entry display with the
- * Edit `<Link>` (navigation only) and the delete-journal-entry feature button
- * (owns the mutation + post-delete navigation). The route stays thin: it
- * loads the entry and renders this widget.
- *
- * Mirrors canonical's `JournalEntryDetail` page layout (title row with Edit +
- * Delete affordances, meta line with game link + date, pre-wrapped body)
- * while reusing the tanstack simplified journal model (content + kind + game).
+ * FSD: widget layer. The route stays thin: it loads the note and renders this.
  */
 export function JournalEntryPage({ entry }: JournalEntryPageProps) {
-  const title = entry.title?.trim() || null;
-  const kindLabel = entry.kind === "QUICK" ? "Quick note" : "Reflection";
-  const displayTitle =
-    title ?? `${kindLabel} from ${formatJournalDate(entry.updatedAt)}`;
+  const content = entry.content.trim();
+  const timePlayed =
+    entry.playedMinutes !== null && entry.playedMinutes > 0
+      ? formatHours(entry.playedMinutes)
+      : null;
 
   return (
     <article className="space-y-xl mx-auto max-w-prose">
-      <p className="text-caption text-primary/70 tracking-widest uppercase">
-        {kindLabel}
-      </p>
-
       <div className="gap-md flex items-start justify-between">
-        <h1 className="text-h1">{displayTitle}</h1>
+        <h1 className="text-h1">Note</h1>
 
         <div className="gap-sm flex shrink-0 items-center">
           <Button asChild size="sm">
@@ -59,7 +51,13 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
         </time>
       </p>
 
-      <p className="text-body whitespace-pre-wrap">{entry.content}</p>
+      {timePlayed ? (
+        <p className="text-h3 font-mono">{timePlayed} played</p>
+      ) : null}
+
+      {content ? (
+        <p className="text-body whitespace-pre-wrap">{content}</p>
+      ) : null}
     </article>
   );
 }

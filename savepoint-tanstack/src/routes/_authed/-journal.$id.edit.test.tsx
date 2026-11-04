@@ -47,8 +47,7 @@ function buildEntry(
   return {
     id: "entry-1",
     userId: "user-1",
-    kind: "QUICK",
-    title: null,
+    playedMinutes: null,
     content: "Edit me",
     createdAt: new Date("2024-01-01T00:00:00Z"),
     updatedAt: new Date("2024-01-01T00:00:00Z"),
@@ -64,7 +63,7 @@ const elements = {
   getEntryContent: () => screen.getByTestId("entry-content"),
   getEntryGameId: () => screen.getByTestId("entry-game-id"),
   getNotFoundHeading: () =>
-    screen.getByRole("heading", { name: "Entry not found" }),
+    screen.getByRole("heading", { name: "Note not found" }),
 };
 
 function renderComponent(entry: JournalTimelineEntry) {

@@ -24,13 +24,19 @@ vi.mock("sonner", () => ({
 const entry: EditJournalEntryFormEntry = {
   id: "entry-7",
   content: "Original content",
-  kind: "QUICK",
+  playedMinutes: 90,
   gameId: "game-7",
 };
 
 const elements = {
   getContent: () =>
     screen.getByRole("textbox", { name: "Content" }) as HTMLTextAreaElement,
+  getTime: () =>
+    screen.getByRole("spinbutton", {
+      name: "Time played (hours)",
+    }) as HTMLInputElement,
+  queryTime: () =>
+    screen.queryByRole("spinbutton", { name: "Time played (hours)" }),
   getSaveButton: () => screen.getByRole("button", { name: "Save" }),
 };
 
@@ -38,6 +44,11 @@ const actions = {
   clearAndType: async (text: string) => {
     await userEvent.clear(elements.getContent());
     await userEvent.type(elements.getContent(), text);
+  },
+  clearContent: async () => userEvent.clear(elements.getContent()),
+  setTime: async (hours: string) => {
+    await userEvent.clear(elements.getTime());
+    if (hours) await userEvent.type(elements.getTime(), hours);
   },
   submit: async () => userEvent.click(elements.getSaveButton()),
 };
@@ -56,6 +67,14 @@ describe("EditJournalEntryForm", () => {
     it("pre-fills the content from the entry", () => {
       expect(elements.getContent().value).toBe("Original content");
     });
+
+    it("pre-fills the time in hours", () => {
+      expect(elements.getTime().value).toBe("1.5");
+    });
+
+    it("lets the time change in half-hour steps", () => {
+      expect(elements.getTime()).toHaveAttribute("step", "0.5");
+    });
   });
 
   describe("given the user edits the content and submits", () => {
@@ -65,13 +84,12 @@ describe("EditJournalEntryForm", () => {
       await actions.submit();
     });
 
-    it("updates the entry with the new content and preserved associations", () => {
+    it("updates the note with the new text and the unchanged time, leaving its date alone", () => {
       expect(vi.mocked(updateJournalEntryFn)).toHaveBeenCalledWith({
         data: {
-          entryId: "entry-7",
+          id: "entry-7",
           content: "Updated content",
-          kind: "QUICK",
-          gameId: "game-7",
+          playedMinutes: 90,
         },
       });
     });
@@ -86,9 +104,11 @@ describe("EditJournalEntryForm", () => {
     });
   });
 
-  describe("given the content is empty (whitespace only)", () => {
+  describe("given the text is blank and the note has no time", () => {
     beforeEach(async () => {
-      render(<EditJournalEntryForm entry={entry} />);
+      render(
+        <EditJournalEntryForm entry={{ ...entry, playedMinutes: null }} />
+      );
       await actions.clearAndType("   ");
     });
 
@@ -103,9 +123,11 @@ describe("EditJournalEntryForm", () => {
     });
   });
 
-  describe("given the form is submitted programmatically with whitespace-only content", () => {
+  describe("given the form is submitted programmatically with blank text and no time", () => {
     beforeEach(async () => {
-      render(<EditJournalEntryForm entry={entry} />);
+      render(
+        <EditJournalEntryForm entry={{ ...entry, playedMinutes: null }} />
+      );
       await actions.clearAndType("   ");
       // Submit directly on the form to hit `if (isEmpty) return` —
       // the Save button is disabled so userEvent.click won't reach handleSubmit.
@@ -156,6 +178,86 @@ describe("EditJournalEntryForm", () => {
           "Something went wrong"
         );
       });
+    });
+  });
+
+  describe("given the text is cleared but the time is still set", () => {
+    beforeEach(async () => {
+      render(<EditJournalEntryForm entry={entry} />);
+      await actions.clearContent();
+    });
+
+    it("keeps Save enabled", () => {
+      expect(elements.getSaveButton()).toBeEnabled();
+    });
+
+    it("saves the time-only note", async () => {
+      await actions.submit();
+      expect(vi.mocked(updateJournalEntryFn)).toHaveBeenCalledWith({
+        data: { id: "entry-7", content: "", playedMinutes: 90 },
+      });
+    });
+  });
+
+  describe("given the text is cleared and the time is cleared too", () => {
+    beforeEach(async () => {
+      render(<EditJournalEntryForm entry={entry} />);
+      await actions.clearContent();
+      await actions.setTime("");
+    });
+
+    it("disables Save", () => {
+      expect(elements.getSaveButton()).toBeDisabled();
+    });
+  });
+
+  describe("given the user sets the time to 2 hours", () => {
+    beforeEach(async () => {
+      render(<EditJournalEntryForm entry={entry} />);
+      await actions.setTime("2");
+      await actions.submit();
+    });
+
+    it("saves 120 minutes", () => {
+      expect(vi.mocked(updateJournalEntryFn)).toHaveBeenCalledWith({
+        data: {
+          id: "entry-7",
+          content: "Original content",
+          playedMinutes: 120,
+        },
+      });
+    });
+  });
+
+  describe("given the user clears the time of a note with text", () => {
+    beforeEach(async () => {
+      render(<EditJournalEntryForm entry={entry} />);
+      await actions.setTime("");
+      await actions.submit();
+    });
+
+    it("clears the time with null", () => {
+      expect(vi.mocked(updateJournalEntryFn)).toHaveBeenCalledWith({
+        data: {
+          id: "entry-7",
+          content: "Original content",
+          playedMinutes: null,
+        },
+      });
+    });
+  });
+
+  describe("given a note without a game", () => {
+    beforeEach(() => {
+      render(
+        <EditJournalEntryForm
+          entry={{ ...entry, gameId: null, playedMinutes: null }}
+        />
+      );
+    });
+
+    it("offers no time field", () => {
+      expect(elements.queryTime()).toBeNull();
     });
   });
 

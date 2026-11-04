@@ -31,12 +31,12 @@ function EditJournalEntryRoute() {
   return (
     <main className="container mx-auto px-4 py-6">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-h1 mb-xl">Edit Journal Entry</h1>
+        <h1 className="text-h1 mb-xl">Edit note</h1>
         <EditJournalEntryForm
           entry={{
             id: entry.id,
             content: entry.content,
-            kind: entry.kind,
+            playedMinutes: entry.playedMinutes,
             gameId: entry.game?.id ?? null,
           }}
         />
@@ -54,8 +54,8 @@ function EditJournalEntryErrorBoundary({ error }: ErrorComponentProps) {
         role="alert"
         className="gap-md container mx-auto flex flex-col px-4 py-12"
       >
-        <h1 className="text-h2">Entry not found</h1>
-        <p>We couldn't find a journal entry matching this URL.</p>
+        <h1 className="text-h2">Note not found</h1>
+        <p>We couldn't find a note matching this URL.</p>
         <Button asChild variant="outline">
           <Link to="/journal">Back to journal</Link>
         </Button>
@@ -69,7 +69,7 @@ function EditJournalEntryErrorBoundary({ error }: ErrorComponentProps) {
       className="gap-md container mx-auto flex flex-col px-4 py-12"
     >
       <h1 className="text-h2">Something went wrong</h1>
-      <p>An error occurred while loading this entry. Please try again.</p>
+      <p>An error occurred while loading this note. Please try again.</p>
       <Button asChild variant="outline">
         <Link to="/journal">Back to journal</Link>
       </Button>

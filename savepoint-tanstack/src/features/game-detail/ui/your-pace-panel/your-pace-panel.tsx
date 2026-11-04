@@ -1,28 +1,18 @@
+import { formatHours } from "@/shared/lib/date";
+
 import type { YourPacePanelProps } from "./your-pace-panel.type";
 
-const MINUTES_PER_HOUR = 60;
 const RECENT_BAR_LIMIT = 9;
 
-function toHours(minutes: number): number {
-  return Math.round(minutes / MINUTES_PER_HOUR);
-}
-
-function toAverageHours(totalMinutes: number, sessions: number): number {
-  if (sessions <= 0) return 0;
-  return Math.round((totalMinutes / sessions / MINUTES_PER_HOUR) * 10) / 10;
+function averageMinutes(totalMinutes: number, sessions: number): number {
+  return sessions > 0 ? totalMinutes / sessions : 0;
 }
 
 export function YourPacePanel({
-  journalCount,
   playtimeTotalMinutes,
   playtimeSessionCount,
   recentSessionMinutes,
 }: YourPacePanelProps) {
-  const totalHours = toHours(playtimeTotalMinutes);
-  const averageHours = toAverageHours(
-    playtimeTotalMinutes,
-    playtimeSessionCount
-  );
   const recent = recentSessionMinutes.slice(-RECENT_BAR_LIMIT);
   const maxMinutes = Math.max(...recent, 1);
 
@@ -36,21 +26,28 @@ export function YourPacePanel({
       </h2>
 
       <div className="gap-lg flex">
-        <PaceStat label="Avg session" value={`${averageHours}h`} />
-        <PaceStat label="Total" value={`${totalHours}h`} />
-        <PaceStat label="Sessions" value={String(journalCount)} />
+        <PaceStat
+          label="Time played"
+          value={formatHours(playtimeTotalMinutes)}
+        />
+        <PaceStat label="Sessions" value={String(playtimeSessionCount)} />
+        <PaceStat
+          label="Per session"
+          value={formatHours(
+            averageMinutes(playtimeTotalMinutes, playtimeSessionCount)
+          )}
+        />
       </div>
 
       {recent.length > 0 ? (
         <>
           <div className="flex h-20 items-end gap-1.5">
             {recent.map((minutes, index) => {
-              const hours = toHours(minutes);
               return (
                 <div
                   key={index}
                   role="img"
-                  aria-label={`Session ${index + 1}: ${hours}h`}
+                  aria-label={`Session ${index + 1}: ${formatHours(minutes)}`}
                   className="bg-primary flex-1 rounded-sm"
                   style={{
                     height: `${Math.max(10, (minutes / maxMinutes) * 100)}%`,

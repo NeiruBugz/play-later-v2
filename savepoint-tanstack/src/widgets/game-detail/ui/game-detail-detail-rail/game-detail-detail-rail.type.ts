@@ -7,6 +7,8 @@ export type GameDetailDetailRailProps = {
   libraryControlsKey: string;
   /** Navigates to ?action=log-session&game=<slug>. */
   onLogSession: () => void;
+  /** True only when the viewer has this game in their library. */
+  showLogTime: boolean;
   /** Aggregated rating from IGDB — null when absent. */
   criticScore: number | null;
   /** SUM of logged playedMinutes for this game; 0 when none. */

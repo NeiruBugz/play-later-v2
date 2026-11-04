@@ -13,10 +13,8 @@ export type {
   GameDetailJumpSpineProps,
   GameDetailJumpSpineSection,
 } from "./game-detail-jump-spine";
-export { JournalFeed } from "./journal-feed";
-export type { JournalFeedProps } from "./journal-feed";
-export { JournalPanel } from "./journal-panel";
-export type { JournalPanelProps } from "./journal-panel";
+export { GameNotesList } from "./game-notes-list";
+export type { GameNote, GameNotesListProps } from "./game-notes-list";
 export { GameLibraryControls } from "./game-library-controls";
 export type {
   GameLibraryControlsProps,

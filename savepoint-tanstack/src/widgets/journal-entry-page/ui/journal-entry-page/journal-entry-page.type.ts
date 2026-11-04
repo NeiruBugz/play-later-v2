@@ -1,10 +1,8 @@
 export type JournalEntryPageEntry = {
   id: string;
-  kind: "QUICK" | "REFLECTION";
-  title: string | null;
   content: string;
+  playedMinutes: number | null;
   createdAt: Date;
-  updatedAt: Date;
   game: {
     id: string;
     title: string;

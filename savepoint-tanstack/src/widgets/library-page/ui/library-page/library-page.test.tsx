@@ -86,18 +86,9 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
   searchPlatformsFn: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
-  createJournalEntryFn: vi.fn(),
+vi.mock("@/features/compose-journal-entry/api/log-time-fn", () => ({
+  logTimeFn: vi.fn(),
 }));
-
-// Spec 025 Slice 3b: new server fns added to compose-journal-entry api barrel
-// must be mocked to prevent server-env access during component tests.
-vi.mock(
-  "@/features/compose-journal-entry/api/get-log-session-game-data",
-  () => ({
-    getLogSessionGameDataFn: vi.fn(),
-  })
-);
 
 vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),

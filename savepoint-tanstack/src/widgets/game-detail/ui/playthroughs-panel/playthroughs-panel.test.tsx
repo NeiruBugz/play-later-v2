@@ -117,7 +117,6 @@ const actions = {
 describe("PlaythroughsPanel", () => {
   const onAddPlaythrough = vi.fn();
   const onEditPlaythrough = vi.fn();
-  const onLogSession = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -131,7 +130,6 @@ describe("PlaythroughsPanel", () => {
           playthroughs={[]}
           onAddPlaythrough={onAddPlaythrough}
           onEditPlaythrough={onEditPlaythrough}
-          onLogSession={onLogSession}
         />
       );
     });
@@ -162,7 +160,6 @@ describe("PlaythroughsPanel", () => {
           playthroughs={[SECOND_RUN, FIRST_RUN]}
           onAddPlaythrough={onAddPlaythrough}
           onEditPlaythrough={onEditPlaythrough}
-          onLogSession={onLogSession}
         />
       );
     });
@@ -171,8 +168,8 @@ describe("PlaythroughsPanel", () => {
       expect(elements.querySectionHeading()).not.toBeNull();
     });
 
-    it("shows total playtime as 3h in the aggregate band", () => {
-      expect(elements.queryPlaytimeValue("3h")).not.toBeNull();
+    it("shows total playtime as 3 h in the aggregate band", () => {
+      expect(elements.queryPlaytimeValue("3 h")).not.toBeNull();
     });
 
     it("shows the playthrough count as 2 in the aggregate band", () => {

@@ -55,7 +55,6 @@ function GameDetailRoute() {
             <TimesToBeatSlot
               igdbId={igdbId}
               playtimeTotalMinutes={data.playtimeTotalMinutes}
-              journalCount={data.journalCount}
               playtimeSessionCount={data.playtimeSessionCount}
               recentSessionMinutes={data.recentSessionMinutes}
             />
@@ -92,13 +91,11 @@ function GameDetailRoute() {
 function TimesToBeatSlot({
   igdbId,
   playtimeTotalMinutes,
-  journalCount,
   playtimeSessionCount,
   recentSessionMinutes,
 }: {
   igdbId: number;
   playtimeTotalMinutes: number;
-  journalCount: number;
   playtimeSessionCount: number;
   recentSessionMinutes: number[];
 }) {
@@ -110,7 +107,6 @@ function TimesToBeatSlot({
     <TimesToBeatSection
       timesToBeat={timesToBeat}
       playtimeTotalMinutes={playtimeTotalMinutes}
-      journalCount={journalCount}
       playtimeSessionCount={playtimeSessionCount}
       recentSessionMinutes={recentSessionMinutes}
     />

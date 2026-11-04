@@ -1,31 +1,35 @@
 import { Link } from "@tanstack/react-router";
 
-import { formatJournalDate } from "@/shared/lib/date";
+import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/card";
 
 import type { JournalEntryCardProps } from "./journal-entry-card.type";
 
 /**
- * Display-only journal entry card — timeline design.
+ * Display-only note card.
  *
- * Header row: game title (prominent heading) on the left, formatted date on
- * the right. Body: entry content clamped to 3 lines. Footer: kind badge so
- * the entry type is still scannable without dominating the card.
+ * Header row: game title (or "No game") on the left, the date the note was
+ * written on the right. Body: the note text clamped to 3 lines, or
+ * "{time} played" when the note has time but no text. Footer: time played
+ * (when the note also has text) and the game link.
  *
  * Entity layer: no mutations. The optional `onSelect` callback lets a
- * composing widget react to clicks (e.g., open a detail dialog) without the
+ * composing widget react to clicks (e.g., open the note view) without the
  * entity importing the feature.
  */
-// TODO(021-S16): include playedMinutes/mood/tags when CRUD lands.
 export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
   const content = entry.content.trim();
-  const kindLabel = entry.kind === "QUICK" ? "Quick note" : "Reflection";
+  const timePlayed =
+    entry.playedMinutes !== null && entry.playedMinutes > 0
+      ? formatHours(entry.playedMinutes)
+      : null;
   const interactive = typeof onSelect === "function";
 
   const headingId = `journal-entry-${entry.id}-heading`;
 
-  const cardHeading = entry.game?.title ?? entry.title ?? kindLabel;
+  const cardHeading = entry.game?.title ?? "No game";
+  const writtenOn = formatJournalDate(entry.createdAt);
 
   const body = (
     <CardContent className="p-lg gap-sm flex flex-col">
@@ -38,25 +42,33 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           {cardHeading}
         </h3>
         <time
-          dateTime={new Date(entry.updatedAt).toISOString()}
+          dateTime={new Date(entry.createdAt).toISOString()}
           className="text-caption text-muted-foreground shrink-0 font-mono tracking-widest uppercase"
         >
-          {formatJournalDate(entry.updatedAt)}
+          {writtenOn}
         </time>
       </div>
 
-      {/* Body: 3-line clamp; italic with curly quotes on desktop */}
-      <p className="text-body text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-wrap md:italic">
-        <span className="hidden md:inline">&ldquo;</span>
-        {content}
-        <span className="hidden md:inline">&rdquo;</span>
-      </p>
+      {content ? (
+        <p className="text-body text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-wrap md:italic">
+          <span className="hidden md:inline">&ldquo;</span>
+          {content}
+          <span className="hidden md:inline">&rdquo;</span>
+        </p>
+      ) : timePlayed ? (
+        <p className="text-body text-muted-foreground leading-relaxed">
+          {timePlayed} played
+        </p>
+      ) : null}
 
-      {/* Footer: kind badge + game link (when game present) */}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-caption text-primary/70 tracking-widest uppercase">
-          {kindLabel}
-        </span>
+        {content && timePlayed ? (
+          <span className="text-caption text-primary/70 font-mono tracking-widest">
+            {timePlayed}
+          </span>
+        ) : (
+          <span />
+        )}
         {entry.game ? (
           <Link
             to="/games/$slug"
@@ -78,7 +90,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           <button
             type="button"
             onClick={() => onSelect(entry.id)}
-            aria-label={`Open journal entry from ${formatJournalDate(entry.updatedAt)}`}
+            aria-label={`Open note from ${writtenOn}`}
             className={cn(
               "block w-full cursor-pointer text-left",
               "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"

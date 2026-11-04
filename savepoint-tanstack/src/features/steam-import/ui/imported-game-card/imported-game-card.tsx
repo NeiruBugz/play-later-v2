@@ -1,7 +1,7 @@
 import { Plus, X } from "lucide-react";
 
 import { getStatusLabel } from "@/entities/library-item";
-import { formatPlaytimeMinutes } from "@/shared/lib/date";
+import { formatHours } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -79,9 +79,7 @@ export function ImportedGameCard({
           </div>
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
             <span>
-              {game.playtime
-                ? formatPlaytimeMinutes(game.playtime)
-                : "Never played"}
+              {game.playtime ? formatHours(game.playtime) : "Never played"}
             </span>
             {lastPlayedLabel ? (
               <>

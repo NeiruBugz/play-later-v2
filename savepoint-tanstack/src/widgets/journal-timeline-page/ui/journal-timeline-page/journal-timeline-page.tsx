@@ -1,5 +1,7 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
+import { JournalGameFilter } from "@/features/journal-timeline/ui/journal-game-filter";
+import { openGlobalAction } from "@/shared/lib/global-action";
 import { PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/button";
 import { JournalTimeline } from "@/widgets/journal-timeline";
@@ -8,37 +10,34 @@ import { JournalStatsRail } from "../journal-stats-rail";
 import type { JournalTimelinePageProps } from "./journal-timeline-page.type";
 
 /**
- * Widget that wraps `JournalTimeline` and adds CRUD navigation:
+ * Widget that wraps `JournalTimeline` and adds navigation:
  *
- * - A header "Compose entry" link navigates to `/journal/new`.
- * - Each entry card is clickable — navigates to `/journal/$id`.
- * - On desktop, pairs the timeline with a `JournalStatsRail` (AC JRN-4).
- *
- * Slice 23 (blocker remediation #1): this widget previously owned compose /
- * detail / edit / delete *dialogs*. The product decision reversed that
- * dialog-only pivot in favor of full page routes for URL + UX parity, so the
- * timeline now navigates to the dedicated pages instead. The compose/edit/
- * delete dialog components are unchanged and still used by the game-detail,
- * library-item-card, and dashboard quick-compose surfaces.
+ * - "New note" opens the Log form (`?action=log-session`).
+ * - The game filter writes `gameId` to the route search: a game id, `none`
+ *   (notes without a game) or nothing (all notes).
+ * - Each note card opens its note view at `/journal/$id`.
+ * - On desktop, pairs the timeline with a `JournalStatsRail`.
  *
  * Layout: both the timeline column and the stats rail are always in the DOM
- * (SSR-safe). Below `md` the grid collapses to a single column and the rail
- * is hidden via `hidden md:block`; above `md` the two-column layout is applied
- * via responsive Tailwind classes — no post-hydration layout swap.
- *
- * FSD: widget layer — composes shared/ui + the entity-backed `JournalTimeline`
- * widget. The route stays thin: it loads data and renders this widget.
+ * (SSR-safe); below `md` the rail is hidden via `hidden md:block`.
  */
-export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
+export function JournalTimelinePage({
+  entries,
+  gameOptions,
+  selectedGame,
+}: JournalTimelinePageProps) {
   const navigate = useNavigate();
 
   const openDetail = (entryId: string) => {
     void navigate({ to: "/journal/$id", params: { id: entryId } });
   };
 
-  const entryCount = entries.length;
-  const entryWord = entryCount === 1 ? "entry" : "entries";
-  const subtitle = `Reflect, don't review. ${entryCount} ${entryWord} across your library.`;
+  const selectGame = (gameId: string | undefined) => {
+    void navigate({ to: ".", search: (prev) => ({ ...prev, gameId }) });
+  };
+
+  const noteCount = entries.length;
+  const subtitle = `${noteCount} ${noteCount === 1 ? "note" : "notes"}`;
 
   return (
     <div className="md:grid md:grid-cols-[1fr_280px] md:items-start md:gap-8">
@@ -48,11 +47,19 @@ export function JournalTimelinePage({ entries }: JournalTimelinePageProps) {
           title="Journal"
           sub={subtitle}
           actions={
-            <Button asChild>
-              <Link to="/journal/new">Compose entry</Link>
+            <Button onClick={() => openGlobalAction(navigate, "log-session")}>
+              New note
             </Button>
           }
         />
+
+        <div className="mb-lg">
+          <JournalGameFilter
+            options={gameOptions}
+            value={selectedGame}
+            onChange={selectGame}
+          />
+        </div>
 
         <JournalTimeline entries={entries} onEntrySelect={openDetail} />
       </div>

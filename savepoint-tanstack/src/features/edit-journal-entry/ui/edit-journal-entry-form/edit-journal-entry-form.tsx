@@ -5,21 +5,33 @@ import { toast } from "sonner";
 import { updateJournalEntryFn } from "@/features/edit-journal-entry/api/update-journal-entry-fn";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 
 import type { EditJournalEntryFormProps } from "./edit-journal-entry-form.type";
 
-// Full-page variant used by the `/journal/$id/edit` route; the dialog variant
-// lives alongside it for the game-detail surface.
+const MINUTES_PER_HOUR = 60;
+const HOUR_STEP = 0.5;
+
+function minutesToHoursInput(minutes: number | null): string {
+  return minutes === null ? "" : String(minutes / MINUTES_PER_HOUR);
+}
+
+function hoursInputToMinutes(hours: string): number | null {
+  const parsed = Number(hours);
+  return parsed > 0 ? Math.round(parsed * MINUTES_PER_HOUR) : null;
+}
 
 export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
   const navigate = useNavigate();
   const [content, setContent] = useState(entry.content);
+  const [hours, setHours] = useState(minutesToHoursInput(entry.playedMinutes));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const trimmed = content.trim();
-  const isEmpty = trimmed.length === 0;
+  const playedMinutes = hoursInputToMinutes(hours);
+  const isEmpty = trimmed.length === 0 && playedMinutes === null;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,14 +40,13 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
     try {
       await updateJournalEntryFn({
         data: {
-          entryId: entry.id,
+          id: entry.id,
           content: trimmed,
-          kind: entry.kind,
-          gameId: entry.gameId,
+          playedMinutes,
         },
       });
       setError(null);
-      toast.success("Entry updated");
+      toast.success("Note updated");
       // Canonical parity: back to the entry's detail page on success.
       await navigate({ to: "/journal/$id", params: { id: entry.id } });
     } catch (err: unknown) {
@@ -51,7 +62,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="gap-md flex flex-col">
+    <form onSubmit={handleSubmit} noValidate className="gap-md flex flex-col">
       <label className="gap-xs flex flex-col text-sm">
         <span className="sr-only">Content</span>
         <Textarea
@@ -61,6 +72,21 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
           onChange={(event) => setContent(event.target.value)}
         />
       </label>
+
+      {entry.gameId !== null ? (
+        <label className="gap-xs flex flex-col text-sm">
+          <span>Time played (hours)</span>
+          <Input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step={HOUR_STEP}
+            value={hours}
+            onChange={(event) => setHours(event.target.value)}
+            className="w-40"
+          />
+        </label>
+      ) : null}
 
       {error !== null ? (
         <p role="alert" className="text-destructive text-sm">

@@ -12,7 +12,6 @@ import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
   Game,
-  JournalEntry,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client";
 import { buildLibraryItem } from "../../../../../test/factories/builders.ts";
@@ -65,16 +64,9 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
   searchPlatformsFn: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
-  createJournalEntryFn: vi.fn(),
+vi.mock("@/features/compose-journal-entry/api/log-time-fn", () => ({
+  logTimeFn: vi.fn(),
 }));
-
-vi.mock(
-  "@/features/compose-journal-entry/api/get-log-session-game-data",
-  () => ({
-    getLogSessionGameDataFn: vi.fn(),
-  })
-);
 
 vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
@@ -156,8 +148,7 @@ const buildData = (
   game: buildGame(gameOverrides),
   igdbDetails: buildIgdbDetails(igdbOverrides),
   libraryEntry,
-  journalTeaser: [],
-  journalCount: 0,
+  notes: [],
   playtimeTotalMinutes: 0,
   playtimeSessionCount: 0,
   recentSessionMinutes: [],
@@ -197,8 +188,7 @@ const elements = {
   queryAllTablists: () => screen.queryAllByRole("tablist"),
   queryAllTabpanels: () => screen.queryAllByRole("tabpanel"),
   queryOverviewTab: () => screen.queryByRole("tab", { name: "Overview" }),
-  queryJournalHeading: () =>
-    screen.queryByRole("heading", { name: "// JOURNAL" }),
+  queryNotesHeading: () => screen.queryByRole("heading", { name: "// NOTES" }),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
   querySummary: () => screen.queryByLabelText("Game summary"),
@@ -336,9 +326,9 @@ describe("GameDetail", () => {
       expect(elements.queryPlatformsLabel()).toBeNull();
     });
 
-    it("does not render the library controls or Journal panel for anonymous viewers", () => {
+    it("does not render the library controls or Notes list for anonymous viewers", () => {
       expect(elements.queryStatusSwitcher()).toBeNull();
-      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryNotesHeading()).toBeNull();
     });
   });
 
@@ -370,7 +360,7 @@ describe("GameDetail", () => {
     it("replaces the personal panels with a single start-tracking invitation", () => {
       expect(elements.queryTrackInvite()).not.toBeNull();
       expect(elements.queryYourRecord()).toBeNull();
-      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryNotesHeading()).toBeNull();
       expect(elements.queryTimesToBeatSlot()).toBeNull();
     });
 
@@ -398,7 +388,7 @@ describe("GameDetail", () => {
 
     it("renders no personal panels", () => {
       expect(elements.queryYourRecord()).toBeNull();
-      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryNotesHeading()).toBeNull();
       expect(elements.queryTimesToBeatSlot()).toBeNull();
       expect(elements.queryStatusSwitcher()).toBeNull();
     });
@@ -432,9 +422,9 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders the overflow menu and Journal panel", () => {
+    it("renders the overflow menu and Notes list", () => {
       expect(elements.queryMoreMenuTrigger()).not.toBeNull();
-      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryNotesHeading()).not.toBeNull();
     });
   });
 
@@ -497,7 +487,7 @@ describe("GameDetail", () => {
       expect(elements.queryGameDetailLabel()).not.toBeNull();
       expect(elements.queryGenresLabel()).not.toBeNull();
       expect(elements.queryPlatformsLabel()).not.toBeNull();
-      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryNotesHeading()).not.toBeNull();
       expect(elements.queryRelatedSlot()).not.toBeNull();
       expect(elements.queryTimesToBeatSlot()).not.toBeNull();
       expect(elements.queryAllTabpanels()).toHaveLength(0);
@@ -536,12 +526,12 @@ describe("GameDetail", () => {
       ).toBe(true);
     });
 
-    it("orders the bento cells Record, Times, About, Themes, Journal, Related", () => {
+    it("orders the bento cells Record, Times, About, Themes, Notes, Related", () => {
       const record = elements.queryYourRecord()!;
       const times = elements.queryTimesToBeatSlot()!;
       const about = elements.queryAboutCard()!;
       const themes = elements.queryThemesTagsCard()!;
-      const journal = elements.queryJournalHeading()!;
+      const journal = elements.queryNotesHeading()!;
       const related = elements.queryRelatedSlot()!;
 
       expect(precedes(record, times)).toBe(true);
@@ -820,9 +810,9 @@ describe("GameDetail", () => {
       expect(elements.queryYourRecord()).not.toBeNull();
     });
 
-    it("renders the personal slots (Your Pace / Times to beat and Journal)", () => {
+    it("renders the personal slots (Your Pace / Times to beat and Notes)", () => {
       expect(elements.queryTimesToBeatSlot()).not.toBeNull();
-      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryNotesHeading()).not.toBeNull();
     });
 
     it("omits every catalog surface (eyebrow, critic ring, About, Themes & Tags, Screenshots, Related)", () => {
@@ -858,7 +848,6 @@ describe("GameDetail", () => {
               { releaseDate: null }
             ),
             playtimeTotalMinutes: 600,
-            journalCount: 4,
           }}
           viewerUserId="user-1"
         />
@@ -918,100 +907,49 @@ describe("GameDetail", () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // RED: unattachedJournalEntries wiring (spec 016 §2.7 / §2.10)
-  // ---------------------------------------------------------------------------
-  // GameDetail must pass data.unattachedJournalEntries as legacyEntries to
-  // JournalFeed so that detached / legacy entries appear in the feed when the
-  // game has runs. The test fails (RED) until GameDetailData carries the field
-  // and game-detail.tsx wires it through.
-  // ---------------------------------------------------------------------------
-
-  describe("given a game with runs and unattached journal entries (spec 016 §2.7 / §2.10)", () => {
-    const legacyEntry: JournalEntry = {
-      id: "entry-legacy-gd-001",
-      kind: "QUICK",
-      title: null,
-      content: "Old note before runs existed",
+  describe("given a signed-in viewer with three notes on the game", () => {
+    const note = (id: string, content: string, day: number) => ({
+      id,
+      content,
       playedMinutes: null,
-      tags: [],
-      mood: null,
-      playSession: null,
-      visibility: "PRIVATE",
-      prompt: null,
-      userId: "user-1",
-      gameId: "game-1",
-      libraryItemId: 42,
-      playthroughId: null,
-      createdAt: new Date("2023-05-01T10:00:00Z"),
-      updatedAt: new Date("2023-05-01T10:00:00Z"),
-      publishedAt: null,
-    };
-
-    const runEntry: JournalEntry = {
-      id: "entry-run-gd-001",
-      kind: "QUICK",
-      title: null,
-      content: "First run note",
-      playedMinutes: 60,
-      tags: [],
-      mood: null,
-      playSession: null,
-      visibility: "PRIVATE",
-      prompt: null,
-      userId: "user-1",
-      gameId: "game-1",
-      libraryItemId: 42,
-      playthroughId: "pt-gd-001",
-      createdAt: new Date("2024-01-10T10:00:00Z"),
-      updatedAt: new Date("2024-01-10T10:00:00Z"),
-      publishedAt: null,
-    };
-
-    const firstRun: PlaythroughWithEntries = {
-      id: "pt-gd-001",
-      ordinal: 1,
-      kind: "FIRST",
-      status: "FINISHED",
-      platform: null,
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 60,
-      rating: null,
-      completion: null,
-      notes: null,
-      journalEntries: [runEntry],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-01-01"),
-      updatedAt: new Date("2024-01-01"),
-    };
+      createdAt: new Date(`2024-01-0${day}T10:00:00Z`),
+    });
 
     beforeEach(() => {
       render(
         <GameDetail
           data={{
             ...buildData(buildLibraryEntry()),
-            playthroughs: [firstRun],
-            unattachedJournalEntries: [legacyEntry],
+            notes: [
+              note("note-1", "Oldest note", 1),
+              note("note-3", "Newest note", 3),
+              note("note-2", "Middle note", 2),
+            ],
           }}
           viewerUserId="user-1"
         />
       );
     });
 
-    it("renders the legacy entry content in the journal feed", () => {
-      expect(screen.queryByText("Old note before runs existed")).not.toBeNull();
+    it("shows each note once", () => {
+      expect(screen.getAllByText("Oldest note")).toHaveLength(1);
+      expect(screen.getAllByText("Middle note")).toHaveLength(1);
+      expect(screen.getAllByText("Newest note")).toHaveLength(1);
     });
 
-    it("renders the legacy entry with no run label inside the journal feed", () => {
-      // Scope to the JournalFeed section to avoid matching "First playthrough"
-      // rendered elsewhere in the widget (e.g. PlaythroughTimeline).
-      const feed = screen.getByRole("region", { name: "Journal feed" });
-      // The run entry carries a "First playthrough" label; the legacy entry
-      // (playthroughId: null) must NOT produce a second one.
-      const labelsInFeed = within(feed).queryAllByText("First playthrough");
-      expect(labelsInFeed).toHaveLength(1);
+    it("lists the notes newest first", () => {
+      const list = screen.getByRole("list", { name: "// NOTES" });
+      const texts = within(list)
+        .getAllByRole("link")
+        .map((link) => link.textContent);
+      expect(texts[0]).toContain("Newest note");
+      expect(texts[1]).toContain("Middle note");
+      expect(texts[2]).toContain("Oldest note");
+    });
+
+    it("links every note to its note view", () => {
+      const list = screen.getByRole("list", { name: "// NOTES" });
+      expect(within(list).getAllByRole("link")).toHaveLength(3);
     });
   });
 
@@ -1122,6 +1060,55 @@ describe("GameDetail", () => {
     });
   });
 
+  describe("Log time (spec 2.15)", () => {
+    const getLogTimeButtons = () =>
+      screen.queryAllByRole("button", { name: "Log time" });
+
+    it("opens the Log form with the game chosen when the viewer has the game in their library", async () => {
+      mockNavigate.mockReset();
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+
+      const [first] = getLogTimeButtons();
+      await userEvent.click(first!);
+
+      const updater = mockNavigate.mock.calls[0]![0].search as (
+        prev: Record<string, unknown>
+      ) => Record<string, unknown>;
+      expect(updater({})).toMatchObject({
+        action: "log-session",
+        game: "hollow-knight",
+      });
+    });
+
+    it("shows no Log time when the game is not in the viewer's library", () => {
+      render(
+        <GameDetail
+          data={buildData(null)}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+      expect(getLogTimeButtons()).toHaveLength(0);
+    });
+
+    it("shows no Log time to a signed-out visitor", () => {
+      render(
+        <GameDetail
+          data={buildData(null)}
+          viewerUserId={null}
+          gameSlug="hollow-knight"
+        />
+      );
+      expect(getLogTimeButtons()).toHaveLength(0);
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // Slice 7 — desktop layout (AC GD-5)
   // Layout is CSS-driven: both the detail rail and the action bar are always in
@@ -1157,10 +1144,10 @@ describe("GameDetail", () => {
         expect(switcher).not.toBeNull();
       });
 
-      it("renders a Log a session CTA inside the detail rail", () => {
+      it("renders a Log time button inside the detail rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
         const logBtn = within(rail).queryByRole("button", {
-          name: "Log a session",
+          name: "Log time",
         });
         expect(logBtn).not.toBeNull();
       });

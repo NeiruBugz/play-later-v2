@@ -12,7 +12,7 @@ export function GameDetailActionBar({
 }: GameDetailActionBarProps) {
   const navigate = useNavigate();
 
-  if (!viewerUserId) return null;
+  if (!viewerUserId || !libraryStatus) return null;
 
   function openLogSession() {
     void navigate({
@@ -30,19 +30,15 @@ export function GameDetailActionBar({
       data-testid="game-detail-action-bar"
       className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-(--bottom-nav-height) z-40 flex items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur-sm md:hidden"
     >
-      {libraryStatus ? (
-        <StatusControl
-          status={libraryStatus.status}
-          onChange={(to) => void libraryStatus.setStatus(to)}
-          disabled={libraryStatus.isPending}
-          className="py-2"
-        />
-      ) : (
-        <span />
-      )}
+      <StatusControl
+        status={libraryStatus.status}
+        onChange={(to) => void libraryStatus.setStatus(to)}
+        disabled={libraryStatus.isPending}
+        className="py-2"
+      />
 
       <Button className="h-11 flex-1" onClick={openLogSession}>
-        Log session
+        Log time
       </Button>
     </div>
   );

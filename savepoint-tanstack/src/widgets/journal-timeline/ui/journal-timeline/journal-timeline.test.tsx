@@ -17,11 +17,9 @@ function makeEntry(
   const createdAt = overrides?.createdAt ?? new Date("2024-01-15T12:00:00Z");
   return {
     id: "entry-1",
-    kind: "QUICK",
-    title: null,
     content: "Default test content",
+    playedMinutes: null,
     createdAt,
-    updatedAt: createdAt,
     game: {
       id: "game-1",
       title: "Test Game",
@@ -33,8 +31,8 @@ function makeEntry(
 }
 
 const elements = {
-  queryEmptyState: () => screen.queryByText("Nothing logged yet"),
-  getEmptyState: () => screen.getByText("Nothing logged yet"),
+  queryEmptyState: () => screen.queryByText("No notes yet"),
+  getEmptyState: () => screen.getByText("No notes yet"),
   queryEntryContent: (text: string) => screen.queryByText(text),
   getEntryContent: (text: string) => screen.getByText(text),
   queryGameTitle: (title: string) => screen.queryByText(title),
@@ -109,36 +107,30 @@ describe("JournalTimeline", () => {
     });
   });
 
-  describe("given entries of mixed kinds (QUICK and REFLECTION)", () => {
+  describe("given a note with time and a note with only time", () => {
     const entries = [
       makeEntry({
-        id: "e-quick",
-        kind: "QUICK",
-        content: "Quick note content.",
+        id: "e-text",
+        content: "Wrote about the boss.",
+        playedMinutes: 90,
       }),
-      makeEntry({
-        id: "e-reflection",
-        kind: "REFLECTION",
-        content: "Long-form reflection content.",
-      }),
+      makeEntry({ id: "e-time", content: "", playedMinutes: 90 }),
     ];
 
     beforeEach(() => {
       render(<JournalTimeline entries={entries} />);
     });
 
-    it("renders the QUICK entry", () => {
-      expect(elements.getEntryContent("Quick note content.")).toBeDefined();
+    it("shows 1.5 h on the note with text", () => {
+      expect(elements.getEntryContent("1.5 h")).toBeDefined();
     });
 
-    it("renders the REFLECTION entry", () => {
-      expect(
-        elements.getEntryContent("Long-form reflection content.")
-      ).toBeDefined();
+    it("reads 1.5 h played on the time-only note", () => {
+      expect(elements.getEntryContent("1.5 h played")).toBeDefined();
     });
 
-    it("renders both entries — neither kind is filtered out", () => {
-      expect(elements.getAllEntries()).toHaveLength(2);
+    it("shows no Quick note or Reflection label", () => {
+      expect(screen.queryByText(/quick note|reflection/i)).toBeNull();
     });
   });
 

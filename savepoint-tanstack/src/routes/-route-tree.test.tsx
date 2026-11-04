@@ -78,15 +78,12 @@ vi.mock("@/features/social-discovery/api", () => ({
 
 vi.mock("@/features/journal-timeline", () => ({
   getJournalTimelinePageDataFn: resolves([]),
+  getJournalGameOptionsFn: resolves([]),
   getJournalEntryPageDataFn: resolves({
     id: "entry-1",
     title: "Entry",
     content: "Body",
   }),
-}));
-
-vi.mock("@/features/compose-journal-entry", () => ({
-  ComposeJournalEntryForm: () => <div data-testid="compose-form" />,
 }));
 
 vi.mock("@/features/edit-journal-entry", () => ({
@@ -122,6 +119,7 @@ vi.mock("@/widgets/app-mobile-topbar", () => ({ AppMobileTopbar: () => null }));
 vi.mock("@/widgets/app-bottom-nav", () => ({ AppBottomNav: () => null }));
 vi.mock("@/widgets/global-action-host", () => ({
   GlobalActionHost: () => null,
+  LogFormHost: () => <div data-testid="compose-form" />,
 }));
 vi.mock("@/features/command-palette", () => ({
   CommandPalette: () => null,

@@ -1,5 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
+import { openGlobalAction } from "@/shared/lib/global-action";
 import { Button } from "@/shared/ui/button";
 
 import type { JournalStatsRailProps } from "./journal-stats-rail.type";
@@ -25,6 +26,7 @@ function deriveStats(entries: JournalStatsRailProps["entries"]) {
  * FSD: widget-internal component, not exported from the widget barrel.
  */
 export function JournalStatsRail({ entries }: JournalStatsRailProps) {
+  const navigate = useNavigate();
   const { entryCount, gamesJournaled } = deriveStats(entries);
 
   return (
@@ -37,14 +39,14 @@ export function JournalStatsRail({ entries }: JournalStatsRailProps) {
             <dd className="text-foreground font-display text-[1.8rem] leading-none font-bold tabular-nums">
               {entryCount}
             </dd>
-            <dt className="text-muted-foreground mt-1 text-sm">Entries</dt>
+            <dt className="text-muted-foreground mt-1 text-sm">Notes</dt>
           </div>
           <div>
             <dd className="text-foreground font-display text-[1.8rem] leading-none font-bold tabular-nums">
               {gamesJournaled}
             </dd>
             <dt className="text-muted-foreground mt-1 text-sm">
-              Games journaled
+              Games with notes
             </dt>
           </div>
         </dl>
@@ -59,11 +61,13 @@ export function JournalStatsRail({ entries }: JournalStatsRailProps) {
       >
         <div className="terminal-label mb-2">// LOG TONIGHT</div>
         <p className="text-foreground-body mb-4 text-sm leading-relaxed">
-          Playtime is enough — thoughts are optional. Reflections can come
-          later.
+          Time played is enough — a note is optional.
         </p>
-        <Button asChild className="w-full">
-          <Link to="/journal/new">Log a session</Link>
+        <Button
+          className="w-full"
+          onClick={() => openGlobalAction(navigate, "log-session")}
+        >
+          Log time
         </Button>
       </div>
     </aside>

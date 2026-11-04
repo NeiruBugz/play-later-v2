@@ -5,7 +5,7 @@
  * Covers:
  * - A per-run Delete button is present for each run node.
  * - Clicking Delete opens a confirmation dialog that warns the user
- *   that journal entries will be detached (not deleted) from the run.
+ *   that notes will be detached (not deleted) from the run.
  * - The confirm dialog has a "Delete run" confirm button and a "Cancel" button.
  * - Confirming calls deletePlaythroughFn with the run id.
  * - Cancelling does NOT call deletePlaythroughFn.
@@ -20,7 +20,7 @@
  * Confirmation dialog:
  *   Role: "alertdialog"  (or "dialog")
  *   Warning text (visible in dialog body):
- *     "Your journal entries will stay but will be detached from this run."
+ *     "Your notes will stay but will be detached from this run."
  *   Confirm button accessible name: "Delete run"
  *   Cancel button accessible name:  "Keep run"
  *
@@ -73,7 +73,6 @@ const defaultProps = {
   playthroughs: [makePlaythrough({ id: RUN_ID, status: "FINISHED" })],
   onAddPlaythrough: vi.fn(),
   onEditPlaythrough: vi.fn(),
-  onLogSession: vi.fn(),
 };
 
 // ---------------------------------------------------------------------------
@@ -89,7 +88,7 @@ const elements = {
     screen.getByRole("dialog"),
   getDetachWarning: () =>
     screen.getByText(
-      "Your journal entries will stay but will be detached from this run."
+      "Your notes will stay but will be detached from this run."
     ),
   getConfirmDeleteButton: () =>
     screen.getByRole("button", { name: "Delete run" }),
@@ -132,7 +131,7 @@ describe("PlaythroughTimeline — PlaythroughNode delete behaviour", () => {
       expect(elements.queryConfirmDialog()).not.toBeNull();
     });
 
-    it("shows the journal-entries detach warning in the dialog", () => {
+    it("shows the notes detach warning in the dialog", () => {
       expect(elements.getDetachWarning()).not.toBeNull();
     });
 

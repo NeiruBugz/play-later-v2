@@ -16,7 +16,6 @@ const elements = {
 
 const noPace = {
   playtimeTotalMinutes: 0,
-  journalCount: 0,
   playtimeSessionCount: 0,
   recentSessionMinutes: [],
 };
@@ -29,7 +28,6 @@ describe("TimesToBeatSection", () => {
         <TimesToBeatSection
           timesToBeat={{ mainStory: 36000, completionist: 72000 }}
           playtimeTotalMinutes={720}
-          journalCount={3}
           playtimeSessionCount={3}
           recentSessionMinutes={[120, 240, 360]}
         />
@@ -45,7 +43,7 @@ describe("TimesToBeatSection", () => {
     });
 
     it("marks the viewer's hours with an accent 'You' marker", () => {
-      expect(elements.getYouMarker().textContent).toContain("12h");
+      expect(elements.getYouMarker().textContent).toContain("12 h");
     });
 
     it("renders the main-story benchmark tick", () => {
@@ -59,8 +57,8 @@ describe("TimesToBeatSection", () => {
     it("puts the viewer's progress in context relative to the main story", () => {
       // 12h - 10h = 2h past the main story; 20h - 12h = 8h left to 100%
       const text = elements.getContext().textContent ?? "";
-      expect(text).toContain("2h past");
-      expect(text).toContain("8h");
+      expect(text).toContain("2 h past");
+      expect(text).toContain("8 h");
     });
   });
 
@@ -71,7 +69,6 @@ describe("TimesToBeatSection", () => {
         <TimesToBeatSection
           timesToBeat={{ mainStory: 36000, completionist: 72000 }}
           playtimeTotalMinutes={180}
-          journalCount={1}
           playtimeSessionCount={1}
           recentSessionMinutes={[180]}
         />
@@ -80,7 +77,7 @@ describe("TimesToBeatSection", () => {
 
     it("phrases the context as hours from the main story", () => {
       const text = elements.getContext().textContent ?? "";
-      expect(text).toContain("7h from");
+      expect(text).toContain("7 h from");
     });
   });
 
@@ -153,7 +150,6 @@ describe("TimesToBeatSection", () => {
         <TimesToBeatSection
           timesToBeat={null}
           playtimeTotalMinutes={600}
-          journalCount={4}
           playtimeSessionCount={4}
           recentSessionMinutes={[60, 120, 180, 240]}
         />
