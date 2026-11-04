@@ -18,7 +18,7 @@ import { SavepointThemeProvider } from "@/app/providers/theme-provider";
 import { getCurrentUserFn } from "@/entities/session/api";
 import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
-import { WhatsNewModal } from "@/features/whats-new";
+import { StatusModelNotice, WhatsNewModal } from "@/features/whats-new";
 import { Toaster } from "@/shared/ui/sonner";
 import { AddFlowProvider } from "@/widgets/add-flow";
 import { AppBottomNav } from "@/widgets/app-bottom-nav";
@@ -127,7 +127,7 @@ export const Route = createRootRoute({
 });
 
 export function RootShell() {
-  const { user } = Route.useLoaderData();
+  const { user, statusModelNoticePending } = Route.useLoaderData();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -166,7 +166,8 @@ export function RootShell() {
             {user ? <GlobalActionHost /> : null}
           </DoneFlowProvider>
         </AddFlowProvider>
-        {user ? <WhatsNewModal /> : null}
+        {user && statusModelNoticePending ? <StatusModelNotice /> : null}
+        {user && !statusModelNoticePending ? <WhatsNewModal /> : null}
         <Toaster />
         <TanStackDevtools
           config={{

@@ -77,15 +77,24 @@ vi.mock("@/entities/session/api/require-user-id-or-redirect", () => ({
 }));
 
 vi.mock("@/entities/session/api", () => ({
-  getCurrentUserFn: vi.fn().mockResolvedValue({ user: null }),
+  getCurrentUserFn: vi
+    .fn()
+    .mockResolvedValue({ user: null, statusModelNoticePending: false }),
 }));
 
 // useLoaderDataMock is hoisted so the vi.mock factory can close over it,
 // and individual describe blocks can reconfigure it via mockReturnValue.
 const { useLoaderDataMock } = vi.hoisted(() => ({
-  useLoaderDataMock: vi.fn((): { user: CurrentUser | null } => ({
-    user: null,
-  })),
+  useLoaderDataMock: vi.fn(
+    (): { user: CurrentUser | null; statusModelNoticePending?: boolean } => ({
+      user: null,
+    })
+  ),
+}));
+
+vi.mock("@/features/whats-new", () => ({
+  StatusModelNotice: () => <div data-testid="status-model-notice" />,
+  WhatsNewModal: () => <div data-testid="whats-new-modal" />,
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -153,6 +162,36 @@ describe("__root route shell", () => {
 
     it("renders the app sidebar", () => {
       expect(screen.getByTestId("app-sidebar")).toBeDefined();
+    });
+  });
+
+  describe("given an authenticated user with the status notice pending", () => {
+    beforeEach(() => {
+      useLoaderDataMock.mockReturnValue({
+        user: { id: "u1", name: "Ada", username: "ada", image: null },
+        statusModelNoticePending: true,
+      });
+      render(<RootShell />);
+    });
+
+    it("shows the status notice instead of What's New", () => {
+      expect(screen.getByTestId("status-model-notice")).toBeDefined();
+      expect(screen.queryByTestId("whats-new-modal")).toBeNull();
+    });
+  });
+
+  describe("given an authenticated user with nothing pending", () => {
+    beforeEach(() => {
+      useLoaderDataMock.mockReturnValue({
+        user: { id: "u1", name: "Ada", username: "ada", image: null },
+        statusModelNoticePending: false,
+      });
+      render(<RootShell />);
+    });
+
+    it("shows What's New and no status notice", () => {
+      expect(screen.getByTestId("whats-new-modal")).toBeDefined();
+      expect(screen.queryByTestId("status-model-notice")).toBeNull();
     });
   });
 });

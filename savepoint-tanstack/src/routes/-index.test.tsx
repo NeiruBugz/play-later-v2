@@ -52,6 +52,7 @@ describe("index route", () => {
     beforeEach(() => {
       vi.mocked(getCurrentUserFn).mockResolvedValue({
         user: { id: "u1", name: "Ada", username: "ada", image: null },
+        statusModelNoticePending: false,
       });
     });
 
@@ -64,7 +65,10 @@ describe("index route", () => {
 
   describe("given the user is anonymous", () => {
     beforeEach(() => {
-      vi.mocked(getCurrentUserFn).mockResolvedValue({ user: null });
+      vi.mocked(getCurrentUserFn).mockResolvedValue({
+        user: null,
+        statusModelNoticePending: false,
+      });
     });
 
     it("resolves without throwing", async () => {

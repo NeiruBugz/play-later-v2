@@ -1,4 +1,4 @@
-export { WhatsNewModal } from "./ui";
+export { StatusModelNotice, WhatsNewModal } from "./ui";
 export { useWhatsNew } from "./model";
 export {
   ANNOUNCEMENTS,

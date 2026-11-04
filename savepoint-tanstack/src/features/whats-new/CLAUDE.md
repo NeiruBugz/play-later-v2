@@ -43,3 +43,13 @@ the rollout cadence we have today. See `../../DIVERGENCES.md` →
    the component test contract stays simple and deterministic.
 
 All three are documented in `../../DIVERGENCES.md` → Slice 20.
+
+## Status-model notice (spec 026)
+
+`StatusModelNotice` is a separate, server-driven one-time dialog. The flag is
+`user.statusModelNoticePending`, returned by the root loader
+(`getCurrentUserFn`); "Got it" calls `acknowledgeNoticeFn`, which sets it false
+and then invalidates the router, so it never reappears on any device. It is
+independent of the localStorage announcements above: `__root.tsx` renders it
+instead of `WhatsNewModal` while pending, so the two never stack. Failures show
+`getUserFacingErrorMessage` copy and keep the dialog open.
