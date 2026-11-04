@@ -237,13 +237,13 @@ Verify-task conventions:
 - [ ] **Slice 9: Play History and one rating**
 
   > Spec §2.10, §2.11 (audit N19).
-  - [ ] Server:
+  - [x] Server:
     - `getEndedPlays` and the game-detail `history`.
     - Remove "Best rating", the per-run rating reads, the profile playthroughs query and the public playthrough CRUD.
     - Delete `features/manage-playthrough`.
     - The details form loses its date fields.
     - Test: Done → Play again → Done = 2 plays. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - `PlayHistory`.
     - Delete the playthrough panel, timeline, drawer, jump-spine entry, card "Add playthrough" and `profile-playthroughs-section`.
     - A single 5-star half-step rating on the game page.
