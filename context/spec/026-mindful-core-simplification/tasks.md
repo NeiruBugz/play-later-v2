@@ -33,38 +33,38 @@ Verify-task conventions:
     - Set a game to Playing by status alone, then log 2 h with no text: it saves with no error (T2).
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 2: Three statuses everywhere, and a status only changes when the user changes it**
+- [x] **Slice 2: Three statuses everywhere, and a status only changes when the user changes it**
 
   > The app runs on Want / Playing / Done (spec §2.1, §2.2, §2.12 data conversion, §2.13 labels, §2.18 label case). The existing controls are reused, with relabelled 3-option pickers.
-  - [ ] Add `libraryItemFactory`, `playFactory` and `noteFactory` test helpers under `test/`. **[Agent: testing]**
-  - [ ] Schema plus migration A `<ts>_mindful_core_model`:
+  - [x] Add `libraryItemFactory`, `playFactory` and `noteFactory` test helpers under `test/`. **[Agent: testing]**
+  - [x] Schema plus migration A `<ts>_mindful_core_model`:
     - The new enum `LibraryItemStatus { WANT, PLAYING, DONE }`, the enums `DoneOutcome` and `JournalPrompt`, and the new columns.
     - `@@unique([userId, upNextPosition])`, the `CHECK` 1..5, and `@@unique([userId, gameId])`.
     - The backfill exactly as in technical-considerations §2.2, including the step 6 time-played backfill (time-only notes for run minutes not covered by notes).
     - Legacy columns stay in the schema.
     - Run `prisma:generate`. **[Agent: prisma-database]**
-  - [ ] Migration test `test/integration/mindful-core-migration.integration.test.ts`:
+  - [x] Migration test `test/integration/mindful-core-migration.integration.test.ts`:
     - Apply every prior migration, seed legacy rows with raw SQL, then execute the **real** migration A file read from disk.
     - Cover all seed cases from technical-considerations §4.
     - Assert all the invariants, including that time played per game is unchanged. **[Agent: prisma-database]**
-  - [ ] Add a pre-deploy section to `docs/cutover-rollback.md`:
+  - [x] Add a pre-deploy section to `docs/cutover-rollback.md`:
     - Create a Neon branch of production.
     - Run the duplicate `(userId, gameId)` pre-check.
     - Dry-run migration A on the branch.
     - Rollback = restore the branch. **[Agent: prisma-database]**
-  - [ ] Rewrite `entities/library-item/model/status.ts` as the client-safe single source of truth:
+  - [x] Rewrite `entities/library-item/model/status.ts` as the client-safe single source of truth:
     - 3 statuses, the Zod schema, label/icon/badge (title case), `NEXT_STEP`, `getQueueMarker`, `getDoneLabel`, `UP_NEXT_MAX`. **[Agent: tanstack-fullstack]**
-  - [ ] Status core in entities:
+  - [x] Status core in entities:
     - Add `setLibraryItemStatus`. It runs in one transaction with a row lock: it writes `status` and `statusChangedAt`, opens or closes plays, and leaves the queue when the game becomes Playing.
     - Delete the derived status, the run sync and the manual override.
     - Update `getLibrary`, the counts, the stats, `getLibraryItemsByIgdbIds` and `calculate-smart-status` (PLAYING within 7 days, otherwise WANT).
     - The Steam import goes through `setLibraryItemStatus`.
     - Integration tests. **[Agent: tanstack-fullstack]**
-  - [ ] Server functions and loaders:
+  - [x] Server functions and loaders:
     - `setStatusFn` in `features/manage-library-entry`.
     - Remove the status/date path from `updateLibraryItemFn`, and the status select from the details form (T3). Delete the manual-override fns.
     - Update the library page data, the Home counts, the game-detail single status, the profile counts and the activity status. **[Agent: tanstack-fullstack]**
-  - [ ] UI relabel to 3 statuses using the existing controls:
+  - [x] UI relabel to 3 statuses using the existing controls:
     - One 3-option picker on the game page. The card menu offers 3 options.
     - Filter All/Want/Playing/Done.
     - Home strip: 3 statuses. Status CSS vars go 5 → 3.
@@ -73,8 +73,8 @@ Verify-task conventions:
     - Activity copy: "wants to play / is playing / is done with".
     - Profile: Want/Playing/Done counts.
     - Badges in title case, with `whitespace-nowrap` and room reserved before the menu, so they are never cut off at 390 px (N22). **[Agent: react-frontend]**
-  - [ ] Update every existing test that references the 5 statuses, the manual override or the derived status, using the factories. The full suite must pass. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Update every existing test that references the 5 statuses, the manual override or the derived status, using the factories. The full suite must pass. **[Agent: testing]**
+  - [x] Verify:
     - Run `typecheck`, `lint`, `test:unit`, `test:integration` and `build`.
     - Re-seed the audit accounts and apply migration A.
     - The library shows only Want/Playing/Done.
