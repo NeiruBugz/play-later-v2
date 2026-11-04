@@ -27,6 +27,7 @@ const inputSchema = z.object({
   // Stars (0.5–5), the user-facing unit. Converted to the 1–10 storage int
   // before hitting Prisma (see handler).
   minRating: z.number().min(0.5).max(5).multipleOf(0.5).optional(),
+  unratedOnly: z.boolean().optional(),
   sortBy: sortBySchema.optional(),
   sortOrder: sortOrderSchema.optional(),
 });

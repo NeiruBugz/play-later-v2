@@ -15,6 +15,8 @@ export type GetLibraryFilters = {
   /** Only meaningful with `status: WANT`; ignored for every other view. */
   notOwnedOnly?: boolean;
   minRating?: number;
+  /** Only games without a rating; takes precedence over `minRating`. */
+  unratedOnly?: boolean;
   sortBy?: "title" | "createdAt" | "updatedAt";
   sortOrder?: "asc" | "desc";
 };

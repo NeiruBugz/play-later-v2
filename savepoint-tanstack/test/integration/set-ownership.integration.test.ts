@@ -6,7 +6,6 @@ import {
 } from "@/entities/activity-feed/api/get-activity-feed.server";
 import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-item-status.server";
 import { setOwnership } from "@/entities/library-item/api/set-ownership.server";
-import { getProfilePlaythroughs } from "@/entities/playthrough/api/get-profile-playthroughs.server";
 import { getPublicProfile } from "@/entities/profile/api/get-public-profile.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -150,15 +149,6 @@ describe("friends' reads never expose ownership", () => {
 
     expect(items).toHaveLength(1);
     expect(items[0]).not.toHaveProperty("isOwned");
-  });
-
-  it("profile playthroughs carry no isOwned key", async () => {
-    const { owner, viewer } = await seedPublicOwnerWithNotOwnedItem();
-
-    const runs = await getProfilePlaythroughs(owner.id, true, viewer.id);
-
-    expect(runs).toHaveLength(1);
-    expect(JSON.stringify(runs)).not.toContain("isOwned");
   });
 
   it("the public profile carries no isOwned key", async () => {

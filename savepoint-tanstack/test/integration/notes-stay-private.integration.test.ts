@@ -11,7 +11,6 @@ import {
 } from "@/entities/activity-feed/api/get-activity-feed.server";
 import { getJournalEntryById } from "@/entities/journal-entry/api/get-journal-entry-by-id.server";
 import { getJournalTimeline } from "@/entities/journal-entry/api/get-journal.server";
-import { getProfilePlaythroughs } from "@/entities/playthrough/api/get-profile-playthroughs.server";
 import { getPublicProfile } from "@/entities/profile/api/get-public-profile.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -72,14 +71,12 @@ describe("given a user with a public profile and a note on a played game", () =>
     return { owner, friend, note };
   }
 
-  it("then public profile, playthrough and activity reads never contain it", async () => {
+  it("then public profile and activity reads never contain it", async () => {
     const { owner, friend } = await seed();
 
     const reads = await Promise.all([
       getPublicProfile(owner.username!, friend.id),
       getPublicProfile(owner.username!),
-      getProfilePlaythroughs(owner.id, true, friend.id),
-      getProfilePlaythroughs(owner.id, true),
       getActivityForUser(owner.id, friend.id),
       getActivityForUser(owner.id, undefined),
       getActivityFeedForViewer(friend.id),

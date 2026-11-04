@@ -21,9 +21,6 @@ const searchSchema = z.object({
     .multipleOf(0.5)
     .optional()
     .catch(undefined),
-  // `unratedOnly` is consumed by `MobileFilterBar` (and round-tripped by the
-  // sidebar) but not yet honored by `getLibraryPageDataFn` — backend filtering
-  // arrives in a later slice. Documented divergence in slice 14A.
   unratedOnly: z.boolean().optional().catch(undefined),
   sortBy: z
     .enum(["updatedAt", "createdAt", "title"])
@@ -39,6 +36,7 @@ export const Route = createFileRoute("/_authed/library")({
     platform: search.platform,
     notOwnedOnly: search.notOwnedOnly,
     minRating: search.minRating,
+    unratedOnly: search.unratedOnly,
     sortBy: search.sortBy,
     sortOrder: search.sortOrder,
   }),

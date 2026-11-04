@@ -295,6 +295,37 @@ describe("getLibrary", () => {
       expect(result.total).toBe(4);
     });
 
+    it("follows the current rating when a game is re-rated", async () => {
+      const item = await db.prisma.libraryItem.findFirstOrThrow({
+        where: { userId: "lib-user-rating", gameId: "lib-game-r3" },
+      });
+      const idsAtLeast7 = async () =>
+        (await getLibrary("lib-user-rating", { minRating: 7 })).items.map(
+          (i) => i.game.id
+        );
+
+      expect(await idsAtLeast7()).not.toContain("lib-game-r3");
+
+      await db.prisma.libraryItem.update({
+        where: { id: item.id },
+        data: { rating: 8 },
+      });
+      expect(await idsAtLeast7()).toContain("lib-game-r3");
+
+      await db.prisma.libraryItem.update({
+        where: { id: item.id },
+        data: { rating: 2 },
+      });
+      expect(await idsAtLeast7()).not.toContain("lib-game-r3");
+    });
+
+    it("returns only unrated items with unratedOnly", async () => {
+      const result = await getLibrary("lib-user-rating", { unratedOnly: true });
+
+      expect(result.items.map((i) => i.game.id)).toEqual(["lib-game-r4"]);
+      expect(result.total).toBe(1);
+    });
+
     it("returns an empty list when minRating exceeds all ratings", async () => {
       const result = await getLibrary("lib-user-rating", { minRating: 10 });
 

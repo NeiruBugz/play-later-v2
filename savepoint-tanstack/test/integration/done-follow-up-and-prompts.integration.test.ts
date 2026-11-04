@@ -22,7 +22,6 @@ import { getLibraryStats } from "@/entities/library-item/api/get-library-stats.s
 import { setDoneOutcome } from "@/entities/library-item/api/set-done-outcome.server";
 import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-item-status.server";
 import { setRating } from "@/entities/library-item/api/set-rating.server";
-import { getProfilePlaythroughs } from "@/entities/playthrough/api/get-profile-playthroughs.server";
 import { getPublicProfile } from "@/entities/profile/api/get-public-profile.server";
 import { saveDoneFollowUpWorker } from "@/features/done-follow-up/api/save-done-follow-up-fn.worker";
 import { setDoneOutcomeWorker } from "@/features/done-follow-up/api/set-done-outcome-fn.worker";
@@ -435,7 +434,6 @@ describe("doneOutcome stays private", () => {
       activity: await getActivityForUser(owner.id, viewer.id),
       feed: await getActivityFeedForViewer(viewer.id),
       profile: await getPublicProfile("privateoutcome", viewer.id),
-      runs: await getProfilePlaythroughs(owner.id, true, viewer.id),
     };
 
     expect(reads.activity.items).toHaveLength(1);

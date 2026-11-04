@@ -19,6 +19,7 @@ export async function getLibrary(
     platform,
     notOwnedOnly,
     minRating,
+    unratedOnly,
     sortBy,
     sortOrder = "desc",
   } = filters;
@@ -28,7 +29,9 @@ export async function getLibrary(
     ...(upNext ? { upNextPosition: { not: null } } : status && { status }),
     ...(platform && { platform }),
     ...(notOwnedOnly && status === "WANT" && !upNext && { isOwned: false }),
-    ...(minRating !== undefined && { rating: { gte: minRating } }),
+    ...(unratedOnly
+      ? { rating: null }
+      : minRating !== undefined && { rating: { gte: minRating } }),
   };
 
   const orderBy: Prisma.LibraryItemOrderByWithRelationInput = upNext

@@ -4,9 +4,6 @@ import { getLibraryItemsByIgdbIds } from "@/entities/library-item/api/get-librar
 import { getLibraryStats } from "@/entities/library-item/api/get-library-stats.server";
 import { getLibraryStatusCounts } from "@/entities/library-item/api/get-library-status-counts.server";
 import { getLibrary } from "@/entities/library-item/api/get-library.server";
-import { createPlaythrough } from "@/entities/playthrough/api/create-playthrough.server";
-import { deletePlaythrough } from "@/entities/playthrough/api/delete-playthrough.server";
-import { updatePlaythrough } from "@/entities/playthrough/api/update-playthrough.server";
 
 import {
   createGame,
@@ -50,32 +47,6 @@ async function seedItem(
   });
   return { item, game };
 }
-
-describe("a status only changes when the user changes it", () => {
-  it("keeps the item status when a run is created, updated and deleted", async () => {
-    const user = await createUser(db.prisma);
-    const { item } = await seedItem(user.id, "WANT");
-    const statusOf = async () =>
-      (
-        await db.prisma.libraryItem.findUniqueOrThrow({
-          where: { id: item.id },
-        })
-      ).status;
-
-    const run = await createPlaythrough(user.id, {
-      libraryItemId: item.id,
-      status: "FINISHED",
-      finishedAt: new Date("2025-02-01T00:00:00.000Z"),
-    });
-    expect(await statusOf()).toBe("WANT");
-
-    await updatePlaythrough(user.id, { id: run.id, status: "ABANDONED" });
-    expect(await statusOf()).toBe("WANT");
-
-    await deletePlaythrough(user.id, run.id);
-    expect(await statusOf()).toBe("WANT");
-  });
-});
 
 describe("library reads on the three statuses", () => {
   it("getLibrary filters by status", async () => {
@@ -141,9 +112,9 @@ describe("a play row never changes status by itself", () => {
     const play = await db.prisma.playthrough.findFirstOrThrow({
       where: { libraryItemId: item.id },
     });
-    await updatePlaythrough(user.id, {
-      id: play.id,
-      finishedAt: new Date("2025-02-01T00:00:00.000Z"),
+    await db.prisma.playthrough.update({
+      where: { id: play.id },
+      data: { finishedAt: new Date("2025-02-01T00:00:00.000Z") },
     });
     const after = await db.prisma.libraryItem.findUniqueOrThrow({
       where: { id: item.id },

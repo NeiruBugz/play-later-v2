@@ -56,6 +56,7 @@ import {
 
 // RED import — this module does not exist until the GREEN step (task 3).
 import { getGameDetails } from "@/entities/game/api/get-game-details.server";
+import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-item-status.server";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -620,10 +621,10 @@ describe("getGameDetails", () => {
   describe("Spec 016 — playthroughs and derived fields", () => {
     // Anonymous viewer
     describe("anonymous viewer", () => {
-      it("returns empty playthroughs, zero playtimeTotalMinutes", async () => {
+      it("returns empty history, zero playtimeTotalMinutes", async () => {
         const result = await getGameDetails({ slug: GAME_SLUG });
 
-        expect(result.playthroughs).toEqual([]);
+        expect(result.history).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
       });
 
@@ -651,20 +652,20 @@ describe("getGameDetails", () => {
         });
       });
 
-      it("returns empty playthroughs, zero playtime", async () => {
+      it("returns empty history, zero playtime", async () => {
         const result = await getGameDetails({
           slug: GAME_SLUG,
           userId: "ggd-user-pt-noentry",
         });
 
-        expect(result.playthroughs).toEqual([]);
+        expect(result.history).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
 
     // Authed — library entry exists but no runs
-    describe("authed viewer with library entry and no playthroughs", () => {
-      it("returns empty playthroughs and zero playtime", async () => {
+    describe("authed viewer with library entry and no plays", () => {
+      it("returns empty history and zero playtime", async () => {
         await seedUserAndLibrary("pt-noruns", "WANT");
 
         const result = await getGameDetails({
@@ -672,7 +673,7 @@ describe("getGameDetails", () => {
           userId: "ggd-user-pt-noruns",
         });
 
-        expect(result.playthroughs).toEqual([]);
+        expect(result.history).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
@@ -698,7 +699,7 @@ describe("getGameDetails", () => {
           userId: "ggd-user-pt-playing",
         });
 
-        expect(result.playthroughs).toHaveLength(1);
+        expect(result.history).toEqual([]);
         expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
@@ -716,6 +717,7 @@ describe("getGameDetails", () => {
             ordinal: 1,
             status: "FINISHED",
             playtimeMinutes: 600,
+            finishedAt: new Date("2024-03-01T00:00:00.000Z"),
           },
         });
 
@@ -724,7 +726,7 @@ describe("getGameDetails", () => {
           userId: "ggd-user-pt-finished",
         });
 
-        expect(result.playthroughs).toHaveLength(1);
+        expect(result.history).toHaveLength(1);
         expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
@@ -739,6 +741,7 @@ describe("getGameDetails", () => {
             ordinal: 1,
             status: "FINISHED",
             playtimeMinutes: 400,
+            finishedAt: new Date("2024-03-01T00:00:00.000Z"),
           },
         });
         await db.prisma.playthrough.create({
@@ -747,6 +750,7 @@ describe("getGameDetails", () => {
             ordinal: 2,
             status: "ABANDONED",
             playtimeMinutes: 150,
+            finishedAt: new Date("2024-04-01T00:00:00.000Z"),
           },
         });
 
@@ -755,7 +759,7 @@ describe("getGameDetails", () => {
           userId: "ggd-user-pt-multi",
         });
 
-        expect(result.playthroughs).toHaveLength(2);
+        expect(result.history).toHaveLength(2);
         expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
@@ -832,99 +836,94 @@ describe("getGameDetails", () => {
       });
     });
 
-    // -----------------------------------------------------------------------
-    // Playthroughs ordering — ordinal desc
-    // -----------------------------------------------------------------------
-    describe("playthroughs ordering", () => {
-      it("returns playthroughs ordered by ordinal descending", async () => {
-        const { libraryItemId } = await seedUserAndLibrary("pt-order", "DONE");
-        await db.prisma.playthrough.create({
-          data: {
-            libraryItemId,
-            ordinal: 1,
-            status: "FINISHED",
-            playtimeMinutes: 100,
-          },
-        });
-        await db.prisma.playthrough.create({
-          data: {
-            libraryItemId,
-            ordinal: 2,
-            status: "FINISHED",
-            playtimeMinutes: 200,
-          },
-        });
-        await db.prisma.playthrough.create({
-          data: {
-            libraryItemId,
-            ordinal: 3,
-            status: "ABANDONED",
-            playtimeMinutes: 50,
-          },
-        });
+    describe("history (ended plays)", () => {
+      it("lists two ended plays newest first after Done, Play again, Done", async () => {
+        const { libraryItemId } = await seedUserAndLibrary("pt-again", "WANT");
+        const userId = "ggd-user-pt-again";
 
-        const result = await getGameDetails({
-          slug: GAME_SLUG,
-          userId: "ggd-user-pt-order",
-        });
+        vi.useFakeTimers({ toFake: ["Date"] });
+        try {
+          vi.setSystemTime(new Date("2024-03-03T10:00:00.000Z"));
+          await setLibraryItemStatus(userId, libraryItemId, "PLAYING");
+          vi.setSystemTime(new Date("2024-03-20T10:00:00.000Z"));
+          await setLibraryItemStatus(userId, libraryItemId, "DONE");
+          vi.setSystemTime(new Date("2024-05-01T10:00:00.000Z"));
+          await setLibraryItemStatus(userId, libraryItemId, "PLAYING");
+          vi.setSystemTime(new Date("2024-05-09T10:00:00.000Z"));
+          await setLibraryItemStatus(userId, libraryItemId, "DONE");
+        } finally {
+          vi.useRealTimers();
+        }
 
-        expect(result.playthroughs).toHaveLength(3);
-        expect(result.playthroughs[0]!.ordinal).toBe(3);
-        expect(result.playthroughs[1]!.ordinal).toBe(2);
-        expect(result.playthroughs[2]!.ordinal).toBe(1);
+        const result = await getGameDetails({ slug: GAME_SLUG, userId });
+
+        expect(
+          result.history.map((play) => [
+            play.startedAt?.toISOString(),
+            play.finishedAt.toISOString(),
+          ])
+        ).toEqual([
+          ["2024-05-01T10:00:00.000Z", "2024-05-09T10:00:00.000Z"],
+          ["2024-03-03T10:00:00.000Z", "2024-03-20T10:00:00.000Z"],
+        ]);
       });
-    });
 
-    // -----------------------------------------------------------------------
-    // Playthroughs carry their journalEntries
-    // -----------------------------------------------------------------------
-    describe("playthroughs include their journalEntries", () => {
-      it("each playthrough carries its journalEntries ordered by createdAt desc", async () => {
-        const { libraryItemId, gameId } = await seedUserAndLibrary(
-          "pt-entries",
-          "PLAYING"
-        );
-        const playthrough = await db.prisma.playthrough.create({
+      it("is empty for a never-played game", async () => {
+        await seedUserAndLibrary("pt-never", "WANT");
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-never",
+        });
+
+        expect(result.history).toEqual([]);
+      });
+
+      it("is empty for another viewer of the same game", async () => {
+        const { libraryItemId } = await seedUserAndLibrary("pt-owner", "DONE");
+        await db.prisma.playthrough.create({
           data: {
             libraryItemId,
             ordinal: 1,
-            status: "PLAYING",
-            playtimeMinutes: 120,
+            status: "FINISHED",
+            finishedAt: new Date("2024-03-01T00:00:00.000Z"),
           },
         });
-        await db.prisma.journalEntry.create({
-          data: {
-            userId: "ggd-user-pt-entries",
-            gameId,
-            playthroughId: playthrough.id,
-            content: "Earlier entry",
-            kind: "QUICK",
-            createdAt: new Date("2024-02-01T00:00:00.000Z"),
-            updatedAt: new Date("2024-02-01T00:00:00.000Z"),
-          },
+        await db.prisma.user.create({ data: makeUser("pt-other") });
+
+        const result = await getGameDetails({
+          slug: GAME_SLUG,
+          userId: "ggd-user-pt-other",
         });
-        await db.prisma.journalEntry.create({
+
+        expect(result.history).toEqual([]);
+      });
+
+      it("carries no playthroughs payload and a single rating", async () => {
+        const { libraryItemId } = await seedUserAndLibrary("pt-shape", "DONE");
+        await db.prisma.libraryItem.update({
+          where: { id: libraryItemId },
+          data: { rating: 7 },
+        });
+        await db.prisma.playthrough.create({
           data: {
-            userId: "ggd-user-pt-entries",
-            gameId,
-            playthroughId: playthrough.id,
-            content: "Later entry",
-            kind: "QUICK",
-            createdAt: new Date("2024-02-10T00:00:00.000Z"),
-            updatedAt: new Date("2024-02-10T00:00:00.000Z"),
+            libraryItemId,
+            ordinal: 1,
+            status: "FINISHED",
+            rating: 9,
+            finishedAt: new Date("2024-03-01T00:00:00.000Z"),
           },
         });
 
         const result = await getGameDetails({
           slug: GAME_SLUG,
-          userId: "ggd-user-pt-entries",
+          userId: "ggd-user-pt-shape",
         });
 
-        const run = result.playthroughs[0]!;
-        expect(run.journalEntries).toHaveLength(2);
-        // Ordered createdAt desc — most recent first
-        expect(run.journalEntries[0]!.content).toBe("Later entry");
-        expect(run.journalEntries[1]!.content).toBe("Earlier entry");
+        expect(result).not.toHaveProperty("playthroughs");
+        expect(result.libraryEntry?.rating).toBe(7);
+        expect(JSON.stringify(result.history)).not.toContain("rating");
+        expect(JSON.stringify(result.history)).not.toContain("journalEntries");
       });
     });
   });

@@ -9,11 +9,9 @@ import type {
   Game,
   JournalEntry,
   LibraryItem,
-  Playthrough,
 } from "../../../../shared/lib/prisma/client.ts";
+import { getEndedPlays, type EndedPlay } from "./get-ended-plays.server";
 import { upsertThinGameFromIgdbDetailsPayload } from "./upsert-game.server";
-
-type PlaythroughWithEntries = Playthrough & { journalEntries: JournalEntry[] };
 
 const RECENT_SESSION_LIMIT = 9;
 
@@ -73,7 +71,8 @@ export interface GameDetails {
   playtimeSessionCount: number;
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
-  playthroughs: PlaythroughWithEntries[];
+  /** Ended plays, newest first; the owner's own game only, empty otherwise. */
+  history: EndedPlay[];
 }
 
 export async function getGameDetails(params: {
@@ -95,11 +94,11 @@ export async function getGameDetails(params: {
   let playtimeTotalMinutes = 0;
   let playtimeSessionCount = 0;
   let recentSessionMinutes: number[] = [];
-  let playthroughs: PlaythroughWithEntries[] = [];
+  let history: EndedPlay[] = [];
 
   if (userId) {
     // Step 1: fetch library entry + journal aggregates in parallel.
-    // Playthrough query depends on libraryEntry.id so it must come after.
+    // History query depends on libraryEntry.id so it must come after.
     const [entry, userNotes, sessionAggregate, recentMinutesRows] =
       await Promise.all([
         prisma.libraryItem.findFirst({
@@ -141,13 +140,9 @@ export async function getGameDetails(params: {
       .map((row) => row.playedMinutes as number)
       .reverse();
 
-    // Step 2: fetch playthroughs by libraryEntry.id (dependent read — no N+1).
+    // Step 2: ended plays by libraryEntry.id (dependent read).
     if (libraryEntry) {
-      playthroughs = await prisma.playthrough.findMany({
-        where: { libraryItemId: libraryEntry.id },
-        include: { journalEntries: { orderBy: { createdAt: "desc" } } },
-        orderBy: { ordinal: "desc" },
-      });
+      history = await getEndedPlays(userId, libraryEntry.id);
     }
   }
 
@@ -161,6 +156,6 @@ export async function getGameDetails(params: {
     playtimeTotalMinutes,
     playtimeSessionCount,
     recentSessionMinutes,
-    playthroughs,
+    history,
   };
 }
