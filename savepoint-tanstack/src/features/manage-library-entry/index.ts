@@ -8,7 +8,7 @@ export {
 export { setStatusFn } from "./api/set-status-fn";
 export type { SetStatusResult } from "./api/set-status-fn.worker";
 
-export { useSetOwnership, useSetStatus } from "./model";
+export { changeStatusWithUndo, useSetOwnership, useSetStatus } from "./model";
 export type {
   UseSetOwnershipArgs,
   UseSetOwnershipResult,
