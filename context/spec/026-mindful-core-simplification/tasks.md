@@ -213,7 +213,7 @@ Verify-task conventions:
     - The Journal filter "No game" lists only notes without a game.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 8: Done follow-up and optional prompts**
+- [x] **Slice 8: Done follow-up and optional prompts**
 
   > Spec §2.7, §2.8.
   - [x] Server:
@@ -227,7 +227,7 @@ Verify-task conventions:
     - `GamePrompts` (Enter/Save, × dismiss, hidden while Playing).
     - The "why" field in `AddConfirmation`; its timer pauses while it is focused or being typed in.
     - Prompt answers are headed by their question. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Skip → Done with nothing recorded.
     - Let go plus a note → "Done · Let go" and a note headed "What stayed with you?". A friend sees "Done" only.
     - A dismissed prompt doesn't return.
