@@ -12,3 +12,8 @@ export type {
   SetLibraryItemStatusResult,
   SetLibraryItemStatusUndo,
 } from "./set-library-item-status.server";
+export type { RestoreLibraryItemResult } from "./restore-library-item.server";
+export type {
+  MoveInUpNextTarget,
+  UpNextQueueEntry,
+} from "./move-in-up-next.server";

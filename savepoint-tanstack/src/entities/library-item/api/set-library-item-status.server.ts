@@ -5,8 +5,8 @@ import type {
   DoneOutcome,
   LibraryItem,
   LibraryItemStatus,
-  Prisma,
 } from "../../../../shared/lib/prisma/client.ts";
+import { compactQueueAfter, lockUserQueue } from "./up-next-queue.server";
 
 export type LibraryItemStatusSnapshot = {
   status: LibraryItemStatus;
@@ -32,7 +32,7 @@ export async function setLibraryItemStatus(
   to: LibraryItemStatus
 ): Promise<SetLibraryItemStatusResult> {
   return prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
+    await lockUserQueue(tx, userId);
 
     const owned = await tx.libraryItem.findFirst({
       where: { id, userId },
@@ -115,22 +115,4 @@ export async function setLibraryItemStatus(
 
     return { item, undo: { snapshot, createdPlayId, closedPlayId } };
   });
-}
-
-async function compactQueueAfter(
-  tx: Prisma.TransactionClient,
-  userId: string,
-  vacatedPosition: number
-): Promise<void> {
-  const behind = await tx.libraryItem.findMany({
-    where: { userId, upNextPosition: { gt: vacatedPosition } },
-    orderBy: { upNextPosition: "asc" },
-    select: { id: true, upNextPosition: true },
-  });
-  for (const row of behind) {
-    await tx.libraryItem.update({
-      where: { id: row.id },
-      data: { upNextPosition: (row.upNextPosition as number) - 1 },
-    });
-  }
 }
