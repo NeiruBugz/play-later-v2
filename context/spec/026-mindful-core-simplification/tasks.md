@@ -111,7 +111,7 @@ Verify-task conventions:
     - Offline: the status reverts with "Couldn't save. Try again."
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 4: Up Next queue**
+- [x] **Slice 4: Up Next queue**
 
   > Spec §2.4.
   - [x] Queue operations in entities:
@@ -128,7 +128,7 @@ Verify-task conventions:
     - `QueueMarker` on cards, search, palette and the add dialog.
     - Home top-3 rail with "See all" and the empty copy. **[Agent: react-frontend]**
   - [x] Desktop drag: add `@dnd-kit/core` and `@dnd-kit/sortable` at exact pinned versions, lazy-loaded, desktop only, calling `moveInUpNextFn`. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Queue 5: numbered 1–5. A 6th shows the full message.
     - Move and drag reorders persist after reload.
     - Start #1: it leaves the queue and the rest renumber.
@@ -136,12 +136,12 @@ Verify-task conventions:
     - Home shows the top 3 and the empty state.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 5: Owned or not**
+- [x] **Slice 5: Owned or not**
 
   > Spec §2.5 (audit N8).
   - [x] Add `setOwnership` and `setOwnershipFn`, plus `notOwnedOnly` in `getLibrary`. Friends' reads never expose ownership. Remove the acquisition filter from the library query and params. Tests. **[Agent: tanstack-fullstack]**
   - [x] UI: the ownership toggle, the `NotOwnedTag`, and the "Not owned only" toggle (Want filter only). Delete the Acquisition filter UI (`filter-library/lib/acquisition.ts`, desktop and mobile). **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - The not-owned tag survives Playing → Want.
     - The toggle lists only not-owned Want games.
     - No Acquisition filter at 390 or 1440 px.
