@@ -75,6 +75,15 @@ describe("LogForm", () => {
     });
   });
 
+  describe("the note field", () => {
+    it("invites an optional note without asking a follow-up question", async () => {
+      await renderForm();
+      expect(elements.note()).toHaveAttribute(
+        "placeholder", "Add a note (optional)"
+      );
+    });
+  });
+
   describe("when opened without a game", () => {
     it("lists library games with a search field that filters them", async () => {
       const user = userEvent.setup();

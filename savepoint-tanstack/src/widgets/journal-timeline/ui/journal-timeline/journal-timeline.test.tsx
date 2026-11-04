@@ -151,6 +151,10 @@ describe("JournalTimeline", () => {
       ).toBeDefined();
     });
 
+    it("shows no placeholder letters in place of a cover", () => {
+      expect(screen.queryByText("??")).toBeNull();
+    });
+
     it("does not render a broken image element for the missing cover", () => {
       const imgs = screen.queryAllByRole("img");
       for (const img of imgs) {

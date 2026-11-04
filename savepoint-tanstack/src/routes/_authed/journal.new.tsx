@@ -21,7 +21,7 @@ function NewNoteRoute() {
   const navigate = useNavigate();
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <section className="container mx-auto px-4 py-6">
       <div className="space-y-xl mx-auto max-w-3xl">
         <header className="space-y-md">
           <h1 className="text-h1">New note</h1>
@@ -34,6 +34,6 @@ function NewNoteRoute() {
           onClose={() => void navigate({ to: "/journal" })}
         />
       </div>
-    </main>
+    </section>
   );
 }

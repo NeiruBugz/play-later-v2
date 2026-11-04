@@ -46,12 +46,9 @@ export function GameDetailDetailRail({
 
       {libraryControlsProps !== null ? (
         <Card variant="flat" className="p-5">
-          <p className="text-caption text-muted-foreground mb-3 tracking-widest uppercase">
-            Your time
-          </p>
           <dl className="flex flex-col gap-3 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Total played</dt>
+              <dt className="text-muted-foreground">Time played</dt>
               <dd className="font-semibold tabular-nums">
                 {playtimeTotalMinutes > 0
                   ? formatHours(playtimeTotalMinutes)

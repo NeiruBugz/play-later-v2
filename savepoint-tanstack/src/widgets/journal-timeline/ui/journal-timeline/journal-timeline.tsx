@@ -1,3 +1,5 @@
+import { NotebookPen } from "lucide-react";
+
 import { JournalEntryCard } from "@/entities/journal-entry/ui/journal-entry-card";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -85,9 +87,13 @@ function CoverAvatar({ game }: CoverAvatarProps) {
           className="bg-muted flex size-full items-center justify-center"
           aria-hidden="true"
         >
-          <span className="text-caption text-muted-foreground font-mono select-none">
-            {game?.title?.slice(0, 2).toUpperCase() ?? "??"}
-          </span>
+          {game ? (
+            <span className="text-caption text-muted-foreground font-mono select-none">
+              {game.title.slice(0, 2).toUpperCase()}
+            </span>
+          ) : (
+            <NotebookPen className="text-muted-foreground size-4" />
+          )}
         </div>
       )}
     </div>

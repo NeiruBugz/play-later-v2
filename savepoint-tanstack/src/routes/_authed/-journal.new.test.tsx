@@ -43,4 +43,9 @@ describe("/journal/new route", () => {
     renderRoute({});
     expect(screen.getByRole("heading", { name: "New note" })).toBeDefined();
   });
+
+  it("does not nest a main landmark inside the app shell", () => {
+    renderRoute({});
+    expect(screen.queryByRole("main")).toBeNull();
+  });
 });

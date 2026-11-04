@@ -181,7 +181,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
           id="log-form-note"
           value={content}
           onChange={(event) => setContent(event.target.value)}
-          placeholder="What stayed with you?"
+          placeholder="Add a note (optional)"
           className="min-h-[100px]"
         />
       </div>

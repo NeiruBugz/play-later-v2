@@ -45,7 +45,7 @@ export function GameDetail({
     playtimeTotalMinutes,
     playtimeSessionCount,
   } = data;
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate();
 
   type DrawerState =
     | { open: false }

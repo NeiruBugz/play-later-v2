@@ -19,10 +19,14 @@ import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
 const mockNavigate = vi.fn();
+const mockUseNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn() }),
-  useNavigate: () => mockNavigate,
+  useNavigate: (options?: unknown) => {
+    mockUseNavigate(options);
+    return mockNavigate;
+  },
   Link: ({ to, children, ...rest }: any) => (
     <a href={to} {...rest}>
       {children}
@@ -1086,6 +1090,28 @@ describe("GameDetail", () => {
       });
     });
 
+    it("navigates relative to the current page so the game page stays open", async () => {
+      mockNavigate.mockReset();
+      mockUseNavigate.mockReset();
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+
+      const rail = screen.getByTestId("game-detail-detail-rail");
+      await userEvent.click(
+        within(rail).getByRole("button", { name: "Log time" })
+      );
+
+      expect(mockNavigate.mock.calls[0]![0].to).toBe(".");
+      for (const [options] of mockUseNavigate.mock.calls) {
+        expect(options?.from).toBeUndefined();
+      }
+    });
+
     it("shows no Log time when the game is not in the viewer's library", () => {
       render(
         <GameDetail
@@ -1158,9 +1184,9 @@ describe("GameDetail", () => {
         expect(ring).not.toBeNull();
       });
 
-      it("renders a Your time summary section inside the detail rail", () => {
+      it("shows the Time played label inside the detail rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
-        expect(within(rail).queryByText("Your time")).not.toBeNull();
+        expect(within(rail).queryByText("Time played")).not.toBeNull();
       });
 
       it("renders the jump spine in the DOM (both mobile and desktop variants)", () => {
@@ -1205,12 +1231,14 @@ describe("GameDetail", () => {
         );
       });
 
-      it("shows total played time in the Your time section inside the rail", () => {
+      it("shows time played and no old labels inside the rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
-        expect(within(rail).queryByText("Total played")).not.toBeNull();
+        expect(within(rail).queryByText("Time played")).not.toBeNull();
+        expect(within(rail).queryByText("Total played")).toBeNull();
+        expect(within(rail).queryByText("Your time")).toBeNull();
       });
 
-      it("shows sessions count in the Your time section inside the rail", () => {
+      it("shows the sessions count inside the rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
         expect(within(rail).queryByText("Sessions")).not.toBeNull();
       });
