@@ -21,7 +21,6 @@ export type StatusLensProps = {
   counts?: LibraryStatusCounts;
   platform: string | undefined;
   acquisition: string | undefined;
-  startedOnly: boolean | undefined;
   minRating: number | undefined;
   unratedOnly: boolean | undefined;
   sortBy: LibrarySortBy;

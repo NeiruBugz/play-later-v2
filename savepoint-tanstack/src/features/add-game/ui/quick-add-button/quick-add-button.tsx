@@ -13,7 +13,7 @@ type Phase = "idle" | "adding" | "added";
 
 /**
  * One-tap add for a search result. Adds the game at its default status
- * (SHELF) without opening the full add modal — the compact "+" affordance
+ * (Want) without opening the full add modal — the compact "+" affordance
  * F08 surfaces on unowned search cards. Once added, it locks into a checkmark
  * so the row reads as owned without a full page refresh.
  */
@@ -49,7 +49,7 @@ export function QuickAddButton({ igdbId, gameTitle }: QuickAddButtonProps) {
       className={cn(
         "inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow-md transition-colors [&_svg]:size-4",
         isAdded
-          ? "bg-[var(--status-played)] text-white"
+          ? "bg-[var(--status-done)] text-white"
           : "bg-primary text-primary-foreground hover:bg-primary/90"
       )}
     >

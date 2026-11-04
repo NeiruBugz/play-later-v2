@@ -71,8 +71,7 @@ export function DashboardJumpBackInHero({
           <div className="flex min-w-0 flex-1 flex-col">
             <LibraryStatusBadge
               status="PLAYING"
-              hasBeenPlayed
-              className="mb-1.5 self-start uppercase"
+              className="mb-1.5 self-start"
             />
             <Link
               to="/games/$slug"

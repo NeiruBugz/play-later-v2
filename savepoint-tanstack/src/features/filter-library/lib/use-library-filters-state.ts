@@ -12,7 +12,6 @@ export type LibraryFiltersStateInput = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
   acquisition: LibraryAcquisition | undefined;
-  startedOnly: boolean | undefined;
   minRating: number | undefined;
   unratedOnly: boolean | undefined;
   sortBy: LibrarySortBy;
@@ -22,7 +21,6 @@ export type LibraryFiltersStateInput = {
 export type LibraryFiltersState = {
   currentStatus: LibraryStatus | "__all__";
   currentAcquisition: LibraryAcquisition | undefined;
-  startedOnly: boolean;
   sortValue: string;
   platformValue: string;
   hasActiveFilters: boolean;
@@ -30,7 +28,6 @@ export type LibraryFiltersState = {
   onStatusPick: (value: LibraryStatus) => void;
   onStatusAll: () => void;
   onAcquisitionPick: (value: LibraryAcquisition) => void;
-  onStartedOnlyChange: (checked: boolean) => void;
   onPlatformChange: (raw: string) => void;
   onSortChange: (raw: string) => void;
   onMinRatingChange: (next: number | null) => void;
@@ -51,7 +48,6 @@ export function useLibraryFiltersState(
     status,
     platform,
     acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
@@ -64,7 +60,6 @@ export function useLibraryFiltersState(
       status: LibraryStatus | undefined;
       platform: string | undefined;
       acquisition: LibraryAcquisition | undefined;
-      startedOnly: boolean | undefined;
       minRating: number | undefined;
       unratedOnly: boolean | undefined;
       sortBy: LibrarySortBy;
@@ -77,7 +72,6 @@ export function useLibraryFiltersState(
         status,
         platform,
         acquisition,
-        startedOnly,
         minRating,
         unratedOnly,
         sortBy,
@@ -95,7 +89,6 @@ export function useLibraryFiltersState(
     (status !== undefined ? 1 : 0) +
     (platform !== undefined ? 1 : 0) +
     (acquisition !== undefined ? 1 : 0) +
-    (startedOnly === true ? 1 : 0) +
     (minRating !== undefined ? 1 : 0) +
     (unratedOnly === true ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0;
@@ -108,10 +101,6 @@ export function useLibraryFiltersState(
 
   const onAcquisitionPick = (value: LibraryAcquisition) => {
     updateSearch({ acquisition: acquisition === value ? undefined : value });
-  };
-
-  const onStartedOnlyChange = (checked: boolean) => {
-    updateSearch({ startedOnly: checked ? true : undefined });
   };
 
   const onPlatformChange = (raw: string) => {
@@ -139,7 +128,6 @@ export function useLibraryFiltersState(
       status: undefined,
       platform: undefined,
       acquisition: undefined,
-      startedOnly: undefined,
       minRating: undefined,
       unratedOnly: undefined,
       sortBy: "updatedAt",
@@ -151,7 +139,6 @@ export function useLibraryFiltersState(
   return {
     currentStatus,
     currentAcquisition: acquisition,
-    startedOnly: startedOnly === true,
     sortValue,
     platformValue,
     hasActiveFilters,
@@ -159,7 +146,6 @@ export function useLibraryFiltersState(
     onStatusPick,
     onStatusAll,
     onAcquisitionPick,
-    onStartedOnlyChange,
     onPlatformChange,
     onSortChange,
     onMinRatingChange,

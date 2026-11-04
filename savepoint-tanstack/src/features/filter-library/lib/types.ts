@@ -5,12 +5,7 @@
  * consume from here to stay in lockstep.
  */
 
-export type LibraryStatus =
-  | "PLAYING"
-  | "PLAYED"
-  | "UP_NEXT"
-  | "SHELF"
-  | "WISHLIST";
+export type LibraryStatus = "WANT" | "PLAYING" | "DONE";
 
 export type LibrarySortBy = "updatedAt" | "createdAt" | "title";
 export type LibrarySortOrder = "asc" | "desc";

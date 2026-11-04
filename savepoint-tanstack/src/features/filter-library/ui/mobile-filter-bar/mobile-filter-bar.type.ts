@@ -10,7 +10,6 @@ export type MobileFilterBarProps = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
   acquisition: LibraryAcquisition | undefined;
-  startedOnly: boolean | undefined;
   minRating: number | undefined;
   unratedOnly: boolean | undefined;
   sortBy: LibrarySortBy;

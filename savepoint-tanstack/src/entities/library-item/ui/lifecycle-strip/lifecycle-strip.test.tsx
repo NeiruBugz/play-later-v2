@@ -36,11 +36,11 @@ describe("LibraryLifecycleStrip", () => {
     });
   });
 
-  describe("given an untouched shelf game", () => {
+  describe("given an untouched Want game", () => {
     beforeEach(() => {
       render(
         <LibraryLifecycleStrip
-          status="SHELF"
+          status="WANT"
           createdAt={daysAgo(320)}
           startedAt={null}
           completedAt={null}
@@ -63,7 +63,7 @@ describe("LibraryLifecycleStrip", () => {
     beforeEach(() => {
       render(
         <LibraryLifecycleStrip
-          status="PLAYED"
+          status="DONE"
           createdAt={daysAgo(90)}
           startedAt={daysAgo(80)}
           completedAt={daysAgo(10)}

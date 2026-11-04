@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
-import { LIBRARY_STATUS_LABELS } from "@/entities/library-item/model";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
-import { DatePicker } from "@/shared/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -17,20 +15,13 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { RatingInput } from "@/shared/ui/rating-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
 import { getPlatformOptionsFn } from "../../api/get-platform-options";
 import { type PlatformOptions } from "../../api/get-platform-options.constants";
 import { searchPlatformsFn } from "../../api/search-platforms-fn";
 import { RemoveFromLibraryDialog } from "../remove-from-library-dialog";
-import { STATUS_VALUES, useLibraryModalForm } from "./library-modal.utility";
+import { useLibraryModalForm } from "./library-modal.utility";
 import { PlatformCombobox } from "./platform-combobox";
 
 type LibraryModalProps = {
@@ -71,16 +62,10 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
   }, [entry.game.id]);
 
   const {
-    status,
-    setStatus,
     platform,
     setPlatform,
     rating,
     setRating,
-    startedAt,
-    setStartedAt,
-    completedAt,
-    setCompletedAt,
     error,
     isSubmitting,
     handleSubmit,
@@ -91,34 +76,10 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{entry.game.title}</DialogTitle>
-          <DialogDescription>
-            Update status, rating, platform, and play dates.
-          </DialogDescription>
+          <DialogDescription>Update rating and platform.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="gap-md flex flex-col">
-          <div className="gap-xs flex flex-col text-sm">
-            <span id="library-modal-status-label">Status</span>
-            <Select
-              value={status}
-              onValueChange={(next) => setStatus(next as typeof status)}
-            >
-              <SelectTrigger
-                aria-label="Status"
-                aria-labelledby="library-modal-status-label"
-              >
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_VALUES.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {LIBRARY_STATUS_LABELS[value]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="gap-xs flex flex-col text-sm">
             <span id="library-modal-platform-label">Platform</span>
             <PlatformCombobox
@@ -137,35 +98,6 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
               value={rating === "" ? null : Number.parseInt(rating, 10)}
               onChange={(next) => setRating(next === null ? "" : String(next))}
             />
-          </div>
-
-          <div className="gap-xs flex flex-col text-sm">
-            <span id="library-modal-started-label">Started</span>
-            <DatePicker
-              ariaLabel="Started"
-              value={startedAt}
-              onChange={setStartedAt}
-            />
-          </div>
-
-          <div className="gap-xs flex flex-col text-sm">
-            <span id="library-modal-completed-label">Completed</span>
-            <DatePicker
-              ariaLabel="Completed"
-              value={completedAt}
-              onChange={setCompletedAt}
-            />
-            {completedAt === null ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onClick={() => setCompletedAt(new Date())}
-              >
-                Mark complete
-              </Button>
-            ) : null}
           </div>
 
           {error !== null ? (

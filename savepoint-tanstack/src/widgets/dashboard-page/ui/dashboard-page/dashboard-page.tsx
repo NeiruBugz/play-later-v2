@@ -11,11 +11,7 @@ import { buildEyebrowDate, buildGreeting } from "./dashboard-page.utility";
 
 export function DashboardPage({ data }: DashboardPageProps) {
   const total =
-    data.statusCounts.WISHLIST +
-    data.statusCounts.SHELF +
-    data.statusCounts.UP_NEXT +
-    data.statusCounts.PLAYING +
-    data.statusCounts.PLAYED;
+    data.statusCounts.WANT + data.statusCounts.PLAYING + data.statusCounts.DONE;
 
   const mostInProgressGame = data.quickLogGames[0] ?? null;
   const now = new Date();
@@ -65,8 +61,8 @@ export function DashboardPage({ data }: DashboardPageProps) {
             <DashboardGameRail
               title="Up next"
               items={data.upNext.items}
-              viewAll={{ status: "UP_NEXT" }}
-              viewAllLabel="View All Up Next"
+              viewAll={{ status: "WANT" }}
+              viewAllLabel="View All Want"
               emptyMessage="No games queued up"
             />
 

@@ -12,7 +12,6 @@ import { Button } from "@/shared/ui/button";
 import { AcquisitionList } from "../acquisition-list";
 import { PlatformSelect } from "../platform-select";
 import { SortSelect } from "../sort-select";
-import { StartedOnlyToggle } from "../started-only-toggle";
 import { StatusList } from "../status-list";
 
 export type {
@@ -27,7 +26,6 @@ export type LibraryFiltersProps = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
   acquisition: LibraryAcquisition | undefined;
-  startedOnly: boolean | undefined;
   minRating: number | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
@@ -56,7 +54,6 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     status,
     platform,
     acquisition,
-    startedOnly,
     minRating,
     sortBy,
     sortOrder,
@@ -68,14 +65,12 @@ export function LibraryFilters(props: LibraryFiltersProps) {
   const {
     currentStatus,
     currentAcquisition,
-    startedOnly: startedOnlyChecked,
     sortValue,
     platformValue,
     hasActiveFilters,
     onStatusPick,
     onStatusAll,
     onAcquisitionPick,
-    onStartedOnlyChange,
     onPlatformChange,
     onSortChange,
     onClearAll,
@@ -83,7 +78,6 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     status,
     platform,
     acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
@@ -136,17 +130,6 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           current={currentAcquisition}
           onPick={onAcquisitionPick}
           variant="sidebar"
-        />
-      </section>
-
-      <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
-          Activity
-        </p>
-        <StartedOnlyToggle
-          id="sidebar-started-only"
-          checked={startedOnlyChecked}
-          onCheckedChange={onStartedOnlyChange}
         />
       </section>
 

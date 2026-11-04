@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 
+import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { ManageFromGameDetailButton } from "./manage-from-game-detail-button";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -28,30 +29,11 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
   searchPlatformsFn: vi.fn(() => Promise.resolve([])),
 }));
 
-const buildEntry = (): LibraryItemWithGame => ({
-  id: 1,
-  userId: "user-1",
-  gameId: "game-1",
-  status: "PLAYING",
-  platform: "PC",
-  rating: null,
-  createdAt: new Date("2025-01-01T00:00:00Z"),
-  updatedAt: new Date("2025-01-02T00:00:00Z"),
-  statusChangedAt: null,
-  acquisitionType: "DIGITAL",
-  startedAt: null,
-  completedAt: null,
-  hasBeenPlayed: false,
-  statusIsManual: false,
-  game: {
-    id: "game-1",
-    igdbId: 1,
-    title: "Hollow Knight",
-    slug: "hollow-knight",
-    coverImage: null,
-    releaseDate: null,
-  },
-});
+const buildEntry = (): LibraryItemWithGame =>
+  buildLibraryItemWithGame(
+    { id: 1, status: "PLAYING", platform: "PC" },
+    { id: "game-1", title: "Hollow Knight", slug: "hollow-knight" }
+  );
 
 const elements = {
   getButton: () =>

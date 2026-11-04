@@ -15,7 +15,6 @@ const defaultProps = {
   status: undefined,
   platform: undefined,
   acquisition: undefined,
-  startedOnly: undefined,
   minRating: undefined,
   unratedOnly: undefined,
   sortBy: "updatedAt" as const,
@@ -41,8 +40,6 @@ const elements = {
     screen.getByRole("switch", { name: "Show only unrated games" }),
   getAcquisitionOption: (label: string) =>
     screen.getByRole("button", { name: `Filter by ${label}` }),
-  getStartedSwitch: () =>
-    screen.getByRole("switch", { name: "Hide untouched games" }),
   queryClearAllButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
   getClearAllButton: () =>
@@ -68,7 +65,6 @@ const actions = {
   toggleUnrated: () => userEvent.click(elements.getUnratedSwitch()),
   pickAcquisition: (label: string) =>
     userEvent.click(elements.getAcquisitionOption(label)),
-  toggleStarted: () => userEvent.click(elements.getStartedSwitch()),
   clearAll: () => userEvent.click(elements.getClearAllButton()),
   clearMinRating: () => userEvent.click(elements.getClearMinRatingButton()),
 };
@@ -101,11 +97,9 @@ describe("MobileFilterBar", () => {
 
     it("renders all filter controls inside the sheet", async () => {
       await elements.findDialog();
-      expect(elements.getStatusFilterButton("Up Next")).toBeDefined();
+      expect(elements.getStatusFilterButton("Want")).toBeDefined();
       expect(elements.getStatusFilterButton("Playing")).toBeDefined();
-      expect(elements.getStatusFilterButton("Shelf")).toBeDefined();
-      expect(elements.getStatusFilterButton("Played")).toBeDefined();
-      expect(elements.getStatusFilterButton("Wishlist")).toBeDefined();
+      expect(elements.getStatusFilterButton("Done")).toBeDefined();
       expect(elements.getPlatformTrigger()).toBeDefined();
       expect(elements.getSortTrigger()).toBeDefined();
       expect(elements.getMinRatingSlider()).toBeDefined();
@@ -262,7 +256,6 @@ describe("MobileFilterBar", () => {
           status="PLAYING"
           platform="PC"
           acquisition={undefined}
-          startedOnly={undefined}
           minRating={7}
           unratedOnly={true}
           sortBy="title"
@@ -312,23 +305,6 @@ describe("MobileFilterBar", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
           search: expect.objectContaining({ acquisition: "PHYSICAL" }),
-        })
-      );
-    });
-  });
-
-  describe("given the user enables 'Only games I've started' in the sheet", () => {
-    beforeEach(async () => {
-      render(<MobileFilterBar {...defaultProps} />);
-      await actions.openSheet();
-      await elements.findDialog();
-      await actions.toggleStarted();
-    });
-
-    it("calls navigate with search.startedOnly set to true", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ startedOnly: true }),
         })
       );
     });

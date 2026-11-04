@@ -8,7 +8,7 @@ const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
 describe("computeLifecycleStrip", () => {
   describe("given a completed item", () => {
     const model = computeLifecycleStrip({
-      status: "PLAYED",
+      status: "DONE",
       createdAt: daysAgo(90),
       startedAt: daysAgo(80),
       completedAt: daysAgo(10),
@@ -52,9 +52,9 @@ describe("computeLifecycleStrip", () => {
     });
   });
 
-  describe("given an untouched shelf item", () => {
+  describe("given an untouched Want item", () => {
     const model = computeLifecycleStrip({
-      status: "SHELF",
+      status: "WANT",
       createdAt: daysAgo(320),
       startedAt: null,
       completedAt: null,
@@ -69,9 +69,9 @@ describe("computeLifecycleStrip", () => {
     });
   });
 
-  describe("given a tried-then-shelved item (started, no completion, not playing)", () => {
+  describe("given a Want item that was started earlier (started, no completion, not playing)", () => {
     const model = computeLifecycleStrip({
-      status: "SHELF",
+      status: "WANT",
       createdAt: daysAgo(200),
       startedAt: daysAgo(150),
       completedAt: null,

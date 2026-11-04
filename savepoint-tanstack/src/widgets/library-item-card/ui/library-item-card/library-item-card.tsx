@@ -1,6 +1,5 @@
 import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
-  isTouched,
   LibraryLifecycleStrip,
   LibraryStatusBadge,
   resolveAcquisitionEmphasis,
@@ -24,12 +23,6 @@ export function LibraryItemCard({
 }: LibraryItemCardProps) {
   const hasPlatform =
     typeof item.platform === "string" && item.platform.trim().length > 0;
-  // F04: a started-then-shelved game reads differently from one never touched.
-  // "Touched" is derived from real play signals (startedAt / completedAt /
-  // status) — see isTouched — not the dead `hasBeenPlayed` flag.
-  const touched = isTouched(item);
-  const isTried =
-    touched && (item.status === "SHELF" || item.status === "WISHLIST");
   // F03: the chip flags non-default acquisition (subscription / physical);
   // the DIGITAL default stays implicit to keep the row clean.
   const showAcquisitionChip = shouldShowAcquisitionChip(item.acquisitionType);
@@ -55,17 +48,8 @@ export function LibraryItemCard({
           density="minimal"
           coverAccentClassName={getStatusCoverAccent(item.status)}
           badges={
-            <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
-              <LibraryStatusBadge
-                status={item.status}
-                hasBeenPlayed={touched}
-                className="uppercase"
-              />
-              {isTried ? (
-                <span className="bg-foreground text-background rounded-full px-2 py-0.5 text-[10px] leading-none font-semibold tracking-wide uppercase">
-                  Tried
-                </span>
-              ) : null}
+            <div className="absolute bottom-2 left-2 flex flex-col items-start gap-1 md:top-2 md:bottom-auto">
+              <LibraryStatusBadge status={item.status} />
             </div>
           }
         />

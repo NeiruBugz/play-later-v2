@@ -18,9 +18,9 @@ import type { GameResultItemProps } from "./game-result-item.type";
  * statically-typed TanStack `<Link>` so back-button history works and the
  * test contract can assert on the resolved `href`.
  *
- * Also renders an "Add to Up Next" quick action (canonical's `showAddHint` +
- * `useQuickAddFromPalette`). Clicking it adds the game to the library at
- * `UP_NEXT` and surfaces an undo toast, instead of navigating.
+ * Also renders an "Add" quick action (canonical's `showAddHint` +
+ * `useQuickAddFromPalette`). Clicking it adds the game to the library as
+ * `WANT` and surfaces an undo toast, instead of navigating.
  */
 export function GameResultItem({
   igdbId,
@@ -43,7 +43,7 @@ export function GameResultItem({
     try {
       const { id } = await quickAddToLibraryFn({ data: { igdbId } });
       showUndoToast({
-        message: `Added "${name}" to Up Next`,
+        message: `Added "${name}" to Want`,
         onUndo: () => {
           void (async () => {
             try {
@@ -103,14 +103,14 @@ export function GameResultItem({
         disabled={isAdding}
         onClick={handleQuickAdd}
         onMouseDown={(event) => event.preventDefault()}
-        aria-label={`Add ${name} to Up Next`}
+        aria-label={`Add ${name}`}
       >
         {isAdding ? (
           <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
         ) : (
           <Plus className="h-3 w-3" aria-hidden="true" />
         )}
-        Add to Up Next
+        Add
       </Button>
     </CommandItem>
   );

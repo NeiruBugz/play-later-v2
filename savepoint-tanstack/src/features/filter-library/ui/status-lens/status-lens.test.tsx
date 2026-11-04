@@ -13,11 +13,9 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 const defaultCounts: LibraryStatusCounts = {
+  WANT: 12,
   PLAYING: 3,
-  UP_NEXT: 5,
-  SHELF: 12,
-  PLAYED: 47,
-  WISHLIST: 8,
+  DONE: 47,
 };
 
 const defaultProps = {
@@ -27,7 +25,6 @@ const defaultProps = {
   sortOrder: "desc" as const,
   platform: undefined as string | undefined,
   acquisition: undefined as string | undefined,
-  startedOnly: undefined as boolean | undefined,
   minRating: undefined as number | undefined,
   unratedOnly: undefined as boolean | undefined,
 };
@@ -36,16 +33,13 @@ const elements = {
   getLens: () => screen.getByRole("tablist", { name: "Filter by status" }),
   getAllTab: () => screen.getByRole("tab", { name: /All/ }),
   getPlayingTab: () => screen.getByRole("tab", { name: /Playing/ }),
-  getPlayedTab: () => screen.getByRole("tab", { name: /Played/ }),
-  getUpNextTab: () => screen.getByRole("tab", { name: /Up Next/ }),
-  getShelfTab: () => screen.getByRole("tab", { name: /Shelf/ }),
-  getWishlistTab: () => screen.getByRole("tab", { name: /Wishlist/ }),
+  getDoneTab: () => screen.getByRole("tab", { name: /Done/ }),
+  getWantTab: () => screen.getByRole("tab", { name: /Want/ }),
 };
 
 const actions = {
   clickPlaying: () => userEvent.click(elements.getPlayingTab()),
   clickAll: () => userEvent.click(elements.getAllTab()),
-  clickPlayed: () => userEvent.click(elements.getPlayedTab()),
 };
 
 describe("StatusLens", () => {
@@ -70,20 +64,21 @@ describe("StatusLens", () => {
       expect(elements.getPlayingTab().textContent).toContain("3");
     });
 
-    it("renders the Played tab with count", () => {
-      expect(elements.getPlayedTab().textContent).toContain("47");
+    it("renders the Done tab with count", () => {
+      expect(elements.getDoneTab().textContent).toContain("47");
     });
 
-    it("renders the Up Next tab with count", () => {
-      expect(elements.getUpNextTab().textContent).toContain("5");
+    it("renders the Want tab with count", () => {
+      expect(elements.getWantTab().textContent).toContain("12");
     });
 
-    it("renders the Shelf tab with count", () => {
-      expect(elements.getShelfTab().textContent).toContain("12");
-    });
-
-    it("renders the Wishlist tab with count", () => {
-      expect(elements.getWishlistTab().textContent).toContain("8");
+    it("renders exactly the All, Want, Playing and Done tabs", () => {
+      expect(screen.getAllByRole("tab").map((t) => t.textContent)).toEqual([
+        "All62",
+        "Want12",
+        "Playing3",
+        "Done47",
+      ]);
     });
 
     it("the All tab is selected when no status filter is active", () => {

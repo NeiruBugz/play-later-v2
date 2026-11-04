@@ -12,13 +12,11 @@ const elements = {
 describe("LibraryStatusBadge", () => {
   describe("given each LibraryItemStatus value", () => {
     it.each([
+      ["WANT", "Want"],
       ["PLAYING", "Playing"],
-      ["PLAYED", "Played"],
-      ["UP_NEXT", "Up Next"],
-      ["SHELF", "Shelf"],
-      ["WISHLIST", "Wishlist"],
+      ["DONE", "Done"],
     ] as const)(
-      "renders %s with label %s and an aria-label",
+      "renders %s with title-case label %s and an aria-label",
       (status: LibraryItemStatus, label: string) => {
         render(<LibraryStatusBadge status={status} />);
         const badge = elements.getBadge();
@@ -29,21 +27,18 @@ describe("LibraryStatusBadge", () => {
     );
   });
 
-  describe("given status UP_NEXT and hasBeenPlayed=true", () => {
-    it("renders the Replay label", () => {
-      render(<LibraryStatusBadge status="UP_NEXT" hasBeenPlayed />);
-      expect(elements.getBadge()).toHaveTextContent("Replay");
-      expect(elements.getBadge()).toHaveAttribute(
-        "aria-label",
-        "Status: Replay"
-      );
+  describe("title case and no truncation", () => {
+    it("never applies the uppercase class", () => {
+      render(<LibraryStatusBadge status="PLAYING" />);
+      expect(elements.getBadge().className).not.toMatch(/\buppercase\b/);
     });
-  });
 
-  describe("given status UP_NEXT and hasBeenPlayed=false", () => {
-    it("renders the Up Next label", () => {
-      render(<LibraryStatusBadge status="UP_NEXT" hasBeenPlayed={false} />);
-      expect(elements.getBadge()).toHaveTextContent("Up Next");
+    it("keeps the label on one line without truncating it", () => {
+      render(<LibraryStatusBadge status="PLAYING" />);
+      const badge = elements.getBadge();
+      expect(badge.className).toMatch(/whitespace-nowrap/);
+      expect(badge.className).toMatch(/shrink-0/);
+      expect(badge.className).not.toMatch(/\btruncate\b/);
     });
   });
 
@@ -55,12 +50,19 @@ describe("LibraryStatusBadge", () => {
   });
 
   describe("status-themed leading dot", () => {
-    it("renders a colored dot using the matching status CSS-var token", () => {
-      render(<LibraryStatusBadge status="PLAYING" />);
-      const dot = screen.getByTestId("library-status-badge-dot");
-      expect(dot.className).toMatch(/bg-\[var\(--status-playing\)\]/);
-      expect(dot).toHaveAttribute("data-status-variant", "playing");
-    });
+    it.each([
+      ["WANT", "want"],
+      ["PLAYING", "playing"],
+      ["DONE", "done"],
+    ] as const)(
+      "renders %s dot with the matching status CSS-var token",
+      (status: LibraryItemStatus, variant: string) => {
+        render(<LibraryStatusBadge status={status} />);
+        const dot = screen.getByTestId("library-status-badge-dot");
+        expect(dot.className).toContain(`bg-[var(--status-${variant})]`);
+        expect(dot).toHaveAttribute("data-status-variant", variant);
+      }
+    );
 
     it("wraps the pill in the canonical glassy black background", () => {
       render(<LibraryStatusBadge status="PLAYING" />);
@@ -73,10 +75,9 @@ describe("LibraryStatusBadge", () => {
   describe("custom className", () => {
     it("appends the consumer-provided className", () => {
       render(
-        <LibraryStatusBadge status="SHELF" className="absolute top-2 left-2" />
+        <LibraryStatusBadge status="WANT" className="absolute top-2 left-2" />
       );
-      const badge = elements.getBadge();
-      expect(badge.className).toMatch(/absolute/);
+      expect(elements.getBadge().className).toMatch(/absolute/);
     });
   });
 });

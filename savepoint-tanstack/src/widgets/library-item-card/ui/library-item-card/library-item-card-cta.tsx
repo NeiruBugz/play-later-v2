@@ -1,9 +1,8 @@
 import { Loader2, PlusCircle } from "lucide-react";
-import { useState, type MouseEvent, type SyntheticEvent } from "react";
+import { type MouseEvent, type SyntheticEvent } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
-import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry";
-import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
+import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
 import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import { Button } from "@/shared/ui/button";
 
@@ -32,9 +31,9 @@ export type LibraryItemCardCtaProps = {
 };
 
 /**
- * Card primary-CTA button — restored to parity with canonical
- * `LibraryCardCta`. Status-driven label (Queue It / Log Session / Start
- * Playing / Add to Shelf / Replay). Click is stopped so the outer card
+ * Card primary-CTA button. Label and target come from `NEXT_STEP` (Start
+ * playing / Mark done / Play again); a click moves the game there through
+ * `setStatusFn`. Click is stopped so the outer card
  * `<Link>` does not navigate.
  *
  * Lives as a sibling of the card link (rendered by the parent widget),
@@ -46,42 +45,19 @@ export function LibraryItemCardCta({
   onAddPlaythrough,
 }: LibraryItemCardCtaProps) {
   const { pending: isPending, run } = useMutationAction();
-  const [logSessionOpen, setLogSessionOpen] = useState(false);
-
   const {
     label,
     icon: Icon,
     emphasis,
-    action,
+    target,
   } = getPrimaryCtaPayload(item.status);
 
   const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
     stop(event);
-
-    if (action.kind === "logSession") {
-      setLogSessionOpen(true);
-      return;
-    }
-
-    const startedAt =
-      action.startedAtNullableSet && item.startedAt === null
-        ? new Date()
-        : undefined;
-
-    await run(
-      () =>
-        updateLibraryItemFn({
-          data: {
-            itemId: item.id,
-            status: action.status,
-            ...(startedAt !== undefined ? { startedAt } : {}),
-          },
-        }),
-      {
-        successMessage: "Status updated",
-        errorFallback: "Failed to update status",
-      }
-    );
+    await run(() => setStatusFn({ data: { id: item.id, to: target } }), {
+      successMessage: "Status updated",
+      errorFallback: "Failed to update status",
+    });
   };
 
   return (
@@ -122,14 +98,6 @@ export function LibraryItemCardCta({
           <PlusCircle aria-hidden />
           Add playthrough
         </Button>
-      ) : null}
-
-      {action.kind === "logSession" ? (
-        <ComposeJournalEntryDialog
-          open={logSessionOpen}
-          onOpenChange={setLogSessionOpen}
-          defaultGameId={item.game.id}
-        />
       ) : null}
     </>
   );

@@ -15,7 +15,6 @@ const defaultProps = {
   status: undefined,
   platform: undefined,
   acquisition: undefined,
-  startedOnly: undefined,
   minRating: undefined,
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
@@ -34,8 +33,6 @@ const elements = {
     screen.getByRole("option", { name, hidden: true }),
   getAcquisitionOption: (label: string) =>
     screen.getByRole("button", { name: `Filter by ${label}` }),
-  getStartedSwitch: () =>
-    screen.getByRole("switch", { name: "Hide untouched games" }),
   getClearFiltersButton: () =>
     screen.getByRole("button", { name: "Clear all filters" }),
   queryClearFiltersButton: () =>
@@ -75,13 +72,11 @@ describe("LibraryFilters", () => {
       expect(elements.querySortHeading()).not.toBeNull();
     });
 
-    it("renders all five status filter buttons and the All pill", () => {
+    it("renders the three status filter buttons and the All pill", () => {
       expect(elements.getAllStatusesButton()).toBeDefined();
+      expect(elements.queryStatusButton("Filter by Want")).not.toBeNull();
       expect(elements.queryStatusButton("Filter by Playing")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Played")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Up Next")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Shelf")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Wishlist")).not.toBeNull();
+      expect(elements.queryStatusButton("Filter by Done")).not.toBeNull();
     });
 
     it("renders the Platform and Sort select triggers", () => {
@@ -130,18 +125,18 @@ describe("LibraryFilters", () => {
       render(
         <LibraryFilters
           {...defaultProps}
-          counts={{ PLAYING: 3, PLAYED: 2, UP_NEXT: 1, SHELF: 0, WISHLIST: 5 }}
+          counts={{ WANT: 0, PLAYING: 3, DONE: 2 }}
         />
       );
     });
 
     it("renders total count on the All pill and per-status counts on each button including zero", () => {
-      // 3 + 2 + 1 + 0 + 5 = 11
-      expect(elements.getAllStatusesButton().textContent).toContain("11");
+      // 0 + 3 + 2 = 5
+      expect(elements.getAllStatusesButton().textContent).toContain("5");
       expect(
         elements.getStatusButton("Filter by Playing").textContent
       ).toContain("3");
-      expect(elements.getStatusButton("Filter by Shelf").textContent).toContain(
+      expect(elements.getStatusButton("Filter by Want").textContent).toContain(
         "0"
       );
     });
@@ -162,16 +157,16 @@ describe("LibraryFilters", () => {
     });
   });
 
-  describe("given the user clicks the Played status button", () => {
+  describe("given the user clicks the Done status button", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} />);
-      await actions.selectStatus("Filter by Played");
+      await actions.selectStatus("Filter by Done");
     });
 
-    it("calls navigate with search.status set to PLAYED", () => {
+    it("calls navigate with search.status set to DONE", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ status: "PLAYED" }),
+          search: expect.objectContaining({ status: "DONE" }),
         })
       );
     });
@@ -286,7 +281,6 @@ describe("LibraryFilters", () => {
           status="PLAYING"
           platform="PC"
           acquisition={undefined}
-          startedOnly={undefined}
           minRating={3.5}
           sortBy="title"
           sortOrder="asc"
@@ -325,25 +319,10 @@ describe("LibraryFilters", () => {
     });
   });
 
-  describe("given the user enables 'Only games I've started'", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} />);
-      await userEvent.click(elements.getStartedSwitch());
-    });
-
-    it("calls navigate with search.startedOnly set to true", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ startedOnly: true }),
-        })
-      );
-    });
-  });
-
   describe("given any filter change is made", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} />);
-      await actions.selectStatus("Filter by Shelf");
+      await actions.selectStatus("Filter by Want");
     });
 
     it("calls mockNavigate exactly once per interaction (router is the observed boundary)", () => {

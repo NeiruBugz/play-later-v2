@@ -5,7 +5,7 @@ import { computeLifecycleStrip } from "./lifecycle-strip.utility";
 
 const TONE_FILL_CLASS = {
   playing: "bg-[var(--status-playing)]",
-  completed: "bg-[var(--status-played)]",
+  completed: "bg-[var(--status-done)]",
   idle: "bg-transparent",
 } as const;
 

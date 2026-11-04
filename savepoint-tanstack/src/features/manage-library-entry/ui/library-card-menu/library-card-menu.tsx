@@ -16,7 +16,7 @@ import {
 } from "@/shared/ui/dropdown-menu";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
-import { updateLibraryItemFn } from "../../api/update-library-item-fn";
+import { setStatusFn } from "../../api/set-status-fn";
 import { RemoveFromLibraryDialog } from "../remove-from-library-dialog";
 import type { LibraryCardMenuProps } from "./library-card-menu.type";
 
@@ -43,13 +43,10 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
     next: (typeof STATUS_ENTRIES)[number]["value"]
   ) => {
     if (next === item.status) return;
-    await run(
-      () => updateLibraryItemFn({ data: { itemId: item.id, status: next } }),
-      {
-        successMessage: "Status updated",
-        errorFallback: "Failed to update status",
-      }
-    );
+    await run(() => setStatusFn({ data: { id: item.id, to: next } }), {
+      successMessage: "Status updated",
+      errorFallback: "Failed to update status",
+    });
   };
 
   const handleRemove = async () => {

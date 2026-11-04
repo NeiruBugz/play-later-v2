@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Download, Library, SearchX } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { isTouched, LibraryStatusBadge } from "@/entities/library-item";
+import { LibraryStatusBadge } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddGameTrigger } from "@/features/add-game";
 import {
@@ -63,11 +63,7 @@ function LibraryGridTile({
             />
           )}
           <div className="absolute top-2 left-2">
-            <LibraryStatusBadge
-              status={item.status}
-              hasBeenPlayed={isTouched(item)}
-              className="uppercase"
-            />
+            <LibraryStatusBadge status={item.status} />
           </div>
         </div>
         <h3 className="mt-2 line-clamp-1 text-sm leading-tight font-medium group-hover:underline">
@@ -111,11 +107,9 @@ function computeStatusCounts(
   items: ReadonlyArray<LibraryItemWithGame>
 ): LibraryStatusCounts {
   const acc: LibraryStatusCounts = {
-    WISHLIST: 0,
-    SHELF: 0,
-    UP_NEXT: 0,
+    WANT: 0,
     PLAYING: 0,
-    PLAYED: 0,
+    DONE: 0,
   };
   for (const item of items) {
     acc[item.status] = (acc[item.status] ?? 0) + 1;
@@ -130,7 +124,6 @@ export function LibraryPage(props: LibraryPageProps) {
     status,
     platform,
     acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
     sortBy,
@@ -163,7 +156,6 @@ export function LibraryPage(props: LibraryPageProps) {
     status ||
     platform ||
     acquisition ||
-    startedOnly ||
     minRating !== undefined ||
     unratedOnly === true
   );
@@ -270,7 +262,6 @@ export function LibraryPage(props: LibraryPageProps) {
         counts={statusCounts}
         platform={platform}
         acquisition={acquisition}
-        startedOnly={startedOnly}
         minRating={minRating}
         unratedOnly={unratedOnly}
         sortBy={sortBy}
@@ -281,7 +272,6 @@ export function LibraryPage(props: LibraryPageProps) {
         status={status}
         platform={platform}
         acquisition={acquisition}
-        startedOnly={startedOnly}
         minRating={minRating}
         unratedOnly={unratedOnly}
         sortBy={sortBy}
@@ -296,7 +286,6 @@ export function LibraryPage(props: LibraryPageProps) {
           status={status}
           platform={platform}
           acquisition={acquisition}
-          startedOnly={startedOnly}
           minRating={minRating}
           unratedOnly={unratedOnly}
           sortBy={sortBy}

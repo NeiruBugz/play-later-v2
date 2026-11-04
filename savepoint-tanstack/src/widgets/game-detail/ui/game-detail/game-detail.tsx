@@ -46,8 +46,6 @@ export function GameDetail({
     libraryEntry,
     journalTeaser,
     playthroughs = [],
-    derivedStatus,
-    statusIsManual = false,
     unattachedJournalEntries = [],
     playtimeTotalMinutes,
     playtimeSessionCount,
@@ -155,9 +153,6 @@ export function GameDetail({
           igdbId: game.igdbId,
           gameTitle: game.title,
           entry: libraryEntry,
-          playthroughCount: playthroughs.length,
-          derivedStatus: derivedStatus ?? libraryEntry?.status ?? "SHELF",
-          statusIsManual,
         }
       : null;
 
@@ -412,11 +407,6 @@ export function GameDetail({
                   igdbId={game.igdbId}
                   gameTitle={game.title}
                   entry={libraryEntry}
-                  playthroughCount={playthroughs.length}
-                  derivedStatus={
-                    derivedStatus ?? libraryEntry?.status ?? "SHELF"
-                  }
-                  statusIsManual={statusIsManual}
                 />
               </div>
             ) : null}
@@ -456,7 +446,6 @@ export function GameDetail({
               playtimeTotalMinutes={playtimeTotalMinutes}
               playtimeSessionCount={playtimeSessionCount}
               lastSessionDate={null}
-              derivedStatus={derivedStatus ?? libraryEntry?.status ?? null}
             />
           </div>
         </div>
@@ -512,7 +501,7 @@ export function GameDetail({
       {gameSlug ? (
         <GameDetailActionBar
           gameSlug={gameSlug}
-          gameStatus={derivedStatus ?? libraryEntry?.status ?? null}
+          gameStatus={libraryEntry?.status ?? null}
           viewerUserId={viewerUserId}
           onStatusClick={() => {
             document

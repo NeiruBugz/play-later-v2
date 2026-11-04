@@ -61,11 +61,9 @@ function makeData(
   return {
     username: "Ada",
     statusCounts: {
-      WISHLIST: 0,
-      SHELF: 0,
-      UP_NEXT: 0,
+      WANT: 0,
       PLAYING: 0,
-      PLAYED: 0,
+      DONE: 0,
     },
     hasEmptyLibrary: true,
     showStats: false,
@@ -139,11 +137,9 @@ describe("DashboardPage", () => {
               },
             ],
             statusCounts: {
-              WISHLIST: 0,
-              SHELF: 0,
-              UP_NEXT: 2,
+              WANT: 2,
               PLAYING: 3,
-              PLAYED: 1,
+              DONE: 1,
             },
             continuePlaying: {
               items: [],
@@ -188,11 +184,9 @@ describe("DashboardPage", () => {
             hasEmptyLibrary: false,
             showStats: true,
             statusCounts: {
-              WISHLIST: 1,
-              SHELF: 1,
-              UP_NEXT: 1,
+              WANT: 1,
               PLAYING: 1,
-              PLAYED: 1,
+              DONE: 1,
             },
           })}
         />

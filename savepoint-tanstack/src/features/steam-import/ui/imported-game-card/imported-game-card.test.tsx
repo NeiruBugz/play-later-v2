@@ -76,6 +76,37 @@ describe("ImportedGameCard", () => {
     });
   });
 
+  describe("given the suggested-status badge", () => {
+    it("reads Want for a game that was not played recently", () => {
+      render(
+        <ImportedGameCard
+          game={baseGame}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+      expect(screen.getByLabelText("Suggested status: Want")).toHaveTextContent(
+        "Want"
+      );
+    });
+
+    it("reads Playing, not the raw enum, for a game played yesterday", () => {
+      render(
+        <ImportedGameCard
+          game={{
+            ...baseGame,
+            lastPlayedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+      const badge = screen.getByLabelText("Suggested status: Playing");
+      expect(badge).toHaveTextContent("Playing");
+      expect(badge).not.toHaveTextContent("PLAYING");
+    });
+  });
+
   describe("given a game with a last-played timestamp", () => {
     beforeEach(() => {
       const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);

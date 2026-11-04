@@ -25,7 +25,6 @@ vi.mock("@/entities/library-item", () => ({
   LibraryStatusBadge: ({ status }: { status: string }) => (
     <span data-testid="status-badge">{status}</span>
   ),
-  isTouched: () => false,
 }));
 
 function makeItem(
@@ -89,8 +88,8 @@ describe("DashboardGameRail", () => {
       render(
         <DashboardGameRail
           title="Up next"
-          items={[makeItem({ status: "UP_NEXT" })]}
-          viewAll={{ status: "UP_NEXT" }}
+          items={[makeItem({ status: "WANT" })]}
+          viewAll={{ status: "WANT" }}
           viewAllLabel="See all"
         />
       );
@@ -110,7 +109,7 @@ describe("DashboardGameRail", () => {
       render(
         <DashboardGameRail
           title="Recently played"
-          items={[makeItem({ status: "PLAYED" })]}
+          items={[makeItem({ status: "DONE" })]}
           viewAll={{ sortBy: "createdAt", sortOrder: "desc" }}
           viewAllLabel="View Library"
         />

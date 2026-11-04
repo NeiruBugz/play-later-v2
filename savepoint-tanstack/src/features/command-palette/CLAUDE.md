@@ -21,9 +21,9 @@ search-trigger buttons fire `openCommandPalette()` which dispatches a
 - `ui/game-result-item/` — single Games-group row. Cover + name +
   release year wrapped in a TanStack `<Link to="/games/$slug">` so back-
   button history works and the test contract can assert on the href.
-  Also renders an "Add to Up Next" quick action.
+  Also renders an "Add" quick action (adds as Want).
 - `api/quick-add-to-library-fn.ts` — adds a searched IGDB game to the
-  library at `UP_NEXT` (composes `addGameToLibrary`).
+  library as `WANT` (composes `addGameToLibrary`).
 - `api/remove-library-item-fn.ts` — undo side of quick-add (composes
   `deleteLibraryItem`).
 - `ui/palette-navigation-group/` — five jump targets (Library, Journal,
@@ -46,9 +46,9 @@ search-trigger buttons fire `openCommandPalette()` which dispatches a
 Remaining feature gaps vs `savepoint-app/features/command-palette/`:
 
 1. ~~No quick-add flow.~~ **Closed (Slice 22).** Each game result row
-   renders an "Add to Up Next" action (canonical `showAddHint` +
+   renders an "Add" action (canonical `showAddHint` +
    `useQuickAddFromPalette`). It calls the feature's own
-   `quickAddToLibraryFn` (status `UP_NEXT`) and emits an undo toast that
+   `quickAddToLibraryFn` (status `WANT`) and emits an undo toast that
    calls `removeLibraryItemFn`. Both server fns live in
    `api/` so the palette never imports another feature's server fn.
 2. **No recent-games empty state.** Canonical loads recent library

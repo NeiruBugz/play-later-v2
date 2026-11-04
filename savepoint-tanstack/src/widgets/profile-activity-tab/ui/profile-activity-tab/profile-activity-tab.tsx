@@ -4,10 +4,7 @@ import type {
   ActivityFeedResult,
   FeedItem,
 } from "@/entities/activity-feed/model";
-import {
-  getStatusLabel,
-  type LibraryItemStatus,
-} from "@/entities/library-item/model";
+import type { LibraryItemStatus } from "@/entities/library-item/model";
 import { formatLocaleDate } from "@/shared/lib/date";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
@@ -15,11 +12,17 @@ import { EmptyState } from "@/shared/ui/empty-state";
 
 import type { ProfileActivityTabProps } from "./profile-activity-tab.type";
 
+const ACTIVITY_PHRASE: Record<LibraryItemStatus, string> = {
+  WANT: "wants to play",
+  PLAYING: "is playing",
+  DONE: "is done with",
+};
+
 function activityLine(item: FeedItem): string {
   const handle = item.userUsername
     ? `@${item.userUsername}`
     : (item.userName ?? "Someone");
-  return `${handle} added ${item.gameTitle} to ${getStatusLabel(item.status as LibraryItemStatus)}`;
+  return `${handle} ${ACTIVITY_PHRASE[item.status as LibraryItemStatus]} ${item.gameTitle}`;
 }
 
 export function ProfileActivityTab({

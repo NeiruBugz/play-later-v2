@@ -4,13 +4,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 
+import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { LibraryCardMenu } from "./library-card-menu";
 
-const mockUpdateLibraryItemFn = vi.fn();
+const mockSetStatusFn = vi.fn();
 const mockDeleteLibraryItemFn = vi.fn();
 
-vi.mock("../../api/update-library-item-fn", () => ({
-  updateLibraryItemFn: (...args: unknown[]) => mockUpdateLibraryItemFn(...args),
+vi.mock("../../api/set-status-fn", () => ({
+  setStatusFn: (...args: unknown[]) => mockSetStatusFn(...args),
 }));
 
 vi.mock("../../api/delete-library-item-fn", () => ({
@@ -51,34 +52,11 @@ vi.mock("sonner", () => ({
   },
 }));
 
-function makeItem(
-  overrides: Partial<LibraryItemWithGame> = {}
-): LibraryItemWithGame {
-  return {
-    id: 1,
-    userId: "user-001",
-    gameId: "game-001",
-    status: "PLAYING",
-    acquisitionType: "DIGITAL",
-    rating: null,
-    platform: null,
-    startedAt: null,
-    completedAt: null,
-    statusChangedAt: null,
-    hasBeenPlayed: false,
-    statusIsManual: false,
-    createdAt: new Date("2024-01-01T00:00:00.000Z"),
-    updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-    game: {
-      id: "game-001",
-      igdbId: 12345,
-      title: "Test Game",
-      slug: "test-game",
-      coverImage: null,
-      releaseDate: null,
-    },
-    ...overrides,
-  };
+function makeItem(): LibraryItemWithGame {
+  return buildLibraryItemWithGame(
+    { id: 1, status: "PLAYING" },
+    { title: "Test Game", slug: "test-game" }
+  );
 }
 
 const elements = {
@@ -94,6 +72,8 @@ const elements = {
     screen.getByRole("menuitem", { name: "Remove from Library" }),
   getChangeStatusTrigger: () =>
     screen.getByRole("menuitem", { name: "Change Status" }),
+  getStatusOption: (label: string) =>
+    screen.getByRole("menuitem", { name: `Change status to ${label}` }),
 };
 
 const actions = {
@@ -120,7 +100,7 @@ const actions = {
 
 describe("LibraryCardMenu", () => {
   beforeEach(() => {
-    mockUpdateLibraryItemFn.mockReset();
+    mockSetStatusFn.mockReset();
     mockDeleteLibraryItemFn.mockReset();
     mockInvalidate.mockReset();
     mockInvalidate.mockResolvedValue(undefined);
@@ -263,10 +243,33 @@ describe("LibraryCardMenu", () => {
     });
   });
 
-  // Note: Radix DropdownMenuSubContent does not open via pointer/hover in
-  // jsdom because it relies on real pointer events that jsdom does not
-  // fully emulate. The handleStatusChange and its error branches are
-  // exercised by the integration tests for the underlying entity layer.
-  // The submenu trigger visibility (Change Status is visible) is already
-  // asserted in the "given the user opens the dropdown menu" describe block.
+  describe("given the user opens the Change Status submenu on a Playing game", () => {
+    beforeEach(async () => {
+      mockSetStatusFn.mockResolvedValue({});
+      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      await actions.openMenu();
+      elements.getChangeStatusTrigger().focus();
+      await userEvent.keyboard("{ArrowRight}");
+    });
+
+    it("offers exactly Want, Playing and Done, with the current status disabled", async () => {
+      await screen.findByRole("menuitem", { name: "Change status to Want" });
+      expect(
+        screen.getAllByRole("menuitem", { name: /^Change status to / })
+      ).toHaveLength(3);
+      expect(elements.getStatusOption("Playing")).toHaveAttribute(
+        "aria-disabled",
+        "true"
+      );
+    });
+
+    it("calls setStatusFn with the item id and the chosen status", async () => {
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "Change status to Done" })
+      );
+      expect(mockSetStatusFn).toHaveBeenCalledWith({
+        data: { id: 1, to: "DONE" },
+      });
+    });
+  });
 });

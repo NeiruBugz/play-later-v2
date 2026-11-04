@@ -61,13 +61,13 @@ const elements = {
     document.querySelector(
       'img[src*="images.igdb.com"]'
     ) as HTMLImageElement | null,
-  getAddToUpNextButton: (name: string) =>
-    screen.getByRole("button", { name: `Add ${name} to Up Next` }),
+  getAddButton: (name: string) =>
+    screen.getByRole("button", { name: `Add ${name}` }),
 };
 
 const actions = {
-  clickAddToUpNext: (name: string) =>
-    userEvent.click(elements.getAddToUpNextButton(name)),
+  clickAdd: (name: string) =>
+    userEvent.click(elements.getAddButton(name)),
 };
 
 const GAME = {
@@ -142,17 +142,17 @@ describe("GameResultItem", () => {
       expect(elements.queryYear("2017")).not.toBeNull();
     });
 
-    it("offers an Add to Up Next quick action", () => {
-      expect(elements.getAddToUpNextButton(GAME.name)).toBeInTheDocument();
+    it("offers an Add quick action", () => {
+      expect(elements.getAddButton(GAME.name)).toBeInTheDocument();
     });
   });
 
-  describe("given the user clicks Add to Up Next", () => {
+  describe("given the user clicks Add", () => {
     let onAfterSelect: ReturnType<typeof vi.fn>;
 
     beforeEach(async () => {
       ({ onAfterSelect } = renderRow());
-      await actions.clickAddToUpNext(GAME.name);
+      await actions.clickAdd(GAME.name);
     });
 
     it("adds the game to the library by its IGDB id", () => {
@@ -161,10 +161,10 @@ describe("GameResultItem", () => {
       });
     });
 
-    it("surfaces an Up Next confirmation with undo", () => {
+    it("confirms the game was added to Want, with undo", () => {
       expect(showUndoToast).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: `Added "${GAME.name}" to Up Next`,
+          message: `Added "${GAME.name}" to Want`,
         })
       );
     });
@@ -177,7 +177,7 @@ describe("GameResultItem", () => {
   describe("given the user undoes the add", () => {
     beforeEach(async () => {
       renderRow();
-      await actions.clickAddToUpNext(GAME.name);
+      await actions.clickAdd(GAME.name);
       const opts = showUndoToast.mock.calls[0]?.[0] as {
         onUndo: () => void;
       };
@@ -215,7 +215,7 @@ describe("GameResultItem", () => {
     beforeEach(async () => {
       vi.mocked(quickAddToLibraryFn).mockRejectedValue(new Error("Add failed"));
       renderRow();
-      await actions.clickAddToUpNext(GAME.name);
+      await actions.clickAdd(GAME.name);
     });
 
     it("shows the error message via toast.error", async () => {
@@ -228,7 +228,7 @@ describe("GameResultItem", () => {
     beforeEach(async () => {
       vi.mocked(quickAddToLibraryFn).mockRejectedValue("raw");
       renderRow();
-      await actions.clickAddToUpNext(GAME.name);
+      await actions.clickAdd(GAME.name);
     });
 
     it("shows a fallback error message via toast.error", async () => {
@@ -240,7 +240,7 @@ describe("GameResultItem", () => {
   describe("given the undo action succeeds", () => {
     beforeEach(async () => {
       renderRow();
-      await actions.clickAddToUpNext(GAME.name);
+      await actions.clickAdd(GAME.name);
       const opts = showUndoToast.mock.calls[0]?.[0] as {
         onUndo: () => void;
       };
@@ -261,7 +261,7 @@ describe("GameResultItem", () => {
   describe("given the undo removeLibraryItemFn rejects with a non-Error", () => {
     beforeEach(async () => {
       renderRow();
-      await actions.clickAddToUpNext(GAME.name);
+      await actions.clickAdd(GAME.name);
       vi.mocked(removeLibraryItemFn).mockRejectedValue("raw undo error");
       const opts = showUndoToast.mock.calls[0]?.[0] as {
         onUndo: () => void;

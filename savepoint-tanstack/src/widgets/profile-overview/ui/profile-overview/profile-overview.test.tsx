@@ -19,7 +19,9 @@ vi.mock("@tanstack/react-router", () => ({
     params?: { slug?: string };
   } & React.HTMLAttributes<HTMLAnchorElement>) => (
     <a
-      href={to === "/games/$slug" && params?.slug ? `/games/${params.slug}` : to}
+      href={
+        to === "/games/$slug" && params?.slug ? `/games/${params.slug}` : to
+      }
       {...rest}
     >
       {children}
@@ -42,15 +44,9 @@ const stubProfile: Profile = {
 };
 
 const stubStats: LibraryStats = {
-  statusCounts: {
-    SHELF: 3,
-    PLAYING: 1,
-    // PLAYED includes dropped + finished games; deliberately larger than the
-    // real completion count so the two stats are observably distinct.
-    PLAYED: 5,
-  },
-  // Real completions (`completedAt IS NOT NULL`) — fewer than PLAYED.
-  completedCount: 2,
+  want: 3,
+  playing: 1,
+  done: 5,
   recentGames: [
     {
       gameId: "game-1",
@@ -162,26 +158,25 @@ describe("ProfileOverview", () => {
       expect(style).toContain("linear-gradient");
     });
 
-    it("renders four inline stat items in the compact header stat row", () => {
+    it("renders five inline stat items in the compact header stat row", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      expect(screen.getAllByTestId("profile-stat-item").length).toBe(4);
+      expect(screen.getAllByTestId("profile-stat-item").length).toBe(5);
     });
 
-    it("shows played and completed as distinct stat items (no phantom COMPLETED fallback)", () => {
+    it("shows Want, Playing and Done counts and no played / completed stat", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      const items = screen.getAllByTestId("profile-stat-item");
-      const playedItem = items.find(
-        (item) => within(item).queryByText("played") !== null
-      );
-      const completedItem = items.find(
-        (item) => within(item).queryByText("completed") !== null
-      );
-      // PLAYED status count (5) and real completions (2) are different numbers
-      // rendered in their own stat items — proving the two metrics aren't conflated.
-      expect(playedItem).toBeDefined();
-      expect(completedItem).toBeDefined();
-      expect(within(playedItem!).getByText("5")).toBeInTheDocument();
-      expect(within(completedItem!).getByText("2")).toBeInTheDocument();
+      const statTexts = screen
+        .getAllByTestId("profile-stat-item")
+        .map((item) => item.textContent);
+      expect(statTexts).toEqual([
+        "9in library",
+        "3want",
+        "1playing",
+        "5done",
+        "3notes",
+      ]);
+      expect(screen.queryByText("played")).toBeNull();
+      expect(screen.queryByText("completed")).toBeNull();
     });
   });
 
@@ -261,10 +256,10 @@ describe("ProfileOverview", () => {
       expect(elements.getStatRow()).toBeDefined();
     });
 
-    it("stat row contains exactly 4 inline stat items (in library / played / completed / entries)", () => {
+    it("stat row contains exactly 5 inline stat items (in library / want / playing / done / notes)", () => {
       const row = elements.getStatRow();
       const items = within(row).getAllByTestId("profile-stat-item");
-      expect(items.length).toBe(4);
+      expect(items.length).toBe(5);
     });
 
     it("stat row is inside the identity block", () => {

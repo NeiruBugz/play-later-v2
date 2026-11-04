@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
-import { isTouched, LibraryStatusBadge } from "@/entities/library-item";
+import { LibraryStatusBadge } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -40,11 +40,7 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
           />
         )}
         <div className="absolute top-1.5 left-1.5">
-          <LibraryStatusBadge
-            status={item.status}
-            hasBeenPlayed={isTouched(item)}
-            className="uppercase"
-          />
+          <LibraryStatusBadge status={item.status} />
         </div>
       </div>
       <p className="mt-2 truncate text-sm leading-tight font-medium group-hover:underline">

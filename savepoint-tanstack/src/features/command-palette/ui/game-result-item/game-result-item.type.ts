@@ -3,11 +3,11 @@
  *
  * Cover image, title, and release year. Mirrors canonical's
  * `savepoint-app/features/command-palette/ui/game-result-item.tsx`, including
- * the "Add to Up Next" quick-add affordance (canonical `showAddHint` +
+ * the "Add" quick-add affordance (canonical `showAddHint` +
  * `useQuickAddFromPalette`).
  */
 export type GameResultItemProps = {
-  /** IGDB game id — used by the "Add to Up Next" quick-add mutation. */
+  /** IGDB game id — used by the "Add" quick-add mutation. */
   igdbId: number;
   /** IGDB image id (e.g. `co1abc`). `null` renders the placeholder. */
   coverImageId: string | null;

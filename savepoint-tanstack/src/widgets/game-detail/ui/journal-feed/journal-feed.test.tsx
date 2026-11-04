@@ -86,6 +86,7 @@ function makeEntry(
     mood: overrides.mood ?? null,
     playSession: overrides.playSession ?? null,
     visibility: overrides.visibility ?? "PRIVATE",
+    prompt: overrides.prompt ?? null,
     userId: overrides.userId ?? "user-jf-001",
     gameId: overrides.gameId ?? "game-jf-001",
     libraryItemId: overrides.libraryItemId ?? 1,

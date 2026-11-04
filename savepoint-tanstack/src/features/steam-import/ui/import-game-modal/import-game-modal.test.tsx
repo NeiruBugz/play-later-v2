@@ -109,6 +109,29 @@ describe(ImportGameModal, () => {
     });
   });
 
+  describe("given the status picker is opened", () => {
+    beforeEach(async () => {
+      render(
+        <ImportGameModal
+          isOpen
+          game={baseGame}
+          onClose={vi.fn()}
+          onImported={vi.fn()}
+        />
+      );
+      await userEvent.click(screen.getByRole("combobox"));
+    });
+
+    it("offers exactly Want, Playing and Done", async () => {
+      const options = await screen.findAllByRole("option");
+      expect(options.map((option) => option.textContent)).toEqual([
+        "Want",
+        "Playing",
+        "Done",
+      ]);
+    });
+  });
+
   describe("given import throws NeedsManualMatchError", () => {
     beforeEach(async () => {
       const err = Object.assign(new Error("needs manual"), {

@@ -95,7 +95,7 @@ describe("GameCard", () => {
       render(
         <GameCard
           game={{ ...baseGame, coverImageId: null }}
-          coverAccentClassName="bg-gradient-to-br from-[var(--status-shelf)] to-background"
+          coverAccentClassName="bg-gradient-to-br from-[var(--status-want)] to-background"
           asLink={false}
         />
       );
@@ -103,7 +103,7 @@ describe("GameCard", () => {
 
     it("applies the accent class to the placeholder", () => {
       expect(elements.queryCoverPlaceholder()?.className).toContain(
-        "from-[var(--status-shelf)]"
+        "from-[var(--status-want)]"
       );
     });
 

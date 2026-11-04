@@ -34,7 +34,7 @@ export function DashboardQuickLogHero({
           </div>
           {!hasGames ? (
             <Button asChild variant="secondary" size="sm">
-              <Link to="/library" search={{ status: "SHELF" }}>
+              <Link to="/library" search={{ status: "WANT" }}>
                 Find a game to start
               </Link>
             </Button>

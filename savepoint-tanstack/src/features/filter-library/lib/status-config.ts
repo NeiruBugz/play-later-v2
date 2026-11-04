@@ -33,7 +33,7 @@ export type { StatusBadgeVariant, StatusEntry, AcquisitionFilterEntry };
  *  - idle: muted foreground, transparent background, no border accent
  *  - active: primary token (brand red on light, theme-aware in dark)
  *
- * The 5 per-status entries are kept (vs. a single shared shape) so a
+ * The 3 per-status entries are kept (vs. a single shared shape) so a
  * future spec can re-introduce dot-glyphs or per-status decoration
  * without rewriting the consumer call sites.
  */
@@ -55,11 +55,9 @@ export const STATUS_FILTER_STYLES: Record<
   StatusBadgeVariant,
   { active: string; inactive: string }
 > = {
+  want: { active: ACTIVE, inactive: IDLE },
   playing: { active: ACTIVE, inactive: IDLE },
-  played: { active: ACTIVE, inactive: IDLE },
-  shelf: { active: ACTIVE, inactive: IDLE },
-  upNext: { active: ACTIVE, inactive: IDLE },
-  wishlist: { active: ACTIVE, inactive: IDLE },
+  done: { active: ACTIVE, inactive: IDLE },
 };
 
 export type SortOption = {

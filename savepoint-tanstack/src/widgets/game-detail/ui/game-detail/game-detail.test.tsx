@@ -12,6 +12,7 @@ import type {
   JournalEntry,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client";
+import { buildLibraryItem } from "../../../../../test/factories/builders.ts";
 import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
@@ -80,19 +81,9 @@ vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
   deletePlaythroughFn: vi.fn(),
 }));
 
-vi.mock(
-  "@/features/manage-playthrough/api/set-library-status-manual-fn",
-  () => ({
-    setLibraryStatusManualFn: vi.fn(),
-  })
-);
-
-vi.mock(
-  "@/features/manage-playthrough/api/clear-library-status-manual-fn",
-  () => ({
-    clearLibraryStatusManualFn: vi.fn(),
-  })
-);
+vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
+  setStatusFn: vi.fn(),
+}));
 
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
@@ -123,22 +114,8 @@ const buildIgdbDetails = (
   ...overrides,
 });
 
-const buildLibraryEntry = (): LibraryItem => ({
-  id: 42,
-  status: "PLAYING",
-  createdAt: new Date("2025-01-01T00:00:00Z"),
-  updatedAt: new Date("2025-01-02T00:00:00Z"),
-  statusChangedAt: null,
-  platform: "PC",
-  userId: "user-1",
-  acquisitionType: "DIGITAL",
-  gameId: "game-1",
-  startedAt: null,
-  completedAt: null,
-  hasBeenPlayed: false,
-  statusIsManual: false,
-  rating: null,
-});
+const buildLibraryEntry = (): LibraryItem =>
+  buildLibraryItem({ id: 42, status: "PLAYING", platform: "PC" });
 
 const buildData = (
   libraryEntry: LibraryItem | null,
@@ -839,6 +816,7 @@ describe("GameDetail", () => {
       mood: null,
       playSession: null,
       visibility: "PRIVATE",
+      prompt: null,
       userId: "user-1",
       gameId: "game-1",
       libraryItemId: 42,
@@ -858,6 +836,7 @@ describe("GameDetail", () => {
       mood: null,
       playSession: null,
       visibility: "PRIVATE",
+      prompt: null,
       userId: "user-1",
       gameId: "game-1",
       libraryItemId: 42,

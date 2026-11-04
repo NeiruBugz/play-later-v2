@@ -19,6 +19,7 @@ function makeEntry(): JournalEntry {
     mood: null,
     tags: [],
     visibility: "PRIVATE",
+    prompt: null,
     createdAt: new Date("2024-01-15T12:00:00Z"),
     updatedAt: new Date("2024-01-15T12:00:00Z"),
     publishedAt: null,

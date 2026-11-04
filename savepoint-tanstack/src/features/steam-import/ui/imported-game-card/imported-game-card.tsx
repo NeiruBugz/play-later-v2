@@ -1,5 +1,6 @@
 import { Plus, X } from "lucide-react";
 
+import { getStatusLabel } from "@/entities/library-item";
 import { formatPlaytimeMinutes } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -71,9 +72,9 @@ export function ImportedGameCard({
             <h3 className="truncate font-medium">{game.name}</h3>
             <Badge
               variant="outline"
-              aria-label={`Suggested status: ${smartStatus}`}
+              aria-label={`Suggested status: ${getStatusLabel(smartStatus)}`}
             >
-              {smartStatus}
+              {getStatusLabel(smartStatus)}
             </Badge>
           </div>
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">

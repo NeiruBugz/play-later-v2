@@ -1,4 +1,3 @@
-import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.ts";
 import type { LibraryStatusSwitcherProps } from "../library-status-switcher/library-status-switcher.type";
 
 export type GameDetailDetailRailProps = {
@@ -16,6 +15,4 @@ export type GameDetailDetailRailProps = {
   playtimeSessionCount: number;
   /** Most recent session date string, or null. */
   lastSessionDate: string | null;
-  /** Derived status for the game — used to display your overall progress. */
-  derivedStatus: LibraryItemStatus | null;
 };

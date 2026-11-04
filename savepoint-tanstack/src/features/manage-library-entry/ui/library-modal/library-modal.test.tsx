@@ -2,15 +2,13 @@
  * Component test for LibraryModal (manage-library-entry).
  *
  * The modal's contract:
- *   - Started / Completed are DatePicker triggers (buttons queried by their
- *     accessible name "Started" / "Completed"), not native date inputs.
- *   - A "Mark complete" one-tap sets Completed to a non-null Date when empty.
- *   - Remove is a destructive footer button (not a one-item ⋯ menu); the
+ *   - Edits platform and rating only; status moves through `setStatusFn`
+ *     and there are no started/completed date fields or "Mark complete".
+ *   - Remove is a destructive footer button (not a one-item menu); the
  *     confirmation is the shared RemoveFromLibraryDialog (no typing).
- *   - Marking Completed derives PLAYED in the Status select.
  */
 
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -18,6 +16,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
+import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
 import { getPlatformOptionsFn } from "../../api/get-platform-options";
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
@@ -57,30 +56,10 @@ const PLATFORM_OPTIONS_RESULT = [
   { label: "Your platforms", platforms: ["Steam Deck"] },
 ];
 
-const STUB_ENTRY: LibraryItemWithGame = {
-  id: 42,
-  userId: "user-abc",
-  gameId: "game-xyz",
-  status: "PLAYING",
-  platform: "PC",
-  rating: 8,
-  startedAt: new Date("2024-01-15"),
-  completedAt: null,
-  createdAt: new Date("2024-01-01"),
-  updatedAt: new Date("2024-01-15"),
-  statusChangedAt: null,
-  acquisitionType: "DIGITAL",
-  hasBeenPlayed: true,
-  statusIsManual: false,
-  game: {
-    id: "game-xyz",
-    igdbId: 1234,
-    title: "Hollow Knight",
-    slug: "hollow-knight",
-    coverImage: null,
-    releaseDate: null,
-  },
-};
+const STUB_ENTRY: LibraryItemWithGame = buildLibraryItemWithGame(
+  { id: 42, status: "PLAYING", platform: "PC", rating: 8 },
+  { id: "game-xyz", title: "Hollow Knight", slug: "hollow-knight" }
+);
 
 const onOpenChange = vi.fn();
 
@@ -91,23 +70,15 @@ const defaultProps = {
 };
 
 const elements = {
-  getStatusCombobox: () => screen.getByRole("combobox", { name: "Status" }),
   getPlatformCombobox: () => screen.getByRole("button", { name: "Platform" }),
   getRatingInput: () => screen.getByRole("slider", { name: "Rating" }),
-  getStartedTrigger: () => screen.getByRole("button", { name: "Started" }),
-  getCompletedTrigger: () => screen.getByRole("button", { name: "Completed" }),
-  // Each calendar day is a button inside its gridcell; the gridcell's accessible
-  // name is its day-of-month text, unambiguous for mid-month days.
-  getCalendarDayButton: (dayOfMonth: string) =>
-    within(screen.getByRole("gridcell", { name: dayOfMonth })).getByRole(
-      "button"
-    ),
   getSaveButton: () => screen.getByRole("button", { name: "Save changes" }),
-  getMarkCompleteButton: () =>
-    screen.getByRole("button", { name: "Mark complete" }),
+  queryStatusCombobox: () => screen.queryByRole("combobox", { name: "Status" }),
+  queryStartedTrigger: () => screen.queryByRole("button", { name: "Started" }),
+  queryCompletedTrigger: () =>
+    screen.queryByRole("button", { name: "Completed" }),
   queryMarkCompleteButton: () =>
     screen.queryByRole("button", { name: "Mark complete" }),
-
   getDeleteFromLibraryButton: () =>
     screen.getByRole("button", { name: "Remove from library" }),
   queryConfirmTitle: () =>
@@ -122,12 +93,7 @@ const elements = {
 
 const actions = {
   clickSave: () => userEvent.click(elements.getSaveButton()),
-  clickMarkComplete: () => userEvent.click(elements.getMarkCompleteButton()),
   openPlatformSelect: () => userEvent.click(elements.getPlatformCombobox()),
-  pickStartedDay: async (dayOfMonth: string) => {
-    await userEvent.click(elements.getStartedTrigger());
-    await userEvent.click(elements.getCalendarDayButton(dayOfMonth));
-  },
   openDeleteConfirm: async () => {
     await userEvent.click(elements.getDeleteFromLibraryButton());
   },
@@ -154,12 +120,16 @@ describe("LibraryModal", () => {
     });
 
     it("renders all editable form fields and controls", () => {
-      expect(elements.getStatusCombobox()).toBeDefined();
       expect(elements.getPlatformCombobox()).toBeDefined();
       expect(elements.getRatingInput()).toBeDefined();
-      expect(elements.getStartedTrigger()).toBeDefined();
-      expect(elements.getCompletedTrigger()).toBeDefined();
       expect(elements.getSaveButton()).toBeDefined();
+    });
+
+    it("no longer offers a status select, play dates or Mark complete", () => {
+      expect(elements.queryStatusCombobox()).toBeNull();
+      expect(elements.queryStartedTrigger()).toBeNull();
+      expect(elements.queryCompletedTrigger()).toBeNull();
+      expect(elements.queryMarkCompleteButton()).toBeNull();
     });
 
     it("exposes remove as a footer button, with the confirmation hidden until invoked", () => {
@@ -167,72 +137,8 @@ describe("LibraryModal", () => {
       expect(elements.queryConfirmTitle()).toBeNull();
     });
 
-    it("renders datepicker triggers for Started and Completed", () => {
-      expect(elements.getStartedTrigger()).toBeDefined();
-      expect(elements.getCompletedTrigger()).toBeDefined();
-    });
-
     it("does not show an inline alert before any submission", () => {
       expect(elements.queryInlineAlert()).toBeNull();
-    });
-  });
-
-  describe("given the entry has no completed date", () => {
-    beforeEach(() => {
-      render(
-        <LibraryModal
-          {...defaultProps}
-          entry={{ ...STUB_ENTRY, completedAt: null }}
-        />
-      );
-    });
-
-    it("offers a Mark complete shortcut", () => {
-      expect(elements.getMarkCompleteButton()).toBeDefined();
-    });
-
-    it("fills the completed date and submits a non-null completedAt after marking", async () => {
-      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
-      await actions.clickMarkComplete();
-      await actions.clickSave();
-      await waitFor(() => {
-        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
-      });
-      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
-        data: { completedAt: unknown };
-      };
-      expect(arg.data.completedAt).not.toBeNull();
-    });
-  });
-
-  describe("given the entry already has a completed date", () => {
-    beforeEach(() => {
-      render(
-        <LibraryModal
-          {...defaultProps}
-          entry={{ ...STUB_ENTRY, completedAt: new Date("2024-03-01") }}
-        />
-      );
-    });
-
-    it("hides the Mark complete shortcut", () => {
-      expect(elements.queryMarkCompleteButton()).toBeNull();
-    });
-  });
-
-  describe("given a non-PLAYED item and the user marks it complete", () => {
-    beforeEach(async () => {
-      render(
-        <LibraryModal
-          {...defaultProps}
-          entry={{ ...STUB_ENTRY, status: "PLAYING", completedAt: null }}
-        />
-      );
-      await actions.clickMarkComplete();
-    });
-
-    it("moves the status to Played", () => {
-      expect(elements.getStatusCombobox().textContent).toContain("Played");
     });
   });
 
@@ -243,14 +149,13 @@ describe("LibraryModal", () => {
       await actions.clickSave();
     });
 
-    it("calls updateLibraryItemFn with the entry id in the { data } envelope", async () => {
+    it("sends only the entry id, platform and rating to updateLibraryItemFn", async () => {
       await waitFor(() => {
         expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
       });
-      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]![0]! as {
-        data: { itemId: number };
-      };
-      expect(arg.data.itemId).toBe(STUB_ENTRY.id);
+      expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledWith({
+        data: { itemId: STUB_ENTRY.id, platform: "PC", rating: 8 },
+      });
     });
 
     it("does not call deleteLibraryItemFn on save", () => {
@@ -465,7 +370,6 @@ describe("LibraryModal", () => {
 
     it("does not render the form", () => {
       expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
-      expect(screen.queryByRole("combobox", { name: "Status" })).toBeNull();
     });
   });
 
@@ -520,54 +424,6 @@ describe("LibraryModal", () => {
     it("separates the game's platforms from the user's under section headings", async () => {
       expect(await screen.findByText("This game")).toBeInTheDocument();
       expect(screen.getByText("Your platforms")).toBeInTheDocument();
-    });
-  });
-
-  describe("given the user sets a start date", () => {
-    beforeEach(async () => {
-      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
-      render(
-        <LibraryModal
-          {...defaultProps}
-          entry={{ ...STUB_ENTRY, startedAt: null }}
-        />
-      );
-      await actions.pickStartedDay("15");
-      await actions.clickSave();
-    });
-
-    it("submits a non-null startedAt value to updateLibraryItemFn", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
-      });
-      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
-        data: { startedAt: unknown };
-      };
-      expect(arg.data.startedAt).not.toBeNull();
-    });
-  });
-
-  describe("given the user sets a completed date", () => {
-    beforeEach(async () => {
-      vi.mocked(updateLibraryItemFn).mockResolvedValue(undefined as never);
-      render(
-        <LibraryModal
-          {...defaultProps}
-          entry={{ ...STUB_ENTRY, completedAt: null }}
-        />
-      );
-      await actions.clickMarkComplete();
-      await actions.clickSave();
-    });
-
-    it("submits a non-null completedAt value to updateLibraryItemFn", async () => {
-      await waitFor(() => {
-        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledOnce();
-      });
-      const arg = vi.mocked(updateLibraryItemFn).mock.calls[0]?.[0] as {
-        data: { completedAt: unknown };
-      };
-      expect(arg.data.completedAt).not.toBeNull();
     });
   });
 });

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 
+import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { LibraryPage } from "./library-page";
 
 // LibraryFilters uses useNavigate from @tanstack/react-router; LibraryItemCard
@@ -44,6 +45,10 @@ vi.mock("@/features/add-game/api/search-games-fn", () => ({
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
+  setStatusFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
@@ -102,30 +107,15 @@ vi.mock("@/features/manage-playthrough", () => ({
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;
-}): LibraryItemWithGame => ({
-  id: overrides.id,
-  userId: "user-1",
-  gameId: `game-${overrides.id}`,
-  status: "PLAYING",
-  platform: "PC",
-  rating: null,
-  createdAt: new Date("2025-01-01T00:00:00Z"),
-  updatedAt: new Date("2025-01-02T00:00:00Z"),
-  statusChangedAt: null,
-  acquisitionType: "DIGITAL",
-  startedAt: null,
-  completedAt: null,
-  hasBeenPlayed: false,
-  statusIsManual: false,
-  game: {
-    id: `game-${overrides.id}`,
-    igdbId: 1,
-    title: overrides.gameTitle,
-    slug: overrides.gameTitle.toLowerCase().replace(/\s+/g, "-"),
-    coverImage: null,
-    releaseDate: null,
-  },
-});
+}): LibraryItemWithGame =>
+  buildLibraryItemWithGame(
+    { id: overrides.id, status: "PLAYING", platform: "PC" },
+    {
+      id: `game-${overrides.id}`,
+      title: overrides.gameTitle,
+      slug: overrides.gameTitle.toLowerCase().replace(/\s+/g, "-"),
+    }
+  );
 
 const defaultViewProps = {
   status: undefined,
@@ -148,8 +138,8 @@ const elements = {
     screen.getByRole("button", { name: "Filter by Playing" }),
   getAllFilterButton: () =>
     screen.getByRole("button", { name: "Show all statuses" }),
-  getPlayedFilterButton: () =>
-    screen.getByRole("button", { name: "Filter by Played" }),
+  getDoneFilterButton: () =>
+    screen.getByRole("button", { name: "Filter by Done" }),
   queryGameTitleHeading: (title: string) =>
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
@@ -300,12 +290,12 @@ describe("LibraryPage", () => {
   });
 
   describe("Phase 3 visual-parity push", () => {
-    describe("given a library with two PLAYING items and one SHELF item", () => {
+    describe("given a library with two PLAYING items and one WANT item", () => {
       beforeEach(() => {
         const items = [
           buildItem({ id: 1, gameTitle: "Hollow Knight" }),
           buildItem({ id: 2, gameTitle: "Celeste" }),
-          { ...buildItem({ id: 3, gameTitle: "Tunic" }), status: "SHELF" },
+          { ...buildItem({ id: 3, gameTitle: "Tunic" }), status: "WANT" },
         ] as LibraryItemWithGame[];
         render(<LibraryPage items={items} total={3} {...defaultViewProps} />);
       });
@@ -338,7 +328,7 @@ describe("LibraryPage", () => {
     describe("given full-library statusCounts while the grid is filtered to PLAYING", () => {
       beforeEach(() => {
         // The grid shows only the 2 PLAYING items, but the loader-supplied
-        // statusCounts describe the WHOLE library (47 PLAYED exist elsewhere).
+        // statusCounts describe the WHOLE library (47 Done exist elsewhere).
         const items = [
           buildItem({ id: 1, gameTitle: "Hollow Knight" }),
           buildItem({ id: 2, gameTitle: "Celeste" }),
@@ -349,11 +339,9 @@ describe("LibraryPage", () => {
             total={2}
             status="PLAYING"
             statusCounts={{
-              WISHLIST: 12,
-              SHELF: 84,
-              UP_NEXT: 6,
+              WANT: 12,
               PLAYING: 2,
-              PLAYED: 47,
+              DONE: 47,
             }}
             platform={undefined}
             minRating={undefined}
@@ -363,8 +351,8 @@ describe("LibraryPage", () => {
         );
       });
 
-      it("shows the full-library PLAYED count (47), not 0, even though no PLAYED item is on the page", () => {
-        expect(elements.getPlayedFilterButton().textContent).toContain("47");
+      it("shows the full-library Done count (47), not 0, even though no Done item is on the page", () => {
+        expect(elements.getDoneFilterButton().textContent).toContain("47");
       });
 
       it("still shows the PLAYING count from the full-library counts", () => {
@@ -405,11 +393,9 @@ describe("LibraryPage", () => {
             total={3}
             {...defaultViewProps}
             statusCounts={{
+              WANT: 0,
               PLAYING: 3,
-              PLAYED: 0,
-              UP_NEXT: 0,
-              SHELF: 0,
-              WISHLIST: 0,
+              DONE: 0,
             }}
           />
         );

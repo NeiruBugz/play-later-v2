@@ -289,7 +289,7 @@ describe("SearchGamesResults", () => {
       mockSearchGamesFn.mockResolvedValue({
         games: [
           makeIgdbGame(1, "Hades", "hades", {
-            library: { status: "PLAYED", rating: 9 },
+            library: { status: "DONE", rating: 9 },
           }),
           makeIgdbGame(2, "Sword of Hades", "sword-of-hades", {
             library: null,
@@ -309,7 +309,7 @@ describe("SearchGamesResults", () => {
     });
 
     it("shows the library status on an owned result", () => {
-      expect(screen.getByLabelText("Status: Played")).toBeInTheDocument();
+      expect(screen.getByLabelText("Status: Done")).toBeInTheDocument();
     });
 
     it("renders the add affordance only for unowned results", () => {

@@ -31,18 +31,15 @@ export function ProfileOverview({
   const usernameSlug = profile.username ?? profile.id;
   const avatarSrc = profile.image ?? DEFAULT_AVATAR_SRC;
 
-  const gameCount = Object.values(stats.statusCounts).reduce(
-    (sum, count) => sum + (count ?? 0),
-    0
-  );
-  const played = stats.statusCounts.PLAYED ?? 0;
+  const { want, playing, done } = stats;
+  const gameCount = want + playing + done;
 
-  // Compact stat row: 4 key numbers inline (design ref sp-screens-c.jsx ProfileScreen).
   const inlineStats = [
     { label: "in library", value: gameCount },
-    { label: "played", value: played },
-    { label: "completed", value: stats.completedCount ?? 0 },
-    { label: "entries", value: stats.journalCount ?? 0 },
+    { label: "want", value: want },
+    { label: "playing", value: playing },
+    { label: "done", value: done },
+    { label: "notes", value: stats.journalCount ?? 0 },
   ] as const;
 
   // Primary action renders below the identity block as a full-width button (AC PRO-2).
