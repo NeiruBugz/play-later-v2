@@ -139,8 +139,8 @@ Verify-task conventions:
 - [ ] **Slice 5: Owned or not**
 
   > Spec §2.5 (audit N8).
-  - [ ] Add `setOwnership` and `setOwnershipFn`, plus `notOwnedOnly` in `getLibrary`. Friends' reads never expose ownership. Remove the acquisition filter from the library query and params. Tests. **[Agent: tanstack-fullstack]**
-  - [ ] UI: the ownership toggle, the `NotOwnedTag`, and the "Not owned only" toggle (Want filter only). Delete the Acquisition filter UI (`filter-library/lib/acquisition.ts`, desktop and mobile). **[Agent: react-frontend]**
+  - [x] Add `setOwnership` and `setOwnershipFn`, plus `notOwnedOnly` in `getLibrary`. Friends' reads never expose ownership. Remove the acquisition filter from the library query and params. Tests. **[Agent: tanstack-fullstack]**
+  - [x] UI: the ownership toggle, the `NotOwnedTag`, and the "Not owned only" toggle (Want filter only). Delete the Acquisition filter UI (`filter-library/lib/acquisition.ts`, desktop and mobile). **[Agent: react-frontend]**
   - [ ] Verify:
     - The not-owned tag survives Playing → Want.
     - The toggle lists only not-owned Want games.
