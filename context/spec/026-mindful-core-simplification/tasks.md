@@ -177,7 +177,7 @@ Verify-task conventions:
     - At 390 px, every card's "⋯" can be tapped at any scroll position.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 7: One Log form, plain notes, one time-played total**
+- [x] **Slice 7: One Log form, plain notes, one time-played total**
 
   > Spec §2.9, §2.15, §2.16, plus the "Mark as Playing" offer from §2.2 (audit N4, N5, N6, N7, N10, N12, N13, N21).
   - [x] Server:
@@ -203,7 +203,7 @@ Verify-task conventions:
     - Journal filter: All / each game with notes / "No game" (T4). A note without time can be saved without a game.
     - One `formatHours` ("1.5 h") everywhere (N10).
     - No Quick note/Reflection labels. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Every Log entry point opens the same form. Search filters the library games, and the form fits a 900 px-tall desktop viewport.
     - Log 1.5 h with no text on a Want game: it saves, stays Want, and offers "Mark as Playing".
     - A not-in-library game page and a signed-out view show no "Log time".
