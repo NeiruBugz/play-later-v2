@@ -1,11 +1,11 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import prettier from "eslint-config-prettier";
+import boundaries from "eslint-plugin-boundaries";
+import jestDom from "eslint-plugin-jest-dom";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
-import jestDom from "eslint-plugin-jest-dom";
 import testingLibrary from "eslint-plugin-testing-library";
-import boundaries from "eslint-plugin-boundaries";
-import prettier from "eslint-config-prettier";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
@@ -122,13 +122,8 @@ export default tseslint.config(
       "src/features/command-palette/ui/command-palette/command-palette.test.tsx",
       "src/features/command-palette/ui/game-result-item/game-result-item.test.tsx",
       "src/features/command-palette/ui/palette-navigation-group/palette-navigation-group.test.tsx",
-      // RunStatusBadge test queries the Lucide SVG icon via document.querySelector —
-      // there is no accessible role/name on a bare <svg aria-hidden>; direct access
-      // is the only viable approach here.
-      "src/entities/playthrough/ui/run-status-badge/run-status-badge.test.tsx",
-      // Slice-5 (016) tests detect italic body text via closest("em") — bare <em>
-      // has no accessible role, so direct DOM traversal is the only viable approach.
-      "src/widgets/game-detail/ui/playthrough-timeline/nested-journal.test.tsx",
+      // Detects italic body text via closest("em") — bare <em> has no accessible
+      // role, so direct DOM traversal is the only viable approach.
       "src/widgets/game-detail/ui/journal-feed/journal-feed.test.tsx",
     ],
     rules: {
@@ -222,7 +217,14 @@ export default tseslint.config(
             // also import down from all layers.
             {
               from: "app",
-              allow: ["app", "routes", "widgets", "feature", "entity", "shared"],
+              allow: [
+                "app",
+                "routes",
+                "widgets",
+                "feature",
+                "entity",
+                "shared",
+              ],
             },
             // ── routes ─────────────────────────────────────────────────────
             // routes/__root.tsx imports @/app (ErrorBoundary, theme provider,
@@ -276,5 +278,5 @@ export default tseslint.config(
       "boundaries/no-unknown-files": "off",
     },
   },
-  prettier,
+  prettier
 );
