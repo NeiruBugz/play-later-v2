@@ -26,6 +26,8 @@ This change replaces all of that with one small model the user can hold in their
 
 Notes become plain notes. Adding a game and changing its status each take one tap and can be undone.
 
+**North star (from the 2026-11-04 think-aloud):** "make tracking and adding dead simple."
+
 **Success looks like:** the author can add a game, queue it, start it, and mark it done without thinking about where it should go. In the following weeks, he opens SavePoint at least once a week.
 
 ---
@@ -101,6 +103,8 @@ Any status can be reached in two taps: tap the status control, then tap a status
   - [ ] When the user taps the status control on a grid tile, a list row, the game page, or the phone bottom bar, then the status picker opens directly, without scrolling the page or opening a menu first.
   - [ ] Given the user is on a phone, when they scroll the game page to any position, then the bottom bar with the status pill is fully visible above the navigation and can be tapped.
   - [ ] When the user opens the library on desktop, then a grid / list switch is visible, and in list view every row shows its next-step button.
+  - [ ] Given a game has earlier plays and notes, when the user taps its status control on the game page and picks Done, then the game shows Done — the status control works the same for every game, whatever its history.
+  - [ ] When the user opens a game's details for editing, then there is no status field: the status is changed only with the status control and the next-step button.
   - [ ] When the user taps a status in the picker, then the new status is shown immediately, without any further confirmation step.
   - [ ] When the user taps "Undo" within 5 seconds of a status change, then the game returns to its previous status and its previous Up Next place.
   - [ ] Given the user undoes "Start playing" or "Play again", when they expand History on the game page, then no new play has been added.
@@ -155,7 +159,7 @@ There are four ways to add a game:
 All four behave the same:
 
 - One tap adds the game as **Want**.
-- A confirmation then shows "Added {Game} to Want", with "Put in Up Next", "Undo", and the optional "why" field of 2.8.
+- A confirmation then shows "Added {Game} to Want", with "Start playing", "Put in Up Next", "Undo", and the optional "why" field of 2.8. "Start playing" covers "heard of it, playing tonight".
 - The confirmation stays for 8 seconds. It stays longer while the user is typing in the "why" field.
 - Search results appear as the user types.
 - The search stays open after adding, so several games can be added in a row.
@@ -168,6 +172,7 @@ Steam import is a separate, reviewed flow (2.13) and is not covered here.
   - [ ] When the user taps "+" next to a search result on the search page, in the add dialog, or in the command palette, then the game is added as Want and the confirmation "Added {Game} to Want" appears with "Put in Up Next" and "Undo".
   - [ ] When the user taps "Add to library" on the page of a game they don't have, then the game is added as Want, the same confirmation appears, and the page shows the game's status control.
   - [ ] When the user taps "Put in Up Next" in the confirmation, then the game joins the queue under the rules of 2.4.
+  - [ ] When the user taps "Start playing" in the add confirmation (from any of the four add paths, the command palette included), then the game shows Playing and a play begins, without opening the game page.
   - [ ] When the user taps "Undo" while the confirmation is visible, then the game is no longer in their library, its queue place is freed, and any "why" answer given in that confirmation is gone.
   - [ ] Given the user has not touched the confirmation, when 8 seconds pass, then the confirmation disappears and the game stays in the library.
   - [ ] When the user types a game name in the add dialog, the search page, or the command palette and stops typing, then results appear within 1 second without pressing Enter.
@@ -227,6 +232,8 @@ All journal items are plain notes. A note has text and, optionally, time played,
 - Time played is shown wherever the note appears.
 - Notes are sorted and dated by when they were written. Editing a note never moves it or changes its date.
 - Editing a note can change both its text and its time.
+- A note without time may have no game: a general thought such as "one big RPG at a time". Time played always needs a game.
+- The Journal can be filtered by game. The filter offers "All", each game that has notes, and "No game".
 
 - **Acceptance Criteria:**
   - [ ] When the user views any note on the game page, in the Journal, or in the note view, then no "Quick note" or "Reflection" label, mood, or tag is shown.
@@ -240,6 +247,9 @@ All journal items are plain notes. A note has text and, optionally, time played,
   - [ ] Given a note has time but no text, when it appears in the Journal or on the game page, then it reads "{time} played" (for example "1.5 h played") instead of an empty card.
   - [ ] Given the user edits a note written last week, when they return to the Journal, then the note keeps its original date and its place in the list.
   - [ ] When the user edits a note, then they can change its text and its time, and "Save" stays enabled with empty text as long as time is set.
+  - [ ] When the user picks a game in the Journal filter, then only that game's notes are listed; when they pick "No game", then only notes without a game are listed; when they pick "All", then every note is listed.
+  - [ ] When the user writes a note in the Journal without choosing a game and without time, then it saves and appears under "No game".
+  - [ ] Given the user entered time but chose no game, when they try to save, then "Save" stays disabled and they see: "Choose a game to log time."
 
 ### 2.10. Play history instead of playthroughs
 
@@ -329,7 +339,7 @@ Every "Log" action opens the same **Log form**, which has three parts:
 
 It opens from the "Log" button in the navigation and from "Log time" on the game page.
 
-Only games in the user's library can be logged. When no game is chosen yet, the form shows a search field and the user's library, with Playing games first and then the rest by name. The list scrolls inside the form, so the form never grows taller than the screen. The chosen game's name and cover appear at the top of the form.
+Only games in the user's library can be logged. When the form is opened from the Journal's "New note", choosing a game is optional for a note without time (2.9). When no game is chosen yet, the form shows a search field and the user's library, with Playing games first and then the rest by name. The list scrolls inside the form, so the form never grows taller than the screen. The chosen game's name and cover appear at the top of the form.
 
 - **Acceptance Criteria:**
   - [ ] When the user taps "Log" in the navigation or "Log time" on a game page, then the same Log form opens, with the game already chosen when opened from a game page.
@@ -407,6 +417,7 @@ These defects block first use or the flows above, so they are fixed as part of t
 
 - **Acceptance Criteria:**
   - [ ] Given a new user has no username yet, when they sign in, then the profile setup page opens once and they can complete it, with no endless redirect or browser error.
+  - [ ] Given a game became Playing only by choosing the status (time was never logged for it), when the user logs 2 h for it with no text, then the log saves and no validation error is shown (think-aloud T2: this blocked the weekly loop).
   - [ ] When the user taps "Edit" on a note, then the note edit form opens, rather than the Journal list staying on screen.
   - [ ] When the user taps "Followers" or "Following" on a profile, then the list of people appears.
   - [ ] When anyone other than the owner views a profile (signed out included), then no note text and no per-play ratings are shown.
@@ -452,7 +463,7 @@ These defects block first use or the flows above, so they are fixed as part of t
 - A soft limit on how many games can be Playing (roadmap #5).
 - Reframing Times to Beat and removing "Your Pace" comparisons (roadmap #6).
 - Smarter Steam import suggestions beyond the label change and the 7-day rule (roadmap #7).
-- Suggestions of what to play next (roadmap #8).
+- Suggestions of what to play next (roadmap #8), including picking by mood or weight ("something light, like a roguelike"), the real decision seen in the think-aloud (T6).
 - Wishlist "already waiting" context before buying (roadmap #9).
 - Editing or deleting plays in History.
 - Sharing notes publicly or with friends; moods, tags, or note titles.
@@ -477,3 +488,11 @@ These defects block first use or the flows above, so they are fixed as part of t
   - Separate audit items S1–S9 were added to Out-of-Scope.
   - User decisions: keep the search page via "See all results", remove Home "Recently played", time format "1.5 h", include U1–U6.
   - Reason: the audit measured that duplication, labels that don't match the data, and desktop/phone disagreement drive the "inconvenient" feeling the spec exists to fix.
+- 2026-11-04 — Think-aloud session (`ui-audit/think-aloud.md`, takeaways T1–T7) — Folded the participant session into the spec.
+  - §1 gains the north star "make tracking and adding dead simple" (T7).
+  - §2.6: the add confirmation, the command palette included, offers "Start playing" (T1).
+  - §2.3: the status control works for every game whatever its history, and the details form has no status field (T3).
+  - §2.9: Journal filter by game including "No game"; notes without time may have no game (T4).
+  - §2.19: time-only logging for a game made Playing by status alone, a weekly-loop blocker raised into the first slice (T2).
+  - T5 confirms the Home counter removal (§2.17, N14).
+  - T6 (pick by mood or weight) goes to roadmap #8.
