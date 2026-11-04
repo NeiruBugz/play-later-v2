@@ -4,8 +4,9 @@ import {
   upsertGameFromIgdb,
   upsertGameFromIgdbPayload,
 } from "@/entities/game/api/upsert-game.server";
-import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
-import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-item-status.server";
+import { createWantLibraryItem } from "@/entities/library-item/api/add-game-to-library.server";
+import { setLibraryItemStatusInTx } from "@/entities/library-item/api/set-library-item-status.server";
+import { lockUserQueue } from "@/entities/library-item/api/up-next-queue.server";
 import { libraryItemStatusSchema } from "@/entities/library-item/model";
 import {
   matchSteamGameByAppId,
@@ -44,11 +45,11 @@ export type ImportGameToLibraryResult = {
  *  2. Resolve igdbId: `manualIgdbId` if provided, otherwise throw
  *     `NeedsManualMatchError`.
  *  3. Cache-or-fetch a local `Game` row by `igdbId` via entities/game.
- *  4. Refuse if the user already has a LibraryItem for this game (throws
- *     `ConflictError`; the modal surfaces "already in library").
- *  5. Create the LibraryItem (WANT) via entities/library-item, move it to the
- *     chosen status through `setLibraryItemStatus` (so a PLAYING import opens a
- *     play), and flip `igdbMatchStatus: MATCHED`.
+ *  4. In one transaction: refuse if the user already has a LibraryItem for
+ *     this game (throws `ConflictError` after flipping MATCHED; the modal
+ *     surfaces "already in library"); otherwise create the LibraryItem (WANT),
+ *     move it to the chosen status through `setLibraryItemStatusInTx` (so a
+ *     PLAYING import opens a play), and flip `igdbMatchStatus: MATCHED`.
  */
 export async function importGameToLibraryWorker(
   userId: string | undefined,
@@ -109,41 +110,42 @@ export async function importGameToLibraryWorker(
     ? await upsertGameFromIgdbPayload(matchedRemote)
     : await upsertGameFromIgdb(igdbId);
 
-  // Assert duplicate presence at the feature level before adding (to throw specific ConflictError)
-  const existing = await prisma.libraryItem.findFirst({
-    where: { userId, gameId: game.id },
-  });
-  if (existing) {
-    // Still flip the imported-game status so the row leaves the
+  // One transaction: library item, status change and MATCHED flip commit or
+  // roll back together, so a retry after a failure starts from a clean slate.
+  // The per-user advisory lock (shared with status changes) serialises
+  // concurrent imports of the same game.
+  const outcome = await prisma.$transaction(async (tx) => {
+    await lockUserQueue(tx, userId);
+
+    const existing = await tx.libraryItem.findUnique({
+      where: { userId_gameId: { userId, gameId: game.id } },
+      select: { id: true },
+    });
+    // Flip the imported-game status either way so the row leaves the
     // "needs work" tab — the import intent already succeeded once.
-    await prisma.importedGame.update({
+    await tx.importedGame.update({
       where: { id: importedGameId },
       data: { igdbMatchStatus: "MATCHED" },
     });
+    if (existing) return { alreadyInLibrary: true } as const;
+
+    let item = await createWantLibraryItem(tx, userId, game.id, {
+      platform: "PC (Microsoft Windows)",
+    });
+    if (status !== item.status) {
+      ({ item } = await setLibraryItemStatusInTx(tx, userId, item.id, status));
+    }
+    return { alreadyInLibrary: false, libraryItemId: item.id } as const;
+  });
+
+  if (outcome.alreadyInLibrary) {
     throw new ConflictError("Game is already in your library", {
       gameId: game.id,
     });
   }
 
-  // Create LibraryItem via entities/library-item
-  let { item: libraryItem } = await addGameToLibrary(userId, game.id, {
-    platform: "PC (Microsoft Windows)",
-  });
-  if (status !== libraryItem.status) {
-    ({ item: libraryItem } = await setLibraryItemStatus(
-      userId,
-      libraryItem.id,
-      status
-    ));
-  }
-
-  await prisma.importedGame.update({
-    where: { id: importedGameId },
-    data: { igdbMatchStatus: "MATCHED" },
-  });
-
   return {
-    libraryItemId: libraryItem.id,
+    libraryItemId: outcome.libraryItemId,
     gameId: game.id,
     gameSlug: game.slug,
   };
