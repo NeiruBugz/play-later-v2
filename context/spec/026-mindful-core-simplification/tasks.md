@@ -259,10 +259,10 @@ Verify-task conventions:
 - [ ] **Slice 10: Home, library and Journal without duplicates or pressure**
 
   > Spec §2.17 and the rest of §2.18 (audit N9, N14, N15, N16, N17, N20, N23).
-  - [ ] Server:
+  - [x] Server:
     - Home data returns `{ playing[], upNextTop3[], counts }`. Delete `recentlyPlayed` and the stats-card data (N9, N14).
     - The Journal stats return no period counts (N20). **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - Home renders each game once, with Up Next visible without scrolling at 390 × 844 when one game is Playing (N15).
     - A single counts strip; delete the stats card and the distribution bar (N14).
     - One empty state: "Pick from Up Next" → the Up Next view, or "Add a game" → the add search (N16).
