@@ -293,7 +293,7 @@ Verify-task conventions:
 - [ ] **Slice 12: Contract migration**
 
   > Drops the legacy fields once slices 1–11 are verified in production (technical-considerations §2.2, migration B).
-  - [ ] Confirm no code reads the legacy fields:
+  - [x] Confirm no code reads the legacy fields (audit 2026-11-04: see [migration-b-readiness.md](./migration-b-readiness.md) — 3 production writes and test/seed edits remain, to be done with migration B):
     - `statusIsManual`, `hasBeenPlayed`, `startedAt`, `completedAt`, `acquisitionType`.
     - Journal `kind`, `mood`, `tags`, `playSession`, `visibility`, `publishedAt`.
     - Playthrough `kind`, `status`, `rating`, `completion`, `notes`, `playtimeMinutes`.
