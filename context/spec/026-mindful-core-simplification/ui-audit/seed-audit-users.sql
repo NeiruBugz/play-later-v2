@@ -1,7 +1,10 @@
--- Seeds the local audit accounts with a pre-026 (five-status) library.
+-- Targets the post-026 schema (Want/Playing/Done + Up Next queue). Same logical library as the original five-status seed,
+-- converted by hand with the functional-spec 2.12 mapping. Requires migration 20261104120000_mindful_core_model.
+-- Seeds the local audit accounts.
 -- Accounts must exist first (created via Better Auth sign-up, see ui-audit.md § Setup).
--- Idempotent: wipes all three audit accounts, resets audit_empty to first-run, re-creates audit_full + audit_friend data.
--- Run: docker exec -i savepoint-postgres psql -U postgres -d savepoint-db < seed-audit-users.sql
+-- Idempotent: wipes all three audit accounts, resets audit_empty to first-run, re-creates audit_full + audit_friend data
+-- (audit_full + audit_friend are 'existing users': statusModelNoticePending = true; audit_empty is a new sign-up: false).
+-- Run: docker exec -i savepoint-postgres psql -v ON_ERROR_STOP=1 -U postgres -d savepoint-db < seed-audit-users.sql
 
 DO $$
 DECLARE
@@ -20,7 +23,7 @@ BEGIN
   DELETE FROM "Follow" WHERE "followerId" IN (full_id, friend_id, empty_id) OR "followingId" IN (full_id, friend_id, empty_id);
 
   UPDATE "user" SET username = NULL, "usernameNormalized" = NULL, "profileSetupCompletedAt" = NULL,
-    "onboardingDismissedAt" = NULL, image = NULL, "updatedAt" = now()
+    "onboardingDismissedAt" = NULL, image = NULL, "statusModelNoticePending" = false, "updatedAt" = now()
   WHERE id = empty_id;
 
   UPDATE "user" SET
@@ -28,70 +31,74 @@ BEGIN
     "profileSetupCompletedAt" = now() - interval '200 days', "createdAt" = now() - interval '200 days',
     "steamId64" = '76561190000000001', "steamUsername" = 'audit_full_steam',
     "steamProfileURL" = 'https://steamcommunity.com/profiles/76561190000000001',
-    "steamConnectedAt" = now() - interval '30 days', "updatedAt" = now()
+    "steamConnectedAt" = now() - interval '30 days', "statusModelNoticePending" = true, "updatedAt" = now()
   WHERE id = full_id;
 
   UPDATE "user" SET
     username = 'audit_friend', "usernameNormalized" = 'audit_friend', "isPublicProfile" = true,
     "profileSetupCompletedAt" = now() - interval '150 days', "createdAt" = now() - interval '150 days',
-    "updatedAt" = now()
+    "statusModelNoticePending" = true, "updatedAt" = now()
   WHERE id = friend_id;
 
   INSERT INTO "Follow" ("followerId", "followingId") VALUES (full_id, friend_id), (friend_id, full_id);
 
-  -- audit_full library: every legacy status, the quirk cases from feature-brief §5
+  -- audit_full library: every status/outcome combination plus the quirk cases from feature-brief §5
   FOR row IN SELECT * FROM (VALUES
-    -- title, status, platform, acquisition, hasBeenPlayed, rating, statusIsManual, startedDaysAgo, completedDaysAgo, addedDaysAgo
-    ('The Witcher 3: Wild Hunt',                       'PLAYING',  'PC',              'DIGITAL',      true,  9,    false, 20,   NULL, 700),
-    ('Final Fantasy VII Rebirth',                      'PLAYING',  'PlayStation 5',   'PHYSICAL',     false, NULL, false, 10,   NULL, 60),
-    ('Metal Gear Solid Delta: Snake Eater',            'PLAYING',  'PlayStation 5',   'DIGITAL',      false, NULL, false, 3,    NULL, 5),
-    ('Final Fantasy VII Remake',                       'UP_NEXT',  'PlayStation 5',   'DIGITAL',      true,  8,    false, NULL, NULL, 400),
-    ('Resident Evil 2',                                'UP_NEXT',  'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 90),
-    ('Final Fantasy X HD Remaster',                    'UP_NEXT',  'PC',              'SUBSCRIPTION', false, NULL, false, NULL, NULL, 45),
-    ('Assassin''s Creed Shadows',                      'UP_NEXT',  'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 20),
-    ('Final Fantasy XV',                               'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 300),
-    ('Final Fantasy XIII',                             'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 290),
-    ('Crisis Core: Final Fantasy VII - Reunion',       'SHELF',    'Nintendo Switch', 'PHYSICAL',     false, NULL, false, NULL, NULL, 250),
-    ('Resident Evil 6',                                'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 240),
-    ('Shadow Warrior',                                 'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 230),
-    ('Final Fantasy V',                                'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 200),
-    ('Final Fantasy III',                              'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 199),
-    ('Final Fantasy II',                               'SHELF',    'PC',              'DIGITAL',      false, NULL, false, NULL, NULL, 198),
-    ('Dirge of Cerberus: Final Fantasy VII',           'SHELF',    'PlayStation 5',   'PHYSICAL',     false, NULL, false, NULL, NULL, 150),
-    ('Final Fantasy VII Remake: Episode Intermission', 'SHELF',    'PlayStation 5',   'DIGITAL',      false, NULL, false, NULL, NULL, 120),
-    ('Assassin''s Creed Shadows: Claws of Awaji',      'WISHLIST', NULL,              'DIGITAL',      false, NULL, false, NULL, NULL, 15),
-    ('Resident Evil 4 VR',                             'WISHLIST', NULL,              'DIGITAL',      false, NULL, false, NULL, NULL, 40),
-    ('Final Fantasy: Mystic Quest',                    'WISHLIST', NULL,              'DIGITAL',      false, NULL, false, NULL, NULL, 80),
-    ('Scary Shadow Spot: Bitter Glass',                'WISHLIST', NULL,              'DIGITAL',      false, NULL, false, NULL, NULL, 8),
-    ('Before Crisis: Final Fantasy VII',               'WISHLIST', NULL,              'DIGITAL',      false, NULL, false, NULL, NULL, 100),
-    ('The Legend of Zelda: Breath of the Wild',        'PLAYED',   'Nintendo Switch', 'PHYSICAL',     true,  10,   false, 1100, 1000, 1100),
-    ('Final Fantasy VII',                              'PLAYED',   'PC',              'DIGITAL',      true,  8,    false, 500,  470,  500),
-    ('Crisis Core: Final Fantasy VII',                 'PLAYED',   'PC',              'DIGITAL',      true,  NULL, false, 180,  NULL, 180),
-    ('Demon Hunter: Shadow World',                     'PLAYED',   'PC',              'DIGITAL',      true,  4,    true,  60,   NULL, 60),
-    ('Final Fantasy VII Snowboarding',                 'PLAYED',   'PC',              'DIGITAL',      true,  NULL, false, NULL, 30,   35),
-    ('Resident Evil 4: Mobile Edition',                'PLAYED',   'PC',              'DIGITAL',      true,  7,    false, 900,  50,   900)
-  ) AS t(title, status, platform, acq, played, rating, manual, started, completed, added)
+    -- title, status, platform, acquisition, hasBeenPlayed, rating, owned, outcome, upNextPosition, startedDaysAgo, completedDaysAgo, addedDaysAgo
+    ('The Witcher 3: Wild Hunt',                       'PLAYING', 'PC',              'DIGITAL',      true,  9,    true,  NULL,     NULL, 20,   NULL, 700),
+    ('Final Fantasy VII Rebirth',                      'PLAYING', 'PlayStation 5',   'PHYSICAL',     false, NULL, true,  NULL,     NULL, 10,   NULL, 60),
+    ('Metal Gear Solid Delta: Snake Eater',            'PLAYING', 'PlayStation 5',   'DIGITAL',      false, NULL, true,  NULL,     NULL, 3,    NULL, 5),
+    ('Final Fantasy VII Remake',                       'DONE',    'PlayStation 5',   'DIGITAL',      true,  8,    true,  NULL,     4,    NULL, NULL, 400),
+    ('Resident Evil 2',                                'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     3,    NULL, NULL, 90),
+    ('Final Fantasy X HD Remaster',                    'WANT',    'PC',              'SUBSCRIPTION', false, NULL, true,  NULL,     2,    NULL, NULL, 45),
+    ('Assassin''s Creed Shadows',                      'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     1,    NULL, NULL, 20),
+    ('Final Fantasy XV',                               'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 300),
+    ('Final Fantasy XIII',                             'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 290),
+    ('Crisis Core: Final Fantasy VII - Reunion',       'WANT',    'Nintendo Switch', 'PHYSICAL',     false, NULL, true,  NULL,     NULL, NULL, NULL, 250),
+    ('Resident Evil 6',                                'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 240),
+    ('Shadow Warrior',                                 'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 230),
+    ('Final Fantasy V',                                'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 200),
+    ('Final Fantasy III',                              'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 199),
+    ('Final Fantasy II',                               'WANT',    'PC',              'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 198),
+    ('Dirge of Cerberus: Final Fantasy VII',           'WANT',    'PlayStation 5',   'PHYSICAL',     false, NULL, true,  NULL,     NULL, NULL, NULL, 150),
+    ('Final Fantasy VII Remake: Episode Intermission', 'WANT',    'PlayStation 5',   'DIGITAL',      false, NULL, true,  NULL,     NULL, NULL, NULL, 120),
+    ('Assassin''s Creed Shadows: Claws of Awaji',      'WANT',    NULL,              'DIGITAL',      false, NULL, false, NULL,     NULL, NULL, NULL, 15),
+    ('Resident Evil 4 VR',                             'WANT',    NULL,              'DIGITAL',      false, NULL, false, NULL,     NULL, NULL, NULL, 40),
+    ('Final Fantasy: Mystic Quest',                    'WANT',    NULL,              'DIGITAL',      false, NULL, false, NULL,     NULL, NULL, NULL, 80),
+    ('Scary Shadow Spot: Bitter Glass',                'WANT',    NULL,              'DIGITAL',      false, NULL, false, NULL,     NULL, NULL, NULL, 8),
+    ('Before Crisis: Final Fantasy VII',               'WANT',    NULL,              'DIGITAL',      false, NULL, false, NULL,     NULL, NULL, NULL, 100),
+    ('The Legend of Zelda: Breath of the Wild',        'DONE',    'Nintendo Switch', 'PHYSICAL',     true,  10,   true,  NULL,     NULL, 1100, 1000, 1100),
+    ('Final Fantasy VII',                              'DONE',    'PC',              'DIGITAL',      true,  8,    true,  NULL,     NULL, 500,  470,  500),
+    ('Crisis Core: Final Fantasy VII',                 'DONE',    'PC',              'DIGITAL',      true,  NULL, true,  'LET_GO', NULL, 180,  NULL, 180),
+    ('Demon Hunter: Shadow World',                     'DONE',    'PC',              'DIGITAL',      true,  4,    true,  'LET_GO', NULL, 60,   NULL, 60),
+    ('Final Fantasy VII Snowboarding',                 'DONE',    'PC',              'DIGITAL',      true,  NULL, true,  NULL,     NULL, NULL, 30,   35),
+    ('Resident Evil 4: Mobile Edition',                'DONE',    'PC',              'DIGITAL',      true,  7,    true,  NULL,     NULL, 900,  50,   900)
+  ) AS t(title, status, platform, acq, played, rating, owned, outcome, pos, started, completed, added)
   LOOP
     INSERT INTO "LibraryItem" ("userId", "gameId", status, platform, "acquisitionType", "hasBeenPlayed", rating,
-                               "statusIsManual", "startedAt", "completedAt", "createdAt", "updatedAt", "statusChangedAt")
+                               "isOwned", "doneOutcome", "upNextPosition",
+                               "startedAt", "completedAt", "createdAt", "updatedAt", "statusChangedAt")
     SELECT full_id, g.id, row.status::"LibraryItemStatus", row.platform, row.acq::"AcquisitionType", row.played, row.rating,
-           row.manual, now() - make_interval(days => row.started), now() - make_interval(days => row.completed),
+           row.owned, row.outcome::"DoneOutcome", row.pos,
+           now() - make_interval(days => row.started), now() - make_interval(days => row.completed),
            now() - make_interval(days => row.added), now() - make_interval(days => least(row.added, coalesce(row.started, row.added))),
            now() - make_interval(days => least(row.added, coalesce(row.started, row.added)))
-    FROM "Game" g WHERE g.title = row.title;
+    FROM (SELECT DISTINCT ON (title) * FROM "Game" ORDER BY title, id) g WHERE g.title = row.title;
   END LOOP;
 
-  -- Playthroughs (runs): replay in progress, abandoned-but-Played, two ratings, Replay-in-queue
+  -- Plays (Playthrough rows): open play per Playing game, ended plays for Done games, abandoned-but-Done, two ratings, Replay-in-queue
   FOR row IN SELECT * FROM (VALUES
     -- title, ordinal, kind, status, startedDaysAgo, finishedDaysAgo, minutes, rating, completion
     ('The Witcher 3: Wild Hunt',                1, 'FIRST',  'FINISHED',  700,  640,  7200, 9,    'Main + DLC'),
     ('The Witcher 3: Wild Hunt',                2, 'REPLAY', 'PLAYING',   20,   NULL, 840,  NULL, NULL),
     ('Final Fantasy VII Rebirth',               1, 'FIRST',  'PLAYING',   10,   NULL, 1320, NULL, NULL),
+    ('Metal Gear Solid Delta: Snake Eater',     1, 'FIRST',  'PLAYING',   3,    NULL, 0,    NULL, NULL),
     ('Final Fantasy VII Remake',                1, 'FIRST',  'FINISHED',  400,  370,  2400, 8,    'Main story'),
     ('The Legend of Zelda: Breath of the Wild', 1, 'FIRST',  'FINISHED',  1100, 1000, 8400, 10,   '100%'),
     ('Final Fantasy VII',                       1, 'FIRST',  'FINISHED',  500,  470,  2700, 8,    NULL),
     ('Crisis Core: Final Fantasy VII',          1, 'FIRST',  'ABANDONED', 180,  150,  420,  NULL, NULL),
     ('Demon Hunter: Shadow World',              1, 'FIRST',  'ABANDONED', 60,   55,   90,   NULL, NULL),
+    ('Final Fantasy VII Snowboarding',          1, 'FIRST',  'FINISHED',  NULL, 30,   0,    NULL, NULL),
     ('Resident Evil 4: Mobile Edition',         1, 'FIRST',  'FINISHED',  900,  850,  600,  6,    NULL),
     ('Resident Evil 4: Mobile Edition',         2, 'REPLAY', 'FINISHED',  80,   50,   480,  8,    NULL)
   ) AS t(title, ordinal, kind, status, started, finished, minutes, rating, completion)
@@ -131,21 +138,38 @@ BEGIN
     LEFT JOIN "Playthrough" p ON p."libraryItemId" = li.id AND p.ordinal = row.run_ordinal;
   END LOOP;
 
+  -- Time played lives in logs: one time-only note per run for the minutes its notes do not already cover (migration step 6e)
+  INSERT INTO "JournalEntry" (id, content, "playedMinutes", "userId", "gameId", "libraryItemId", "playthroughId", "createdAt", "updatedAt")
+  SELECT gen_random_uuid()::text, '', p."playtimeMinutes" - COALESCE(n.noted, 0), li."userId", li."gameId", li.id, p.id,
+         COALESCE(p."finishedAt", p."updatedAt"), COALESCE(p."finishedAt", p."updatedAt")
+  FROM "Playthrough" p
+  JOIN "LibraryItem" li ON li.id = p."libraryItemId"
+  LEFT JOIN (
+    SELECT "playthroughId", sum("playedMinutes") AS noted FROM "JournalEntry" WHERE "playthroughId" IS NOT NULL GROUP BY 1
+  ) n ON n."playthroughId" = p.id
+  WHERE li."userId" = full_id AND p."playtimeMinutes" > COALESCE(n.noted, 0);
+
   -- audit_friend: small public library with recent status changes for the activity feed
   FOR row IN SELECT * FROM (VALUES
-    ('The Witcher 3: Wild Hunt',                'PLAYING',  2),
-    ('The Legend of Zelda: Breath of the Wild', 'PLAYED',   5),
-    ('Resident Evil 2',                         'SHELF',    7),
-    ('Final Fantasy XV',                        'UP_NEXT',  1),
-    ('Final Fantasy VII Rebirth',               'WISHLIST', 3)
-  ) AS t(title, status, days)
+    -- title, status, owned, upNextPosition, daysAgo
+    ('The Witcher 3: Wild Hunt',                'PLAYING', true,  NULL, 2),
+    ('The Legend of Zelda: Breath of the Wild', 'DONE',    true,  NULL, 5),
+    ('Resident Evil 2',                         'WANT',    true,  NULL, 7),
+    ('Final Fantasy XV',                        'WANT',    true,  1,    1),
+    ('Final Fantasy VII Rebirth',               'WANT',    false, NULL, 3)
+  ) AS t(title, status, owned, pos, days)
   LOOP
-    INSERT INTO "LibraryItem" ("userId", "gameId", status, platform, "hasBeenPlayed", rating, "createdAt", "updatedAt", "statusChangedAt")
-    SELECT friend_id, g.id, row.status::"LibraryItemStatus", 'PC', row.status = 'PLAYED',
-           CASE WHEN row.status = 'PLAYED' THEN 9 END,
+    INSERT INTO "LibraryItem" ("userId", "gameId", status, platform, "hasBeenPlayed", rating, "isOwned", "upNextPosition",
+                               "createdAt", "updatedAt", "statusChangedAt")
+    SELECT friend_id, g.id, row.status::"LibraryItemStatus", 'PC', row.status = 'DONE',
+           CASE WHEN row.status = 'DONE' THEN 9 END, row.owned, row.pos,
            now() - make_interval(days => row.days), now() - make_interval(days => row.days), now() - make_interval(days => row.days)
-    FROM "Game" g WHERE g.title = row.title;
+    FROM (SELECT DISTINCT ON (title) * FROM "Game" ORDER BY title, id) g WHERE g.title = row.title;
   END LOOP;
+
+  INSERT INTO "Playthrough" (id, "libraryItemId", ordinal, kind, status, platform, "startedAt", "updatedAt")
+  SELECT gen_random_uuid()::text, li.id, 1, 'FIRST', 'PLAYING', li.platform, li."createdAt", now()
+  FROM "LibraryItem" li WHERE li."userId" = friend_id AND li.status = 'PLAYING';
 
   -- Steam import staging for audit_full: copy the 40 most-played titles already staged locally
   INSERT INTO "ImportedGame" (id, name, storefront, "storefrontGameId", playtime, "lastPlayedAt", "igdbMatchStatus", "userId", "updatedAt")
