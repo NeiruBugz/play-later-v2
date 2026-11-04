@@ -19,13 +19,52 @@ const RECENT_SESSION_LIMIT = 9;
 
 export type GameDetailsNote = Pick<
   JournalEntry,
-  "id" | "content" | "playedMinutes" | "createdAt"
+  "id" | "content" | "playedMinutes" | "createdAt" | "prompt"
 >;
+
+export type GameDetailsPrompts = { why: boolean; stayed: boolean };
+
+const NO_PROMPTS: GameDetailsPrompts = { why: false, stayed: false };
+
+export function derivePrompts(
+  entry: Pick<
+    LibraryItem,
+    | "status"
+    | "statusChangedAt"
+    | "whyPromptDismissedAt"
+    | "stayedPromptDismissedAt"
+  >,
+  notes: Array<Pick<GameDetailsNote, "prompt" | "createdAt">>
+): GameDetailsPrompts {
+  if (entry.status === "WANT") {
+    return {
+      why:
+        !entry.whyPromptDismissedAt &&
+        !notes.some((note) => note.prompt === "WHY"),
+      stayed: false,
+    };
+  }
+  if (entry.status === "DONE") {
+    const since = entry.statusChangedAt ?? new Date(0);
+    const dismissedSince =
+      entry.stayedPromptDismissedAt !== null &&
+      entry.stayedPromptDismissedAt >= since;
+    const answeredSince = notes.some(
+      (note) => note.prompt === "STAYED" && note.createdAt >= since
+    );
+    return { why: false, stayed: !dismissedSince && !answeredSince };
+  }
+  return NO_PROMPTS;
+}
 
 export interface GameDetails {
   game: Game;
   igdbDetails: GameDetailsResponseItem;
   libraryEntry: LibraryItem | null;
+  /** How a Done game ended; the owner's own game only, null for everyone else. */
+  doneOutcome: LibraryItem["doneOutcome"];
+  /** Which optional prompts to offer; both false unless the viewer owns the item. */
+  prompts: GameDetailsPrompts;
   /** The viewer's notes for this game, newest first; empty for anonymous viewers. */
   notes: GameDetailsNote[];
   /** Time played: sum of the viewer's notes' playedMinutes for this game; 0 when none. */
@@ -52,6 +91,7 @@ export async function getGameDetails(params: {
 
   let libraryEntry: LibraryItem | null = null;
   let notes: GameDetailsNote[] = [];
+  let prompts = NO_PROMPTS;
   let playtimeTotalMinutes = 0;
   let playtimeSessionCount = 0;
   let recentSessionMinutes: number[] = [];
@@ -74,6 +114,7 @@ export async function getGameDetails(params: {
             content: true,
             playedMinutes: true,
             createdAt: true,
+            prompt: true,
           },
         }),
         prisma.journalEntry.aggregate({
@@ -91,6 +132,7 @@ export async function getGameDetails(params: {
 
     libraryEntry = entry;
     notes = userNotes;
+    if (entry) prompts = derivePrompts(entry, userNotes);
     playtimeSessionCount = sessionAggregate._count.playedMinutes;
     playtimeTotalMinutes = sessionAggregate._sum.playedMinutes ?? 0;
     // Fetched newest→oldest for the "most recent" bound; reverse to oldest→newest
@@ -113,6 +155,8 @@ export async function getGameDetails(params: {
     game,
     igdbDetails,
     libraryEntry,
+    doneOutcome: libraryEntry?.doneOutcome ?? null,
+    prompts,
     notes,
     playtimeTotalMinutes,
     playtimeSessionCount,

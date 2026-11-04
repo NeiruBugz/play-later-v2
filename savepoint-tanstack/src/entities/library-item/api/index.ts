@@ -24,3 +24,10 @@ export type {
   AddGameToLibraryOptions,
   AddGameToLibraryResult,
 } from "./add-game-to-library.server";
+export type { SetDoneOutcomeResult } from "./set-done-outcome.server";
+export type { SetRatingResult } from "./set-rating.server";
+export type { PromptKind } from "./dismiss-prompt.server";
+export type {
+  DoneFollowUpInput,
+  SaveDoneFollowUpResult,
+} from "./save-done-follow-up.server";
