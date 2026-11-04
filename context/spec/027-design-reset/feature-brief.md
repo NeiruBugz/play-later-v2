@@ -57,19 +57,22 @@ There is no "design reset" feature yet; this brief describes the look it would c
 
 ## 6. Open questions
 
-1. **Scope: cleanup only, or cleanup plus a new visual language?** Assumption: both, in two phases — first make the app match the stock kit with today's colors (no intended visual change beyond fixing the broken bits), then introduce the new identity. Partly answered: the competitor screenshot points to "we need our own look". [user]
-2. **Which stock starting point?** The style this app was created with is now legacy; the kit offers newer named looks. Assumption: start from the classic stock look closest to today's; the exact choice is made in the technical spec.
-3. **Keep the teal accent?** Assumption: change it — it is in the competitor's color family and reads as the generic AI-generated look. Keep warm cream / charcoal surfaces.
-4. **Drop the `// SECTION` terminal labels?** Assumption: yes, everywhere; section labels become plain, sentence-case.
-5. **Keep Space Grotesk as the display font?** Assumption: replace it as part of the identity phase; the choice of the new font is a design decision made with a few visual options.
-6. **Which 2–3 signature elements?** Assumption: (a) covers — one consistent cover treatment everywhere, covers carry the color; (b) the Up Next queue card on the home screen; (c) page titles in the display font. 
-7. **Logo:** Assumption: keep the Save Glow mark, make it adapt to Dark mode; social-share image updated to the current mark.
-8. **Landing page:** Assumption: in scope — brought onto the same palette; its forced dark mode is kept or dropped as part of the identity phase.
-9. **Both modes kept?** Assumption: yes, Light + Dark + System as today.
-10. **Sequencing with 026:** Assumption: 027 starts after 026 ships; nothing from 027 lands earlier.
-11. **Product name collision** — out of scope for 027; recorded for a separate branding decision.
+All eleven answered by the user on 2026-11-04 [user]; kept here with the decision.
+
+1. **Scope** — two phases in one spec: phase 1 returns the app to the stock kit with today's colors and fixes what is silently broken; phase 2 introduces the new visual language. Separate slices.
+2. **Stock starting point** — the kit's soft, rounded, roomy look ("Maia"). Consequence: phase 1 is visibly different (softer corners, more space instead of spec-022's crisp 3px corners), not an invisible cleanup; its before/after check is a visual review.
+3. **Accent** — phase 1 keeps today's teal; phase 2 replaces it, chosen from 2–3 visual options that suit the warm surfaces and stay away from cyan.
+4. **`// SECTION` terminal labels** — removed in phase 1; section labels become plain, sentence-case, in the regular font.
+5. **Display font** — phase 1 makes titles use one font consistently; phase 2 replaces Space Grotesk, chosen from 2–3 visual options.
+6. **Signature elements (phase 2)** — (a) one cover treatment everywhere, covers carry the color; (b) the Up Next card on the home screen as a recognizable object; (c) one status chip design for Want / Playing / Done. Page titles in the new font are not a signature element.
+7. **Logo** — a new logo in phase 2 (not a recolor of Save Glow). Favicon and social-share image follow.
+8. **Landing page** — in scope for both phases: phase 1 removes off-palette colors and moves it onto shared components; phase 2 shows the new language; the forced dark mode goes, the landing follows the chosen theme.
+9. **Modes** — Light + Dark + System stay.
+10. **Sequencing** — 027 starts after 026 ships; "before" screenshots are taken from the 026 screens.
+11. **Product name** — a new product name is part of 027 phase 2, together with the logo (the name "SavePoint" collides with Two Average Gamers' tracker and an App Store app). Open sub-question for the spec: where the name appears (app header, landing, browser tab, sign-in, share image, emails) and whether the address changes — assumed: every user-visible place, address out of scope.
 
 ## 7. Dialog log
 
 - 2026-11-04 — Before the spec run: user proposed resetting to the stock kit and then making it "relatively unique"; assistant recommended doing it after 026 as a separate spec. User shared a screenshot of the same-named competitor ("they even have a style similar to ours"); timeline check found both looks appeared ~April 2026 and our name predates their rebuild. Folded into sections 2, 5 (quirks 6, 7) and 6 (questions 1, 3, 4, 11).
 - 2026-11-04 — User signed up to the competitor and shared its profile and library screens ("мда"). Seen: dark navy chrome, teal-cyan accent and filled chips, chunky all-caps display titles, monospaced tracked caps for stat labels and status tags, a row of profile counters (logs, played, backlog, average rating, followers), status filters Playing / Backlog / Played / Wishlist with counts, cover grid with a status tag on the cover, top navigation with Decision Engine, Ask SavePoint, Lists, Feed and a locked "Year in Gaming". [user] Much of it is what our product definition rejects (yearly recaps, counters, community feed) and what 026 removes; the visual reset should express the opposite tone — calm, few things at once, covers first — rather than only swapping colors. Strengthens the assumptions in questions 3, 4 and 5.
+- 2026-11-04 — Walked the user through sections 1–5; asked the eleven open questions one at a time. Answers recorded in section 6: two phases; Maia as the stock base; accent and display font replaced in phase 2; terminal labels removed in phase 1; signatures = covers, Up Next card, status chip; new logo; landing in both phases; Light + Dark + System; after 026; rename inside 027.
