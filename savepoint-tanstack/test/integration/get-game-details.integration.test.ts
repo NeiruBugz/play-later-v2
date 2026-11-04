@@ -26,9 +26,8 @@
  * Throws NotFoundError when IGDB returns an empty array for the given slug.
  *
  * Notes for impl agent:
- *   - Slug → IGDB lookup: IGDB `/games` endpoint accepts `where slug = "<slug>"`.
- *     A new helper `getGameBySlug(slug: string)` (mirrors `getGameByIgdbId`) is
- *     the cleanest approach; alternatively re-use `igdbFetch` directly.
+ *   - Slug → IGDB lookup: IGDB `/games` endpoint accepts `where slug = "<slug>"`
+ *     (see `getGameDetailsFromIgdb`).
  *   - After resolving the IGDB game, call `upsertGameFromIgdb(igdbId)` for the
  *     DB cache step (or inline equivalent).
  *   - `libraryEntry`: when `userId` provided, return the most-recent LibraryItem

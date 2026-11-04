@@ -17,7 +17,6 @@ vi.mock("@/widgets/landing-hero", () => ({
 vi.mock("@/widgets/landing-features", () => ({
   LandingFeaturesStrip: () => <div data-testid="landing-features-strip" />,
   LandingPreviewCard: () => <div data-testid="landing-preview-card" />,
-  LandingFeatures: () => <div data-testid="landing-features" />,
 }));
 
 vi.mock("@tanstack/react-router", async () => ({

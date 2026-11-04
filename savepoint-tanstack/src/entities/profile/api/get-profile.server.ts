@@ -21,14 +21,3 @@ export async function getProfileById(userId: string): Promise<Profile> {
   }
   return profile;
 }
-
-export async function getProfileByUsername(username: string): Promise<Profile> {
-  const profile = await prisma.user.findUnique({
-    where: { usernameNormalized: username.toLowerCase().trim() },
-    select: PROFILE_SELECT,
-  });
-  if (!profile) {
-    throw new NotFoundError("Profile not found", { username });
-  }
-  return profile;
-}
