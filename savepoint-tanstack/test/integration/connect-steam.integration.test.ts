@@ -40,14 +40,13 @@ import { connectSteamWorker } from "@/features/steam-connect/api/connect-steam.w
 import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
 
 import {
-  buildValidOpenIdParams,
-  STEAM_ID_64,
-} from "../support/steam-openid-params.ts";
-
-import {
   setupIsolatedDatabase,
   type IsolatedDatabase,
 } from "../setup/isolated-db.ts";
+import {
+  buildValidOpenIdParams,
+  STEAM_ID_64,
+} from "../support/steam-openid-params.ts";
 
 // ---------------------------------------------------------------------------
 // Isolated DB

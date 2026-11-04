@@ -60,7 +60,9 @@ describe("verifyOpenIdResponse", () => {
     });
 
     it("returns the verified Steam ID64", async () => {
-      const result = await verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID });
+      const result = await verifyOpenIdResponse(VALID_PARAMS, {
+        userId: USER_ID,
+      });
       expect(result).toBe(STEAM_ID_64);
     });
 
@@ -105,9 +107,9 @@ describe("verifyOpenIdResponse", () => {
     });
 
     it("throws ValidationError (forged or expired signature)", async () => {
-      await expect(verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })).rejects.toBeInstanceOf(
-        ValidationError
-      );
+      await expect(
+        verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(ValidationError);
     });
   });
 
@@ -117,7 +119,10 @@ describe("verifyOpenIdResponse", () => {
       vi.stubGlobal("fetch", spy);
 
       await expect(
-        verifyOpenIdResponse({ ...VALID_PARAMS, "openid.mode": "cancel" }, { userId: USER_ID })
+        verifyOpenIdResponse(
+          { ...VALID_PARAMS, "openid.mode": "cancel" },
+          { userId: USER_ID }
+        )
       ).rejects.toBeInstanceOf(ValidationError);
       expect(spy).not.toHaveBeenCalled();
     });
@@ -135,9 +140,9 @@ describe("verifyOpenIdResponse", () => {
       );
       const rest = { ...VALID_PARAMS };
       delete rest["openid.claimed_id"];
-      await expect(verifyOpenIdResponse(rest, { userId: USER_ID })).rejects.toBeInstanceOf(
-        ValidationError
-      );
+      await expect(
+        verifyOpenIdResponse(rest, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(ValidationError);
     });
   });
 
@@ -152,11 +157,14 @@ describe("verifyOpenIdResponse", () => {
           )
       );
       await expect(
-        verifyOpenIdResponse({
-          ...VALID_PARAMS,
-          "openid.claimed_id":
-            "https://steamcommunity.com/openid/notanid/banana",
-        }, { userId: USER_ID })
+        verifyOpenIdResponse(
+          {
+            ...VALID_PARAMS,
+            "openid.claimed_id":
+              "https://steamcommunity.com/openid/notanid/banana",
+          },
+          { userId: USER_ID }
+        )
       ).rejects.toBeInstanceOf(ValidationError);
     });
   });
@@ -167,9 +175,9 @@ describe("verifyOpenIdResponse", () => {
         "fetch",
         vi.fn().mockRejectedValue(new TypeError("fetch failed"))
       );
-      await expect(verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })).rejects.toBeInstanceOf(
-        UpstreamError
-      );
+      await expect(
+        verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(UpstreamError);
     });
 
     it("throws UpstreamError on non-2xx response", async () => {
@@ -181,9 +189,9 @@ describe("verifyOpenIdResponse", () => {
             makeFetchResponse({ ok: false, status: 500, body: "boom" })
           )
       );
-      await expect(verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })).rejects.toBeInstanceOf(
-        UpstreamError
-      );
+      await expect(
+        verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(UpstreamError);
     });
   });
 });
