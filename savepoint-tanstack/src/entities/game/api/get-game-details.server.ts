@@ -97,53 +97,39 @@ export async function getGameDetails(params: {
   let history: EndedPlay[] = [];
 
   if (userId) {
-    // Step 1: fetch library entry + journal aggregates in parallel.
-    // History query depends on libraryEntry.id so it must come after.
-    const [entry, userNotes, sessionAggregate, recentMinutesRows] =
-      await Promise.all([
-        prisma.libraryItem.findFirst({
-          where: { userId, gameId: game.id },
-          orderBy: { updatedAt: "desc" },
-        }),
-        prisma.journalEntry.findMany({
-          where: { userId, gameId: game.id },
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            content: true,
-            playedMinutes: true,
-            createdAt: true,
-            prompt: true,
-          },
-        }),
-        prisma.journalEntry.aggregate({
-          where: { userId, gameId: game.id, playedMinutes: { gt: 0 } },
-          _count: { playedMinutes: true },
-          _sum: { playedMinutes: true },
-        }),
-        prisma.journalEntry.findMany({
-          where: { userId, gameId: game.id, playedMinutes: { gt: 0 } },
-          orderBy: { createdAt: "desc" },
-          take: RECENT_SESSION_LIMIT,
-          select: { playedMinutes: true },
-        }),
-      ]);
+    const [entry, userNotes, endedPlays] = await Promise.all([
+      prisma.libraryItem.findUnique({
+        where: { userId_gameId: { userId, gameId: game.id } },
+      }),
+      prisma.journalEntry.findMany({
+        where: { userId, gameId: game.id },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          content: true,
+          playedMinutes: true,
+          createdAt: true,
+          prompt: true,
+        },
+      }),
+      getEndedPlays(userId, game.id),
+    ]);
 
     libraryEntry = entry;
     notes = userNotes;
     if (entry) prompts = derivePrompts(entry, userNotes);
-    playtimeSessionCount = sessionAggregate._count.playedMinutes;
-    playtimeTotalMinutes = sessionAggregate._sum.playedMinutes ?? 0;
-    // Fetched newest→oldest for the "most recent" bound; reverse to oldest→newest
-    // so the rhythm chart reads left-to-right.
-    recentSessionMinutes = recentMinutesRows
-      .map((row) => row.playedMinutes as number)
-      .reverse();
 
-    // Step 2: ended plays by libraryEntry.id (dependent read).
-    if (libraryEntry) {
-      history = await getEndedPlays(userId, libraryEntry.id);
-    }
+    const timedMinutes = userNotes
+      .map((note) => note.playedMinutes)
+      .filter((minutes): minutes is number => minutes !== null && minutes > 0);
+    playtimeSessionCount = timedMinutes.length;
+    playtimeTotalMinutes = timedMinutes.reduce((sum, m) => sum + m, 0);
+    // Notes are newest→oldest; take the most recent, then reverse so the
+    // rhythm chart reads oldest→newest.
+    recentSessionMinutes = timedMinutes
+      .slice(0, RECENT_SESSION_LIMIT)
+      .reverse();
+    history = endedPlays;
   }
 
   return {
