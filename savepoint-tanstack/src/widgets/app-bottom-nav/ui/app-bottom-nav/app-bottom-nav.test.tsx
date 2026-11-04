@@ -24,8 +24,8 @@ vi.mock("@tanstack/react-router", () => ({
 const elements = {
   getNavLink: (name: string) => screen.getByRole("link", { name }),
   queryNavLink: (name: string) => screen.queryByRole("link", { name }),
-  getLogButton: () => screen.getByRole("button", { name: "Log a session" }),
-  queryLogButton: () => screen.queryByRole("button", { name: "Log a session" }),
+  getLogButton: () => screen.getByRole("button", { name: "Log" }),
+  queryLogButton: () => screen.queryByRole("button", { name: "Log" }),
   getAllLinks: () => screen.getAllByRole("link"),
   getNav: () => screen.getByRole("navigation"),
 };

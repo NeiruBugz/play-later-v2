@@ -58,9 +58,8 @@ const elements = {
   getSearchTrigger: () =>
     screen.getByRole("button", { name: "Open command palette" }),
   getAddGameLink: () => screen.getByRole("link", { name: "Add game" }),
-  getLogSessionCta: () => screen.getByRole("button", { name: "Log a session" }),
-  queryLogSessionCta: () =>
-    screen.queryByRole("button", { name: "Log a session" }),
+  getLogSessionCta: () => screen.getByRole("button", { name: "Log" }),
+  queryLogSessionCta: () => screen.queryByRole("button", { name: "Log" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
   getUserMenuTrigger: () =>
     screen.getByRole("button", { name: "Open user menu" }),
@@ -152,7 +151,7 @@ describe("AppSidebar", () => {
       );
     });
 
-    it("renders a prominent Log a session CTA button", () => {
+    it("renders a prominent Log CTA button", () => {
       expect(elements.getLogSessionCta()).toBeDefined();
     });
 
@@ -163,7 +162,7 @@ describe("AppSidebar", () => {
       );
     });
 
-    it("gives Add game and Log a session different icons", () => {
+    it("gives Add game and Log different icons", () => {
       expect(iconClass(elements.getAddGameLink())).toContain("lucide-");
       expect(iconClass(elements.getAddGameLink())).not.toBe(
         iconClass(elements.getLogSessionCta())
@@ -255,7 +254,7 @@ describe("AppSidebar", () => {
     });
   });
 
-  describe("given the user clicks the Log a session CTA", () => {
+  describe("given the user clicks the Log CTA", () => {
     beforeEach(async () => {
       currentPath = "/library";
       render(<AppSidebar user={stubUser} />);

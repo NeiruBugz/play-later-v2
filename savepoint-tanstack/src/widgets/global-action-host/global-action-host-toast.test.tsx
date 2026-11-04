@@ -31,8 +31,9 @@ vi.mock("@/shared/lib/use-media-query", () => ({
   useMediaQuery: () => mocks.isDesktop,
 }));
 vi.mock("@/features/compose-journal-entry", () => ({
-  LogSessionForGame: () => null,
-  LogSessionGamePicker: () => null,
+  LogForm: () => null,
+  LogFollowUpsProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
 }));
 vi.mock("@/features/add-game/api/add-game-fn", () => ({
   addGameFn: mocks.addGameFn,

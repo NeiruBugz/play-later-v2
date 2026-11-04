@@ -45,7 +45,7 @@ export function AppBottomNav() {
       <div className="flex flex-1 flex-col items-center justify-end pb-1">
         <button
           type="button"
-          aria-label="Log a session"
+          aria-label="Log"
           onClick={openLogSession}
           className="bg-primary text-primary-foreground flex aspect-square size-14 shrink-0 -translate-y-3 items-center justify-center rounded-full shadow-lg"
         >

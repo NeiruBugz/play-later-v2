@@ -147,12 +147,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         <button
           type="button"
-          aria-label="Log a session"
+          aria-label="Log"
           onClick={openLogSession}
           className={`bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
         >
           <BookOpen size={16} aria-hidden="true" />
-          {!collapsed && "Log a session"}
+          {!collapsed && "Log"}
         </button>
 
         <Link
