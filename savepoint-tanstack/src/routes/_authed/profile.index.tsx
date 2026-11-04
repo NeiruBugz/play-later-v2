@@ -13,7 +13,7 @@ import { getProfilePageDataFn } from "@/features/profile-overview/api";
  * Query params are preserved so deep-links like `/profile?edit=true`
  * survive the bounce.
  */
-export const Route = createFileRoute("/_authed/profile")({
+export const Route = createFileRoute("/_authed/profile/")({
   beforeLoad: async ({ search }) => {
     const { profile } = await getProfilePageDataFn();
     const username = profile.username;

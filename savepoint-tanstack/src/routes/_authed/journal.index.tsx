@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getJournalTimelinePageDataFn } from "@/features/journal-timeline";
 import { JournalTimelinePage } from "@/widgets/journal-timeline-page";
 
-export const Route = createFileRoute("/_authed/journal")({
+export const Route = createFileRoute("/_authed/journal/")({
   loader: () => getJournalTimelinePageDataFn(),
   component: JournalPage,
 });

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { getProfilePageDataFn } from "@/features/profile-overview/api";
 
-import { Route } from "./_authed/profile";
+import { Route } from "./_authed/profile.index";
 
 vi.mock("@/features/profile-overview/api", () => ({
   getProfilePageDataFn: vi.fn(),

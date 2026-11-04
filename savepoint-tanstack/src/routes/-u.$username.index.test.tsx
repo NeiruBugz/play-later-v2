@@ -6,7 +6,7 @@ import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
 import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
 import { NotFoundError } from "@/shared/lib/errors";
 
-import { Route } from "./u.$username";
+import { Route } from "./u.$username.index";
 
 vi.mock("@/features/profile-overview/api", () => ({
   getPublicProfilePageDataFn: vi.fn(),

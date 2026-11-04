@@ -18,7 +18,7 @@ import { JournalEntryPage } from "@/widgets/journal-entry-page";
  * `NotFoundError` for both missing and cross-user — the `errorComponent`
  * branches on `AppError.code === "NOT_FOUND"` for the 404 surface.
  */
-export const Route = createFileRoute("/_authed/journal/$id")({
+export const Route = createFileRoute("/_authed/journal/$id/")({
   loader: ({ params }) =>
     getJournalEntryPageDataFn({ data: { entryId: params.id } }),
   component: JournalEntryDetailRoute,

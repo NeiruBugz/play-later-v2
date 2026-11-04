@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { JournalTimelineEntry } from "@/entities/journal-entry/model/types";
 import { NotFoundError } from "@/shared/lib/errors";
 
-import { Route } from "./journal.$id";
+import { Route } from "./journal.$id.index";
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await vi.importActual<any>("@tanstack/react-router")),
