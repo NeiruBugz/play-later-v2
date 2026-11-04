@@ -36,6 +36,7 @@ export function CommandPalette({
   open: openProp,
   onOpenChange,
   renderAddAction,
+  wrapBody,
 }: CommandPaletteProps = {}) {
   const isControlled = openProp !== undefined;
   const internal = useCommandPalette();
@@ -63,7 +64,7 @@ export function CommandPalette({
     shouldSearch && !isLoading && !error && results.length === 0;
   const showEmptyHint = !shouldSearch;
 
-  const body = (
+  const commandBody = (
     <Command shouldFilter={false} label="Search games">
       <CommandInput
         // The Slice-17 test contract asserts
@@ -154,6 +155,8 @@ export function CommandPalette({
       </CommandList>
     </Command>
   );
+
+  const body = wrapBody ? wrapBody(commandBody) : commandBody;
 
   if (!isDesktop) {
     return (

@@ -15,6 +15,7 @@ import type {
   ApplyLibraryChange,
   UseAddGameResult,
 } from "./add-game.type";
+import { useInlineAddConfirmation } from "./inline-add-confirmation-context";
 
 type LocalChange = { state: AddedLibraryState | null };
 
@@ -30,6 +31,7 @@ export function useAddGame({
 }: AddableGame): UseAddGameResult {
   const router = useRouter();
   const followUps = useAddFollowUps();
+  const presentInline = useInlineAddConfirmation();
   const [local, setLocal] = useState<LocalChange | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const inFlight = useRef(false);
@@ -58,29 +60,33 @@ export function useAddGame({
   };
 
   const showConfirmation = (item: AddedItem, created: boolean) => {
+    const renderConfirmation = (dismiss: () => void) => (
+      <AddConfirmation
+        gameTitle={item.gameTitle}
+        status={item.status}
+        upNextPosition={item.upNextPosition}
+        onStartPlaying={
+          followUps
+            ? () => followUps.startPlaying(item, applyChange)
+            : undefined
+        }
+        onPutInUpNext={
+          followUps ? () => followUps.putInUpNext(item, applyChange) : undefined
+        }
+        onSaveWhy={
+          followUps ? (text) => followUps.saveWhy(item, text) : undefined
+        }
+        onUndo={created ? () => undo(item.libraryItemId) : undefined}
+        onDismiss={dismiss}
+      />
+    );
+
+    if (presentInline) {
+      presentInline(renderConfirmation);
+      return;
+    }
     toast.custom(
-      (toastId) => (
-        <AddConfirmation
-          gameTitle={item.gameTitle}
-          status={item.status}
-          upNextPosition={item.upNextPosition}
-          onStartPlaying={
-            followUps
-              ? () => followUps.startPlaying(item, applyChange)
-              : undefined
-          }
-          onPutInUpNext={
-            followUps
-              ? () => followUps.putInUpNext(item, applyChange)
-              : undefined
-          }
-          onSaveWhy={
-            followUps ? (text) => followUps.saveWhy(item, text) : undefined
-          }
-          onUndo={created ? () => undo(item.libraryItemId) : undefined}
-          onDismiss={() => toast.dismiss(toastId)}
-        />
-      ),
+      (toastId) => renderConfirmation(() => toast.dismiss(toastId)),
       { duration: Number.POSITIVE_INFINITY }
     );
   };

@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AddGameAction } from "@/features/add-game/ui/add-game-action";
 import { AddGameContent } from "@/features/add-game/ui/add-game-content";
+import { InlineAddConfirmationHost } from "@/features/add-game/ui/inline-add-confirmation-host";
 import { CommandPalette } from "@/features/command-palette/ui/command-palette";
 import { SearchGamesResults } from "@/features/search-games/ui/search-games-results";
 
@@ -152,6 +153,9 @@ const entryPoints: {
           <CommandPalette
             open
             onOpenChange={vi.fn()}
+            wrapBody={(body) => (
+              <InlineAddConfirmationHost>{body}</InlineAddConfirmationHost>
+            )}
             renderAddAction={({ igdbId, name }) => (
               <AddGameAction game={{ igdbId, name, library: null }} />
             )}

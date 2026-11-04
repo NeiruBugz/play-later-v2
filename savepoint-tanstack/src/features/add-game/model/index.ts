@@ -1,4 +1,5 @@
 export { AddFollowUpsProvider } from "./add-follow-ups-context";
+export { InlineAddConfirmationProvider } from "./inline-add-confirmation-context";
 export { useAddGame } from "./use-add-game";
 export type {
   AddableGame,

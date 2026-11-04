@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { getStatusLabel, InLibraryIndicator } from "@/entities/library-item";
@@ -25,20 +25,6 @@ export function AddConfirmation({
   const alreadyInLibrary = onUndo === undefined;
   const canChangeStatus = status !== "PLAYING";
 
-  const rootRef = useRef<HTMLDivElement>(null);
-  const whyInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const keepFocusInside = (event: Event) => {
-      event.stopPropagation();
-      if (event.target === whyInputRef.current) setIsWhyFocused(true);
-    };
-    root.addEventListener("focusin", keepFocusInside);
-    return () => root.removeEventListener("focusin", keepFocusInside);
-  }, []);
-
   const showWhy = onSaveWhy !== undefined && !alreadyInLibrary;
   const isTypingWhy = isWhyFocused || why !== "";
 
@@ -63,7 +49,6 @@ export function AddConfirmation({
 
   return (
     <div
-      ref={rootRef}
       role="status"
       aria-live="polite"
       style={{ pointerEvents: "auto" }}
@@ -85,10 +70,10 @@ export function AddConfirmation({
           <div className="gap-xs flex">
             <Input
               id="add-confirmation-why"
-              ref={whyInputRef}
               value={why}
               disabled={isBusy}
               onChange={(event) => setWhy(event.target.value)}
+              onFocus={() => setIsWhyFocused(true)}
               onBlur={() => setIsWhyFocused(false)}
               className="h-8 min-w-0 flex-1"
             />

@@ -11,6 +11,7 @@ import { Input } from "@/shared/ui/input";
 
 import { searchGamesFn } from "../../api/search-games-fn";
 import { AddGameAction } from "../add-game-action";
+import { InlineAddConfirmationHost } from "../inline-add-confirmation-host";
 import type { AddGameContentProps } from "./add-game-content.type";
 
 type SearchState =
@@ -98,59 +99,61 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
   };
 
   return (
-    <div className="gap-lg flex flex-col">
-      <form onSubmit={handleSubmit} className="relative flex items-center">
-        <Search
-          aria-hidden="true"
-          className="text-muted-foreground pointer-events-none absolute left-3 h-4 w-4"
-        />
-        <Input
-          type="search"
-          aria-label="Search games"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search games"
-          className={cn("flex-1 rounded-full pl-9")}
-        />
-      </form>
+    <InlineAddConfirmationHost>
+      <div className="gap-lg flex flex-col">
+        <form onSubmit={handleSubmit} className="relative flex items-center">
+          <Search
+            aria-hidden="true"
+            className="text-muted-foreground pointer-events-none absolute left-3 h-4 w-4"
+          />
+          <Input
+            type="search"
+            aria-label="Search games"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search games"
+            className={cn("flex-1 rounded-full pl-9")}
+          />
+        </form>
 
-      {search.phase === "searching" ? (
-        <p
-          role="status"
-          aria-live="polite"
-          className="text-muted-foreground text-sm"
-        >
-          Searching...
-        </p>
-      ) : null}
-
-      {search.phase === "error" ? (
-        <p role="alert" className="text-destructive text-sm">
-          Search is unavailable. Try again.
-        </p>
-      ) : null}
-
-      {search.phase === "done" && search.games.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No results found</p>
-      ) : null}
-
-      {search.phase === "done" && search.games.length > 0 ? (
-        <section aria-label="Search results" className="gap-md flex flex-col">
-          <ul className="gap-sm flex flex-col">
-            {search.games.map((game) => (
-              <SearchResultRow key={game.id} game={game} />
-            ))}
-          </ul>
-          <Link
-            to="/games/search"
-            search={{ q: debouncedQuery }}
-            onClick={onSeeAll}
-            className="text-primary text-sm font-medium underline-offset-4 hover:underline"
+        {search.phase === "searching" ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-muted-foreground text-sm"
           >
-            See all results
-          </Link>
-        </section>
-      ) : null}
-    </div>
+            Searching...
+          </p>
+        ) : null}
+
+        {search.phase === "error" ? (
+          <p role="alert" className="text-destructive text-sm">
+            Search is unavailable. Try again.
+          </p>
+        ) : null}
+
+        {search.phase === "done" && search.games.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No results found</p>
+        ) : null}
+
+        {search.phase === "done" && search.games.length > 0 ? (
+          <section aria-label="Search results" className="gap-md flex flex-col">
+            <ul className="gap-sm flex flex-col">
+              {search.games.map((game) => (
+                <SearchResultRow key={game.id} game={game} />
+              ))}
+            </ul>
+            <Link
+              to="/games/search"
+              search={{ q: debouncedQuery }}
+              onClick={onSeeAll}
+              className="text-primary text-sm font-medium underline-offset-4 hover:underline"
+            >
+              See all results
+            </Link>
+          </section>
+        ) : null}
+      </div>
+    </InlineAddConfirmationHost>
   );
 }

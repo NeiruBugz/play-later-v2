@@ -11,6 +11,8 @@ export interface CommandPaletteProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   /** Slot for the add control on games outside the library; filled by the route. */
+  /** Wraps the palette body so the add confirmation can render inside the modal; filled by the route. */
+  wrapBody?: (body: ReactNode) => ReactNode;
   renderAddAction?: (game: { igdbId: number; name: string }) => ReactNode;
 }
 

@@ -16,7 +16,7 @@ import "@/app/dev-console-error-expander";
 
 import { SavepointThemeProvider } from "@/app/providers/theme-provider";
 import { getCurrentUserFn } from "@/entities/session/api";
-import { AddGameAction } from "@/features/add-game";
+import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
 import { WhatsNewModal } from "@/features/whats-new";
 import { Toaster } from "@/shared/ui/sonner";
@@ -155,6 +155,9 @@ export function RootShell() {
             </AppShell>
             {user ? (
               <CommandPalette
+                wrapBody={(body) => (
+                  <InlineAddConfirmationHost>{body}</InlineAddConfirmationHost>
+                )}
                 renderAddAction={({ igdbId, name }) => (
                   <AddGameAction game={{ igdbId, name, library: null }} />
                 )}

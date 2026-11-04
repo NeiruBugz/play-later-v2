@@ -4,3 +4,4 @@ export { AddGameAction } from "./add-game-action";
 export type { AddGameActionProps } from "./add-game-action";
 export { AddGameContent } from "./add-game-content";
 export type { AddGameContentProps } from "./add-game-content";
+export { InlineAddConfirmationHost } from "./inline-add-confirmation-host";

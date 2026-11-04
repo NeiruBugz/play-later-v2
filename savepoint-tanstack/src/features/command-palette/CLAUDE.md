@@ -28,7 +28,8 @@ The palette does not add games itself. `renderAddAction` is a slot the root
 route fills with `AddGameAction` from `features/add-game` (a feature may not
 import a sibling feature). Adding keeps the palette open; the confirmation
 ("Added {Game} to Want", Start playing, Put in Up Next, Undo) is the shared
-add-game toast, wired by `widgets/add-flow`. The palette's own quick-add and
+add-game confirmation, rendered inline in the palette through the `wrapBody`
+slot (a toast cannot take focus inside the modal), wired by `widgets/add-flow`. The palette's own quick-add and
 remove-as-undo server fns no longer exist.
 
 ## Key behaviours
