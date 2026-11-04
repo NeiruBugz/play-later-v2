@@ -216,12 +216,12 @@ Verify-task conventions:
 - [ ] **Slice 8: Done follow-up and optional prompts**
 
   > Spec §2.7, §2.8.
-  - [ ] Server:
+  - [x] Server:
     - `setDoneOutcome`, `setRating` and `dismissPrompt`.
     - `saveDoneFollowUpFn`, `answerPromptFn` and `dismissPromptFn`.
     - Game detail `prompts { why, stayed }` flags. `doneOutcome` for the owner only.
     - Tests. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - `DoneFollowUp` (dialog/sheet; Finished/Let go; pre-filled rating; "What stayed with you?"; Save/Skip/Undo; close = Skip; stays open on error).
     - The editable "Done · Finished/Let go" label.
     - `GamePrompts` (Enter/Save, × dismiss, hidden while Playing).
