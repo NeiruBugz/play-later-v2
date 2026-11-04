@@ -8,57 +8,38 @@ search-trigger buttons fire `openCommandPalette()` which dispatches a
 ## Structure
 
 - `hooks/use-command-palette.ts` — open / close / toggle + global
-  ⌘K binding + the custom-event channel. Exports `openCommandPalette()`
-  so external widgets can open the palette without a context provider.
-- `hooks/use-debounced-value.ts` — generic debounce hook. Currently
-  unused by `command-palette.tsx` (the component uses an imperative
-  timer for test determinism), but kept available for other features.
-- `ui/command-palette/` — main palette. Composes shadcn `Command` /
-  `CommandInput` / `CommandList` / `CommandGroup` primitives (with
-  `shouldFilter={false}` since search is server-side). Owns the 300ms
-  debounce; passes an `inputRef` down so the "Add game to library"
-  quick action can refocus.
-- `ui/game-result-item/` — single Games-group row. Cover + name +
-  release year wrapped in a TanStack `<Link to="/games/$slug">` so back-
-  button history works and the test contract can assert on the href.
-  Also renders an "Add" quick action (adds as Want).
-- `api/quick-add-to-library-fn.ts` — adds a searched IGDB game to the
-  library as `WANT` (composes `addGameToLibrary`).
-- `api/remove-library-item-fn.ts` — undo side of quick-add (composes
-  `deleteLibraryItem`).
-- `ui/palette-navigation-group/` — five jump targets (Library, Journal,
-  Profile, Settings, Dashboard). Substring-filtered by the live query;
-  renders nothing when no item matches.
-- `ui/palette-quick-actions-group/` — two actions: "Add game to library"
-  (refocuses the input) and "New journal entry" (navigates to
-  `/journal`).
+  ⌘K binding + the custom-event channel.
+- `hooks/use-debounced-game-search.ts` — 300 ms imperative debounce (for
+  test determinism) around the library-aware `searchGamesFn`.
+- `ui/command-palette/` — main palette (shadcn `Command`, `shouldFilter={false}`
+  since search is server-side). Shows "See all results" (`/games/search?q=`)
+  under the results once the text is long enough for the search page.
+- `ui/game-result-item/` — Games-group row: cover + name + year in a
+  `<Link to="/games/$slug">`. Games already in the library show "In library"
+  with their status and queue marker. Games outside it render the
+  `renderAddAction` slot.
+- `ui/palette-navigation-group/` — five jump targets, substring-filtered.
+- `ui/palette-quick-actions-group/` — one action: "New note", which opens the
+  note composer through `openGlobalAction(navigate, "log-session")`.
+
+## Add flow
+
+The palette does not add games itself. `renderAddAction` is a slot the root
+route fills with `AddGameAction` from `features/add-game` (a feature may not
+import a sibling feature). Adding keeps the palette open; the confirmation
+("Added {Game} to Want", Start playing, Put in Up Next, Undo) is the shared
+add-game toast, wired by `widgets/add-flow`. The palette's own quick-add and
+remove-as-undo server fns no longer exist.
 
 ## Key behaviours
 
-- ⌘K (and Ctrl+K) toggles open from any page.
-- Esc closes (Radix Dialog default).
-- Typing fires `searchGamesFn` exactly once per debounced query.
-- Search-result rows are `<Link>`s so the back button works.
-- Navigation rows are also `<Link>`s; quick actions are imperative.
+- ⌘K (and Ctrl+K) toggles open from any page; Esc closes.
+- Typing fires `searchGamesFn` once per debounced query.
+- Result and navigation rows are `<Link>`s so the back button works.
+- No technical source names ("IGDB") in user-facing copy.
 
 ## Divergences from canonical
 
-Remaining feature gaps vs `savepoint-app/features/command-palette/`:
-
-1. ~~No quick-add flow.~~ **Closed (Slice 22).** Each game result row
-   renders an "Add" action (canonical `showAddHint` +
-   `useQuickAddFromPalette`). It calls the feature's own
-   `quickAddToLibraryFn` (status `WANT`) and emits an undo toast that
-   calls `removeLibraryItemFn`. Both server fns live in
-   `api/` so the palette never imports another feature's server fn.
-2. **No recent-games empty state.** Canonical loads recent library
-   games on open; tanstack lacks the entity query.
-3. ~~No mobile-sheet variant.~~ **Closed (Slice 22).** At `<768px`
-   `command-palette.tsx` renders the same `Command` body inside a bottom
-   `Sheet` (`data-testid="command-palette-mobile-sheet"`); the centered
-   `Dialog` is md+ only. Gated by `useMediaQuery("(min-width: 768px)")`.
-
-Minor: "New journal entry" routes to `/journal` (canonical goes to
-`/journal/new`, which tanstack doesn't have).
-
-Full reasoning in `../../DIVERGENCES.md` → "Slice 17 — Command palette".
+No recent-games empty state (canonical loads recent library games on open).
+The mobile variant is a bottom `Sheet` below 768 px. See
+`../../DIVERGENCES.md` → "Slice 17 — Command palette".

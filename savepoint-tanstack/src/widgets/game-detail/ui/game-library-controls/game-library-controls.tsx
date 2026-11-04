@@ -1,5 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -8,10 +8,8 @@ import {
   NotOwnedTag,
   QueueMarker,
   StatusControl,
-  StatusPicker,
 } from "@/entities/library-item";
-import { getStatusEntry } from "@/entities/library-item/model";
-import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
+import { AddGameAction } from "@/features/add-game";
 import {
   LibraryModal,
   RemoveFromLibraryDialog,
@@ -28,7 +26,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
-import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client";
 import type { GameLibraryControlsProps } from "./game-library-controls.type";
 
 export function GameLibraryControls({
@@ -39,8 +36,6 @@ export function GameLibraryControls({
   libraryOwnership,
 }: GameLibraryControlsProps) {
   const router = useRouter();
-  const [addPickerOpen, setAddPickerOpen] = useState(false);
-  const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
@@ -49,20 +44,6 @@ export function GameLibraryControls({
     gameTitle,
     upNextPosition: entry?.upNextPosition ?? null,
   });
-
-  const handleAdd = async (status: LibraryItemStatus) => {
-    if (adding) return;
-    setAdding(true);
-    try {
-      await addGameToLibraryFn({ data: { igdbId, status } });
-      toast.success(`Added to library as ${getStatusEntry(status).label}`);
-      await router.invalidate();
-    } catch (err: unknown) {
-      toast.error(getErrorMessage(err, "Something went wrong"));
-    } finally {
-      setAdding(false);
-    }
-  };
 
   const handleRemove = async () => {
     if (entry === null || removing) return;
@@ -142,17 +123,9 @@ export function GameLibraryControls({
           </DropdownMenu>
         </>
       ) : (
-        <StatusPicker
-          value={null}
-          onSelect={(to) => void handleAdd(to)}
-          open={addPickerOpen}
-          onOpenChange={setAddPickerOpen}
-          trigger={
-            <Button type="button" size="sm" disabled={adding}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Add to library
-            </Button>
-          }
+        <AddGameAction
+          game={{ igdbId, name: gameTitle, library: null }}
+          variant="labelled"
         />
       )}
 

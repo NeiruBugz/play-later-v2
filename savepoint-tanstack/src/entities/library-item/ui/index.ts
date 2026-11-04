@@ -16,3 +16,5 @@ export { QueueMarker } from "./queue-marker";
 export type { QueueMarkerProps } from "./queue-marker";
 export { NotOwnedTag } from "./not-owned-tag";
 export type { NotOwnedTagProps } from "./not-owned-tag";
+export { InLibraryIndicator } from "./in-library-indicator";
+export type { InLibraryIndicatorProps } from "./in-library-indicator";

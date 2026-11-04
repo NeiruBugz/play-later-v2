@@ -16,9 +16,11 @@ import "@/app/dev-console-error-expander";
 
 import { SavepointThemeProvider } from "@/app/providers/theme-provider";
 import { getCurrentUserFn } from "@/entities/session/api";
+import { AddGameAction } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
 import { WhatsNewModal } from "@/features/whats-new";
 import { Toaster } from "@/shared/ui/sonner";
+import { AddFlowProvider } from "@/widgets/add-flow";
 import { AppBottomNav } from "@/widgets/app-bottom-nav";
 import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
 import { AppShell } from "@/widgets/app-shell";
@@ -141,15 +143,23 @@ export function RootShell() {
   return (
     <QueryClientProvider client={queryClient}>
       <SavepointThemeProvider defaultTheme="system">
-        <AppShell
-          sidebar={user ? <AppSidebar user={user} /> : undefined}
-          mobileTopbar={user ? <AppMobileTopbar /> : undefined}
-          mobileBottomNav={user ? <AppBottomNav /> : undefined}
-        >
-          <Outlet />
-        </AppShell>
-        {user ? <CommandPalette /> : null}
-        {user ? <GlobalActionHost /> : null}
+        <AddFlowProvider>
+          <AppShell
+            sidebar={user ? <AppSidebar user={user} /> : undefined}
+            mobileTopbar={user ? <AppMobileTopbar /> : undefined}
+            mobileBottomNav={user ? <AppBottomNav /> : undefined}
+          >
+            <Outlet />
+          </AppShell>
+          {user ? (
+            <CommandPalette
+              renderAddAction={({ igdbId, name }) => (
+                <AddGameAction game={{ igdbId, name, library: null }} />
+              )}
+            />
+          ) : null}
+          {user ? <GlobalActionHost /> : null}
+        </AddFlowProvider>
         {user ? <WhatsNewModal /> : null}
         <Toaster />
         <TanStackDevtools

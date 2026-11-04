@@ -23,6 +23,16 @@ vi.mock("@/features/command-palette", () => ({
 
 // RootShell mounts <GlobalActionHost/> when authed. Stub so its transitive
 // server-fn imports (→ auth.server env reads) are not loaded in jsdom.
+vi.mock("@/features/add-game", () => ({
+  AddGameAction: () => null,
+}));
+
+vi.mock("@/widgets/add-flow", () => ({
+  AddFlowProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 vi.mock("@/widgets/global-action-host", () => ({
   GlobalActionHost: () => null,
 }));

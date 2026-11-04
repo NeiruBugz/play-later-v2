@@ -1,12 +1,14 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useRef } from "react";
 
+import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
+import { openGlobalAction } from "@/shared/lib/global-action";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
   Command,
   CommandGroup,
   CommandInput,
+  CommandItem,
   CommandList,
 } from "@/shared/ui/command";
 import {
@@ -29,17 +31,15 @@ import { PaletteNavigationGroup } from "../palette-navigation-group";
 import { PaletteQuickActionsGroup } from "../palette-quick-actions-group";
 import type { CommandPaletteProps } from "./command-palette.type";
 
-// Divergence vs. canonical: no recent-games empty state (see
-// DIVERGENCES.md → Slice 17).
 export function CommandPalette({
   open: openProp,
   onOpenChange,
+  renderAddAction,
 }: CommandPaletteProps = {}) {
   const isControlled = openProp !== undefined;
   const internal = useCommandPalette();
   const isOpen = isControlled ? openProp : internal.isOpen;
   const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
   const isDesktop = useIsDesktop();
 
   const { query, setQuery, results, isLoading, error, shouldSearch } =
@@ -65,7 +65,6 @@ export function CommandPalette({
   const body = (
     <Command shouldFilter={false} label="Search games">
       <CommandInput
-        ref={inputRef}
         // The Slice-17 test contract asserts
         // `getByRole("combobox", { name: /search/i })`. cmdk's Input
         // always emits `aria-labelledby` pointing at the Command's
@@ -106,21 +105,36 @@ export function CommandPalette({
                     : null
                 }
                 library={game.library}
+                renderAddAction={renderAddAction}
                 onAfterSelect={closeAndReset}
               />
             ))}
           </CommandGroup>
         )}
 
+        {shouldSearch &&
+          !isLoading &&
+          results.length > 0 &&
+          query.trim().length >= MIN_GAME_SEARCH_QUERY_LENGTH && (
+            <CommandGroup>
+              <CommandItem value="see-all-results" asChild>
+                <Link
+                  to="/games/search"
+                  search={{ q: query.trim() }}
+                  onClick={closeAndReset}
+                >
+                  See all results
+                </Link>
+              </CommandItem>
+            </CommandGroup>
+          )}
+
         <PaletteNavigationGroup query={query} onAfterSelect={closeAndReset} />
 
         <PaletteQuickActionsGroup
           query={query}
-          onFocusSearch={() => inputRef.current?.focus()}
-          onNewJournalEntry={() => {
-            // Canonical routes to `/journal/new`, which tanstack
-            // doesn't have — see DIVERGENCES.md → Slice 17.
-            navigate({ to: "/journal" });
+          onNewNote={() => {
+            openGlobalAction(navigate, "log-session");
             closeAndReset();
           }}
         />

@@ -39,8 +39,12 @@ vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
 }));
 
-vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
-  addGameToLibraryFn: vi.fn(),
+vi.mock("@/features/add-game/api/add-game-fn", () => ({
+  addGameFn: vi.fn(),
+}));
+
+vi.mock("@/features/add-game/api/undo-add-game-fn", () => ({
+  undoAddGameFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({

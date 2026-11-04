@@ -1,8 +1,9 @@
-export {
-  AddFromGameDetailButton,
-  AddGameContent,
-  AddGameModal,
-  AddGameTrigger,
-  QuickAddButton,
-} from "./ui";
-export type { AddGameContentProps, QuickAddButtonProps } from "./ui";
+export { AddGameAction, AddGameContent } from "./ui";
+export type { AddGameActionProps, AddGameContentProps } from "./ui";
+export { AddFollowUpsProvider } from "./model";
+export type {
+  AddedItem,
+  AddedLibraryState,
+  AddFollowUps,
+  ApplyLibraryChange,
+} from "./model";

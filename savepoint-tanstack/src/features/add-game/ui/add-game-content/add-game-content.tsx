@@ -1,15 +1,23 @@
+import { Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import { QueueMarker } from "@/entities/library-item";
 import type { LibraryAwareSearchItem as SearchResultGame } from "@/entities/library-item/api/search-library-aware-games.worker";
+import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
 
 import { searchGamesFn } from "../../api/search-games-fn";
-import { QuickAddButton } from "../quick-add-button";
+import { AddGameAction } from "../add-game-action";
 import type { AddGameContentProps } from "./add-game-content.type";
+
+type SearchState =
+  | { phase: "idle" }
+  | { phase: "searching" }
+  | { phase: "error" }
+  | { phase: "done"; games: SearchResultGame[] };
 
 function SearchResultRow({ game }: { game: SearchResultGame }) {
   const coverUrl = buildCoverImageUrl(
@@ -39,13 +47,13 @@ function SearchResultRow({ game }: { game: SearchResultGame }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{game.name}</p>
-        {game.library ? (
-          <QueueMarker
-            status={game.library.status}
-            upNextPosition={game.library.upNextPosition}
-          />
-        ) : null}
+        <Link
+          to="/games/$slug"
+          params={{ slug: game.slug }}
+          className="block truncate text-sm font-medium"
+        >
+          {game.name}
+        </Link>
         {releaseYear !== null ? (
           <p className="text-muted-foreground text-xs tabular-nums">
             {releaseYear}
@@ -53,39 +61,41 @@ function SearchResultRow({ game }: { game: SearchResultGame }) {
         ) : null}
       </div>
       <div className="shrink-0">
-        <QuickAddButton igdbId={game.id} gameTitle={game.name} />
+        <AddGameAction
+          game={{ igdbId: game.id, name: game.name, library: game.library }}
+        />
       </div>
     </li>
   );
 }
 
-export function AddGameContent({ onAdded }: AddGameContentProps) {
+export function AddGameContent({ onSeeAll }: AddGameContentProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResultGame[] | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [search, setSearch] = useState<SearchState>({ phase: "idle" });
+  const debouncedQuery = useDebouncedValue(query.trim());
 
-  void onAdded;
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = query.trim();
-    if (trimmed.length === 0) return;
-
-    setIsSearching(true);
-    setSearched(true);
-
-    try {
-      const result = await searchGamesFn({ data: { name: trimmed } });
-      setResults(result.games);
-    } finally {
-      setIsSearching(false);
+  useEffect(() => {
+    if (debouncedQuery.length < MIN_GAME_SEARCH_QUERY_LENGTH) {
+      setSearch({ phase: "idle" });
+      return;
     }
-  };
+    let cancelled = false;
+    setSearch({ phase: "searching" });
+    searchGamesFn({ data: { name: debouncedQuery } })
+      .then((result) => {
+        if (!cancelled) setSearch({ phase: "done", games: result.games });
+      })
+      .catch(() => {
+        if (!cancelled) setSearch({ phase: "error" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery]);
 
-  const showEmpty =
-    !isSearching && searched && results !== null && results.length === 0;
-  const showResults = !isSearching && results !== null && results.length > 0;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
 
   return (
     <div className="gap-lg flex flex-col">
@@ -104,7 +114,7 @@ export function AddGameContent({ onAdded }: AddGameContentProps) {
         />
       </form>
 
-      {isSearching ? (
+      {search.phase === "searching" ? (
         <p
           role="status"
           aria-live="polite"
@@ -114,18 +124,31 @@ export function AddGameContent({ onAdded }: AddGameContentProps) {
         </p>
       ) : null}
 
-      {showEmpty ? (
+      {search.phase === "error" ? (
+        <p role="alert" className="text-destructive text-sm">
+          Search is unavailable. Try again.
+        </p>
+      ) : null}
+
+      {search.phase === "done" && search.games.length === 0 ? (
         <p className="text-muted-foreground text-sm">No results found</p>
       ) : null}
 
-      {showResults ? (
-        <section aria-label="IGDB results">
-          <p className="terminal-label mb-3">// IGDB RESULTS</p>
+      {search.phase === "done" && search.games.length > 0 ? (
+        <section aria-label="Search results" className="gap-md flex flex-col">
           <ul className="gap-sm flex flex-col">
-            {results!.map((game) => (
+            {search.games.map((game) => (
               <SearchResultRow key={game.id} game={game} />
             ))}
           </ul>
+          <Link
+            to="/games/search"
+            search={{ q: debouncedQuery }}
+            onClick={onSeeAll}
+            className="text-primary text-sm font-medium underline-offset-4 hover:underline"
+          >
+            See all results
+          </Link>
         </section>
       ) : null}
     </div>

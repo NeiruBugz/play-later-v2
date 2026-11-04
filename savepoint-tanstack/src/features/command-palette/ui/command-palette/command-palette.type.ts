@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { LibraryAwareSearchItem } from "@/entities/library-item/api/search-library-aware-games.worker";
 
 export interface CommandPaletteProps {
@@ -8,6 +10,8 @@ export interface CommandPaletteProps {
    */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Slot for the add control on games outside the library; filled by the route. */
+  renderAddAction?: (game: { igdbId: number; name: string }) => ReactNode;
 }
 
 export interface PaletteResultItem {

@@ -1,0 +1,1 @@
+export const ADD_CONFIRMATION_DURATION_MS = 8000;

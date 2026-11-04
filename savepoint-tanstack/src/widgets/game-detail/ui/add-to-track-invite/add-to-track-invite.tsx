@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
 
-import { AddFromGameDetailButton } from "@/features/add-game";
+import { AddGameAction } from "@/features/add-game";
 import { Button } from "@/shared/ui/button";
 
 import type { AddToTrackInviteProps } from "./add-to-track-invite.type";
@@ -34,7 +34,10 @@ export function AddToTrackInvite({
         </p>
       </div>
       {isSignedIn ? (
-        <AddFromGameDetailButton igdbId={igdbId} gameTitle={gameTitle} />
+        <AddGameAction
+          game={{ igdbId, name: gameTitle, library: null }}
+          variant="labelled"
+        />
       ) : (
         <Button asChild>
           <Link to="/login">Sign in</Link>

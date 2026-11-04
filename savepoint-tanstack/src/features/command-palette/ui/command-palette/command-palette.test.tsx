@@ -6,7 +6,7 @@
  * - Typing debounces 300 ms before calling searchGamesFn exactly once.
  * - Search result rows render as <Link to="/games/$slug"> anchors.
  *
- * NOT tested: desktop/mobile branching, quick-add flow, navigation-group,
+ * NOT tested: desktop/mobile branching, navigation-group,
  * quick-actions-group, IGDB cover format, server fn correctness.
  */
 
@@ -33,11 +33,13 @@ vi.mock("@tanstack/react-router", () => ({
     to,
     href,
     params,
+    search,
     children,
     ...rest
   }: {
     to?: string;
     href?: string;
+    search?: Record<string, string>;
     params?: Record<string, string>;
     children: React.ReactNode;
   } & Record<string, unknown>) => {
@@ -48,7 +50,14 @@ vi.mock("@tanstack/react-router", () => ({
       }
     }
     return (
-      <a href={resolvedHref} {...rest}>
+      <a
+        href={
+          search
+            ? `${resolvedHref}?${new URLSearchParams(search)}`
+            : resolvedHref
+        }
+        {...rest}
+      >
         {children}
       </a>
     );
@@ -59,14 +68,6 @@ const mockSearchGamesFn = vi.fn();
 
 vi.mock("../../api/search-games-fn", () => ({
   searchGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),
-}));
-
-vi.mock("../../api/quick-add-to-library-fn", () => ({
-  quickAddToLibraryFn: vi.fn(),
-}));
-
-vi.mock("../../api/remove-library-item-fn", () => ({
-  removeLibraryItemFn: vi.fn(),
 }));
 
 const elements = {
@@ -289,46 +290,89 @@ describe("CommandPalette", () => {
     });
   });
 
-  describe("given the palette is open and the user clicks the New Journal Entry quick action", () => {
-    const user = userEvent.setup({
-      advanceTimers: (ms) => vi.advanceTimersByTime(ms),
+  describe("given the palette is open with no query", () => {
+    beforeEach(() => {
+      render(<CommandPalette open={true} onOpenChange={vi.fn()} />);
     });
 
-    beforeEach(async () => {
-      render(<CommandPalette />);
-      await user.keyboard("{Meta>}k{/Meta}");
-      const journalBtn = screen.queryByRole("option", {
-        name: /new journal entry/i,
-      });
-      if (journalBtn) {
-        await user.click(journalBtn);
-      }
+    it("has a New note quick action and no Add game quick action", () => {
+      expect(screen.queryByRole("option", { name: "New note" })).not.toBeNull();
+      expect(screen.queryByText("Add game to library")).toBeNull();
     });
 
-    it("calls navigate toward /journal when the quick action fires", () => {
-      // The action may or may not be visible depending on palette state;
-      // this test just confirms the navigate mock is available and setup is valid.
-      expect(mockNavigate).toBeDefined();
+    it("never shows the technical source name", () => {
+      expect(document.body.textContent).not.toContain("IGDB");
     });
   });
 
-  describe("given the palette is open and the user clicks Add game to library", () => {
+  describe("given the user chooses New note", () => {
+    const onOpenChange = vi.fn();
+
+    beforeEach(async () => {
+      render(<CommandPalette open={true} onOpenChange={onOpenChange} />);
+      await userEvent.click(screen.getByRole("option", { name: "New note" }));
+    });
+
+    it("opens the note composer through the log-session action", () => {
+      const options = mockNavigate.mock.calls[0]![0] as {
+        search: (prev: object) => object;
+      };
+      expect(options.search({})).toEqual({
+        action: "log-session",
+        game: undefined,
+      });
+    });
+
+    it("closes the palette", () => {
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe("given a search with results and an injected add slot", () => {
     const user = userEvent.setup({
       advanceTimers: (ms) => vi.advanceTimersByTime(ms),
     });
 
     beforeEach(async () => {
-      render(<CommandPalette open={true} onOpenChange={vi.fn()} />);
-      const addGameBtn = screen.queryByRole("option", {
-        name: /add game to library/i,
+      mockSearchGamesFn.mockResolvedValue({
+        games: [
+          {
+            id: 9,
+            name: "Hades",
+            slug: "hades",
+            cover: null,
+            first_release_date: null,
+            platforms: [],
+            library: null,
+          },
+        ],
+        count: 1,
       });
-      if (addGameBtn) {
-        await user.click(addGameBtn);
-      }
+      render(
+        <CommandPalette
+          open={true}
+          onOpenChange={vi.fn()}
+          renderAddAction={({ name }) => (
+            <button type="button">{`Add ${name}`}</button>
+          )}
+        />
+      );
+      await user.type(elements.getSearchInput(), "hades");
+      vi.advanceTimersByTime(300);
+      await waitFor(() => {
+        expect(elements.queryResultByName("Hades")).not.toBeNull();
+      });
     });
 
-    it("does not navigate away (focuses the search input instead)", () => {
-      expect(mockNavigate).not.toHaveBeenCalled();
+    it("renders the add slot for the result", () => {
+      expect(
+        screen.queryByRole("button", { name: "Add Hades" })
+      ).not.toBeNull();
+    });
+
+    it("links See all results to the search page with the same text", () => {
+      const link = screen.getByText("See all results").closest("a");
+      expect(link?.getAttribute("href")).toBe("/games/search?q=hades");
     });
   });
 

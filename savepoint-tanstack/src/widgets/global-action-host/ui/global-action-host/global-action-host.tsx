@@ -27,7 +27,7 @@ export function GlobalActionHost() {
 
   function renderContent() {
     if (action === "add-game") {
-      return <AddGameContent onAdded={handleClose} />;
+      return <AddGameContent />;
     }
 
     if (action === "log-session") {
