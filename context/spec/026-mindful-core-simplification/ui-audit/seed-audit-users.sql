@@ -1,24 +1,27 @@
 -- Seeds the local audit accounts with a pre-026 (five-status) library.
 -- Accounts must exist first (created via Better Auth sign-up, see ui-audit.md § Setup).
--- Idempotent: wipes and re-creates the data of audit_full + audit_friend on every run.
+-- Idempotent: wipes all three audit accounts, resets audit_empty to first-run, re-creates audit_full + audit_friend data.
 -- Run: docker exec -i savepoint-postgres psql -U postgres -d savepoint-db < seed-audit-users.sql
 
 DO $$
 DECLARE
   full_id   text := (SELECT id FROM "user" WHERE email = 'audit_full@savepoint.local');
   friend_id text := (SELECT id FROM "user" WHERE email = 'audit_friend@savepoint.local');
-  item_id   int;
-  run_id    text;
+  empty_id  text := (SELECT id FROM "user" WHERE email = 'audit_empty@savepoint.local');
   row       record;
 BEGIN
-  IF full_id IS NULL OR friend_id IS NULL THEN
+  IF full_id IS NULL OR friend_id IS NULL OR empty_id IS NULL THEN
     RAISE EXCEPTION 'audit accounts missing: sign them up first';
   END IF;
 
-  DELETE FROM "JournalEntry" WHERE "userId" IN (full_id, friend_id);
-  DELETE FROM "LibraryItem"  WHERE "userId" IN (full_id, friend_id);
-  DELETE FROM "ImportedGame" WHERE "userId" IN (full_id, friend_id);
-  DELETE FROM "Follow" WHERE "followerId" IN (full_id, friend_id) OR "followingId" IN (full_id, friend_id);
+  DELETE FROM "JournalEntry" WHERE "userId" IN (full_id, friend_id, empty_id);
+  DELETE FROM "LibraryItem"  WHERE "userId" IN (full_id, friend_id, empty_id);
+  DELETE FROM "ImportedGame" WHERE "userId" IN (full_id, friend_id, empty_id);
+  DELETE FROM "Follow" WHERE "followerId" IN (full_id, friend_id, empty_id) OR "followingId" IN (full_id, friend_id, empty_id);
+
+  UPDATE "user" SET username = NULL, "usernameNormalized" = NULL, "profileSetupCompletedAt" = NULL,
+    "onboardingDismissedAt" = NULL, image = NULL, "updatedAt" = now()
+  WHERE id = empty_id;
 
   UPDATE "user" SET
     username = 'audit_full', "usernameNormalized" = 'audit_full', "isPublicProfile" = true,
