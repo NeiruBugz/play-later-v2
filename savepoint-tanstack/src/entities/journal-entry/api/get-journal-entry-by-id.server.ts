@@ -25,7 +25,7 @@ export async function getJournalEntryById(
   });
 
   if (!entry || entry.userId !== userId) {
-    throw new NotFoundError("Journal entry not found", { entryId });
+    throw new NotFoundError("Note not found", { entryId });
   }
 
   return entry;

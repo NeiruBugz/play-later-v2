@@ -106,6 +106,18 @@ describe("ProfileOverview", () => {
   });
 
   describe("given recently played games", () => {
+    it("titles the section Playing, matching its content", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      expect(screen.getByRole("heading", { name: "Playing" })).toBeVisible();
+      expect(screen.queryByText(/recently played/i)).toBeNull();
+    });
+
     it("links each tile to the game's slug page", () => {
       render(
         <ProfileOverview
@@ -144,7 +156,7 @@ describe("ProfileOverview", () => {
   });
 
   describe("given any viewer (default tab)", () => {
-    it("defaults to the Overview tab showing Recently Played", () => {
+    it("defaults to the Overview tab showing the Playing section", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
       expect(elements.queryRecentlyPlayed()).not.toBeNull();
     });

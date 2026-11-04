@@ -241,13 +241,40 @@ describe("DashboardPage", () => {
       expect(search({})).toEqual({ action: "add-game", game: undefined });
     });
 
-    it("shows the empty-queue copy without a See all link", () => {
-      expect(screen.getByText(QUEUE_EMPTY_COPY)).toBeVisible();
+    it("explains the empty queue once, inside the single empty state", () => {
+      expect(screen.getAllByText(QUEUE_EMPTY_COPY)).toHaveLength(1);
+      expect(
+        within(elements.getEmptyStates()[0]).getByText(QUEUE_EMPTY_COPY)
+      ).toBeVisible();
       expect(screen.queryByRole("link", { name: /see all/i })).toBeNull();
+    });
+
+    it("has a single main landmark region of its own: none, since the app shell owns it", () => {
+      expect(screen.queryByRole("main")).toBeNull();
     });
 
     it("shows no counts strip for an empty library", () => {
       expect(elements.getCountsStrips()).toHaveLength(0);
+    });
+  });
+
+  describe("given a Playing game and an empty queue", () => {
+    beforeEach(() => {
+      render(
+        <DashboardPage
+          data={makeData({
+            playing: [makeItem("p1", "Elden Ring")],
+            counts: { WANT: 0, PLAYING: 1, DONE: 0 },
+          })}
+        />
+      );
+    });
+
+    it("keeps the Up Next empty copy and shows no empty state", () => {
+      expect(
+        within(elements.getUpNextSection()).getByText(QUEUE_EMPTY_COPY)
+      ).toBeVisible();
+      expect(elements.getEmptyStates()).toHaveLength(0);
     });
   });
 

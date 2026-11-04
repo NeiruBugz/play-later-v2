@@ -169,7 +169,7 @@ const elements = {
   queryStatusPillsNamed: (label: string) =>
     screen.queryAllByRole("button", { name: `Status: ${label}. Change` }),
   getHeaderStatusPill: (label: string) =>
-    within(screen.getByRole("main")).getAllByRole("button", {
+    within(document.body).getAllByRole("button", {
       name: `Status: ${label}. Change`,
     })[0]!,
   getActionBarStatusPill: (label: string) =>

@@ -229,7 +229,7 @@ export function GameDetail({
   );
 
   return (
-    <main className="relative flex flex-col">
+    <div className="relative flex flex-col">
       <div
         aria-hidden="true"
         data-testid="game-detail-hero-backdrop"
@@ -408,6 +408,6 @@ export function GameDetail({
           viewerUserId={viewerUserId}
         />
       ) : null}
-    </main>
+    </div>
   );
 }

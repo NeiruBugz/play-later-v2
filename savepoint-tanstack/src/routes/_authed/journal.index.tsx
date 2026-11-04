@@ -33,12 +33,12 @@ function JournalPage() {
   const { gameId } = Route.useSearch();
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <JournalTimelinePage
         entries={entries}
         gameOptions={gameOptions}
         selectedGame={gameId}
       />
-    </main>
+    </div>
   );
 }

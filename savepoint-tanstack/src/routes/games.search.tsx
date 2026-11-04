@@ -18,7 +18,7 @@ function GameSearchRoute() {
   const query = q ?? "";
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <div className="space-y-xl">
         <div className="space-y-sm">
           <h1 className="heading-lg">Search Games</h1>
@@ -45,6 +45,6 @@ function GameSearchRoute() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

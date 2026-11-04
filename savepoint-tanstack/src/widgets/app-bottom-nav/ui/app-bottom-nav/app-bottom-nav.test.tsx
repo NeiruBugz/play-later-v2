@@ -131,6 +131,20 @@ describe("AppBottomNav", () => {
     });
   });
 
+  describe("given the user taps the visible Log label", () => {
+    beforeEach(async () => {
+      currentPath = "/library";
+      render(<AppBottomNav />);
+      await userEvent.click(screen.getByText("Log"));
+    });
+
+    it("opens the Log form just like the round button", () => {
+      expect(mockNavigate).toHaveBeenCalledOnce();
+      const { search } = mockNavigate.mock.calls[0][0];
+      expect(search({})).toMatchObject({ action: "log-session" });
+    });
+  });
+
   describe("given the active destination has a non-color active indicator", () => {
     beforeEach(() => {
       currentPath = "/journal";
@@ -160,13 +174,14 @@ describe("AppBottomNav", () => {
     });
 
     it("the Log button is a ≥44px circular FAB", () => {
-      const logButton = elements.getLogButton();
+      // eslint-disable-next-line testing-library/no-node-access
+      const circle = elements.getLogButton().firstElementChild!;
       // The Log FAB is a 56px circle (size-14) — a true square, satisfying the ≥44px tap-target requirement.
       expect(
-        logButton.className.includes("size-14") ||
-          logButton.className.includes("h-14")
+        circle.className.includes("size-14") ||
+          circle.className.includes("h-14")
       ).toBe(true);
-      expect(logButton.className.includes("rounded-full")).toBe(true);
+      expect(circle.className.includes("rounded-full")).toBe(true);
     });
   });
 });

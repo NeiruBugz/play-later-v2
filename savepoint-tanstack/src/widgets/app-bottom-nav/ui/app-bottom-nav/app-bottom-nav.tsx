@@ -42,19 +42,25 @@ export function AppBottomNav() {
         </Link>
       ))}
 
-      <div className="flex flex-1 flex-col items-center justify-end pb-1">
-        <button
-          type="button"
-          aria-label="Log"
-          onClick={openLogSession}
+      <button
+        type="button"
+        aria-label="Log"
+        onClick={openLogSession}
+        className="flex flex-1 flex-col items-center justify-end pb-1"
+      >
+        <span
+          aria-hidden="true"
           className="bg-primary text-primary-foreground flex aspect-square size-14 shrink-0 -translate-y-3 items-center justify-center rounded-full shadow-lg"
         >
-          <Plus size={26} aria-hidden="true" />
-        </button>
-        <span className="text-muted-foreground -mt-1 text-[11px] font-medium">
+          <Plus size={26} />
+        </span>
+        <span
+          aria-hidden="true"
+          className="text-muted-foreground -mt-1 text-[11px] font-medium"
+        >
           Log
         </span>
-      </div>
+      </button>
 
       {DEST_ITEMS_RIGHT.map(({ label, to, icon: Icon }) => (
         <Link

@@ -46,7 +46,7 @@ function DevIgdbSearch() {
   }
 
   return (
-    <main className="page-wrap px-4 py-12">
+    <div className="page-wrap px-4 py-12">
       <Card className="mx-auto max-w-2xl space-y-4 p-6">
         <h1 className="text-2xl font-bold">Dev: IGDB search</h1>
         <form onSubmit={handleSubmit} className="flex items-end gap-2">
@@ -94,6 +94,6 @@ function DevIgdbSearch() {
           cutover.
         </small>
       </Card>
-    </main>
+    </div>
   );
 }

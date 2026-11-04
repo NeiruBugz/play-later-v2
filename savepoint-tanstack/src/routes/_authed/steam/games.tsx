@@ -134,7 +134,7 @@ function SteamGamesRoute() {
   } = Route.useLoaderData();
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <h2 className="text-h2 mb-6">Import from Steam</h2>
       <ImportedGamesPage
         games={games}
@@ -144,7 +144,7 @@ function SteamGamesRoute() {
         includeMatched={includeMatched}
         filters={filters}
       />
-    </main>
+    </div>
   );
 }
 
@@ -160,7 +160,7 @@ function SteamGamesError({ error }: { error: unknown }) {
   const message = getErrorMessage(error, "Could not load Steam games");
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <h2 className="text-h2 mb-6">Import from Steam</h2>
       {errName === "SteamProfilePrivateError" ? (
         <SteamPrivacyErrorCard message={message} />
@@ -173,6 +173,6 @@ function SteamGamesError({ error }: { error: unknown }) {
       ) : (
         <GenericErrorBanner message={message} />
       )}
-    </main>
+    </div>
   );
 }

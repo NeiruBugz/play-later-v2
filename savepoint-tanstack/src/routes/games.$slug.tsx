@@ -196,7 +196,7 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
 
   if (isNotFound) {
     return (
-      <main
+      <div
         role="alert"
         className="gap-md container mx-auto flex flex-col px-4 py-12"
       >
@@ -207,12 +207,12 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
             Go home
           </Link>
         </p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main
+    <div
       role="alert"
       className="gap-md container mx-auto flex flex-col px-4 py-12"
     >
@@ -223,6 +223,6 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
           Go home
         </Link>
       </p>
-    </main>
+    </div>
   );
 }

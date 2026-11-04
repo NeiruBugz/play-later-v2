@@ -11,6 +11,8 @@ import { DashboardPlayingSection } from "../dashboard-playing-section";
 import { DashboardStatusStrip } from "../dashboard-status-strip";
 import type { DashboardPageProps } from "./dashboard-page.type";
 
+const EMPTY_QUEUE_COPY = "Nothing queued yet — put up to 5 games in Up Next.";
+
 export function DashboardPage({ data }: DashboardPageProps) {
   const navigate = useNavigate();
   const total = data.counts.WANT + data.counts.PLAYING + data.counts.DONE;
@@ -22,7 +24,7 @@ export function DashboardPage({ data }: DashboardPageProps) {
   }
 
   return (
-    <main className="container mx-auto px-4 py-4 md:py-6">
+    <div className="container mx-auto px-4 py-4 md:py-6">
       <PageHeader
         className="mb-3 md:mb-6"
         title="Home"
@@ -43,6 +45,7 @@ export function DashboardPage({ data }: DashboardPageProps) {
           <EmptyState
             spacing="compact"
             title="Nothing playing right now"
+            description={hasQueue ? undefined : EMPTY_QUEUE_COPY}
             action={
               hasQueue
                 ? {
@@ -55,14 +58,16 @@ export function DashboardPage({ data }: DashboardPageProps) {
           />
         )}
 
-        <DashboardGameRail
-          title="Up Next"
-          items={data.upNextTop3}
-          viewAll={{ status: "UP_NEXT" }}
-          viewAllLabel="See all"
-          emptyMessage="Nothing queued yet — put up to 5 games in Up Next."
-        />
+        {hasPlaying || hasQueue ? (
+          <DashboardGameRail
+            title="Up Next"
+            items={data.upNextTop3}
+            viewAll={{ status: "UP_NEXT" }}
+            viewAllLabel="See all"
+            emptyMessage={EMPTY_QUEUE_COPY}
+          />
+        ) : null}
       </div>
-    </main>
+    </div>
   );
 }

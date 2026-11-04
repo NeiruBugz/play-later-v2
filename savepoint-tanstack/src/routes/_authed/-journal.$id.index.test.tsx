@@ -1,3 +1,4 @@
+import { isNotFound } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -69,6 +70,11 @@ function renderComponent(entry: JournalTimelineEntry) {
   render(<Component />);
 }
 
+function renderNotFound() {
+  const NotFoundComponent = Route.options.notFoundComponent as ComponentType;
+  render(<NotFoundComponent />);
+}
+
 function renderError(error: Error) {
   const ErrorComponent = Route.options.errorComponent as ComponentType<{
     error: Error;
@@ -107,12 +113,25 @@ describe("/journal/$id route", () => {
     });
   });
 
-  describe("given a NotFoundError reaches the error component", () => {
-    beforeEach(() => {
-      renderError(new NotFoundError("Journal entry not found"));
+  describe("given the entry is missing or belongs to someone else", () => {
+    it("turns the NotFoundError into the router's notFound", async () => {
+      const api = await import("@/features/journal-timeline");
+      vi.mocked(api.getJournalEntryPageDataFn).mockRejectedValue(
+        new NotFoundError("Note not found")
+      );
+      const loader = Route.options.loader as (args: {
+        params: { id: string };
+      }) => Promise<unknown>;
+
+      const thrown = await loader({ params: { id: "foreign" } }).catch(
+        (error: unknown) => error
+      );
+
+      expect(isNotFound(thrown)).toBe(true);
     });
 
-    it("renders the 404 surface", () => {
+    it("renders the Note not found surface through the not-found component", () => {
+      renderNotFound();
       expect(elements.getNotFoundHeading()).toBeDefined();
     });
   });

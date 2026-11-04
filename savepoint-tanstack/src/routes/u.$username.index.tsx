@@ -120,7 +120,7 @@ function PublicProfilePage() {
     ) : undefined;
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <ProfileOverview
         profile={profile}
         stats={stats}
@@ -132,13 +132,13 @@ function PublicProfilePage() {
         activitySlot={activitySlot}
         hideActivityTab={viewerId === null}
       />
-    </main>
+    </div>
   );
 }
 
 function ProfileNotFound() {
   return (
-    <main className="container mx-auto px-4 py-16 text-center">
+    <div className="container mx-auto px-4 py-16 text-center">
       <h1 className="heading-lg mb-2">Profile not found</h1>
       <p className="text-muted-foreground mb-6">
         We couldn't find that profile, or it isn't public.
@@ -146,6 +146,6 @@ function ProfileNotFound() {
       <Button asChild variant="outline">
         <Link to="/">Go home</Link>
       </Button>
-    </main>
+    </div>
   );
 }

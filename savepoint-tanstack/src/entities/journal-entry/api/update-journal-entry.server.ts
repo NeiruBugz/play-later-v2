@@ -33,7 +33,7 @@ export async function updateJournalEntry(
   });
 
   if (!existing) {
-    throw new NotFoundError("Journal entry not found", { entryId });
+    throw new NotFoundError("Note not found", { entryId });
   }
 
   if (existing.userId !== userId) {
@@ -72,6 +72,6 @@ export async function updateJournalEntry(
       ...JOURNAL_ENTRY_READ_ARGS,
     });
   } catch (error) {
-    mapP2025ToNotFound(error, "Journal entry not found", { entryId });
+    mapP2025ToNotFound(error, "Note not found", { entryId });
   }
 }

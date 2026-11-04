@@ -286,7 +286,7 @@ export function LibraryPage(props: LibraryPageProps) {
         : "no-results";
 
   return (
-    <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
+    <div className="gap-xl container mx-auto flex flex-col px-4 py-6">
       <PageHeader
         eyebrow="// LIBRARY"
         title="Library"
@@ -466,6 +466,6 @@ export function LibraryPage(props: LibraryPageProps) {
           }}
         />
       ) : null}
-    </main>
+    </div>
   );
 }
