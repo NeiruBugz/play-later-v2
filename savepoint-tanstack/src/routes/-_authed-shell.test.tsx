@@ -60,6 +60,10 @@ vi.mock("@/widgets/global-action-host", () => ({
   GlobalActionHost: () => null,
 }));
 
+vi.mock("@/widgets/navigation-progress", () => ({
+  NavigationProgress: () => null,
+}));
+
 vi.mock("@/widgets/app-shell", () => ({
   AppShell: ({
     sidebar,
