@@ -25,10 +25,8 @@ const elements = {
     screen.getByRole("button", { name: "Open filters" }),
   queryDialog: () => screen.queryByRole("dialog"),
   findDialog: () => screen.findByRole("dialog"),
-  getStatusFilterButton: (label: string) =>
-    screen.getByRole("button", { name: `Filter by ${label}` }),
-  getStatusClearButton: (label: string) =>
-    screen.getByRole("button", { name: `Clear ${label} filter` }),
+  queryStatusFilterButton: (label: string) =>
+    screen.queryByRole("button", { name: `Filter by ${label}` }),
   getPlatformTrigger: () => screen.getByRole("combobox", { name: "Platform" }),
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
   getOption: (name: string) =>
@@ -54,10 +52,6 @@ const elements = {
 const actions = {
   openSheet: () => userEvent.click(elements.getOpenFiltersButton()),
   pressEscape: () => userEvent.keyboard("{Escape}"),
-  pickStatus: (label: string) =>
-    userEvent.click(elements.getStatusFilterButton(label)),
-  clearStatus: (label: string) =>
-    userEvent.click(elements.getStatusClearButton(label)),
   openPlatformSelect: () => userEvent.click(elements.getPlatformTrigger()),
   pickPlatformOption: (name: string) =>
     userEvent.click(elements.getOption(name)),
@@ -96,9 +90,6 @@ describe("MobileFilterBar", () => {
 
     it("renders all filter controls inside the sheet", async () => {
       await elements.findDialog();
-      expect(elements.getStatusFilterButton("Want")).toBeDefined();
-      expect(elements.getStatusFilterButton("Playing")).toBeDefined();
-      expect(elements.getStatusFilterButton("Done")).toBeDefined();
       expect(elements.getPlatformTrigger()).toBeDefined();
       expect(elements.getSortTrigger()).toBeDefined();
       expect(elements.getMinRatingSlider()).toBeDefined();
@@ -124,37 +115,17 @@ describe("MobileFilterBar", () => {
     });
   });
 
-  describe("given the user picks a status inside the sheet", () => {
-    beforeEach(async () => {
-      render(<MobileFilterBar {...defaultProps} />);
-      await actions.openSheet();
-      await elements.findDialog();
-      await actions.pickStatus("Playing");
-    });
-
-    it("calls navigate with search.status set to PLAYING", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: "PLAYING" }),
-        })
-      );
-    });
-  });
-
-  describe("given a status is active and the user clicks it again", () => {
+  describe("given the sheet is open", () => {
     beforeEach(async () => {
       render(<MobileFilterBar {...defaultProps} status="PLAYING" />);
       await actions.openSheet();
       await elements.findDialog();
-      await actions.clearStatus("Playing");
     });
 
-    it("calls navigate with search.status undefined (toggle-deselect)", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: undefined }),
-        })
-      );
+    it("does not repeat the status choices the status lens already offers", () => {
+      expect(elements.queryStatusFilterButton("Want")).toBeNull();
+      expect(elements.queryStatusFilterButton("Playing")).toBeNull();
+      expect(elements.queryStatusFilterButton("Done")).toBeNull();
     });
   });
 

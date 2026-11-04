@@ -11,9 +11,9 @@ vi.mock("@/entities/game", () => ({
 }));
 
 const elements = {
-  getInput: () => screen.getByRole("textbox", { name: "IGDB search query" }),
+  getInput: () => screen.getByRole("textbox", { name: "Game search query" }),
   queryResultList: () =>
-    screen.queryByRole("list", { name: "IGDB search results" }),
+    screen.queryByRole("list", { name: "Game search results" }),
   queryNoResults: () => screen.queryByText("No games found"),
   querySearching: () => screen.queryByText("Searching…"),
 };

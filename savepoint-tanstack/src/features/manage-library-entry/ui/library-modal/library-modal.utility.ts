@@ -41,11 +41,11 @@ export function useLibraryModalForm({
         },
       });
       setError(null);
-      toast.success("Library entry updated");
+      toast.success("Game updated");
       await router.invalidate();
       onClose();
     } catch (err: unknown) {
-      const message = getErrorMessage(err, "Failed to update library entry");
+      const message = getErrorMessage(err, "Failed to update game");
       setError(message);
       toast.error(message);
     } finally {

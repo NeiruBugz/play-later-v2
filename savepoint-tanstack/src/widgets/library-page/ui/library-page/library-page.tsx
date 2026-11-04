@@ -124,9 +124,7 @@ function LibraryGridTile({
         className="mt-1 flex h-4 items-center"
         onClickCapture={(event) => event.stopPropagation()}
       >
-        {item.rating === null ? (
-          <span className="text-muted-foreground text-xs italic">unrated</span>
-        ) : (
+        {item.rating === null ? null : (
           <RatingInput value={item.rating} size="sm" readOnly />
         )}
       </div>
@@ -297,10 +295,10 @@ export function LibraryPage(props: LibraryPageProps) {
             <Link
               to="/steam/games"
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
-              aria-label="View imported Steam games"
+              aria-label="Import from Steam"
             >
               <Download className="h-4 w-4" aria-hidden />
-              Imported games
+              Import from Steam
             </Link>
             <Button onClick={() => openGlobalAction(navigate, "add-game")}>
               <PackagePlus aria-hidden="true" />
@@ -353,7 +351,6 @@ export function LibraryPage(props: LibraryPageProps) {
             sortBy={sortBy}
             sortOrder={sortOrder}
             platforms={platforms}
-            counts={statusCounts}
           />
         </div>
         <ViewModeToggle
@@ -372,7 +369,6 @@ export function LibraryPage(props: LibraryPageProps) {
           notOwnedOnly={notOwnedOnly}
           sortBy={sortBy}
           sortOrder={sortOrder}
-          counts={statusCounts}
           platforms={platforms}
         />
 
@@ -408,7 +404,7 @@ export function LibraryPage(props: LibraryPageProps) {
               aria-label="Empty library"
               icon={Library}
               title="No games yet"
-              description="Start your library by adding a game, or import your shelf from Steam."
+              description="Start your library by adding a game, or import your games from Steam."
               action={{ label: "Browse games", to: "/games/search" }}
               secondaryAction={{
                 label: "Import from Steam",

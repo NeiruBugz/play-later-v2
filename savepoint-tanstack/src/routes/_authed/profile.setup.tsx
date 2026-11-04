@@ -73,7 +73,7 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
       <h1 className="text-h2">Something went wrong</h1>
       <p>We couldn't load profile setup. Please try again.</p>
       <Button asChild variant="outline">
-        <Link to="/dashboard">Back to dashboard</Link>
+        <Link to="/dashboard">Back to Home</Link>
       </Button>
     </main>
   );

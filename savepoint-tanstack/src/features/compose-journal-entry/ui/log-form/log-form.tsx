@@ -147,7 +147,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
           </button>
           <div
             role="spinbutton"
-            aria-label="Hours played"
+            aria-label="Time played"
             aria-valuenow={hours}
             aria-valuemin={0}
             aria-valuetext={`${hours} hours`}

@@ -32,7 +32,7 @@ const PARTIAL_PROPS = {
 
 const STEP_LABELS = [
   "Add your first game",
-  "Write a journal entry",
+  "Write a note",
   "Set up your profile",
   "Connect Steam",
 ] as const;

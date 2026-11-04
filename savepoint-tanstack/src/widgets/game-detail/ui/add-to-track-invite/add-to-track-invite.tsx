@@ -25,12 +25,12 @@ export function AddToTrackInvite({
       </span>
       <div className="gap-2xs flex flex-col">
         <h2 id="track-invite-heading" className="text-h3">
-          Start tracking {gameTitle}
+          Add {gameTitle}
         </h2>
         <p className="text-muted-foreground text-sm">
           {isSignedIn
-            ? "Add this to your library to log sessions, rate it, and keep a journal."
-            : "Sign in and add this to your library to log sessions, rate it, and keep a journal."}
+            ? "Add this to your library to log time, rate it, and keep notes."
+            : "Sign in and add this to your library to log time, rate it, and keep notes."}
         </p>
       </div>
       {isSignedIn ? (

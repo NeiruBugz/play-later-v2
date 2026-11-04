@@ -18,7 +18,7 @@ describe("EmptyLibraryHero", () => {
   describe("given the component is rendered with all steps incomplete", () => {
     it("renders the hero card with the welcome heading", () => {
       render(<EmptyLibraryHero {...defaultProps} />);
-      expect(screen.getByText("Start Your Gaming Journey")).toBeDefined();
+      expect(screen.getByText("Start your library")).toBeDefined();
     });
 
     it("renders the empty-library-hero test id", () => {

@@ -128,9 +128,7 @@ const elements = {
   getPickerOption: (name: string) => screen.getByRole("radio", { name }),
   queryMenuButton: () => screen.queryByRole("button", { name: "menu-trigger" }),
   queryAcquisitionChip: (label: string) => screen.queryByText(label),
-  queryLifecycleTrack: () => screen.queryByTestId("lifecycle-strip-track"),
-  getLifecycleText: () =>
-    screen.getByTestId("lifecycle-strip").textContent ?? "",
+  queryLifecycleStrip: () => screen.queryByTestId("lifecycle-strip"),
   queryUnrated: () => screen.queryByText("unrated"),
   queryAddPlaythroughButton: () =>
     screen.queryByRole("button", { name: "Add playthrough" }),
@@ -234,14 +232,8 @@ describe("LibraryItemCard", () => {
         expect(className).not.toContain("text-muted-foreground");
       });
 
-      it("dates the play window in the lifecycle caption", () => {
-        // The inline contextual date was retired; temporal info now lives in
-        // the lifecycle strip caption ("started Nw").
-        expect(elements.getLifecycleText()).toMatch(/started/);
-      });
-
-      it('shows "unrated" since this item has no rating', () => {
-        expect(elements.queryUnrated()).not.toBeNull();
+      it("shows no rating text since this item has no rating", () => {
+        expect(elements.queryUnrated()).toBeNull();
       });
 
       it('renders the "Mark done" next-step CTA for status PLAYING', () => {
@@ -390,36 +382,15 @@ describe("LibraryItemCard", () => {
       });
     });
 
-    // The lifecycle caption dates a finish from completedAt (when the player
-    // actually finished), never updatedAt. Regression guard for the
-    // strip-vs-date contradiction ("done Oct 2023" / "Finished yesterday")
-    // spotted on the library grid before the inline date was retired.
-    describe("given a DONE item completed long ago but edited recently", () => {
-      beforeEach(() => {
-        render(
-          <LibraryItemCard
-            item={buildItem({
-              status: "DONE",
-              completedAt: new Date("2023-10-12T00:00:00Z"),
-              updatedAt: new Date("2025-01-02T00:00:00Z"),
-            })}
-          />
-        );
-      });
-
-      it("reads the finish from completedAt in the lifecycle caption", () => {
-        expect(elements.getLifecycleText()).toMatch(/done/);
-      });
-    });
-
     describe("rating display", () => {
       describe("given an unrated item", () => {
         beforeEach(() => {
           render(<LibraryItemCard item={buildItem({ rating: null })} />);
         });
 
-        it('shows the "unrated" placeholder instead of stars', () => {
-          expect(elements.queryUnrated()).not.toBeNull();
+        it("shows neither stars nor an unrated placeholder", () => {
+          expect(elements.queryUnrated()).toBeNull();
+          expect(screen.queryByRole("img", { name: /^Rated / })).toBeNull();
         });
       });
 
@@ -621,19 +592,16 @@ describe("LibraryItemCard", () => {
     });
   });
 
-  // F07 — lifecycle strip renders for every status; it is the card's sole
-  // temporal caption (added / started / done) since the inline date retired.
-  describe("lifecycle strip", () => {
-    describe("given a WANT item", () => {
-      beforeEach(() => {
-        render(<LibraryItemCard item={buildItem({ status: "WANT" })} />);
-      });
-
-      it("renders the lifecycle strip", () => {
-        expect(elements.queryLifecycleTrack()).not.toBeNull();
-      });
-    });
+  describe("backlog-age strip", () => {
+    it.each(["WANT", "PLAYING", "DONE"] as const)(
+      "is absent for a %s item",
+      (status) => {
+        render(<LibraryItemCard item={buildItem({ status })} />);
+        expect(elements.queryLifecycleStrip()).toBeNull();
+      }
+    );
   });
+
   describe("queue marker", () => {
     it("reads 'Up Next #2' on a queued Want game", () => {
       render(

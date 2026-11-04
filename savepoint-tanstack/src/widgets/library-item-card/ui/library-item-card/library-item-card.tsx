@@ -1,6 +1,5 @@
 import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
-  LibraryLifecycleStrip,
   LibraryStatusBadge,
   NextStepButton,
   NotOwnedTag,
@@ -108,14 +107,6 @@ export function LibraryItemCard({
           <NotOwnedTag status={status} isOwned={ownership.isOwned} />
         </div>
 
-        <LibraryLifecycleStrip
-          status={status}
-          createdAt={item.createdAt}
-          startedAt={item.startedAt}
-          completedAt={item.completedAt}
-          className={cn("mt-0.5 mb-1", !isRow && "md:mt-2")}
-        />
-
         <div
           className={cn(
             "text-muted-foreground mt-0 flex h-4 items-center gap-1.5 truncate text-[11px] leading-none",
@@ -137,11 +128,7 @@ export function LibraryItemCard({
             event.stopPropagation();
           }}
         >
-          {item.rating === null ? (
-            <span className="text-muted-foreground text-xs italic">
-              unrated
-            </span>
-          ) : (
+          {item.rating === null ? null : (
             <RatingInput value={item.rating} size="sm" readOnly />
           )}
         </div>

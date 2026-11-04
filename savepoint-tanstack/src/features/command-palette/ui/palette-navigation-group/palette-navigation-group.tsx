@@ -32,7 +32,7 @@ const NAVIGATION_ITEMS: ReadonlyArray<NavigationItem> = [
   { label: "Journal", to: "/journal", icon: BookOpen },
   { label: "Profile", to: "/profile", icon: User },
   { label: "Settings", to: "/settings/profile", icon: Settings },
-  { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
+  { label: "Home", to: "/dashboard", icon: LayoutGrid },
 ];
 
 export function PaletteNavigationGroup({

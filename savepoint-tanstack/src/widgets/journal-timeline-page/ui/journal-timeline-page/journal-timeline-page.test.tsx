@@ -206,11 +206,15 @@ describe("JournalTimelinePage", () => {
       renderPage([makeEntry({ id: "e1" }), makeEntry({ id: "e2" })]);
     });
 
-    it("renders the stats rail with a Log time button", () => {
+    it("renders the rail with a Log time button", () => {
       expect(
-        screen.getByRole("complementary", { name: "Journaling stats" })
+        screen.getByRole("complementary", { name: "Log tonight" })
       ).toBeDefined();
       expect(screen.getByRole("button", { name: "Log time" })).toBeDefined();
+    });
+
+    it("shows no period counts", () => {
+      expect(screen.queryByText(/this month/i)).toBeNull();
     });
   });
 });

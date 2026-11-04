@@ -73,7 +73,7 @@ export function OnboardingChecklist({
       },
       {
         id: "journal",
-        label: "Write a journal entry",
+        label: "Write a note",
         done: journalEntryCount > 0,
       },
       {

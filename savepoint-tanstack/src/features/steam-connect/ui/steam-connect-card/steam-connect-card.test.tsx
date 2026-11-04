@@ -13,7 +13,7 @@
  *       - title "Steam Account Connected"
  *       - shows the steam id text content
  *       - Alert hint with privacy-pending copy
- *       - "Manage Imported Games" link to /steam/games
+ *       - "Import from Steam" link to /steam/games
  *       - "Disconnect" opens a confirmation Dialog; confirming calls
  *         disconnectSteamFn({ data: {} }) and on success fires
  *         toast.success("Steam disconnected") + router.invalidate.
@@ -65,7 +65,7 @@ const elements = {
   queryConnectLink: () =>
     screen.queryByRole("link", { name: "Sign in with Steam" }),
   queryManageLink: () =>
-    screen.queryByRole("link", { name: "Manage Imported Games" }),
+    screen.queryByRole("link", { name: "Import from Steam" }),
   queryDisconnectButton: () =>
     screen.queryByRole("button", { name: "Disconnect" }),
   // The card-level "Disconnect" trigger (opens the dialog). When the dialog is
@@ -151,7 +151,7 @@ describe("SteamConnectCard", () => {
       expect(elements.queryDisconnectButton()).not.toBeNull();
     });
 
-    it("renders the 'Manage Imported Games' link to /steam/games", () => {
+    it("renders the 'Import from Steam' link to /steam/games", () => {
       expect(elements.queryManageLink()).toHaveAttribute(
         "href",
         "/steam/games"
@@ -177,7 +177,9 @@ describe("SteamConnectCard", () => {
         within(dialog).getByText("Disconnect Steam Account")
       ).toBeInTheDocument();
       expect(
-        within(dialog).getByText(/imported games will be preserved/i)
+        within(dialog).getByText(
+          /games you already imported will stay in your library/i
+        )
       ).toBeInTheDocument();
     });
 

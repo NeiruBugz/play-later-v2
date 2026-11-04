@@ -52,10 +52,10 @@ const elements = {
   queryCancelButton: () => screen.queryByRole("button", { name: "Cancel" }),
   queryBackButton: () => screen.queryByRole("button", { name: "Back" }),
   querySearchInput: () =>
-    screen.queryByRole("textbox", { name: "IGDB search query" }),
+    screen.queryByRole("textbox", { name: "Game search query" }),
   queryStatusTrigger: () => screen.queryByLabelText("Library status"),
   queryFallbackMessage: () =>
-    screen.queryByText(/Search IGDB and pick the correct entry\./),
+    screen.queryByText(/Search and pick the correct entry\./),
 };
 
 const actions = {
@@ -339,7 +339,7 @@ describe(ImportGameModal, () => {
         />
       );
 
-      const input = screen.getByRole("textbox", { name: "IGDB search query" });
+      const input = screen.getByRole("textbox", { name: "Game search query" });
       await userEvent.type(input, "half");
       // Advance past the 300ms debounce.
       vi.advanceTimersByTime(400);

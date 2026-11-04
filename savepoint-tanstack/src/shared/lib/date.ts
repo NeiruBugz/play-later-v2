@@ -42,7 +42,7 @@ export function formatJournalDate(date: Date | string | number): string {
  * `{ year: "numeric", month: "short", day: "numeric" }`.
  *
  * - default (no options): `en-US` locale, local time zone — matches
- *   `Intl.DateTimeFormat("en-US", ...)` callers (game-metadata, lifecycle-strip).
+ *   `Intl.DateTimeFormat("en-US", ...)` callers (game-metadata).
  * - `{ utc: true }`: `en-US`, `timeZone: "UTC"` — matches the date-picker.
  * - `{ locale: undefined }` (explicit): forwards `undefined` to
  *   `toLocaleDateString` so the runtime default locale is used — matches the

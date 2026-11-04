@@ -40,7 +40,7 @@ const onOpenChange = vi.fn();
 const ENTRY_ID = "entry-id-to-delete-001";
 
 const elements = {
-  getConfirmCopy: () => screen.getByText("Delete this entry?"),
+  getConfirmCopy: () => screen.getByText("Delete this note?"),
   getDeleteButton: () => screen.getByRole("button", { name: "Delete" }),
   getCancelButton: () => screen.getByRole("button", { name: "Cancel" }),
 };
@@ -67,7 +67,7 @@ describe("DeleteJournalEntryDialog", () => {
       );
     });
 
-    it("shows the confirm copy 'Delete this entry?'", () => {
+    it("shows the confirm copy 'Delete this note?'", () => {
       expect(elements.getConfirmCopy()).toBeDefined();
     });
 
@@ -153,8 +153,8 @@ describe("DeleteJournalEntryDialog", () => {
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it("calls toast.success with 'Entry deleted'", () => {
-      expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Entry deleted");
+    it("calls toast.success with 'Note deleted'", () => {
+      expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Note deleted");
     });
   });
 

@@ -78,7 +78,7 @@ function PromptRow({ libraryItemId, gameTitle, kind }: PromptRowProps) {
           variant="ghost"
           disabled={isBusy}
           onClick={dismiss}
-          aria-label={`Dismiss "${question}" for ${gameTitle}`}
+          aria-label={`Hide this question for ${gameTitle}`}
         >
           <X aria-hidden="true" />
         </Button>

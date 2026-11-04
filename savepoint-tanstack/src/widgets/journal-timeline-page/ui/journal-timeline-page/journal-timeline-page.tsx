@@ -65,7 +65,7 @@ export function JournalTimelinePage({
       </div>
 
       <div className="hidden md:block">
-        <JournalStatsRail entries={entries} />
+        <JournalStatsRail />
       </div>
     </div>
   );

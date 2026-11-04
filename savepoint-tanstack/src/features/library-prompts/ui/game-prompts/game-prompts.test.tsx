@@ -29,7 +29,7 @@ const elements = {
   getWhy: () => screen.getByLabelText(WHY),
   queryStayed: () => screen.queryByLabelText(STAYED),
   getSave: () => screen.getByRole("button", { name: "Save" }),
-  getDismiss: () => screen.getByRole("button", { name: /^Dismiss/ }),
+  getDismiss: () => screen.getByRole("button", { name: /^Hide this question/ }),
 };
 
 function renderPrompts(props: Partial<GamePromptsProps> = {}) {

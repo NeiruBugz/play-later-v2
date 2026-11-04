@@ -79,7 +79,7 @@ export function LandingPreviewCard() {
 
         <div className="border-border/40 bg-background/40 mt-4 rounded-xl border p-4">
           <p className="text-muted-foreground text-[10px] font-medium tracking-[0.18em] uppercase">
-            APR 22 · JOURNAL ENTRY
+            APR 22 · NOTE
           </p>
           <p className="text-foreground/90 mt-2 text-sm leading-relaxed italic">
             &ldquo;Took five tries on Hornet — finally read the dash pattern.

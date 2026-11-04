@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -123,13 +123,16 @@ const elements = {
   getPageHeading: () =>
     screen.getByRole("heading", { name: "Library", level: 1 }),
   queryPlayingFilterButton: () =>
-    screen.queryByRole("button", { name: "Filter by Playing" }),
-  getPlayingFilterButton: () =>
-    screen.getByRole("button", { name: "Filter by Playing" }),
-  getAllFilterButton: () =>
-    screen.getByRole("button", { name: "Show all statuses" }),
-  getDoneFilterButton: () =>
-    screen.getByRole("button", { name: "Filter by Done" }),
+    screen.queryByRole("tab", { name: /^Playing/ }),
+  getPlayingFilterButton: () => screen.getByRole("tab", { name: /^Playing/ }),
+  getAllFilterButton: () => screen.getByRole("tab", { name: /^All/ }),
+  getDoneFilterButton: () => screen.getByRole("tab", { name: /^Done/ }),
+  queryStatusFilters: () =>
+    screen.queryAllByRole("tablist", { name: "Filter by status" }),
+  querySidebarStatusButtons: () =>
+    screen.queryAllByRole("button", {
+      name: /^Filter by (Want|Playing|Done)$/,
+    }),
   queryGameTitleHeading: (title: string) =>
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
@@ -171,7 +174,9 @@ describe("LibraryPage", () => {
         screen.getByRole("link", { name: "Browse games" })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Import from Steam" })
+        within(screen.getByLabelText("Empty library")).getByRole("link", {
+          name: "Import from Steam",
+        })
       ).toBeInTheDocument();
     });
 
@@ -185,8 +190,12 @@ describe("LibraryPage", () => {
       expect(elements.queryLibraryList()).toBeNull();
     });
 
-    it("mounts the LibraryFilters status controls", () => {
-      expect(elements.queryPlayingFilterButton()).not.toBeNull();
+    it("shows the status filter once, with no sidebar status list beside it", () => {
+      expect(elements.queryStatusFilters()).toHaveLength(1);
+      expect(elements.querySidebarStatusButtons()).toHaveLength(0);
+      expect(
+        screen.queryByRole("button", { name: "Show all statuses" })
+      ).toBeNull();
     });
 
     it("shows an Add game button in the page header", () => {
@@ -248,8 +257,9 @@ describe("LibraryPage", () => {
       expect(elements.queryEmptyHeading()).toBeNull();
     });
 
-    it("still mounts LibraryFilters", () => {
+    it("still shows the status filter, exactly once", () => {
       expect(elements.queryPlayingFilterButton()).not.toBeNull();
+      expect(elements.queryStatusFilters()).toHaveLength(1);
     });
 
     it("shows an Add game button in the page header", () => {
@@ -309,12 +319,12 @@ describe("LibraryPage", () => {
         expect(search({})).toEqual({ action: "add-game", game: undefined });
       });
 
-      it("passes per-status counts through to LibraryFilters (rail renders count next to Playing)", () => {
+      it("shows the per-status count on the Playing chip", () => {
         const playing = elements.getPlayingFilterButton();
         expect(playing.textContent).toContain("2");
       });
 
-      it("renders the totalCount next to the All button", () => {
+      it("renders the total count on the All chip", () => {
         const all = elements.getAllFilterButton();
         expect(all.textContent).toContain("3");
       });

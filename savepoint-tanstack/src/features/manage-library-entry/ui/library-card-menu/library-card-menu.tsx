@@ -78,7 +78,7 @@ export function LibraryCardMenu({
               onClick={stopProp}
             >
               <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
-              View Journal Entries
+              View notes
             </Link>
           </DropdownMenuItem>
 

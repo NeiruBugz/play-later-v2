@@ -251,9 +251,7 @@ describe("LibraryModal", () => {
 
     it("fires toast.success with the locked update copy", async () => {
       await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          "Library entry updated"
-        );
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Game updated");
       });
       expect(vi.mocked(toast.success)).toHaveBeenCalledOnce();
     });

@@ -27,9 +27,9 @@ const baseGame: ImportedGame = {
 
 const elements = {
   queryAddButton: () =>
-    screen.queryByRole("button", { name: "Add Half-Life 2 to library" }),
+    screen.queryByRole("button", { name: "Add Half-Life 2" }),
   queryDismissButton: () =>
-    screen.queryByRole("button", { name: "Dismiss Half-Life 2" }),
+    screen.queryByRole("button", { name: "Remove Half-Life 2" }),
   queryRestoreButton: () =>
     screen.queryByRole("button", { name: "Restore Half-Life 2" }),
   queryName: () => screen.queryByText("Half-Life 2"),

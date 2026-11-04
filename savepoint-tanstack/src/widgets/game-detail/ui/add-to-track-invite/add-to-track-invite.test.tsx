@@ -33,7 +33,8 @@ const elements = {
   queryAddButton: () =>
     screen.queryByRole("button", { name: "Add to library" }),
   querySignInLink: () => screen.queryByRole("link", { name: "Sign in" }),
-  queryInvitationCopy: () => screen.queryByText(/start tracking/i),
+  queryInvitationCopy: () =>
+    screen.queryByRole("heading", { name: "Add Hollow Knight" }),
 };
 
 describe("AddToTrackInvite", () => {
@@ -44,7 +45,7 @@ describe("AddToTrackInvite", () => {
       );
     });
 
-    it("renders an invitation to start tracking", () => {
+    it("renders an invitation to add the game", () => {
       expect(elements.getRegion()).toBeDefined();
       expect(elements.queryInvitationCopy()).not.toBeNull();
     });
@@ -98,7 +99,7 @@ describe("AddToTrackInvite", () => {
       );
     });
 
-    it("renders an invitation to start tracking", () => {
+    it("renders an invitation to add the game", () => {
       expect(elements.getRegion()).toBeDefined();
       expect(elements.queryInvitationCopy()).not.toBeNull();
     });

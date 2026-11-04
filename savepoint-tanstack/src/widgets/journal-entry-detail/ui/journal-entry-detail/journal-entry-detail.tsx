@@ -29,9 +29,8 @@ export function JournalEntryDetail({
   onDelete,
 }: JournalEntryDetailProps) {
   const title = entry.title?.trim() || null;
-  const kindLabel = entry.kind === "QUICK" ? "Quick note" : "Reflection";
   const displayTitle =
-    title ?? `${kindLabel} from ${formatJournalDate(entry.updatedAt)}`;
+    title ?? `Note from ${formatJournalDate(entry.updatedAt)}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -39,7 +38,7 @@ export function JournalEntryDetail({
         <DialogHeader>
           <DialogTitle>{displayTitle}</DialogTitle>
           <DialogDescription>
-            {kindLabel} · {formatJournalDate(entry.updatedAt)}
+            Note · {formatJournalDate(entry.updatedAt)}
           </DialogDescription>
         </DialogHeader>
 

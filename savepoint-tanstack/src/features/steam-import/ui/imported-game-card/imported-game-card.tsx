@@ -18,7 +18,7 @@ import {
  *
  * Three render variants keyed off `game.igdbMatchStatus`:
  *   - `MATCHED`             → cover + name + "Add to library" + dismiss.
- *   - `PENDING` / `UNMATCHED` → placeholder + name + "Search IGDB" + dismiss.
+ *   - `PENDING` / `UNMATCHED` → placeholder + name + "Search" + dismiss.
  *   - `IGNORED`             → muted + "Restore" (handled by widget via
  *                              `onAddToLibrary` repurposed for restore — Phase
  *                              D ships the IGNORED branch only when the
@@ -98,8 +98,8 @@ export function ImportedGameCard({
               size="icon"
               onClick={onAddToLibrary}
               disabled={isPending}
-              aria-label={`Add ${game.name} to library`}
-              title="Add to library"
+              aria-label={`Add ${game.name}`}
+              title="Add"
             >
               <Plus />
             </Button>
@@ -125,8 +125,8 @@ export function ImportedGameCard({
               size="icon"
               onClick={onDismiss}
               disabled={isPending}
-              aria-label={`Dismiss ${game.name}`}
-              title="Dismiss game"
+              aria-label={`Remove ${game.name}`}
+              title="Remove game"
             >
               <X />
             </Button>

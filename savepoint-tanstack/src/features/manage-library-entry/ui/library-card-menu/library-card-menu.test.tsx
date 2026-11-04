@@ -65,7 +65,7 @@ const elements = {
   queryTriggerButton: () =>
     screen.queryByRole("button", { name: "Actions for Test Game" }),
   getViewJournalItem: () =>
-    screen.getByRole("menuitem", { name: "View Journal Entries" }),
+    screen.getByRole("menuitem", { name: "View notes" }),
   getEditDetailsItem: () =>
     screen.getByRole("menuitem", { name: "Edit Library Details" }),
   getRemoveItem: () =>
@@ -131,7 +131,7 @@ describe("LibraryCardMenu", () => {
       await actions.openMenu();
     });
 
-    it("shows the View Journal Entries item", () => {
+    it("shows the View notes item", () => {
       expect(elements.getViewJournalItem()).toBeDefined();
     });
 

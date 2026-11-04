@@ -116,11 +116,8 @@ describe("AppSidebar", () => {
       elements.getSearchTrigger();
     });
 
-    it("renders a Home/Dashboard nav link with href /dashboard", () => {
-      expect(elements.getNavLink("Dashboard")).toHaveAttribute(
-        "href",
-        "/dashboard"
-      );
+    it("renders a Home nav link with href /dashboard", () => {
+      expect(elements.getNavLink("Home")).toHaveAttribute("href", "/dashboard");
     });
 
     it("renders a Library link with href /library", () => {
@@ -227,10 +224,8 @@ describe("AppSidebar", () => {
       );
     });
 
-    it("does not mark the Dashboard link as the current page", () => {
-      expect(elements.getNavLink("Dashboard")).not.toHaveAttribute(
-        "aria-current"
-      );
+    it("does not mark the Home link as the current page", () => {
+      expect(elements.getNavLink("Home")).not.toHaveAttribute("aria-current");
     });
   });
 
@@ -325,7 +320,7 @@ describe("AppSidebar", () => {
     });
 
     it("renders nav link labels as visible text", () => {
-      expect(screen.getByText("Dashboard")).toBeDefined();
+      expect(screen.getByText("Home")).toBeDefined();
       expect(screen.getByText("Library")).toBeDefined();
     });
   });
@@ -348,7 +343,7 @@ describe("AppSidebar", () => {
     });
 
     it("nav links carry aria-label in collapsed mode so the destination is still announced", () => {
-      expect(elements.getNavLink("Dashboard")).toBeDefined();
+      expect(elements.getNavLink("Home")).toBeDefined();
       expect(elements.getNavLink("Library")).toBeDefined();
     });
 

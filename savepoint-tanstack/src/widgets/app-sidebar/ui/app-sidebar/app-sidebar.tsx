@@ -40,7 +40,7 @@ export interface AppSidebarProps {
 const SIDEBAR_COLLAPSED_KEY = "sp:sidebar-collapsed";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/dashboard", icon: House },
+  { label: "Home", to: "/dashboard", icon: House },
   { label: "Library", to: "/library", icon: Library },
   { label: "Journal", to: "/journal", icon: BookOpen },
   { label: "Profile", to: "/profile", icon: User },

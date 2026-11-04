@@ -22,7 +22,7 @@ export function DeleteJournalEntryButton({
     setIsDeleting(true);
     try {
       await deleteJournalEntryFn({ data: { entryId } });
-      toast.success("Entry deleted");
+      toast.success("Note deleted");
       // Canonical parity: back to the timeline after delete.
       await navigate({ to: "/journal" });
     } catch (err: unknown) {

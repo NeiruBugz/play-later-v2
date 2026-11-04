@@ -66,9 +66,9 @@ type FilterFieldConfig = {
 const FILTER_FIELDS: readonly FilterFieldConfig[] = [
   {
     paramKey: "playtimeStatus",
-    fieldLabel: "Playtime Status",
+    fieldLabel: "Time played status",
     triggerId: "playtime-status-filter",
-    triggerAriaLabel: "Filter by playtime status",
+    triggerAriaLabel: "Filter by time played status",
     chipPrefix: "Status: ",
     options: [
       { value: ALL, label: "All" },
@@ -78,10 +78,10 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
   },
   {
     paramKey: "playtimeRange",
-    fieldLabel: "Playtime Range",
+    fieldLabel: "Time played range",
     triggerId: "playtime-range-filter",
-    triggerAriaLabel: "Filter by playtime range",
-    chipPrefix: "Playtime: ",
+    triggerAriaLabel: "Filter by time played range",
+    chipPrefix: "Time played: ",
     options: [
       { value: ALL, label: "All" },
       { value: "under_1h", label: "Under 1 hour", chipLabel: "Under 1h" },
@@ -123,8 +123,8 @@ const SORT_OPTIONS: readonly FilterOption[] = [
   { value: SORT_DEFAULT, label: "Recently Added" },
   { value: "name_asc", label: "Name (A-Z)" },
   { value: "name_desc", label: "Name (Z-A)" },
-  { value: "playtime_desc", label: "Playtime (High to Low)" },
-  { value: "playtime_asc", label: "Playtime (Low to High)" },
+  { value: "playtime_desc", label: "Time played (High to Low)" },
+  { value: "playtime_asc", label: "Time played (Low to High)" },
   { value: "last_played_desc", label: "Last Played (Recent)" },
   { value: "last_played_asc", label: "Last Played (Oldest)" },
 ];
@@ -221,7 +221,7 @@ export function ImportedGamesFilterBar({
   if (includeIgnored) {
     chips.push({
       key: "include",
-      label: "Showing dismissed",
+      label: "Showing removed",
       onRemove: () => update({ include: undefined }),
     });
   }
@@ -251,7 +251,7 @@ export function ImportedGamesFilterBar({
             }
           }}
           className="pr-9 pl-9"
-          aria-label="Search imported games"
+          aria-label="Search Steam games"
         />
         {searchValue ? (
           <Button
@@ -310,7 +310,7 @@ export function ImportedGamesFilterBar({
           htmlFor="show-dismissed"
           className="text-muted-foreground cursor-pointer text-sm font-normal"
         >
-          Show dismissed games
+          Show removed games
         </Label>
       </div>
 

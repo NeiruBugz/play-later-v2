@@ -20,19 +20,17 @@ import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
 import { RatingControls } from "../rating-controls";
 import { SortSelect } from "../sort-select";
-import { StatusList } from "../status-list";
 import type { MobileFilterBarProps } from "./mobile-filter-bar.type";
 
 /**
- * Mobile counterpart to `LibraryFilters` — collapses the same Status / Platform
- * / Sort sections into a bottom-anchored Sheet, plus the minimum-rating
+ * Mobile counterpart to `LibraryFilters` — collapses the same Platform / Sort
+ * sections into a bottom-anchored Sheet, plus the minimum-rating
  * `RatingInput` and the unrated-only `Switch` controls (parity with canonical
  * `MobileFilterBar`). Visible <xl, hidden ≥xl where the sidebar takes over.
  *
  * Divergences from canonical:
  * - No free-text "search" input (broader scope; deferred to S16 search route).
  * - No Steam-import shortcut (separate widget surface in tanstack — deferred).
- * - No status count badges (sidebar punted them; mobile bar matches).
  */
 export function MobileFilterBar(props: MobileFilterBarProps) {
   const {
@@ -43,19 +41,16 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
     notOwnedOnly,
     sortBy,
     sortOrder,
-    counts,
     platforms = DEFAULT_PLATFORMS,
   } = props;
 
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const {
-    currentStatus,
     sortValue,
     platformValue,
     hasActiveFilters,
     activeFilterCount,
-    onStatusPick,
     onNotOwnedOnlyChange,
     onPlatformChange,
     onSortChange,
@@ -111,28 +106,17 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
           <SheetHeader>
             <SheetTitle>Filters</SheetTitle>
             <SheetDescription>
-              Refine your library by status, platform, sort, and rating.
+              Refine your library by platform, sort, and rating.
             </SheetDescription>
           </SheetHeader>
 
           <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
-              Status
-            </p>
-            <StatusList
-              currentStatus={currentStatus}
-              counts={counts}
-              onPick={onStatusPick}
-              variant="sheet"
+            <NotOwnedOnlyToggle
+              id="mobile-not-owned-only"
+              status={status}
+              checked={notOwnedOnly === true}
+              onChange={onNotOwnedOnlyChange}
             />
-            <div className="mt-sm">
-              <NotOwnedOnlyToggle
-                id="mobile-not-owned-only"
-                status={status}
-                checked={notOwnedOnly === true}
-                onChange={onNotOwnedOnlyChange}
-              />
-            </div>
           </section>
 
           <section>

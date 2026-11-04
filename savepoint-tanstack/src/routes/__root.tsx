@@ -60,7 +60,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "A library, not a backlog. Curate your collection across every platform and journal what made each game matter.",
+          "A library, not a backlog. Curate your library across every platform and journal what made each game matter.",
       },
       { property: "og:title", content: "SavePoint" },
       {

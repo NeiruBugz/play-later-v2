@@ -41,7 +41,7 @@ export function ProfileActivityTab({
       <EmptyState
         data-testid="profile-activity-empty"
         title="No activity yet"
-        description="Activity will appear here once journal entries and library changes are tracked publicly."
+        description="Activity will appear here once notes and library changes are tracked publicly."
       />
     );
   }

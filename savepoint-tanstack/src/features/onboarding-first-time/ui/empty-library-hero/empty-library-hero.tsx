@@ -35,7 +35,7 @@ export function EmptyLibraryHero(props: EmptyLibraryHeroProps) {
 
       <div className="space-y-sm max-w-md">
         <h2 className="text-h2 font-semibold tracking-tight">
-          Start Your Gaming Journey
+          Start your library
         </h2>
         <p className="text-muted-foreground text-body">
           Track what you&apos;re playing, what you&apos;ve finished, and
