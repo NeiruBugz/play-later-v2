@@ -148,7 +148,7 @@ Verify-task conventions:
     - A friend's view shows no ownership.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 6: Instant add, the same everywhere**
+- [x] **Slice 6: Instant add, the same everywhere**
 
   > Spec §2.6, plus the §2.18 add/icon/palette items (audit N3, N11, N18, N21). The "why" field comes in Slice 8.
   - [x] Server:
@@ -169,7 +169,7 @@ Verify-task conventions:
     - Add uses an icon distinct from Log (N18).
     - The phone library FAB never overlaps card menus.
     - Palette: delete the "Add game to library" quick action (N21). **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Each of the four entry points shows "Added X to Want". Start playing (the palette included), Put in Up Next and Undo work.
     - A game already in the library shows its status in the palette and the dialog, with no Undo offered.
     - "See all results" opens the search page with the query.
