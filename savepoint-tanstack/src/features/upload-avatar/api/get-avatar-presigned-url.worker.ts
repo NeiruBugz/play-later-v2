@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { env } from "@env";
 import { z, ZodError } from "zod";
 
 import {
@@ -9,6 +8,7 @@ import {
   AVATAR_MAX_BYTES,
   AVATAR_MIME_ALLOW_LIST,
   AVATAR_PATH_PREFIX,
+  buildAvatarPublicUrl,
   s3Client,
 } from "@/shared/api/s3.server";
 import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
@@ -26,7 +26,11 @@ const AVATAR_PRESIGN_INPUT = z.object({
 
 type AvatarPresignInput = z.infer<typeof AVATAR_PRESIGN_INPUT>;
 
-export type AvatarPresignResult = { uploadUrl: string; publicUrl: string };
+export type AvatarPresignResult = {
+  uploadUrl: string;
+  publicUrl: string;
+  key: string;
+};
 
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -52,13 +56,6 @@ export function parseAvatarPresignInput(data: unknown): AvatarPresignInput {
 function buildAvatarKey(userId: string, contentType: string): string {
   const ext = MIME_TO_EXT[contentType] ?? "bin";
   return `${AVATAR_PATH_PREFIX}${userId}/${randomUUID()}.${ext}`;
-}
-
-function buildPublicUrl(key: string): string {
-  if (env.AWS_ENDPOINT_URL) {
-    return `${env.AWS_ENDPOINT_URL}/${AVATAR_BUCKET}/${key}`;
-  }
-  return `https://${AVATAR_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${key}`;
 }
 
 export async function getAvatarPresignedUrlWorker(
@@ -91,5 +88,5 @@ export async function getAvatarPresignedUrlWorker(
     },
     "presigned url issued"
   );
-  return { uploadUrl, publicUrl: buildPublicUrl(key) };
+  return { uploadUrl, publicUrl: buildAvatarPublicUrl(key), key };
 }

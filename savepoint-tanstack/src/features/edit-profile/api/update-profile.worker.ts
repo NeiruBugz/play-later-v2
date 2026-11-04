@@ -8,14 +8,15 @@ import {
 } from "@/shared/lib/constants";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
+const PROFILE_NAME_MAX_LENGTH = 100;
+
 export const UPDATE_PROFILE_INPUT = z.object({
-  name: z.string().min(1).optional(),
+  name: z.string().min(1).max(PROFILE_NAME_MAX_LENGTH).optional(),
   username: z
     .string()
     .min(USERNAME_MIN_LENGTH)
     .max(USERNAME_MAX_LENGTH)
     .optional(),
-  image: z.url().optional(),
   isPublicProfile: z.boolean().optional(),
 });
 

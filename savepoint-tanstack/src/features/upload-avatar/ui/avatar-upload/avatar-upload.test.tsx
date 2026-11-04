@@ -30,6 +30,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 const STUB_UPLOAD_URL = "https://s3.example.com/upload/stub-key";
 const STUB_PUBLIC_URL = "https://cdn.example.com/avatars/stub-key.jpg";
+const STUB_KEY = "user-avatars/u1/stub-key.jpg";
 
 const createMockFile = (
   name: string,
@@ -56,6 +57,7 @@ describe("AvatarUpload", () => {
       vi.mocked(getAvatarPresignedUrlFn).mockResolvedValue({
         uploadUrl: STUB_UPLOAD_URL,
         publicUrl: STUB_PUBLIC_URL,
+        key: STUB_KEY,
       });
 
       vi.mocked(setAvatarUrlFn).mockResolvedValue({ ok: true });
@@ -98,13 +100,13 @@ describe("AvatarUpload", () => {
       );
     });
 
-    it("calls setAvatarUrlFn with the publicUrl", async () => {
+    it("calls setAvatarUrlFn with the object key only", async () => {
       await waitFor(() => {
         expect(vi.mocked(setAvatarUrlFn)).toHaveBeenCalledOnce();
       });
 
       expect(vi.mocked(setAvatarUrlFn)).toHaveBeenCalledWith({
-        data: { url: STUB_PUBLIC_URL },
+        data: { key: STUB_KEY },
       });
     });
 
@@ -174,6 +176,7 @@ describe("AvatarUpload", () => {
       vi.mocked(getAvatarPresignedUrlFn).mockResolvedValue({
         uploadUrl: STUB_UPLOAD_URL,
         publicUrl: STUB_PUBLIC_URL,
+        key: STUB_KEY,
       });
 
       vi.stubGlobal(
@@ -229,6 +232,7 @@ describe("AvatarUpload", () => {
       vi.mocked(getAvatarPresignedUrlFn).mockResolvedValue({
         uploadUrl: STUB_UPLOAD_URL,
         publicUrl: STUB_PUBLIC_URL,
+        key: STUB_KEY,
       });
 
       vi.mocked(setAvatarUrlFn).mockRejectedValue(new Error(PERSIST_ERROR));

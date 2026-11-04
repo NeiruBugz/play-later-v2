@@ -8,12 +8,10 @@ import {
 } from "./set-avatar-url.worker";
 
 /**
- * Persist the final public avatar URL to `User.image` for the signed-in user.
- *
- * The URL is the public S3 object URL produced after the client uploads via
- * the presigned PUT issued by `getAvatarUploadUrlFn`. Ownership is implicit:
- * the user IS the session user. We do not validate the URL points at "our"
- * bucket — that is a content-policy concern out of scope for this slice.
+ * Persist the signed-in user's avatar. The client sends only the S3 object
+ * `key` returned by the presign step; the server checks it sits under the
+ * user's own avatar prefix and derives the public URL itself, so no
+ * client-supplied URL is ever stored.
  */
 export const setAvatarUrlFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => SET_AVATAR_URL_INPUT.parse(data))
