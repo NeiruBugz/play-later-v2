@@ -234,7 +234,7 @@ Verify-task conventions:
     - Typing a "why" answer keeps the add toast open.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 9: Play History and one rating**
+- [x] **Slice 9: Play History and one rating**
 
   > Spec §2.10, §2.11 (audit N19).
   - [x] Server:
@@ -249,7 +249,7 @@ Verify-task conventions:
     - A single 5-star half-step rating on the game page.
     - Min-rating / unrated filters on desktop, from the shared filter definition (N19).
     - No date fields in the details form. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - 2 plays appear in History with correct dates. A never-played game has no History.
     - A rating of 7 shows 3.5 stars.
     - The min-rating filter works at 1440 px.
