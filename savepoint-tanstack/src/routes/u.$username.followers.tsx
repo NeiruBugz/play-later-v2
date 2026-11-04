@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
+import { getDisplayName } from "@/entities/profile/model";
 import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
 import { listFollowersFn } from "@/features/social-discovery/api";
 import { NotFoundError } from "@/shared/lib/errors";
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/u/$username/followers")({
 
 function FollowersListPage() {
   const { profile, list } = Route.useLoaderData();
-  const displayName = profile.name ?? profile.username ?? "User";
+  const displayName = getDisplayName(profile, "User");
 
   return (
     <div className="space-y-md container mx-auto max-w-2xl px-4 py-6">

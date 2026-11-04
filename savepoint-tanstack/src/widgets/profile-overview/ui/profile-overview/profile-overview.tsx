@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 
+import { getDisplayName } from "@/entities/profile/model";
 import { AvatarUpload } from "@/features/upload-avatar";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -23,10 +24,7 @@ export function ProfileOverview({
   activitySlot,
   hideActivityTab = false,
 }: ProfileOverviewProps) {
-  // Never expose an email-shaped `name` — see README "Display-name privacy".
-  const nonEmailName =
-    profile.name && !profile.name.includes("@") ? profile.name : null;
-  const displayName = nonEmailName ?? profile.username ?? "User";
+  const displayName = getDisplayName(profile, "User");
   const usernameSlug = profile.username ?? profile.id;
   const avatarSrc = profile.image ?? DEFAULT_AVATAR_SRC;
 

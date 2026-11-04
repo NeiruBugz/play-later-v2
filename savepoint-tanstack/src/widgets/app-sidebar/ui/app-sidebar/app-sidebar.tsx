@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { getDisplayName } from "@/entities/profile/model";
 import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
 import { authClient } from "@/shared/api/auth-client";
@@ -70,8 +71,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
     });
   };
 
-  const nonEmailName = user.name && !user.name.includes("@") ? user.name : null;
-  const displayName = nonEmailName ?? user.username ?? "Account";
+  const displayName = getDisplayName(user, "Account");
   const firstChar = (displayName.trim().charAt(0) || "?").toUpperCase();
 
   const handleSignOut = () => {
