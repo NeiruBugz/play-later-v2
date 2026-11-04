@@ -177,7 +177,7 @@ export function ProfileOverview({
                     <Link
                       key={game.gameId}
                       to="/games/$slug"
-                      params={{ slug: String(game.gameId) }}
+                      params={{ slug: game.slug }}
                       className="group relative block overflow-hidden rounded-lg"
                       data-testid="overview-recently-played-entry"
                     >

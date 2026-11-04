@@ -11,12 +11,17 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({
     children,
     to,
+    params,
     ...rest
   }: {
     children: React.ReactNode;
     to: string;
+    params?: { slug?: string };
   } & React.HTMLAttributes<HTMLAnchorElement>) => (
-    <a href={to} {...rest}>
+    <a
+      href={to === "/games/$slug" && params?.slug ? `/games/${params.slug}` : to}
+      {...rest}
+    >
       {children}
     </a>
   ),
@@ -49,6 +54,7 @@ const stubStats: LibraryStats = {
   recentGames: [
     {
       gameId: "game-1",
+      slug: "balatro",
       title: "Balatro",
       coverImage: "/covers/balatro.jpg",
       lastPlayed: new Date("2026-05-07T12:00:00.000Z"),
@@ -103,6 +109,20 @@ describe("ProfileOverview", () => {
       for (const link of links) {
         expect(link).toHaveAttribute("href", "/settings/profile");
       }
+    });
+  });
+
+  describe("given recently played games", () => {
+    it("links each tile to the game's slug page", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      const tile = screen.getByTestId("overview-recently-played-entry");
+      expect(tile).toHaveAttribute("href", "/games/balatro");
     });
   });
 

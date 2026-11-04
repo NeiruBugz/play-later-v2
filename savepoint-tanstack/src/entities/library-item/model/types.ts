@@ -33,6 +33,7 @@ export type GetLibraryResult = {
 
 export type RecentGame = {
   gameId: string;
+  slug: string;
   title: string;
   coverImage: string | null;
   lastPlayed: Date;

@@ -22,7 +22,7 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
         where: { userId, status: "PLAYING" },
         include: {
           game: {
-            select: { id: true, title: true, coverImage: true },
+            select: { id: true, slug: true, title: true, coverImage: true },
           },
         },
         orderBy: { updatedAt: "desc" },
@@ -41,6 +41,7 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
 
   const recentGames: RecentGame[] = recentItems.map((item) => ({
     gameId: item.game.id,
+    slug: item.game.slug,
     title: item.game.title,
     coverImage: item.game.coverImage,
     lastPlayed: item.updatedAt,

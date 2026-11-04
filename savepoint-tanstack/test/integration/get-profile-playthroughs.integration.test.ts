@@ -263,8 +263,18 @@ describe("getProfilePlaythroughs", () => {
       expect(newer.platform).toBe("PS5");
       expect(newer.startedAt).toEqual(new Date("2024-06-01T00:00:00.000Z"));
       expect(newer.finishedAt).toEqual(new Date("2024-07-01T00:00:00.000Z"));
-      expect(newer.rating).toBe(9);
-      expect(newer.notes).toBe("Great replay");
+    });
+
+    it("withholds rating and notes from a signed-out viewer", async () => {
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC
+      );
+
+      for (const run of runs) {
+        expect(run.rating).toBeNull();
+        expect(run.notes).toBeNull();
+      }
     });
 
     it("exposes null finishedAt on a PLAYING run", async () => {
@@ -293,6 +303,36 @@ describe("getProfilePlaythroughs", () => {
 
       expect(runs.length).toBe(2);
       expect(runs[0]!.id).toBe("gpp-run-pub-newer");
+    });
+
+    it("withholds rating and notes", async () => {
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC,
+        PRIVATE_OWNER_ID
+      );
+
+      for (const run of runs) {
+        expect(run.rating).toBeNull();
+        expect(run.notes).toBeNull();
+      }
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Public profile — owner viewer
+  // -------------------------------------------------------------------------
+
+  describe("given a public profile and the owner as viewer", () => {
+    it("returns rating and notes", async () => {
+      const runs = await getProfilePlaythroughs(
+        PUBLIC_OWNER_ID,
+        PUBLIC_IS_PUBLIC,
+        PUBLIC_OWNER_ID
+      );
+
+      expect(runs[0]!.rating).toBe(9);
+      expect(runs[0]!.notes).toBe("Great replay");
     });
   });
 

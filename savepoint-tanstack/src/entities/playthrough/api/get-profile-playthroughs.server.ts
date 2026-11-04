@@ -23,6 +23,9 @@ export type { ProfilePlaythrough };
  * route already owns the 404 decision; this section silently hides on a
  * denied read.
  *
+ * Run notes and ratings are private: they are selected from the database only
+ * for the owner. Any other viewer (including signed out) gets `null` for both.
+ *
  * Results are ordered newest-first by `createdAt` (recent activity).
  */
 export async function getProfilePlaythroughs(
@@ -48,8 +51,7 @@ export async function getProfilePlaythroughs(
       platform: true,
       startedAt: true,
       finishedAt: true,
-      rating: true,
-      notes: true,
+      ...(isOwner ? { rating: true, notes: true } : {}),
       libraryItem: {
         select: {
           game: {
@@ -73,8 +75,8 @@ export async function getProfilePlaythroughs(
     platform: row.platform,
     startedAt: row.startedAt,
     finishedAt: row.finishedAt,
-    rating: row.rating,
-    notes: row.notes,
+    rating: row.rating ?? null,
+    notes: row.notes ?? null,
     game: row.libraryItem.game,
   }));
 }
