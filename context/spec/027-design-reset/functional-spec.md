@@ -121,7 +121,7 @@ The teal accent is replaced by a new single brand color, chosen by the product o
 
 #### 2.9 New title font
 
-The title font is replaced, chosen by the product owner from 2–3 visual options. [NEEDS CLARIFICATION: assumed the body font (Geist) stays unchanged in phase 2; confirm, or include it in the font review.]
+The title font is replaced, chosen by the product owner from 2–3 visual options. The body font (Geist) stays unchanged.
 
 - **Acceptance Criteria:**
   - [ ] When the product owner reviews the font options, then each option is shown on the same page titles and game names in Light and in Dark.
@@ -138,25 +138,27 @@ Game covers look the same everywhere; covers bring the color to the screen and t
 
 #### 2.11 Signature: the Up Next card
 
-The Up Next queue on the home screen becomes the product's recognizable object — the first thing a user sees and associates with the app. [NEEDS CLARIFICATION: assumed form is a "shelf" of the queued games' covers in queue order with the first one larger and emphasized; confirm, or describe the form you have in mind.]
+The Up Next queue on the home screen becomes the product's recognizable object — the first thing a user sees and associates with the app. It is a "shelf": the covers of the queued games in a row, in queue order, with the first one — the game to play next — larger and emphasized.
 
 - **Acceptance Criteria:**
   - [ ] When the user opens the home screen with games in Up Next, then the Up Next card is the first element in reading order above the fold and the largest one, at both phone width and desktop width.
+  - [ ] When the user looks at the Up Next card with three or more games queued, then the covers appear in queue order, left to right, and the first cover is visibly larger than the others.
   - [ ] When the user opens the home screen with an empty Up Next, then the card keeps the same outline and position and shows a button that opens the quick search to find a game to add.
   - [ ] When the product owner compares the Up Next card with the same-named competitor's home, library, profile and game pages during the phase 2 review (2.7), then they find nothing in its layout or styling that copies them.
 
 #### 2.12 Signature: one status chip
 
-One status chip design is used everywhere a game's status appears. [NEEDS CLARIFICATION: assumed four labels with three colors — Want, Playing, Done, and "Let go" in the Done color; confirm, or give "Let go" its own color or show it as plain "Done".]
+One status chip design is used everywhere a game's status appears. It has four labels and three colors: Want, Playing, Done, and "Let go" for a game that was dropped, shown in the Done color — dropping a game is as normal an ending as finishing it.
 
 - **Acceptance Criteria:**
   - [ ] When the user sees a game's status on a library card, the game page, the home screen, search results and a profile's library, then the chip has the same shape, size, wording and capitalization in all of them.
   - [ ] When the user compares the chips for Want, Playing and Done, then they differ by color and label only, and Playing uses the accent color.
+  - [ ] When the user sees a game that was marked Done with the outcome "Let go", then its chip reads "Let go" in the same color as a Done chip.
   - [ ] When the user views a chip in Light and in Dark, then its text meets the contrast level in 2.6.
 
 #### 2.13 New product name and logo
 
-The product gets a new name and a new logo, replacing "SavePoint" and the Save Glow mark. [NEEDS CLARIFICATION: the new name itself is chosen by the product owner; assumed it is chosen before phase 2 starts.]
+The product gets a new name, a new logo and a new web address, replacing "SavePoint", the Save Glow mark and the current address. The product owner chooses the name inside phase 2, in the same design round as the accent and title font; the logo is designed last, for the chosen name.
 
 - **Acceptance Criteria:**
   - [ ] When the user looks at the app header (sidebar and phone top bar), landing page, sign-in page, browser tab title and browser tab icon, then they see only the new name and the new logo.
@@ -164,6 +166,8 @@ The product gets a new name and a new logo, replacing "SavePoint" and the Save G
   - [ ] When someone pastes a link to the landing page or to a game page into a messaging app that shows link previews (for example Telegram or Slack), then the preview shows the new name and the new logo.
   - [ ] When the user views the logo in Light and in Dark, then it is clearly visible on both surfaces.
   - [ ] When the user adds the app to a phone home screen from the browser's "Add to Home Screen" option, then the icon and name shown are the new ones.
+  - [ ] When anyone opens an old link to any page on the current address, then they land on the same page at the new address.
+  - [ ] Given the user was signed in on the current address, when they first open the new address, then they sign in at most once more and their library and settings are unchanged. [NEEDS CLARIFICATION: staying signed in across a change of address is not automatic; assumed a single re-sign-in is acceptable — confirm, or require no re-sign-in.]
 
 #### 2.14 Light, Dark and System stay
 
@@ -181,7 +185,7 @@ The theme options remain Light, Dark and System throughout both phases; a user's
 
 - The look of every screen listed in 2.0, in Light and Dark.
 - Phase 1: the stock kit's "Maia" style with today's palette and fonts; fixing the silently broken styling in 2.2; removing terminal-style labels, retired-look leftovers, off-palette colors and the template "About" page; landing page follows the theme. Released on its own.
-- Phase 2: new accent, new title font, the three signature elements, new product name and logo, browser tab icon, home-screen icon and link preview.
+- Phase 2: new accent, new title font, the three signature elements, new product name, logo and web address (with old links redirected), browser tab icon, home-screen icon and link preview.
 - Readability, keyboard focus and tap-size baselines in 2.6; an owner review per phase (2.7).
 
 ### Out-of-Scope
@@ -191,7 +195,6 @@ The theme options remain Light, Dark and System throughout both phases; a user's
 - A third theme or a user-selectable accent color.
 - Emails: the app sends none today.
 - Unifying covers and status chips in phase 1 beyond what the stock kit changes on its own; their unification is phase 2 (2.10, 2.12).
-- Changing the web address of the app. [NEEDS CLARIFICATION: assumed the address stays the same after the rename; confirm.]
 - Starting phase 1 before spec 026 has shipped.
 
 ---
