@@ -1,11 +1,11 @@
-export { getRelatedGamesFn } from "./api";
-export type { RelatedGame } from "./api";
+export { getRelatedCollectionsFn } from "./api";
+export type { RelatedCollection, RelatedGame } from "./api";
+export { relatedGamesQueryOptions } from "./model";
 export {
-  RelatedGamesInfiniteList,
+  RelatedGamesList,
   RelatedGamesSkeleton,
   RelatedGamesTabs,
-  type RelatedGamesInfiniteListProps,
-  type RelatedGamesPage,
+  type RelatedGamesListProps,
   type RelatedGamesTabsProps,
   type RelatedGamesTabsSection,
 } from "./ui";

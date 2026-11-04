@@ -10,8 +10,11 @@ import { Route } from "./games.$slug";
 
 vi.mock("@/features/game-detail/api", () => ({
   getGameDetailPageDataFn: vi.fn(),
-  getRelatedGamesForGameFn: vi.fn(),
   getTimesToBeatForGameFn: vi.fn(),
+}));
+
+vi.mock("@/features/browse-related-games/api", () => ({
+  getRelatedCollectionsFn: vi.fn(),
 }));
 
 vi.mock("@/widgets/game-detail", () => ({
@@ -49,7 +52,7 @@ vi.mock("@/features/browse-related-games", () => ({
       {sections.map((section) => (
         <div
           key={section.collectionId}
-          data-testid={`infinite-list-${section.collectionId}`}
+          data-testid={`related-list-${section.collectionId}`}
         />
       ))}
     </div>
@@ -110,7 +113,6 @@ const buildView = (
     notes: [],
     playtimeTotalMinutes: 0,
     playtimeSessionCount: 0,
-    recentSessionMinutes: [],
     history: [],
   },
   viewerUserId: null,
@@ -134,8 +136,8 @@ const elements = {
   queryTimesToBeatSkeleton: () =>
     screen.queryByTestId("times-to-beat-skeleton"),
   queryTimesToBeatSection: () => screen.queryByTestId("times-to-beat-section"),
-  queryInfiniteList: (collectionId: number) =>
-    screen.queryByTestId(`infinite-list-${collectionId}`),
+  queryRelatedList: (collectionId: number) =>
+    screen.queryByTestId(`related-list-${collectionId}`),
   getRelatedGamesAlert: () => screen.getByText("Couldn't load related games"),
   getTimesToBeatAlert: () => screen.getByText("Couldn't load times to beat"),
 };
@@ -148,7 +150,10 @@ async function arrangeSlotFns({
   timesToBeat: Promise<unknown>;
 }) {
   const api = await import("@/features/game-detail/api");
-  vi.mocked(api.getRelatedGamesForGameFn).mockReturnValue(relatedGames as any);
+  const relatedApi = await import("@/features/browse-related-games/api");
+  vi.mocked(relatedApi.getRelatedCollectionsFn).mockReturnValue(
+    relatedGames as any
+  );
   vi.mocked(api.getTimesToBeatForGameFn).mockReturnValue(timesToBeat as any);
 }
 
@@ -240,20 +245,13 @@ describe("/games/$slug route", () => {
       });
     });
 
-    it("renders the resolved related-games infinite list once the slot fetch settles", async () => {
+    it("renders the resolved related-games tabs once the slot fetch settles", async () => {
       await arrangeSlotFns({
         relatedGames: Promise.resolve([
           {
             collectionId: 99,
             collectionName: "Test Collection",
-            pageSize: 20,
-            firstPage: {
-              games: [],
-              total: 0,
-              page: 1,
-              pageSize: 20,
-              hasMore: false,
-            },
+            games: [],
           },
         ]),
         timesToBeat: Promise.resolve(null),
@@ -261,7 +259,7 @@ describe("/games/$slug route", () => {
       renderRoute(buildView());
 
       await waitFor(() => {
-        expect(elements.queryInfiniteList(99)).not.toBeNull();
+        expect(elements.queryRelatedList(99)).not.toBeNull();
       });
     });
 
@@ -360,16 +358,17 @@ describe("/games/$slug loader prefetch", () => {
     vi.mocked(api.getTimesToBeatForGameFn).mockResolvedValue({
       mainStory: 1,
     } as any);
-    vi.mocked(api.getRelatedGamesForGameFn).mockResolvedValue([]);
+    const relatedApi = await import("@/features/browse-related-games/api");
+    vi.mocked(relatedApi.getRelatedCollectionsFn).mockResolvedValue([]);
     vi.mocked(api.getTimesToBeatForGameFn).mockClear();
-    vi.mocked(api.getRelatedGamesForGameFn).mockClear();
+    vi.mocked(relatedApi.getRelatedCollectionsFn).mockClear();
     const queryClient = new QueryClient();
     const loader = Route.options.loader as (args: any) => Promise<unknown>;
     const result = await loader({
       params: { slug: "celeste" },
       context: { queryClient },
     });
-    return { api, queryClient, result };
+    return { api, relatedApi, queryClient, result };
   };
 
   it("returns the page data without waiting on the slot queries", async () => {
@@ -377,7 +376,8 @@ describe("/games/$slug loader prefetch", () => {
     vi.mocked(api.getTimesToBeatForGameFn).mockReturnValue(
       new Promise(() => undefined) as any
     );
-    vi.mocked(api.getRelatedGamesForGameFn).mockReturnValue(
+    const relatedApi = await import("@/features/browse-related-games/api");
+    vi.mocked(relatedApi.getRelatedCollectionsFn).mockReturnValue(
       new Promise(() => undefined) as any
     );
     vi.mocked(api.getGameDetailPageDataFn).mockResolvedValue(buildView());
@@ -403,10 +403,13 @@ describe("/games/$slug loader prefetch", () => {
   });
 
   it("prefetches related-games into the query client once", async () => {
-    const { api, queryClient } = await runLoader(buildView());
+    const { relatedApi, queryClient } = await runLoader(buildView());
     await vi.waitFor(() => {
       expect(queryClient.getQueryData(["related-games", 1234])).toEqual([]);
     });
-    expect(api.getRelatedGamesForGameFn).toHaveBeenCalledTimes(1);
+    expect(relatedApi.getRelatedCollectionsFn).toHaveBeenCalledTimes(1);
+    expect(relatedApi.getRelatedCollectionsFn).toHaveBeenCalledWith({
+      data: { igdbId: 1234 },
+    });
   });
 });

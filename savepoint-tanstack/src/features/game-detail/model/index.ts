@@ -1,4 +1,1 @@
-export {
-  relatedGamesQueryOptions,
-  timesToBeatQueryOptions,
-} from "./game-detail-queries";
+export { timesToBeatQueryOptions } from "./game-detail-queries";

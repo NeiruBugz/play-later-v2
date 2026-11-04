@@ -11,34 +11,22 @@ export function buildTimesToBeatQuery(igdbId: number): string {
     .build();
 }
 
-export const GAME_COLLECTIONS_FIELDS = [
+export const RELATED_COLLECTIONS_FIELDS = [
   "collections.id",
   "collections.name",
+  "collections.games.id",
+  "collections.games.name",
+  "collections.games.slug",
+  "collections.games.cover.image_id",
+  "collections.games.game_type",
+  "collections.games.first_release_date",
 ] as const;
 
-export function buildGameCollectionsByIdQuery(igdbId: number): string {
+export function buildRelatedCollectionsQuery(igdbId: number): string {
   return new QueryBuilder()
-    .fields([...GAME_COLLECTIONS_FIELDS])
+    .fields([...RELATED_COLLECTIONS_FIELDS])
     .where(`id = ${igdbId}`)
     .limit(1)
-    .build();
-}
-
-export const COLLECTION_GAMES_FIELDS = [
-  "id",
-  "name",
-  "games.id",
-  "games.name",
-  "games.slug",
-  "games.cover.image_id",
-  "games.game_type",
-] as const;
-
-export function buildCollectionGamesQuery(collectionId: number): string {
-  return new QueryBuilder()
-    .fields([...COLLECTION_GAMES_FIELDS])
-    .where(`id = ${collectionId}`)
-    .sort("games.first_release_date", "asc")
     .build();
 }
 

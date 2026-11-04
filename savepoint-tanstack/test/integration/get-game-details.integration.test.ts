@@ -20,7 +20,6 @@
  *   libraryEntry: LibraryItem | null;
  *   notes: JournalTimelineEntry[]; // the viewer's notes, newest first; [] when anon or none
  *   playtimeTotalMinutes: number;  // SUM(playedMinutes), null-safe → 0
- *   recentSessionMinutes: number[]; // recent non-null playedMinutes, oldest→newest, ~9
  * }>
  *
  * Throws NotFoundError when IGDB returns an empty array for the given slug.
@@ -206,7 +205,6 @@ describe("getGameDetails", () => {
 
       expect(result.notes).toEqual([]);
       expect(result.playtimeTotalMinutes).toBe(0);
-      expect(result.recentSessionMinutes).toEqual([]);
     });
 
     it("inserts a Game row on cache miss", async () => {
@@ -337,7 +335,7 @@ describe("getGameDetails", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Personal aggregates — playtimeTotalMinutes, recentSessionMinutes
+  // Personal aggregates — playtimeTotalMinutes, playtimeSessionCount
   // -------------------------------------------------------------------------
 
   describe("personal aggregates across many entries", () => {
@@ -414,16 +412,10 @@ describe("getGameDetails", () => {
       expect(result.playtimeSessionCount).toBeLessThan(result.notes.length);
     });
 
-    it("returns the most-recent non-null playedMinutes series oldest→newest, bounded to ~9", async () => {
+    it("no longer exposes a per-session minutes series", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
 
-      // Non-null minutes in createdAt order:
-      // 30,45,60,15,90,20,25,35,40,50 (10 values). Bounded to the most recent 9
-      // and presented oldest→newest for a left-to-right rhythm chart.
-      expect(result.recentSessionMinutes).toEqual([
-        45, 60, 15, 90, 20, 25, 35, 40, 50,
-      ]);
-      expect(result.recentSessionMinutes.length).toBeLessThanOrEqual(9);
+      expect(result).not.toHaveProperty("recentSessionMinutes");
     });
   });
 
@@ -461,7 +453,6 @@ describe("getGameDetails", () => {
       expect(result.notes).toHaveLength(1);
       expect(result.playtimeTotalMinutes).toBe(0);
       expect(result.playtimeSessionCount).toBe(0);
-      expect(result.recentSessionMinutes).toEqual([]);
     });
   });
 
@@ -478,7 +469,6 @@ describe("getGameDetails", () => {
 
       expect(result.notes).toEqual([]);
       expect(result.playtimeTotalMinutes).toBe(0);
-      expect(result.recentSessionMinutes).toEqual([]);
     });
   });
 
@@ -632,7 +622,6 @@ describe("getGameDetails", () => {
 
         expect(result.notes).toEqual([]);
         expect(result.playtimeSessionCount).toBe(0);
-        expect(result.recentSessionMinutes).toEqual([]);
       });
     });
 

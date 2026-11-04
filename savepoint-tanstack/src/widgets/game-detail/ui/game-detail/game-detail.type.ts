@@ -30,8 +30,6 @@ export type GameDetailData = {
   playtimeTotalMinutes: number;
   /** Count of journal entries carrying non-null playedMinutes — the true denominator for average session length. */
   playtimeSessionCount: number;
-  /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
-  recentSessionMinutes: number[];
   /** Ended plays of the viewer's library entry; owner only, empty when none. */
   history?: Play[];
 };
