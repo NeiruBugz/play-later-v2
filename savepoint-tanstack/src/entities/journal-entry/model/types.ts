@@ -7,13 +7,26 @@ export const JOURNAL_ENTRY_GAME_SELECT = {
   coverImage: true,
 } as const satisfies Prisma.GameSelect;
 
+export const JOURNAL_ENTRY_OMIT = {
+  kind: true,
+  title: true,
+  mood: true,
+} as const satisfies Prisma.JournalEntryOmit;
+
+export const JOURNAL_ENTRY_READ_ARGS = {
+  omit: JOURNAL_ENTRY_OMIT,
+  include: { game: { select: JOURNAL_ENTRY_GAME_SELECT } },
+} as const satisfies Prisma.JournalEntryDefaultArgs;
+
 /**
- * A journal entry with its (optional) related game projected down to the
- * fields the timeline UI needs. `playthroughId` is part of the base Prisma
- * payload (nullable String on JournalEntry) — it allows the run-aware
- * JournalFeed to group entries under a run. The run label is derived in the
- * widget from the run's `kind`; only the id is carried here.
+ * A note with its (optional) related game projected down to the fields the
+ * UI needs. Reads and mutations return this shape: kind, title and mood are
+ * never exposed.
  */
-export type JournalTimelineEntry = Prisma.JournalEntryGetPayload<{
-  include: { game: { select: typeof JOURNAL_ENTRY_GAME_SELECT } };
-}>;
+export type JournalTimelineEntry = Prisma.JournalEntryGetPayload<
+  typeof JOURNAL_ENTRY_READ_ARGS
+>;
+
+export const JOURNAL_NO_GAME_FILTER = "none";
+
+export type JournalGameFilter = string | typeof JOURNAL_NO_GAME_FILTER;

@@ -18,8 +18,7 @@
  * }): Promise<{
  *   game: Game;                    // local Game row (cache-upserted from IGDB)
  *   libraryEntry: LibraryItem | null;
- *   journalTeaser: JournalEntry[]; // most recent N (e.g. 3); [] when anon or none
- *   journalCount: number;          // TRUE count (not capped at the teaser limit)
+ *   notes: JournalTimelineEntry[]; // the viewer's notes, newest first; [] when anon or none
  *   playtimeTotalMinutes: number;  // SUM(playedMinutes), null-safe → 0
  *   recentSessionMinutes: number[]; // recent non-null playedMinutes, oldest→newest, ~9
  * }>
@@ -34,8 +33,8 @@
  *     DB cache step (or inline equivalent).
  *   - `libraryEntry`: when `userId` provided, return the most-recent LibraryItem
  *     for (userId, gameId) or null if none exists.
- *   - `journalTeaser`: when `userId` provided, return up to 3 JournalEntry rows
- *     for (userId, gameId) ordered by createdAt DESC; empty array otherwise.
+ *   - `notes`: when `userId` provided, return every note for (userId, gameId)
+ *     ordered by createdAt DESC; empty array otherwise.
  *   - `relatedGames`: by franchise or genre; may be [] on first pass; impl decides.
  *     Tests only assert the array shape (Array.isArray), not contents.
  *   - The fetch mock below intercepts both slug-lookup and (if needed) related-game
@@ -190,7 +189,7 @@ describe("getGameDetails", () => {
   // -------------------------------------------------------------------------
 
   describe("anonymous — no userId provided", () => {
-    it("returns the resolved game, null libraryEntry, and empty journalTeaser", async () => {
+    it("returns the resolved game, null libraryEntry, and empty notes", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG });
 
       expect(result.game).toBeDefined();
@@ -199,13 +198,13 @@ describe("getGameDetails", () => {
       expect(result.game.title).toBe(MOCK_IGDB_GAME.name);
 
       expect(result.libraryEntry).toBeNull();
-      expect(result.journalTeaser).toEqual([]);
+      expect(result.notes).toEqual([]);
     });
 
     it("zeroes all personal aggregates for an anonymous viewer", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG });
 
-      expect(result.journalCount).toBe(0);
+      expect(result.notes).toEqual([]);
       expect(result.playtimeTotalMinutes).toBe(0);
       expect(result.recentSessionMinutes).toEqual([]);
     });
@@ -234,7 +233,7 @@ describe("getGameDetails", () => {
       await db.prisma.user.create({ data: makeUser("alice") });
     });
 
-    it("returns null libraryEntry and empty journalTeaser", async () => {
+    it("returns null libraryEntry and empty notes", async () => {
       const result = await getGameDetails({
         slug: GAME_SLUG,
         userId: "ggd-user-alice",
@@ -242,7 +241,7 @@ describe("getGameDetails", () => {
 
       expect(result.game.slug).toBe(GAME_SLUG);
       expect(result.libraryEntry).toBeNull();
-      expect(result.journalTeaser).toEqual([]);
+      expect(result.notes).toEqual([]);
     });
   });
 
@@ -307,7 +306,7 @@ describe("getGameDetails", () => {
       const game = await db.prisma.game.findUnique({
         where: { slug: GAME_SLUG },
       });
-      // Create 4 entries — teaser should return at most 3, ordered desc by createdAt.
+      // Create 4 entries — all are returned, newest first.
       for (let i = 1; i <= 4; i++) {
         await db.prisma.journalEntry.create({
           data: {
@@ -322,34 +321,26 @@ describe("getGameDetails", () => {
       }
     });
 
-    it("returns up to 3 most-recent journal entries ordered desc by createdAt", async () => {
+    it("returns every note exactly once, newest first by createdAt", async () => {
       const result = await getGameDetails({
         slug: GAME_SLUG,
         userId: "ggd-user-carol",
       });
 
-      expect(result.journalTeaser.length).toBeLessThanOrEqual(3);
-      expect(result.journalTeaser.length).toBeGreaterThan(0);
-
-      // Verify descending createdAt order.
-      for (let i = 0; i < result.journalTeaser.length - 1; i++) {
-        expect(
-          new Date(result.journalTeaser[i]!.createdAt).getTime()
-        ).toBeGreaterThanOrEqual(
-          new Date(result.journalTeaser[i + 1]!.createdAt).getTime()
-        );
-      }
-
-      // Most recent entry (index 4) has content "Journal entry 4".
-      expect(result.journalTeaser[0]!.content).toBe("Journal entry 4");
+      expect(result.notes.map((note) => note.content)).toEqual([
+        "Journal entry 4",
+        "Journal entry 3",
+        "Journal entry 2",
+        "Journal entry 1",
+      ]);
     });
   });
 
   // -------------------------------------------------------------------------
-  // Personal aggregates — journalCount, playtimeTotalMinutes, recentSessionMinutes
+  // Personal aggregates — playtimeTotalMinutes, recentSessionMinutes
   // -------------------------------------------------------------------------
 
-  describe("personal aggregates with more than the teaser limit of entries", () => {
+  describe("personal aggregates across many entries", () => {
     const USER_ID = "ggd-user-dave";
     // playedMinutes for 12 entries in createdAt order (entry 1 = oldest).
     // Some are null to exercise null-safety and the non-null series filter.
@@ -398,20 +389,16 @@ describe("getGameDetails", () => {
       }
     });
 
-    it("returns the true journal count, not capped at the teaser limit", async () => {
+    it("returns all of the viewer's notes", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
 
-      expect(result.journalCount).toBe(MINUTES_BY_INDEX.length);
-      expect(result.journalCount).toBeGreaterThan(result.journalTeaser.length);
+      expect(result.notes).toHaveLength(MINUTES_BY_INDEX.length);
     });
 
-    it("reports zero playtimeTotalMinutes when there are no playthroughs (source is runs, not journal entries)", async () => {
-      // Spec 016 (decision #3): playtimeTotalMinutes = Σ playthroughs.playtimeMinutes.
-      // Dave has journal entries with playedMinutes but NO library entry / runs, so the
-      // run sum is 0 regardless of what the journals contain.
+    it("sums the notes' playedMinutes into playtimeTotalMinutes (no run or library entry needed)", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
 
-      expect(result.playtimeTotalMinutes).toBe(0);
+      expect(result.playtimeTotalMinutes).toBe(410);
     });
 
     it("counts only entries with logged minutes, not every journal entry", async () => {
@@ -421,10 +408,10 @@ describe("getGameDetails", () => {
         (m) => m !== null
       ).length;
       expect(result.playtimeSessionCount).toBe(expectedWithMinutes);
-      // The null entries make this strictly smaller than journalCount — the
+      // The null entries make this strictly smaller than the note count — the
       // gap is exactly what would dilute an "average session" computed off
-      // journalCount.
-      expect(result.playtimeSessionCount).toBeLessThan(result.journalCount);
+      // every note.
+      expect(result.playtimeSessionCount).toBeLessThan(result.notes.length);
     });
 
     it("returns the most-recent non-null playedMinutes series oldest→newest, bounded to ~9", async () => {
@@ -471,7 +458,7 @@ describe("getGameDetails", () => {
     it("reports zero total playtime and an empty session series when no minutes are logged", async () => {
       const result = await getGameDetails({ slug: GAME_SLUG, userId: USER_ID });
 
-      expect(result.journalCount).toBe(1);
+      expect(result.notes).toHaveLength(1);
       expect(result.playtimeTotalMinutes).toBe(0);
       expect(result.playtimeSessionCount).toBe(0);
       expect(result.recentSessionMinutes).toEqual([]);
@@ -483,13 +470,13 @@ describe("getGameDetails", () => {
       await db.prisma.user.create({ data: makeUser("frank") });
     });
 
-    it("zeroes journalCount, playtime, and the session series", async () => {
+    it("zeroes notes, playtime, and the session series", async () => {
       const result = await getGameDetails({
         slug: GAME_SLUG,
         userId: "ggd-user-frank",
       });
 
-      expect(result.journalCount).toBe(0);
+      expect(result.notes).toEqual([]);
       expect(result.playtimeTotalMinutes).toBe(0);
       expect(result.recentSessionMinutes).toEqual([]);
     });
@@ -544,13 +531,13 @@ describe("getGameDetails", () => {
       expect(result.libraryEntry).toBeNull();
     });
 
-    it("does not return user A's journalTeaser when queried as user B", async () => {
+    it("does not return user A's notes when queried as user B", async () => {
       const result = await getGameDetails({
         slug: GAME_SLUG,
         userId: "ggd-user-userB",
       });
 
-      expect(result.journalTeaser).toEqual([]);
+      expect(result.notes).toEqual([]);
     });
   });
 
@@ -643,7 +630,7 @@ describe("getGameDetails", () => {
       it("still populates journal-derived fields from zero entries for anonymous viewer", async () => {
         const result = await getGameDetails({ slug: GAME_SLUG });
 
-        expect(result.journalCount).toBe(0);
+        expect(result.notes).toEqual([]);
         expect(result.playtimeSessionCount).toBe(0);
         expect(result.recentSessionMinutes).toEqual([]);
       });
@@ -692,7 +679,7 @@ describe("getGameDetails", () => {
 
     // Authed — one PLAYING run
     describe("authed viewer with one PLAYING playthrough (90 min)", () => {
-      it("returns one run, playtimeTotalMinutes = 90", async () => {
+      it("returns one run; its playtime does not feed playtimeTotalMinutes", async () => {
         const { libraryItemId } = await seedUserAndLibrary(
           "pt-playing",
           "PLAYING"
@@ -712,13 +699,13 @@ describe("getGameDetails", () => {
         });
 
         expect(result.playthroughs).toHaveLength(1);
-        expect(result.playtimeTotalMinutes).toBe(90);
+        expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
 
     // Authed — one FINISHED run
     describe("authed viewer with one FINISHED playthrough (600 min)", () => {
-      it("returns one run, playtimeTotalMinutes = 600", async () => {
+      it("returns one run; its playtime does not feed playtimeTotalMinutes", async () => {
         const { libraryItemId } = await seedUserAndLibrary(
           "pt-finished",
           "DONE"
@@ -738,13 +725,13 @@ describe("getGameDetails", () => {
         });
 
         expect(result.playthroughs).toHaveLength(1);
-        expect(result.playtimeTotalMinutes).toBe(600);
+        expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
 
     // Authed — FINISHED + ABANDONED runs
     describe("authed viewer with FINISHED and ABANDONED playthroughs", () => {
-      it("sums both runs", async () => {
+      it("returns both runs without summing their playtime", async () => {
         const { libraryItemId } = await seedUserAndLibrary("pt-multi", "DONE");
         await db.prisma.playthrough.create({
           data: {
@@ -769,7 +756,7 @@ describe("getGameDetails", () => {
         });
 
         expect(result.playthroughs).toHaveLength(2);
-        expect(result.playtimeTotalMinutes).toBe(550);
+        expect(result.playtimeTotalMinutes).toBe(0);
       });
     });
 
@@ -777,8 +764,8 @@ describe("getGameDetails", () => {
     // REGRESSION: playtime-source change (decision #3)
     // The journal sum DIFFERS from the run sum — assert we read from runs.
     // -----------------------------------------------------------------------
-    describe("playtime-source regression guard — run sum vs journal sum", () => {
-      it("uses Σ playthroughs.playtimeMinutes, NOT Σ journal.playedMinutes", async () => {
+    describe("playtime-source regression guard — notes sum vs run sum", () => {
+      it("uses Σ notes playedMinutes, NOT Σ playthroughs.playtimeMinutes", async () => {
         const { libraryItemId, gameId } = await seedUserAndLibrary(
           "pt-source",
           "DONE"
@@ -822,11 +809,26 @@ describe("getGameDetails", () => {
           userId: "ggd-user-pt-source",
         });
 
-        // Journal sum = 100; run sum = 300. Assert the run sum wins.
-        const journalSum = 100;
-        const runSum = 300;
-        expect(result.playtimeTotalMinutes).not.toBe(journalSum);
-        expect(result.playtimeTotalMinutes).toBe(runSum);
+        // Journal sum = 100; run sum = 300. Assert the notes win.
+        expect(result.playtimeTotalMinutes).toBe(100);
+        expect(result.playtimeSessionCount).toBe(2);
+      });
+
+      it("90 min + 30 min notes read as 120 minutes over 2 sessions, ignoring text-only notes", async () => {
+        const { gameId } = await seedUserAndLibrary("pt-sum", "PLAYING");
+        const userId = "ggd-user-pt-sum";
+        await db.prisma.journalEntry.createMany({
+          data: [
+            { userId, gameId, content: "", playedMinutes: 90 },
+            { userId, gameId, content: "", playedMinutes: 30 },
+            { userId, gameId, content: "just a thought" },
+          ],
+        });
+
+        const result = await getGameDetails({ slug: GAME_SLUG, userId });
+
+        expect(result.playtimeTotalMinutes).toBe(120);
+        expect(result.playtimeSessionCount).toBe(2);
       });
     });
 
@@ -923,159 +925,6 @@ describe("getGameDetails", () => {
         // Ordered createdAt desc — most recent first
         expect(run.journalEntries[0]!.content).toBe("Later entry");
         expect(run.journalEntries[1]!.content).toBe("Earlier entry");
-      });
-    });
-
-    // -----------------------------------------------------------------------
-    // Spec-016 blocker #4 — unattached (null-playthroughId) journal entries
-    // §2.7: entries detached after run deletion; §2.10: legacy pre-spec entries.
-    // §2.11: feed hidden when game has no runs — unattachedJournalEntries
-    //        must be [] when playthroughs is empty, even if null-run entries exist.
-    // -----------------------------------------------------------------------
-    describe("unattachedJournalEntries — entries with null playthroughId", () => {
-      it("returns null-playthroughId entries in unattachedJournalEntries when the game has runs", async () => {
-        const { libraryItemId, gameId } = await seedUserAndLibrary(
-          "pt-detached",
-          "PLAYING"
-        );
-        // One run with one attached entry
-        const playthrough = await db.prisma.playthrough.create({
-          data: {
-            libraryItemId,
-            ordinal: 1,
-            status: "PLAYING",
-            playtimeMinutes: 60,
-          },
-        });
-        await db.prisma.journalEntry.create({
-          data: {
-            userId: "ggd-user-pt-detached",
-            gameId,
-            playthroughId: playthrough.id,
-            content: "Attached entry",
-            kind: "QUICK",
-            createdAt: new Date("2024-03-01T00:00:00.000Z"),
-            updatedAt: new Date("2024-03-01T00:00:00.000Z"),
-          },
-        });
-        // One unattached (null playthroughId) entry — simulates legacy or detached
-        await db.prisma.journalEntry.create({
-          data: {
-            userId: "ggd-user-pt-detached",
-            gameId,
-            playthroughId: null,
-            content: "Unattached entry",
-            kind: "QUICK",
-            createdAt: new Date("2024-03-05T00:00:00.000Z"),
-            updatedAt: new Date("2024-03-05T00:00:00.000Z"),
-          },
-        });
-
-        const result = await getGameDetails({
-          slug: GAME_SLUG,
-          userId: "ggd-user-pt-detached",
-        });
-
-        // Unattached entry appears in the dedicated field
-        expect(result.unattachedJournalEntries).toHaveLength(1);
-        expect(result.unattachedJournalEntries[0]!.content).toBe(
-          "Unattached entry"
-        );
-
-        // The attached entry is NOT in unattachedJournalEntries
-        const unattachedContents = result.unattachedJournalEntries.map(
-          (e) => e.content
-        );
-        expect(unattachedContents).not.toContain("Attached entry");
-
-        // The run's journalEntries only has the attached entry
-        expect(result.playthroughs[0]!.journalEntries).toHaveLength(1);
-        expect(result.playthroughs[0]!.journalEntries[0]!.content).toBe(
-          "Attached entry"
-        );
-      });
-
-      it("returns unattachedJournalEntries ordered by createdAt desc", async () => {
-        const { libraryItemId, gameId } = await seedUserAndLibrary(
-          "pt-detached-order",
-          "PLAYING"
-        );
-        await db.prisma.playthrough.create({
-          data: {
-            libraryItemId,
-            ordinal: 1,
-            status: "PLAYING",
-            playtimeMinutes: 30,
-          },
-        });
-        await db.prisma.journalEntry.create({
-          data: {
-            userId: "ggd-user-pt-detached-order",
-            gameId,
-            playthroughId: null,
-            content: "Older unattached",
-            kind: "QUICK",
-            createdAt: new Date("2024-04-01T00:00:00.000Z"),
-            updatedAt: new Date("2024-04-01T00:00:00.000Z"),
-          },
-        });
-        await db.prisma.journalEntry.create({
-          data: {
-            userId: "ggd-user-pt-detached-order",
-            gameId,
-            playthroughId: null,
-            content: "Newer unattached",
-            kind: "QUICK",
-            createdAt: new Date("2024-04-10T00:00:00.000Z"),
-            updatedAt: new Date("2024-04-10T00:00:00.000Z"),
-          },
-        });
-
-        const result = await getGameDetails({
-          slug: GAME_SLUG,
-          userId: "ggd-user-pt-detached-order",
-        });
-
-        expect(result.unattachedJournalEntries).toHaveLength(2);
-        // Most recent first
-        expect(result.unattachedJournalEntries[0]!.content).toBe(
-          "Newer unattached"
-        );
-        expect(result.unattachedJournalEntries[1]!.content).toBe(
-          "Older unattached"
-        );
-      });
-
-      it("returns [] for unattachedJournalEntries when the game has NO runs — preserving §2.11 feed-hidden contract", async () => {
-        const { gameId } = await seedUserAndLibrary(
-          "pt-no-runs-detached",
-          "WANT"
-        );
-        // Null-playthroughId entry exists but NO playthroughs — feed must stay hidden
-        await db.prisma.journalEntry.create({
-          data: {
-            userId: "ggd-user-pt-no-runs-detached",
-            gameId,
-            playthroughId: null,
-            content: "Legacy entry, no run",
-            kind: "QUICK",
-          },
-        });
-
-        const result = await getGameDetails({
-          slug: GAME_SLUG,
-          userId: "ggd-user-pt-no-runs-detached",
-        });
-
-        // No runs → feed hidden → unattached entries not returned
-        expect(result.playthroughs).toHaveLength(0);
-        expect(result.unattachedJournalEntries).toEqual([]);
-      });
-
-      it("returns [] for anonymous viewers regardless of null-playthroughId entries", async () => {
-        const result = await getGameDetails({ slug: GAME_SLUG });
-
-        expect(result.unattachedJournalEntries).toEqual([]);
       });
     });
   });

@@ -23,10 +23,9 @@ const STUB_ENTRY = {
   id: ENTRY_ID,
   userId: OWNER_ID,
   libraryItemId: 1,
+  gameId: "unit-game",
   content: "Test journal content",
-  rating: null,
-  hoursPlayed: null,
-  platform: null,
+  playedMinutes: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -66,23 +65,6 @@ describe("updateJournalEntry — Prisma error mapping", () => {
     it("re-throws as NotFoundError", async () => {
       await expect(
         updateJournalEntry(OWNER_ID, ENTRY_ID, { content: "new content" })
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
-  });
-
-  describe("given prisma.journalEntry.update throws P2003 with game in meta (invalid gameId)", () => {
-    beforeEach(() => {
-      mockedUpdate.mockRejectedValue(
-        makePrismaError("P2003", {
-          field_name: "game_id",
-          cause: "Foreign key constraint violated on the field: `gameId`",
-        })
-      );
-    });
-
-    it("re-throws as NotFoundError for the missing game", async () => {
-      await expect(
-        updateJournalEntry(OWNER_ID, ENTRY_ID, { gameId: "nonexistent-game" })
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 import {
   getJournalTimeline,
@@ -6,19 +7,22 @@ import {
 } from "@/entities/journal-entry/api/get-journal.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
+const GET_JOURNAL_TIMELINE_INPUT = z
+  .object({ gameId: z.string().min(1).optional() })
+  .optional();
+
 /**
- * Loader-only server fn for `/journal`.
+ * Loader-only server fn for `/journal`. `gameId` narrows to one game; `"none"`
+ * narrows to notes without a game; omitted returns every note.
  *
- * Per the strict feature-server-fn rule this would be a loader-direct read of
- * `getJournalTimeline` (entity query, `.server.ts`). The Start route extractor
- * does not strip `.server.ts` imports from client preload, so the canonical
- * shape hangs on hover-preload (foot-gun #2 / CONTEXT.md → loader-direct read).
- * Wrapping the read in a `createServerFn` exported from this non-`.server.ts`
- * file keeps the route file client-safe.
+ * Wrapped in a `createServerFn` (not a loader-direct entity read) so the route
+ * file stays client-safe — see foot-gun #2 / CONTEXT.md → loader-direct read.
  */
 export const getJournalTimelinePageDataFn = createServerFn({
   method: "GET",
-}).handler(async (): Promise<JournalTimelineEntry[]> => {
-  const userId = await requireUserId();
-  return getJournalTimeline(userId);
-});
+})
+  .inputValidator((data: unknown) => GET_JOURNAL_TIMELINE_INPUT.parse(data))
+  .handler(async ({ data }): Promise<JournalTimelineEntry[]> => {
+    const userId = await requireUserId();
+    return getJournalTimeline(userId, { gameId: data?.gameId });
+  });

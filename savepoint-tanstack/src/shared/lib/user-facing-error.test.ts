@@ -47,6 +47,17 @@ describe("getUserFacingErrorMessage", () => {
     });
   });
 
+  describe("given time logged without a game", () => {
+    it("maps the TIME_NEEDS_GAME validation to its own copy", () => {
+      const error = new ValidationError("raw: no game", {
+        code: "TIME_NEEDS_GAME",
+      });
+      expect(getUserFacingErrorMessage(error)).toBe(
+        "Choose a game to log time."
+      );
+    });
+  });
+
   describe("given an undo that is no longer available", () => {
     it("maps the UNDO_ADD_UNAVAILABLE conflict to its own copy", () => {
       const error = new ConflictError("raw: too old", {

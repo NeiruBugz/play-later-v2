@@ -6,28 +6,20 @@ import type { JournalTimelineEntry } from "@/entities/journal-entry/model/types"
 import { requireUserId } from "@/entities/session/api/require-user-id";
 
 /**
- * Zod schema for the `updateJournalEntryFn` payload.
- *
- * - `entryId` is required (Better-Auth-style id; never `cuid()`).
- * - `content`, `kind`, `gameId` are optional — only keys explicitly present
- *   in `input` are forwarded to Prisma at the entity layer.
- *   `gameId: null` clears the association; `gameId: undefined` leaves it
- *   untouched.
+ * `id` is a Better-Auth-style id (`z.string().min(1)`, never `cuid()`).
+ * Only keys present are changed; the note must keep text or time, and time
+ * needs the note's game (enforced by the entity query).
  */
 const UPDATE_JOURNAL_ENTRY_INPUT = z.object({
-  entryId: z.string().min(1),
-  content: z.string().min(1).max(5000).optional(),
-  kind: z.enum(["QUICK", "REFLECTION"]).optional(),
-  gameId: z.string().min(1).nullable().optional(),
+  id: z.string().min(1),
+  content: z.string().max(5000).optional(),
+  playedMinutes: z.number().int().positive().nullable().optional(),
 });
 
 export const updateJournalEntryFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UPDATE_JOURNAL_ENTRY_INPUT.parse(data))
   .handler(async ({ data }): Promise<JournalTimelineEntry> => {
-    const parsed = UPDATE_JOURNAL_ENTRY_INPUT.parse(data);
-    const { entryId, ...input } = parsed;
-
+    const { id, ...input } = UPDATE_JOURNAL_ENTRY_INPUT.parse(data);
     const userId = await requireUserId();
-
-    return updateJournalEntry(userId, entryId, input);
+    return updateJournalEntry(userId, id, input);
   });

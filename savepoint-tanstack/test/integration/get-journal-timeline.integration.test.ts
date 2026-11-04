@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { getJournalTimeline } from "@/entities/journal-entry/api/get-journal.server";
+import {
+  getJournalGameOptions,
+  getJournalTimeline,
+} from "@/entities/journal-entry/api/get-journal.server";
 
 import {
   setupIsolatedDatabase,
@@ -137,12 +140,12 @@ describe("getJournalTimeline", () => {
       });
     });
 
-    it("surfaces the edited entry before the older un-edited entry (ordered by updatedAt desc)", async () => {
+    it("keeps the edited entry in its original place (ordered by createdAt desc)", async () => {
       const result = await getJournalTimeline("jt-user-008");
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe("jt-entry-008-edited");
-      expect(result[1].id).toBe("jt-entry-008-fresh");
+      expect(result[0].id).toBe("jt-entry-008-fresh");
+      expect(result[1].id).toBe("jt-entry-008-edited");
     });
   });
 
@@ -215,30 +218,82 @@ describe("getJournalTimeline", () => {
     });
   });
 
-  describe("given the user has entries of mixed kind", () => {
+  describe("given stored entries carry a kind, title and mood", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("007") });
+      await db.prisma.journalEntry.create({
+        data: {
+          ...makeJournalEntry("jt-entry-007-a", "jt-user-007", {
+            kind: "REFLECTION",
+          }),
+          title: "Legacy title",
+          mood: "EXCITED",
+        },
+      });
+    });
+
+    it("drops kind, title and mood from what is returned", async () => {
+      const [entry] = await getJournalTimeline("jt-user-007");
+
+      expect(entry).not.toHaveProperty("kind");
+      expect(entry).not.toHaveProperty("title");
+      expect(entry).not.toHaveProperty("mood");
+      expect(entry?.id).toBe("jt-entry-007-a");
+    });
+  });
+
+  describe("given notes for two games and notes without a game", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("010") });
+      await db.prisma.user.create({ data: makeUser("011") });
+      await db.prisma.game.create({ data: makeGame("010-b", 50010) });
+      await db.prisma.game.create({ data: makeGame("010-a", 50011) });
+      await db.prisma.game.create({ data: makeGame("010-unused", 50012) });
       await db.prisma.journalEntry.createMany({
         data: [
-          makeJournalEntry("jt-entry-007-a", "jt-user-007", {
-            content: "Quick entry",
-            kind: "QUICK",
+          makeJournalEntry("jt-e-010-1", "jt-user-010", {
+            gameId: "jt-game-010-b",
           }),
-          makeJournalEntry("jt-entry-007-b", "jt-user-007", {
-            content: "Long-form entry",
-            kind: "REFLECTION",
+          makeJournalEntry("jt-e-010-2", "jt-user-010", {
+            gameId: "jt-game-010-a",
+          }),
+          makeJournalEntry("jt-e-010-3", "jt-user-010", {}),
+          makeJournalEntry("jt-e-010-4", "jt-user-011", {
+            gameId: "jt-game-010-unused",
           }),
         ],
       });
     });
 
-    it("returns all entries regardless of kind", async () => {
-      const result = await getJournalTimeline("jt-user-007");
+    it("filters to one game with gameId", async () => {
+      const result = await getJournalTimeline("jt-user-010", {
+        gameId: "jt-game-010-a",
+      });
 
-      expect(result).toHaveLength(2);
-      const kinds = result.map((e) => e.kind);
-      expect(kinds).toContain("QUICK");
-      expect(kinds).toContain("REFLECTION");
+      expect(result.map((e) => e.id)).toEqual(["jt-e-010-2"]);
+    });
+
+    it('lists only notes without a game for "none"', async () => {
+      const result = await getJournalTimeline("jt-user-010", {
+        gameId: "none",
+      });
+
+      expect(result.map((e) => e.id)).toEqual(["jt-e-010-3"]);
+    });
+
+    it("returns every note with no filter", async () => {
+      const result = await getJournalTimeline("jt-user-010");
+
+      expect(result).toHaveLength(3);
+    });
+
+    it("lists the user's games that have notes, by title, as filter options", async () => {
+      const options = await getJournalGameOptions("jt-user-010");
+
+      expect(options).toEqual([
+        { id: "jt-game-010-a", title: "JT Game 010-a" },
+        { id: "jt-game-010-b", title: "JT Game 010-b" },
+      ]);
     });
   });
 
