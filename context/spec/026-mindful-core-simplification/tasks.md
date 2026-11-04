@@ -180,7 +180,7 @@ Verify-task conventions:
 - [ ] **Slice 7: One Log form, plain notes, one time-played total**
 
   > Spec §2.9, §2.15, §2.16, plus the "Mark as Playing" offer from §2.2 (audit N4, N5, N6, N7, N10, N12, N13, N21).
-  - [ ] Server:
+  - [x] Server:
     - `createJournalEntry` requires content or minutes, needs no run, and increments the open play.
     - `logTimeFn` returns `{ noteId, offerMarkPlaying }`.
     - `updateJournalEntry` accepts content and `playedMinutes` (content or time).
@@ -188,14 +188,14 @@ Verify-task conventions:
     - `getLoggableGames` returns library items only, Playing first then by title (N6, N7).
     - Game detail: time played = the notes total, sessions = notes with time; Times to Beat / Your Pace read the same total (N10).
     - Tests. **[Agent: tanstack-fullstack]**
-  - [ ] UI, the Log form (N5):
+  - [x] UI, the Log form (N5):
     - One Log form (the global action host `log-session`) opened from the nav, the sidebar, the game page "Log time" (owners only, N7), the Journal "New note" and the palette "New note" (N21).
     - `/journal/new` renders the same content.
     - Delete the minutes compose dialog and the text-only form.
     - Picker: search field, scroll container capped to the viewport, chosen game's title and cover in the header (N6).
     - Confirmation "Logged {time} for {Game}", with "Mark as Playing" when the game isn't Playing.
     - Remove the run picker. **[Agent: react-frontend]**
-  - [ ] UI, notes and time:
+  - [x] UI, notes and time:
     - One `GameNotesList` on the game page; each note links to its note view (N4).
     - Delete `journal-teaser` and the nested per-run note lists.
     - The note card and note view show time; a time-only note reads "{time} played" (N12).
