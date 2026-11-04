@@ -15,7 +15,10 @@ import {
   LIBRARY_STATUS_VALUES,
 } from "@/entities/library-item/model";
 import { addGameToLibraryFn } from "@/features/add-game/api/add-game-to-library-fn";
-import { LibraryModal } from "@/features/manage-library-entry";
+import {
+  LibraryModal,
+  RemoveFromLibraryDialog,
+} from "@/features/manage-library-entry";
 import { deleteLibraryItemFn } from "@/features/manage-library-entry/api/delete-library-item-fn";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
 import { clearLibraryStatusManualFn } from "@/features/manage-playthrough/api/clear-library-status-manual-fn";
@@ -126,6 +129,7 @@ export function LibraryStatusSwitcher({
   const [pending, setPending] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   // Reveals the status picker inline when user clicks "Set manually" in State 2.
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -430,7 +434,7 @@ export function LibraryStatusSwitcher({
               Edit details…
             </DropdownMenuItem>
             <DropdownMenuItem
-              onSelect={handleRemove}
+              onSelect={() => setConfirmingRemove(true)}
               className="text-destructive"
             >
               Remove from library
@@ -438,6 +442,15 @@ export function LibraryStatusSwitcher({
           </DropdownMenuContent>
         </DropdownMenu>
       ) : null}
+
+      <RemoveFromLibraryDialog
+        open={confirmingRemove}
+        onOpenChange={setConfirmingRemove}
+        gameTitle={gameTitle}
+        onConfirm={() => {
+          void handleRemove();
+        }}
+      />
 
       {editOpen && optimisticEntry !== null ? (
         <LibraryModal

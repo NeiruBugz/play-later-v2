@@ -103,6 +103,16 @@ const actions = {
   clickRemove: async () => {
     await userEvent.click(elements.getRemoveItem());
   },
+  confirmRemove: async () => {
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Remove" })
+    );
+  },
+  cancelRemove: async () => {
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Cancel" })
+    );
+  },
   clickEditDetails: async () => {
     await userEvent.click(elements.getEditDetailsItem());
   },
@@ -159,13 +169,47 @@ describe("LibraryCardMenu", () => {
     });
   });
 
-  describe("given the user clicks Remove from Library and the call succeeds", () => {
+  describe("given the user chooses Remove from Library", () => {
+    beforeEach(async () => {
+      render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
+      await actions.openMenu();
+      await actions.clickRemove();
+    });
+
+    it("asks for confirmation in the agreed words", async () => {
+      expect(
+        await screen.findByText("Remove Test Game from your library?")
+      ).toBeDefined();
+      expect(
+        screen.getByText(
+          "Its play history and rating will be deleted. Your notes stay in your Journal."
+        )
+      ).toBeDefined();
+      expect(mockDeleteLibraryItemFn).not.toHaveBeenCalled();
+    });
+
+    it("needs no typing to confirm", async () => {
+      await screen.findByRole("button", { name: "Remove" });
+      expect(screen.queryByRole("textbox")).toBeNull();
+    });
+
+    it("keeps the game when Cancel is chosen", async () => {
+      await actions.cancelRemove();
+      expect(mockDeleteLibraryItemFn).not.toHaveBeenCalled();
+      expect(
+        screen.queryByText("Remove Test Game from your library?")
+      ).toBeNull();
+    });
+  });
+
+  describe("given the user confirms Remove from Library and the call succeeds", () => {
     beforeEach(async () => {
       mockDeleteLibraryItemFn.mockResolvedValue(undefined);
 
       render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
       await actions.openMenu();
       await actions.clickRemove();
+      await actions.confirmRemove();
     });
 
     it("calls deleteLibraryItemFn with the item id", () => {
@@ -181,13 +225,14 @@ describe("LibraryCardMenu", () => {
     });
   });
 
-  describe("given the user clicks Remove from Library and the call fails with an Error", () => {
+  describe("given the user confirms Remove from Library and the call fails with an Error", () => {
     beforeEach(async () => {
       mockDeleteLibraryItemFn.mockRejectedValue(new Error("Server error"));
 
       render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
       await actions.openMenu();
       await actions.clickRemove();
+      await actions.confirmRemove();
     });
 
     it("calls deleteLibraryItemFn", () => {
@@ -200,13 +245,14 @@ describe("LibraryCardMenu", () => {
     });
   });
 
-  describe("given the user clicks Remove from Library and a non-Error is thrown", () => {
+  describe("given the user confirms Remove from Library and a non-Error is thrown", () => {
     beforeEach(async () => {
       mockDeleteLibraryItemFn.mockRejectedValue("unexpected");
 
       render(<LibraryCardMenu item={makeItem()} onEdit={vi.fn()} />);
       await actions.openMenu();
       await actions.clickRemove();
+      await actions.confirmRemove();
     });
 
     it("shows a fallback error message via toast.error", async () => {

@@ -267,7 +267,7 @@ describe("LibraryStatusSwitcher", () => {
       });
     });
 
-    describe("when removed via the overflow menu", () => {
+    describe("when Remove from library is chosen from the overflow menu", () => {
       beforeEach(async () => {
         vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined as never);
         await userEvent.click(elements.getMoreTrigger());
@@ -276,7 +276,29 @@ describe("LibraryStatusSwitcher", () => {
         );
       });
 
-      it("calls deleteLibraryItemFn with the entry id", async () => {
+      it("asks for confirmation without removing yet", async () => {
+        expect(
+          await screen.findByText("Remove Hollow Knight from your library?")
+        ).toBeDefined();
+        expect(
+          screen.getByText(
+            "Its play history and rating will be deleted. Your notes stay in your Journal."
+          )
+        ).toBeDefined();
+        expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
+      });
+
+      it("keeps the game when Cancel is chosen", async () => {
+        await userEvent.click(
+          await screen.findByRole("button", { name: "Cancel" })
+        );
+        expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
+      });
+
+      it("removes the game with the entry id when Remove is chosen", async () => {
+        await userEvent.click(
+          await screen.findByRole("button", { name: "Remove" })
+        );
         await waitFor(() => {
           expect(vi.mocked(deleteLibraryItemFn)).toHaveBeenCalledWith({
             data: { itemId: 42 },

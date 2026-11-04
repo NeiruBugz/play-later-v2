@@ -5,8 +5,8 @@
  *   - Started / Completed are DatePicker triggers (buttons queried by their
  *     accessible name "Started" / "Completed"), not native date inputs.
  *   - A "Mark complete" one-tap sets Completed to a non-null Date when empty.
- *   - Delete is a destructive footer button (not a one-item ⋯ menu); the
- *     confirmation is a typed-name gate (type the title to arm "Delete").
+ *   - Remove is a destructive footer button (not a one-item ⋯ menu); the
+ *     confirmation is the shared RemoveFromLibraryDialog (no typing).
  *   - Marking Completed derives PLAYED in the Status select.
  */
 
@@ -109,12 +109,11 @@ const elements = {
     screen.queryByRole("button", { name: "Mark complete" }),
 
   getDeleteFromLibraryButton: () =>
-    screen.getByRole("button", { name: "Delete from library" }),
-  getDeleteConfirmInput: () =>
-    screen.getByLabelText("Type the game title to confirm deletion"),
-  queryDeleteConfirmInput: () =>
-    screen.queryByLabelText("Type the game title to confirm deletion"),
-  getDeleteButton: () => screen.getByRole("button", { name: "Delete" }),
+    screen.getByRole("button", { name: "Remove from library" }),
+  queryConfirmTitle: () =>
+    screen.queryByText("Remove Hollow Knight from your library?"),
+  queryTextbox: () => screen.queryByRole("textbox"),
+  getDeleteButton: () => screen.getByRole("button", { name: "Remove" }),
   getCancelButton: () => screen.getByRole("button", { name: "Cancel" }),
 
   getInlineAlert: () => screen.getByRole("alert"),
@@ -132,8 +131,6 @@ const actions = {
   openDeleteConfirm: async () => {
     await userEvent.click(elements.getDeleteFromLibraryButton());
   },
-  typeDeleteConfirmation: (title: string) =>
-    userEvent.type(elements.getDeleteConfirmInput(), title),
   clickDelete: () => userEvent.click(elements.getDeleteButton()),
   clickCancel: () => userEvent.click(elements.getCancelButton()),
 };
@@ -165,9 +162,9 @@ describe("LibraryModal", () => {
       expect(elements.getSaveButton()).toBeDefined();
     });
 
-    it("exposes delete as a footer button, with the confirm gate hidden until invoked", () => {
+    it("exposes remove as a footer button, with the confirmation hidden until invoked", () => {
       expect(elements.getDeleteFromLibraryButton()).toBeDefined();
-      expect(elements.queryDeleteConfirmInput()).toBeNull();
+      expect(elements.queryConfirmTitle()).toBeNull();
     });
 
     it("renders datepicker triggers for Started and Completed", () => {
@@ -292,23 +289,28 @@ describe("LibraryModal", () => {
       expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
     });
 
-    it("shows the typed-name confirmation surface", () => {
-      expect(elements.getDeleteConfirmInput()).toBeDefined();
+    it("asks for confirmation in the agreed words with Remove and Cancel", () => {
+      expect(elements.queryConfirmTitle()).not.toBeNull();
+      expect(
+        screen.getByText(
+          "Its play history and rating will be deleted. Your notes stay in your Journal."
+        )
+      ).toBeDefined();
       expect(elements.getDeleteButton()).toBeDefined();
       expect(elements.getCancelButton()).toBeDefined();
     });
 
-    it("keeps the Delete button disabled until the title is typed exactly", () => {
-      expect(elements.getDeleteButton()).toBeDisabled();
+    it("does not ask the user to type the title", () => {
+      expect(elements.queryTextbox()).toBeNull();
+      expect(elements.getDeleteButton()).toBeEnabled();
     });
   });
 
-  describe("given the user types the title and confirms deletion", () => {
+  describe("given the user confirms removal", () => {
     beforeEach(async () => {
       vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined);
       render(<LibraryModal {...defaultProps} />);
       await actions.openDeleteConfirm();
-      await actions.typeDeleteConfirmation("Hollow Knight");
       await actions.clickDelete();
     });
 
@@ -330,8 +332,8 @@ describe("LibraryModal", () => {
       expect(vi.mocked(deleteLibraryItemFn)).not.toHaveBeenCalled();
     });
 
-    it("hides the typed-name confirmation surface", () => {
-      expect(elements.queryDeleteConfirmInput()).toBeNull();
+    it("closes the confirmation", () => {
+      expect(elements.queryConfirmTitle()).toBeNull();
     });
   });
 
@@ -403,7 +405,6 @@ describe("LibraryModal", () => {
       vi.mocked(deleteLibraryItemFn).mockResolvedValue(undefined);
       render(<LibraryModal {...defaultProps} />);
       await actions.openDeleteConfirm();
-      await actions.typeDeleteConfirmation("Hollow Knight");
       await actions.clickDelete();
     });
 
@@ -439,7 +440,6 @@ describe("LibraryModal", () => {
       );
       render(<LibraryModal {...defaultProps} />);
       await actions.openDeleteConfirm();
-      await actions.typeDeleteConfirmation("Hollow Knight");
       await actions.clickDelete();
     });
 

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { type SyntheticEvent } from "react";
+import { useState, type SyntheticEvent } from "react";
 
 import { STATUS_ENTRIES } from "@/entities/library-item/model";
 import { useMutationAction } from "@/shared/lib/use-mutation-action";
@@ -17,6 +17,7 @@ import {
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
+import { RemoveFromLibraryDialog } from "../remove-from-library-dialog";
 import type { LibraryCardMenuProps } from "./library-card-menu.type";
 
 const stop = (event: SyntheticEvent) => {
@@ -36,6 +37,7 @@ const stopProp = (event: SyntheticEvent) => {
  */
 export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
   const { pending: isPending, run } = useMutationAction();
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
 
   const handleStatusChange = async (
     next: (typeof STATUS_ENTRIES)[number]["value"]
@@ -120,9 +122,7 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onSelect={() => {
-              void handleRemove();
-            }}
+            onSelect={() => setConfirmingRemove(true)}
             onClick={stopProp}
             className="text-destructive focus:text-destructive"
             disabled={isPending}
@@ -132,6 +132,14 @@ export function LibraryCardMenu({ item, onEdit }: LibraryCardMenuProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <RemoveFromLibraryDialog
+        open={confirmingRemove}
+        onOpenChange={setConfirmingRemove}
+        gameTitle={item.game.title}
+        onConfirm={() => {
+          void handleRemove();
+        }}
+      />
     </div>
   );
 }
