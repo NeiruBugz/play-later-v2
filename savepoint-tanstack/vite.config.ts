@@ -7,6 +7,10 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  // @dnd-kit is only reached through the lazily loaded SortableUpNextQueue, so
+  // Vite discovers it late, re-optimizes deps mid-session and a second React
+  // copy breaks hooks ("Cannot read properties of null (reading 'useMemo')").
+  optimizeDeps: { include: ["@dnd-kit/core", "@dnd-kit/sortable"] },
   // `nitro()` produces the Nitro server bundle (`.output/server/index.mjs`) the
   // `start` script runs. Locally Nitro defaults to the node-server preset; in
   // Vercel CI it auto-detects the Vercel preset via the `VERCEL` env var.
