@@ -1,4 +1,1 @@
-export {
-  LandingFeaturesStrip,
-  LandingPreviewCard,
-} from "./landing-features";
+export { LandingFeaturesStrip, LandingPreviewCard } from "./landing-features";
