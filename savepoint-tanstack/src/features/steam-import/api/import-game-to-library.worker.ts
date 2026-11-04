@@ -126,8 +126,7 @@ export async function importGameToLibraryWorker(
   }
 
   // Create LibraryItem via entities/library-item
-  let libraryItem = await addGameToLibrary(userId, {
-    gameId: game.id,
+  let { item: libraryItem } = await addGameToLibrary(userId, game.id, {
     platform: "PC (Microsoft Windows)",
   });
   if (status !== libraryItem.status) {

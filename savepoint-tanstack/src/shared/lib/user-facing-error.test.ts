@@ -47,6 +47,17 @@ describe("getUserFacingErrorMessage", () => {
     });
   });
 
+  describe("given an undo that is no longer available", () => {
+    it("maps the UNDO_ADD_UNAVAILABLE conflict to its own copy", () => {
+      const error = new ConflictError("raw: too old", {
+        code: "UNDO_ADD_UNAVAILABLE",
+      });
+      expect(getUserFacingErrorMessage(error)).toBe(
+        "This game can't be undone anymore. Remove it from your library instead."
+      );
+    });
+  });
+
   describe("given an AppError that crossed createServerFn serialization", () => {
     it("still maps by the surviving code property although it is a plain Error", () => {
       const revived = Object.assign(new Error("raw: item 7 missing"), {

@@ -12,6 +12,8 @@ const MESSAGES_BY_APP_ERROR_CODE: Record<AppErrorCode, string> = {
 
 const MESSAGES_BY_SPECIFIC_CODE: Record<string, string> = {
   UP_NEXT_FULL: "Up Next holds 5 games. Remove one to add this.",
+  UNDO_ADD_UNAVAILABLE:
+    "This game can't be undone anymore. Remove it from your library instead.",
 };
 
 function readString(source: unknown, key: string): string | undefined {

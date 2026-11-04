@@ -5,19 +5,31 @@ import { getLibraryPageDataFn } from "@/features/library-list";
 import { LibraryPage } from "@/widgets/library-page";
 
 const searchSchema = z.object({
-  status: z.enum(["WANT", "PLAYING", "DONE", "UP_NEXT"]).optional(),
-  platform: z.string().min(1).optional(),
-  notOwnedOnly: z.boolean().optional(),
+  status: z
+    .enum(["WANT", "PLAYING", "DONE", "UP_NEXT"])
+    .optional()
+    .catch(undefined),
+  platform: z.string().min(1).optional().catch(undefined),
+  notOwnedOnly: z.boolean().optional().catch(undefined),
   // User-facing unit is stars (0.5–5, half-star precision). The URL reads
   // `?minRating=3.5`, not the raw 1–10 storage int. Conversion to storage
   // happens at the loader/entity seam. See shared/lib/rating.ts.
-  minRating: z.number().min(0.5).max(5).multipleOf(0.5).optional(),
+  minRating: z
+    .number()
+    .min(0.5)
+    .max(5)
+    .multipleOf(0.5)
+    .optional()
+    .catch(undefined),
   // `unratedOnly` is consumed by `MobileFilterBar` (and round-tripped by the
   // sidebar) but not yet honored by `getLibraryPageDataFn` — backend filtering
   // arrives in a later slice. Documented divergence in slice 14A.
-  unratedOnly: z.boolean().optional(),
-  sortBy: z.enum(["updatedAt", "createdAt", "title"]).optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
+  unratedOnly: z.boolean().optional().catch(undefined),
+  sortBy: z
+    .enum(["updatedAt", "createdAt", "title"])
+    .optional()
+    .catch(undefined),
+  sortOrder: z.enum(["asc", "desc"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_authed/library")({
