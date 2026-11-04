@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
 import { ComposeJournalEntryDialog } from "@/features/compose-journal-entry/ui/compose-journal-entry-dialog";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
+import { SAVE_FAILED_MESSAGE } from "@/shared/lib/user-facing-error";
 
 vi.mock("@/shared/lib/use-media-query", () => ({
   useIsDesktop: vi.fn(() => false),
@@ -251,8 +252,8 @@ describe("ComposeJournalEntryDialog", () => {
       expect(onOpenChange).not.toHaveBeenCalledWith(false);
     });
 
-    it("calls toast.error with the rejection message", () => {
-      expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Server error");
+    it("calls toast.error with the plain save-failed message", () => {
+      expect(vi.mocked(toast.error)).toHaveBeenCalledWith(SAVE_FAILED_MESSAGE);
     });
   });
 
@@ -266,10 +267,10 @@ describe("ComposeJournalEntryDialog", () => {
       await actions.submit();
     });
 
-    it("shows the fallback error message", async () => {
+    it("shows the plain save-failed message", async () => {
       await waitFor(() => {
         expect(screen.getByRole("alert").textContent).toContain(
-          "Something went wrong"
+          SAVE_FAILED_MESSAGE
         );
       });
     });

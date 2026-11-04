@@ -3,8 +3,8 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { createJournalEntryFn } from "@/features/compose-journal-entry/api/create-journal-entry-fn";
-import { getSaveErrorMessage } from "@/features/compose-journal-entry/lib/get-save-error-message";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
+import { getUserFacingErrorMessage } from "@/shared/lib/user-facing-error";
 import { Button } from "@/shared/ui/button";
 import { DialogFooter } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
@@ -59,7 +59,7 @@ export function ComposeJournalEntryDialog({
       await router.invalidate();
       onOpenChange(false);
     } catch (err: unknown) {
-      const message = getSaveErrorMessage(err);
+      const message = getUserFacingErrorMessage(err);
       setError(message);
       toast.error(message);
     } finally {
