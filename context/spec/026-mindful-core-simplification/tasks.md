@@ -151,20 +151,20 @@ Verify-task conventions:
 - [ ] **Slice 6: Instant add, the same everywhere**
 
   > Spec §2.6, plus the §2.18 add/icon/palette items (audit N3, N11, N18, N21). The "why" field comes in Slice 8.
-  - [ ] Server:
+  - [x] Server:
     - `addGameToLibrary` returns `{ item, created }` (P2002 → the existing item).
     - Guarded `undoAddGame`.
     - `addGameFn` and `undoAddGameFn`.
     - Delete the palette quick-add, the search quick-add and the remove-as-undo fns.
     - Integration test: undo never deletes a pre-existing item. **[Agent: tanstack-fullstack]**
-  - [ ] UI, add flow:
+  - [x] UI, add flow:
     - `useAddGame` and `AddConfirmation` ("Added {Game} to Want", Start playing (T1), Put in Up Next, Undo only when `created`, 8 s) for the search page, the add dialog, the palette and the game page "Add to library".
     - Live search. The dialog and palette stay open; added results show "In library".
     - Already-in-library results show the status and marker in every search (N11).
     - "See all results" → `/games/search?q=` (N3).
     - The failure toast.
     - Remove "IGDB" from user-facing copy (N23). **[Agent: react-frontend]**
-  - [ ] UI, entry points:
+  - [x] UI, entry points:
     - "Add game" on Home, the library header and the desktop sidebar.
     - Add uses an icon distinct from Log (N18).
     - The phone library FAB never overlaps card menus.
