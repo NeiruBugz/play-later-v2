@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,15 +8,14 @@ import { DashboardPage } from "./dashboard-page";
 
 const mockNavigate = vi.fn();
 
-// Link-rendering composition — mock the router to a plain anchor.
-// Drop `params` / `search` before spreading so React doesn't warn about
-// unknown DOM attrs.
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children, ...rest }: any) => {
+    const search = rest.search as Record<string, string> | undefined;
     delete rest.params;
     delete rest.search;
+    const query = search ? `?${new URLSearchParams(search).toString()}` : "";
     return (
-      <a href={typeof to === "string" ? to : "#"} {...rest}>
+      <a href={`${to}${query}`} {...rest}>
         {children}
       </a>
     );
@@ -24,86 +23,58 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-// Stub child widgets — this suite verifies composition and structural
-// layout, not each child's internals.
-vi.mock("../dashboard-jump-back-in-hero", () => ({
-  DashboardJumpBackInHero: ({
-    mostInProgressGame,
-  }: {
-    mostInProgressGame: { slug: string } | null;
-  }) => (
-    <div data-testid="jump-back-in-hero">
-      {`hero:${mostInProgressGame?.slug ?? "none"}`}
-    </div>
-  ),
+vi.mock("@/shared/lib/igdb-image", () => ({
+  buildCoverImageUrl: () => "https://images.igdb.com/cover.jpg",
 }));
 
-vi.mock("../dashboard-continue-list", () => ({
-  DashboardContinueList: () => <div data-testid="continue-list" />,
-}));
+function makeItem(id: string, title: string, overrides: object = {}) {
+  return {
+    id,
+    status: "PLAYING",
+    platform: "PC",
+    upNextPosition: null,
+    game: {
+      id: `game-${id}`,
+      igdbId: 1,
+      title,
+      slug: title.toLowerCase().replace(/\s+/g, "-"),
+      coverImage: "abc",
+    },
+    ...overrides,
+  } as unknown as DashboardPageData["playing"][number];
+}
 
-vi.mock("../dashboard-status-strip", () => ({
-  DashboardStatusStrip: () => <div data-testid="status-strip" />,
-}));
-
-vi.mock("../dashboard-game-rail", () => ({
-  DashboardGameRail: ({
-    title,
-    items,
-    viewAll,
-    viewAllLabel,
-    emptyMessage,
-  }: {
-    title: string;
-    items: unknown[];
-    viewAll: { status?: string };
-    viewAllLabel?: string;
-    emptyMessage?: string;
-  }) => (
-    <section
-      data-testid="game-rail"
-      data-count={items.length}
-      data-view-all-status={viewAll.status}
-      data-view-all-label={viewAllLabel}
-      data-empty={emptyMessage}
-    >
-      {title}
-    </section>
-  ),
-}));
-
-vi.mock("../dashboard-stats-card", () => ({
-  DashboardStatsCard: () => <div data-testid="stats-card" />,
-}));
+function makeQueued(position: number, title: string) {
+  return makeItem(`q${position}`, title, {
+    status: "WANT",
+    upNextPosition: position,
+  });
+}
 
 function makeData(
   overrides: Partial<DashboardPageData> = {}
 ): DashboardPageData {
   return {
-    username: "Ada",
-    statusCounts: {
-      WANT: 0,
-      PLAYING: 0,
-      DONE: 0,
-    },
-    hasEmptyLibrary: true,
-    showStats: false,
-    quickLogGames: [],
-    continuePlaying: { items: [], total: 0 },
-    upNext: { items: [], total: 0 },
-    recentlyAdded: { items: [] },
+    playing: [],
+    upNextTop3: [],
+    upNextTotal: 0,
+    counts: { WANT: 0, PLAYING: 0, DONE: 0 },
     ...overrides,
-  };
+  } as DashboardPageData;
 }
 
+const QUEUE_EMPTY_COPY = "Nothing queued yet — put up to 5 games in Up Next.";
+
 const elements = {
-  getJumpBackInHero: () => screen.getByTestId("jump-back-in-hero"),
-  getStatusStrip: () => screen.queryByTestId("status-strip"),
-  getGameRails: () => screen.queryAllByTestId("game-rail"),
-  getStatsCard: () => screen.queryByTestId("stats-card"),
-  getEmptyLibraryHeading: () => screen.queryByText("Your library is empty"),
-  getBrowseLibraryLink: () =>
-    screen.queryByRole("link", { name: "Browse Library" }),
+  getHomeHeading: () => screen.getByRole("heading", { level: 1 }),
+  getPlayingSection: () => screen.getByRole("region", { name: "Playing" }),
+  getUpNextSection: () => screen.getByRole("region", { name: "Up Next" }),
+  getCountsStrips: () => screen.queryAllByLabelText("Library status summary"),
+  getAddGameButtons: () =>
+    screen.getAllByRole("button", { name: "Add a game" }),
+  queryPickFromUpNext: () =>
+    screen.queryByRole("link", { name: "Pick from Up Next" }),
+  getEmptyStates: () => screen.queryAllByRole("status"),
 };
 
 describe("DashboardPage", () => {
@@ -111,162 +82,181 @@ describe("DashboardPage", () => {
     mockNavigate.mockReset();
   });
 
-  describe("given the Home header", () => {
+  describe("given one Playing game and a full queue", () => {
+    beforeEach(() => {
+      render(
+        <DashboardPage
+          data={makeData({
+            playing: [makeItem("p1", "Elden Ring")],
+            upNextTop3: [
+              makeQueued(1, "Hades"),
+              makeQueued(2, "Celeste"),
+              makeQueued(3, "Hollow Knight"),
+            ],
+            upNextTotal: 5,
+            counts: { WANT: 6, PLAYING: 1, DONE: 4 },
+          })}
+        />
+      );
+    });
+
+    it("titles the screen Home", () => {
+      expect(elements.getHomeHeading()).toHaveTextContent("Home");
+    });
+
+    it("shows the Playing game exactly once", () => {
+      expect(screen.getAllByText("Elden Ring")).toHaveLength(1);
+    });
+
+    it("keeps the Playing game inside the Playing section only", () => {
+      expect(
+        within(elements.getUpNextSection()).queryByText("Elden Ring")
+      ).toBeNull();
+    });
+
+    it("shows the status counts once", () => {
+      expect(elements.getCountsStrips()).toHaveLength(1);
+      const strip = elements.getCountsStrips()[0];
+      expect(strip).toHaveTextContent("11 games");
+      expect(within(strip).getByRole("link", { name: /Want 6/ })).toBeVisible();
+      expect(within(strip).getByRole("link", { name: /Done 4/ })).toBeVisible();
+    });
+
+    it("lists the queued games in queue order with their markers", () => {
+      const upNext = within(elements.getUpNextSection());
+      const titles = upNext
+        .getAllByRole("link")
+        .map((el) => el.textContent ?? "")
+        .filter((text) => /Hades|Celeste|Hollow Knight/.test(text));
+      expect(
+        titles.map((text) => text.match(/Hades|Celeste|Hollow/)![0])
+      ).toEqual(["Hades", "Celeste", "Hollow"]);
+      expect(upNext.getAllByText(/Up Next #/)).toHaveLength(3);
+    });
+
+    it("links See all to the library's Up Next view", () => {
+      expect(
+        within(elements.getUpNextSection()).getByRole("link", {
+          name: /see all/i,
+        })
+      ).toHaveAttribute("href", "/library?status=UP_NEXT");
+    });
+
+    it("shows no empty state", () => {
+      expect(elements.getEmptyStates()).toHaveLength(0);
+    });
+
+    it("lays out only Playing then Up Next below the counts, so Up Next needs no scrolling on a phone", () => {
+      const sections = screen
+        .getAllByRole("region")
+        .map((el) => el.getAttribute("aria-labelledby"));
+      expect(sections).toEqual([
+        "home-playing-heading",
+        "home-up-next-heading",
+      ]);
+      expect(
+        within(elements.getPlayingSection()).getAllByRole("listitem")
+      ).toHaveLength(1);
+    });
+
+    it("logs time for the Playing game from its Log button", async () => {
+      await userEvent.click(screen.getByRole("button", { name: "Log" }));
+      const { search } = mockNavigate.mock.calls[0][0];
+      expect(search({})).toEqual({ action: "log-session", game: "elden-ring" });
+    });
+  });
+
+  describe("given a stats card, distribution bar or recent history would once have shown", () => {
+    beforeEach(() => {
+      render(
+        <DashboardPage
+          data={makeData({
+            playing: [makeItem("p1", "Elden Ring")],
+            counts: { WANT: 3, PLAYING: 1, DONE: 3 },
+          })}
+        />
+      );
+    });
+
+    it("shows none of them and avoids retired words", () => {
+      const text = document.body.textContent ?? "";
+      expect(text).not.toMatch(/recently played/i);
+      expect(text).not.toMatch(
+        /dashboard|playthrough|backlog|completed|log session/i
+      );
+      expect(screen.queryByRole("progressbar")).toBeNull();
+      expect(
+        screen.queryByRole("img", { name: /distribution|chart/i })
+      ).toBeNull();
+    });
+  });
+
+  describe("given nothing is Playing and the queue has games", () => {
+    beforeEach(() => {
+      render(
+        <DashboardPage
+          data={makeData({
+            upNextTop3: [makeQueued(1, "Hades")],
+            upNextTotal: 1,
+            counts: { WANT: 1, PLAYING: 0, DONE: 0 },
+          })}
+        />
+      );
+    });
+
+    it("shows exactly one empty state", () => {
+      expect(elements.getEmptyStates()).toHaveLength(1);
+    });
+
+    it("offers Pick from Up Next, opening the library's Up Next view", () => {
+      expect(elements.queryPickFromUpNext()).toHaveAttribute(
+        "href",
+        "/library?status=UP_NEXT"
+      );
+    });
+
+    it("does not offer a second Add a game button in the empty state", () => {
+      expect(
+        within(elements.getEmptyStates()[0]).queryByRole("button", {
+          name: "Add a game",
+        })
+      ).toBeNull();
+    });
+  });
+
+  describe("given nothing is Playing and the queue is empty", () => {
     beforeEach(() => {
       render(<DashboardPage data={makeData()} />);
     });
 
-    it("opens the add search from the Add game button", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "Add game" }));
+    it("shows exactly one empty state with Add a game", () => {
+      expect(elements.getEmptyStates()).toHaveLength(1);
+      expect(elements.getAddGameButtons()).toHaveLength(1);
+      expect(elements.queryPickFromUpNext()).toBeNull();
+    });
+
+    it("opens the add search from Add a game", async () => {
+      await userEvent.click(elements.getAddGameButtons()[0]);
       const { search } = mockNavigate.mock.calls[0][0];
       expect(search({})).toEqual({ action: "add-game", game: undefined });
     });
+
+    it("shows the empty-queue copy without a See all link", () => {
+      expect(screen.getByText(QUEUE_EMPTY_COPY)).toBeVisible();
+      expect(screen.queryByRole("link", { name: /see all/i })).toBeNull();
+    });
+
+    it("shows no counts strip for an empty library", () => {
+      expect(elements.getCountsStrips()).toHaveLength(0);
+    });
   });
 
-  describe("given the library is empty", () => {
-    beforeEach(() => {
+  describe("given the Home header", () => {
+    it("opens the add search from the Add game button", async () => {
       render(<DashboardPage data={makeData()} />);
-    });
-
-    it("renders the jump-back-in hero with no game threaded in", () => {
-      expect(elements.getJumpBackInHero().textContent).toBe("hero:none");
-    });
-
-    it("renders the empty-library fallback heading", () => {
-      expect(elements.getEmptyLibraryHeading()).not.toBeNull();
-    });
-
-    it("renders the Browse Library CTA pointing at /library", () => {
-      expect(elements.getBrowseLibraryLink()).toHaveAttribute(
-        "href",
-        "/library"
-      );
-    });
-
-    it("does not render any game rails in the empty-library branch", () => {
-      expect(elements.getGameRails()).toHaveLength(0);
-    });
-
-    it("does not render the stats card when showStats is false", () => {
-      expect(elements.getStatsCard()).toBeNull();
-    });
-  });
-
-  describe("given the library has games", () => {
-    beforeEach(() => {
-      render(
-        <DashboardPage
-          data={makeData({
-            hasEmptyLibrary: false,
-            showStats: false,
-            quickLogGames: [
-              {
-                id: "g1",
-                igdbId: 1,
-                title: "Elden Ring",
-                slug: "elden-ring",
-                coverImage: null,
-                platform: null,
-              },
-            ],
-            statusCounts: {
-              WANT: 2,
-              PLAYING: 3,
-              DONE: 1,
-            },
-            continuePlaying: {
-              items: [],
-              total: 3,
-            },
-            upNext: { items: [], total: 2 },
-            recentlyAdded: { items: [] },
-          })}
-        />
-      );
-    });
-
-    it("renders the jump-back-in hero with the first quickLogGame's slug", () => {
-      expect(elements.getJumpBackInHero().textContent).toBe("hero:elden-ring");
-    });
-
-    it("renders the compact status strip", () => {
-      expect(elements.getStatusStrip()).not.toBeNull();
-    });
-
-    it("renders the three game rails (Playing, Up next, Recently played)", () => {
-      const titles = elements.getGameRails().map((el) => el.textContent);
-      expect(titles).toEqual(
-        expect.arrayContaining(["Playing", "Up Next", "Recently played"])
-      );
-    });
-
-    it("does not render the empty-library fallback", () => {
-      expect(elements.getEmptyLibraryHeading()).toBeNull();
-    });
-
-    it("does not render the stats card when showStats is false", () => {
-      expect(elements.getStatsCard()).toBeNull();
-    });
-  });
-
-  describe("given the library has games and stats are above threshold", () => {
-    beforeEach(() => {
-      render(
-        <DashboardPage
-          data={makeData({
-            hasEmptyLibrary: false,
-            showStats: true,
-            statusCounts: {
-              WANT: 1,
-              PLAYING: 1,
-              DONE: 1,
-            },
-          })}
-        />
-      );
-    });
-
-    it("renders the stats card", () => {
-      expect(elements.getStatsCard()).not.toBeNull();
-    });
-
-    it("renders three game rails (the desktop Playing slot is the continue list)", () => {
-      expect(elements.getGameRails()).toHaveLength(3);
-    });
-
-    it("renders the desktop continue list beside the hero", () => {
-      expect(screen.getByTestId("continue-list")).not.toBeNull();
-    });
-  });
-
-  describe("given more than 3 games are queued", () => {
-    beforeEach(() => {
-      const queued = [1, 2, 3, 4, 5].map((n) => ({ id: n }));
-      render(
-        <DashboardPage
-          data={makeData({
-            hasEmptyLibrary: false,
-            statusCounts: { WANT: 5, PLAYING: 0, DONE: 0 },
-            upNext: {
-              items: queued as unknown as DashboardPageData["upNext"]["items"],
-              total: 5,
-            },
-          })}
-        />
-      );
-    });
-
-    it("shows only the first 3 in the Up Next rail, with See all to the Up Next filter and the empty copy ready", () => {
-      const rail = elements
-        .getGameRails()
-        .find((el) => el.textContent === "Up Next")!;
-      expect(rail).toHaveAttribute("data-count", "3");
-      expect(rail).toHaveAttribute("data-view-all-status", "UP_NEXT");
-      expect(rail).toHaveAttribute("data-view-all-label", "See all");
-      expect(rail).toHaveAttribute(
-        "data-empty",
-        "Nothing queued yet — put up to 5 games in Up Next."
-      );
+      await userEvent.click(screen.getByRole("button", { name: "Add game" }));
+      const { search } = mockNavigate.mock.calls[0][0];
+      expect(search({})).toEqual({ action: "add-game", game: undefined });
     });
   });
 });

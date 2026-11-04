@@ -1,6 +1,5 @@
-import type { DashboardStatusCounts } from "@/features/dashboard";
+import type { DashboardPageData } from "@/features/dashboard";
 
 export type DashboardStatusStripProps = {
-  statusCounts: DashboardStatusCounts;
-  total: number;
+  counts: DashboardPageData["counts"];
 };

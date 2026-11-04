@@ -69,99 +69,9 @@ function makeItem(
 const elements = {
   getSectionHeading: (name: string) => screen.getByRole("heading", { name }),
   getSeeAllLink: () => screen.queryByRole("link", { name: /see all/i }),
-  getViewLibraryLink: () =>
-    screen.queryByRole("link", { name: /view library/i }),
-  getAllLinks: () => screen.queryAllByRole("link"),
-  queryEmptyBrowseLink: () =>
-    screen.queryByRole("link", { name: /browse games/i }),
 };
 
 describe("DashboardGameRail", () => {
-  describe("given the rail has items", () => {
-    beforeEach(() => {
-      render(
-        <DashboardGameRail
-          title="Playing"
-          items={[makeItem()]}
-          viewAll={{ status: "PLAYING" }}
-          viewAllLabel="See all"
-        />
-      );
-    });
-
-    it("renders a section heading with the rail title", () => {
-      expect(elements.getSectionHeading("Playing")).toBeDefined();
-    });
-
-    it("renders a see-all link", () => {
-      expect(elements.getSeeAllLink()).not.toBeNull();
-    });
-  });
-
-  describe("given the rail has items and a custom viewAll search", () => {
-    beforeEach(() => {
-      render(
-        <DashboardGameRail
-          title="Up next"
-          items={[makeItem({ status: "WANT" })]}
-          viewAll={{ status: "WANT" }}
-          viewAllLabel="See all"
-        />
-      );
-    });
-
-    it("renders a see-all link", () => {
-      expect(elements.getSeeAllLink()).not.toBeNull();
-    });
-
-    it("the see-all link points to /library", () => {
-      expect(elements.getSeeAllLink()).toHaveAttribute("href", "/library");
-    });
-  });
-
-  describe("given the rail has items and a custom viewAllLabel", () => {
-    beforeEach(() => {
-      render(
-        <DashboardGameRail
-          title="Recently played"
-          items={[makeItem({ status: "DONE" })]}
-          viewAll={{ sortBy: "createdAt", sortOrder: "desc" }}
-          viewAllLabel="View Library"
-        />
-      );
-    });
-
-    it("renders a link with the custom viewAllLabel", () => {
-      expect(elements.getViewLibraryLink()).not.toBeNull();
-    });
-
-    it("the custom-label link also points to /library", () => {
-      expect(elements.getViewLibraryLink()).toHaveAttribute("href", "/library");
-    });
-  });
-
-  describe("given the rail is empty", () => {
-    beforeEach(() => {
-      render(
-        <DashboardGameRail
-          title="Playing"
-          items={[]}
-          viewAll={{ status: "PLAYING" }}
-          viewAllLabel="See all"
-          emptyMessage="No games in progress"
-        />
-      );
-    });
-
-    it("does not render a see-all link when there are no items", () => {
-      expect(elements.getSeeAllLink()).toBeNull();
-    });
-
-    it("renders the empty-state browse link instead", () => {
-      expect(elements.queryEmptyBrowseLink()).not.toBeNull();
-    });
-  });
-
   describe("given the Up Next rail with queued games", () => {
     beforeEach(() => {
       render(
@@ -222,6 +132,7 @@ describe("DashboardGameRail", () => {
       expect(
         screen.getByText("Nothing queued yet — put up to 5 games in Up Next.")
       ).toBeDefined();
+      expect(screen.queryAllByRole("link")).toHaveLength(0);
     });
   });
 });
