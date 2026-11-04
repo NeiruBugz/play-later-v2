@@ -745,4 +745,42 @@ describe("LibraryPage", () => {
       expect(screen.queryByRole("menuitem", { name: /Up Next/ })).toBeNull();
     });
   });
+
+  describe.each([
+    { filter: "WANT" as const, viewLabel: "Grid view" },
+    { filter: "WANT" as const, viewLabel: "List view" },
+    { filter: "DONE" as const, viewLabel: "Grid view" },
+    { filter: "DONE" as const, viewLabel: "List view" },
+  ])(
+    "given the $filter filter in $viewLabel with a queued game",
+    ({ filter, viewLabel }) => {
+      beforeEach(async () => {
+        render(
+          <LibraryPage
+            items={[
+              buildLibraryItemWithGame(
+                { id: 31, status: filter, upNextPosition: 2 },
+                { id: "g-31", title: "Queued Game", slug: "queued-game" }
+              ),
+              buildLibraryItemWithGame(
+                { id: 32, status: filter, upNextPosition: null },
+                { id: "g-32", title: "Plain Game", slug: "plain-game" }
+              ),
+            ]}
+            total={2}
+            {...defaultViewProps}
+            status={filter}
+          />
+        );
+        await userEvent.click(screen.getByRole("button", { name: viewLabel }));
+      });
+
+      it("shows the queue marker on the queued game only", () => {
+        const expected = filter === "WANT" ? "Up Next #2" : "Replay";
+
+        expect(screen.getAllByTestId("queue-marker")).toHaveLength(1);
+        expect(screen.getByText(expected)).toBeInTheDocument();
+      });
+    }
+  );
 });
