@@ -83,7 +83,7 @@ Verify-task conventions:
     - The profile shows 3 counts.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 3: One-tap next step, direct picker, undo, desktop parity**
+- [x] **Slice 3: One-tap next step, direct picker, undo, desktop parity**
 
   > Spec §2.3, §2.14, plus the undo part of §2.13 (audit N1, N2).
   - [x] Add `restoreLibraryItem`:
@@ -104,7 +104,7 @@ Verify-task conventions:
     - Desktop gets the grid/list toggle and the rich list card with the next-step button (N2).
     - Delete `library-item-card-cta`.
     - Component tests. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - "Start playing" → Playing plus an Undo toast. Undo → back to Want, and History has no new play.
     - At 390 px, `elementFromPoint` at the bar's centre returns the bar at top, middle and bottom scroll positions, and tapping its pill opens the picker.
     - At 1440 px, the grid/list toggle works and list rows show the next-step buttons.
