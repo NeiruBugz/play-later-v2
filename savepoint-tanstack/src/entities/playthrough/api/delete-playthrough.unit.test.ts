@@ -6,7 +6,7 @@
  * - NotFoundError when the run's libraryItem.userId !== userId
  *   (anti-enumeration — same error for missing vs. not-owned).
  * - Happy path: playthrough.delete called with the correct id.
- * - syncLibraryStatusFromRuns invoked after the delete (status re-sync).
+ * - Library item status is never written.
  *
  * Prisma is mocked via the global setup in test/setup/unit-setup.ts.
  * $transaction is made to invoke the callback synchronously with a mock tx.
@@ -98,10 +98,10 @@ describe("deletePlaythrough", () => {
       );
     });
 
-    it("calls syncLibraryStatusFromRuns (libraryItem.update) after the delete", async () => {
+    it("never writes the library item status", async () => {
       await deletePlaythrough(OWNER_ID, RUN_ID);
 
-      expect(tx.libraryItem.update).toHaveBeenCalled();
+      expect(tx.libraryItem.update).not.toHaveBeenCalled();
     });
   });
 

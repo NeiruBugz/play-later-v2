@@ -25,11 +25,9 @@ export async function getLibraryStatusCounts(
   });
 
   const counts: LibraryStatusCountMap = {
-    WISHLIST: 0,
-    SHELF: 0,
-    UP_NEXT: 0,
+    WANT: 0,
     PLAYING: 0,
-    PLAYED: 0,
+    DONE: 0,
   };
   for (const row of grouped) {
     counts[row.status] = row._count;

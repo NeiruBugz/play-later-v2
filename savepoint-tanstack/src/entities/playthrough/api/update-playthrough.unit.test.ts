@@ -7,8 +7,7 @@
  * - NotFoundError when the run does not exist.
  * - NotFoundError when the run's libraryItem.userId !== userId
  *   (anti-enumeration — same error for missing vs. not-owned).
- * - syncLibraryStatusFromRuns is invoked inside the same transaction on a
- *   status change.
+ * - Library item status is never written, even on a run status change.
  * - ConflictError when Prisma raises a unique-constraint violation on
  *   @@unique([libraryItemId, ordinal]).
  *
@@ -138,10 +137,10 @@ describe("updatePlaythrough", () => {
         cb(tx)) as never);
     });
 
-    it("calls syncLibraryStatusFromRuns (libraryItem.update) after the patch", async () => {
+    it("never writes the library item status", async () => {
       await updatePlaythrough(OWNER_ID, { id: RUN_ID, status: "FINISHED" });
 
-      expect(tx.libraryItem.update).toHaveBeenCalled();
+      expect(tx.libraryItem.update).not.toHaveBeenCalled();
     });
   });
 

@@ -11,7 +11,6 @@ import type {
   PlaythroughStatus,
 } from "../../../../shared/lib/prisma/client.ts";
 import { isOrdinalUniqueConflict } from "../model/ordinal-conflict";
-import { syncLibraryStatusFromRuns } from "./sync-library-status.server";
 
 export type CreatePlaythroughInput = {
   libraryItemId: number;
@@ -38,8 +37,8 @@ export type CreatePlaythroughInput = {
  *   A caller passing `FIRST` on a subsequent run gets silently coerced to
  *   `REPLAY`.
  *
- * Status sync (`syncLibraryStatusFromRuns`) runs in the same transaction
- * so `LibraryItem.status` + `hasBeenPlayed` are never stale.
+ * Never touches `LibraryItem.status`: a status only changes through
+ * `setLibraryItemStatus`.
  */
 export async function createPlaythrough(
   userId: string,
@@ -91,7 +90,7 @@ export async function createPlaythrough(
       const ordinal = maxOrdinal + 1;
       const kind: PlaythroughKind = isFirst ? "FIRST" : "REPLAY";
 
-      const run = await tx.playthrough.create({
+      return tx.playthrough.create({
         data: {
           libraryItemId: input.libraryItemId,
           ordinal,
@@ -106,10 +105,6 @@ export async function createPlaythrough(
           notes: input.notes ?? null,
         },
       });
-
-      await syncLibraryStatusFromRuns(tx, input.libraryItemId);
-
-      return run;
     });
   } catch (error) {
     if (error instanceof NotFoundError) throw error;

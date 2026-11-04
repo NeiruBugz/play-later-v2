@@ -3,17 +3,12 @@ import {
   type GameDetailsResponseItem,
 } from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db.server";
-import {
-  deriveHasBeenPlayed,
-  deriveLibraryStatus,
-} from "@/shared/lib/derive-playthrough-status";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import type {
   Game,
   JournalEntry,
   LibraryItem,
-  LibraryItemStatus,
   Playthrough,
 } from "../../../../shared/lib/prisma/client.ts";
 import { upsertThinGameFromIgdbDetailsPayload } from "./upsert-game.server";
@@ -37,9 +32,6 @@ export interface GameDetails {
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
   playthroughs: PlaythroughWithEntries[];
-  derivedStatus: LibraryItemStatus;
-  statusIsManual: boolean;
-  hasBeenPlayed: boolean;
   /**
    * Journal entries for this game with no associated playthrough (playthroughId = null).
    * Covers two cases from spec 016:
@@ -143,13 +135,6 @@ export async function getGameDetails(params: {
     }
   }
 
-  const derivedStatus = deriveLibraryStatus(
-    playthroughs,
-    libraryEntry?.status ?? "SHELF"
-  );
-  const statusIsManual = libraryEntry?.statusIsManual ?? false;
-  const hasBeenPlayed = deriveHasBeenPlayed(playthroughs);
-
   return {
     game,
     igdbDetails,
@@ -160,9 +145,6 @@ export async function getGameDetails(params: {
     playtimeSessionCount,
     recentSessionMinutes,
     playthroughs,
-    derivedStatus,
-    statusIsManual,
-    hasBeenPlayed,
     unattachedJournalEntries,
   };
 }

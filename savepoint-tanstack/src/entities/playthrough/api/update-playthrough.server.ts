@@ -11,7 +11,6 @@ import type {
   PlaythroughStatus,
 } from "../../../../shared/lib/prisma/client.ts";
 import { isOrdinalUniqueConflict } from "../model/ordinal-conflict";
-import { syncLibraryStatusFromRuns } from "./sync-library-status.server";
 
 export type UpdatePlaythroughInput = {
   id: string;
@@ -34,8 +33,8 @@ export type UpdatePlaythroughInput = {
  * `libraryItem.userId`, then checks against `userId`. Both "missing" and
  * "not-yours" produce `NotFoundError` (anti-enumeration).
  *
- * Runs inside a `$transaction` alongside `syncLibraryStatusFromRuns` so
- * `LibraryItem.status` + `hasBeenPlayed` never drift after a status change.
+ * Never touches `LibraryItem.status`: a status only changes through
+ * `setLibraryItemStatus`.
  *
  * This is the single seam that maps the `@@unique([libraryItemId, ordinal])`
  * constraint to `ConflictError`. No other file maps it.
@@ -72,9 +71,7 @@ export async function updatePlaythrough(
         throw new NotFoundError("Playthrough not found", { id });
       }
 
-      const libraryItemId = existing.libraryItem.id;
-
-      const updated = await tx.playthrough.update({
+      return tx.playthrough.update({
         where: { id },
         data: {
           ...(fields.ordinal !== undefined && { ordinal: fields.ordinal }),
@@ -97,10 +94,6 @@ export async function updatePlaythrough(
           ...(fields.notes !== undefined && { notes: fields.notes }),
         },
       });
-
-      await syncLibraryStatusFromRuns(tx, libraryItemId);
-
-      return updated;
     });
   } catch (error) {
     if (error instanceof NotFoundError) throw error;

@@ -5,15 +5,11 @@ import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 import {
   Prisma,
   type LibraryItem,
-  type LibraryItemStatus,
 } from "../../../../shared/lib/prisma/client.ts";
 
 export type UpdateLibraryItemInput = {
-  status?: LibraryItemStatus;
   rating?: number | null;
   platform?: string | null;
-  startedAt?: Date | null;
-  completedAt?: Date | null;
 };
 
 export async function updateLibraryItem(
@@ -36,11 +32,8 @@ export async function updateLibraryItem(
   }
 
   const data: Prisma.LibraryItemUpdateInput = {};
-  if (input.status !== undefined) data.status = input.status;
   if (input.rating !== undefined) data.rating = input.rating;
   if (input.platform !== undefined) data.platform = input.platform;
-  if (input.startedAt !== undefined) data.startedAt = input.startedAt;
-  if (input.completedAt !== undefined) data.completedAt = input.completedAt;
 
   try {
     return await prisma.libraryItem.update({

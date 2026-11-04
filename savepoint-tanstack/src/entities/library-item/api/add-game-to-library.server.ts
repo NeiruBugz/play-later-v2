@@ -26,7 +26,7 @@ export async function addGameToLibrary(
     data: {
       userId,
       gameId: input.gameId,
-      ...(input.status !== undefined && { status: input.status }),
+      status: input.status ?? "WANT",
       platform: input.platform ?? null,
     },
   });

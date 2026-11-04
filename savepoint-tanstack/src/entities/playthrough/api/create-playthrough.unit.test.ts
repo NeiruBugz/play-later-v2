@@ -12,7 +12,7 @@
  * Prisma is mocked via the global setup in test/setup/unit.ts.
  * $transaction is made to invoke the callback synchronously with a mock tx
  * that exposes the table delegates used by createPlaythrough +
- * syncLibraryStatusFromRuns.
+ * nothing else.
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -133,14 +133,13 @@ describe("createPlaythrough", () => {
       );
     });
 
-    it("calls syncLibraryStatusFromRuns inside the same transaction", async () => {
+    it("never writes the library item status", async () => {
       await createPlaythrough(OWNER_ID, {
         libraryItemId: ITEM_ID,
         status: "PLAYING",
       });
 
-      expect(tx.libraryItem.findUnique).toHaveBeenCalled();
-      expect(tx.libraryItem.update).toHaveBeenCalled();
+      expect(tx.libraryItem.update).not.toHaveBeenCalled();
     });
   });
 

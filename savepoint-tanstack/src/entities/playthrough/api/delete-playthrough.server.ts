@@ -1,8 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
-import { syncLibraryStatusFromRuns } from "./sync-library-status.server";
-
 /**
  * Deletes a playthrough by id.
  *
@@ -37,9 +35,6 @@ export async function deletePlaythrough(
       throw new NotFoundError("Playthrough not found", { id });
     }
 
-    const libraryItemId = existing.libraryItem.id;
-
     await tx.playthrough.delete({ where: { id } });
-    await syncLibraryStatusFromRuns(tx, libraryItemId);
   });
 }

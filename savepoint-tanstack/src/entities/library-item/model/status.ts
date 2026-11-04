@@ -1,31 +1,20 @@
 /**
- * Status metadata for the library shelf taxonomy. The entity layer is the
- * rightful owner of the LibraryItemStatus shape, its display labels, and the
- * badge-variant tokens. Features (e.g. `filter-library`) compose on top.
+ * Single client-safe source of truth for the 3-status library model
+ * (Want, Playing, Done). Anything keyed by status value lives here; feature
+ * decoration (e.g. filter-button styles) lives in the feature.
  *
- * FSD: entities cannot import from features. Anything keyed by status value
- * lives here; feature-specific decoration (e.g. filter-button active/inactive
- * styles) lives in the feature.
+ * Client-safe: type-only Prisma imports, no `.server` imports.
  */
 
-import {
-  Archive,
-  Bookmark,
-  CheckCircle,
-  Gamepad2,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
+import { Bookmark, CheckCircle, Gamepad2, type LucideIcon } from "lucide-react";
 import { z } from "zod";
 
-import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
+import type {
+  DoneOutcome,
+  LibraryItemStatus,
+} from "../../../../shared/lib/prisma/client.ts";
 
-export type StatusBadgeVariant =
-  | "wishlist"
-  | "shelf"
-  | "upNext"
-  | "playing"
-  | "played";
+export type StatusBadgeVariant = "want" | "playing" | "done";
 
 export type StatusEntry = {
   value: LibraryItemStatus;
@@ -35,72 +24,27 @@ export type StatusEntry = {
 };
 
 export const STATUS_ENTRIES: ReadonlyArray<StatusEntry> = [
-  { value: "UP_NEXT", label: "Up Next", badgeVariant: "upNext", icon: Star },
+  { value: "WANT", label: "Want", badgeVariant: "want", icon: Bookmark },
   {
     value: "PLAYING",
     label: "Playing",
     badgeVariant: "playing",
     icon: Gamepad2,
   },
-  { value: "SHELF", label: "Shelf", badgeVariant: "shelf", icon: Archive },
-  {
-    value: "PLAYED",
-    label: "Played",
-    badgeVariant: "played",
-    icon: CheckCircle,
-  },
-  {
-    value: "WISHLIST",
-    label: "Wishlist",
-    badgeVariant: "wishlist",
-    icon: Bookmark,
-  },
+  { value: "DONE", label: "Done", badgeVariant: "done", icon: CheckCircle },
 ];
 
-/**
- * Canonical, ordered value list for the library status taxonomy — the single
- * source the `z.enum` schema and every UI option array derive from. The order
- * is the user-facing select order; it deliberately differs from
- * `STATUS_ENTRIES` (badge order). The `satisfies` clause keys it to
- * `LibraryItemStatus`, and `assertCoversStatusEntries` below guarantees it can
- * never drift from the set of values declared in `STATUS_ENTRIES`.
- */
 export const LIBRARY_STATUS_VALUES = [
-  "WISHLIST",
-  "SHELF",
-  "UP_NEXT",
+  "WANT",
   "PLAYING",
-  "PLAYED",
+  "DONE",
 ] as const satisfies ReadonlyArray<LibraryItemStatus>;
 
 export const libraryItemStatusSchema = z.enum(LIBRARY_STATUS_VALUES);
 
-type StatusEntryValue = (typeof STATUS_ENTRIES)[number]["value"];
-type LibraryStatusValue = (typeof LIBRARY_STATUS_VALUES)[number];
-
-// Compile-time guard: the canonical value list and STATUS_ENTRIES must cover
-// exactly the same set of statuses. If either side gains/loses a value without
-// the other matching, one of these assignments stops type-checking.
-const _entriesCoverValues: StatusEntryValue = "" as LibraryStatusValue;
-const _valuesCoverEntries: LibraryStatusValue = "" as StatusEntryValue;
-void _entriesCoverValues;
-void _valuesCoverEntries;
-
 const STATUS_ENTRY_MAP = new Map<LibraryItemStatus, StatusEntry>(
-  STATUS_ENTRIES.map((e) => [e.value, e])
+  STATUS_ENTRIES.map((entry) => [entry.value, entry])
 );
-
-export const LIBRARY_STATUS_LABELS: Record<LibraryItemStatus, string> = {
-  WISHLIST: "Wishlist",
-  SHELF: "Shelf",
-  UP_NEXT: "Up Next",
-  PLAYING: "Playing",
-  PLAYED: "Played",
-};
-
-export function getStatusLabel(status: LibraryItemStatus): string {
-  return LIBRARY_STATUS_LABELS[status];
-}
 
 export function getStatusEntry(status: LibraryItemStatus): StatusEntry {
   const entry = STATUS_ENTRY_MAP.get(status);
@@ -108,11 +52,39 @@ export function getStatusEntry(status: LibraryItemStatus): StatusEntry {
   return entry;
 }
 
-/**
- * `UP_NEXT` doubles as both "queued for the first time" and "queued for a
- * replay" — the Boolean drives the user-facing copy. Other statuses ignore
- * the flag.
- */
-export function getUpNextLabel(hasBeenPlayed: boolean): string {
-  return hasBeenPlayed ? "Replay" : "Up Next";
+export function getStatusLabel(status: LibraryItemStatus): string {
+  return getStatusEntry(status).label;
+}
+
+export const NEXT_STEP: Record<
+  LibraryItemStatus,
+  { label: string; target: LibraryItemStatus }
+> = {
+  WANT: { label: "Start playing", target: "PLAYING" },
+  PLAYING: { label: "Mark done", target: "DONE" },
+  DONE: { label: "Play again", target: "PLAYING" },
+};
+
+export const UP_NEXT_MAX = 5;
+
+export function getQueueMarker({
+  status,
+  upNextPosition,
+}: {
+  status: LibraryItemStatus;
+  upNextPosition: number | null;
+}): string | null {
+  if (upNextPosition === null) return null;
+  if (status === "WANT") return `Up Next #${upNextPosition}`;
+  if (status === "DONE") return "Replay";
+  return null;
+}
+
+const DONE_OUTCOME_LABELS: Record<DoneOutcome, string> = {
+  FINISHED: "Done · Finished",
+  LET_GO: "Done · Let go",
+};
+
+export function getDoneLabel(outcome: DoneOutcome | null): string {
+  return outcome === null ? "Done" : DONE_OUTCOME_LABELS[outcome];
 }
