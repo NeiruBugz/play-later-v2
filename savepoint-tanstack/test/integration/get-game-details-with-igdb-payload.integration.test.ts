@@ -202,10 +202,10 @@ describe("getGameDetails — canonical dual-track contract", () => {
       igdbHitCount = 0;
     });
 
-    it("hits IGDB again (no entity-level cache; loader cache handles this upstream)", async () => {
+    it("answers from the IGDB response cache without calling IGDB again", async () => {
       await getGameDetails({ slug: GAME_SLUG });
 
-      expect(igdbHitCount).toBeGreaterThan(0);
+      expect(igdbHitCount).toBe(0);
     });
 
     it("does NOT create a duplicate Game row", async () => {

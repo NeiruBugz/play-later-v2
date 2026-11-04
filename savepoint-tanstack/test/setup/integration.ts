@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, vi } from "vitest";
 
+import { igdbResponseCache } from "@/shared/api/igdb/response-cache";
+
 vi.mock("@tanstack/react-start/server", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@tanstack/react-start/server")>();
@@ -38,6 +40,8 @@ process.env.AWS_SECRET_ACCESS_KEY = "test";
 process.env.S3_BUCKET_NAME = "savepoint-dev";
 process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
 
-beforeEach(() => {});
+beforeEach(() => {
+  igdbResponseCache.clear();
+});
 
 afterEach(() => {});

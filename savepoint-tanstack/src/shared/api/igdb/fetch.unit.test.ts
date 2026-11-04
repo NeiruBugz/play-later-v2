@@ -12,6 +12,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { IgdbHttpError } from "./errors";
 import { igdbFetch } from "./fetch";
+import { igdbResponseCache } from "./response-cache";
+import { forceRefresh } from "./token";
 
 vi.mock("@env", () => ({
   env: { IGDB_CLIENT_ID: "test-client-id" },
@@ -19,6 +21,7 @@ vi.mock("@env", () => ({
 
 vi.mock("./token", () => ({
   getAccessToken: vi.fn().mockResolvedValue("mock-token"),
+  forceRefresh: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -59,8 +62,20 @@ function makeFetchResponse(init: {
 
 const QUERY = `fields name,slug; where id = 1; limit 1;`;
 
+const OK_RESPONSE = makeFetchResponse({
+  ok: true,
+  status: 200,
+  json: [{ id: 1, name: "Halo", slug: "halo" }],
+});
+
+function makeStatusResponse(status: number): Response {
+  return makeFetchResponse({ ok: false, status, body: "" });
+}
+
 describe("igdbFetch", () => {
   beforeEach(() => {
+    igdbResponseCache.clear();
+    vi.mocked(forceRefresh).mockClear();
     vi.spyOn(crypto, "randomUUID").mockReturnValue(
       "00000000-0000-0000-0000-000000000001" as `${string}-${string}-${string}-${string}-${string}`
     );
@@ -184,6 +199,127 @@ describe("igdbFetch", () => {
         expect(err.context.bodySnippet).toBe("<html>upstream offline</html>");
         expect(err.context.igdbTitle).toBeUndefined();
       }
+    });
+  });
+
+  describe("given IGDB rejects the token with a 401 once", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(makeStatusResponse(401))
+        .mockResolvedValueOnce(OK_RESPONSE);
+      vi.stubGlobal("fetch", fetchMock);
+    });
+
+    it("refreshes the token and returns the retried response", async () => {
+      await expect(igdbFetch("/games", QUERY)).resolves.toEqual([
+        { id: 1, name: "Halo", slug: "halo" },
+      ]);
+      expect(forceRefresh).toHaveBeenCalledOnce();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("given IGDB keeps returning 401", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      fetchMock = vi.fn().mockResolvedValue(makeStatusResponse(401));
+      vi.stubGlobal("fetch", fetchMock);
+    });
+
+    it("retries once, then throws the 401", async () => {
+      await expect(igdbFetch("/games", QUERY)).rejects.toMatchObject({
+        name: "IgdbHttpError",
+        context: { status: 401 },
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("given IGDB rate-limits the request with a 429 once", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(makeStatusResponse(429))
+        .mockResolvedValueOnce(OK_RESPONSE);
+      vi.stubGlobal("fetch", fetchMock);
+    });
+
+    it("waits and returns the retried response", async () => {
+      await expect(igdbFetch("/games", QUERY)).resolves.toEqual([
+        { id: 1, name: "Halo", slug: "halo" },
+      ]);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("given IGDB keeps returning 429", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      fetchMock = vi.fn().mockResolvedValue(makeStatusResponse(429));
+      vi.stubGlobal("fetch", fetchMock);
+    });
+
+    it("retries once, then throws the 429", async () => {
+      await expect(igdbFetch("/games", QUERY)).rejects.toMatchObject({
+        context: { status: 429 },
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("given any request", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      fetchMock = vi.fn().mockResolvedValue(OK_RESPONSE);
+      vi.stubGlobal("fetch", fetchMock);
+      await igdbFetch("/games", QUERY);
+    });
+
+    it("sends an abort signal so a hung socket cannot hold the request", () => {
+      const init = fetchMock.mock.calls[0][1] as RequestInit;
+      expect(init.signal).toBeInstanceOf(AbortSignal);
+    });
+  });
+
+  describe("given the same query was answered moments ago", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      fetchMock = vi.fn().mockResolvedValue(OK_RESPONSE);
+      vi.stubGlobal("fetch", fetchMock);
+      await igdbFetch("/games", QUERY);
+      await igdbFetch("/games", QUERY);
+    });
+
+    it("answers from the cache without calling IGDB again", () => {
+      expect(fetchMock).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("given the same query failed moments ago", () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(makeStatusResponse(500))
+        .mockResolvedValueOnce(OK_RESPONSE);
+      vi.stubGlobal("fetch", fetchMock);
+      await igdbFetch("/games", QUERY).catch(() => undefined);
+    });
+
+    it("calls IGDB again instead of replaying the failure", async () => {
+      await expect(igdbFetch("/games", QUERY)).resolves.toEqual([
+        { id: 1, name: "Halo", slug: "halo" },
+      ]);
     });
   });
 });
