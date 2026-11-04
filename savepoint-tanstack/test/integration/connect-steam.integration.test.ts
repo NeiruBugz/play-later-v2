@@ -40,6 +40,11 @@ import { connectSteamWorker } from "@/features/steam-connect/api/connect-steam.w
 import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
 
 import {
+  buildValidOpenIdParams,
+  STEAM_ID_64,
+} from "../support/steam-openid-params.ts";
+
+import {
   setupIsolatedDatabase,
   type IsolatedDatabase,
 } from "../setup/isolated-db.ts";
@@ -68,21 +73,8 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 const USER_ID = "cs-user-alice";
-const STEAM_ID_64 = "76561198012345678";
 
-const VALID_PARAMS: Record<string, string> = {
-  "openid.mode": "id_res",
-  "openid.ns": "http://specs.openid.net/auth/2.0",
-  "openid.claimed_id": `https://steamcommunity.com/openid/id/${STEAM_ID_64}`,
-  "openid.identity": `https://steamcommunity.com/openid/id/${STEAM_ID_64}`,
-  "openid.return_to": "http://localhost:6061/steam/callback",
-  "openid.sig": "test-signature",
-  "openid.signed":
-    "signed,op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle",
-  "openid.assoc_handle": "12345",
-  "openid.response_nonce": "2026-05-20T00:00:00Zabcdef",
-  "openid.op_endpoint": "https://steamcommunity.com/openid/login",
-};
+const VALID_PARAMS = buildValidOpenIdParams(USER_ID);
 
 function makeFetchResponse(init: {
   ok: boolean;
@@ -215,6 +207,42 @@ describe("connectSteamWorker", () => {
         connectSteamWorker(USER_ID, { params: VALID_PARAMS })
       ).rejects.toThrow(ValidationError);
 
+      const user = await db.prisma.user.findUnique({
+        where: { id: USER_ID },
+        select: { steamId64: true },
+      });
+      expect(user?.steamId64).toBeNull();
+    });
+  });
+
+  describe("oversized OpenID params", () => {
+    it.each([
+      ["a value over the length bound", { "openid.sig": "x".repeat(5000) }],
+      ["a key over the length bound", { ["k".repeat(300)]: "v" }],
+      [
+        "more entries than Steam ever sends",
+        Object.fromEntries(
+          Array.from({ length: 100 }, (_, i) => [`openid.extra${i}`, "v"])
+        ),
+      ],
+    ])("rejects %s before calling Steam", async (_label, extra) => {
+      const spy = vi.fn();
+      vi.stubGlobal("fetch", spy);
+      await expect(
+        connectSteamWorker(USER_ID, { params: { ...VALID_PARAMS, ...extra } })
+      ).rejects.toThrow();
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("response bound to another user", () => {
+    it("throws ValidationError and does not write steamId64", async () => {
+      stubSteamIsValid();
+      await expect(
+        connectSteamWorker(USER_ID, {
+          params: buildValidOpenIdParams("someone-else"),
+        })
+      ).rejects.toThrow(ValidationError);
       const user = await db.prisma.user.findUnique({
         where: { id: USER_ID },
         select: { steamId64: true },

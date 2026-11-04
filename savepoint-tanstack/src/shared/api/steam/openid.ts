@@ -8,31 +8,91 @@
  * the response body. That's the entire protocol.
  *
  * Public surface:
- *   verifyOpenIdResponse(params): Promise<string>
+ *   verifyOpenIdResponse(params, { userId }): Promise<string>
  *     - Throws ValidationError on bad inputs OR is_valid:false response.
  *       Rationale: bad/forged OpenID params are CALLER INPUT being invalid,
  *       not an upstream failure.
  *     - Throws UpstreamError on network failure or non-2xx from Steam.
  *     - Returns the verified Steam64 ID on success.
  *
+ * Beyond Steam's signature check, the response must target this app's
+ * callback, come from Steam's endpoint, sign the identity fields and carry a
+ * short-lived state bound to `userId` (see login-state.server.ts).
+ *
  * Pure function — no internal state, idempotent across re-invocations
  * with the same params.
  */
+import { env } from "@env";
+
 import { createLogger } from "@/shared/lib";
 import { UpstreamError, ValidationError } from "@/shared/lib/errors";
 
+import { isValidSteamLoginState } from "./login-state.server";
+
 const logger = createLogger({ service: "steam-openid" });
 
-const STEAM_OPENID_URL = "https://steamcommunity.com/openid/login";
-const STEAM_ID_FROM_CLAIMED_ID = /\/openid\/id\/(\d+)$/;
+export const STEAM_OPENID_URL = "https://steamcommunity.com/openid/login";
+export const STEAM_CALLBACK_PATH = "/steam/callback";
+const CLAIMED_ID_PATTERN = /^https:\/\/steamcommunity\.com\/openid\/id\/(\d+)$/;
+const REQUIRED_SIGNED_FIELDS = [
+  "op_endpoint",
+  "claimed_id",
+  "identity",
+  "return_to",
+  "response_nonce",
+] as const;
+
+function reject(reason: string): never {
+  logger.warn({ reason }, "Steam OpenID response rejected");
+  throw new ValidationError("Invalid OpenID response", { reason });
+}
+
+function assertSignedFields(params: Record<string, string>): void {
+  const signed = new Set((params["openid.signed"] ?? "").split(","));
+  for (const field of REQUIRED_SIGNED_FIELDS) {
+    if (!signed.has(field)) reject(`${field} is not covered by the signature`);
+  }
+}
+
+function assertReturnToBoundToUser(
+  returnTo: string | undefined,
+  userId: string
+): void {
+  let url: URL;
+  try {
+    url = new URL(returnTo ?? "");
+  } catch {
+    return reject("return_to is not a URL");
+  }
+  const expected = new URL(STEAM_CALLBACK_PATH, env.BETTER_AUTH_URL);
+  if (url.origin !== expected.origin || url.pathname !== expected.pathname) {
+    reject("return_to does not point at this app's callback");
+  }
+  const state = url.searchParams.get("state");
+  if (
+    !state ||
+    !isValidSteamLoginState({
+      state,
+      userId,
+      secret: env.BETTER_AUTH_SECRET,
+    })
+  ) {
+    reject("login state is missing, expired or bound to another user");
+  }
+}
 
 export async function verifyOpenIdResponse(
-  params: Record<string, string>
+  params: Record<string, string>,
+  { userId }: { userId: string }
 ): Promise<string> {
   const mode = params["openid.mode"];
   if (mode !== "id_res") {
     logger.warn({ mode }, "OpenID mode is not id_res");
     throw new ValidationError("Invalid OpenID mode", { mode });
+  }
+
+  if (params["openid.op_endpoint"] !== STEAM_OPENID_URL) {
+    reject("op_endpoint is not Steam");
   }
 
   const claimedId = params["openid.claimed_id"];
@@ -41,14 +101,19 @@ export async function verifyOpenIdResponse(
     throw new ValidationError("Missing claimed_id");
   }
 
-  const match = STEAM_ID_FROM_CLAIMED_ID.exec(claimedId);
-  const steamId64 = match?.[1];
+  const steamId64 = CLAIMED_ID_PATTERN.exec(claimedId)?.[1];
   if (!steamId64) {
-    logger.warn({ claimedId }, "OpenID claimed_id has no extractable steam64");
+    logger.warn({ claimedId }, "OpenID claimed_id is not a Steam identity");
     throw new ValidationError("Could not extract Steam ID from claimed_id", {
       claimedId,
     });
   }
+  if (params["openid.identity"] !== claimedId) {
+    reject("identity differs from claimed_id");
+  }
+
+  assertSignedFields(params);
+  assertReturnToBoundToUser(params["openid.return_to"], userId);
 
   const verifyParams = new URLSearchParams(params);
   verifyParams.set("openid.mode", "check_authentication");
