@@ -97,7 +97,7 @@ describe.each([
         <Toaster />
       </AddFlowProvider>
     );
-    await userEvent.type(screen.getByLabelText("Search games"), "hades");
+    await userEvent.type(await screen.findByLabelText("Search games"), "hades");
     await userEvent.click(
       await screen.findByRole("button", { name: "Add Hades" })
     );
