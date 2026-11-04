@@ -256,7 +256,7 @@ Verify-task conventions:
     - No playthrough UI remains.
     - Stop the server by PID and delete the artifacts. **[Agent: testing]**
 
-- [ ] **Slice 10: Home, library and Journal without duplicates or pressure**
+- [x] **Slice 10: Home, library and Journal without duplicates or pressure**
 
   > Spec §2.17 and the rest of §2.18 (audit N9, N14, N15, N16, N17, N20, N23).
   - [x] Server:
@@ -270,7 +270,7 @@ Verify-task conventions:
     - Delete the lifecycle strip from cards; the rating shows only when set (N17).
     - Remove the "This month" Journal counts (N20).
     - Copy sweep against "Words used in the app" across all surfaces (N23). **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Home at 390 × 844 with one Playing game: the game appears once and Up Next is above the fold.
     - Home has no "Recently played", no stats card and no distribution bar.
     - Both empty-state branches lead to working screens.
@@ -283,8 +283,8 @@ Verify-task conventions:
 - [ ] **Slice 11: One-time "new statuses" notice**
 
   > Spec §2.12 explanation.
-  - [ ] Server: the root loader exposes `statusModelNoticePending`, and add an idempotent `acknowledgeNoticeFn`. **[Agent: tanstack-fullstack]**
-  - [ ] UI: a server-driven one-time dialog with "Got it", separate from the localStorage announcements. **[Agent: react-frontend]**
+  - [x] Server: the root loader exposes `statusModelNoticePending`, and add an idempotent `acknowledgeNoticeFn`. **[Agent: tanstack-fullstack]**
+  - [x] UI: a server-driven one-time dialog with "Got it", separate from the localStorage announcements. **[Agent: react-frontend]**
   - [ ] Verify:
     - An existing user sees it once, across two browser contexts.
     - A new sign-up never sees it.
