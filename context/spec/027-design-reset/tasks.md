@@ -147,7 +147,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
 - [ ] **Slice 9: Every screen is on stock spacing and type, with plain section labels**
-  - [ ] Write the dev-only codemod `scripts/codemods/tailwind-semantic.ts` (ts-morph).
+  - [x] Write the dev-only codemod `scripts/codemods/tailwind-semantic.ts` (ts-morph).
     - It reads the current values from `styles.css` and maps semantic spacing to numeric Tailwind steps, the type classes to stock sizes, and `shadow-paper-*` to `shadow-xs/sm/md`.
     - It touches only string literals in `className`, `cn()` and `cva()`.
     - Where one element ends up with two conflicting spacing classes (a `Card` variant plus a call-site override; see the Slice 7 accepted deviation), keep one stock value on purpose. Release 1 showed the variant's value (e.g. `p-2xl`, 24px), not the call site's.
