@@ -52,7 +52,11 @@ import type {
 const ALL = "all" as const;
 const SORT_DEFAULT = "added_desc" as const;
 
-type FilterOption = { value: string; label: string; chipLabel?: string };
+type FilterOption = {
+  value: string | null;
+  label: string;
+  chipLabel?: string;
+};
 
 type FilterFieldConfig = {
   paramKey: "playtimeStatus" | "playtimeRange" | "platform" | "lastPlayed";
@@ -71,7 +75,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by time played status",
     chipPrefix: "Status: ",
     options: [
-      { value: ALL, label: "All" },
+      { value: null, label: "All" },
       { value: "played", label: "Played" },
       { value: "never_played", label: "Never Played" },
     ],
@@ -83,7 +87,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by time played range",
     chipPrefix: "Time played: ",
     options: [
-      { value: ALL, label: "All" },
+      { value: null, label: "All" },
       { value: "under_1h", label: "Under 1 hour", chipLabel: "Under 1h" },
       { value: "1_to_10h", label: "1-10 hours", chipLabel: "1-10h" },
       { value: "10_to_50h", label: "10-50 hours", chipLabel: "10-50h" },
@@ -97,7 +101,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by platform",
     chipPrefix: "Platform: ",
     options: [
-      { value: ALL, label: "All Platforms" },
+      { value: null, label: "All Platforms" },
       { value: "windows", label: "Windows" },
       { value: "mac", label: "Mac" },
       { value: "linux", label: "Linux" },
@@ -110,7 +114,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by last played date",
     chipPrefix: "Last played: ",
     options: [
-      { value: ALL, label: "All Time" },
+      { value: null, label: "All Time" },
       { value: "30_days", label: "Last 30 days" },
       { value: "1_year", label: "Last year" },
       { value: "over_1_year", label: "Over a year ago" },
@@ -178,9 +182,11 @@ export function ImportedGamesFilterBar({
     K extends "playtimeStatus" | "playtimeRange" | "platform" | "lastPlayed",
   >(
     key: K,
-    value: string
+    value: string | null
   ) => {
-    update({ [key]: value === ALL ? undefined : (value as never) });
+    update({
+      [key]: value === null || value === ALL ? undefined : (value as never),
+    });
   };
 
   const commitSearch = () => {
@@ -195,7 +201,7 @@ export function ImportedGamesFilterBar({
   };
 
   const selectedValueFor = (key: FilterFieldConfig["paramKey"]) =>
-    filters[key] ?? ALL;
+    filters[key] === undefined || filters[key] === ALL ? null : filters[key];
 
   const chips: ChipDef[] = [];
   if (filters.q && filters.q.trim().length > 0) {
@@ -276,10 +282,11 @@ export function ImportedGamesFilterBar({
         </Label>
         <Select
           value={filters.sortBy ?? SORT_DEFAULT}
+          items={SORT_OPTIONS}
           onValueChange={(value) =>
             update({
               sortBy:
-                value === SORT_DEFAULT
+                value === null || value === SORT_DEFAULT
                   ? undefined
                   : (value as ImportedGamesFilters["sortBy"]),
             })
@@ -290,7 +297,7 @@ export function ImportedGamesFilterBar({
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem key={option.value ?? ALL} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
@@ -325,6 +332,7 @@ export function ImportedGamesFilterBar({
             </Label>
             <Select
               value={selectedValueFor(field.paramKey)}
+              items={field.options}
               onValueChange={(v) => setEnum(field.paramKey, v)}
             >
               <SelectTrigger
@@ -335,7 +343,7 @@ export function ImportedGamesFilterBar({
               </SelectTrigger>
               <SelectContent>
                 {field.options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value ?? ALL} value={option.value}>
                     {option.label}
                   </SelectItem>
                 ))}

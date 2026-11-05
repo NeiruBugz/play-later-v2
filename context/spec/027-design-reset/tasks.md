@@ -76,7 +76,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
 
 - [ ] **Slice 5: Selects run on Base UI with today's look**
-  - [ ] Re-implement `select` on Base UI:
+  - [x] Re-implement `select` on Base UI:
     - pass `items` so the trigger shows the label, not the raw value;
     - `alignItemWithTrigger={false}`;
     - no empty-string values; use `null` for "all".

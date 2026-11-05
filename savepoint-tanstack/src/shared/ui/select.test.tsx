@@ -28,7 +28,7 @@ const actions = {
 const onValueChange = vi.fn();
 
 function ControlledHarness() {
-  const [value, setValue] = React.useState<string | undefined>(undefined);
+  const [value, setValue] = React.useState<string | null>(null);
   return (
     <Select
       value={value}
