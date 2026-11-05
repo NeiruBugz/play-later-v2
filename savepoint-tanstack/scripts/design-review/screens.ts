@@ -20,6 +20,7 @@ export type Screen = {
   path?: string;
   open?: (page: Page, ctx: ReviewContext) => Promise<void>;
   skip?: string;
+  viewports?: ("phone" | "desktop")[];
 };
 
 // Server-rendered controls do nothing until React hydrates, so an action is
@@ -82,6 +83,7 @@ export const SCREENS: Screen[] = [
   {
     id: "library-filters-sheet",
     auth: true,
+    viewports: ["phone"],
     open: async (page) => {
       await page.goto("/library");
       const filters = page.getByRole("button", { name: "Open filters" });

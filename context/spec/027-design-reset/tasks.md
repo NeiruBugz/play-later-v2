@@ -29,7 +29,7 @@ Conventions for every slice:
     - Body text is at least 15px.
     - No clipped or overlapping interactive elements.
     - Write `report.json` next to the images, listing each failure with selector, screen and width. **[Agent: testing]**
-  - [ ] Capture the phase-1 "before" set (phone in Light and Dark; desktop in Light and Dark) and the baseline `report.json`. **[Agent: testing]**
+  - [x] Capture the phase-1 "before" set (phone in Light and Dark; desktop in Light and Dark) and the baseline `report.json`. **[Agent: testing]**
   - [ ] Verify:
     - Start the app (record the PID) and run the script end to end. Confirm the PNGs exist for every screen and both modes, and that `report.json` lists today's known failures, such as 14px inputs and 10–11px labels.
     - Confirm `git status` shows no files under `review/`.

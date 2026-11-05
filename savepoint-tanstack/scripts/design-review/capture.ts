@@ -234,6 +234,12 @@ async function captureScreen(
 ): Promise<ScreenResult> {
   if (screen.skip)
     return { id: screen.id, status: "skipped", detail: screen.skip };
+  if (screen.viewports && !screen.viewports.includes(viewport.name))
+    return {
+      id: screen.id,
+      status: "skipped",
+      detail: `${screen.viewports.join("/")}-only`,
+    };
   try {
     if (screen.open) await screen.open(page, ctx);
     else if (screen.path) await page.goto(screen.path);
