@@ -92,6 +92,7 @@ describe("ThemeToggle", () => {
 
   describe("given the user selects Dark", () => {
     beforeEach(async () => {
+      document.documentElement.classList.remove("dark");
       render(<Harness defaultTheme="system" />);
       await actions.openPicker();
       await actions.selectOption("Dark");
@@ -99,6 +100,10 @@ describe("ThemeToggle", () => {
 
     it("closes the picker after selection", () => {
       expect(elements.queryOptionButton("Dark")).toBeNull();
+    });
+
+    it("applies the dark theme to the page", () => {
+      expect(document.documentElement).toHaveClass("dark");
     });
 
     it("keeps the trigger present after selection", () => {

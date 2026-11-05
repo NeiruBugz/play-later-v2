@@ -51,7 +51,7 @@ Conventions for every slice:
 
 - [ ] **Slice 3: Tooltips, popovers and menus run on Base UI with today's look**
   - [x] Re-implement `tooltip` (`delayDuration` becomes `delay`), `popover` (Positioner hidden in the wrapper) and `dropdown-menu` (Base UI `menu`; labels inside `Menu.Group`; the compat wrapper maps `onSelect` to `onClick`, and to `closeOnClick={false}` where a handler calls `preventDefault`). Keep today's classes and API. **[Agent: react-frontend]**
-  - [ ] Update or add behaviour tests for the status picker popover, the theme-toggle menu (`modal={false}`), the game library controls menu and the Up Next menu actions. Open them with `userEvent`, select an item, and assert the visible outcome. **[Agent: testing]**
+  - [x] Update or add behaviour tests for the status picker popover, the theme-toggle menu (`modal={false}`), the game library controls menu and the Up Next menu actions. Open them with `userEvent`, select an item, and assert the visible outcome. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). At desktop width, change a game's status through the status picker popover, switch the theme through the menu, and use one library-card menu action.
