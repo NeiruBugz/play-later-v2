@@ -9,7 +9,7 @@ import {
 } from "./save-done-follow-up-fn.worker";
 
 export const saveDoneFollowUpFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SAVE_DONE_FOLLOW_UP_INPUT.parse(data))
+  .validator((data: unknown) => SAVE_DONE_FOLLOW_UP_INPUT.parse(data))
   .handler(async ({ data }): Promise<SaveDoneFollowUpResult> => {
     const userId = await requireUserId();
     return saveDoneFollowUpWorker(userId, data);

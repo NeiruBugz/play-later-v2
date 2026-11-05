@@ -11,7 +11,7 @@ import { enforceSearchRateLimit } from "@/shared/api/search-rate-limit.server";
 
 /** Palette search: library-aware (results carry `library`: { status, upNextPosition, rating } | null). */
 export const searchGamesFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SEARCH_LIBRARY_AWARE_INPUT.parse(data))
+  .validator((data: unknown) => SEARCH_LIBRARY_AWARE_INPUT.parse(data))
   .handler(async ({ data }): Promise<LibraryAwareSearchResult> => {
     const userId = await getServerUserId(getRequest());
     await enforceSearchRateLimit(userId);

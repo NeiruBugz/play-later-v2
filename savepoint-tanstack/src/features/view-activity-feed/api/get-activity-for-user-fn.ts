@@ -19,7 +19,7 @@ import {
  * profiles' activity. The viewer is never trusted from input.
  */
 export const getActivityForUserFn = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => GET_ACTIVITY_FOR_USER_INPUT.parse(data))
+  .validator((data: unknown) => GET_ACTIVITY_FOR_USER_INPUT.parse(data))
   .handler(async ({ data }): Promise<ActivityFeedResult> => {
     const viewerUserId = await getServerUserId(getRequest());
     return getActivityForUserWorker(viewerUserId ?? undefined, data);

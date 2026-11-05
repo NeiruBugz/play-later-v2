@@ -14,7 +14,7 @@ const DELETE_LIBRARY_ITEM_INPUT = z.object({
 });
 
 export const deleteLibraryItemFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => DELETE_LIBRARY_ITEM_INPUT.parse(data))
+  .validator((data: unknown) => DELETE_LIBRARY_ITEM_INPUT.parse(data))
   .handler(async ({ data }): Promise<void> => {
     const userId = await requireUserId();
     const { itemId } = DELETE_LIBRARY_ITEM_INPUT.parse(data);

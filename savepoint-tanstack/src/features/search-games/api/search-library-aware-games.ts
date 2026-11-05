@@ -15,7 +15,7 @@ import { enforceSearchRateLimit } from "@/shared/api/search-rate-limit.server";
  * rather than `requireUserId`. The worker owns the annotation join.
  */
 export const searchLibraryAwareGamesFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SEARCH_LIBRARY_AWARE_INPUT.parse(data))
+  .validator((data: unknown) => SEARCH_LIBRARY_AWARE_INPUT.parse(data))
   .handler(async ({ data }): Promise<LibraryAwareSearchResult> => {
     const userId = await getServerUserId(getRequest());
     await enforceSearchRateLimit(userId);

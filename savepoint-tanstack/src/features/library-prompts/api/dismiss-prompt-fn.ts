@@ -9,7 +9,7 @@ import {
 } from "./dismiss-prompt-fn.worker";
 
 export const dismissPromptFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => DISMISS_PROMPT_INPUT.parse(data))
+  .validator((data: unknown) => DISMISS_PROMPT_INPUT.parse(data))
   .handler(async ({ data }): Promise<DismissPromptResult> => {
     const userId = await requireUserId();
     return dismissPromptWorker(userId, data);

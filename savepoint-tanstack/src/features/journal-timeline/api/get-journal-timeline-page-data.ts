@@ -21,7 +21,7 @@ const GET_JOURNAL_TIMELINE_INPUT = z
 export const getJournalTimelinePageDataFn = createServerFn({
   method: "GET",
 })
-  .inputValidator((data: unknown) => GET_JOURNAL_TIMELINE_INPUT.parse(data))
+  .validator((data: unknown) => GET_JOURNAL_TIMELINE_INPUT.parse(data))
   .handler(async ({ data }): Promise<JournalTimelineEntry[]> => {
     const userId = await requireUserId();
     return getJournalTimeline(userId, { gameId: data?.gameId });

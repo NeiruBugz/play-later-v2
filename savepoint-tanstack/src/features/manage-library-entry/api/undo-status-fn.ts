@@ -9,7 +9,7 @@ import {
 } from "./undo-status-fn.worker";
 
 export const undoStatusFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => UNDO_STATUS_INPUT.parse(data))
+  .validator((data: unknown) => UNDO_STATUS_INPUT.parse(data))
   .handler(async ({ data }): Promise<UndoStatusResult> => {
     const userId = await requireUserId();
     return undoStatusWorker(userId, data);

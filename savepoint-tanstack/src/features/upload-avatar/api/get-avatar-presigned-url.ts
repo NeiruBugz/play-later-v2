@@ -13,7 +13,7 @@ import {
  * public URL the browser writes back to the profile after the upload.
  */
 export const getAvatarPresignedUrlFn = createServerFn({ method: "POST" })
-  .inputValidator(parseAvatarPresignInput)
+  .validator(parseAvatarPresignInput)
   .handler(async ({ data }): Promise<AvatarPresignResult> => {
     const userId = await requireUserId();
     return getAvatarPresignedUrlWorker(userId, data);

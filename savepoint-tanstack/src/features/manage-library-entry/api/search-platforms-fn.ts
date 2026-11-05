@@ -8,7 +8,7 @@ import {
 } from "./search-platforms-fn.worker";
 
 export const searchPlatformsFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SEARCH_PLATFORMS_INPUT.parse(data))
+  .validator((data: unknown) => SEARCH_PLATFORMS_INPUT.parse(data))
   .handler(async ({ data }): Promise<string[]> => {
     const userId = await requireUserId();
     return searchPlatformsWorker(userId, data);

@@ -8,7 +8,7 @@ import {
 } from "./unfollow-user.worker";
 
 export const unfollowUserFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => UNFOLLOW_USER_INPUT.parse(data))
+  .validator((data: unknown) => UNFOLLOW_USER_INPUT.parse(data))
   .handler(async ({ data }): Promise<void> => {
     const userId = await requireUserId();
     await unfollowUserWorker(userId, data);

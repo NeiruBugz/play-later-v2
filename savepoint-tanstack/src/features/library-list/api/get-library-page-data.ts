@@ -57,7 +57,7 @@ export type GetLibraryPageDataResult = GetLibraryResult & {
 };
 
 export const getLibraryPageDataFn = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => inputSchema.parse(input))
+  .validator((input: unknown) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<GetLibraryPageDataResult> => {
     const { status, ...filters } = inputSchema.parse(data);
     const userId = await requireUserId();

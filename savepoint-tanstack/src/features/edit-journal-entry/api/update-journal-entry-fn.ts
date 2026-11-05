@@ -17,7 +17,7 @@ const UPDATE_JOURNAL_ENTRY_INPUT = z.object({
 });
 
 export const updateJournalEntryFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => UPDATE_JOURNAL_ENTRY_INPUT.parse(data))
+  .validator((data: unknown) => UPDATE_JOURNAL_ENTRY_INPUT.parse(data))
   .handler(async ({ data }): Promise<JournalTimelineEntry> => {
     const { id, ...input } = UPDATE_JOURNAL_ENTRY_INPUT.parse(data);
     const userId = await requireUserId();

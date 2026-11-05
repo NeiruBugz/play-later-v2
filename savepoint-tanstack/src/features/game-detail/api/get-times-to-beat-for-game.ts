@@ -11,7 +11,7 @@ const inputSchema = z.object({
 });
 
 export const getTimesToBeatForGameFn = createServerFn({ method: "GET" })
-  .inputValidator((value: unknown) => inputSchema.parse(value))
+  .validator((value: unknown) => inputSchema.parse(value))
   .handler(async ({ data }): Promise<TimesToBeat | null> => {
     const { igdbId } = inputSchema.parse(data);
     return getTimesToBeat({ igdbId });

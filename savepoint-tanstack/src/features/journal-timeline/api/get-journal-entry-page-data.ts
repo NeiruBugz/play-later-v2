@@ -31,7 +31,7 @@ const GET_JOURNAL_ENTRY_INPUT = z.object({
  * `NotFoundError` for both missing and cross-user).
  */
 export const getJournalEntryPageDataFn = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => GET_JOURNAL_ENTRY_INPUT.parse(data))
+  .validator((data: unknown) => GET_JOURNAL_ENTRY_INPUT.parse(data))
   .handler(async ({ data }): Promise<JournalTimelineEntry> => {
     const { entryId } = GET_JOURNAL_ENTRY_INPUT.parse(data);
 

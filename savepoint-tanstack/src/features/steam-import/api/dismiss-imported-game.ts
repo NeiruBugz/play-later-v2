@@ -15,7 +15,7 @@ import {
  * foot-gun #1.
  */
 export const dismissImportedGameFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => DISMISS_IMPORTED_GAME_INPUT.parse(data))
+  .validator((data: unknown) => DISMISS_IMPORTED_GAME_INPUT.parse(data))
   .handler(async ({ data }): Promise<void> => {
     const userId = await requireUserId();
     await dismissImportedGameWorker(userId, data);
