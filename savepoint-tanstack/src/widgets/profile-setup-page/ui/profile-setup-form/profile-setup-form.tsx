@@ -98,10 +98,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
             </p>
           ) : null}
         </CardContent>
-        <StickyFooter
-          aboveBottomNav
-          className="mt-6 max-md:mx-0 max-md:bg-card max-md:px-(--card-spacing) md:px-(--card-spacing)"
-        >
+        <StickyFooter aboveBottomNav className="mt-6 md:px-(--card-spacing)">
           <Button
             type="submit"
             disabled={isSubmitting || !isUsernameValid}

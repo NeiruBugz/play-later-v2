@@ -75,7 +75,7 @@ export function EmailSignInForm({ enabled }: EmailSignInFormProps) {
             </FormItem>
           )}
         />
-        <StickyFooter className="max-md:-mx-3 max-md:px-3">
+        <StickyFooter>
           <Button type="submit">Sign in</Button>
         </StickyFooter>
       </form>
