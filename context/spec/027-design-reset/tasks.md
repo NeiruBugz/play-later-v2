@@ -119,7 +119,7 @@ Conventions for every slice:
 
     Accepted deviation (owner, 2026-11-05): moving the spacing utilities to `@utility` sorts them alphabetically, so where one element carries two custom spacing classes (a `Card` variant `p-2xl` plus a call-site `p-lg`; `tailwind-merge` keeps both) the other one now wins. Journal cards and the settings/account cards render tighter than Release 1. Left until Slice 9.
 
-- [ ] **Slice 8: Every primitive has the stock Maia look in today's palette**
+- [x] **Slice 8: Every primitive has the stock Maia look in today's palette**
   - [x] Change `components.json` to `style: "base-maia"` and `baseColor: "neutral"`.
     - Map today's spec-022 oklch values onto the stock shadcn variable names in `:root` and `.dark`. `--primary` is today's teal, and `--accent` is the stock hover surface.
     - Keep `--success/warning/info`, `--status-want/playing/done` and the bottom-nav variables, each declared raw and as `--color-*` in `@theme inline`. Use one stock `--radius`. Delete the other non-stock tokens.
@@ -135,7 +135,7 @@ Conventions for every slice:
     - Sheets: stock `SheetContent` has no body padding, so the Add game and Log time sheets are edge to edge on phone. Restore the side inset.
     - 44px on phone (owner, 2026-11-05: everything at 44px, per §2.6): `Input` `h-11 md:h-9`, Button `sm` `h-11 md:h-8`, and drop the `h-8 w-8` override on the game page "More library actions" icon button. Update the deviation table in `src/shared/ui/README.md` and tech spec §2.4.
     Cover the tabs and sheet fixes with behaviour tests. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). At desktop width, confirm all of the following:
       - primary buttons on every screen share height and corner radius;
@@ -201,9 +201,9 @@ Conventions for every slice:
     - Then ask the owner to do the real-device check on an iPhone and an Android phone: notch and home indicator, the keyboard over text fields, no zoom on focus. Record the result in the slice notes. **[Agent: testing]**
 
 - [ ] **Slice 12: Phone screens use bottom sheets, readable text and thumb-sized targets**
-  - [ ] Route Remove from library, `library-modal`, whats-new, the Steam import modal and Steam connect through `ResponsiveModal`, so they open as bottom sheets on phone with a visible close button. **[Agent: react-frontend]**
+  - [ ] Route Remove from library, `library-modal`, whats-new, the Steam import modal and Steam connect through `ResponsiveModal`, so they open as bottom sheets on phone with a visible close button. The sheet close button must not overlap the header text (Slice 8 verify: on the Log time sheet it covers the end of the description). **[Agent: react-frontend]**
   - [ ] Replace every `text-[10px]` and `text-[11px]`: bottom-nav labels, landing, library card, platform and status badges, profile. The floor is `text-xs`; body text is `text-base md:text-sm`. **[Agent: react-frontend]**
-  - [ ] Bring every tappable element to at least 44×44 at phone width. Migrate the remaining native `<button>` elements to `Button`, or give them `min-h-11 min-w-11 md:min-h-0 md:min-w-0`. Extend the hit area of small icon controls. **[Agent: react-frontend]**
+  - [ ] Bring every tappable element to at least 44×44 at phone width. Migrate the remaining native `<button>` elements to `Button`, or give them `min-h-11 min-w-11 md:min-h-0 md:min-w-0`. Extend the hit area of small icon controls. Known from the Slice 8 verify: the toast "Undo" action is sonner's own action button (24px; style it through the `Toaster`'s `toastOptions.classNames.actionButton`, the `Button` inside `UndoToastBody` is not on that path), the Grid/List view toggles are 42 px wide, the game page tabs are 32 px, the status chip and status-picker rows are under 44. **[Agent: react-frontend]**
   - [ ] Make hover-only information reachable by tap. Platform badges open a `Popover` on tap; the Steam imported-card icon buttons replace `title=` with `aria-label` plus a tooltip or popover. **[Agent: react-frontend]**
   - [ ] Write behaviour tests:
     - Remove from library opens as a sheet when `useIsDesktop` is false and as a dialog when it is true;
