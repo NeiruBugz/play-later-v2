@@ -1,11 +1,21 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 
-import { AddGameContent } from "@/features/add-game";
 import { closeGlobalAction } from "@/shared/lib/global-action";
 import { keepOpenOnToastInteraction } from "@/shared/lib/keep-open-on-toast-interaction";
 import { ResponsiveModal } from "@/shared/ui";
 
-import { LogFormHost } from "../log-form-host";
+const AddGameContent = lazy(() =>
+  import("@/features/add-game/ui/add-game-content").then((module) => ({
+    default: module.AddGameContent,
+  }))
+);
+
+const LogFormHost = lazy(() =>
+  import("../log-form-host").then((module) => ({
+    default: module.LogFormHost,
+  }))
+);
 
 export function GlobalActionHost() {
   const { action, game } = useSearch({ from: "__root__" });
@@ -54,7 +64,7 @@ export function GlobalActionHost() {
       sheetTestId="global-action-sheet"
       onInteractOutside={keepOpenOnToastInteraction}
     >
-      {content}
+      <Suspense fallback={null}>{content}</Suspense>
     </ResponsiveModal>
   );
 }

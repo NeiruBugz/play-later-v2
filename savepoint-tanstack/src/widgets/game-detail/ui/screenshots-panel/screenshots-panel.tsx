@@ -1,6 +1,9 @@
 import { useState } from "react";
 
-import { buildScreenshotUrl } from "@/shared/lib/igdb-image";
+import {
+  buildScreenshotThumbUrl,
+  buildScreenshotUrl,
+} from "@/shared/lib/igdb-image";
 import { ImageLightbox } from "@/shared/ui/image-lightbox";
 
 import type { ScreenshotsPanelProps } from "./screenshots-panel.type";
@@ -15,7 +18,7 @@ export function ScreenshotsPanel({
 
   const images = screenshots
     .map((shot, i) => ({
-      thumb: buildScreenshotUrl(shot.image_id, "t_720p"),
+      thumb: buildScreenshotThumbUrl(shot.image_id),
       full: buildScreenshotUrl(shot.image_id, "t_1080p"),
       alt: `Screenshot ${i + 1}`,
     }))
@@ -50,6 +53,10 @@ export function ScreenshotsPanel({
             <img
               src={image.thumb}
               alt=""
+              loading="lazy"
+              decoding="async"
+              width={569}
+              height={320}
               aria-hidden="true"
               className="aspect-video w-full object-cover transition-transform hover:scale-[1.03]"
             />

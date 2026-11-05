@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { PlatformBadges } from "@/entities/game";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { buildCoverImageProps } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
 
 import {
@@ -27,7 +27,7 @@ export function GameCard({
   ...props
 }: GameCardProps) {
   const { slug, title, coverImageId, releaseYear, platforms = [] } = game;
-  const coverUrl = buildCoverImageUrl(coverImageId, "t_720p");
+  const cover = buildCoverImageProps(coverImageId);
   const showMeta =
     density === "detailed" &&
     ((releaseYear ?? null) !== null || platforms.length > 0);
@@ -47,11 +47,13 @@ export function GameCard({
       {...props}
     >
       <div className={cn(gameCardCoverVariants(), "w-full")}>
-        {coverUrl ? (
+        {cover ? (
           <img
-            src={coverUrl}
+            src={cover.src}
+            srcSet={cover.srcSet}
             alt={`Cover for ${title}`}
             loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (

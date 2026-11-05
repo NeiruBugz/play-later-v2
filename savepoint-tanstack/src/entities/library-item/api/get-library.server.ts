@@ -42,25 +42,22 @@ export async function getLibrary(
         ? { createdAt: sortOrder }
         : { updatedAt: sortOrder };
 
-  const [items, total] = await Promise.all([
-    prisma.libraryItem.findMany({
-      where,
-      orderBy,
-      include: {
-        game: {
-          select: {
-            id: true,
-            igdbId: true,
-            title: true,
-            slug: true,
-            coverImage: true,
-            releaseDate: true,
-          },
+  const items = await prisma.libraryItem.findMany({
+    where,
+    orderBy,
+    include: {
+      game: {
+        select: {
+          id: true,
+          igdbId: true,
+          title: true,
+          slug: true,
+          coverImage: true,
+          releaseDate: true,
         },
       },
-    }),
-    prisma.libraryItem.count({ where }),
-  ]);
+    },
+  });
 
-  return { items, total };
+  return { items, total: items.length };
 }

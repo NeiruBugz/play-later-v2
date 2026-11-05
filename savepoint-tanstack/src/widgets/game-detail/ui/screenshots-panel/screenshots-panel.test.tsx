@@ -14,6 +14,9 @@ const elements = {
   queryHeading: () => screen.queryByRole("heading", { name: "Screenshots" }),
   getThumbnail: (n: number) =>
     screen.getByRole("button", { name: `Open screenshot ${n}` }),
+  getThumbnailImage: (n: number) =>
+    // eslint-disable-next-line testing-library/no-node-access
+    elements.getThumbnail(n).querySelector("img") as HTMLImageElement,
   queryLightboxImage: (n: number) =>
     screen.queryByRole("img", { name: `Screenshot ${n}` }),
 };
@@ -36,6 +39,17 @@ describe("ScreenshotsPanel", () => {
       expect(elements.getThumbnail(1)).not.toBeNull();
       expect(elements.getThumbnail(2)).not.toBeNull();
       expect(elements.getThumbnail(3)).not.toBeNull();
+    });
+
+    it("loads thumbnails at the medium screenshot size", () => {
+      expect(elements.getThumbnailImage(1)).toHaveAttribute(
+        "src",
+        "https://images.igdb.com/igdb/image/upload/t_screenshot_med/abc1.jpg"
+      );
+    });
+
+    it("defers loading thumbnails until they near the viewport", () => {
+      expect(elements.getThumbnailImage(1)).toHaveAttribute("loading", "lazy");
     });
 
     it("does not show the lightbox before a thumbnail is clicked", () => {

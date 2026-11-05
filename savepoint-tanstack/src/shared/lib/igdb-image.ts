@@ -6,6 +6,7 @@ export type IgdbCoverSize =
   | "t_cover_small"
   | "t_cover_big"
   | "t_cover_big_2x"
+  | "t_screenshot_med"
   | "t_720p"
   | "t_1080p";
 
@@ -26,4 +27,27 @@ export function buildScreenshotUrl(
   size: IgdbCoverSize = "t_1080p"
 ): string | null {
   return buildCoverImageUrl(imageId, size);
+}
+
+export interface CoverImageProps {
+  src: string;
+  srcSet: string | undefined;
+}
+
+export function buildCoverImageProps(
+  coverImage: string | null | undefined
+): CoverImageProps | null {
+  const src = buildCoverImageUrl(coverImage, "t_cover_big");
+  if (!src) return null;
+  const src2x = buildCoverImageUrl(coverImage, "t_cover_big_2x");
+  return {
+    src,
+    srcSet: src2x && src2x !== src ? `${src} 1x, ${src2x} 2x` : undefined,
+  };
+}
+
+export function buildScreenshotThumbUrl(
+  imageId: string | null | undefined
+): string | null {
+  return buildScreenshotUrl(imageId, "t_screenshot_med");
 }

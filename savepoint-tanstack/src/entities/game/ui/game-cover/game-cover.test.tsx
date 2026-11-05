@@ -33,6 +33,28 @@ describe("GameCover", () => {
     });
   });
 
+  describe("given the cover is below the fold (default)", () => {
+    beforeEach(() => {
+      render(<GameCover src="https://cdn.example.com/c.jpg" alt="Below" />);
+    });
+
+    it("loads lazily", () => {
+      expect(elements.queryImg("Below")).toHaveAttribute("loading", "lazy");
+    });
+  });
+
+  describe("given the cover is the hero (eager)", () => {
+    beforeEach(() => {
+      render(
+        <GameCover src="https://cdn.example.com/c.jpg" alt="Hero" eager />
+      );
+    });
+
+    it("loads immediately", () => {
+      expect(elements.queryImg("Hero")).toHaveAttribute("loading", "eager");
+    });
+  });
+
   describe("given src is null", () => {
     beforeEach(() => {
       render(<GameCover src={null} alt="Hollow Knight" />);
