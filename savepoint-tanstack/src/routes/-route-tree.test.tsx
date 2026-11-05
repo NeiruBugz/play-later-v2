@@ -170,6 +170,12 @@ describe("real route tree", () => {
     expect(router.state.location.pathname).toBe(path);
   });
 
+  it("has no /about route", async () => {
+    const router = await renderAt("/journal");
+
+    expect(Object.keys(router.routesByPath)).not.toContain("/about");
+  });
+
   it("does not render the profile page on the followers route", async () => {
     await renderAt("/u/other/followers");
 
