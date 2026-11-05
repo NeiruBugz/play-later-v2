@@ -169,7 +169,7 @@ Conventions for every slice:
       - page titles, including the profile name, use the title font.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 10: The custom styling layer cannot come back**
+- [x] **Slice 10: The custom styling layer cannot come back**
   - [x] Delete the remaining semantic spacing, typography and shadow utilities from `styles.css`. Confirm `styles.css` is about 300 lines and `rg` finds none of the retired names in `src/`. **[Agent: react-frontend]**
   - [x] Add `eslint-plugin-better-tailwindcss` (exact pin) to `eslint.config.mjs`. Rules:
     - `no-unknown-classes` against `src/styles.css`;
@@ -182,7 +182,7 @@ Conventions for every slice:
     - bump `prettier-plugin-tailwindcss` to the v4-aware line with `tailwindStylesheet: "./src/styles.css"`;
     - upgrade `tailwind-merge` to the v3 line, with exact pins;
     - update `.claude/rules/tanstack/shared.md` and `widgets.md`, `src/shared/README.md`, `DIVERGENCES.md` and the spec-022 design README to the new rule: tokens in `styles.css`, stock `shadcn view` output as the source of truth, deviations listed in `shared/ui/README.md`. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Add a throwaway file using `px-xl`, `text-[11px]` and `bg-[#2f8a82]`, and confirm lint fails on each. Delete the file.
     - Confirm `cn("text-xs","text-muted-foreground")` keeps both classes, using a small node check that is then deleted. **[Agent: testing]**
