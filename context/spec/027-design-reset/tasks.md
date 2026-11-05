@@ -88,7 +88,7 @@ Conventions for every slice:
     - Start the app (record the PID). Change library sort and the journal game filter, at phone width and at desktop width, and confirm the list updates and the trigger label is correct.
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
 
-- [ ] **Slice 6: Call sites use Base UI directly; Radix is gone (Release 1)**
+- [x] **Slice 6: Call sites use Base UI directly; Radix is gone (Release 1)**
   - [x] Migrate the call sites with a ts-morph codemod:
     - `<Button asChild><Link …/></Button>` becomes `<Link className={buttonVariants(...)}>`;
     - triggers with `asChild` use `render={<… />}`, adding `nativeButton={false}` when the element is a link;
@@ -97,7 +97,7 @@ Conventions for every slice:
     Delete the compat wrappers. Remove all 13 `@radix-ui/*` packages; `rg "@radix-ui"` must return nothing. **[Agent: react-frontend]**
   - [x] Add an ESLint `no-restricted-syntax` rule banning the `asChild` JSX attribute, with a test in `test/eslint/` proving it fires. **[Agent: react-frontend]**
   - [x] Fix the regression the first Slice 6 verify found: the "All" / "All platforms" select triggers render muted. Base UI sets `data-placeholder` when the value is `null`, and `select.tsx` styles that as `text-muted-foreground`. An explicit "All" choice must render in foreground text as in `review/phase1/before`; a trigger with no selection and a placeholder stays muted. Cover both with a behaviour test. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate and `rg "@radix-ui|asChild" src`, which must be empty.
     - Start the app (record the PID). Run the full review-script capture into a temporary folder and compare it with `review/phase1/before`. There must be no visible change.
     - Walk the main flows in the Playwright MCP: add a game, change status, Undo, log a session, filter the library, open settings.
