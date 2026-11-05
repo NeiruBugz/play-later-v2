@@ -208,7 +208,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <DropdownMenuTrigger
             type="button"
             aria-label="Open user menu"
-            className={`hover:bg-accent data-[state=open]:bg-accent flex w-full items-center rounded-md py-1.5 text-sm ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
+            className={`hover:bg-accent data-[popup-open]:bg-accent flex w-full items-center rounded-md py-1.5 text-sm ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
           >
             <Avatar className="h-7 w-7">
               {user.image ? (
