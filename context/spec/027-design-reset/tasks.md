@@ -104,7 +104,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the temporary files.
     - Release 1 can ship after this. **[Agent: testing]**
 
-- [ ] **Slice 7: Titles use the title font, `/about` shows "not found", and the token layer is cleaned up**
+- [x] **Slice 7: Titles use the title font, `/about` shows "not found", and the token layer is cleaned up**
   - [x] In `src/styles.css`:
     - add `--font-sans`, `--font-mono` and `--font-display` to `@theme`, so `font-display` produces CSS;
     - move the still-used custom utilities from `@layer utilities` to `@utility`, so their variants start working (hover shadows, `sm:` gaps);
@@ -112,10 +112,12 @@ Conventions for every slice:
 
     Diff the compiled CSS to confirm no live class disappeared. **[Agent: react-frontend]**
   - [x] Delete `src/routes/about.tsx` and regenerate `routeTree.gen.ts`. Add an assertion to `src/routes/-route-tree.test.tsx` that `/about` is absent. **[Agent: tanstack-fullstack]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Open `/about` and see the standard not-found screen. Confirm in the Playwright MCP, via computed `font-family`, that the four former no-op places use Space Grotesk: log-session title, journal stats rail, journal entry card. Confirm that hovering a button at desktop changes its shadow.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+    Accepted deviation (owner, 2026-11-05): moving the spacing utilities to `@utility` sorts them alphabetically, so where one element carries two custom spacing classes (a `Card` variant `p-2xl` plus a call-site `p-lg`; `tailwind-merge` keeps both) the other one now wins. Journal cards and the settings/account cards render tighter than Release 1. Left until Slice 9.
 
 - [ ] **Slice 8: Every primitive has the stock Maia look in today's palette**
   - [ ] Change `components.json` to `style: "base-maia"` and `baseColor: "neutral"`.
@@ -143,6 +145,7 @@ Conventions for every slice:
   - [ ] Write the dev-only codemod `scripts/codemods/tailwind-semantic.ts` (ts-morph).
     - It reads the current values from `styles.css` and maps semantic spacing to numeric Tailwind steps, the type classes to stock sizes, and `shadow-paper-*` to `shadow-xs/sm/md`.
     - It touches only string literals in `className`, `cn()` and `cva()`.
+    - Where one element ends up with two conflicting spacing classes (a `Card` variant plus a call-site override; see the Slice 7 accepted deviation), keep one stock value on purpose. Release 1 showed the variant's value (e.g. `p-2xl`, 24px), not the call site's.
     - Run it on `src/shared` and `src/entities`, then run the gate. **[Agent: react-frontend]**
   - [ ] Run the codemod on `src/features`, then on `src/widgets` and `src/routes`, running the gate after each layer. Grep for retired names left in template literals and fix them by hand. Fix bare `rounded` and arbitrary radius values per file. **[Agent: react-frontend]**
   - [ ] Add `SectionLabel` (body font, sentence case) to `shared/ui`. Replace `terminal-label`, the local `TerminalLabel` clone and every `// LABEL` string with it. Make `PageHeader` the only page-title style, on every screen in §2.0. Remove `font-serif` from the profile name. **[Agent: react-frontend]**
