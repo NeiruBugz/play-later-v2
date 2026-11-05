@@ -160,7 +160,10 @@ export function CommandPalette({
 
   if (!isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={keepOpenOnToastPress(handleOpenChange)}>
+      <Sheet
+        open={isOpen}
+        onOpenChange={keepOpenOnToastPress(handleOpenChange)}
+      >
         <SheetContent
           side="bottom"
           className="gap-0 p-0"
@@ -178,9 +181,7 @@ export function CommandPalette({
 
   return (
     <Dialog open={isOpen} onOpenChange={keepOpenOnToastPress(handleOpenChange)}>
-      <DialogContent
-        className="max-w-2xl gap-0 p-0"
-      >
+      <DialogContent className="max-w-2xl gap-0 p-0">
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <DialogDescription className="sr-only">
           Search games, jump to a page, or run a quick action.

@@ -55,10 +55,7 @@ export function ResponsiveModal({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent
-          className={contentClassName}
-          data-testid={dialogTestId}
-        >
+        <DialogContent className={contentClassName} data-testid={dialogTestId}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description !== undefined ? (
