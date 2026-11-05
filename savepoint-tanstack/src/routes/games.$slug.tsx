@@ -22,6 +22,7 @@ import {
 import { AppError, NotFoundError } from "@/shared/lib/errors";
 import { Card } from "@/shared/ui/card";
 import { PageHeader } from "@/shared/ui/page-header";
+import { SectionLabel } from "@/shared/ui/section-label";
 import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
@@ -122,12 +123,7 @@ function RelatedGamesSections({ sections }: { sections: RelatedCollection[] }) {
         aria-labelledby="related-games-heading"
         className="flex flex-col gap-2"
       >
-        <h2
-          id="related-games-heading"
-          className="font-display text-2xl font-semibold tracking-tight"
-        >
-          Related games
-        </h2>
+        <SectionLabel id="related-games-heading">Related games</SectionLabel>
         <RelatedGamesTabs
           sections={sections}
           renderGame={(game) => (
@@ -157,12 +153,7 @@ function SectionErrorMessage({
 }) {
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
-      <h2
-        id={headingId}
-        className="font-display text-2xl font-semibold tracking-tight"
-      >
-        {heading}
-      </h2>
+      <SectionLabel id={headingId}>{heading}</SectionLabel>
       <div role="alert" className="text-destructive text-sm">
         {message}
       </div>

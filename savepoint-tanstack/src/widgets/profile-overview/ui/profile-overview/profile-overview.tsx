@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { PageHeader } from "@/shared/ui/page-header";
+import { SectionLabel } from "@/shared/ui/section-label";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import { deriveBannerGradient } from "../../lib/derive-banner-gradient";
@@ -162,9 +163,7 @@ export function ProfileOverview({
           <div className="space-y-8">
             {stats.recentGames.length > 0 ? (
               <section data-testid="overview-recently-played">
-                <h2 className="font-display mb-4 text-2xl font-semibold tracking-tight">
-                  Playing
-                </h2>
+                <SectionLabel className="mb-4">Playing</SectionLabel>
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
                   {stats.recentGames.map((game) => (
                     <Link

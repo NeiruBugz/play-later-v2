@@ -5,6 +5,7 @@ import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { buttonVariants } from "@/shared/ui/button";
 import { PageHeader } from "@/shared/ui/page-header";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { JournalEntryPageProps } from "./journal-entry-page.type";
 
@@ -58,15 +59,11 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
       </p>
 
       {entry.prompt ? (
-        <h2 className="font-display text-2xl font-semibold tracking-tight">
-          {PROMPT_QUESTION[entry.prompt]}
-        </h2>
+        <SectionLabel>{PROMPT_QUESTION[entry.prompt]}</SectionLabel>
       ) : null}
 
       {timePlayed ? (
-        <p className="font-display text-2xl font-semibold tracking-tight">
-          {timePlayed} played
-        </p>
+        <SectionLabel as="p">{timePlayed} played</SectionLabel>
       ) : null}
 
       {content ? (

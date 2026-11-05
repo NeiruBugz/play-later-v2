@@ -1,5 +1,7 @@
 import { type ReactNode } from "react";
 
+import { PageHeader } from "@/shared/ui/page-header";
+
 type AuthPageViewProps = {
   cognitoButton: ReactNode;
   credentialsForm?: ReactNode;
@@ -18,13 +20,12 @@ export function AuthPageView({
           <p className="font-display text-5xl font-bold tracking-tight">
             SavePoint
           </p>
-          <h1 className="font-display sr-only text-4xl font-semibold tracking-tight">
-            Sign in
-          </h1>
           <p className="text-muted-foreground mt-1.5 text-xs font-medium">
             Your games and the things you&apos;ve thought about them.
           </p>
         </div>
+
+        <PageHeader title="Sign in" />
 
         {notice}
 

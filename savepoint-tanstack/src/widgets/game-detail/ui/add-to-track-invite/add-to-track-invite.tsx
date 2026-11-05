@@ -3,6 +3,7 @@ import { BookOpen } from "lucide-react";
 
 import { AddGameAction } from "@/features/add-game";
 import { buttonVariants } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { AddToTrackInviteProps } from "./add-to-track-invite.type";
 
@@ -24,12 +25,7 @@ export function AddToTrackInvite({
         <BookOpen className="text-primary h-5 w-5" />
       </span>
       <div className="flex flex-col">
-        <h2
-          id="track-invite-heading"
-          className="font-display text-2xl font-semibold tracking-tight"
-        >
-          Add {gameTitle}
-        </h2>
+        <SectionLabel id="track-invite-heading">Add {gameTitle}</SectionLabel>
         <p className="text-muted-foreground text-sm">
           {isSignedIn
             ? "Add this to your library to log time, rate it, and keep notes."

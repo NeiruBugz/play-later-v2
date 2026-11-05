@@ -38,7 +38,7 @@ export function EmptyLibraryHero({
       </div>
 
       <div className="max-w-md space-y-1.5">
-        <h2 className="font-display text-3xl font-semibold tracking-tight">
+        <h2 className="text-xl font-semibold tracking-tight">
           Start your library
         </h2>
         <p className="text-muted-foreground text-base">

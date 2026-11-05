@@ -1,3 +1,4 @@
+import { SectionLabel } from "@/shared/ui/section-label";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 /**
@@ -11,12 +12,9 @@ export function TimesToBeatSkeleton() {
       aria-busy="true"
       className="flex flex-col gap-2"
     >
-      <h2
-        id="times-to-beat-heading-skeleton"
-        className="font-display text-2xl font-semibold tracking-tight"
-      >
+      <SectionLabel id="times-to-beat-heading-skeleton">
         Times to beat
-      </h2>
+      </SectionLabel>
       <div className="grid grid-cols-2 gap-2">
         <Skeleton className="h-4 w-24 rounded-md" />
         <Skeleton className="h-4 w-16 rounded-md" />

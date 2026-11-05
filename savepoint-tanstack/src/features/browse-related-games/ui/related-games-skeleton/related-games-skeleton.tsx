@@ -1,3 +1,4 @@
+import { SectionLabel } from "@/shared/ui/section-label";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 /**
@@ -13,12 +14,9 @@ export function RelatedGamesSkeleton() {
       aria-busy="true"
       className="flex flex-col gap-2"
     >
-      <h2
-        id="related-games-heading-skeleton"
-        className="font-display text-2xl font-semibold tracking-tight"
-      >
+      <SectionLabel id="related-games-heading-skeleton">
         Related games
-      </h2>
+      </SectionLabel>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {Array.from({ length: PLACEHOLDER_COUNT }).map((_, index) => (
           <li key={index} className="flex flex-col gap-2">

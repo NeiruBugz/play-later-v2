@@ -176,6 +176,14 @@ describe("real route tree", () => {
     expect(Object.keys(router.routesByPath)).not.toContain("/about");
   });
 
+  it("shows the not-found page title for an unknown path", async () => {
+    await renderAt("/about");
+
+    expect(
+      await screen.findByRole("heading", { name: "Page not found" })
+    ).toBeInTheDocument();
+  });
+
   it("does not render the profile page on the followers route", async () => {
     await renderAt("/u/other/followers");
 

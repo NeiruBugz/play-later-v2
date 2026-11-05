@@ -58,7 +58,7 @@ Run on every non-skipped screen at 360x780, 390x844 and 430x932, in Light only (
 | `bodyFontSize`     | body text is under 15px (rule below)                                                                                                                                                                                                |
 | `clippedOrCovered` | an enabled interactive element is cut by an `overflow: hidden/clip` ancestor or the viewport edge, or `checkClickable` (verify-ui, loaded and evaluated in the page) reports it covered or unreachable after scrolling it into view |
 
-Body-text rule: an element counts as body text when it has direct text and is a `p` or `li`, or has at least 40 characters of direct text. Anything inside `label`, `button`, `nav`, `th`, `caption`, `figcaption`, `small`, `time`, `code`, `kbd`, `[role=button|tab|menuitem|option]`, `[data-slot=badge]` or `[data-slot=label]` is a label, not body text. Disabled controls are skipped by `clippedOrCovered`; the dev-only TanStack Devtools toggle is ignored.
+Body-text rule: an element counts as body text when it has direct text and is a `p` or `li`, or has at least 40 characters of direct text. Anything inside `label`, `button`, `nav`, `th`, `caption`, `figcaption`, `small`, `time`, `code`, `kbd`, `[role=button|tab|menuitem|option]`, `[data-slot=badge]`, `[data-slot=label]` or `[data-slot=section-label]` is a label, not body text. Disabled controls are skipped by `clippedOrCovered`; the dev-only TanStack Devtools toggle is ignored.
 
 ### report.json
 

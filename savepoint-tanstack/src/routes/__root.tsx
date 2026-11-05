@@ -9,7 +9,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { z } from "zod";
 
-import { ErrorBoundary } from "@/app";
+import { ErrorBoundary, NotFoundPage } from "@/app";
 
 import "@/app/dev-console-error-expander";
 
@@ -130,6 +130,7 @@ export const Route = createRootRouteWithContext<{
   component: RootShell,
   shellComponent: RootDocument,
   errorComponent: ErrorBoundary,
+  notFoundComponent: NotFoundPage,
 });
 
 export function RootShell() {

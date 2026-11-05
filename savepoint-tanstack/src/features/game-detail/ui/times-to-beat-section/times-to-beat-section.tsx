@@ -1,5 +1,6 @@
 import { formatHours } from "@/shared/lib/date";
 import { Card } from "@/shared/ui/card";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { TimesToBeatSectionProps } from "./times-to-beat-section.type";
 
@@ -22,12 +23,7 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
         aria-labelledby="times-to-beat-heading"
         className="flex flex-col gap-2"
       >
-        <h2
-          id="times-to-beat-heading"
-          className="font-display text-2xl font-semibold tracking-tight"
-        >
-          Times to beat
-        </h2>
+        <SectionLabel id="times-to-beat-heading">Times to beat</SectionLabel>
         <dl className="flex flex-wrap gap-4">
           {entries.map((entry) => (
             <div key={entry.label} className="flex flex-col">
