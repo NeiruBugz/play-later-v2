@@ -1,19 +1,13 @@
 import type { ReactNode } from "react";
 
-import type { RelatedGame } from "../../api";
-import type { RelatedGamesPage } from "../related-games-infinite-list";
+import type { RelatedCollection, RelatedGame } from "../../api";
 
-export type RelatedGamesTabsSection = {
-  collectionId: number;
-  collectionName: string;
-  pageSize: number;
-  firstPage: RelatedGamesPage;
-};
+export type RelatedGamesTabsSection = RelatedCollection;
 
 export type RelatedGamesTabsProps = {
   sections: ReadonlyArray<RelatedGamesTabsSection>;
   /**
-   * Render prop forwarded to each `RelatedGamesInfiniteList`. Injected by the
+   * Render prop forwarded to each `RelatedGamesList`. Injected by the
    * composing route/widget so the feature never imports from `widgets/`.
    */
   renderGame: (game: RelatedGame) => ReactNode;

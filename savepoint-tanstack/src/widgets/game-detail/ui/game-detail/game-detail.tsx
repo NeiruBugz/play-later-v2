@@ -172,11 +172,7 @@ export function GameDetail({
           </Card>
         ) : null}
 
-        {showTimesToBeatPanel ? (
-          <Card variant="flat" className="gap-md p-xl flex flex-col">
-            {timesToBeatSlot}
-          </Card>
-        ) : null}
+        {showTimesToBeatPanel ? timesToBeatSlot : null}
 
         {hasAboutData ? (
           <Card

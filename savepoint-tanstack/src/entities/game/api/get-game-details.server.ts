@@ -13,8 +13,6 @@ import type {
 import { getEndedPlays, type EndedPlay } from "./get-ended-plays.server";
 import { upsertThinGameFromIgdbDetailsPayload } from "./upsert-game.server";
 
-const RECENT_SESSION_LIMIT = 9;
-
 export type GameDetailsNote = Pick<
   JournalEntry,
   "id" | "content" | "playedMinutes" | "createdAt" | "prompt"
@@ -69,8 +67,6 @@ export interface GameDetails {
   playtimeTotalMinutes: number;
   /** Sessions: count of the viewer's notes with playedMinutes > 0 — the denominator for average session length. */
   playtimeSessionCount: number;
-  /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
-  recentSessionMinutes: number[];
   /** Ended plays, newest first; the owner's own game only, empty otherwise. */
   history: EndedPlay[];
 }
@@ -93,7 +89,6 @@ export async function getGameDetails(params: {
   let prompts = NO_PROMPTS;
   let playtimeTotalMinutes = 0;
   let playtimeSessionCount = 0;
-  let recentSessionMinutes: number[] = [];
   let history: EndedPlay[] = [];
 
   if (userId) {
@@ -124,11 +119,6 @@ export async function getGameDetails(params: {
       .filter((minutes): minutes is number => minutes !== null && minutes > 0);
     playtimeSessionCount = timedMinutes.length;
     playtimeTotalMinutes = timedMinutes.reduce((sum, m) => sum + m, 0);
-    // Notes are newest→oldest; take the most recent, then reverse so the
-    // rhythm chart reads oldest→newest.
-    recentSessionMinutes = timedMinutes
-      .slice(0, RECENT_SESSION_LIMIT)
-      .reverse();
     history = endedPlays;
   }
 
@@ -141,7 +131,6 @@ export async function getGameDetails(params: {
     notes,
     playtimeTotalMinutes,
     playtimeSessionCount,
-    recentSessionMinutes,
     history,
   };
 }

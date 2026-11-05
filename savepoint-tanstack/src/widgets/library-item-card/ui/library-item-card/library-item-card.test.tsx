@@ -16,7 +16,7 @@ import { LibraryItemCard } from "./library-item-card";
 
 // LibraryItemCard renders GameCard, which wraps the card in a TanStack
 // <Link>. The link requires a RouterProvider context — mock it as a plain
-// <a> (matches the precedent in library-grid / related-games-infinite-list
+// <a> (matches the precedent in library-grid / related-games-list
 // / game-card). Also mock the CTA's server fn so we don't reach the Start
 // runtime.
 vi.mock("@tanstack/react-router", () => ({

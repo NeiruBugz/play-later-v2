@@ -101,7 +101,7 @@ _Make SavePoint the place the author picks his next game every week. Simplificat
 
 5. [ ] **Soft Playing Limit** — starting a game beyond the limit asks whether to put one aside. _Assumption: limit 3, soft; validate in use._
 
-6. [ ] **Reframe Times to Beat** — show length as "about N evenings"; remove you-vs-benchmark and "Your Pace" comparisons shipped in spec 023.
+6. [ ] **Reframe Times to Beat** — show length as "about N evenings"; remove you-vs-benchmark and "Your Pace" comparisons shipped in spec 023. _Partially done 2026-11-04: Your Pace and the you-vs-benchmark comparison removed; the "about N evenings" framing remains._
 
 7. [ ] **Steam Import on the Simplified Model** — the in-app Steam import (rebuilt without Lambda in spec 021, curation from spec 003) feeds Want/Playing/Done; re-verify end to end and adapt smart status. _Corrects the stale "blocked — pipeline removed" note: import no longer depends on Lambda._
 

@@ -10,14 +10,10 @@ import {
   RelatedGamesSkeleton,
   RelatedGamesTabs,
 } from "@/features/browse-related-games";
-import {
-  getGameDetailPageDataFn,
-  type RelatedCollectionSection,
-} from "@/features/game-detail/api";
-import {
-  relatedGamesQueryOptions,
-  timesToBeatQueryOptions,
-} from "@/features/game-detail/model";
+import type { RelatedCollection } from "@/features/browse-related-games/api";
+import { relatedGamesQueryOptions } from "@/features/browse-related-games/model";
+import { getGameDetailPageDataFn } from "@/features/game-detail/api";
+import { timesToBeatQueryOptions } from "@/features/game-detail/model";
 import {
   TimesToBeatSection,
   TimesToBeatSkeleton,
@@ -51,20 +47,23 @@ function GameDetailRoute() {
       timesToBeatSlot={
         <SectionErrorBoundary
           fallback={
-            <SectionErrorMessage
-              headingId="times-to-beat-heading"
-              heading="Times to beat"
-              message="Couldn't load times to beat"
-            />
+            <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <SectionErrorMessage
+                headingId="times-to-beat-heading"
+                heading="Times to beat"
+                message="Couldn't load times to beat"
+              />
+            </Card>
           }
         >
-          <Suspense fallback={<TimesToBeatSkeleton />}>
-            <TimesToBeatSlot
-              igdbId={igdbId}
-              playtimeTotalMinutes={data.playtimeTotalMinutes}
-              playtimeSessionCount={data.playtimeSessionCount}
-              recentSessionMinutes={data.recentSessionMinutes}
-            />
+          <Suspense
+            fallback={
+              <Card variant="flat" className="gap-md p-xl flex flex-col">
+                <TimesToBeatSkeleton />
+              </Card>
+            }
+          >
+            <TimesToBeatSlot igdbId={igdbId} />
           </Suspense>
         </SectionErrorBoundary>
       }
@@ -95,28 +94,11 @@ function GameDetailRoute() {
   );
 }
 
-function TimesToBeatSlot({
-  igdbId,
-  playtimeTotalMinutes,
-  playtimeSessionCount,
-  recentSessionMinutes,
-}: {
-  igdbId: number;
-  playtimeTotalMinutes: number;
-  playtimeSessionCount: number;
-  recentSessionMinutes: number[];
-}) {
+function TimesToBeatSlot({ igdbId }: { igdbId: number }) {
   const { data: timesToBeat } = useSuspenseQuery(
     timesToBeatQueryOptions(igdbId)
   );
-  return (
-    <TimesToBeatSection
-      timesToBeat={timesToBeat}
-      playtimeTotalMinutes={playtimeTotalMinutes}
-      playtimeSessionCount={playtimeSessionCount}
-      recentSessionMinutes={recentSessionMinutes}
-    />
-  );
+  return <TimesToBeatSection timesToBeat={timesToBeat} />;
 }
 
 function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
@@ -125,11 +107,7 @@ function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
   return <RelatedGamesSections sections={sections} />;
 }
 
-function RelatedGamesSections({
-  sections,
-}: {
-  sections: RelatedCollectionSection[];
-}) {
+function RelatedGamesSections({ sections }: { sections: RelatedCollection[] }) {
   return (
     <Card variant="flat" className="gap-md p-xl flex flex-col">
       <section

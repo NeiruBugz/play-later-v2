@@ -1,5 +1,5 @@
 /**
- * Suspense fallback for `RelatedGamesInfiniteList`. Mimics the grid shape
+ * Suspense fallback for `RelatedGamesTabs`. Mimics the grid shape
  * (5-up at lg) with shimmer placeholders. Pure CSS — no props, no logic.
  */
 const PLACEHOLDER_COUNT = 10;

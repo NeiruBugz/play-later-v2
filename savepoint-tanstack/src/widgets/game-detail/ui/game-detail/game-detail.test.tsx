@@ -153,7 +153,6 @@ const buildData = (
   notes: [],
   playtimeTotalMinutes: 0,
   playtimeSessionCount: 0,
-  recentSessionMinutes: [],
 });
 
 const elements = {

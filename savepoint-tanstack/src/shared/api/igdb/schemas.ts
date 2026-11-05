@@ -34,18 +34,6 @@ const GameTypeSchema = z.object({
   name: z.string().optional(),
 });
 
-export const CollectionRefSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-});
-
-export type CollectionRef = z.infer<typeof CollectionRefSchema>;
-
-export const GameCollectionsResponseItemSchema = z.object({
-  id: z.number(),
-  collections: z.array(CollectionRefSchema).optional(),
-});
-
 export const TimesToBeatItemSchema = z.object({
   id: z.number().optional(),
   normally: z.number().optional(),
@@ -71,13 +59,18 @@ export const CollectionGameItemSchema = z.object({
   slug: z.string(),
   cover: z.object({ image_id: z.string() }).optional(),
   game_type: z.number().optional(),
+  first_release_date: z.number().optional(),
 });
 
-export const CollectionWithGamesSchema = z.object({
+export const RelatedCollectionSchema = z.object({
   id: z.number(),
   name: z.string(),
-  games: z.array(CollectionGameItemSchema),
+  games: z.array(CollectionGameItemSchema).optional(),
+});
+
+export const RelatedCollectionsResponseItemSchema = z.object({
+  id: z.number(),
+  collections: z.array(RelatedCollectionSchema).optional(),
 });
 
 export type CollectionGameItem = z.infer<typeof CollectionGameItemSchema>;
-export type CollectionWithGames = z.infer<typeof CollectionWithGamesSchema>;

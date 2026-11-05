@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 
-import { RelatedGamesInfiniteList } from "../related-games-infinite-list";
+import { RelatedGamesList } from "../related-games-list";
 import type { RelatedGamesTabsProps } from "./related-games-tabs.type";
 
 export function RelatedGamesTabs({
@@ -33,12 +33,7 @@ export function RelatedGamesTabs({
           forceMount
           className="data-[state=inactive]:hidden"
         >
-          <RelatedGamesInfiniteList
-            collectionId={section.collectionId}
-            pageSize={section.pageSize}
-            firstPage={section.firstPage}
-            renderGame={renderGame}
-          />
+          <RelatedGamesList games={section.games} renderGame={renderGame} />
         </TabsContent>
       ))}
     </Tabs>
