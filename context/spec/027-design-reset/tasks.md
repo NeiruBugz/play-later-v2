@@ -196,7 +196,7 @@ Conventions for every slice:
     - Use it for the primary button of the sign-in, profile setup, log, journal edit and profile settings forms.
     - Move the bottom-sheet primary buttons into `SheetFooter`: Add game, Log session, filters.
     - Add a `visualViewport` adjustment only if the device check shows a field hidden behind the iOS keyboard. **[Agent: react-frontend]**
-  - [ ] Fix what the first Slice 11 verify found: `StickyFooter` is `position: sticky`, so on short forms (profile setup, settings profile, journal edit) the primary button sits under the last field instead of in the bottom third, and on profile setup it never pins (its sticky container is the card). On phone the primary button must always sit in the bottom third and stay there while scrolling, without covering content (reserve its height at the end of the scroll area) and above the bottom nav where there is one. **[Agent: react-frontend]**
+  - [x] Fix what the first Slice 11 verify found: `StickyFooter` is `position: sticky`, so on short forms (profile setup, settings profile, journal edit) the primary button sits under the last field instead of in the bottom third, and on profile setup it never pins (its sticky container is the card). On phone the primary button must always sit in the bottom third and stay there while scrolling, without covering content (reserve its height at the end of the scroll area) and above the bottom nav where there is one. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP at 390×844, confirm:
