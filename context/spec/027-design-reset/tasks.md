@@ -192,7 +192,7 @@ Conventions for every slice:
   - [x] Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` using `env(safe-area-inset-*)`. Apply them to the mobile top bar, the game-detail action bar, the navigation progress bar and the sheet.
     - `SheetContent`: switch to `max-h-[90dvh]`; the scroll area becomes `flex-1 overflow-y-auto`; add a sticky `SheetFooter` with `pb-safe`.
     - Phone `Toaster`: `mobileOffset` above `--bottom-nav-height`. **[Agent: react-frontend]**
-  - [ ] Add a `StickyFooter` primitive: pinned at the bottom with `pb-safe` on phone, inline from `md` up.
+  - [x] Add a `StickyFooter` primitive: pinned at the bottom with `pb-safe` on phone, inline from `md` up.
     - Use it for the primary button of the sign-in, profile setup, log, journal edit and profile settings forms.
     - Move the bottom-sheet primary buttons into `SheetFooter`: Add game, Log session, filters.
     - Add a `visualViewport` adjustment only if the device check shows a field hidden behind the iOS keyboard. **[Agent: react-frontend]**
