@@ -60,7 +60,7 @@ Conventions for every slice:
     - Compare a temporary capture with `review/phase1/before`. There must be no visible change.
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
 
-- [ ] **Slice 4: Dialogs, sheets and the command palette run on Base UI with today's look**
+- [x] **Slice 4: Dialogs, sheets and the command palette run on Base UI with today's look**
   - [x] Re-implement `dialog`, `sheet` (Base UI dialog), `command` (cmdk inside a Base UI Dialog), `image-lightbox` and `responsive-modal`. Keep today's classes and API. **[Agent: react-frontend]**
   - [x] Add a `shared/lib` helper that keeps a dialog or sheet open when the user presses the toaster. It reads `onOpenChange(open, details)` and cancels on `details.reason === "outside-press"` inside the toaster.
     - Replace the 5 `onInteractOutside` sites with it: `responsive-modal`, `global-action-host`, `command-palette` ×2 and `done-follow-up`. **[Agent: react-frontend]**
@@ -69,7 +69,7 @@ Conventions for every slice:
     - pressing the backdrop closes it;
     - Escape closes it and returns focus to the trigger;
     - the command palette opens with ⌘K and filters results. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). At phone width, open Add game and Log session from the bottom nav. Open the command palette at desktop width. Open the image lightbox on a game page. Change a status and press Undo while a sheet is open.
     - Compare a temporary capture with the "before" set. There must be no visible change.
