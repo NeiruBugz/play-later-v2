@@ -39,7 +39,7 @@ Conventions for every slice:
   - [x] Add `@base-ui/react` (exact pin) and add a no-op `Element.prototype.getAnimations` polyfill to `test/setup/unit.ts`.
     - Spike first: re-implement `button` on Base UI and run the whole `src/shared/ui/*.test.tsx` suite.
     - If the harness breaks, fix it here before continuing. **[Agent: react-frontend]**
-  - [ ] Re-implement `button`, `label` (plain `<label>`), `separator`, `avatar`, `checkbox`, `switch`, `collapsible`, `tabs` and `segmented-control` on Base UI parts.
+  - [x] Re-implement `button`, `label` (plain `<label>`), `separator`, `avatar`, `checkbox`, `switch`, `collapsible`, `tabs` and `segmented-control` on Base UI parts.
     - Keep today's class strings and today's public API. Add thin compat wrappers where needed: `asChild` maps to `render`; `forceMount` maps to `keepMounted`.
     - Translate `data-[state=…]` selectors to `data-checked` / `data-unchecked` / `data-active`, including `related-games-tabs.tsx`. **[Agent: react-frontend]**
   - [ ] Update tests in these primitives that asserted `data-state=` so they assert `aria-checked`, `aria-selected` or `aria-expanded`. Add a behaviour test showing that `tabs` keeps an inactive panel mounted where `forceMount` was used. **[Agent: testing]**
