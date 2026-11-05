@@ -12,6 +12,8 @@ Conventions for every slice:
   - Record the dev-server PID when starting it, and stop the server with `kill <PID>` at the end. Never pipe a daemon's stop command into another command.
   - Sign in with the local credentials provider (`AUTH_ENABLE_CREDENTIALS=true`) against the seeded dev DB.
 - **Review images** are kept on purpose; they are the owner's review material, not throwaway verification artifacts. They live under `context/spec/027-design-reset/review/`, which is gitignored. Everything else a Verify task produces (extra screenshots, traces, temporary scripts) is deleted at the end of that task.
+- **Comparison captures** always run with `--reseed`, which restores the seeded audit accounts first. Interactive checks that change data run before the capture, not after it.
+  - In `review/phase1/before`, three screens were captured mid-animation: `quick-search`, `library-remove-confirm` and `library-filters-sheet-dark`. Compare them by eye, not by pixel diff.
 - **Release markers:** Slices 2–6 together form **Release 1** (library swap, no visual change). Slices 7–15 form **Release 2** (phase 1). Slices 16–22 form **Release 3** (phase 2).
 
 ---

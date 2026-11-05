@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,6 +36,14 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(scriptDir, "../..");
 const repoRoot = resolve(appRoot, "..");
 
+const SEED_SQL_PATH = join(
+  repoRoot,
+  "context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql"
+);
+const DB_CONTAINER = process.env.REVIEW_DB_CONTAINER ?? "savepoint-postgres";
+const ANIMATION_WAIT_MS = 5_000;
+const SETTLE_PAUSE_MS = 150;
+
 const THEME_STORAGE_KEY = "theme";
 const WHATS_NEW_STORAGE_KEY = "whatsNewLastSeenVersion";
 
@@ -44,6 +53,7 @@ const { values: args } = parseArgs({
     set: { type: "string" },
     desktop: { type: "boolean", default: false },
     checks: { type: "boolean", default: false },
+    reseed: { type: "boolean", default: false },
     out: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
   },
@@ -105,6 +115,38 @@ async function newContext(
   return context;
 }
 
+function reseedAuditAccounts(): void {
+  if (!existsSync(SEED_SQL_PATH))
+    fail(`--reseed: seed file not found at ${SEED_SQL_PATH}`);
+  const result = spawnSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      DB_CONTAINER,
+      "psql",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-U",
+      "postgres",
+      "-d",
+      "savepoint-db",
+    ],
+    { input: readFileSync(SEED_SQL_PATH), encoding: "utf8" }
+  );
+  if (result.error) {
+    fail(
+      `--reseed: could not run docker (${result.error.message}). Is Docker installed and running?`
+    );
+  }
+  if (result.status !== 0) {
+    fail(
+      `--reseed: psql in container "${DB_CONTAINER}" exited ${result.status}. Check \`docker compose ps\` (override with REVIEW_DB_CONTAINER).\n${result.stderr}`
+    );
+  }
+  console.log(`reseeded audit accounts via ${DB_CONTAINER}`);
+}
+
 async function signIn(context: BrowserContext): Promise<void> {
   const response = await context.request.post("/api/auth/sign-in/email", {
     headers: { Origin: baseURL },
@@ -120,6 +162,50 @@ async function signIn(context: BrowserContext): Promise<void> {
 async function settle(page: Page): Promise<void> {
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
+}
+
+// Dialogs, sheets and the command palette animate in; a screenshot taken
+// mid-animation is half-faded. Bounded waits that log instead of failing.
+async function awaitVisualStability(page: Page, label: string): Promise<void> {
+  try {
+    await page.waitForFunction(
+      () =>
+        document
+          .getAnimations()
+          .every(
+            (a) =>
+              a.playState !== "running" ||
+              a.effect?.getComputedTiming().iterations === Infinity
+          ),
+      undefined,
+      { timeout: ANIMATION_WAIT_MS }
+    );
+  } catch {
+    console.log(
+      `  ${label}: animations still running after ${ANIMATION_WAIT_MS}ms`
+    );
+  }
+  try {
+    await page.waitForFunction(
+      () =>
+        Array.from(document.images).every((img) => {
+          const r = img.getBoundingClientRect();
+          const inViewport =
+            r.bottom > 0 &&
+            r.right > 0 &&
+            r.top < window.innerHeight &&
+            r.left < window.innerWidth;
+          return !inViewport || img.complete;
+        }),
+      undefined,
+      { timeout: ANIMATION_WAIT_MS }
+    );
+  } catch {
+    console.log(
+      `  ${label}: viewport images not loaded after ${ANIMATION_WAIT_MS}ms`
+    );
+  }
+  await page.waitForTimeout(SETTLE_PAUSE_MS);
 }
 
 // One-time, server-driven notice (acknowledged once per account). It would
@@ -244,7 +330,9 @@ async function captureScreen(
     if (screen.open) await screen.open(page, ctx);
     else if (screen.path) await page.goto(screen.path);
     await settle(page);
+    await awaitVisualStability(page, screen.id);
     for (const hook of screenHooks) await hook(page, screen, viewport, theme);
+    await awaitVisualStability(page, screen.id);
     const dir = join(outDir, viewport.name);
     await mkdir(dir, { recursive: true });
     await page.screenshot({
@@ -270,6 +358,8 @@ async function main(): Promise<void> {
       "REVIEW_EMAIL and REVIEW_PASSWORD must be set (local credentials-provider account, e.g. the seeded audit_full user)."
     );
   }
+
+  if (args.reseed) reseedAuditAccounts();
 
   const viewports = args.desktop ? [PHONE, DESKTOP] : [PHONE];
   const whatsNewVersion = currentWhatsNewVersion();
