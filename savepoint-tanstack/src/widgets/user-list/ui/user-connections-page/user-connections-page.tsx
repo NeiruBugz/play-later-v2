@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import { getDisplayName } from "@/entities/profile/model";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 
 import { UserList } from "../user-list";
 import type { UserConnectionsPageProps } from "./user-connections-page.type";
@@ -25,14 +26,15 @@ export function UserConnectionsPage({
         >
           ← Back to {displayName}
         </Link>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {kind === "followers" ? "Followers" : "Following"}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {kind === "followers"
-            ? `People following @${handle}`
-            : `People @${handle} follows`}
-        </p>
+        <PageHeader
+          title={kind === "followers" ? "Followers" : "Following"}
+          sub={
+            kind === "followers"
+              ? `People following @${handle}`
+              : `People @${handle} follows`
+          }
+          className="mb-0"
+        />
       </div>
       <UserList variant={kind} entries={entries} total={total} />
     </div>

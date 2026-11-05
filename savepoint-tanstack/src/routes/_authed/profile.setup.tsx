@@ -8,6 +8,7 @@ import {
 import { getProfileSetupStatusFn } from "@/features/setup-profile/api/get-profile-setup-status";
 import { AppError } from "@/shared/lib/errors";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 import { ProfileSetupForm } from "@/widgets/profile-setup-page";
 
 /**
@@ -56,9 +57,7 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
         role="alert"
         className="container mx-auto flex flex-col gap-2 px-4 py-12"
       >
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Sign in required
-        </h1>
+        <PageHeader title="Sign in required" className="mb-0" />
         <p>Please sign in to finish setting up your profile.</p>
         <Link to="/login" className={buttonVariants({ variant: "outline" })}>
           Go to sign in
@@ -72,9 +71,7 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
       role="alert"
       className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="font-display text-3xl font-semibold tracking-tight">
-        Something went wrong
-      </h1>
+      <PageHeader title="Something went wrong" className="mb-0" />
       <p>We couldn't load profile setup. Please try again.</p>
       <Link to="/dashboard" className={buttonVariants({ variant: "outline" })}>
         Back to Home

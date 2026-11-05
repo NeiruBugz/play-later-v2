@@ -5,6 +5,7 @@ import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { openGlobalAction } from "@/shared/lib/global-action";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { DashboardPlayingSectionProps } from "./dashboard-playing-section.type";
 
@@ -62,12 +63,9 @@ export function DashboardPlayingSection({
 }: DashboardPlayingSectionProps) {
   return (
     <section aria-labelledby="home-playing-heading">
-      <h2
-        id="home-playing-heading"
-        className="mb-2 text-lg font-semibold tracking-tight"
-      >
+      <SectionLabel id="home-playing-heading" className="mb-2">
         Playing
-      </h2>
+      </SectionLabel>
       <ul className="flex flex-col gap-2 md:grid md:grid-cols-2 md:gap-3">
         {items.map((item) => (
           <PlayingRow key={item.id} item={item} />

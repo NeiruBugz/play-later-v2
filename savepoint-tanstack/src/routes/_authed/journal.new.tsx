@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { PageHeader } from "@/shared/ui/page-header";
 import { LogFormHost } from "@/widgets/global-action-host";
 
 const searchSchema = z.object({
@@ -23,14 +24,11 @@ function NewNoteRoute() {
   return (
     <section className="container mx-auto px-4 py-6">
       <div className="mx-auto max-w-3xl space-y-4">
-        <header className="space-y-2">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">
-            New note
-          </h1>
-          <p className="text-muted-foreground text-base">
-            Log time played or write a note about a game in your library.
-          </p>
-        </header>
+        <PageHeader
+          title="New note"
+          sub="Log time played or write a note about a game in your library."
+          className="mb-0"
+        />
         <LogFormHost
           gameSlug={game}
           onClose={() => void navigate({ to: "/journal" })}

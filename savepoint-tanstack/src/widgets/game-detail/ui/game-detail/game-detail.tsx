@@ -9,6 +9,7 @@ import {
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
 import { Card } from "@/shared/ui/card";
+import { PageHeader } from "@/shared/ui/page-header";
 
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
@@ -324,9 +325,7 @@ export function GameDetail({
                   </p>
                 ) : null}
 
-                <h1 className="font-display mb-4 text-4xl font-semibold tracking-tight break-words">
-                  {game.title}
-                </h1>
+                <PageHeader title={game.title} className="mb-4" />
               </div>
 
               {/* Critic ring shown in hero on mobile; on desktop it lives in the rail */}

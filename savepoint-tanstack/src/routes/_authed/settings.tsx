@@ -42,7 +42,7 @@ function SettingsLayout() {
     return (
       <div className="container mx-auto px-4 py-6">
         {backLink}
-        <PageHeader eyebrow="// SETTINGS" title="Settings" />
+        <PageHeader title="Settings" />
         {activeSegment === undefined ? <SettingsList /> : <Outlet />}
       </div>
     );
@@ -51,7 +51,7 @@ function SettingsLayout() {
   return (
     <div className="container mx-auto px-4 py-6">
       {backLink}
-      <PageHeader eyebrow="// SETTINGS" title="Settings" />
+      <PageHeader title="Settings" />
       <div className="grid gap-6 md:grid-cols-[200px_1fr]">
         <aside>
           <SettingsRail activeSegment={activeSegment} />

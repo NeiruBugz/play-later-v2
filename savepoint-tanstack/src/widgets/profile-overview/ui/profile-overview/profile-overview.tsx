@@ -6,6 +6,7 @@ import { AvatarUpload } from "@/features/upload-avatar";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { PageHeader } from "@/shared/ui/page-header";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import { deriveBannerGradient } from "../../lib/derive-banner-gradient";
@@ -86,14 +87,11 @@ export function ProfileOverview({
           </div>
 
           {/* Name + handle */}
-          <h1 className="font-serif text-2xl tracking-tight md:text-4xl">
-            {displayName}
-          </h1>
-          {profile.username ? (
-            <p className="text-muted-foreground mt-0.5 text-sm">
-              @{profile.username}
-            </p>
-          ) : null}
+          <PageHeader
+            title={displayName}
+            sub={profile.username ? `@${profile.username}` : undefined}
+            className="mb-0"
+          />
 
           {/* Follower / following counts */}
           {profile.username &&

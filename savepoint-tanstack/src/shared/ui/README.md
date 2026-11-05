@@ -31,3 +31,7 @@ Primitives are the stock shadcn `base-maia` output (`shadcn view <name>` / `shad
 ## Kept as-is
 
 `form.tsx` (`base-maia` has no `form`; shadcn ships `field`). Only moved to stock tokens (`space-y-2`).
+
+## Repo-owned primitives (not shadcn)
+
+`SectionLabel`: the one section-label style (`text-muted-foreground text-sm font-medium`, body font, sentence case). Renders an `h2` by default; `as` switches to `h3`, `h4`, `p` or `span`. `PageHeader`: the one page-title style (`font-display`, `h1`) with optional `sub` and `actions`; no eyebrow.

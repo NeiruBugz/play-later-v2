@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildCoverImageProps } from "@/shared/lib/igdb-image";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
 
@@ -82,12 +83,7 @@ export function DashboardGameRail({
   return (
     <section aria-labelledby="home-up-next-heading">
       <header className="mb-2 flex items-baseline justify-between">
-        <h2
-          id="home-up-next-heading"
-          className="text-lg font-semibold tracking-tight"
-        >
-          {title}
-        </h2>
+        <SectionLabel id="home-up-next-heading">{title}</SectionLabel>
         {showViewAll ? (
           <Link
             to="/library"

@@ -4,6 +4,7 @@ import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { GameNote, GameNotesListProps } from "./game-notes-list.type";
 
@@ -26,9 +27,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
   return (
     <>
       <div className="flex items-center justify-between gap-2">
-        <h2 id="game-notes-heading" className="terminal-label">
-          // NOTES
-        </h2>
+        <SectionLabel id="game-notes-heading">Notes</SectionLabel>
         <Button type="button" size="sm" variant="outline" onClick={onNewNote}>
           New note
         </Button>

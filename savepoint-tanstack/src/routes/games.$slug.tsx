@@ -21,6 +21,7 @@ import {
 } from "@/features/game-detail/ui";
 import { AppError, NotFoundError } from "@/shared/lib/errors";
 import { Card } from "@/shared/ui/card";
+import { PageHeader } from "@/shared/ui/page-header";
 import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
@@ -191,9 +192,7 @@ function GameNotFound() {
       role="alert"
       className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="font-display text-3xl font-semibold tracking-tight">
-        Game not found
-      </h1>
+      <PageHeader title="Game not found" className="mb-0" />
       <p>We couldn't find a game matching this URL.</p>
       <p>
         <Link to="/" className="underline">
@@ -214,9 +213,7 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
       role="alert"
       className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="font-display text-3xl font-semibold tracking-tight">
-        Something went wrong
-      </h1>
+      <PageHeader title="Something went wrong" className="mb-0" />
       <p>An error occurred while loading this game. Please try again.</p>
       <p>
         <Link to="/" className="underline">

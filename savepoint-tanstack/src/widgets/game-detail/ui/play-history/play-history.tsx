@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { formatDayMonth } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { Play, PlayHistoryProps } from "./play-history.type";
 
@@ -25,19 +26,21 @@ export function PlayHistory({ plays }: PlayHistoryProps) {
 
   return (
     <section className="flex flex-col gap-2" data-testid="play-history">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls="play-history-list"
-        onClick={() => setOpen((current) => !current)}
-        className="terminal-label focus-visible:ring-ring flex items-center gap-2 text-left focus-visible:ring-2 focus-visible:outline-none"
-      >
-        History
-        <ChevronDown
-          aria-hidden="true"
-          className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
-        />
-      </button>
+      <SectionLabel>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls="play-history-list"
+          onClick={() => setOpen((current) => !current)}
+          className="focus-visible:ring-ring flex items-center gap-2 text-left focus-visible:ring-2 focus-visible:outline-none"
+        >
+          History
+          <ChevronDown
+            aria-hidden="true"
+            className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
+          />
+        </button>
+      </SectionLabel>
       {open ? (
         <ul id="play-history-list" className="flex flex-col gap-1 text-sm">
           {newestFirst.map((play) => (

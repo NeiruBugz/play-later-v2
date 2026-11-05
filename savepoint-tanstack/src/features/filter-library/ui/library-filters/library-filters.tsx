@@ -7,6 +7,7 @@ import {
   type LibraryStatusCounts,
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
@@ -79,9 +80,9 @@ export function LibraryFilters(props: LibraryFiltersProps) {
     >
       {status === "WANT" ? (
         <section>
-          <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
+          <SectionLabel as="p" className="mb-3">
             Ownership
-          </p>
+          </SectionLabel>
           <NotOwnedOnlyToggle
             id="sidebar-not-owned-only"
             status={status}
@@ -92,9 +93,9 @@ export function LibraryFilters(props: LibraryFiltersProps) {
       ) : null}
 
       <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
+        <SectionLabel as="p" className="mb-3">
           Platform
-        </p>
+        </SectionLabel>
         <PlatformSelect
           value={platformValue}
           platforms={platforms}
@@ -113,9 +114,9 @@ export function LibraryFilters(props: LibraryFiltersProps) {
       />
 
       <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
+        <SectionLabel as="p" className="mb-3">
           Sort
-        </p>
+        </SectionLabel>
         <SortSelect value={sortValue} onChange={onSortChange} />
       </section>
 

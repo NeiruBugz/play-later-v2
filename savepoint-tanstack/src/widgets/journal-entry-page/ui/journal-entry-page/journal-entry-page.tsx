@@ -4,6 +4,7 @@ import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 
 import type { JournalEntryPageProps } from "./journal-entry-page.type";
 
@@ -23,22 +24,22 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
 
   return (
     <article className="mx-auto max-w-prose space-y-4">
-      <div className="flex items-start justify-between gap-2">
-        <h1 className="font-display text-4xl font-semibold tracking-tight">
-          Note
-        </h1>
-
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Link
-            to="/journal/$id/edit"
-            params={{ id: entry.id }}
-            className={buttonVariants({ size: "sm" })}
-          >
-            Edit
-          </Link>
-          <DeleteJournalEntryButton entryId={entry.id} />
-        </div>
-      </div>
+      <PageHeader
+        title="Note"
+        className="mb-0"
+        actions={
+          <>
+            <Link
+              to="/journal/$id/edit"
+              params={{ id: entry.id }}
+              className={buttonVariants({ size: "sm" })}
+            >
+              Edit
+            </Link>
+            <DeleteJournalEntryButton entryId={entry.id} />
+          </>
+        }
+      />
 
       <p className="text-muted-foreground text-xs font-medium">
         {entry.game ? (

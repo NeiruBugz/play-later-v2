@@ -13,7 +13,6 @@
   /* Theme · Light — warm cream, cozy curation desk (UNIFIED v2). */
   --background: oklch(0.96 0.014 85);
   --foreground: oklch(0.2 0.02 60);
-  --foreground-body: oklch(0.31 0.018 60);
   /* Surface colors */
   --card: oklch(0.99 0.008 85);
   --card-foreground: oklch(0.2 0.02 60);
@@ -125,7 +124,6 @@
      warm (~70) and low-chroma so it reads as the same family as light mode. */
   --background: oklch(0.17 0.008 70);
   --foreground: oklch(0.94 0.008 85);
-  --foreground-body: oklch(0.82 0.01 85);
   /* Surfaces stack via lightness */
   --card: oklch(0.205 0.009 70);
   --card-foreground: oklch(0.94 0.008 85);
@@ -186,14 +184,12 @@
   --font-sans: "Geist", system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-serif: Georgia, "Times New Roman", serif;
 }
 
 @theme inline {
   /* Tailwind color mappings */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-foreground-body: var(--foreground-body);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -303,14 +299,6 @@
   font-size: var(--font-size-body-sm);
   line-height: var(--font-line-height-body-sm);
   font-weight: var(--font-weight-body);
-}
-
-@utility terminal-label {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-body-xs);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
 }
 
 @utility text-display {

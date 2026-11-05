@@ -189,13 +189,14 @@ const elements = {
   queryAllTablists: () => screen.queryAllByRole("tablist"),
   queryAllTabpanels: () => screen.queryAllByRole("tabpanel"),
   queryOverviewTab: () => screen.queryByRole("tab", { name: "Overview" }),
-  queryNotesHeading: () => screen.queryByRole("heading", { name: "// NOTES" }),
+  queryNotesHeading: () => screen.queryByRole("heading", { name: "Notes" }),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
   querySummary: () => screen.queryByLabelText("Game summary"),
-  queryGameDetailLabel: () => screen.queryByText("// ABOUT"),
-  queryGenresLabel: () => screen.queryByText("// GENRES"),
-  queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
+  queryGameDetailLabel: () => screen.queryByRole("heading", { name: "About" }),
+  queryGenresLabel: () => screen.queryByRole("heading", { name: "Genres" }),
+  queryPlatformsLabel: () =>
+    screen.queryByRole("heading", { name: "Platforms" }),
   getSummaryText: () => screen.getByLabelText("Game summary"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),
@@ -220,7 +221,7 @@ const elements = {
     screen.queryByRole("button", { name: "Playthroughs" }),
   queryHistoryToggle: () => screen.queryByRole("button", { name: "History" }),
   queryRatingSlider: () => screen.queryByRole("slider", { name: /Rate|Rated/ }),
-  queryThemesLabel: () => screen.queryByText("// THEMES"),
+  queryThemesLabel: () => screen.queryByRole("heading", { name: "Themes" }),
   queryEmDash: () => screen.queryByText("—"),
   queryScreenshotsRegion: () =>
     screen.queryByLabelText("Screenshots of Hollow Knight"),
@@ -947,7 +948,7 @@ describe("GameDetail", () => {
     });
 
     it("lists the notes newest first", () => {
-      const list = screen.getByRole("list", { name: "// NOTES" });
+      const list = screen.getByRole("list", { name: "Notes" });
       const texts = within(list)
         .getAllByRole("link")
         .map((link) => link.textContent);
@@ -957,7 +958,7 @@ describe("GameDetail", () => {
     });
 
     it("links every note to its note view", () => {
-      const list = screen.getByRole("list", { name: "// NOTES" });
+      const list = screen.getByRole("list", { name: "Notes" });
       expect(within(list).getAllByRole("link")).toHaveLength(3);
     });
   });

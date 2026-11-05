@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { listConnectionsFn } from "@/features/social-discovery/api";
 import { NotFoundError } from "@/shared/lib/errors";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 import { UserConnectionsPage } from "@/widgets";
 
 /**
@@ -42,9 +43,7 @@ function FollowingListPage() {
 function ListNotFound() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
-      <h1 className="font-display mb-2 text-3xl font-semibold tracking-tight">
-        Profile not found
-      </h1>
+      <PageHeader title="Profile not found" className="mb-2 justify-center" />
       <Link to="/" className={buttonVariants({ variant: "outline" })}>
         Go home
       </Link>

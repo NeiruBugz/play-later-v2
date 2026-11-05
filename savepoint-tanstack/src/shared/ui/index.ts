@@ -14,6 +14,8 @@ export { PageHeader } from "./page-header";
 export type { PageHeaderProps } from "./page-header";
 export { ResponsiveModal } from "./responsive-modal";
 export type { ResponsiveModalProps } from "./responsive-modal";
+export { SectionLabel } from "./section-label";
+export type { SectionLabelProps } from "./section-label";
 export { SegmentedControl } from "./segmented-control";
 export type {
   SegmentedControlOption,

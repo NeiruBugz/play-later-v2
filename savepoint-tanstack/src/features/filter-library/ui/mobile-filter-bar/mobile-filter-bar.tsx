@@ -7,6 +7,7 @@ import {
   useLibraryFiltersState,
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 import {
   Sheet,
   SheetContent,
@@ -122,9 +123,9 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
           </section>
 
           <section>
-            <p className="text-muted-foreground mb-1.5 text-xs font-semibold tracking-wider uppercase">
+            <SectionLabel as="p" className="mb-1.5">
               Platform
-            </p>
+            </SectionLabel>
             <PlatformSelect
               value={platformValue}
               platforms={platforms}
@@ -134,9 +135,9 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
           </section>
 
           <section>
-            <p className="text-muted-foreground mb-1.5 text-xs font-semibold tracking-wider uppercase">
+            <SectionLabel as="p" className="mb-1.5">
               Sort
-            </p>
+            </SectionLabel>
             <SortSelect value={sortValue} onChange={onSortChange} />
           </section>
 

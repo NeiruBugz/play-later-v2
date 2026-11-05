@@ -6,14 +6,12 @@ export interface PageHeaderProps extends Omit<
   ComponentPropsWithoutRef<"header">,
   "title"
 > {
-  eyebrow?: ReactNode;
   title: ReactNode;
   sub?: ReactNode;
   actions?: ReactNode;
 }
 
 export function PageHeader({
-  eyebrow,
   title,
   sub,
   actions,
@@ -29,10 +27,7 @@ export function PageHeader({
       {...props}
     >
       <div className="min-w-0">
-        {eyebrow ? (
-          <div className="terminal-label mb-1.5">{eyebrow}</div>
-        ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+        <h1 className="font-display text-2xl font-semibold tracking-tight break-words md:text-3xl">
           {title}
         </h1>
         {sub ? (

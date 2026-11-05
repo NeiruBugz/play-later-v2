@@ -5,6 +5,7 @@ import {
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
 import { ImageLightbox } from "@/shared/ui/image-lightbox";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { ScreenshotsPanelProps } from "./screenshots-panel.type";
 
@@ -34,12 +35,9 @@ export function ScreenshotsPanel({
       aria-labelledby="screenshots-heading"
       aria-label={`Screenshots of ${gameTitle}`}
     >
-      <h2
-        id="screenshots-heading"
-        className="text-muted-foreground mb-2 font-mono text-xs tracking-wider uppercase"
-      >
+      <SectionLabel id="screenshots-heading" className="mb-2">
         Screenshots
-      </h2>
+      </SectionLabel>
 
       <div className="flex gap-1.5 overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible">
         {images.map((image, i) => (

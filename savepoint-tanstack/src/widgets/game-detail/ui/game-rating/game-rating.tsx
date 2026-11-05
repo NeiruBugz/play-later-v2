@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
 import { getUserFacingErrorMessage } from "@/shared/lib/user-facing-error";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { GameRatingProps } from "./game-rating.type";
 
@@ -33,7 +34,7 @@ export function GameRating({ libraryItemId, rating }: GameRatingProps) {
 
   return (
     <div className="flex items-center gap-3" data-testid="game-rating">
-      <h2 className="terminal-label">// RATING</h2>
+      <SectionLabel>Rating</SectionLabel>
       <RatingInput
         value={displayed}
         readOnly={false}

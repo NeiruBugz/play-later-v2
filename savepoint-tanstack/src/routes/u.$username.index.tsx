@@ -10,6 +10,7 @@ import {
 } from "@/features/view-activity-feed/api";
 import { NotFoundError } from "@/shared/lib/errors";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 import { ProfileActivityTab, ProfileOverview } from "@/widgets";
 
 /**
@@ -123,9 +124,7 @@ function PublicProfilePage() {
 function ProfileNotFound() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
-      <h1 className="font-display mb-2 text-3xl font-semibold tracking-tight">
-        Profile not found
-      </h1>
+      <PageHeader title="Profile not found" className="mb-2 justify-center" />
       <p className="text-muted-foreground mb-6">
         We couldn't find that profile, or it isn't public.
       </p>

@@ -3,6 +3,7 @@ import { ChevronRight, Settings, UserCircle2 } from "lucide-react";
 
 import { ThemeToggle } from "@/features/toggle-theme";
 import { cn } from "@/shared/lib/utils";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { SettingsListProps } from "./settings-list.type";
 
@@ -18,12 +19,9 @@ function SettingsGroup({ header, children }: SettingsGroupProps) {
   return (
     <div className="mb-6">
       {header && (
-        <div
-          data-testid={headerId}
-          className="text-muted-foreground mb-2 px-1 text-xs font-medium tracking-widest uppercase"
-        >
+        <SectionLabel data-testid={headerId} className="mb-2 px-1">
           {header}
-        </div>
+        </SectionLabel>
       )}
       <div className="border-border/55 bg-card overflow-hidden rounded-xl border shadow-sm">
         {children}

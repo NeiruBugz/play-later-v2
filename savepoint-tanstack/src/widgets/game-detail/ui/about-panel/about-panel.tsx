@@ -1,3 +1,5 @@
+import { SectionLabel } from "@/shared/ui/section-label";
+
 import type { AboutPanelProps } from "./about-panel.type";
 
 type Fact = { term: string; value: string };
@@ -31,7 +33,7 @@ export function AboutPanel({
 
       {facts.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-[max-content_1fr] md:items-baseline">
-          <span className="terminal-label">// ABOUT</span>
+          <SectionLabel>About</SectionLabel>
           <dl className="text-sm">
             {facts.map((fact) => (
               <div key={fact.term} className="flex gap-2">

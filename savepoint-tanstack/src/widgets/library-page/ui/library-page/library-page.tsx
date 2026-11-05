@@ -322,7 +322,6 @@ export function LibraryPage(props: LibraryPageProps) {
   return (
     <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
       <PageHeader
-        eyebrow="// LIBRARY"
         title="Library"
         actions={
           <>
