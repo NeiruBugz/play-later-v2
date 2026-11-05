@@ -42,7 +42,7 @@ Conventions for every slice:
   - [x] Re-implement `button`, `label` (plain `<label>`), `separator`, `avatar`, `checkbox`, `switch`, `collapsible`, `tabs` and `segmented-control` on Base UI parts.
     - Keep today's class strings and today's public API. Add thin compat wrappers where needed: `asChild` maps to `render`; `forceMount` maps to `keepMounted`.
     - Translate `data-[state=…]` selectors to `data-checked` / `data-unchecked` / `data-active`, including `related-games-tabs.tsx`. **[Agent: react-frontend]**
-  - [ ] Update tests in these primitives that asserted `data-state=` so they assert `aria-checked`, `aria-selected` or `aria-expanded`. Add a behaviour test showing that `tabs` keeps an inactive panel mounted where `forceMount` was used. **[Agent: testing]**
+  - [x] Update tests in these primitives that asserted `data-state=` so they assert `aria-checked`, `aria-selected` or `aria-expanded`. Add a behaviour test showing that `tabs` keeps an inactive panel mounted where `forceMount` was used. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, toggle a switch and a checkbox in settings, switch tabs on a game page, and open a collapsible.

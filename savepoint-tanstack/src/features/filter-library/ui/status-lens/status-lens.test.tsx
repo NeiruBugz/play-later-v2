@@ -90,7 +90,7 @@ describe("StatusLens", () => {
     });
 
     it("the All tab is selected when no status filter is active", () => {
-      expect(elements.getAllTab()).toHaveAttribute("data-state", "active");
+      expect(elements.getAllTab()).toHaveAttribute("aria-selected", "true");
     });
   });
 
@@ -145,11 +145,11 @@ describe("StatusLens", () => {
     });
 
     it("the Playing tab is selected", () => {
-      expect(elements.getPlayingTab()).toHaveAttribute("data-state", "active");
+      expect(elements.getPlayingTab()).toHaveAttribute("aria-selected", "true");
     });
 
     it("the All tab is not selected", () => {
-      expect(elements.getAllTab()).toHaveAttribute("data-state", "inactive");
+      expect(elements.getAllTab()).toHaveAttribute("aria-selected", "false");
     });
   });
 
