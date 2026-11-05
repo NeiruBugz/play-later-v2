@@ -40,7 +40,7 @@ Entities compose `shared/` only.
 
 ### Session entity (`entities/session/api/`)
 
-`entities/session/api/*.ts` may contain `createServerFn` wrappers (without `.server.ts` suffix) — specifically `requireUserIdOrRedirectFn`, `getCurrentUserIdFn`. This is the documented architectural carve-out: session is the access ticket, not a domain entity, and route guards need a `createServerFn` for `beforeLoad`. See [`../../../savepoint-tanstack/CONTEXT.md`](../../../savepoint-tanstack/CONTEXT.md).
+`entities/session/api/*.ts` may contain `createServerFn` wrappers (without `.server.ts` suffix) — specifically `getCurrentUserFn` (~~`requireUserIdOrRedirectFn`~~, ~~`getCurrentUserIdFn`~~ removed: guards now read `context.user` from the root `beforeLoad`, which caches `currentUserQueryOptions`). This is the documented architectural carve-out: session is the access ticket, not a domain entity. See [`../../../savepoint-tanstack/CONTEXT.md`](../../../savepoint-tanstack/CONTEXT.md).
 
 ## See also
 

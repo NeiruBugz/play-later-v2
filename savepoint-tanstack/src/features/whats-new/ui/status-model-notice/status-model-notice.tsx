@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { invalidateCurrentUser } from "@/entities/session/api/invalidate-current-user";
 import { acknowledgeNoticeFn } from "@/features/whats-new/api/acknowledge-notice-fn";
 import { getUserFacingErrorMessage } from "@/shared/lib/user-facing-error";
 import { Button } from "@/shared/ui/button";
@@ -18,6 +20,7 @@ const STATUS_EXPLANATIONS = [
 
 export function StatusModelNotice() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -28,6 +31,7 @@ export function StatusModelNotice() {
     try {
       await acknowledgeNoticeFn();
       setOpen(false);
+      await invalidateCurrentUser(queryClient);
       await router.invalidate();
     } catch (err: unknown) {
       setError(getUserFacingErrorMessage(err));

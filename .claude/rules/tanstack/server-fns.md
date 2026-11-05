@@ -31,8 +31,10 @@ export const myFn = createServerFn({ method: "POST" })
 ## Auth gates
 
 - **Rule:** authed handlers resolve `userId` via `requireUserId()` only. **Why:** single seam for `UnauthorizedError` throw semantics.
-- **Rule:** `getServerUserId(getRequest())` is reserved for (a) anonymous-allowed reads (e.g., `getPublicProfile`), (b) route guards in `entities/session/api/*.ts`. **Why:** documented narrow exceptions; using it elsewhere bypasses the auth-throw seam.
-- **Rule:** the route-guard `requireUserIdOrRedirectFn` is for `beforeLoad` only (it redirects). Inside a handler body, use `requireUserId()` (it throws). **Why:** redirects don't compose inside handlers; throws do.
+- ~~**Rule:** `getServerUserId(getRequest())` is reserved for (a) anonymous-allowed reads (e.g., `getPublicProfile`), (b) route guards in `entities/session/api/*.ts`. **Why:** documented narrow exceptions; using it elsewhere bypasses the auth-throw seam.~~ — superseded 2026-11-04 (root `beforeLoad` caches the current user):
+- **Rule:** `getServerUserId(getRequest())` is reserved for (a) anonymous-allowed reads (e.g., `getPublicProfile`), (b) the session entity itself. **Why:** documented narrow exceptions; using it elsewhere bypasses the auth-throw seam.
+- ~~**Rule:** the route-guard `requireUserIdOrRedirectFn` is for `beforeLoad` only (it redirects). Inside a handler body, use `requireUserId()` (it throws). **Why:** redirects don't compose inside handlers; throws do.~~ — superseded 2026-11-04 (root `beforeLoad` caches the current user):
+- **Rule:** route guards read `context.user` (root `beforeLoad`); inside a handler body, use `requireUserId()` (it throws). **Why:** guards are UX redirects from cached data; the handler check is the real enforcement.
 
 ## Validate-twice
 

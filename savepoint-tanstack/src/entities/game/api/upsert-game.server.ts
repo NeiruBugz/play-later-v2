@@ -6,12 +6,16 @@ import {
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { isUniqueViolationOn } from "@/shared/lib/prisma";
 
 import type { Game } from "../../../../shared/lib/prisma/client.ts";
 
-export async function upsertGameFromIgdbPayload(
-  payload: SearchResponseItem
-): Promise<Game> {
+type GamePayload = Pick<
+  SearchResponseItem,
+  "id" | "name" | "slug" | "first_release_date" | "cover"
+>;
+
+async function findOrCreateGame(payload: GamePayload): Promise<Game> {
   const existing = await prisma.game.findUnique({
     where: { igdbId: payload.id },
   });
@@ -26,43 +30,36 @@ export async function upsertGameFromIgdbPayload(
 
   const coverImage = buildCoverImageUrl(payload.cover?.image_id, "t_cover_big");
 
-  return prisma.game.create({
-    data: {
-      igdbId: payload.id,
-      title: payload.name,
-      slug: payload.slug,
-      releaseDate,
-      coverImage,
-    },
-  });
+  try {
+    return await prisma.game.create({
+      data: {
+        igdbId: payload.id,
+        title: payload.name,
+        slug: payload.slug,
+        releaseDate,
+        coverImage,
+      },
+    });
+  } catch (error) {
+    if (!isUniqueViolationOn(error, ["igdbId"])) throw error;
+    const concurrentlyCreated = await prisma.game.findUnique({
+      where: { igdbId: payload.id },
+    });
+    if (!concurrentlyCreated) throw error;
+    return concurrentlyCreated;
+  }
 }
 
-export async function upsertThinGameFromIgdbDetailsPayload(
+export function upsertGameFromIgdbPayload(
+  payload: SearchResponseItem
+): Promise<Game> {
+  return findOrCreateGame(payload);
+}
+
+export function upsertThinGameFromIgdbDetailsPayload(
   payload: GameDetailsResponseItem
 ): Promise<Game> {
-  const existing = await prisma.game.findUnique({
-    where: { igdbId: payload.id },
-  });
-  if (existing) {
-    return existing;
-  }
-
-  const releaseDate =
-    typeof payload.first_release_date === "number"
-      ? new Date(payload.first_release_date * 1000)
-      : null;
-
-  const coverImage = buildCoverImageUrl(payload.cover?.image_id, "t_cover_big");
-
-  return prisma.game.create({
-    data: {
-      igdbId: payload.id,
-      title: payload.name,
-      slug: payload.slug,
-      releaseDate,
-      coverImage,
-    },
-  });
+  return findOrCreateGame(payload);
 }
 
 export async function upsertGameFromIgdb(igdbId: number): Promise<Game> {

@@ -15,5 +15,9 @@ export type { ProfileActivityTabProps } from "./profile-activity-tab";
 export { ProfileOverview } from "./profile-overview";
 export { SettingsRail } from "./settings-rail";
 export type { SettingsRailProps } from "./settings-rail";
-export { UserList } from "./user-list";
-export type { UserListProps, UserListVariant } from "./user-list";
+export { UserConnectionsPage, UserList } from "./user-list";
+export type {
+  UserConnectionsPageProps,
+  UserListProps,
+  UserListVariant,
+} from "./user-list";

@@ -1,7 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { LibraryGrid } from "@/entities/library-item/ui";
-import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
 import { FollowUserButton } from "@/features/follow-user";
 import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
 import { UnfollowUserButton } from "@/features/unfollow-user";
@@ -16,11 +15,10 @@ import { ProfileActivityTab, ProfileOverview } from "@/widgets";
 /**
  * Public profile route.
  *
- * Loader fetches the public profile + library stats via the privacy-aware
- * `getPublicProfile` entity query (throws `NotFoundError` for both "missing"
- * and "private"). We also fetch the optional viewer so the widget can
- * decide whether to show the owner-only "Edit Profile" / "Change avatar"
- * affordances.
+ * One RPC: `getPublicProfilePageDataFn` resolves the privacy-aware profile
+ * (`NotFoundError` for both "missing" and "private"), the optional viewer
+ * (so the widget can show owner-only "Edit Profile" / "Change avatar"), and
+ * the activity seed.
  *
  * Slice 20 additions:
  *   - follower / following counts + isFollowing live on the page data.
@@ -32,23 +30,9 @@ import { ProfileActivityTab, ProfileOverview } from "@/widgets";
 export const Route = createFileRoute("/u/$username/")({
   loader: async ({ params }) => {
     try {
-      const [pageData, viewer] = await Promise.all([
-        getPublicProfilePageDataFn({ data: { username: params.username } }),
-        getCurrentUserFn(),
-      ]);
-      const viewerId = viewer.user?.id ?? null;
-      const isOwnProfile =
-        viewerId !== null && viewerId === pageData.profile.id;
-
-      const activity = viewerId
-        ? isOwnProfile
-          ? await getActivityFeedFn({ data: {} })
-          : await getActivityForUserFn({
-              data: { targetUserId: pageData.profile.id },
-            })
-        : null;
-
-      return { ...pageData, viewerId, activity };
+      return await getPublicProfilePageDataFn({
+        data: { username: params.username },
+      });
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw notFound();

@@ -8,13 +8,12 @@ export type EndedPlay = {
 
 export async function getEndedPlays(
   userId: string,
-  libraryItemId: number
+  gameId: string
 ): Promise<EndedPlay[]> {
   const plays = await prisma.playthrough.findMany({
     where: {
-      libraryItemId,
       finishedAt: { not: null },
-      libraryItem: { userId },
+      libraryItem: { userId, gameId },
     },
     select: { id: true, startedAt: true, finishedAt: true },
     orderBy: [
