@@ -105,7 +105,7 @@ Conventions for every slice:
     - Release 1 can ship after this. **[Agent: testing]**
 
 - [ ] **Slice 7: Titles use the title font, `/about` shows "not found", and the token layer is cleaned up**
-  - [ ] In `src/styles.css`:
+  - [x] In `src/styles.css`:
     - add `--font-sans`, `--font-mono` and `--font-display` to `@theme`, so `font-display` produces CSS;
     - move the still-used custom utilities from `@layer utilities` to `@utility`, so their variants start working (hover shadows, `sm:` gaps);
     - delete the dead parts: about 114 spacing classes, 13 typography classes, unused keyframes, the duplicate reduced-motion block, the v3-shaped `--container-*`, the self-referencing `@theme` bindings, and the unused `chart-*` and `sidebar-*` tokens.
