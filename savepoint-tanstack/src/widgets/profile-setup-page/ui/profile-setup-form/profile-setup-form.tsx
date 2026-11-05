@@ -16,10 +16,10 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
+import { StickyFooter } from "@/shared/ui/sticky-footer";
 
 import type { ProfileSetupFormProps } from "./profile-setup-form.type";
 
@@ -98,7 +98,10 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
             </p>
           ) : null}
         </CardContent>
-        <CardFooter>
+        <StickyFooter
+          aboveBottomNav
+          className="mt-6 max-md:mx-0 max-md:bg-card max-md:px-(--card-spacing) md:px-(--card-spacing)"
+        >
           <Button
             type="submit"
             disabled={isSubmitting || !isUsernameValid}
@@ -106,7 +109,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
           >
             {isSubmitting ? "Saving..." : "Complete setup"}
           </Button>
-        </CardFooter>
+        </StickyFooter>
       </form>
     </Card>
   );

@@ -12,7 +12,7 @@ export { ImageLightbox } from "./image-lightbox";
 export type { ImageLightboxProps, LightboxImage } from "./image-lightbox";
 export { PageHeader } from "./page-header";
 export type { PageHeaderProps } from "./page-header";
-export { ResponsiveModal } from "./responsive-modal";
+export { ModalBody, ModalFooter, ResponsiveModal } from "./responsive-modal";
 export type { ResponsiveModalProps } from "./responsive-modal";
 export { SectionLabel } from "./section-label";
 export type { SectionLabelProps } from "./section-label";
@@ -24,6 +24,8 @@ export type {
 } from "./segmented-control";
 export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
+export { StickyFooter } from "./sticky-footer";
+export type { StickyFooterProps } from "./sticky-footer";
 export { Textarea } from "./textarea";
 export { showUndoToast, UndoToastBody } from "./undo-toast";
 export type { ShowUndoToastOptions, UndoToastBodyProps } from "./undo-toast";

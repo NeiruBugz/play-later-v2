@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
+import { StickyFooter } from "@/shared/ui/sticky-footer";
 
 import type { EmailSignInFormProps } from "./email-sign-in-form.type";
 
@@ -74,7 +75,9 @@ export function EmailSignInForm({ enabled }: EmailSignInFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Sign in</Button>
+        <StickyFooter className="max-md:-mx-3 max-md:px-3">
+          <Button type="submit">Sign in</Button>
+        </StickyFooter>
       </form>
     </Form>
   );

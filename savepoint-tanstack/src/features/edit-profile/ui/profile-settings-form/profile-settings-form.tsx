@@ -9,6 +9,7 @@ import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { StickyFooter } from "@/shared/ui/sticky-footer";
 
 import { updateProfileFn } from "../../api/update-profile";
 import { ProfileVisibilityToggle } from "../profile-visibility-toggle";
@@ -92,9 +93,11 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isSubmitting}>
-        Save changes
-      </Button>
+      <StickyFooter aboveBottomNav>
+        <Button type="submit" disabled={isSubmitting}>
+          Save changes
+        </Button>
+      </StickyFooter>
     </form>
   );
 }

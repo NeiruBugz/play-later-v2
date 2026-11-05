@@ -10,8 +10,10 @@ import { Button } from "@/shared/ui/button";
 import { SectionLabel } from "@/shared/ui/section-label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -105,7 +107,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             ) : null}
           </SheetTrigger>
         </div>
-        <SheetContent side="bottom" className="space-y-3">
+        <SheetContent side="bottom">
           <SheetHeader>
             <SheetTitle>Filters</SheetTitle>
             <SheetDescription>
@@ -113,57 +115,61 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             </SheetDescription>
           </SheetHeader>
 
-          <section>
-            <NotOwnedOnlyToggle
-              id="mobile-not-owned-only"
-              status={status}
-              checked={notOwnedOnly === true}
-              onChange={onNotOwnedOnlyChange}
+          <SheetBody className="space-y-3">
+            <section>
+              <NotOwnedOnlyToggle
+                id="mobile-not-owned-only"
+                status={status}
+                checked={notOwnedOnly === true}
+                onChange={onNotOwnedOnlyChange}
+              />
+            </section>
+
+            <section>
+              <SectionLabel as="p" className="mb-1.5">
+                Platform
+              </SectionLabel>
+              <PlatformSelect
+                value={platformValue}
+                platforms={platforms}
+                rawPlatform={platform}
+                onChange={onPlatformChange}
+              />
+            </section>
+
+            <section>
+              <SectionLabel as="p" className="mb-1.5">
+                Sort
+              </SectionLabel>
+              <SortSelect value={sortValue} onChange={onSortChange} />
+            </section>
+
+            <RatingControls
+              idPrefix="mobile"
+              minRating={minRating}
+              unratedOnly={unratedOnly}
+              onMinRatingChange={onMinRatingChange}
+              onClearMinRating={onClearMinRating}
+              onUnratedOnlyChange={onUnratedOnlyChange}
             />
-          </section>
-
-          <section>
-            <SectionLabel as="p" className="mb-1.5">
-              Platform
-            </SectionLabel>
-            <PlatformSelect
-              value={platformValue}
-              platforms={platforms}
-              rawPlatform={platform}
-              onChange={onPlatformChange}
-            />
-          </section>
-
-          <section>
-            <SectionLabel as="p" className="mb-1.5">
-              Sort
-            </SectionLabel>
-            <SortSelect value={sortValue} onChange={onSortChange} />
-          </section>
-
-          <RatingControls
-            idPrefix="mobile"
-            minRating={minRating}
-            unratedOnly={unratedOnly}
-            onMinRatingChange={onMinRatingChange}
-            onClearMinRating={onClearMinRating}
-            onUnratedOnlyChange={onUnratedOnlyChange}
-          />
+          </SheetBody>
 
           {hasActiveFilters ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                onClearAll({ onAfterClear: () => setSheetOpen(false) })
-              }
-              aria-label="Clear all filters"
-              className="w-full"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-              <span className="ml-1">Clear all filters</span>
-            </Button>
+            <SheetFooter>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  onClearAll({ onAfterClear: () => setSheetOpen(false) })
+                }
+                aria-label="Clear all filters"
+                className="w-full"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                <span className="ml-1">Clear all filters</span>
+              </Button>
+            </SheetFooter>
           ) : null}
         </SheetContent>
       </Sheet>

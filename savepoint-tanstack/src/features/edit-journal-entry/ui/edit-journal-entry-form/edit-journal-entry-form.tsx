@@ -6,6 +6,7 @@ import { updateJournalEntryFn } from "@/features/edit-journal-entry/api/update-j
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { StickyFooter } from "@/shared/ui/sticky-footer";
 import { Textarea } from "@/shared/ui/textarea";
 
 import type { EditJournalEntryFormProps } from "./edit-journal-entry-form.type";
@@ -94,7 +95,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
         </p>
       ) : null}
 
-      <div className="flex justify-end gap-1.5">
+      <StickyFooter aboveBottomNav className="flex justify-end gap-1.5">
         <Button
           type="button"
           variant="outline"
@@ -106,7 +107,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
         <Button type="submit" disabled={isSubmitting || isEmpty}>
           Save
         </Button>
-      </div>
+      </StickyFooter>
     </form>
   );
 }
