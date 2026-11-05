@@ -22,7 +22,7 @@ Conventions for every slice:
     - Create `scripts/design-review/capture.ts` and a screen list `scripts/design-review/screens.ts`. The list covers every screen in functional-spec §2.0, including the empty, loading, error and not-found states that can be reached with seeded data.
     - The script signs in through the credentials provider. It writes PNGs to `context/spec/027-design-reset/review/<phase>/<before|after>/<phone|desktop>/<screen>-<light|dark>.png`: phone at 390×844 always, desktop at 1440×900 behind a `--desktop` flag.
     - Add `context/spec/027-design-reset/review/` to the repo `.gitignore`. **[Agent: testing]**
-  - [ ] Add the automated phone checks to the same script, run at 360×780, 390×844 and 430×932 on every screen. Reuse `.claude/skills/verify-ui/scripts/check-overflow.js` and `check-clickable.js` through `page.evaluate`.
+  - [x] Add the automated phone checks to the same script, run at 360×780, 390×844 and 430×932 on every screen. Reuse `.claude/skills/verify-ui/scripts/check-overflow.js` and `check-clickable.js` through `page.evaluate`.
     - No horizontal page scroll (`scrollWidth <= innerWidth`).
     - Every interactive element is at least 44×44.
     - No visible text has a computed font size below 12px.

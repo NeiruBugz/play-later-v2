@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -10,6 +10,13 @@ import {
   type Page,
 } from "@playwright/test";
 
+import {
+  CHECKS,
+  PHONE_SIZES,
+  runPhoneChecks,
+  summarize,
+  type ScreenWidthResult,
+} from "./phone-checks.ts";
 import {
   SCREENS,
   ScreenSkipped,
@@ -36,6 +43,7 @@ const { values: args } = parseArgs({
     phase: { type: "string" },
     set: { type: "string" },
     desktop: { type: "boolean", default: false },
+    checks: { type: "boolean", default: false },
     out: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
   },
@@ -57,6 +65,9 @@ const outDir = resolve(
   args.out ??
     join(repoRoot, "context/spec/027-design-reset/review", args.phase, args.set)
 );
+
+const checksEnabled =
+  args.checks || args.set === "before" || args.set === "after";
 
 const currentWhatsNewVersion = (): string => {
   const config = readFileSync(
@@ -175,6 +186,45 @@ type ScreenHook = (
 // is written. The phone checks register here.
 const screenHooks: ScreenHook[] = [];
 
+const phoneCheckResults: ScreenWidthResult[] = [];
+
+if (checksEnabled) {
+  screenHooks.push(async (page, screen, viewport, theme) => {
+    if (viewport.name !== "phone" || theme !== "light") return;
+    phoneCheckResults.push(...(await runPhoneChecks(page, screen.id, PHONE)));
+  });
+}
+
+async function writeReport(): Promise<void> {
+  const summary = summarize(phoneCheckResults);
+  await mkdir(outDir, { recursive: true });
+  await writeFile(
+    join(outDir, "report.json"),
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        baseUrl: baseURL,
+        widths: PHONE_SIZES.map((size) => size.width),
+        screens: phoneCheckResults,
+        summary,
+      },
+      null,
+      2
+    )
+  );
+  for (const check of CHECKS) {
+    const failing = phoneCheckResults.filter((r) =>
+      r.failures.some((f) => f.check === check)
+    ).length;
+    console.log(
+      `check ${check}: ${summary.byCheck[check]} failures on ${failing}/${phoneCheckResults.length} screen-widths`
+    );
+  }
+  console.log(
+    `checks total: ${summary.total} failures -> ${join(outDir, "report.json")}`
+  );
+}
+
 async function captureScreen(
   page: Page,
   screen: Screen,
@@ -261,6 +311,8 @@ async function main(): Promise<void> {
   } finally {
     await browser.close();
   }
+
+  if (checksEnabled) await writeReport();
 
   const failed = results.filter((r) => r.status === "failed").length;
   console.log(
