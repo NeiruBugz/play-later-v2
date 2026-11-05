@@ -5,6 +5,7 @@ import { UpstreamError } from "@/shared/lib/errors";
 
 import { igdbContextFromThrown } from "./errors";
 import { igdbFetch } from "./fetch";
+import { escapeIgdbString } from "./query-builder";
 
 const logger = createLogger({ service: "igdb-get-game-details-by-slug" });
 
@@ -31,10 +32,6 @@ const DETAILS_FIELDS = [
   "involved_companies.company.name",
   "franchise",
 ] as const;
-
-function escapeSlug(slug: string): string {
-  return slug.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
 
 const GenreSchema = z.object({ id: z.number(), name: z.string() });
 const PlatformSchema = z.object({
@@ -74,7 +71,7 @@ export type GameDetailsResponseItem = z.infer<
 export async function getGameDetailsFromIgdb(
   slug: string
 ): Promise<GameDetailsResponseItem | null> {
-  const query = `fields ${DETAILS_FIELDS.join(",")}; where slug = "${escapeSlug(slug)}"; limit 1;`;
+  const query = `fields ${DETAILS_FIELDS.join(",")}; where slug = "${escapeIgdbString(slug)}"; limit 1;`;
 
   let response: unknown;
   try {
