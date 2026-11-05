@@ -100,3 +100,6 @@ credentials*
 secrets*
 
 CLAUDE.local.md
+
+# Design review screenshots (spec 027, kept locally)
+context/spec/027-design-reset/review/
