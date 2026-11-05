@@ -154,6 +154,11 @@ Conventions for every slice:
     - Run it on `src/shared` and `src/entities`, then run the gate. **[Agent: react-frontend]**
   - [x] Run the codemod on `src/features`, then on `src/widgets` and `src/routes`, running the gate after each layer. Grep for retired names left in template literals and fix them by hand. Fix bare `rounded` and arbitrary radius values per file. **[Agent: react-frontend]**
   - [x] Add `SectionLabel` (body font, sentence case) to `shared/ui`. Replace `terminal-label`, the local `TerminalLabel` clone and every `// LABEL` string with it. Make `PageHeader` the only page-title style, on every screen in §2.0. Remove `font-serif` from the profile name. Replace the last `text-foreground-body` (`journal-stats-rail.tsx`) with a stock color and delete `--foreground-body` (task 8.1 kept it because that file still reads it). **[Agent: react-frontend]**
+  - [ ] Finish what the first Slice 9 verify found:
+    - Section headings still in the title style become `SectionLabel`: game page "Times to beat" (incl. its skeleton) and "Related games" (`routes/games.$slug.tsx`), `journal-entry-page.tsx`, `add-to-track-invite.tsx`, `empty-library-hero.tsx`, and the `/settings/account` "Account" `h2`; `rg 'font-display' src` should then only hit `PageHeader` (and the landing hero, Slice 13).
+    - Unknown URLs (`defaultNotFoundComponent`) render the not-found state with `PageHeader`, like the per-route not-found states.
+    - Sign-in: its visible title uses the `PageHeader` style.
+    - The review script's body-text rule treats `[data-slot=section-label]` as a label. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, assert on every screen that:
