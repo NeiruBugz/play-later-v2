@@ -14,7 +14,7 @@ import { toast } from "sonner";
  *   - `showSyncFailedToast(message?)` — fires on reject.
  */
 export function showSyncStartedToast(description?: string): void {
-  toast.info("Steam library sync started", {
+  toast.info("Steam import started", {
     description:
       description ??
       "This may take a few minutes. We'll notify you when it's complete.",
@@ -24,14 +24,14 @@ export function showSyncStartedToast(description?: string): void {
 
 export function showSyncCompletedToast(gameCount: number): void {
   const gameLabel = gameCount === 1 ? "game" : "games";
-  toast.success("Steam library sync completed", {
+  toast.success("Steam import completed", {
     description: `${gameCount} ${gameLabel} imported successfully.`,
     duration: 5000,
   });
 }
 
 export function showSyncFailedToast(errorMessage?: string): void {
-  toast.error("Steam library sync failed", {
+  toast.error("Steam import failed", {
     description:
       errorMessage ??
       "Please try again or contact support if the issue persists.",

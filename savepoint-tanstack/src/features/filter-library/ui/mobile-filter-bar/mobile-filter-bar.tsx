@@ -1,11 +1,10 @@
-import { LayoutGrid, LayoutList, SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
 import {
   DEFAULT_PLATFORMS,
-  STATUS_ENTRIES,
+  STATUS_FILTER_ENTRIES,
   useLibraryFiltersState,
-  type LibraryStatus,
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
 import {
@@ -17,54 +16,42 @@ import {
   SheetTrigger,
 } from "@/shared/ui/sheet";
 
-import { AcquisitionList } from "../acquisition-list";
+import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
 import { RatingControls } from "../rating-controls";
 import { SortSelect } from "../sort-select";
-import { StartedOnlyToggle } from "../started-only-toggle";
-import { StatusList } from "../status-list";
 import type { MobileFilterBarProps } from "./mobile-filter-bar.type";
 
 /**
- * Mobile counterpart to `LibraryFilters` — collapses the same Status / Platform
- * / Sort sections into a bottom-anchored Sheet, plus the minimum-rating
+ * Mobile counterpart to `LibraryFilters` — collapses the same Platform / Sort
+ * sections into a bottom-anchored Sheet, plus the minimum-rating
  * `RatingInput` and the unrated-only `Switch` controls (parity with canonical
  * `MobileFilterBar`). Visible <xl, hidden ≥xl where the sidebar takes over.
  *
  * Divergences from canonical:
  * - No free-text "search" input (broader scope; deferred to S16 search route).
  * - No Steam-import shortcut (separate widget surface in tanstack — deferred).
- * - No status count badges (sidebar punted them; mobile bar matches).
  */
 export function MobileFilterBar(props: MobileFilterBarProps) {
   const {
     status,
     platform,
-    acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
-    counts,
     platforms = DEFAULT_PLATFORMS,
-    viewMode,
-    onViewModeChange,
   } = props;
 
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const {
-    currentStatus,
-    currentAcquisition,
-    startedOnly: startedOnlyChecked,
     sortValue,
     platformValue,
     hasActiveFilters,
     activeFilterCount,
-    onStatusPick,
-    onAcquisitionPick,
-    onStartedOnlyChange,
+    onNotOwnedOnlyChange,
     onPlatformChange,
     onSortChange,
     onMinRatingChange,
@@ -74,22 +61,21 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   } = useLibraryFiltersState({
     status,
     platform,
-    acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
   });
 
-  const activeStatusEntry = STATUS_ENTRIES.find(
-    (e) => e.value === (status as LibraryStatus | undefined)
+  const activeStatusEntry = STATUS_FILTER_ENTRIES.find(
+    (e) => e.value === status
   );
 
   return (
     <div className="mb-md md:hidden" aria-label="Mobile library filters">
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        {/* Single row: [Filters flex-1 with count badge] [Grid view] [List view] */}
+        {/* Single row: [Filters flex-1 with count badge] */}
         <div className="flex items-center gap-1">
           <SheetTrigger asChild>
             <Button
@@ -115,46 +101,21 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
               ) : null}
             </Button>
           </SheetTrigger>
-          {viewMode !== undefined ? (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label="Grid view"
-                aria-pressed={viewMode === "grid"}
-                onClick={() => onViewModeChange?.("grid")}
-              >
-                <LayoutGrid className="h-4 w-4" aria-hidden />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label="List view"
-                aria-pressed={viewMode === "list"}
-                onClick={() => onViewModeChange?.("list")}
-              >
-                <LayoutList className="h-4 w-4" aria-hidden />
-              </Button>
-            </>
-          ) : null}
         </div>
         <SheetContent side="bottom" className="space-y-lg">
           <SheetHeader>
             <SheetTitle>Filters</SheetTitle>
             <SheetDescription>
-              Refine your library by status, platform, sort, and rating.
+              Refine your library by platform, sort, and rating.
             </SheetDescription>
           </SheetHeader>
 
           <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
-              Status
-            </p>
-            <StatusList
-              currentStatus={currentStatus}
-              counts={counts}
-              onPick={onStatusPick}
-              variant="sheet"
+            <NotOwnedOnlyToggle
+              id="mobile-not-owned-only"
+              status={status}
+              checked={notOwnedOnly === true}
+              onChange={onNotOwnedOnlyChange}
             />
           </section>
 
@@ -172,31 +133,13 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
 
           <section>
             <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
-              Acquisition
-            </p>
-            <AcquisitionList
-              current={currentAcquisition}
-              onPick={onAcquisitionPick}
-              variant="sheet"
-            />
-          </section>
-
-          <section>
-            <StartedOnlyToggle
-              id="mobile-started-only"
-              checked={startedOnlyChecked}
-              onCheckedChange={onStartedOnlyChange}
-            />
-          </section>
-
-          <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
               Sort
             </p>
             <SortSelect value={sortValue} onChange={onSortChange} />
           </section>
 
           <RatingControls
+            idPrefix="mobile"
             minRating={minRating}
             unratedOnly={unratedOnly}
             onMinRatingChange={onMinRatingChange}

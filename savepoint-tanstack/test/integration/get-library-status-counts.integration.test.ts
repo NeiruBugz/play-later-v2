@@ -49,7 +49,7 @@ function makeLibraryItem(
   id: number,
   userId: string,
   gameId: string,
-  status: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED"
+  status: "WANT" | "PLAYING" | "DONE"
 ) {
   return {
     id,
@@ -72,11 +72,10 @@ describe("getLibraryStatusCounts", () => {
       const counts = await getLibraryStatusCounts("counts-user-001");
 
       expect(counts).toEqual({
-        WISHLIST: 0,
-        SHELF: 0,
-        UP_NEXT: 0,
+        WANT: 0,
         PLAYING: 0,
-        PLAYED: 0,
+        DONE: 0,
+        upNext: 0,
       });
     });
   });
@@ -93,9 +92,9 @@ describe("getLibraryStatusCounts", () => {
       await db.prisma.libraryItem.createMany({
         data: [
           makeLibraryItem(2001, "counts-user-002", "counts-game-a", "PLAYING"),
-          makeLibraryItem(2002, "counts-user-002", "counts-game-b", "PLAYED"),
-          makeLibraryItem(2003, "counts-user-002", "counts-game-c", "PLAYED"),
-          makeLibraryItem(2004, "counts-user-002", "counts-game-d", "SHELF"),
+          makeLibraryItem(2002, "counts-user-002", "counts-game-b", "DONE"),
+          makeLibraryItem(2003, "counts-user-002", "counts-game-c", "DONE"),
+          makeLibraryItem(2004, "counts-user-002", "counts-game-d", "WANT"),
         ],
       });
     });
@@ -104,11 +103,8 @@ describe("getLibraryStatusCounts", () => {
       const counts = await getLibraryStatusCounts("counts-user-002");
 
       expect(counts.PLAYING).toBe(1);
-      expect(counts.PLAYED).toBe(2);
-      expect(counts.SHELF).toBe(1);
-      // Statuses with no items are still present and zeroed.
-      expect(counts.WISHLIST).toBe(0);
-      expect(counts.UP_NEXT).toBe(0);
+      expect(counts.DONE).toBe(2);
+      expect(counts.WANT).toBe(1);
     });
   });
 
@@ -118,18 +114,53 @@ describe("getLibraryStatusCounts", () => {
       await db.prisma.user.create({ data: makeUser("004") });
       await db.prisma.game.create({ data: makeGame("e", 20005) });
       await db.prisma.libraryItem.create({
-        data: makeLibraryItem(
-          2005,
-          "counts-user-004",
-          "counts-game-e",
-          "PLAYED"
-        ),
+        data: makeLibraryItem(2005, "counts-user-004", "counts-game-e", "DONE"),
       });
     });
 
     it("does not leak another user's counts", async () => {
       const counts = await getLibraryStatusCounts("counts-user-003");
-      expect(counts.PLAYED).toBe(0);
+      expect(counts.DONE).toBe(0);
+    });
+  });
+
+  describe("given queued games across WANT and DONE", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("005") });
+      await Promise.all([
+        db.prisma.game.create({ data: makeGame("f", 20006) }),
+        db.prisma.game.create({ data: makeGame("g", 20007) }),
+        db.prisma.game.create({ data: makeGame("h", 20008) }),
+      ]);
+      await db.prisma.libraryItem.createMany({
+        data: [
+          {
+            ...makeLibraryItem(
+              2006,
+              "counts-user-005",
+              "counts-game-f",
+              "WANT"
+            ),
+            upNextPosition: 1,
+          },
+          {
+            ...makeLibraryItem(
+              2007,
+              "counts-user-005",
+              "counts-game-g",
+              "DONE"
+            ),
+            upNextPosition: 2,
+          },
+          makeLibraryItem(2008, "counts-user-005", "counts-game-h", "WANT"),
+        ],
+      });
+    });
+
+    it("counts queued games as upNext without changing the per-status counts", async () => {
+      const counts = await getLibraryStatusCounts("counts-user-005");
+
+      expect(counts).toEqual({ WANT: 2, PLAYING: 0, DONE: 1, upNext: 2 });
     });
   });
 });

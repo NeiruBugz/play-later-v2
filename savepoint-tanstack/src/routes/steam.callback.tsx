@@ -51,9 +51,9 @@ function SteamCallbackPage() {
   // The loader always either redirects or throws — this is a defensive
   // fallback that should not render in normal flow.
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <p>Connecting your Steam account…</p>
-    </main>
+    </div>
   );
 }
 
@@ -61,7 +61,7 @@ function SteamCallbackError({ error }: { error: unknown }) {
   const message = resolveErrorMessage(error);
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <h2 className="mb-2 text-2xl font-semibold">
         Could not connect Steam account
       </h2>
@@ -72,7 +72,7 @@ function SteamCallbackError({ error }: { error: unknown }) {
       >
         Back to account settings
       </a>
-    </main>
+    </div>
   );
 }
 

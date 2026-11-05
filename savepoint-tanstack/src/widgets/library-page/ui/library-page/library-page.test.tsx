@@ -1,16 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 
+import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { LibraryPage } from "./library-page";
+
+const mockNavigate = vi.hoisted(() => vi.fn());
 
 // LibraryFilters uses useNavigate from @tanstack/react-router; LibraryItemCard
 // (via GameCard) uses <Link>. Mock the module so we don't need a router
 // context for a pure widget render test.
 vi.mock("@tanstack/react-router", () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mockNavigate,
   useRouter: () => ({ invalidate: vi.fn() }),
   Link: ({
     to,
@@ -38,12 +42,30 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
+vi.mock("@/features/up-next/api/add-to-up-next-fn", () => ({
+  addToUpNextFn: vi.fn(),
+}));
+vi.mock("@/features/up-next/api/remove-from-up-next-fn", () => ({
+  removeFromUpNextFn: vi.fn(),
+}));
+vi.mock("@/features/up-next/api/move-in-up-next-fn", () => ({
+  moveInUpNextFn: vi.fn(),
+}));
+
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
 }));
 
-vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
-  addGameToLibraryFn: vi.fn(),
+vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
+  setOwnershipFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
+  setStatusFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
+  undoStatusFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
@@ -64,68 +86,26 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
   searchPlatformsFn: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
-  createJournalEntryFn: vi.fn(),
+vi.mock("@/features/compose-journal-entry/api/log-time-fn", () => ({
+  logTimeFn: vi.fn(),
 }));
-
-// Spec 025 Slice 3b: new server fns added to compose-journal-entry api barrel
-// must be mocked to prevent server-env access during component tests.
-vi.mock(
-  "@/features/compose-journal-entry/api/get-log-session-game-data",
-  () => ({
-    getLogSessionGameDataFn: vi.fn(),
-  })
-);
 
 vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
 }));
 
-// Spec 016 §2.13 — mock the manage-playthrough feature so the drawer renders
-// as a dialog in the DOM without needing the full feature runtime.
-vi.mock("@/features/manage-playthrough", () => ({
-  AddEditPlaythroughDrawer: ({
-    open,
-    libraryItemId,
-  }: {
-    open: boolean;
-    libraryItemId: number;
-    onOpenChange: (open: boolean) => void;
-  }) =>
-    open ? (
-      <div role="dialog" aria-label="Add playthrough drawer">
-        Add playthrough for {libraryItemId}
-      </div>
-    ) : null,
-}));
-
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;
-}): LibraryItemWithGame => ({
-  id: overrides.id,
-  userId: "user-1",
-  gameId: `game-${overrides.id}`,
-  status: "PLAYING",
-  platform: "PC",
-  rating: null,
-  createdAt: new Date("2025-01-01T00:00:00Z"),
-  updatedAt: new Date("2025-01-02T00:00:00Z"),
-  statusChangedAt: null,
-  acquisitionType: "DIGITAL",
-  startedAt: null,
-  completedAt: null,
-  hasBeenPlayed: false,
-  statusIsManual: false,
-  game: {
-    id: `game-${overrides.id}`,
-    igdbId: 1,
-    title: overrides.gameTitle,
-    slug: overrides.gameTitle.toLowerCase().replace(/\s+/g, "-"),
-    coverImage: null,
-    releaseDate: null,
-  },
-});
+}): LibraryItemWithGame =>
+  buildLibraryItemWithGame(
+    { id: overrides.id, status: "PLAYING", platform: "PC" },
+    {
+      id: `game-${overrides.id}`,
+      title: overrides.gameTitle,
+      slug: overrides.gameTitle.toLowerCase().replace(/\s+/g, "-"),
+    }
+  );
 
 const defaultViewProps = {
   status: undefined,
@@ -143,13 +123,16 @@ const elements = {
   getPageHeading: () =>
     screen.getByRole("heading", { name: "Library", level: 1 }),
   queryPlayingFilterButton: () =>
-    screen.queryByRole("button", { name: "Filter by Playing" }),
-  getPlayingFilterButton: () =>
-    screen.getByRole("button", { name: "Filter by Playing" }),
-  getAllFilterButton: () =>
-    screen.getByRole("button", { name: "Show all statuses" }),
-  getPlayedFilterButton: () =>
-    screen.getByRole("button", { name: "Filter by Played" }),
+    screen.queryByRole("tab", { name: /^Playing/ }),
+  getPlayingFilterButton: () => screen.getByRole("tab", { name: /^Playing/ }),
+  getAllFilterButton: () => screen.getByRole("tab", { name: /^All/ }),
+  getDoneFilterButton: () => screen.getByRole("tab", { name: /^Done/ }),
+  queryStatusFilters: () =>
+    screen.queryAllByRole("tablist", { name: "Filter by status" }),
+  querySidebarStatusButtons: () =>
+    screen.queryAllByRole("button", {
+      name: /^Filter by (Want|Playing|Done)$/,
+    }),
   queryGameTitleHeading: (title: string) =>
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
@@ -164,9 +147,7 @@ const elements = {
     screen.queryByRole("button", { name: `Actions for ${title}` }),
   queryDialog: () => screen.queryByRole("dialog"),
   queryAddPlaythroughButton: () =>
-    screen.queryByRole("button", { name: "Add playthrough" }),
-  queryAddPlaythroughDrawer: () =>
-    screen.queryByRole("dialog", { name: "Add playthrough drawer" }),
+    screen.queryByRole("button", { name: /add playthrough/i }),
   queryFilterInput: () =>
     screen.queryByRole("searchbox", { name: "Filter library by title" }),
   getFilterInput: () =>
@@ -175,6 +156,45 @@ const elements = {
 };
 
 describe("LibraryPage", () => {
+  describe("given the library is empty and onboarding is shown", () => {
+    const onboarding = {
+      libraryItemCount: 0,
+      journalEntryCount: 0,
+      userImage: null,
+      userSteamId: null,
+    };
+
+    beforeEach(() => {
+      localStorage.clear();
+      mockNavigate.mockClear();
+      render(
+        <LibraryPage
+          items={[]}
+          total={0}
+          onboarding={onboarding}
+          {...defaultViewProps}
+        />
+      );
+    });
+
+    it("offers an Add a game button that opens the add search", async () => {
+      const user = userEvent.setup();
+
+      await user.click(
+        within(screen.getByTestId("empty-library-hero")).getByRole("button", {
+          name: "Add a game",
+        })
+      );
+
+      const searchUpdater = mockNavigate.mock.calls.at(-1)?.[0].search;
+      expect(searchUpdater({})).toMatchObject({ action: "add-game" });
+    });
+
+    it("does not point at a + button", () => {
+      expect(screen.queryByText(/\+ button|button below/i)).toBeNull();
+    });
+  });
+
   describe("given the library is empty", () => {
     beforeEach(() => {
       render(<LibraryPage items={[]} total={0} {...defaultViewProps} />);
@@ -188,12 +208,27 @@ describe("LibraryPage", () => {
       expect(elements.queryEmptyHeading()).not.toBeNull();
     });
 
-    it("offers the first-run dual CTAs (browse + import)", () => {
+    it("offers an Add a game button that opens the add search", async () => {
+      const user = userEvent.setup();
+      const emptyLibrary = within(screen.getByLabelText("Empty library"));
+
+      await user.click(
+        emptyLibrary.getByRole("button", { name: "Add a game" })
+      );
+
+      const searchUpdater = mockNavigate.mock.calls.at(-1)?.[0].search;
+      expect(searchUpdater({})).toMatchObject({ action: "add-game" });
+    });
+
+    it("does not point at a + button", () => {
+      expect(screen.queryByText(/\+ button|button below/i)).toBeNull();
+    });
+
+    it("offers the first-run dual CTAs (add + import)", () => {
       expect(
-        screen.getByRole("link", { name: "Browse games" })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: "Import from Steam" })
+        within(screen.getByLabelText("Empty library")).getByRole("link", {
+          name: "Import from Steam",
+        })
       ).toBeInTheDocument();
     });
 
@@ -207,11 +242,15 @@ describe("LibraryPage", () => {
       expect(elements.queryLibraryList()).toBeNull();
     });
 
-    it("mounts the LibraryFilters status controls", () => {
-      expect(elements.queryPlayingFilterButton()).not.toBeNull();
+    it("shows the status filter once, with no sidebar status list beside it", () => {
+      expect(elements.queryStatusFilters()).toHaveLength(1);
+      expect(elements.querySidebarStatusButtons()).toHaveLength(0);
+      expect(
+        screen.queryByRole("button", { name: "Show all statuses" })
+      ).toBeNull();
     });
 
-    it("mounts the AddGameTrigger in the page header", () => {
+    it("shows an Add game button in the page header", () => {
       expect(elements.queryAddGameTrigger()).not.toBeNull();
     });
   });
@@ -270,11 +309,12 @@ describe("LibraryPage", () => {
       expect(elements.queryEmptyHeading()).toBeNull();
     });
 
-    it("still mounts LibraryFilters", () => {
+    it("still shows the status filter, exactly once", () => {
       expect(elements.queryPlayingFilterButton()).not.toBeNull();
+      expect(elements.queryStatusFilters()).toHaveLength(1);
     });
 
-    it("mounts the AddGameTrigger in the page header", () => {
+    it("shows an Add game button in the page header", () => {
       expect(elements.queryAddGameTrigger()).not.toBeNull();
     });
 
@@ -300,12 +340,12 @@ describe("LibraryPage", () => {
   });
 
   describe("Phase 3 visual-parity push", () => {
-    describe("given a library with two PLAYING items and one SHELF item", () => {
+    describe("given a library with two PLAYING items and one WANT item", () => {
       beforeEach(() => {
         const items = [
           buildItem({ id: 1, gameTitle: "Hollow Knight" }),
           buildItem({ id: 2, gameTitle: "Celeste" }),
-          { ...buildItem({ id: 3, gameTitle: "Tunic" }), status: "SHELF" },
+          { ...buildItem({ id: 3, gameTitle: "Tunic" }), status: "WANT" },
         ] as LibraryItemWithGame[];
         render(<LibraryPage items={items} total={3} {...defaultViewProps} />);
       });
@@ -318,18 +358,25 @@ describe("LibraryPage", () => {
         expect(elements.queryCountChip()).toBeNull();
       });
 
-      it("mounts the AddGameTrigger as a FAB (still queryable by aria-label)", () => {
-        const trigger = elements.getAddGameTrigger();
-        expect(trigger.className).toMatch(/rounded-full/);
-        expect(trigger.className).toMatch(/fixed/);
+      it("has no floating Add button that could cover a card menu", () => {
+        const addButtons = screen.getAllByRole("button", { name: "Add game" });
+        expect(addButtons).toHaveLength(1);
+        expect(addButtons[0].className).not.toMatch(/fixed|sticky/);
       });
 
-      it("passes per-status counts through to LibraryFilters (rail renders count next to Playing)", () => {
+      it("opens the add search from the header Add game button", async () => {
+        mockNavigate.mockClear();
+        await userEvent.click(elements.getAddGameTrigger());
+        const { search } = mockNavigate.mock.calls[0][0];
+        expect(search({})).toEqual({ action: "add-game", game: undefined });
+      });
+
+      it("shows the per-status count on the Playing chip", () => {
         const playing = elements.getPlayingFilterButton();
         expect(playing.textContent).toContain("2");
       });
 
-      it("renders the totalCount next to the All button", () => {
+      it("renders the total count on the All chip", () => {
         const all = elements.getAllFilterButton();
         expect(all.textContent).toContain("3");
       });
@@ -338,7 +385,7 @@ describe("LibraryPage", () => {
     describe("given full-library statusCounts while the grid is filtered to PLAYING", () => {
       beforeEach(() => {
         // The grid shows only the 2 PLAYING items, but the loader-supplied
-        // statusCounts describe the WHOLE library (47 PLAYED exist elsewhere).
+        // statusCounts describe the WHOLE library (47 Done exist elsewhere).
         const items = [
           buildItem({ id: 1, gameTitle: "Hollow Knight" }),
           buildItem({ id: 2, gameTitle: "Celeste" }),
@@ -349,11 +396,9 @@ describe("LibraryPage", () => {
             total={2}
             status="PLAYING"
             statusCounts={{
-              WISHLIST: 12,
-              SHELF: 84,
-              UP_NEXT: 6,
+              WANT: 12,
               PLAYING: 2,
-              PLAYED: 47,
+              DONE: 47,
             }}
             platform={undefined}
             minRating={undefined}
@@ -363,8 +408,8 @@ describe("LibraryPage", () => {
         );
       });
 
-      it("shows the full-library PLAYED count (47), not 0, even though no PLAYED item is on the page", () => {
-        expect(elements.getPlayedFilterButton().textContent).toContain("47");
+      it("shows the full-library Done count (47), not 0, even though no Done item is on the page", () => {
+        expect(elements.getDoneFilterButton().textContent).toContain("47");
       });
 
       it("still shows the PLAYING count from the full-library counts", () => {
@@ -379,7 +424,6 @@ describe("LibraryPage", () => {
           buildItem({ id: 2, gameTitle: "Celeste" }),
         ];
         render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
-        const userEvent = (await import("@testing-library/user-event")).default;
         await userEvent.type(elements.getFilterInput(), "hollow");
       });
 
@@ -405,11 +449,9 @@ describe("LibraryPage", () => {
             total={3}
             {...defaultViewProps}
             statusCounts={{
+              WANT: 0,
               PLAYING: 3,
-              PLAYED: 0,
-              UP_NEXT: 0,
-              SHELF: 0,
-              WISHLIST: 0,
+              DONE: 0,
             }}
           />
         );
@@ -448,7 +490,6 @@ describe("LibraryPage", () => {
           buildItem({ id: 2, gameTitle: "Celeste" }),
         ];
         render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
-        const userEvent = (await import("@testing-library/user-event")).default;
         await userEvent.click(
           screen.getByRole("button", { name: "List view" })
         );
@@ -465,7 +506,6 @@ describe("LibraryPage", () => {
       beforeEach(async () => {
         const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
         render(<LibraryPage items={items} total={1} {...defaultViewProps} />);
-        const userEvent = (await import("@testing-library/user-event")).default;
         await userEvent.click(
           screen.getByRole("button", { name: "List view" })
         );
@@ -559,55 +599,241 @@ describe("LibraryPage", () => {
     });
   });
 
-  // Spec 016 §2.13 — Library-card "Add playthrough" quick-add entry point.
-  // The page lifts a single drawer state; each card's "Add playthrough" control
-  // opens ONE AddEditPlaythroughDrawer (mode="add") over the library.
-  describe("Add playthrough quick-add — spec 016 §2.13", () => {
-    describe("given a library with items and the user has not clicked Add playthrough", () => {
+  describe("given a library with items in list view", () => {
+    beforeEach(async () => {
+      const items = [
+        buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+        buildItem({ id: 2, gameTitle: "Celeste" }),
+      ];
+      render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+      await userEvent.click(screen.getByRole("button", { name: "List view" }));
+    });
+
+    it("offers no Add playthrough action on any card", () => {
+      expect(elements.queryAddPlaythroughButton()).toBeNull();
+    });
+  });
+
+  describe("given a desktop viewport", () => {
+    beforeEach(() => {
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches: query === "(min-width: 768px)",
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }));
+      const items = [
+        buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+        { ...buildItem({ id: 2, gameTitle: "Tunic" }), status: "WANT" },
+      ] as LibraryItemWithGame[];
+      render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("shows the grid / list switch", () => {
+      expect(screen.getByRole("button", { name: "Grid view" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "List view" })).toBeVisible();
+    });
+
+    it("shows a next-step button on every grid tile", () => {
+      expect(
+        screen.getByRole("button", { name: "Mark done" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Start playing" })
+      ).toBeInTheDocument();
+    });
+
+    it("keeps next-step buttons on every row after switching to list view", async () => {
+      await userEvent.click(screen.getByRole("button", { name: "List view" }));
+      expect(
+        screen.getByRole("button", { name: "Mark done" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Start playing" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("given the Up Next filter is selected", () => {
+    describe("and games are queued", () => {
       beforeEach(() => {
-        const items = [
-          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+        const queued = [
+          buildItem({ id: 1, gameTitle: "Hades" }),
           buildItem({ id: 2, gameTitle: "Celeste" }),
         ];
-        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+        render(
+          <LibraryPage
+            items={queued}
+            total={2}
+            {...defaultViewProps}
+            status="UP_NEXT"
+          />
+        );
       });
 
-      it("does not show the Add playthrough drawer at rest", () => {
-        expect(elements.queryAddPlaythroughDrawer()).toBeNull();
+      it("lists the queued games as a numbered queue with move buttons", () => {
+        expect(
+          screen.getByRole("list", { name: "Up Next queue" })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "Move Hades down" })
+        ).toBeInTheDocument();
+      });
+
+      it("does not show the library grid", () => {
+        expect(elements.queryLibraryList()).toBeNull();
       });
     });
 
-    describe("given a library with items and the user clicks Add playthrough on a card", () => {
-      beforeEach(async () => {
-        const items = [
-          buildItem({ id: 1, gameTitle: "Hollow Knight" }),
-          buildItem({ id: 2, gameTitle: "Celeste" }),
-        ];
-        render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
-        const userEvent = (await import("@testing-library/user-event")).default;
-        // Spec 025: inline quick-actions (incl. "Add playthrough") live in the
-        // list view; the default grid shows clean cover tiles. Switch to list
-        // first, then exercise the quick-add.
-        await userEvent.click(
-          screen.getByRole("button", { name: "List view" })
+    describe("and nothing is queued", () => {
+      beforeEach(() => {
+        render(
+          <LibraryPage
+            items={[]}
+            total={0}
+            {...defaultViewProps}
+            status="UP_NEXT"
+          />
         );
-        // Click the first "Add playthrough" button (Hollow Knight, id=1).
-        // Two cards each have an "Add playthrough" button — getAllByRole gives
-        // us both; index 0 is Hollow Knight (rendered first).
-        const [firstBtn] = screen.getAllByRole("button", {
-          name: "Add playthrough",
-        });
-        await userEvent.click(firstBtn);
       });
 
-      it("opens the AddEditPlaythroughDrawer", () => {
-        expect(elements.queryAddPlaythroughDrawer()).not.toBeNull();
-      });
-
-      it("passes the correct library item id to the drawer", () => {
-        const drawer = elements.queryAddPlaythroughDrawer();
-        expect(drawer?.textContent).toContain("1");
+      it("tells the user to queue up to 5 games", () => {
+        expect(
+          screen.getByText("Nothing queued yet — put up to 5 games in Up Next.")
+        ).toBeInTheDocument();
       });
     });
   });
+
+  describe("given Want games with and without ownership", () => {
+    const buildWant = (id: number, title: string, isOwned: boolean) =>
+      buildLibraryItemWithGame(
+        { id, status: "WANT", isOwned },
+        { id: `game-${id}`, title, slug: `game-${id}` }
+      );
+
+    it("tags only the Want game the user does not own", () => {
+      render(
+        <LibraryPage
+          items={[buildWant(1, "Hades", true), buildWant(2, "Celeste", false)]}
+          total={2}
+          {...defaultViewProps}
+          status="WANT"
+        />
+      );
+      expect(screen.getAllByText("Not owned")).toHaveLength(1);
+    });
+
+    it("tags it in the list view too", async () => {
+      render(
+        <LibraryPage
+          items={[buildWant(2, "Celeste", false)]}
+          total={1}
+          {...defaultViewProps}
+        />
+      );
+      await userEvent.click(screen.getByRole("button", { name: /list/i }));
+      expect(screen.getAllByText("Not owned")).toHaveLength(1);
+    });
+
+    it("offers the Not owned only toggle with the Want filter, and no Acquisition filter", () => {
+      render(
+        <LibraryPage
+          items={[buildWant(2, "Celeste", false)]}
+          total={1}
+          {...defaultViewProps}
+          status="WANT"
+        />
+      );
+      expect(
+        screen.getByRole("switch", { name: "Not owned only" })
+      ).toBeDefined();
+      expect(screen.queryByText("Acquisition")).toBeNull();
+    });
+  });
+
+  describe("given grid tiles with different statuses", () => {
+    beforeEach(() => {
+      render(
+        <LibraryPage
+          items={[
+            buildLibraryItemWithGame(
+              { id: 21, status: "WANT", upNextPosition: null },
+              { id: "g-21", title: "Wanted Game", slug: "wanted-game" }
+            ),
+            buildLibraryItemWithGame(
+              { id: 22, status: "WANT", upNextPosition: 2 },
+              { id: "g-22", title: "Queued Game", slug: "queued-game" }
+            ),
+            buildLibraryItemWithGame(
+              { id: 23, status: "PLAYING", upNextPosition: null },
+              { id: "g-23", title: "Playing Game", slug: "playing-game" }
+            ),
+          ]}
+          total={3}
+          {...defaultViewProps}
+        />
+      );
+    });
+
+    it("offers Put in Up Next in a Want game's menu", async () => {
+      await userEvent.click(elements.queryMenuTrigger("Wanted Game")!);
+
+      expect(
+        screen.getByRole("menuitem", { name: "Put in Up Next" })
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Up Next number on a queued game", () => {
+      expect(screen.getByText("Up Next #2")).toBeInTheDocument();
+    });
+
+    it("offers no Up Next action in a Playing game's menu", async () => {
+      await userEvent.click(elements.queryMenuTrigger("Playing Game")!);
+
+      expect(screen.queryByRole("menuitem", { name: /Up Next/ })).toBeNull();
+    });
+  });
+
+  describe.each([
+    { filter: "WANT" as const, viewLabel: "Grid view" },
+    { filter: "WANT" as const, viewLabel: "List view" },
+    { filter: "DONE" as const, viewLabel: "Grid view" },
+    { filter: "DONE" as const, viewLabel: "List view" },
+  ])(
+    "given the $filter filter in $viewLabel with a queued game",
+    ({ filter, viewLabel }) => {
+      beforeEach(async () => {
+        render(
+          <LibraryPage
+            items={[
+              buildLibraryItemWithGame(
+                { id: 31, status: filter, upNextPosition: 2 },
+                { id: "g-31", title: "Queued Game", slug: "queued-game" }
+              ),
+              buildLibraryItemWithGame(
+                { id: 32, status: filter, upNextPosition: null },
+                { id: "g-32", title: "Plain Game", slug: "plain-game" }
+              ),
+            ]}
+            total={2}
+            {...defaultViewProps}
+            status={filter}
+          />
+        );
+        await userEvent.click(screen.getByRole("button", { name: viewLabel }));
+      });
+
+      it("shows the queue marker on the queued game only", () => {
+        const expected = filter === "WANT" ? "Up Next #2" : "Replay";
+
+        expect(screen.getAllByTestId("queue-marker")).toHaveLength(1);
+        expect(screen.getByText(expected)).toBeInTheDocument();
+      });
+    }
+  );
 });

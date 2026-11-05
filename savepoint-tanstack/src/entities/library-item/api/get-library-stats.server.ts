@@ -6,45 +6,41 @@ import type { LibraryStats, RecentGame } from "../model/types";
 export type { LibraryStats, RecentGame } from "../model/types";
 
 export async function getLibraryStats(userId: string): Promise<LibraryStats> {
-  const [statusCountsRaw, completedCount, recentItems, journalCount] =
-    await Promise.all([
-      prisma.libraryItem.groupBy({
-        by: ["status"],
-        where: { userId },
-        _count: true,
-      }),
-      // Real completions — a timestamp, not a status. PLAYED includes dropped
-      // games; this counts only games the user explicitly marked complete.
-      prisma.libraryItem.count({
-        where: { userId, completedAt: { not: null } },
-      }),
-      prisma.libraryItem.findMany({
-        where: { userId, status: "PLAYING" },
-        include: {
-          game: {
-            select: { id: true, title: true, coverImage: true },
-          },
+  const [statusCountsRaw, recentItems, journalCount] = await Promise.all([
+    prisma.libraryItem.groupBy({
+      by: ["status"],
+      where: { userId },
+      _count: true,
+    }),
+    prisma.libraryItem.findMany({
+      where: { userId, status: "PLAYING" },
+      include: {
+        game: {
+          select: { id: true, slug: true, title: true, coverImage: true },
         },
-        orderBy: { updatedAt: "desc" },
-        take: RECENT_GAMES_LIMIT,
-      }),
-      prisma.journalEntry.count({ where: { userId } }),
-    ]);
+      },
+      orderBy: { updatedAt: "desc" },
+      take: RECENT_GAMES_LIMIT,
+    }),
+    prisma.journalEntry.count({ where: { userId } }),
+  ]);
 
-  const statusCounts = statusCountsRaw.reduce<Record<string, number>>(
-    (acc, item) => {
-      acc[item.status] = item._count;
-      return acc;
-    },
-    {}
-  );
+  const countOf = (status: "WANT" | "PLAYING" | "DONE") =>
+    statusCountsRaw.find((row) => row.status === status)?._count ?? 0;
 
   const recentGames: RecentGame[] = recentItems.map((item) => ({
     gameId: item.game.id,
+    slug: item.game.slug,
     title: item.game.title,
     coverImage: item.game.coverImage,
     lastPlayed: item.updatedAt,
   }));
 
-  return { statusCounts, completedCount, recentGames, journalCount };
+  return {
+    want: countOf("WANT"),
+    playing: countOf("PLAYING"),
+    done: countOf("DONE"),
+    recentGames,
+    journalCount,
+  };
 }

@@ -1,10 +1,11 @@
+import type { NotePrompt } from "@/entities/journal-entry";
+
 export type JournalTimelineEntry = {
   id: string;
-  kind: "QUICK" | "REFLECTION";
-  title: string | null;
   content: string;
+  playedMinutes: number | null;
+  prompt?: NotePrompt | null;
   createdAt: Date;
-  updatedAt: Date;
   game: {
     id: string;
     title: string;
@@ -18,7 +19,7 @@ export type JournalTimelineProps = {
   /**
    * Optional callback fired when the user clicks an entry card. When
    * provided, every card becomes interactive. Wiring an opener (e.g., a
-   * detail dialog) lives in the composing widget.
+   * note view) lives in the composing widget.
    */
   onEntrySelect?: (entryId: string) => void;
 };

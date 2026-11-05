@@ -20,17 +20,19 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
+const gameOptions = [
+  { id: "game-1", title: "Hollow Knight" },
+  { id: "game-2", title: "Celeste" },
+];
+
 function makeEntry(
   overrides?: Partial<JournalTimelineEntry>
 ): JournalTimelineEntry {
-  const createdAt = overrides?.createdAt ?? new Date("2024-01-15T12:00:00Z");
   return {
     id: "entry-1",
-    kind: "QUICK",
-    title: null,
     content: "Tonight's session went well.",
-    createdAt,
-    updatedAt: createdAt,
+    playedMinutes: null,
+    createdAt: new Date("2024-01-15T12:00:00Z"),
     game: {
       id: "game-1",
       title: "Hollow Knight",
@@ -49,17 +51,41 @@ function formatDate(date: Date): string {
   });
 }
 
+function renderPage(
+  entries: JournalTimelineEntry[],
+  selectedGame?: string | undefined
+) {
+  render(
+    <JournalTimelinePage
+      entries={entries}
+      gameOptions={gameOptions}
+      selectedGame={selectedGame}
+    />
+  );
+}
+
+function searchAfter(callIndex = 0): Record<string, unknown> {
+  const { search } = navigateMock.mock.calls[callIndex][0] as {
+    search: (prev: Record<string, unknown>) => Record<string, unknown>;
+  };
+  return search({});
+}
+
 const elements = {
-  getComposeLink: () => screen.getByRole("link", { name: "Compose entry" }),
+  getNewNoteButton: () => screen.getByRole("button", { name: "New note" }),
   getEntryOpener: (date: string) =>
-    screen.getByRole("button", { name: `Open journal entry from ${date}` }),
-  getSubtitle: () => screen.getByText(/Reflect, don't review\./),
-  querySubtitle: () => screen.queryByText(/Reflect, don't review\./),
+    screen.getByRole("button", { name: `Open note from ${date}` }),
+  getFilter: () =>
+    screen.getByRole("combobox", { name: "Filter by game", hidden: true }),
+  getFilterOption: (name: string) =>
+    screen.getByRole("option", { name, hidden: true }),
 };
 
 const actions = {
-  clickEntryCard: async (date: string) =>
-    userEvent.click(elements.getEntryOpener(date)),
+  pickFilter: async (name: string) => {
+    await userEvent.click(elements.getFilter());
+    await userEvent.click(elements.getFilterOption(name));
+  },
 };
 
 describe("JournalTimelinePage", () => {
@@ -69,64 +95,46 @@ describe("JournalTimelinePage", () => {
 
   describe("given an empty timeline", () => {
     beforeEach(() => {
-      render(<JournalTimelinePage entries={[]} />);
+      renderPage([]);
     });
 
-    it("renders a Compose entry link to the /journal/new page", () => {
-      expect(elements.getComposeLink()).toHaveAttribute("href", "/journal/new");
-    });
-
-    it("renders the subtitle with 0 entries", () => {
-      expect(
-        screen.getByText(
-          "Reflect, don't review. 0 entries across your library."
-        )
-      ).toBeDefined();
+    it("shows 0 notes", () => {
+      expect(screen.getByText("0 notes")).toBeDefined();
     });
   });
 
-  describe("given a timeline with one entry", () => {
+  describe("given one note", () => {
     beforeEach(() => {
-      render(<JournalTimelinePage entries={[makeEntry()]} />);
+      renderPage([makeEntry()]);
     });
 
-    it("renders the subtitle with 1 entry (singular)", () => {
-      expect(
-        screen.getByText("Reflect, don't review. 1 entry across your library.")
-      ).toBeDefined();
+    it("shows 1 note (singular)", () => {
+      expect(screen.getByText("1 note")).toBeDefined();
     });
   });
 
-  describe("given a timeline with two entries", () => {
-    beforeEach(() => {
-      render(
-        <JournalTimelinePage
-          entries={[makeEntry({ id: "e1" }), makeEntry({ id: "e2" })]}
-        />
+  describe("given the user taps New note", () => {
+    beforeEach(async () => {
+      renderPage([makeEntry()]);
+      await userEvent.click(elements.getNewNoteButton());
+    });
+
+    it("opens the Log form instead of staying on the list", () => {
+      expect(searchAfter()).toMatchObject({ action: "log-session" });
+    });
+  });
+
+  describe("given the user taps a note", () => {
+    const entry = makeEntry({ id: "entry-card-click" });
+
+    beforeEach(async () => {
+      renderPage([entry]);
+      await userEvent.click(
+        elements.getEntryOpener(formatDate(entry.createdAt))
       );
     });
 
-    it("renders the subtitle with the correct count", () => {
-      expect(
-        screen.getByText(
-          "Reflect, don't review. 2 entries across your library."
-        )
-      ).toBeDefined();
-    });
-  });
-
-  describe("given a timeline with one entry and the user clicks the card", () => {
-    const entry = makeEntry({
-      id: "entry-card-click",
-      content: "Reached the second area.",
-    });
-
-    beforeEach(async () => {
-      render(<JournalTimelinePage entries={[entry]} />);
-      await actions.clickEntryCard(formatDate(entry.updatedAt));
-    });
-
-    it("navigates to the entry detail page", () => {
+    it("navigates to the note view", () => {
       expect(navigateMock).toHaveBeenCalledWith({
         to: "/journal/$id",
         params: { id: "entry-card-click" },
@@ -134,46 +142,79 @@ describe("JournalTimelinePage", () => {
     });
   });
 
-  describe("given multiple entries", () => {
-    const entries = [
-      makeEntry({ id: "e1", content: "First session." }),
-      makeEntry({
-        id: "e2",
-        content: "Second session.",
-        game: {
-          id: "game-2",
-          title: "Celeste",
-          slug: "celeste",
-          coverImage: null,
-        },
-      }),
-    ];
-
+  describe("given the Journal filter", () => {
     beforeEach(() => {
-      render(<JournalTimelinePage entries={entries} />);
+      renderPage([makeEntry()]);
     });
 
-    it("renders the stats rail in the DOM", () => {
-      const rail = screen.getByRole("complementary", {
-        name: "Journaling stats",
-      });
-      expect(rail).toBeDefined();
+    it("filters to a game when it is picked", async () => {
+      await actions.pickFilter("Celeste");
+      expect(searchAfter()).toMatchObject({ gameId: "game-2" });
     });
 
-    it("renders a 'log a session' CTA link in the stats rail", () => {
-      expect(screen.getByRole("link", { name: "Log a session" })).toBeDefined();
+    it("filters to notes without a game when No game is picked", async () => {
+      await actions.pickFilter("No game");
+      expect(searchAfter()).toMatchObject({ gameId: "none" });
     });
   });
 
-  describe("given a single entry", () => {
-    beforeEach(() => {
-      render(<JournalTimelinePage entries={[makeEntry()]} />);
+  describe("given a game is already selected and All is picked", () => {
+    beforeEach(async () => {
+      renderPage([makeEntry()], "game-1");
+      await actions.pickFilter("All");
     });
 
-    it("renders both the timeline column and the stats rail container", () => {
+    it("clears the filter", () => {
+      expect(searchAfter().gameId).toBeUndefined();
+    });
+  });
+
+  describe("given the notes the loader returned for a game", () => {
+    beforeEach(() => {
+      renderPage(
+        [
+          makeEntry({ id: "a", content: "Beat the first boss." }),
+          makeEntry({ id: "b", content: "Found the map." }),
+        ],
+        "game-1"
+      );
+    });
+
+    it("lists those notes and shows the game as selected", () => {
+      expect(screen.getByText("Beat the first boss.")).toBeDefined();
+      expect(screen.getByText("Found the map.")).toBeDefined();
+      expect(elements.getFilter()).toHaveTextContent("Hollow Knight");
+    });
+  });
+
+  describe("given the No game filter is selected", () => {
+    beforeEach(() => {
+      renderPage(
+        [makeEntry({ id: "c", content: "One big RPG at a time.", game: null })],
+        "none"
+      );
+    });
+
+    it("lists the note without a game and shows No game as selected", () => {
+      expect(screen.getByText("One big RPG at a time.")).toBeDefined();
+      expect(elements.getFilter()).toHaveTextContent("No game");
+    });
+  });
+
+  describe("given notes", () => {
+    beforeEach(() => {
+      renderPage([makeEntry({ id: "e1" }), makeEntry({ id: "e2" })]);
+    });
+
+    it("renders the rail with a Log time button", () => {
       expect(
-        screen.getByRole("complementary", { name: "Journaling stats" })
+        screen.getByRole("complementary", { name: "Log tonight" })
       ).toBeDefined();
+      expect(screen.getByRole("button", { name: "Log time" })).toBeDefined();
+    });
+
+    it("shows no period counts", () => {
+      expect(screen.queryByText(/this month/i)).toBeNull();
     });
   });
 });

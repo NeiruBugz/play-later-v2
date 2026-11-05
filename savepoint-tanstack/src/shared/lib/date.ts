@@ -42,7 +42,7 @@ export function formatJournalDate(date: Date | string | number): string {
  * `{ year: "numeric", month: "short", day: "numeric" }`.
  *
  * - default (no options): `en-US` locale, local time zone — matches
- *   `Intl.DateTimeFormat("en-US", ...)` callers (game-metadata, lifecycle-strip).
+ *   `Intl.DateTimeFormat("en-US", ...)` callers (game-metadata).
  * - `{ utc: true }`: `en-US`, `timeZone: "UTC"` — matches the date-picker.
  * - `{ locale: undefined }` (explicit): forwards `undefined` to
  *   `toLocaleDateString` so the runtime default locale is used — matches the
@@ -87,15 +87,25 @@ export function formatRelativeTime(date: Date, now: Date = new Date()): string {
 }
 
 /**
- * Human-readable playtime for a positive minute count: `6h 30m`, `45m`, `6h`.
- * Callers own the zero/empty case — different surfaces want different copy
- * (`—` on the game-detail rail, `Never played` on the steam-import card) — so
- * this helper assumes `totalMinutes > 0`.
+ * Hours with at most one decimal and no trailing ".0": `1.5 h`, `12 h`, `0.5 h`.
+ * The single hour formatter for time played; minutes are rounded to 0.1 h.
  */
-export function formatPlaytimeMinutes(totalMinutes: number): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
+export function formatHours(minutes: number): string {
+  const hours = Math.round((minutes / 60) * 10) / 10;
+  return `${hours} h`;
+}
+
+/**
+ * Day-and-month display (`3 Mar`), with the year (`3 Mar 2025`) only when it
+ * differs from the year of `now`.
+ */
+export function formatDayMonth(
+  date: Date | string | number,
+  now: Date = new Date()
+): string {
+  const value = new Date(date);
+  const base = `${value.getDate()} ${value.toLocaleDateString("en-GB", { month: "short" })}`;
+  return value.getFullYear() === now.getFullYear()
+    ? base
+    : `${base} ${value.getFullYear()}`;
 }

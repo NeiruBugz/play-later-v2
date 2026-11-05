@@ -1,16 +1,22 @@
 import type {
-  AcquisitionType,
   LibraryItem,
   LibraryItemStatus,
 } from "../../../../shared/lib/prisma/client.ts";
 
 export type GetLibraryFilters = {
   status?: LibraryItemStatus;
+  /**
+   * Status-agnostic queue view: every item with a non-null `upNextPosition`
+   * (WANT or DONE), ordered by position ascending. Takes precedence over
+   * `status` and the sort params.
+   */
+  upNext?: boolean;
   platform?: string;
-  acquisition?: AcquisitionType;
-  /** When true, narrows to games the user has played at least once. */
-  startedOnly?: boolean;
+  /** Only meaningful with `status: WANT`; ignored for every other view. */
+  notOwnedOnly?: boolean;
   minRating?: number;
+  /** Only games without a rating; takes precedence over `minRating`. */
+  unratedOnly?: boolean;
   sortBy?: "title" | "createdAt" | "updatedAt";
   sortOrder?: "asc" | "desc";
 };
@@ -33,21 +39,16 @@ export type GetLibraryResult = {
 
 export type RecentGame = {
   gameId: string;
+  slug: string;
   title: string;
   coverImage: string | null;
   lastPlayed: Date;
 };
 
 export type LibraryStats = {
-  statusCounts: Record<string, number>;
-  /**
-   * Real completion count: `LibraryItem.completedAt IS NOT NULL`. Distinct
-   * from `statusCounts.PLAYED` — PLAYED means "started, then set aside or
-   * finished" (it includes dropped games), whereas `completedCount` only
-   * counts games the user explicitly marked complete. There is no `COMPLETED`
-   * status enum; completion is a timestamp, not a status.
-   */
-  completedCount: number;
+  want: number;
+  playing: number;
+  done: number;
   recentGames: RecentGame[];
   journalCount: number;
 };

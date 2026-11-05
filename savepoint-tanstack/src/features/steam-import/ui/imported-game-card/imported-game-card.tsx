@@ -1,6 +1,7 @@
 import { Plus, X } from "lucide-react";
 
-import { formatPlaytimeMinutes } from "@/shared/lib/date";
+import { getStatusLabel } from "@/entities/library-item";
+import { formatHours } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -17,7 +18,7 @@ import {
  *
  * Three render variants keyed off `game.igdbMatchStatus`:
  *   - `MATCHED`             → cover + name + "Add to library" + dismiss.
- *   - `PENDING` / `UNMATCHED` → placeholder + name + "Search IGDB" + dismiss.
+ *   - `PENDING` / `UNMATCHED` → placeholder + name + "Search" + dismiss.
  *   - `IGNORED`             → muted + "Restore" (handled by widget via
  *                              `onAddToLibrary` repurposed for restore — Phase
  *                              D ships the IGNORED branch only when the
@@ -71,16 +72,14 @@ export function ImportedGameCard({
             <h3 className="truncate font-medium">{game.name}</h3>
             <Badge
               variant="outline"
-              aria-label={`Suggested status: ${smartStatus}`}
+              aria-label={`Suggested status: ${getStatusLabel(smartStatus)}`}
             >
-              {smartStatus}
+              {getStatusLabel(smartStatus)}
             </Badge>
           </div>
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
             <span>
-              {game.playtime
-                ? formatPlaytimeMinutes(game.playtime)
-                : "Never played"}
+              {game.playtime ? formatHours(game.playtime) : "Never played"}
             </span>
             {lastPlayedLabel ? (
               <>
@@ -99,8 +98,8 @@ export function ImportedGameCard({
               size="icon"
               onClick={onAddToLibrary}
               disabled={isPending}
-              aria-label={`Add ${game.name} to library`}
-              title="Add to library"
+              aria-label={`Add ${game.name}`}
+              title="Add"
             >
               <Plus />
             </Button>
@@ -126,8 +125,8 @@ export function ImportedGameCard({
               size="icon"
               onClick={onDismiss}
               disabled={isPending}
-              aria-label={`Dismiss ${game.name}`}
-              title="Dismiss game"
+              aria-label={`Remove ${game.name}`}
+              title="Remove game"
             >
               <X />
             </Button>

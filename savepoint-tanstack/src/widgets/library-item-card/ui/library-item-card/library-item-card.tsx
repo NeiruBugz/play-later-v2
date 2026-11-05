@@ -1,50 +1,67 @@
 import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
-  isTouched,
-  LibraryLifecycleStrip,
   LibraryStatusBadge,
-  resolveAcquisitionEmphasis,
-  resolveAcquisitionLabel,
-  shouldShowAcquisitionChip,
+  NextStepButton,
+  NotOwnedTag,
+  QueueMarker,
+  StatusControl,
 } from "@/entities/library-item";
+import {
+  useSetOwnership,
+  useSetStatus,
+} from "@/features/manage-library-entry/model";
+import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
+import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { cn } from "@/shared/lib/utils";
-import { Badge } from "@/shared/ui/badge";
 import { RatingInput } from "@/shared/ui/rating-input";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { GameCard } from "@/widgets/game-card";
 
-import { LibraryItemCardCta } from "./library-item-card-cta";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { getStatusCoverAccent } from "./library-item-card.utility";
 
 export function LibraryItemCard({
   item,
   menu,
-  onAddPlaythrough,
+  layout = "responsive",
 }: LibraryItemCardProps) {
+  const isRow = layout === "row";
+  const { status, setStatus, isPending } = useSetStatus({
+    id: item.id,
+    gameTitle: item.game.title,
+    status: item.status,
+    upNextPosition: item.upNextPosition,
+    rating: item.rating,
+  });
+  const ownership = useSetOwnership({
+    id: item.id,
+    gameTitle: item.game.title,
+    isOwned: item.isOwned,
+  });
+  const membership = useUpNextMembership({
+    id: item.id,
+    gameTitle: item.game.title,
+    upNextPosition: item.upNextPosition,
+  });
+  const menuNode =
+    typeof menu === "function"
+      ? menu(
+          <UpNextMenuActions status={status} membership={membership} />,
+          ownership
+        )
+      : menu;
   const hasPlatform =
     typeof item.platform === "string" && item.platform.trim().length > 0;
-  // F04: a started-then-shelved game reads differently from one never touched.
-  // "Touched" is derived from real play signals (startedAt / completedAt /
-  // status) — see isTouched — not the dead `hasBeenPlayed` flag.
-  const touched = isTouched(item);
-  const isTried =
-    touched && (item.status === "SHELF" || item.status === "WISHLIST");
-  // F03: the chip flags non-default acquisition (subscription / physical);
-  // the DIGITAL default stays implicit to keep the row clean.
-  const showAcquisitionChip = shouldShowAcquisitionChip(item.acquisitionType);
-  const acquisitionLabel = resolveAcquisitionLabel(
-    item.acquisitionType,
-    item.platform
-  );
-  const acquisitionEmphasis = resolveAcquisitionEmphasis(item.acquisitionType);
 
   return (
     <div
-      className="relative flex flex-row gap-3 md:flex-col md:gap-0"
+      className={cn(
+        "relative flex flex-row gap-3",
+        !isRow && "md:flex-col md:gap-0"
+      )}
       data-testid="library-item-card-root"
     >
-      <div className="relative w-20 shrink-0 md:w-auto">
+      <div className={cn("relative w-20 shrink-0", !isRow && "md:w-auto")}>
         <GameCard
           game={{
             slug: item.game.slug,
@@ -53,62 +70,54 @@ export function LibraryItemCard({
           }}
           asLink
           density="minimal"
-          coverAccentClassName={getStatusCoverAccent(item.status)}
+          coverAccentClassName={getStatusCoverAccent(status)}
           badges={
-            <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
-              <LibraryStatusBadge
-                status={item.status}
-                hasBeenPlayed={touched}
-                className="uppercase"
-              />
-              {isTried ? (
-                <span className="bg-foreground text-background rounded-full px-2 py-0.5 text-[10px] leading-none font-semibold tracking-wide uppercase">
-                  Tried
-                </span>
-              ) : null}
+            <div
+              className={cn(
+                "absolute bottom-2 left-2 flex flex-col items-start gap-1",
+                !isRow && "md:top-2 md:bottom-auto"
+              )}
+            >
+              <LibraryStatusBadge status={status} />
             </div>
           }
         />
-        {menu ? (
-          <div className="absolute top-2 right-2 z-10">{menu}</div>
+        {menuNode ? (
+          <div className="absolute top-2 right-2 z-10">{menuNode}</div>
         ) : null}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col md:contents">
-        <h3 className="mt-0.5 line-clamp-2 text-sm leading-tight font-semibold md:mt-2 md:min-h-[2lh]">
+      <div
+        className={cn("flex min-w-0 flex-1 flex-col", !isRow && "md:contents")}
+      >
+        <h3
+          className={cn(
+            "mt-0.5 line-clamp-2 text-sm leading-tight font-semibold",
+            !isRow && "md:mt-2 md:min-h-[2lh]"
+          )}
+        >
           {item.game.title}
         </h3>
 
-        <LibraryLifecycleStrip
-          status={item.status}
-          createdAt={item.createdAt}
-          startedAt={item.startedAt}
-          completedAt={item.completedAt}
-          className="mt-0.5 mb-1 md:mt-2"
-        />
+        <div className="mt-1 flex flex-wrap items-center gap-1 self-start empty:hidden">
+          <QueueMarker
+            status={status}
+            upNextPosition={membership.upNextPosition}
+          />
+          <NotOwnedTag status={status} isOwned={ownership.isOwned} />
+        </div>
 
         <div
-          className="text-muted-foreground mt-0 flex h-4 items-center gap-1.5 truncate text-[11px] leading-none md:mt-1"
+          className={cn(
+            "text-muted-foreground mt-0 flex h-4 items-center gap-1.5 truncate text-[11px] leading-none",
+            !isRow && "md:mt-1"
+          )}
           data-testid="library-item-card-metadata"
         >
           {hasPlatform ? (
             <TooltipProvider>
               <PlatformBadgeItem name={item.platform!} />
             </TooltipProvider>
-          ) : null}
-          {showAcquisitionChip ? (
-            <Badge
-              variant={
-                acquisitionEmphasis === "subscription" ? "default" : "outline"
-              }
-              className={cn(
-                "h-4 px-1.5 py-0 text-[10px] leading-none font-medium uppercase",
-                acquisitionEmphasis === "subscription" &&
-                  "bg-primary/10 text-primary border-transparent"
-              )}
-            >
-              {acquisitionLabel}
-            </Badge>
           ) : null}
         </div>
 
@@ -119,21 +128,25 @@ export function LibraryItemCard({
             event.stopPropagation();
           }}
         >
-          {item.rating === null ? (
-            <span className="text-muted-foreground text-xs italic">
-              unrated
-            </span>
-          ) : (
-            <RatingInput
-              value={item.rating}
-              size="sm"
-              readOnly
-              aria-label={`Rating: ${item.rating / 2} out of 5 stars`}
-            />
+          {item.rating === null ? null : (
+            <RatingInput value={item.rating} size="sm" readOnly />
           )}
         </div>
 
-        <LibraryItemCardCta item={item} onAddPlaythrough={onAddPlaythrough} />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <StatusControl
+            status={status}
+            onChange={(to) => void setStatus(to)}
+            disabled={isPending}
+            className="text-xs"
+          />
+          <NextStepButton
+            status={status}
+            onStep={(to) => void setStatus(to)}
+            disabled={isPending}
+            className="text-xs font-semibold"
+          />
+        </div>
       </div>
     </div>
   );

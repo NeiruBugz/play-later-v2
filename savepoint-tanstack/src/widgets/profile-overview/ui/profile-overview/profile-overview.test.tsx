@@ -11,12 +11,19 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({
     children,
     to,
+    params,
     ...rest
   }: {
     children: React.ReactNode;
     to: string;
+    params?: { slug?: string };
   } & React.HTMLAttributes<HTMLAnchorElement>) => (
-    <a href={to} {...rest}>
+    <a
+      href={
+        to === "/games/$slug" && params?.slug ? `/games/${params.slug}` : to
+      }
+      {...rest}
+    >
       {children}
     </a>
   ),
@@ -37,18 +44,13 @@ const stubProfile: Profile = {
 };
 
 const stubStats: LibraryStats = {
-  statusCounts: {
-    SHELF: 3,
-    PLAYING: 1,
-    // PLAYED includes dropped + finished games; deliberately larger than the
-    // real completion count so the two stats are observably distinct.
-    PLAYED: 5,
-  },
-  // Real completions (`completedAt IS NOT NULL`) — fewer than PLAYED.
-  completedCount: 2,
+  want: 3,
+  playing: 1,
+  done: 5,
   recentGames: [
     {
       gameId: "game-1",
+      slug: "balatro",
       title: "Balatro",
       coverImage: "/covers/balatro.jpg",
       lastPlayed: new Date("2026-05-07T12:00:00.000Z"),
@@ -68,9 +70,6 @@ const elements = {
   queryLibraryEmpty: () => screen.queryByTestId("profile-library-empty"),
   queryLibrarySlot: () => screen.queryByTestId("profile-library-slot"),
   queryActivityEmpty: () => screen.queryByTestId("profile-activity-empty"),
-  queryPlaythroughsSection: () => screen.queryByTestId("overview-playthroughs"),
-  queryPlaythroughsSlot: () =>
-    screen.queryByTestId("profile-playthroughs-slot"),
   getHeroBanner: () => screen.getByTestId("profile-hero-banner"),
   getStatRow: () => screen.getByTestId("profile-stat-row"),
   getPrimaryAction: () => screen.getByTestId("profile-primary-action"),
@@ -106,6 +105,32 @@ describe("ProfileOverview", () => {
     });
   });
 
+  describe("given recently played games", () => {
+    it("titles the section Playing, matching its content", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      expect(screen.getByRole("heading", { name: "Playing" })).toBeVisible();
+      expect(screen.queryByText(/recently played/i)).toBeNull();
+    });
+
+    it("links each tile to the game's slug page", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      const tile = screen.getByTestId("overview-recently-played-entry");
+      expect(tile).toHaveAttribute("href", "/games/balatro");
+    });
+  });
+
   describe("given isOwnProfile is false (public viewer)", () => {
     it("does not render the change-avatar overlay trigger", () => {
       render(
@@ -131,7 +156,7 @@ describe("ProfileOverview", () => {
   });
 
   describe("given any viewer (default tab)", () => {
-    it("defaults to the Overview tab showing Recently Played", () => {
+    it("defaults to the Overview tab showing the Playing section", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
       expect(elements.queryRecentlyPlayed()).not.toBeNull();
     });
@@ -142,26 +167,25 @@ describe("ProfileOverview", () => {
       expect(style).toContain("linear-gradient");
     });
 
-    it("renders four inline stat items in the compact header stat row", () => {
+    it("renders five inline stat items in the compact header stat row", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      expect(screen.getAllByTestId("profile-stat-item").length).toBe(4);
+      expect(screen.getAllByTestId("profile-stat-item").length).toBe(5);
     });
 
-    it("shows played and completed as distinct stat items (no phantom COMPLETED fallback)", () => {
+    it("shows Want, Playing and Done counts and no played / completed stat", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      const items = screen.getAllByTestId("profile-stat-item");
-      const playedItem = items.find(
-        (item) => within(item).queryByText("played") !== null
-      );
-      const completedItem = items.find(
-        (item) => within(item).queryByText("completed") !== null
-      );
-      // PLAYED status count (5) and real completions (2) are different numbers
-      // rendered in their own stat items — proving the two metrics aren't conflated.
-      expect(playedItem).toBeDefined();
-      expect(completedItem).toBeDefined();
-      expect(within(playedItem!).getByText("5")).toBeInTheDocument();
-      expect(within(completedItem!).getByText("2")).toBeInTheDocument();
+      const statTexts = screen
+        .getAllByTestId("profile-stat-item")
+        .map((item) => item.textContent);
+      expect(statTexts).toEqual([
+        "9in library",
+        "3want",
+        "1playing",
+        "5done",
+        "3notes",
+      ]);
+      expect(screen.queryByText("played")).toBeNull();
+      expect(screen.queryByText("completed")).toBeNull();
     });
   });
 
@@ -202,35 +226,6 @@ describe("ProfileOverview", () => {
     });
   });
 
-  describe("given no playthroughsSlot is supplied", () => {
-    it("does not render the Playthroughs section", () => {
-      render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      expect(elements.queryPlaythroughsSection()).toBeNull();
-    });
-  });
-
-  describe("given a playthroughsSlot is supplied", () => {
-    beforeEach(() => {
-      render(
-        <ProfileOverview
-          profile={stubProfile}
-          stats={stubStats}
-          playthroughsSlot={
-            <div data-testid="profile-playthroughs-slot">Playthroughs</div>
-          }
-        />
-      );
-    });
-
-    it("renders the Playthroughs section wrapper on the overview tab", () => {
-      expect(elements.queryPlaythroughsSection()).not.toBeNull();
-    });
-
-    it("renders the injected slot content inside the section", () => {
-      expect(elements.queryPlaythroughsSlot()).not.toBeNull();
-    });
-  });
-
   // AC PRO-1: compact header — content starts high with a sticky tab strip
   describe("given any viewer (AC PRO-1 compact header)", () => {
     beforeEach(() => {
@@ -241,10 +236,10 @@ describe("ProfileOverview", () => {
       expect(elements.getStatRow()).toBeDefined();
     });
 
-    it("stat row contains exactly 4 inline stat items (in library / played / completed / entries)", () => {
+    it("stat row contains exactly 5 inline stat items (in library / want / playing / done / notes)", () => {
       const row = elements.getStatRow();
       const items = within(row).getAllByTestId("profile-stat-item");
-      expect(items.length).toBe(4);
+      expect(items.length).toBe(5);
     });
 
     it("stat row is inside the identity block", () => {

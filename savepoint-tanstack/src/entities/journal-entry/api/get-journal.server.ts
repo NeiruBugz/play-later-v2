@@ -1,32 +1,42 @@
 import { prisma } from "@/shared/lib/db.server";
 
 import {
-  JOURNAL_ENTRY_GAME_SELECT,
+  JOURNAL_ENTRY_READ_ARGS,
+  JOURNAL_NO_GAME_FILTER,
+  type JournalGameFilter,
   type JournalTimelineEntry,
 } from "../model/types";
 
 export type { JournalTimelineEntry } from "../model/types";
 
+export type JournalGameOption = { id: string; title: string };
+
 /**
- * Returns every journal entry owned by `userId`, newest first, with the
- * related game projected down to {id, title, slug, coverImage}.
+ * Returns the notes owned by `userId`, newest first by `createdAt`.
+ * `gameId` narrows to one game; `"none"` narrows to notes without a game.
  *
  * Empty result (no user, no entries) returns []; never throws.
  */
 export async function getJournalTimeline(
-  userId: string
+  userId: string,
+  filter: { gameId?: JournalGameFilter } = {}
 ): Promise<JournalTimelineEntry[]> {
+  const { gameId } = filter;
   return prisma.journalEntry.findMany({
-    where: { userId },
-    orderBy: { updatedAt: "desc" },
-    include: { game: { select: JOURNAL_ENTRY_GAME_SELECT } },
+    where: {
+      userId,
+      ...(gameId === undefined
+        ? {}
+        : { gameId: gameId === JOURNAL_NO_GAME_FILTER ? null : gameId }),
+    },
+    orderBy: { createdAt: "desc" },
+    ...JOURNAL_ENTRY_READ_ARGS,
   });
 }
 
 /**
- * Returns every journal entry owned by `userId` for the given `gameId`,
- * newest first. Ownership is enforced at the query level so another user's
- * entries for the same game are never returned. Empty result returns [].
+ * Returns the notes owned by `userId` for the given `gameId`, newest first by
+ * `createdAt`. Ownership is enforced at the query level.
  */
 export async function getJournalEntriesForGame(
   userId: string,
@@ -34,7 +44,20 @@ export async function getJournalEntriesForGame(
 ): Promise<JournalTimelineEntry[]> {
   return prisma.journalEntry.findMany({
     where: { userId, gameId },
-    orderBy: { updatedAt: "desc" },
-    include: { game: { select: JOURNAL_ENTRY_GAME_SELECT } },
+    orderBy: { createdAt: "desc" },
+    ...JOURNAL_ENTRY_READ_ARGS,
+  });
+}
+
+/**
+ * The Journal filter options: the user's games that have notes, by title.
+ */
+export async function getJournalGameOptions(
+  userId: string
+): Promise<JournalGameOption[]> {
+  return prisma.game.findMany({
+    where: { JournalEntry: { some: { userId } } },
+    select: { id: true, title: true },
+    orderBy: { title: "asc" },
   });
 }

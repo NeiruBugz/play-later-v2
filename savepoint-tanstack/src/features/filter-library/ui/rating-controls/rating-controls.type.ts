@@ -4,4 +4,5 @@ export type RatingControlsProps = {
   onMinRatingChange: (next: number | null) => void;
   onClearMinRating: () => void;
   onUnratedOnlyChange: (checked: boolean) => void;
+  idPrefix: string;
 };

@@ -43,6 +43,61 @@ Only if `savepoint-tanstack/` is fundamentally broken in production and a forwar
 
 A single cosmetic divergence is **not** a fallback trigger — those are tracked in [`savepoint-tanstack/DIVERGENCES.md`](../savepoint-tanstack/DIVERGENCES.md).
 
+## Spec 026 — pre-deploy for migration A (mindful core model)
+
+Spec 026 migration A (`<ts>_mindful_core_model`) swaps the `LibraryItemStatus` enum (`WISHLIST`/`SHELF`/`UP_NEXT`/`PLAYING`/`PLAYED` → `WANT`/`PLAYING`/`DONE`) and adds `@@unique([userId, gameId])`. **This is the exception to "do not touch the DB" above.** The swap is not backward compatible: reverted app code that writes `SHELF` fails against the new enum, so a Vercel revert alone cannot roll back. The DB must be restored. Migration B (`<ts>_mindful_core_contract`, drops the legacy columns) is a separate, later deploy that runs only after migration A is verified in production.
+
+1. **Branch production.** Immediately before merging to `main` (the `deploy.yml` job runs `prisma migrate deploy` on push), create a Neon branch of production named `pre-026-<yyyy-mm-dd>`.
+   - Console: Neon project → **Branches** → **Create branch** → parent `production`, current data.
+   - CLI: `neonctl branches create --name pre-026-<yyyy-mm-dd> --project-id <project-id>` (parent defaults to the project's default branch).
+2. **Duplicate pre-check.** Run against the Neon branch (SQL Editor or `psql`). It must return **zero rows**; otherwise the unique index fails and the migration aborts. If rows return, dedupe before deploying (keep the oldest, re-point notes).
+
+   ```sql
+   SELECT "userId", "gameId", COUNT(*) AS copies
+   FROM "LibraryItem"
+   GROUP BY "userId", "gameId"
+   HAVING COUNT(*) > 1;
+   ```
+
+3. **Dry run on the branch.** Do not run against production. Point a local shell at the branch's connection strings (the same two variables `deploy.yml` uses) and apply the pending migration:
+
+   ```bash
+   export POSTGRES_PRISMA_URL="<branch pooled URL>"
+   export POSTGRES_URL_NON_POOLING="<branch direct URL>"
+   pnpm --filter savepoint-tanstack prisma:migrate:deploy
+   ```
+
+   Then sanity-check on the branch. Each query must hold:
+
+   ```sql
+   -- only the three new statuses (expect WANT, PLAYING, DONE)
+   SELECT DISTINCT status FROM "LibraryItem";
+
+   -- at most 5 queued per user (expect zero rows)
+   SELECT "userId", COUNT(*) FROM "LibraryItem"
+   WHERE "upNextPosition" IS NOT NULL
+   GROUP BY "userId" HAVING COUNT(*) > 5;
+
+   -- open plays == PLAYING items (both expect zero rows)
+   SELECT li.id FROM "LibraryItem" li
+   WHERE li.status = 'PLAYING'
+     AND (SELECT COUNT(*) FROM "Playthrough" p
+          WHERE p."libraryItemId" = li.id AND p."finishedAt" IS NULL) <> 1;
+   SELECT p.id FROM "Playthrough" p
+   JOIN "LibraryItem" li ON li.id = p."libraryItemId"
+   WHERE p."finishedAt" IS NULL AND li.status <> 'PLAYING';
+
+   -- notice flag set for every existing user (expect zero rows)
+   SELECT id FROM "user" WHERE "statusModelNoticePending" IS NOT TRUE;
+   ```
+
+4. **Deploy.** Merge to `main`. Keep the `pre-026-<date>` branch until migration B ships.
+5. **Rollback (any production regression after the merge).**
+   1. Stop writes: promote the pre-026 Vercel deployment, or pause traffic.
+   2. Restore the production database from `pre-026-<yyyy-mm-dd>`: Neon console → **Branches** → `production` → **Restore** → source `pre-026-<yyyy-mm-dd>` (a point-in-time restore to just before the deploy also works). Connection strings stay the same.
+   3. Revert the Vercel deployment to the pre-026 build (promote the prior deployment, then `git revert` the merge on `main`). Reverting `main` re-runs `prisma migrate deploy`; it must find no pending 026 migration, so confirm `_prisma_migrations` was restored with the DB.
+   4. Verify (see below). Writes made between the deploy and the restore are lost; note the window.
+
 ## Decision checklist
 
 ### When to roll back (triggers)

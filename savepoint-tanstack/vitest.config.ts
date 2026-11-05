@@ -5,6 +5,11 @@ import { defineConfig } from "vitest/config";
 const __filename = fileURLToPath(import.meta.url);
 const rootDir = path.dirname(__filename);
 
+const startServerFnResolverStub = path.resolve(
+  rootDir,
+  "./test/support/server-fn-resolver.ts"
+);
+
 const sharedAlias = {
   "@": path.resolve(rootDir, "./src"),
   "#": path.resolve(rootDir, "./src"),
@@ -69,11 +74,15 @@ export default defineConfig({
     projects: [
       {
         resolve: {
-          alias: sharedAlias,
+          alias: {
+            ...sharedAlias,
+            "#tanstack-start-server-fn-resolver": startServerFnResolverStub,
+          },
         },
         test: {
           name: "unit",
           environment: "jsdom",
+          server: { deps: { inline: [/@tanstack\/start-server-core/] } },
           include: [
             "src/**/*.unit.test.{ts,tsx}",
             "src/**/*.test.{ts,tsx}",

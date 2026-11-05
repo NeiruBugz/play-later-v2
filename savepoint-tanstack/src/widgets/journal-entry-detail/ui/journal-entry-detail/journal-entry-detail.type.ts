@@ -1,6 +1,5 @@
 export type JournalEntryDetailEntry = {
   id: string;
-  kind: "QUICK" | "REFLECTION";
   title: string | null;
   content: string;
   createdAt: Date;

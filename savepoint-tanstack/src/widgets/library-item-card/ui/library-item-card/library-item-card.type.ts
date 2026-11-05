@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import type { UseSetOwnershipResult } from "@/features/manage-library-entry";
 
 export type LibraryItemCardProps = {
   item: LibraryItemWithGame;
@@ -10,13 +11,19 @@ export type LibraryItemCardProps = {
    * The card body is a TanStack Link to /games/$slug — the host MUST stop
    * event propagation on menu interactions so they don't trigger that
    * outer navigation (preventDefault on the trigger button is the standard
-   * shape; see LibraryCardMenu).
+   * shape; see LibraryCardMenu). A function receives the Up Next menu
+   * items (hidden for Playing) to pass on as the menu's `extraItems`, and the
+   * card's ownership state so the menu and the "Not owned" tag agree.
    */
-  menu?: ReactNode;
+  menu?:
+    | ReactNode
+    | ((
+        upNextActions: ReactNode,
+        ownership: UseSetOwnershipResult
+      ) => ReactNode);
   /**
-   * When provided, an "Add playthrough" icon button is rendered below the
-   * primary CTA. Omitting it hides the action entirely — use this to keep
-   * the card action-free in read-only contexts (e.g. public-profile grid).
+   * "responsive" (default) is a row on phones and a vertical tile from md up;
+   * "row" stays a row at every width (library list view).
    */
-  onAddPlaythrough?: (libraryItemId: number) => void;
+  layout?: "responsive" | "row";
 };

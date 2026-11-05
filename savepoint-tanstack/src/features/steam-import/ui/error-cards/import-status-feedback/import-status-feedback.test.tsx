@@ -29,7 +29,7 @@ describe("import-status-feedback", () => {
 
     it("fires toast.info with the locked title", () => {
       expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
-        "Steam library sync started",
+        "Steam import started",
         expect.objectContaining({ duration: 5000 })
       );
     });
@@ -42,7 +42,7 @@ describe("import-status-feedback", () => {
 
     it("fires toast.success with the game count in the description", () => {
       expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-        "Steam library sync completed",
+        "Steam import completed",
         expect.objectContaining({
           description: "3 games imported successfully.",
         })
@@ -57,7 +57,7 @@ describe("import-status-feedback", () => {
 
     it("pluralizes correctly for the singular case", () => {
       expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-        "Steam library sync completed",
+        "Steam import completed",
         expect.objectContaining({
           description: "1 game imported successfully.",
         })
@@ -72,7 +72,7 @@ describe("import-status-feedback", () => {
 
     it("fires toast.error with the supplied message in the description", () => {
       expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
-        "Steam library sync failed",
+        "Steam import failed",
         expect.objectContaining({ description: "upstream-fail" })
       );
     });

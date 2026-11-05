@@ -23,16 +23,10 @@ const badgeVariants = cva(
         nintendo:
           "border-transparent bg-[#e60012]/10 text-[#e60012] hover:bg-[#e60012]/20 dark:bg-[#e60012]/20 dark:text-[#f66]",
         pc: "border-transparent bg-[#1b2838]/10 text-[#1b2838] hover:bg-[#1b2838]/20 dark:bg-[#66c0f4]/20 dark:text-[#66c0f4]",
-        wishlist:
-          "border-transparent bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] uppercase",
-        shelf:
-          "border-transparent bg-[var(--status-shelf)] text-[var(--status-shelf-foreground)] uppercase",
-        upNext:
-          "border-transparent bg-[var(--status-upNext)] text-[var(--status-upNext-foreground)] uppercase",
+        want: "border-transparent bg-[var(--status-want)] text-[var(--status-want-foreground)]",
         playing:
-          "border-transparent bg-[var(--status-playing)] text-[var(--status-playing-foreground)] uppercase",
-        played:
-          "border-transparent bg-[var(--status-played)] text-[var(--status-played-foreground)] uppercase",
+          "border-transparent bg-[var(--status-playing)] text-[var(--status-playing-foreground)]",
+        done: "border-transparent bg-[var(--status-done)] text-[var(--status-done-foreground)]",
       },
     },
     defaultVariants: {

@@ -1,3 +1,7 @@
 import { createStart } from "@tanstack/react-start";
 
-export const startInstance = createStart(() => ({}));
+import { appErrorSerializationAdapter } from "./shared/lib/app-error-serialization";
+
+export const startInstance = createStart(() => ({
+  serializationAdapters: [appErrorSerializationAdapter],
+}));

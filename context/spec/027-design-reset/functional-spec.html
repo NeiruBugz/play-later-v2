@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design reset</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  @media (prefers-color-scheme: dark) {
+    :root {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  }
+  :root[data-theme='dark'] {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  :root[data-theme='light'] {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 36px 28px 80px; }
+  @media (max-width: 700px) { main { padding: 20px 16px 60px; } }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 42px 0 12px; }
+  h4 { margin: 14px 0 6px; font-size: 14px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 4px; }
+  .statusbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
+  .status-chip { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--warn); color: var(--chip-ink); }
+  .progress { font-size: 13px; color: var(--muted); }
+  .bar { display: inline-block; width: 140px; height: 7px; border-radius: 4px; background: var(--line); vertical-align: middle; margin: 0 6px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--ok); }
+  .src { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; color: var(--chip-ink); white-space: nowrap; }
+  .src.interview { background: var(--src-interview); }
+  .src.code { background: var(--src-code); }
+  .src.web { background: var(--src-web); }
+  .src.kb { background: var(--src-kb); }
+  .glance { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin-top: 14px; }
+  .glance ul { margin: 8px 0 0; padding-left: 20px; }
+  .glance li { margin: 6px 0; }
+  table.decisions { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  table.decisions th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line); }
+  table.decisions td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.decisions td:first-child { font-weight: 600; width: 26%; }
+  .why { color: var(--muted); font-size: 13px; display: block; margin-top: 2px; }
+  .diagram-wrap { overflow-x: auto; margin-top: 12px; }
+  .diagram-note { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .diagram-wrap svg { max-width: 100%; height: auto; display: block; }
+  .d-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .d-label { fill: var(--ink); font-size: 13px; font-weight: 600; }
+  .d-sublabel { fill: var(--muted); font-size: 11.5px; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .d-arrow.dashed { stroke-dasharray: 5 4; }
+  .d-head { fill: var(--muted); }
+  .tabs { margin-top: 12px; }
+  .tabbar { display: flex; gap: 4px; border-bottom: 2px solid var(--line); }
+  .tabbar button { appearance: none; border: none; background: none; color: var(--muted); font: 600 14px/1.4 inherit; padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tabbar button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tabbar button .count { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+  .tabpanel { display: none; padding: 6px 2px 0; }
+  .tabpanel.active { display: block; }
+  ul.findings { list-style: none; margin: 10px 0 0; padding: 0; }
+  ul.findings li { margin: 0; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  ul.findings li:last-child { border-bottom: none; }
+  .impact { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .impact a { color: var(--accent); text-decoration: none; }
+  .impact a:hover { text-decoration: underline; }
+  .empty { color: var(--muted); font-size: 14px; padding: 16px 4px; }
+  .req { border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .req h3 { margin: 0 0 4px; font-size: 16.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+  .req h3 .provrow { display: flex; gap: 5px; }
+  .req .oneliner { margin: 2px 0 6px; }
+  .req .prose { color: var(--muted); font-size: 14px; margin: 0 0 4px; }
+  details.ac { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.ac summary { cursor: pointer; font-size: 13.5px; color: var(--accent); font-weight: 600; }
+  details.ac ul { list-style: none; padding-left: 4px; margin: 10px 0 2px; }
+  details.ac li { margin: 10px 0; padding-left: 26px; position: relative; font-size: 14.5px; }
+  details.ac li::before { content: "☐"; position: absolute; left: 2px; top: 0; color: var(--pending); font-size: 15px; }
+  details.ac li.done::before { content: "☑"; color: var(--ok); }
+  details.ac li b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  .cols h4 { margin: 0 0 6px; }
+  .cols ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .cols li { margin: 5px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  code { background: var(--panel); border-radius: 4px; padding: 1px 5px; font-size: .92em; }
+  .tablewrap { overflow-x: auto; margin: 12px 0; }
+  table.md { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+  table.md th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  table.md td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.md tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<main>
+<h1>Design reset</h1>
+<div class="meta">Topic: Reset the app's look to a clean, consistent foundation built on the stock component kit, then give the product its own visual identity — new accent, title font, cover treatment, Up Next card, status chip, name and logo. &nbsp;·&nbsp; Author: Nail Badiullin</div>
+<div class="statusbar">
+  <span class="status-chip">Draft</span>
+  <span class="progress">Verification: <span class="bar"><i style="width:0%"></i></span> 0 of 58 criteria verified</span>
+</div>
+<h2 id="glance">At a glance</h2>
+<div class="glance"><ul><li>The app's look is reset in two phases, after spec 026 ships.</li>
+<li>Both phases are phone first: designed and approved at phone width (checked at 360, 390 and 430), then scaled up to desktop.</li>
+<li>Phase 1 rebuilds every screen on the stock component kit's soft, rounded style with today's colors and fonts, fixes styling that silently fails, and removes the terminal-style labels and leftovers of retired looks.</li>
+<li>Phase 2 gives the product its own identity: a new accent outside teal/cyan, a new title font, one cover treatment, an Up Next 'shelf' and one status chip.</li>
+<li>Phase 2 also renames the product, with a new logo and web address, because a same-named competitor looks almost identical.</li>
+<li>Each phase is approved by the product owner on before/after images; Light, Dark and System stay.</li></ul></div>
+<h2 id="decisions">Decisions to approve</h2>
+<p class="meta">These are the judgment calls in this spec — the things a reviewer might want to challenge. Everything else follows from them.</p>
+<table class="decisions">
+  <tr><th>Decision</th><th>Choice</th><th>Source</th></tr>
+<tr>
+    <td>Scope</td>
+    <td>Two phases in one spec: clean foundation, then own identity<span class="why">Cleanup alone would leave the generic look shared with the competitor</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Stock starting point</td>
+    <td>The kit's soft, rounded 'Maia' style<span class="why">Matches the calm product tone; makes phase 1 a visible change</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Accent</td>
+    <td>Keep teal in phase 1, replace in phase 2 from 2–3 options outside teal/cyan<span class="why">Today's 'sage' is teal, the competitor's color family</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Terminal labels</td>
+    <td>Removed in phase 1<span class="why">Leftover of a retired theme and the most recognizable shared trait with the competitor</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Fonts</td>
+    <td>Title font replaced in phase 2; body font stays<span class="why">Today's title font is part of the generic AI-generated look</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Signature elements</td>
+    <td>One cover treatment, the Up Next shelf, one status chip<span class="why">They are the objects of the nightly loop: pick, play, mark</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Let go chip</td>
+    <td>Own label, Done color<span class="why">Dropping is as normal an ending as finishing</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Name, logo, address</td>
+    <td>New name chosen inside phase 2; logo last; new address with redirects<span class="why">Name collision with an existing tracker and an App Store app</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Sequencing</td>
+    <td>After spec 026 ships; phases release separately<span class="why">026 removes or reshapes many of the screens being restyled</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Phone first</td>
+    <td>Phone look and feel in phase 1 (sheets, thumb zone, keyboard, safe areas, no hover-only); phase 2 designed on the phone first; checked at 360 / 390 / 430<span class="why">The phone is where the app is used most; 025 gave the layout, 026 fixes phone bugs, 027 makes it comfortable in the hand</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+</table>
+
+<h2 id="findings">Findings that shaped this spec</h2>
+<p class="meta">What the research phase discovered and where it landed. The technical detail behind each finding lives in <code>research-notes.md</code>.</p>
+<div class="tabs">
+  <div class="tabbar" role="tablist">
+<button class="active" role="tab" onclick="tab(0, this)">Codebase exploration <span class="count">· 5</span></button>
+<button class="" role="tab" onclick="tab(1, this)">Web research <span class="count">· 4</span></button>
+<button class="" role="tab" onclick="tab(2, this)">Knowledge base <span class="count">· 0</span></button>
+  </div>
+<div class="tabpanel active"><ul class="findings"><li>A second, private set of spacing, text and shadow styles sits on top of the kit; ~270 uses mixed with the kit's own in 44 files<span class="impact">→ Phase 1 returns to one set</span></li>
+<li>About 15 hover/responsive styles and the title font silently do nothing; dialog footers have no gap; text fields have 32px padding<span class="impact">→ Listed as fixes in 2.2</span></li>
+<li>Covers have 7 corner/shadow treatments; status chip ~8 designs; page titles 7 styles; section labels 4<span class="impact">→ Unified by 2.1, 2.3, 2.11, 2.13</span></li>
+<li>12 '// LABEL' eyebrows and a terminal-label style from the Terminal Green theme<span class="impact">→ Removed in 2.3</span></li>
+<li>Landing uses off-palette gradients and forces dark; a template 'About' page is still reachable<span class="impact">→ Removed in 2.4, 2.5</span></li></ul></div>
+<div class="tabpanel "><ul class="findings"><li>shadcn/ui now ships named styles (Vega, Nova, Maia, Lyra, Mira…); new-york is legacy<span class="impact">→ Phase 1 base is the Maia style</span></li>
+<li>Avoiding the generic look: tokens before components, one accent, a real display face, one signature element<span class="impact">→ Shaped phase 2</span></li>
+<li>A same-named tracker (Two Average Gamers) with near-identical styling, rebuilt April 2026<span class="impact">→ Rename and new address in 2.14</span></li>
+<li>WCAG AA contrast, 3:1 focus outlines, ≥24px targets (44px on touch)<span class="impact">→ Baselines in 2.6 (phone) and 2.7 (readability)</span></li></ul></div>
+<div class="tabpanel "><div class="empty">Internal knowledge base not configured; the user skipped source discovery.</div></div>
+</div>
+<h2>Requirements</h2>
+<section class="req" id="r20">
+  <h3><span>2.0 Definitions used in this specification</span><span class="provrow"></span></h3>
+  
+  <p class="prose"><strong>Screens covered</strong> (&quot;every screen&quot;): landing page; sign-in; profile setup; home screen (also called the dashboard); library; game page; journal list, a single journal entry, and the compose/edit entry page; own and public profile, including followers and following lists; settings; search (the quick search opened with ⌘K / Ctrl+K and the search results page); the dialogs and bottom sheets &quot;Add game&quot;, &quot;Log session&quot;, &quot;Remove from library&quot; and the library filters sheet; and each screen's empty, loading, error and &quot;page not found&quot; states.</p>
+<p class="prose"><strong>Phone width:</strong> a window 390 × 844 points — the size every screen is designed and reviewed at. <strong>Phone widths:</strong> phone width plus a small phone, 360 × 780 points, and a large phone, 430 × 932 points. <strong>Desktop width:</strong> a window 1440 × 900 points. <strong>Above the fold:</strong> visible at that size without scrolling.</p>
+<p class="prose"><strong>Bottom sheet:</strong> a panel that slides up from the bottom edge of a phone screen and covers part of it, used on phones instead of a dialog in the middle of the screen.</p>
+<p class="prose"><strong>Thumb zone:</strong> the bottom third of a phone screen, the part a thumb reaches when the phone is held in one hand.</p>
+<p class="prose"><strong>Today's palette:</strong> Light — warm cream surfaces, dark warm text, teal accent; Dark — warm charcoal surfaces, soft off-white text, a lighter teal accent; in both, one color per status (Want, Playing, Done), red for destructive actions and errors, green, amber and blue for success, warning and information messages, and greys derived from the surface color.</p>
+<p class="prose"><strong>Today's fonts:</strong> Space Grotesk for titles, Geist for body text, Geist Mono for numbers where alignment matters.</p>
+<p class="prose"><strong>Primary button:</strong> the filled button in the accent color that performs a screen's or dialog's main action. A screen or dialog has at most one.</p>
+<p class="prose"><strong>Interactive card:</strong> a card that opens something when clicked or tapped — library game cards, Up Next items, home-screen game tiles, journal entries in the list.</p>
+<p class="prose"><strong>Section label:</strong> a short label that names a group of content inside a page (for example &quot;This month&quot; in the journal). It is not a page title, a card title or the label of a form field.</p>
+<p class="prose"><strong>Retired looks:</strong> themes removed earlier — Paper, Boxart, Terminal Green, Cartridge, Aurora, Jewel and Y2K — and the original project template the app was started from.</p>
+  
+</section>
+<section class="req" id="r-phase-1-clean-foundation">
+  <h3><span>Phase 1 — Clean foundation</span><span class="provrow"></span></h3>
+  
+  <p class="prose">#### 2.1 One consistent set of building blocks</p>
+<p class="prose">Buttons, text fields, text areas, dropdowns, menus, tabs, dialogs, bottom sheets, tooltips, toasts and cards look and behave the same on every screen, in the stock kit's &quot;Maia&quot; style, using today's palette and today's fonts.</p>
+<p class="prose">#### 2.2 Intended styling actually shows</p>
+<p class="prose">The following styling, intended today but silently failing, works after phase 1. The list is complete for this specification.</p>
+<p class="prose">#### 2.3 Terminal-style labels removed</p>
+<p class="prose">Section labels written as <code>// SECTION</code> in a monospaced capital style are replaced by plain labels in the body font, in sentence case.</p>
+<p class="prose">#### 2.4 Leftovers of retired looks removed</p>
+<p class="prose">Colors, pages and decorations that belong to the retired looks are removed: the decorative pink, violet, orange and green gradients and glowing blobs on the landing page, the serif font on the profile name, and the template &quot;About&quot; page.</p>
+<p class="prose">#### 2.5 Landing page on the shared foundation</p>
+<p class="prose">The landing page uses the same building blocks and palette as the rest of the app and follows the visitor's theme choice instead of always being dark.</p>
+<p class="prose">#### 2.6 Phone first</p>
+<p class="prose">The app is comfortable to use on a phone held in one hand. This covers how screens look and where controls sit on a phone; which screens exist, what they show and how the user moves between them stay as spec 026 leaves them.</p>
+<p class="prose">#### 2.7 Readability kept through the reset</p>
+<p class="prose">The reset must not make anything harder to read.</p>
+<p class="prose">#### 2.8 Phase acceptance review</p>
+<p class="prose">Each phase visibly changes the look, so each is accepted by the product owner through a side-by-side visual review before release. The phone is reviewed first; desktop follows once the phone is approved.</p>
+  <details class="ac"><summary>Acceptance criteria — 32 (0 verified)</summary><ul>
+<li class="">When the user visits every screen listed in 2.0, then every primary button of the same size (small, regular or large) has the same height, corner roundness and text style.</li>
+<li class="">When the user opens any two dialogs in the app (for example &quot;Add game&quot; and &quot;Remove from library&quot;), then their corner roundness, inner spacing and button layout match.</li>
+<li class="">When the user opens a dialog at desktop width that has two buttons at the bottom, then the buttons have a visible gap between them.</li>
+<li class="">When the user clicks into any text field, then the typed text starts the same short distance from the left edge in every text field in the app, no wider than the gap between the text and the field's top edge.</li>
+<li class="">When the user compares cards on the home screen, game page and journal, then they share the same corner roundness and inner spacing.</li>
+<li class="">When the user switches between Light and Dark on any screen, then shapes, spacing, sizes and fonts stay the same and only colors change.</li>
+<li class="">When the user views any page title on the screens listed in 2.0, then it uses today's title font (Space Grotesk), the same on every page, including the person's name on a profile (today shown in a serif font).</li>
+<li class="">When the user hovers over a button, an interactive card or a menu item at desktop width, then it visibly changes (a background or shadow change), and every element of the same kind changes the same way.</li>
+<li class="">When the user receives a toast message in Dark mode, then the toast uses the dark surface, not a light one.</li>
+<li class="">When the user opens a dialog with two bottom buttons at desktop width, or clicks into a text field, then the gap and padding described in 2.1 apply.</li>
+<li class="">When the user browses every screen listed in 2.0, then no label starts with &quot;//&quot; and no section label is written in a monospaced font.</li>
+<li class="">When the user views a section label (for example the journal's monthly summary), then it reads in sentence case, such as &quot;This month&quot;, not &quot;THIS MONTH&quot;.</li>
+<li class="">When the user compares section labels across the home screen, game page, journal and settings, then they all use the same size, weight and color.</li>
+<li class="">When the user browses every screen listed in 2.0, then every color in the interface comes from today's palette (2.0); game covers, screenshots and user avatars are excluded.</li>
+<li class="">When the user opens the address <code>/about</code>, then they see the app's standard &quot;page not found&quot; screen.</li>
+<li class="">When a signed-out visitor opens the landing page, then it uses the same buttons, fonts and palette as the signed-in app.</li>
+<li class="">Given the visitor has not chosen a theme and their device is set to light appearance, when they open the landing page, then it is shown in Light; given the device is set to dark appearance, when they open it, then it is shown in Dark.</li>
+<li class="">Given the visitor previously chose Light or Dark in the app on this browser, when they open the landing page, then it is shown in that choice regardless of the device setting.</li>
+<li class="">Given each of the phone widths (360, 390 and 430 points), when the user visits every screen listed in 2.0, then the page never scrolls sideways and no text, button or cover is cut off or overlaps another, apart from long names that end with &quot;…&quot; by design.</li>
+<li class="">When the user taps anything that can be tapped on any screen at phone width, then its tappable area is at least 44 × 44 points.</li>
+<li class="">When the user reads any screen at phone width, then no text is smaller than 12 points, and body text is at least 15 points.</li>
+<li class="">When the user opens &quot;Add game&quot;, &quot;Log session&quot;, &quot;Remove from library&quot;, the library filters or the status picker at phone width, then it opens as a bottom sheet, not as a dialog in the middle of the screen, and can be closed with a visible close button or by tapping outside it.</li>
+<li class="">When the user opens a bottom sheet or a form (sign-in, profile setup, the compose/edit entry page, settings) at phone width, then its primary button is in the thumb zone, and stays there while the user scrolls the form.</li>
+<li class="">Given the on-screen keyboard is open at phone width, when the user taps any text field, then the field and its form's primary button stay visible above the keyboard, and the page does not zoom in.</li>
+<li class="">Given a phone with a screen notch and a home indicator (for example an iPhone 15), when the user opens any screen in the browser or from a home-screen icon, then no text, button or navigation item sits under the notch, the status bar or the home indicator.</li>
+<li class="">When the user looks for any action or information that appears on hover at desktop width (for example a tooltip, a card's menu or a cover's details), then it can be reached by tapping at phone width.</li>
+<li class="">When any text is checked in Light and in Dark — body text, labels, button text, placeholder text, secondary (muted) text, toast text and text shown over covers — then it meets the standard accessibility contrast level for text (WCAG AA: 4.5:1, or 3:1 for large text); text on disabled controls is exempt.</li>
+<li class="">When the user moves through a screen with the keyboard, then the focused element always shows a clearly visible outline in both modes, with at least 3:1 contrast against its surroundings.</li>
+<li class="">When a phase is ready for review, then the product owner receives before and after images of the landing page, sign-in, home screen, library, game page, journal list, profile, settings and the &quot;Add game&quot; bottom sheet, each in Light and in Dark, at phone width; the &quot;before&quot; images are taken after spec 026 has shipped (phase 1) or after phase 1 has shipped (phase 2).</li>
+<li class="">When the product owner has approved every phone pair, then they receive the same set of before and after images at desktop width; desktop images are not shown before the phone pairs are approved.</li>
+<li class="">When the product owner compares a before/after pair, then no content, button or piece of information present before is missing after, apart from the items removed in 2.3 and 2.4.</li>
+<li class="">When the product owner has reviewed every pair, then the phase is released only if they approve it; any rejected pair is reworked and shown again.</li>
+</ul></details>
+</section>
+<section class="req" id="r-phase-2-own-identity">
+  <h3><span>Phase 2 — Own identity</span><span class="provrow"></span></h3>
+  
+  <p class="prose">Every phase 2 element — accent, title font, cover treatment, Up Next card, status chip, name and logo — is designed and chosen at phone width first, then scaled up to desktop.</p>
+<p class="prose">#### 2.9 New accent color</p>
+<p class="prose">The teal accent is replaced by a new single brand color, chosen by the product owner from 2–3 visual options. It suits the warm cream and warm charcoal surfaces and lies outside the teal/cyan family (hues between green-blue and blue, roughly 170°–220° on the color wheel). If the product owner rejects every option, a new set of options is prepared.</p>
+<p class="prose">#### 2.10 New title font</p>
+<p class="prose">The title font is replaced, chosen by the product owner from 2–3 visual options. The body font (Geist) stays unchanged.</p>
+<p class="prose">#### 2.11 Signature: one cover treatment</p>
+<p class="prose">Game covers look the same everywhere; covers bring the color to the screen and the interface around them stays calm.</p>
+<p class="prose">#### 2.12 Signature: the Up Next card</p>
+<p class="prose">The Up Next queue on the home screen becomes the product's recognizable object — the first thing a user sees and associates with the app. It is a &quot;shelf&quot;: the covers of the queued games in a row, in queue order, with the first one — the game to play next — larger and emphasized.</p>
+<p class="prose">#### 2.13 Signature: one status chip</p>
+<p class="prose">One status chip design is used everywhere a game's status appears. It has four labels and three colors: Want, Playing, Done, and &quot;Let go&quot; for a game that was dropped, shown in the Done color — dropping a game is as normal an ending as finishing it.</p>
+<p class="prose">#### 2.14 New product name and logo</p>
+<p class="prose">The product gets a new name, a new logo and a new web address, replacing &quot;SavePoint&quot;, the Save Glow mark and the current address. The product owner chooses the name inside phase 2, in the same design round as the accent and title font; the logo is designed last, for the chosen name.</p>
+<p class="prose">#### 2.15 Light, Dark and System stay</p>
+<p class="prose">The theme options remain Light, Dark and System throughout both phases; a user's existing choice is kept.</p>
+  <details class="ac"><summary>Acceptance criteria — 26 (0 verified)</summary><ul>
+<li class="">When the product owner reviews the accent options, then each option is shown on the same set of screens (home screen, library, game page) in Light and in Dark, at phone width first and at desktop width once a phone favourite is picked.</li>
+<li class="">Given the new accent is applied, when the user looks at any screen, then the accent appears only on the primary button, the selected or active item, the Playing status, the keyboard focus outline and text links.</li>
+<li class="">Given the new accent is applied, when the accent is used as a button background or as text, then it meets the contrast level in 2.7 in both modes.</li>
+<li class="">When the product owner reviews the font options, then each option is shown on the same page titles and game names in Light and in Dark, at phone width first and at desktop width once a phone favourite is picked.</li>
+<li class="">Given the new title font is applied, when the user views page titles (including the person's name on a profile), dialog titles, the game's name at the top of the game page, the landing page headline and the product name in the header, then they use the new font; all other text, including game names on cards and lists, uses the body font.</li>
+<li class="">When the user views covers on the home screen, Up Next queue, library, search results, &quot;Add game&quot; bottom sheet or dialog, profile and game page, then every cover has the same proportions (2:3, portrait), the same corner roundness, the same shadow and the same border (or lack of one).</li>
+<li class="">When the user hovers over a cover that opens a game at desktop width, then it shows the same hover feedback everywhere.</li>
+<li class="">When a game has no cover art, then the user sees the same placeholder everywhere, showing the game's name on up to three lines, with a longer name cut off with &quot;…&quot;.</li>
+<li class="">When the user opens the home screen with games in Up Next, then the Up Next card is the first element in reading order above the fold and the largest one, at both phone width and desktop width.</li>
+<li class="">When the user looks at the Up Next card with three or more games queued, then the covers appear in queue order, left to right, and the first cover is visibly larger than the others.</li>
+<li class="">Given phone width and more games queued than fit across the screen, when the user looks at the Up Next card, then the first cover and part of the next one are visible, and the rest are reached by scrolling the shelf sideways, without the page itself scrolling sideways.</li>
+<li class="">When the user opens the home screen with an empty Up Next, then the card keeps the same outline and position and shows a button that opens the quick search to find a game to add.</li>
+<li class="">When the product owner compares the Up Next card with the same-named competitor's home, library, profile and game pages during the phase 2 review (2.8), then they find nothing in its layout or styling that copies them.</li>
+<li class="">When the user sees a game's status on a library card, the game page, the home screen, search results and a profile's library, then the chip has the same shape, size, wording and capitalization in all of them.</li>
+<li class="">When the user compares the chips for Want, Playing and Done, then they differ by color and label only, and Playing uses the accent color.</li>
+<li class="">When the user sees a game that was marked Done with the outcome &quot;Let go&quot;, then its chip reads &quot;Let go&quot; in the same color as a Done chip.</li>
+<li class="">When the user views a chip in Light and in Dark, then its text meets the contrast level in 2.7.</li>
+<li class="">When the user looks at the app header (sidebar and phone top bar), landing page, sign-in page, browser tab title and browser tab icon, then they see only the new name and the new logo.</li>
+<li class="">When the user reads any text in the app, including page text, page titles in the browser and legal text, then the old name &quot;SavePoint&quot; does not appear.</li>
+<li class="">When someone pastes a link to the landing page or to a game page into a messaging app that shows link previews (for example Telegram or Slack), then the preview shows the new name and the new logo.</li>
+<li class="">When the user views the logo in Light and in Dark, then it is clearly visible on both surfaces.</li>
+<li class="">When the user adds the app to a phone home screen from the browser's &quot;Add to Home Screen&quot; option, then the icon and name shown are the new ones.</li>
+<li class="">When anyone opens an old link to any page on the current address, then they land on the same page at the new address.</li>
+<li class="">Given the user was signed in on the current address, when they first open the new address, then they sign in at most once more and their library and settings are unchanged. [NEEDS CLARIFICATION: staying signed in across a change of address is not automatic; assumed a single re-sign-in is acceptable — confirm, or require no re-sign-in.]</li>
+<li class="">When the user opens the theme menu (in the sidebar, the phone top bar or settings) after either phase, then they see exactly Light, Dark and System.</li>
+<li class="">Given the user had chosen Light, Dark or System before the change, when they open the app after either phase, then it opens in that same choice.</li>
+</ul></details>
+</section>
+<h2 id="scope">3. Scope and Boundaries</h2>
+<div class="cols"><div><h4>In-Scope</h4><ul><li>The look of every screen listed in 2.0, in Light and Dark.</li>
+<li>Phase 1: the stock kit's &quot;Maia&quot; style with today's palette and fonts; fixing the silently broken styling in 2.2; removing terminal-style labels, retired-look leftovers, off-palette colors and the template &quot;About&quot; page; landing page follows the theme. Released on its own.</li>
+<li>Phase 2: new accent, new title font, the three signature elements, new product name, logo and web address (with old links redirected), browser tab icon, home-screen icon and link preview.</li>
+<li>Phone first (2.6): both phases designed and approved at phone width before desktop; phone widths 360, 390 and 430 points; bottom sheets instead of dialogs, primary buttons in the thumb zone, fields visible above the keyboard, nothing under the notch or home indicator, no hover-only actions, minimum text and tap sizes.</li>
+<li>Readability and keyboard focus baselines in 2.7; an owner review per phase, phone first (2.8).</li></ul></div>
+<div><h4>Out-of-Scope</h4><ul><li>What any screen does, what information it shows, and how the user moves between screens, including the phone navigation bar — owned by spec 026, which ships first.</li>
+<li>Phone gestures (swiping a card to change status, swiping a sheet down to close it, long-press menus).</li>
+<li>An app-like installed mode beyond the home-screen icon and name in 2.14 (no address bar, splash screen, offline use).</li>
+<li>A separate tablet layout: widths between phone and desktop scale between the two.</li>
+<li>New features, including suggestions of what to play next by mood or length.</li>
+<li>A third theme or a user-selectable accent color.</li>
+<li>Emails: the app sends none today.</li>
+<li>Unifying covers and status chips in phase 1 beyond what the stock kit changes on its own; their unification is phase 2 (2.11, 2.13).</li>
+<li>Starting phase 1 before spec 026 has shipped.</li></ul></div></div>
+<h2>Change Log</h2>
+<p>2026-11-04 — product owner, /awos:spec session — Added phone first: new 2.6 (phone widths 360/390/430, bottom sheets, thumb zone, keyboard, safe areas, no hover-only actions, text and tap sizes), phone-first review order in 2.8, phone-first option reviews in 2.9–2.10, Up Next shelf on a phone in 2.12; gestures, installed-app mode and tablet layout out of scope. Sections from 2.6 on renumbered. Reason: the phone is the main place the app is used, so the reset designs for it first and scales up.</p>
+<footer>
+  This page is a <strong>review lens</strong> — the canonical, normative contract is <code>functional-spec.md</code> in this directory; approvals bind to it, and the technical detail behind the findings lives in <code>research-notes.md</code>.<br>
+  Generated 2026-11-04 from functional-spec.md (510964aa1c9c), status <em>Draft</em> — 58 criteria, 0 verified. Rendered by AWOS (/awos:spec).
+</footer>
+</main>
+<script>
+  function tab(i, el) {
+    document.querySelectorAll('.tabbar button').forEach(function (b, j) { b.classList.toggle('active', j === i); });
+    document.querySelectorAll('.tabpanel').forEach(function (p, j) { p.classList.toggle('active', j === i); });
+  }
+</script>
+</body>
+</html>

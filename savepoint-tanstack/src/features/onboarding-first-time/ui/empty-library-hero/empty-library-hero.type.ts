@@ -4,3 +4,7 @@ export type EmptyLibraryHeroProps = {
   userImage: string | null;
   userSteamId: string | null;
 };
+
+export type EmptyLibraryHeroActionProps = {
+  onAddGame: () => void;
+};

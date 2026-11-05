@@ -29,6 +29,8 @@ export type ResponsiveModalProps = {
   dialogTestId?: string;
   /** `data-testid` applied to the mobile Sheet content. */
   sheetTestId?: string;
+  /** Forwarded to the Dialog/Sheet content; call `preventDefault()` to keep it open. */
+  onInteractOutside?: (event: Event) => void;
 };
 
 /**
@@ -47,13 +49,18 @@ export function ResponsiveModal({
   contentClassName,
   dialogTestId,
   sheetTestId,
+  onInteractOutside,
 }: ResponsiveModalProps) {
   const isDesktop = useIsDesktop();
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className={contentClassName} data-testid={dialogTestId}>
+        <DialogContent
+          className={contentClassName}
+          data-testid={dialogTestId}
+          onInteractOutside={onInteractOutside}
+        >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description !== undefined ? (
@@ -72,6 +79,7 @@ export function ResponsiveModal({
         side="bottom"
         className={contentClassName}
         data-testid={sheetTestId}
+        onInteractOutside={onInteractOutside}
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>

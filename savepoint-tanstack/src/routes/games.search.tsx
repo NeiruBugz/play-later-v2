@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { QuickAddButton } from "@/features/add-game";
+import { AddGameAction } from "@/features/add-game";
 import { SearchGamesInput, SearchGamesResults } from "@/features/search-games";
 
 const searchSchema = z.object({
@@ -18,7 +18,7 @@ function GameSearchRoute() {
   const query = q ?? "";
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       <div className="space-y-xl">
         <div className="space-y-sm">
           <h1 className="heading-lg">Search Games</h1>
@@ -39,12 +39,12 @@ function GameSearchRoute() {
             <SearchGamesResults
               query={query}
               renderAddAction={({ igdbId, name }) => (
-                <QuickAddButton igdbId={igdbId} gameTitle={name} />
+                <AddGameAction game={{ igdbId, name, library: null }} />
               )}
             />
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

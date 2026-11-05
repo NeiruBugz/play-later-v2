@@ -55,7 +55,6 @@ function GameDetailRoute() {
             <TimesToBeatSlot
               igdbId={igdbId}
               playtimeTotalMinutes={data.playtimeTotalMinutes}
-              journalCount={data.journalCount}
               playtimeSessionCount={data.playtimeSessionCount}
               recentSessionMinutes={data.recentSessionMinutes}
             />
@@ -92,13 +91,11 @@ function GameDetailRoute() {
 function TimesToBeatSlot({
   igdbId,
   playtimeTotalMinutes,
-  journalCount,
   playtimeSessionCount,
   recentSessionMinutes,
 }: {
   igdbId: number;
   playtimeTotalMinutes: number;
-  journalCount: number;
   playtimeSessionCount: number;
   recentSessionMinutes: number[];
 }) {
@@ -110,7 +107,6 @@ function TimesToBeatSlot({
     <TimesToBeatSection
       timesToBeat={timesToBeat}
       playtimeTotalMinutes={playtimeTotalMinutes}
-      journalCount={journalCount}
       playtimeSessionCount={playtimeSessionCount}
       recentSessionMinutes={recentSessionMinutes}
     />
@@ -200,7 +196,7 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
 
   if (isNotFound) {
     return (
-      <main
+      <div
         role="alert"
         className="gap-md container mx-auto flex flex-col px-4 py-12"
       >
@@ -211,12 +207,12 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
             Go home
           </Link>
         </p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main
+    <div
       role="alert"
       className="gap-md container mx-auto flex flex-col px-4 py-12"
     >
@@ -227,6 +223,6 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
           Go home
         </Link>
       </p>
-    </main>
+    </div>
   );
 }

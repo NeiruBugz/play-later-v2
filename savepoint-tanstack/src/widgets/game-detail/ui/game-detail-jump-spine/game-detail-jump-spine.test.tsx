@@ -17,12 +17,12 @@ const actions = {
 };
 
 describe("GameDetailJumpSpine", () => {
-  describe("given sections [Playthroughs, About, Journal]", () => {
+  describe("given sections [Rating, About, Journal]", () => {
     beforeEach(() => {
       render(
         <GameDetailJumpSpine
           sections={[
-            { id: "playthroughs", label: "Playthroughs" },
+            { id: "rating", label: "Rating" },
             { id: "about", label: "About" },
             { id: "journal", label: "Journal" },
           ]}
@@ -31,7 +31,7 @@ describe("GameDetailJumpSpine", () => {
     });
 
     it("renders all three section labels as interactive elements", () => {
-      expect(elements.queryButton("Playthroughs")).not.toBeNull();
+      expect(elements.queryButton("Rating")).not.toBeNull();
       expect(elements.queryButton("About")).not.toBeNull();
       expect(elements.queryButton("Journal")).not.toBeNull();
     });
@@ -57,7 +57,7 @@ describe("GameDetailJumpSpine", () => {
       render(
         <GameDetailJumpSpine
           sections={[
-            { id: "playthroughs", label: "Playthroughs" },
+            { id: "rating", label: "Rating" },
             { id: "about", label: "About" },
             { id: "journal", label: "Journal" },
           ]}

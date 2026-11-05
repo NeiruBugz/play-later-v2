@@ -15,7 +15,6 @@ describe("YourPacePanel", () => {
     beforeEach(() => {
       render(
         <YourPacePanel
-          journalCount={4}
           playtimeTotalMinutes={600}
           playtimeSessionCount={4}
           recentSessionMinutes={[60, 120, 180, 240]}
@@ -31,15 +30,17 @@ describe("YourPacePanel", () => {
       expect(within(elements.getStat("Sessions")).getByText("4")).toBeDefined();
     });
 
-    it("shows the total logged hours", () => {
+    it("shows time played in hours", () => {
       // 600 minutes = 10h
-      expect(within(elements.getStat("Total")).getByText("10h")).toBeDefined();
+      expect(
+        within(elements.getStat("Time played")).getByText("10 h")
+      ).toBeDefined();
     });
 
     it("shows the average per session", () => {
       // 10h / 4 sessions = 2.5h
       expect(
-        within(elements.getStat("Avg session")).getByText("2.5h")
+        within(elements.getStat("Per session")).getByText("2.5 h")
       ).toBeDefined();
     });
 
@@ -49,17 +50,15 @@ describe("YourPacePanel", () => {
 
     it("orders the recent-session bars oldest to newest", () => {
       const bars = elements.getBars();
-      expect(bars[0]).toHaveAttribute("aria-label", "Session 1: 1h");
-      expect(bars[3]).toHaveAttribute("aria-label", "Session 4: 4h");
+      expect(bars[0]).toHaveAttribute("aria-label", "Session 1: 1 h");
+      expect(bars[3]).toHaveAttribute("aria-label", "Session 4: 4 h");
     });
   });
 
-  describe("given some entries carry no recorded minutes", () => {
+  describe("given 2 notes with time out of 4 notes", () => {
     beforeEach(() => {
-      // 4 journal entries, but only 2 logged minutes (600 total).
       render(
         <YourPacePanel
-          journalCount={4}
           playtimeTotalMinutes={600}
           playtimeSessionCount={2}
           recentSessionMinutes={[240, 360]}
@@ -67,23 +66,22 @@ describe("YourPacePanel", () => {
       );
     });
 
-    it("counts every journal entry under Sessions", () => {
-      expect(within(elements.getStat("Sessions")).getByText("4")).toBeDefined();
+    it("counts only the notes with time as sessions", () => {
+      expect(within(elements.getStat("Sessions")).getByText("2")).toBeDefined();
     });
 
-    it("averages only over sessions that logged minutes, not all entries", () => {
-      // 600min / 2 contributing sessions = 5h — not 600 / 4 = 2.5h.
+    it("averages over the sessions with time", () => {
+      // 600min / 2 = 5h
       expect(
-        within(elements.getStat("Avg session")).getByText("5h")
+        within(elements.getStat("Per session")).getByText("5 h")
       ).toBeDefined();
     });
   });
 
-  describe("given no recorded session minutes", () => {
+  describe("given no notes with time", () => {
     beforeEach(() => {
       render(
         <YourPacePanel
-          journalCount={2}
           playtimeTotalMinutes={0}
           playtimeSessionCount={0}
           recentSessionMinutes={[]}
@@ -91,8 +89,8 @@ describe("YourPacePanel", () => {
       );
     });
 
-    it("still shows the sessions count", () => {
-      expect(within(elements.getStat("Sessions")).getByText("2")).toBeDefined();
+    it("shows zero sessions", () => {
+      expect(within(elements.getStat("Sessions")).getByText("0")).toBeDefined();
     });
 
     it("renders no recent-session bars", () => {
@@ -104,7 +102,6 @@ describe("YourPacePanel", () => {
     beforeEach(() => {
       render(
         <YourPacePanel
-          journalCount={0}
           playtimeTotalMinutes={0}
           playtimeSessionCount={0}
           recentSessionMinutes={[]}
@@ -114,7 +111,7 @@ describe("YourPacePanel", () => {
 
     it("shows a zero average rather than dividing by zero", () => {
       expect(
-        within(elements.getStat("Avg session")).getByText("0h")
+        within(elements.getStat("Per session")).getByText("0 h")
       ).toBeDefined();
     });
   });
@@ -128,7 +125,6 @@ describe("YourPacePanel", () => {
     beforeEach(() => {
       render(
         <YourPacePanel
-          journalCount={1}
           playtimeTotalMinutes={600}
           playtimeSessionCount={0}
           recentSessionMinutes={[]}
@@ -138,7 +134,7 @@ describe("YourPacePanel", () => {
 
     it("shows 0h for avg session instead of Infinity or NaN", () => {
       expect(
-        within(elements.getStat("Avg session")).getByText("0h")
+        within(elements.getStat("Per session")).getByText("0 h")
       ).toBeDefined();
     });
   });

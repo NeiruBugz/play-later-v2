@@ -4,6 +4,7 @@ import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts"
 
 export type LibraryStateForGame = {
   status: LibraryItemStatus;
+  upNextPosition: number | null;
   /** 1–10 storage int, or null when unrated. Stars conversion happens in UI. */
   rating: number | null;
 };
@@ -30,13 +31,18 @@ export async function getLibraryItemsByIgdbIds(
     where: { userId, game: { igdbId: { in: igdbIds } } },
     select: {
       status: true,
+      upNextPosition: true,
       rating: true,
       game: { select: { igdbId: true } },
     },
   });
 
   for (const row of rows) {
-    result.set(row.game.igdbId, { status: row.status, rating: row.rating });
+    result.set(row.game.igdbId, {
+      status: row.status,
+      upNextPosition: row.upNextPosition,
+      rating: row.rating,
+    });
   }
   return result;
 }

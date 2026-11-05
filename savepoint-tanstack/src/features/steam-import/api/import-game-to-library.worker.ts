@@ -5,6 +5,7 @@ import {
   upsertGameFromIgdbPayload,
 } from "@/entities/game/api/upsert-game.server";
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
+import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-item-status.server";
 import { libraryItemStatusSchema } from "@/entities/library-item/model";
 import {
   matchSteamGameByAppId,
@@ -45,7 +46,9 @@ export type ImportGameToLibraryResult = {
  *  3. Cache-or-fetch a local `Game` row by `igdbId` via entities/game.
  *  4. Refuse if the user already has a LibraryItem for this game (throws
  *     `ConflictError`; the modal surfaces "already in library").
- *  5. Create the LibraryItem via entities/library-item and flip `igdbMatchStatus: MATCHED`.
+ *  5. Create the LibraryItem (WANT) via entities/library-item, move it to the
+ *     chosen status through `setLibraryItemStatus` (so a PLAYING import opens a
+ *     play), and flip `igdbMatchStatus: MATCHED`.
  */
 export async function importGameToLibraryWorker(
   userId: string | undefined,
@@ -123,11 +126,16 @@ export async function importGameToLibraryWorker(
   }
 
   // Create LibraryItem via entities/library-item
-  const libraryItem = await addGameToLibrary(userId, {
-    gameId: game.id,
-    status,
+  let { item: libraryItem } = await addGameToLibrary(userId, game.id, {
     platform: "PC (Microsoft Windows)",
   });
+  if (status !== libraryItem.status) {
+    ({ item: libraryItem } = await setLibraryItemStatus(
+      userId,
+      libraryItem.id,
+      status
+    ));
+  }
 
   await prisma.importedGame.update({
     where: { id: importedGameId },

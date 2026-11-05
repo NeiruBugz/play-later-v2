@@ -111,7 +111,7 @@ describe("importGameToLibraryWorker", () => {
       await expect(
         importGameToLibraryWorker(undefined, {
           importedGameId: "any",
-          status: "SHELF",
+          status: "WANT",
         })
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
@@ -128,7 +128,7 @@ describe("importGameToLibraryWorker", () => {
       await expect(
         importGameToLibraryWorker(ALICE_ID, {
           importedGameId: bobsRowId,
-          status: "SHELF",
+          status: "WANT",
           manualIgdbId: 1,
         })
       ).rejects.toBeInstanceOf(NotFoundError);
@@ -155,7 +155,7 @@ describe("importGameToLibraryWorker", () => {
       await expect(
         importGameToLibraryWorker(ALICE_ID, {
           importedGameId: importedId,
-          status: "SHELF",
+          status: "WANT",
         })
       ).rejects.toBeInstanceOf(NeedsManualMatchError);
     });
@@ -177,7 +177,7 @@ describe("importGameToLibraryWorker", () => {
     it("auto-matches via Steam App ID and creates a LibraryItem", async () => {
       const result = await importGameToLibraryWorker(ALICE_ID, {
         importedGameId: importedId,
-        status: "PLAYED",
+        status: "DONE",
       });
       expect(matchSteamGameMock).toHaveBeenCalledWith("220");
       expect(result.gameSlug).toBe("half-life-2");
@@ -190,7 +190,7 @@ describe("importGameToLibraryWorker", () => {
     it("does NOT call getGameByIgdbId — auto-match payload is sufficient", async () => {
       await importGameToLibraryWorker(ALICE_ID, {
         importedGameId: importedId,
-        status: "PLAYED",
+        status: "DONE",
       });
       expect(getGameByIgdbIdMock).not.toHaveBeenCalled();
     });
@@ -208,7 +208,7 @@ describe("importGameToLibraryWorker", () => {
       await expect(
         importGameToLibraryWorker(ALICE_ID, {
           importedGameId: importedId,
-          status: "SHELF",
+          status: "WANT",
         })
       ).rejects.toBeInstanceOf(NeedsManualMatchError);
     });
@@ -217,7 +217,7 @@ describe("importGameToLibraryWorker", () => {
       try {
         await importGameToLibraryWorker(ALICE_ID, {
           importedGameId: importedId,
-          status: "SHELF",
+          status: "WANT",
         });
       } catch {
         // expected
@@ -246,7 +246,7 @@ describe("importGameToLibraryWorker", () => {
     it("creates a LibraryItem and flips status to MATCHED without hitting IGDB", async () => {
       const result = await importGameToLibraryWorker(ALICE_ID, {
         importedGameId: importedId,
-        status: "PLAYED",
+        status: "DONE",
         manualIgdbId: 555,
       });
 
@@ -256,7 +256,7 @@ describe("importGameToLibraryWorker", () => {
       const item = await db.prisma.libraryItem.findUnique({
         where: { id: result.libraryItemId },
       });
-      expect(item?.status).toBe("PLAYED");
+      expect(item?.status).toBe("DONE");
       expect(item?.userId).toBe(ALICE_ID);
 
       const row = await db.prisma.importedGame.findUnique({
@@ -283,7 +283,7 @@ describe("importGameToLibraryWorker", () => {
     it("fetches from IGDB and persists a new Game row", async () => {
       const result = await importGameToLibraryWorker(ALICE_ID, {
         importedGameId: importedId,
-        status: "UP_NEXT",
+        status: "WANT",
         manualIgdbId: 777,
       });
 
@@ -309,7 +309,7 @@ describe("importGameToLibraryWorker", () => {
       await expect(
         importGameToLibraryWorker(ALICE_ID, {
           importedGameId: importedId,
-          status: "SHELF",
+          status: "WANT",
           manualIgdbId: 99999,
         })
       ).rejects.toBeInstanceOf(NotFoundError);
@@ -332,7 +332,7 @@ describe("importGameToLibraryWorker", () => {
         data: {
           userId: ALICE_ID,
           gameId: game.id,
-          status: "SHELF",
+          status: "WANT",
         },
       });
     });

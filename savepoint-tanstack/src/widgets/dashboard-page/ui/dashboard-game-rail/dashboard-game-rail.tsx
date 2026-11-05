@@ -1,10 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
-import { isTouched, LibraryStatusBadge } from "@/entities/library-item";
+import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
-import { EmptyState } from "@/shared/ui/empty-state";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
 
@@ -40,16 +39,17 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
           />
         )}
         <div className="absolute top-1.5 left-1.5">
-          <LibraryStatusBadge
-            status={item.status}
-            hasBeenPlayed={isTouched(item)}
-            className="uppercase"
-          />
+          <LibraryStatusBadge status={item.status} />
         </div>
       </div>
       <p className="mt-2 truncate text-sm leading-tight font-medium group-hover:underline">
         {item.game.title}
       </p>
+      <QueueMarker
+        status={item.status}
+        upNextPosition={item.upNextPosition}
+        className="mt-1"
+      />
       {item.platform ? (
         <p className="text-muted-foreground mt-0.5 truncate text-xs">
           {item.platform}
@@ -69,8 +69,8 @@ export function DashboardGameRail({
   title,
   items,
   viewAll,
-  viewAllLabel = "View all",
-  emptyMessage = "No games to show",
+  viewAllLabel = "See all",
+  emptyMessage,
 }: DashboardGameRailProps) {
   const hasItems = items.length > 0;
   // Every rail head gets a "see all" link when there are items — the link
@@ -78,9 +78,11 @@ export function DashboardGameRail({
   const showViewAll = hasItems;
 
   return (
-    <section>
+    <section aria-labelledby="home-up-next-heading">
       <header className="mb-2 flex items-baseline justify-between">
-        <h3 className="heading-xs">{title}</h3>
+        <h2 id="home-up-next-heading" className="heading-xs">
+          {title}
+        </h2>
         {showViewAll ? (
           <Link
             to="/library"
@@ -113,17 +115,7 @@ export function DashboardGameRail({
           ))}
         </div>
       ) : (
-        <EmptyState
-          title={emptyMessage}
-          spacing="compact"
-          action={{
-            label: "Browse games",
-            to: "/library",
-            search: viewAll as Record<string, unknown>,
-            variant: "outline",
-            size: "sm",
-          }}
-        />
+        <p className="text-muted-foreground text-sm">{emptyMessage}</p>
       )}
     </section>
   );

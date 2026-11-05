@@ -10,19 +10,24 @@
  * not from here.
  */
 
+import { ListOrdered, type LucideIcon } from "lucide-react";
+
 import {
-  ACQUISITION_FILTER_ENTRIES,
   getStatusEntry,
   STATUS_ENTRIES,
-  type AcquisitionFilterEntry,
   type StatusBadgeVariant,
   type StatusEntry,
 } from "@/entities/library-item";
 
-import type { LibrarySortBy, LibrarySortOrder } from "./types";
+import type {
+  LibrarySortBy,
+  LibrarySortOrder,
+  LibraryStatus,
+  LibraryStatusCounts,
+} from "./types";
 
-export { STATUS_ENTRIES, getStatusEntry, ACQUISITION_FILTER_ENTRIES };
-export type { StatusBadgeVariant, StatusEntry, AcquisitionFilterEntry };
+export { STATUS_ENTRIES, getStatusEntry };
+export type { StatusBadgeVariant, StatusEntry };
 
 /**
  * Two-tone filter styling — Slice 18A visual-parity push (Phase 3).
@@ -33,7 +38,7 @@ export type { StatusBadgeVariant, StatusEntry, AcquisitionFilterEntry };
  *  - idle: muted foreground, transparent background, no border accent
  *  - active: primary token (brand red on light, theme-aware in dark)
  *
- * The 5 per-status entries are kept (vs. a single shared shape) so a
+ * The 3 per-status entries are kept (vs. a single shared shape) so a
  * future spec can re-introduce dot-glyphs or per-status decoration
  * without rewriting the consumer call sites.
  */
@@ -42,8 +47,7 @@ const ACTIVE =
   "bg-primary text-primary-foreground border-transparent hover:bg-primary/90";
 
 /**
- * Shared two-tone toggle styling for any single-select filter button (status,
- * acquisition). Active = primary token; idle = muted. Keeps the rail visually
+ * Shared two-tone toggle styling for any single-select filter button (status). Active = primary token; idle = muted. Keeps the rail visually
  * uniform across sections.
  */
 export const FILTER_TOGGLE_STYLE: { active: string; inactive: string } = {
@@ -55,12 +59,33 @@ export const STATUS_FILTER_STYLES: Record<
   StatusBadgeVariant,
   { active: string; inactive: string }
 > = {
+  want: { active: ACTIVE, inactive: IDLE },
   playing: { active: ACTIVE, inactive: IDLE },
-  played: { active: ACTIVE, inactive: IDLE },
-  shelf: { active: ACTIVE, inactive: IDLE },
-  upNext: { active: ACTIVE, inactive: IDLE },
-  wishlist: { active: ACTIVE, inactive: IDLE },
+  done: { active: ACTIVE, inactive: IDLE },
 };
+
+export type StatusFilterEntry = {
+  value: LibraryStatus;
+  label: string;
+  icon: LucideIcon;
+  badgeVariant?: StatusBadgeVariant;
+};
+
+export const STATUS_FILTER_ENTRIES: ReadonlyArray<StatusFilterEntry> = [
+  { value: "UP_NEXT", label: "Up Next", icon: ListOrdered },
+  ...STATUS_ENTRIES,
+];
+
+/** Up Next marks games already counted under Want or Done, so it is not summed. */
+export function getTotalCount(
+  counts: LibraryStatusCounts | undefined
+): number | undefined {
+  if (!counts) return undefined;
+  return STATUS_ENTRIES.reduce(
+    (sum, entry) => sum + (counts[entry.value] ?? 0),
+    0
+  );
+}
 
 export type SortOption = {
   value: string;

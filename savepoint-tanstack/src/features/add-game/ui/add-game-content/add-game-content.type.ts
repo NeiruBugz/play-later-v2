@@ -1,3 +1,4 @@
 export type AddGameContentProps = {
-  onAdded: () => void;
+  /** Called when the user follows "See all results", so a hosting dialog can close. */
+  onSeeAll?: () => void;
 };

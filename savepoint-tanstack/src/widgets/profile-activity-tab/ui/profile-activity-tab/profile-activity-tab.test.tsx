@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,7 +23,7 @@ const baseItem: FeedItem = {
 const secondItem: FeedItem = {
   ...baseItem,
   id: 2,
-  status: "PLAYED",
+  status: "DONE",
   gameTitle: "Tunic",
 };
 
@@ -69,8 +69,23 @@ describe("ProfileActivityTab", () => {
       expect(elements.getEntries()).toHaveLength(1);
     });
 
-    it("includes the username, game title, and status in the line", () => {
-      expect(screen.getByText("@alice added Balatro to Playing")).toBeTruthy();
+    it("reads as a sentence for the status", () => {
+      expect(screen.getByText("@alice is playing Balatro")).toBeTruthy();
+    });
+
+    it.each([
+      ["WANT", "@alice wants to play Balatro"],
+      ["DONE", "@alice is done with Balatro"],
+    ] as const)("phrases %s as '%s'", (status, line) => {
+      cleanup();
+      render(
+        <ProfileActivityTab
+          initialItems={[{ ...baseItem, status }]}
+          initialNextCursor={null}
+          loadMore={vi.fn()}
+        />
+      );
+      expect(screen.getByText(line)).toBeTruthy();
     });
 
     it("does not render Load more when no cursor", () => {

@@ -1,18 +1,24 @@
 import { Library, Sparkles } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
 
 import { OnboardingChecklist } from "../onboarding-checklist";
-import type { EmptyLibraryHeroProps } from "./empty-library-hero.type";
+import type {
+  EmptyLibraryHeroActionProps,
+  EmptyLibraryHeroProps,
+} from "./empty-library-hero.type";
 
 /**
  * First-time-on-`/library` welcome surface, rendering the checklist beneath a
  * branded hero. When the embedded checklist returns null the hero still renders
- * the welcome copy. No CTA buttons here — the Library widget already provides an
- * `AddGameTrigger` FAB for the "add your first game" CTA.
+ * the welcome copy. The "Add a game" CTA is owned by the caller (`onAddGame`).
  */
-export function EmptyLibraryHero(props: EmptyLibraryHeroProps) {
+export function EmptyLibraryHero({
+  onAddGame,
+  ...checklistProps
+}: EmptyLibraryHeroProps & EmptyLibraryHeroActionProps) {
   return (
     <Card
       variant="outlined"
@@ -35,17 +41,17 @@ export function EmptyLibraryHero(props: EmptyLibraryHeroProps) {
 
       <div className="space-y-sm max-w-md">
         <h2 className="text-h2 font-semibold tracking-tight">
-          Start Your Gaming Journey
+          Start your library
         </h2>
         <p className="text-muted-foreground text-body">
           Track what you&apos;re playing, what you&apos;ve finished, and
-          what&apos;s next. Add your first game with the + button below to get
-          started.
+          what&apos;s next.
         </p>
+        <Button onClick={onAddGame}>Add a game</Button>
       </div>
 
       <div className="w-full max-w-md text-left">
-        <OnboardingChecklist {...props} />
+        <OnboardingChecklist {...checklistProps} />
       </div>
     </Card>
   );

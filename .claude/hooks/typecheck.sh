@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Stop hook: gate turn completion on a clean TypeScript check.
+# Stop hook: gate turn completion on TypeScript errors in the files this session
+# edited. tsc still checks the whole program; only the reported errors are scoped.
 # Exit 0 = allow stop, Exit 2 = block stop and feed stderr back to Claude.
 
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/savepoint-tanstack"
+HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$HOOKS_DIR/../.." && pwd)}/savepoint-tanstack"
+# shellcheck source-path=SCRIPTDIR source=lib/session-edits.sh
+source "$HOOKS_DIR/lib/session-edits.sh"
 
 input=$(cat)
 
@@ -16,19 +20,24 @@ fi
 
 cd "$PROJECT_DIR" || exit 0
 
-# Skip the (whole-program, slow) typecheck unless TS sources actually changed.
-changed=$(
-  {
-    git diff --name-only HEAD -- '*.ts' '*.tsx'
-    git ls-files --others --exclude-standard -- '*.ts' '*.tsx'
-  } 2>/dev/null
+# Scoped to this session's edits so another session's half-finished work in the
+# same tree does not block this one. Trade-off: an edit here that breaks a file
+# this session never touched is left to CI.
+edited=$(session_edited_ts_files "$input" "$PROJECT_DIR")
+[ -z "$edited" ] && exit 0
+
+output=$(pnpm exec tsc --noEmit --pretty false 2>&1) && exit 0
+
+# tsc prints "path(line,col): error ..." followed by indented continuation lines.
+own_errors=$(
+  echo "$output" | awk -v files="$edited" '
+    BEGIN { n = split(files, list, "\n"); for (i = 1; i <= n; i++) mine[list[i]] = 1 }
+    /^[^ ]/ { path = $0; sub(/\(.*/, "", path); keep = (path in mine) }
+    keep
+  '
 )
-[ -z "$changed" ] && exit 0
+[ -z "$own_errors" ] && exit 0
 
-if ! output=$(pnpm typecheck 2>&1); then
-  echo "Typecheck failed — resolve these errors before finishing:" >&2
-  echo "$output" >&2
-  exit 2
-fi
-
-exit 0
+echo "Typecheck failed in files this session edited — resolve these errors before finishing:" >&2
+echo "$own_errors" >&2
+exit 2

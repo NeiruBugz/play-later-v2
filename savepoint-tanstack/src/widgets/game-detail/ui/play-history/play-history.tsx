@@ -1,0 +1,52 @@
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+
+import { formatDayMonth } from "@/shared/lib/date";
+import { cn } from "@/shared/lib/utils";
+
+import type { Play, PlayHistoryProps } from "./play-history.type";
+
+function formatRange(play: Play): string {
+  const started = play.startedAt === null ? "" : formatDayMonth(play.startedAt);
+  if (play.finishedAt === null) return started;
+  return `${started} \u2013 ${formatDayMonth(play.finishedAt)}`.trim();
+}
+
+function endedTime(play: Play): number {
+  return new Date(play.finishedAt ?? play.startedAt ?? 0).getTime();
+}
+
+export function PlayHistory({ plays }: PlayHistoryProps) {
+  const [open, setOpen] = useState(false);
+
+  if (plays.length === 0) return null;
+
+  const newestFirst = [...plays].sort((a, b) => endedTime(b) - endedTime(a));
+
+  return (
+    <section className="gap-md flex flex-col" data-testid="play-history">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls="play-history-list"
+        onClick={() => setOpen((current) => !current)}
+        className="terminal-label focus-visible:ring-ring flex items-center gap-2 text-left focus-visible:ring-2 focus-visible:outline-none"
+      >
+        History
+        <ChevronDown
+          aria-hidden="true"
+          className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open ? (
+        <ul id="play-history-list" className="gap-xs flex flex-col text-sm">
+          {newestFirst.map((play) => (
+            <li key={play.id} className="tabular-nums">
+              {formatRange(play)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}

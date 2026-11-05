@@ -84,10 +84,10 @@ export function ImportedGamesPage({
     setPending(true);
     try {
       await dismissImportedGameFn({ data: { importedGameId } });
-      toast.success("Removed from list");
+      toast.success("Removed");
       router.invalidate();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Could not dismiss game"));
+      toast.error(getErrorMessage(err, "Could not remove game"));
     } finally {
       setPending(false);
     }
@@ -101,7 +101,7 @@ export function ImportedGamesPage({
       showSyncCompletedToast(imported);
       router.invalidate();
     } catch (err) {
-      showSyncFailedToast(getErrorMessage(err, "Sync failed"));
+      showSyncFailedToast(getErrorMessage(err, "Import from Steam failed"));
     } finally {
       setPending(false);
     }
@@ -120,7 +120,7 @@ export function ImportedGamesPage({
           <EmptyState
             icon={Gamepad2}
             title="No matches"
-            description="No imported games match your current filters."
+            description="No games match your current filters."
             action={{
               label: "Clear filters",
               to: "/steam/games",
@@ -148,9 +148,9 @@ export function ImportedGamesPage({
       <EmptyState
         icon={Gamepad2}
         title="No games imported yet"
-        description="Sync your Steam library to see your games here."
+        description="Import from Steam to see your games here."
         action={{
-          label: pending ? "Syncing…" : "Sync from Steam",
+          label: pending ? "Importing…" : "Import from Steam",
           onClick: handleSync,
           disabled: pending,
           variant: "default",
@@ -167,9 +167,9 @@ export function ImportedGamesPage({
       />
       {hasUnmatched ? (
         <Alert variant="warning">
-          <AlertTitle>Some games need a manual IGDB match</AlertTitle>
+          <AlertTitle>Some games need a manual match</AlertTitle>
           <AlertDescription>
-            Click &quot;Search IGDB&quot; on a row to find the right entry.
+            Click &quot;Search&quot; on a row to find the right entry.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -181,14 +181,14 @@ export function ImportedGamesPage({
           onClick={handleSync}
           disabled={pending}
         >
-          {pending ? "Syncing…" : "Sync from Steam"}
+          {pending ? "Importing…" : "Import from Steam"}
         </Button>
       </div>
 
       <ul
         className="space-y-2"
         role="list"
-        aria-label="Imported games"
+        aria-label="Steam games"
         data-include-ignored={includeIgnored ? "true" : "false"}
       >
         {sortedGames.map((game) => (
@@ -212,7 +212,7 @@ export function ImportedGamesPage({
       {pagination && pagination.totalPages > 1 ? (
         <nav
           className="flex items-center justify-between pt-2"
-          aria-label="Imported games pagination"
+          aria-label="Steam games pagination"
         >
           <span className="text-muted-foreground text-sm">
             Page {pagination.page} of {pagination.totalPages} ·{" "}

@@ -1,19 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  /* Single source for the phone bottom nav's total height; the nav sizes
+     itself with it and the game-detail action bar sits on top of it. */
+  --bottom-nav-height: calc(4rem + env(safe-area-inset-bottom));
+}
+
 /* Bottom-nav spacing utilities. */
 @layer utilities {
-  /* Home-indicator inset for FIXED bottom bars (bottom nav, game-detail action
-     bar) — pads their own content up off the iOS home indicator. */
-  .pb-safe-nav {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-
   /* Content clearance for the scrolling page so its last rows aren't hidden
      behind the fixed bottom nav (~4rem tall). Reset to 0 on desktop where the
      nav is replaced by the sidebar. Applied to <main> by AppShell. */
   .pb-bottom-nav {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--bottom-nav-height) + 0.5rem);
   }
   @media (min-width: 48rem) {
     .pb-bottom-nav {
@@ -202,16 +202,12 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Status colors — game-journey taxonomy. "Playing" inherits the accent. */
-  --status-wishlist: oklch(0.52 0.13 250);
-  --status-wishlist-foreground: oklch(0.99 0 0);
-  --status-shelf: oklch(0.5 0.02 70);
-  --status-shelf-foreground: oklch(0.99 0.01 85);
-  --status-upNext: oklch(0.6 0.13 70);
-  --status-upNext-foreground: oklch(0.2 0.02 60);
+  --status-want: oklch(0.52 0.13 250);
+  --status-want-foreground: oklch(0.99 0 0);
   --status-playing: var(--primary);
   --status-playing-foreground: var(--primary-foreground);
-  --status-played: oklch(0.52 0.12 150);
-  --status-played-foreground: oklch(0.99 0 0);
+  --status-done: oklch(0.52 0.12 150);
+  --status-done-foreground: oklch(0.99 0 0);
 
   color-scheme: light;
 }
@@ -297,16 +293,12 @@
   --shadow-btn: var(--shadow-1);
 
   /* Status colors — game-journey taxonomy. "Playing" inherits the accent. */
-  --status-wishlist: oklch(0.7 0.13 250);
-  --status-wishlist-foreground: oklch(0.16 0.012 70);
-  --status-shelf: oklch(0.62 0.015 80);
-  --status-shelf-foreground: oklch(0.16 0.012 70);
-  --status-upNext: oklch(0.78 0.13 70);
-  --status-upNext-foreground: oklch(0.16 0.012 70);
+  --status-want: oklch(0.7 0.13 250);
+  --status-want-foreground: oklch(0.16 0.012 70);
   --status-playing: var(--primary);
   --status-playing-foreground: var(--primary-foreground);
-  --status-played: oklch(0.72 0.13 150);
-  --status-played-foreground: oklch(0.16 0.012 70);
+  --status-done: oklch(0.72 0.13 150);
+  --status-done-foreground: oklch(0.16 0.012 70);
 
   color-scheme: dark;
 }
@@ -367,16 +359,12 @@
   --color-pc: var(--color-pc);
 
   /* Status colors - game journey states */
-  --color-status-wishlist: var(--status-wishlist);
-  --color-status-wishlist-foreground: var(--status-wishlist-foreground);
-  --color-status-shelf: var(--status-shelf);
-  --color-status-shelf-foreground: var(--status-shelf-foreground);
-  --color-status-upNext: var(--status-upNext);
-  --color-status-upNext-foreground: var(--status-upNext-foreground);
+  --color-status-want: var(--status-want);
+  --color-status-want-foreground: var(--status-want-foreground);
   --color-status-playing: var(--status-playing);
   --color-status-playing-foreground: var(--status-playing-foreground);
-  --color-status-played: var(--status-played);
-  --color-status-played-foreground: var(--status-played-foreground);
+  --color-status-done: var(--status-done);
+  --color-status-done-foreground: var(--status-done-foreground);
   /* Border radius */
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);

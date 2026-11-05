@@ -10,46 +10,42 @@ vi.mock("@tanstack/react-router", async () => ({
     options: opts,
     useSearch: vi.fn(),
   }),
+  useNavigate: () => vi.fn(),
 }));
 
-vi.mock("@/features/compose-journal-entry", () => ({
-  ComposeJournalEntryForm: ({
-    defaultGameId,
-  }: {
-    defaultGameId?: string | null;
-  }) => (
-    <div data-testid="compose-form">
-      <span data-testid="default-game-id">{defaultGameId ?? "null"}</span>
+vi.mock("@/widgets/global-action-host", () => ({
+  LogFormHost: ({ gameSlug }: { gameSlug?: string }) => (
+    <div data-testid="log-form">
+      <span data-testid="game-slug">{gameSlug ?? "none"}</span>
     </div>
   ),
 }));
 
-function renderRoute(search: { gameId?: string }) {
-  (Route as unknown as { useSearch: () => { gameId?: string } }).useSearch =
-    () => search;
+function renderRoute(search: { game?: string }) {
+  (Route as unknown as { useSearch: () => { game?: string } }).useSearch = () =>
+    search;
   const Component = Route.options.component as ComponentType;
   render(<Component />);
 }
 
 describe("/journal/new route", () => {
-  describe("given a gameId search param", () => {
-    it("forwards the gameId to the compose form", () => {
-      renderRoute({ gameId: "game-99" });
-      expect(screen.getByTestId("default-game-id").textContent).toBe("game-99");
-    });
+  it("renders the Log form with the game from the search param chosen", () => {
+    renderRoute({ game: "celeste" });
+    expect(screen.getByTestId("game-slug").textContent).toBe("celeste");
   });
 
-  describe("given no gameId search param", () => {
-    it("forwards a null game association", () => {
-      renderRoute({});
-      expect(screen.getByTestId("default-game-id").textContent).toBe("null");
-    });
+  it("renders the Log form with no game chosen by default", () => {
+    renderRoute({});
+    expect(screen.getByTestId("game-slug").textContent).toBe("none");
+  });
 
-    it("renders the page heading", () => {
-      renderRoute({});
-      expect(
-        screen.getByRole("heading", { name: "Write New Entry" })
-      ).toBeDefined();
-    });
+  it("renders the New note heading", () => {
+    renderRoute({});
+    expect(screen.getByRole("heading", { name: "New note" })).toBeDefined();
+  });
+
+  it("does not nest a main landmark inside the app shell", () => {
+    renderRoute({});
+    expect(screen.queryByRole("main")).toBeNull();
   });
 });

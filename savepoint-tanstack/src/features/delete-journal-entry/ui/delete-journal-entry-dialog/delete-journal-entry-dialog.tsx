@@ -30,7 +30,7 @@ export function DeleteJournalEntryDialog({
     try {
       await deleteJournalEntryFn({ data: { entryId } });
       setError(null);
-      toast.success("Entry deleted");
+      toast.success("Note deleted");
       await router.invalidate();
       onOpenChange(false);
     } catch (err: unknown) {
@@ -50,7 +50,7 @@ export function DeleteJournalEntryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete this entry?</DialogTitle>
+          <DialogTitle>Delete this note?</DialogTitle>
           <DialogDescription>This cannot be undone.</DialogDescription>
         </DialogHeader>
 

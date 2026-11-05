@@ -17,7 +17,9 @@ export function RatingControls({
   onMinRatingChange,
   onClearMinRating,
   onUnratedOnlyChange,
+  idPrefix,
 }: RatingControlsProps) {
+  const unratedSwitchId = `${idPrefix}-unrated-only`;
   return (
     <section className="space-y-sm">
       <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
@@ -53,12 +55,12 @@ export function RatingControls({
       </div>
       <div className="gap-sm flex items-center">
         <Switch
-          id="mobile-unrated-only"
+          id={unratedSwitchId}
           checked={unratedOnly === true}
           onCheckedChange={onUnratedOnlyChange}
           aria-label="Show only unrated games"
         />
-        <Label htmlFor="mobile-unrated-only" className="text-sm font-medium">
+        <Label htmlFor={unratedSwitchId} className="text-sm font-medium">
           Unrated only
         </Label>
       </div>

@@ -14,8 +14,6 @@ vi.mock("@tanstack/react-router", () => ({
 const defaultProps = {
   status: undefined,
   platform: undefined,
-  acquisition: undefined,
-  startedOnly: undefined,
   minRating: undefined,
   unratedOnly: undefined,
   sortBy: "updatedAt" as const,
@@ -27,10 +25,8 @@ const elements = {
     screen.getByRole("button", { name: "Open filters" }),
   queryDialog: () => screen.queryByRole("dialog"),
   findDialog: () => screen.findByRole("dialog"),
-  getStatusFilterButton: (label: string) =>
-    screen.getByRole("button", { name: `Filter by ${label}` }),
-  getStatusClearButton: (label: string) =>
-    screen.getByRole("button", { name: `Clear ${label} filter` }),
+  queryStatusFilterButton: (label: string) =>
+    screen.queryByRole("button", { name: `Filter by ${label}` }),
   getPlatformTrigger: () => screen.getByRole("combobox", { name: "Platform" }),
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
   getOption: (name: string) =>
@@ -39,10 +35,10 @@ const elements = {
     screen.getByRole("slider", { name: "Minimum rating filter" }),
   getUnratedSwitch: () =>
     screen.getByRole("switch", { name: "Show only unrated games" }),
-  getAcquisitionOption: (label: string) =>
-    screen.getByRole("button", { name: `Filter by ${label}` }),
-  getStartedSwitch: () =>
-    screen.getByRole("switch", { name: "Hide untouched games" }),
+  getNotOwnedOnlySwitch: () =>
+    screen.getByRole("switch", { name: "Not owned only" }),
+  queryNotOwnedOnlySwitch: () =>
+    screen.queryByRole("switch", { name: "Not owned only" }),
   queryClearAllButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
   getClearAllButton: () =>
@@ -56,19 +52,12 @@ const elements = {
 const actions = {
   openSheet: () => userEvent.click(elements.getOpenFiltersButton()),
   pressEscape: () => userEvent.keyboard("{Escape}"),
-  pickStatus: (label: string) =>
-    userEvent.click(elements.getStatusFilterButton(label)),
-  clearStatus: (label: string) =>
-    userEvent.click(elements.getStatusClearButton(label)),
   openPlatformSelect: () => userEvent.click(elements.getPlatformTrigger()),
   pickPlatformOption: (name: string) =>
     userEvent.click(elements.getOption(name)),
   openSortSelect: () => userEvent.click(elements.getSortTrigger()),
   pickSortOption: (name: string) => userEvent.click(elements.getOption(name)),
   toggleUnrated: () => userEvent.click(elements.getUnratedSwitch()),
-  pickAcquisition: (label: string) =>
-    userEvent.click(elements.getAcquisitionOption(label)),
-  toggleStarted: () => userEvent.click(elements.getStartedSwitch()),
   clearAll: () => userEvent.click(elements.getClearAllButton()),
   clearMinRating: () => userEvent.click(elements.getClearMinRatingButton()),
 };
@@ -101,11 +90,6 @@ describe("MobileFilterBar", () => {
 
     it("renders all filter controls inside the sheet", async () => {
       await elements.findDialog();
-      expect(elements.getStatusFilterButton("Up Next")).toBeDefined();
-      expect(elements.getStatusFilterButton("Playing")).toBeDefined();
-      expect(elements.getStatusFilterButton("Shelf")).toBeDefined();
-      expect(elements.getStatusFilterButton("Played")).toBeDefined();
-      expect(elements.getStatusFilterButton("Wishlist")).toBeDefined();
       expect(elements.getPlatformTrigger()).toBeDefined();
       expect(elements.getSortTrigger()).toBeDefined();
       expect(elements.getMinRatingSlider()).toBeDefined();
@@ -131,37 +115,17 @@ describe("MobileFilterBar", () => {
     });
   });
 
-  describe("given the user picks a status inside the sheet", () => {
-    beforeEach(async () => {
-      render(<MobileFilterBar {...defaultProps} />);
-      await actions.openSheet();
-      await elements.findDialog();
-      await actions.pickStatus("Playing");
-    });
-
-    it("calls navigate with search.status set to PLAYING", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: "PLAYING" }),
-        })
-      );
-    });
-  });
-
-  describe("given a status is active and the user clicks it again", () => {
+  describe("given the sheet is open", () => {
     beforeEach(async () => {
       render(<MobileFilterBar {...defaultProps} status="PLAYING" />);
       await actions.openSheet();
       await elements.findDialog();
-      await actions.clearStatus("Playing");
     });
 
-    it("calls navigate with search.status undefined (toggle-deselect)", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: undefined }),
-        })
-      );
+    it("does not repeat the status choices the status lens already offers", () => {
+      expect(elements.queryStatusFilterButton("Want")).toBeNull();
+      expect(elements.queryStatusFilterButton("Playing")).toBeNull();
+      expect(elements.queryStatusFilterButton("Done")).toBeNull();
     });
   });
 
@@ -261,8 +225,6 @@ describe("MobileFilterBar", () => {
         <MobileFilterBar
           status="PLAYING"
           platform="PC"
-          acquisition={undefined}
-          startedOnly={undefined}
           minRating={7}
           unratedOnly={true}
           sortBy="title"
@@ -300,98 +262,45 @@ describe("MobileFilterBar", () => {
     });
   });
 
-  describe("given the user picks an acquisition inside the sheet", () => {
+  describe("given the sheet is open without a status", () => {
     beforeEach(async () => {
       render(<MobileFilterBar {...defaultProps} />);
       await actions.openSheet();
       await elements.findDialog();
-      await actions.pickAcquisition("Physical");
     });
 
-    it("calls navigate with search.acquisition set to PHYSICAL", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ acquisition: "PHYSICAL" }),
-        })
-      );
+    it("has no Acquisition filter", () => {
+      expect(screen.queryByText("Acquisition")).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Filter by Physical" })
+      ).toBeNull();
+    });
+
+    it("offers no Not owned only toggle", () => {
+      expect(elements.queryNotOwnedOnlySwitch()).toBeNull();
     });
   });
 
-  describe("given the user enables 'Only games I've started' in the sheet", () => {
+  describe("given the Want filter is selected and the user turns on Not owned only", () => {
     beforeEach(async () => {
-      render(<MobileFilterBar {...defaultProps} />);
+      render(<MobileFilterBar {...defaultProps} status="WANT" />);
       await actions.openSheet();
       await elements.findDialog();
-      await actions.toggleStarted();
+      await userEvent.click(elements.getNotOwnedOnlySwitch());
     });
 
-    it("calls navigate with search.startedOnly set to true", () => {
+    it("calls navigate with search.notOwnedOnly true", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ startedOnly: true }),
+          search: expect.objectContaining({ notOwnedOnly: true }),
         })
       );
-    });
-  });
-
-  // Finding #15 — single-row controls: Filters trigger + grid/list view toggle
-  describe("given viewMode and onViewModeChange props are provided", () => {
-    const onViewModeChange = vi.fn();
-
-    beforeEach(() => {
-      render(
-        <MobileFilterBar
-          {...defaultProps}
-          viewMode="grid"
-          onViewModeChange={onViewModeChange}
-        />
-      );
-    });
-
-    it("renders both view-mode buttons alongside the Filters button", () => {
-      expect(elements.getOpenFiltersButton()).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "Grid view" })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "List view" })
-      ).toBeInTheDocument();
-    });
-
-    it("calls onViewModeChange with 'list' when List view is clicked", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "List view" }));
-      expect(onViewModeChange).toHaveBeenCalledWith("list");
-    });
-  });
-
-  describe("given viewMode is 'list' and onViewModeChange is provided", () => {
-    const onViewModeChange = vi.fn();
-
-    beforeEach(() => {
-      render(
-        <MobileFilterBar
-          {...defaultProps}
-          viewMode="list"
-          onViewModeChange={onViewModeChange}
-        />
-      );
-    });
-
-    it("calls onViewModeChange with 'grid' when Grid view is clicked", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "Grid view" }));
-      expect(onViewModeChange).toHaveBeenCalledWith("grid");
     });
   });
 
   describe("given no filters are active", () => {
     beforeEach(() => {
-      render(
-        <MobileFilterBar
-          {...defaultProps}
-          viewMode="grid"
-          onViewModeChange={vi.fn()}
-        />
-      );
+      render(<MobileFilterBar {...defaultProps} />);
     });
 
     it("does not render the active-filter count badge", () => {
@@ -402,13 +311,7 @@ describe("MobileFilterBar", () => {
   describe("given 2 filters are active (platform + status)", () => {
     beforeEach(() => {
       render(
-        <MobileFilterBar
-          {...defaultProps}
-          status="PLAYING"
-          platform="PC"
-          viewMode="grid"
-          onViewModeChange={vi.fn()}
-        />
+        <MobileFilterBar {...defaultProps} status="PLAYING" platform="PC" />
       );
     });
 
@@ -419,14 +322,7 @@ describe("MobileFilterBar", () => {
 
   describe("given 1 filter is active (status only)", () => {
     beforeEach(() => {
-      render(
-        <MobileFilterBar
-          {...defaultProps}
-          status="PLAYING"
-          viewMode="grid"
-          onViewModeChange={vi.fn()}
-        />
-      );
+      render(<MobileFilterBar {...defaultProps} status="PLAYING" />);
     });
 
     it("shows the count badge with the value 1", () => {

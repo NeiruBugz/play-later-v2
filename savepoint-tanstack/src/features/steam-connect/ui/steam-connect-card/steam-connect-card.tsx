@@ -33,7 +33,7 @@ import type { SteamConnectCardProps } from "./steam-connect-card.type";
  * Aligned to canonical `savepoint-app/features/steam-import/ui/steam-connect-card.tsx`:
  *   - Steam glyph (`FaSteam`) beside both titles.
  *   - Copy parity: "Connect Steam Account" / "Steam Account Connected", the
- *     longer connect description, and the "Manage Imported Games" link.
+ *     longer connect description, and the "Import from Steam" link.
  *   - Disconnect is gated behind a confirmation Dialog with canonical's
  *     "imported games will be preserved" explanatory copy.
  *
@@ -70,8 +70,7 @@ export function SteamConnectCard({
             Connect Steam Account
           </CardTitle>
           <CardDescription>
-            Link your Steam account to import your game library and sync your
-            collection.
+            Link your Steam account to import your games into your library.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -123,7 +122,7 @@ export function SteamConnectCard({
             <Button variant="outline" asChild>
               <Link to="/steam/games">
                 <Download className="h-4 w-4" aria-hidden="true" />
-                Manage Imported Games
+                Import from Steam
               </Link>
             </Button>
           </div>
@@ -138,9 +137,9 @@ export function SteamConnectCard({
           <DialogHeader>
             <DialogTitle>Disconnect Steam Account</DialogTitle>
             <DialogDescription>
-              Are you sure you want to disconnect your Steam account? Your
-              imported games will be preserved in your library, but you will
-              need to reconnect to import new games or update your Steam data.
+              Are you sure you want to disconnect your Steam account? Your games
+              you already imported will stay in your library, but you will need
+              to reconnect to import new games or update your Steam data.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

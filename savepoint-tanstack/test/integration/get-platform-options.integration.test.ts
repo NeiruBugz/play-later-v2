@@ -83,7 +83,6 @@ async function logPlatform(userId: string, gameId: string, platform: string) {
       gameId,
       status: "PLAYING",
       acquisitionType: "DIGITAL",
-      hasBeenPlayed: false,
       platform,
       createdAt: new Date("2024-01-01T00:00:00.000Z"),
       updatedAt: new Date("2024-01-01T00:00:00.000Z"),

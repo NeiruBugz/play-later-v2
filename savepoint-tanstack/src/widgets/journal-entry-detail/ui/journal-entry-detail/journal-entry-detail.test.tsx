@@ -11,7 +11,6 @@ const onDelete = vi.fn();
 
 const entry: JournalEntryDetailEntry = {
   id: "entry-xyz",
-  kind: "QUICK",
   title: "First session",
   content: "Played through the tutorial.",
   createdAt: new Date("2024-01-15T12:00:00Z"),

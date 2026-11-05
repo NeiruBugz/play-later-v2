@@ -60,7 +60,7 @@ function makeRouterAt(initialPath: string) {
 }
 
 const elements = {
-  getLogButton: () => screen.getByRole("button", { name: "Log a session" }),
+  getLogButton: () => screen.getByRole("button", { name: "Log" }),
 };
 
 describe("AppBottomNav routing (real router)", () => {

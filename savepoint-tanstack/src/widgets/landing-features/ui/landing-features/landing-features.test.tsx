@@ -65,8 +65,8 @@ describe("LandingPreviewCard", () => {
       expect(screen.getByText(/TEAM CHERRY/, { exact: false })).toBeDefined();
     });
 
-    it("renders the journal entry chip", () => {
-      expect(screen.getByText(/JOURNAL ENTRY/, { exact: false })).toBeDefined();
+    it("renders the note chip", () => {
+      expect(screen.getByText(/NOTE/, { exact: false })).toBeDefined();
     });
 
     it("renders the journal quote", () => {

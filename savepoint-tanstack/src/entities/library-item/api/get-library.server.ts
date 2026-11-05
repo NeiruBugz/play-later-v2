@@ -1,7 +1,6 @@
 import { prisma } from "@/shared/lib/db.server";
 
 import type { Prisma } from "../../../../shared/lib/prisma/client.ts";
-import { TOUCHED_STATUSES } from "../model/touched";
 import type { GetLibraryFilters, GetLibraryResult } from "../model/types";
 
 export type {
@@ -16,33 +15,28 @@ export async function getLibrary(
 ): Promise<GetLibraryResult> {
   const {
     status,
+    upNext,
     platform,
-    acquisition,
-    startedOnly,
+    notOwnedOnly,
     minRating,
+    unratedOnly,
     sortBy,
     sortOrder = "desc",
   } = filters;
 
   const where: Prisma.LibraryItemWhereInput = {
     userId,
-    ...(status && { status }),
+    ...(upNext ? { upNextPosition: { not: null } } : status && { status }),
     ...(platform && { platform }),
-    ...(acquisition && { acquisitionType: acquisition }),
-    // "Touched" is derived from real play signals, not the dead `hasBeenPlayed`
-    // flag: currently/formerly playing, or with a recorded start/finish date.
-    ...(startedOnly && {
-      OR: [
-        { status: { in: [...TOUCHED_STATUSES] } },
-        { startedAt: { not: null } },
-        { completedAt: { not: null } },
-      ],
-    }),
-    ...(minRating !== undefined && { rating: { gte: minRating } }),
+    ...(notOwnedOnly && status === "WANT" && !upNext && { isOwned: false }),
+    ...(unratedOnly
+      ? { rating: null }
+      : minRating !== undefined && { rating: { gte: minRating } }),
   };
 
-  const orderBy: Prisma.LibraryItemOrderByWithRelationInput =
-    sortBy === "title"
+  const orderBy: Prisma.LibraryItemOrderByWithRelationInput = upNext
+    ? { upNextPosition: "asc" }
+    : sortBy === "title"
       ? { game: { title: sortOrder } }
       : sortBy === "createdAt"
         ? { createdAt: sortOrder }

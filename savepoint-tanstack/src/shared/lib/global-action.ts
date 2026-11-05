@@ -26,13 +26,6 @@ export function openGlobalAction(
   });
 }
 
-export function setGlobalActionGame(navigate: NavigateFn, game: string): void {
-  void navigate({
-    to: ".",
-    search: (prev) => ({ ...prev, game }),
-  });
-}
-
 export function closeGlobalAction(navigate: NavigateFn): void {
   void navigate({
     to: ".",

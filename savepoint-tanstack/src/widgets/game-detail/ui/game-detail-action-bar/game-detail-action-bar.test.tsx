@@ -1,10 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GameDetailActionBar } from "./game-detail-action-bar";
 
 const mockNavigate = vi.fn();
+
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: vi.fn(() => false),
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
@@ -17,9 +21,10 @@ vi.mock("@tanstack/react-router", () => ({
 
 const elements = {
   queryStatusPill: () =>
-    screen.queryByRole("button", { name: /Change library status/ }),
+    screen.queryByRole("button", { name: /^Status: .*\. Change$/ }),
+  queryStatusRadios: () => screen.queryAllByRole("radio"),
   queryLogSessionButton: () =>
-    screen.queryByRole("button", { name: "Log session" }),
+    screen.queryByRole("button", { name: "Log time" }),
   queryContainer: () => screen.queryByTestId("game-detail-action-bar"),
 };
 
@@ -32,45 +37,68 @@ const actions = {
   },
 };
 
+const playingState = {
+  status: "PLAYING" as const,
+  setStatus: vi.fn(),
+  isPending: false,
+};
+
 describe("GameDetailActionBar", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
   });
 
   describe("given a signed-in viewer with a library entry (status PLAYING)", () => {
-    const onStatusClick = vi.fn();
+    const scrollIntoView = vi.fn();
+    const scrollTo = vi.fn();
 
     beforeEach(() => {
+      scrollIntoView.mockReset();
+      scrollTo.mockReset();
+      Element.prototype.scrollIntoView = scrollIntoView;
+      vi.stubGlobal("scrollTo", scrollTo);
+      playingState.setStatus.mockReset();
       render(
         <GameDetailActionBar
           gameSlug="hollow-knight"
-          gameStatus="PLAYING"
+          libraryStatus={playingState}
           viewerUserId="user-1"
-          onStatusClick={onStatusClick}
         />
       );
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
     });
 
     it("renders a status pill showing the current status", () => {
       expect(elements.queryStatusPill()).not.toBeNull();
     });
 
-    it("renders a Log session button", () => {
+    it("renders a Log time button", () => {
       expect(elements.queryLogSessionButton()).not.toBeNull();
     });
 
-    it("calls onStatusClick when the status pill is tapped", async () => {
+    it("opens the picker without scrolling when the status pill is tapped", async () => {
       await actions.clickStatusPill();
-      expect(onStatusClick).toHaveBeenCalledTimes(1);
+      expect(elements.queryStatusRadios()).toHaveLength(3);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
+
+    it("reports the picked status", async () => {
+      await actions.clickStatusPill();
+      await userEvent.click(screen.getByRole("radio", { name: "Done" }));
+      expect(playingState.setStatus).toHaveBeenCalledWith("DONE");
     });
   });
 
-  describe("given the user taps the Log session button with slug hollow-knight", () => {
+  describe("given the user taps the Log time button with slug hollow-knight", () => {
     beforeEach(async () => {
       render(
         <GameDetailActionBar
           gameSlug="hollow-knight"
-          gameStatus="PLAYING"
+          libraryStatus={playingState}
           viewerUserId="user-1"
         />
       );
@@ -87,7 +115,7 @@ describe("GameDetailActionBar", () => {
       render(
         <GameDetailActionBar
           gameSlug="hollow-knight"
-          gameStatus={null}
+          libraryStatus={null}
           viewerUserId={null}
         />
       );
@@ -104,16 +132,15 @@ describe("GameDetailActionBar", () => {
       render(
         <GameDetailActionBar
           gameSlug="hollow-knight"
-          gameStatus={null}
+          libraryStatus={null}
           viewerUserId="user-1"
         />
       );
     });
 
-    it("renders an action affordance (Log session button or similar)", () => {
-      const logButton = elements.queryLogSessionButton();
-      const container = elements.queryContainer();
-      expect(logButton !== null || container !== null).toBe(true);
+    it("shows no Log time button", () => {
+      expect(elements.queryLogSessionButton()).toBeNull();
+      expect(elements.queryContainer()).toBeNull();
     });
   });
 });

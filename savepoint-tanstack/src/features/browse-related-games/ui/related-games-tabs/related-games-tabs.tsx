@@ -12,8 +12,11 @@ export function RelatedGamesTabs({
   const firstSection = sections[0]!;
 
   return (
-    <Tabs defaultValue={tabValue(firstSection.collectionId)}>
-      <TabsList>
+    <Tabs
+      defaultValue={tabValue(firstSection.collectionId)}
+      className="min-w-0"
+    >
+      <TabsList className="max-w-full justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {sections.map((section) => (
           <TabsTrigger
             key={section.collectionId}

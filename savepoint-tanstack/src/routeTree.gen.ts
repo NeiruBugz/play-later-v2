@@ -19,10 +19,11 @@ import { Route as GamesSearchRouteImport } from './routes/games.search'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
-import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
-import { Route as AuthedJournalRouteImport } from './routes/_authed/journal'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as UUsernameIndexRouteImport } from './routes/u.$username.index'
+import { Route as AuthedProfileIndexRouteImport } from './routes/_authed/profile.index'
+import { Route as AuthedJournalIndexRouteImport } from './routes/_authed/journal.index'
 import { Route as UUsernameFollowingRouteImport } from './routes/u.$username.following'
 import { Route as UUsernameFollowersRouteImport } from './routes/u.$username.followers'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -31,7 +32,7 @@ import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/sett
 import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
 import { Route as AuthedProfileSetupRouteImport } from './routes/_authed/profile.setup'
 import { Route as AuthedJournalNewRouteImport } from './routes/_authed/journal.new'
-import { Route as AuthedJournalIdRouteImport } from './routes/_authed/journal.$id'
+import { Route as AuthedJournalIdIndexRouteImport } from './routes/_authed/journal.$id.index'
 import { Route as AuthedJournalIdEditRouteImport } from './routes/_authed/journal.$id.edit'
 
 const LoginRoute = LoginRouteImport.update({
@@ -83,24 +84,29 @@ const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedProfileRoute = AuthedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthedRoute,
-} as any)
 const AuthedLibraryRoute = AuthedLibraryRouteImport.update({
   id: '/library',
   path: '/library',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedJournalRoute = AuthedJournalRouteImport.update({
-  id: '/journal',
-  path: '/journal',
-  getParentRoute: () => AuthedRoute,
-} as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const UUsernameIndexRoute = UUsernameIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UUsernameRoute,
+} as any)
+const AuthedProfileIndexRoute = AuthedProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedJournalIndexRoute = AuthedJournalIndexRouteImport.update({
+  id: '/journal/',
+  path: '/journal/',
   getParentRoute: () => AuthedRoute,
 } as any)
 const UUsernameFollowingRoute = UUsernameFollowingRouteImport.update({
@@ -134,24 +140,24 @@ const AuthedSettingsAccountRoute = AuthedSettingsAccountRouteImport.update({
   getParentRoute: () => AuthedSettingsRoute,
 } as any)
 const AuthedProfileSetupRoute = AuthedProfileSetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
-  getParentRoute: () => AuthedProfileRoute,
+  id: '/profile/setup',
+  path: '/profile/setup',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedJournalNewRoute = AuthedJournalNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AuthedJournalRoute,
+  id: '/journal/new',
+  path: '/journal/new',
+  getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedJournalIdRoute = AuthedJournalIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AuthedJournalRoute,
+const AuthedJournalIdIndexRoute = AuthedJournalIdIndexRouteImport.update({
+  id: '/journal/$id/',
+  path: '/journal/$id/',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedJournalIdEditRoute = AuthedJournalIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => AuthedJournalIdRoute,
+  id: '/journal/$id/edit',
+  path: '/journal/$id/edit',
+  getParentRoute: () => AuthedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -159,16 +165,13 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthedDashboardRoute
-  '/journal': typeof AuthedJournalRouteWithChildren
   '/library': typeof AuthedLibraryRoute
-  '/profile': typeof AuthedProfileRouteWithChildren
   '/settings': typeof AuthedSettingsRouteWithChildren
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
-  '/journal/$id': typeof AuthedJournalIdRouteWithChildren
   '/journal/new': typeof AuthedJournalNewRoute
   '/profile/setup': typeof AuthedProfileSetupRoute
   '/settings/account': typeof AuthedSettingsAccountRoute
@@ -177,23 +180,23 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/u/$username/followers': typeof UUsernameFollowersRoute
   '/u/$username/following': typeof UUsernameFollowingRoute
+  '/journal/': typeof AuthedJournalIndexRoute
+  '/profile/': typeof AuthedProfileIndexRoute
+  '/u/$username/': typeof UUsernameIndexRoute
   '/journal/$id/edit': typeof AuthedJournalIdEditRoute
+  '/journal/$id/': typeof AuthedJournalIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthedDashboardRoute
-  '/journal': typeof AuthedJournalRouteWithChildren
   '/library': typeof AuthedLibraryRoute
-  '/profile': typeof AuthedProfileRouteWithChildren
   '/settings': typeof AuthedSettingsRouteWithChildren
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
-  '/u/$username': typeof UUsernameRouteWithChildren
-  '/journal/$id': typeof AuthedJournalIdRouteWithChildren
   '/journal/new': typeof AuthedJournalNewRoute
   '/profile/setup': typeof AuthedProfileSetupRoute
   '/settings/account': typeof AuthedSettingsAccountRoute
@@ -202,7 +205,11 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/u/$username/followers': typeof UUsernameFollowersRoute
   '/u/$username/following': typeof UUsernameFollowingRoute
+  '/journal': typeof AuthedJournalIndexRoute
+  '/profile': typeof AuthedProfileIndexRoute
+  '/u/$username': typeof UUsernameIndexRoute
   '/journal/$id/edit': typeof AuthedJournalIdEditRoute
+  '/journal/$id': typeof AuthedJournalIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -211,16 +218,13 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
-  '/_authed/journal': typeof AuthedJournalRouteWithChildren
   '/_authed/library': typeof AuthedLibraryRoute
-  '/_authed/profile': typeof AuthedProfileRouteWithChildren
   '/_authed/settings': typeof AuthedSettingsRouteWithChildren
   '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
   '/u/$username': typeof UUsernameRouteWithChildren
-  '/_authed/journal/$id': typeof AuthedJournalIdRouteWithChildren
   '/_authed/journal/new': typeof AuthedJournalNewRoute
   '/_authed/profile/setup': typeof AuthedProfileSetupRoute
   '/_authed/settings/account': typeof AuthedSettingsAccountRoute
@@ -229,7 +233,11 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/u/$username/followers': typeof UUsernameFollowersRoute
   '/u/$username/following': typeof UUsernameFollowingRoute
+  '/_authed/journal/': typeof AuthedJournalIndexRoute
+  '/_authed/profile/': typeof AuthedProfileIndexRoute
+  '/u/$username/': typeof UUsernameIndexRoute
   '/_authed/journal/$id/edit': typeof AuthedJournalIdEditRoute
+  '/_authed/journal/$id/': typeof AuthedJournalIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -238,16 +246,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/dashboard'
-    | '/journal'
     | '/library'
-    | '/profile'
     | '/settings'
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
     | '/u/$username'
-    | '/journal/$id'
     | '/journal/new'
     | '/profile/setup'
     | '/settings/account'
@@ -256,23 +261,23 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/u/$username/followers'
     | '/u/$username/following'
+    | '/journal/'
+    | '/profile/'
+    | '/u/$username/'
     | '/journal/$id/edit'
+    | '/journal/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/login'
     | '/dashboard'
-    | '/journal'
     | '/library'
-    | '/profile'
     | '/settings'
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
-    | '/u/$username'
-    | '/journal/$id'
     | '/journal/new'
     | '/profile/setup'
     | '/settings/account'
@@ -281,7 +286,11 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/u/$username/followers'
     | '/u/$username/following'
+    | '/journal'
+    | '/profile'
+    | '/u/$username'
     | '/journal/$id/edit'
+    | '/journal/$id'
   id:
     | '__root__'
     | '/'
@@ -289,16 +298,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/_authed/dashboard'
-    | '/_authed/journal'
     | '/_authed/library'
-    | '/_authed/profile'
     | '/_authed/settings'
     | '/dev/igdb-search'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
     | '/u/$username'
-    | '/_authed/journal/$id'
     | '/_authed/journal/new'
     | '/_authed/profile/setup'
     | '/_authed/settings/account'
@@ -307,7 +313,11 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/u/$username/followers'
     | '/u/$username/following'
+    | '/_authed/journal/'
+    | '/_authed/profile/'
+    | '/u/$username/'
     | '/_authed/journal/$id/edit'
+    | '/_authed/journal/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -395,13 +405,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSettingsRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/profile': {
-      id: '/_authed/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthedProfileRouteImport
-      parentRoute: typeof AuthedRoute
-    }
     '/_authed/library': {
       id: '/_authed/library'
       path: '/library'
@@ -409,18 +412,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedLibraryRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/journal': {
-      id: '/_authed/journal'
-      path: '/journal'
-      fullPath: '/journal'
-      preLoaderRoute: typeof AuthedJournalRouteImport
-      parentRoute: typeof AuthedRoute
-    }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/u/$username/': {
+      id: '/u/$username/'
+      path: '/'
+      fullPath: '/u/$username/'
+      preLoaderRoute: typeof UUsernameIndexRouteImport
+      parentRoute: typeof UUsernameRoute
+    }
+    '/_authed/profile/': {
+      id: '/_authed/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof AuthedProfileIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/journal/': {
+      id: '/_authed/journal/'
+      path: '/journal'
+      fullPath: '/journal/'
+      preLoaderRoute: typeof AuthedJournalIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/u/$username/following': {
@@ -467,72 +484,34 @@ declare module '@tanstack/react-router' {
     }
     '/_authed/profile/setup': {
       id: '/_authed/profile/setup'
-      path: '/setup'
+      path: '/profile/setup'
       fullPath: '/profile/setup'
       preLoaderRoute: typeof AuthedProfileSetupRouteImport
-      parentRoute: typeof AuthedProfileRoute
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/journal/new': {
       id: '/_authed/journal/new'
-      path: '/new'
+      path: '/journal/new'
       fullPath: '/journal/new'
       preLoaderRoute: typeof AuthedJournalNewRouteImport
-      parentRoute: typeof AuthedJournalRoute
+      parentRoute: typeof AuthedRoute
     }
-    '/_authed/journal/$id': {
-      id: '/_authed/journal/$id'
-      path: '/$id'
-      fullPath: '/journal/$id'
-      preLoaderRoute: typeof AuthedJournalIdRouteImport
-      parentRoute: typeof AuthedJournalRoute
+    '/_authed/journal/$id/': {
+      id: '/_authed/journal/$id/'
+      path: '/journal/$id'
+      fullPath: '/journal/$id/'
+      preLoaderRoute: typeof AuthedJournalIdIndexRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/journal/$id/edit': {
       id: '/_authed/journal/$id/edit'
-      path: '/edit'
+      path: '/journal/$id/edit'
       fullPath: '/journal/$id/edit'
       preLoaderRoute: typeof AuthedJournalIdEditRouteImport
-      parentRoute: typeof AuthedJournalIdRoute
+      parentRoute: typeof AuthedRoute
     }
   }
 }
-
-interface AuthedJournalIdRouteChildren {
-  AuthedJournalIdEditRoute: typeof AuthedJournalIdEditRoute
-}
-
-const AuthedJournalIdRouteChildren: AuthedJournalIdRouteChildren = {
-  AuthedJournalIdEditRoute: AuthedJournalIdEditRoute,
-}
-
-const AuthedJournalIdRouteWithChildren = AuthedJournalIdRoute._addFileChildren(
-  AuthedJournalIdRouteChildren,
-)
-
-interface AuthedJournalRouteChildren {
-  AuthedJournalIdRoute: typeof AuthedJournalIdRouteWithChildren
-  AuthedJournalNewRoute: typeof AuthedJournalNewRoute
-}
-
-const AuthedJournalRouteChildren: AuthedJournalRouteChildren = {
-  AuthedJournalIdRoute: AuthedJournalIdRouteWithChildren,
-  AuthedJournalNewRoute: AuthedJournalNewRoute,
-}
-
-const AuthedJournalRouteWithChildren = AuthedJournalRoute._addFileChildren(
-  AuthedJournalRouteChildren,
-)
-
-interface AuthedProfileRouteChildren {
-  AuthedProfileSetupRoute: typeof AuthedProfileSetupRoute
-}
-
-const AuthedProfileRouteChildren: AuthedProfileRouteChildren = {
-  AuthedProfileSetupRoute: AuthedProfileSetupRoute,
-}
-
-const AuthedProfileRouteWithChildren = AuthedProfileRoute._addFileChildren(
-  AuthedProfileRouteChildren,
-)
 
 interface AuthedSettingsRouteChildren {
   AuthedSettingsAccountRoute: typeof AuthedSettingsAccountRoute
@@ -550,20 +529,28 @@ const AuthedSettingsRouteWithChildren = AuthedSettingsRoute._addFileChildren(
 
 interface AuthedRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
-  AuthedJournalRoute: typeof AuthedJournalRouteWithChildren
   AuthedLibraryRoute: typeof AuthedLibraryRoute
-  AuthedProfileRoute: typeof AuthedProfileRouteWithChildren
   AuthedSettingsRoute: typeof AuthedSettingsRouteWithChildren
+  AuthedJournalNewRoute: typeof AuthedJournalNewRoute
+  AuthedProfileSetupRoute: typeof AuthedProfileSetupRoute
   AuthedSteamGamesRoute: typeof AuthedSteamGamesRoute
+  AuthedJournalIndexRoute: typeof AuthedJournalIndexRoute
+  AuthedProfileIndexRoute: typeof AuthedProfileIndexRoute
+  AuthedJournalIdEditRoute: typeof AuthedJournalIdEditRoute
+  AuthedJournalIdIndexRoute: typeof AuthedJournalIdIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRoute,
-  AuthedJournalRoute: AuthedJournalRouteWithChildren,
   AuthedLibraryRoute: AuthedLibraryRoute,
-  AuthedProfileRoute: AuthedProfileRouteWithChildren,
   AuthedSettingsRoute: AuthedSettingsRouteWithChildren,
+  AuthedJournalNewRoute: AuthedJournalNewRoute,
+  AuthedProfileSetupRoute: AuthedProfileSetupRoute,
   AuthedSteamGamesRoute: AuthedSteamGamesRoute,
+  AuthedJournalIndexRoute: AuthedJournalIndexRoute,
+  AuthedProfileIndexRoute: AuthedProfileIndexRoute,
+  AuthedJournalIdEditRoute: AuthedJournalIdEditRoute,
+  AuthedJournalIdIndexRoute: AuthedJournalIdIndexRoute,
 }
 
 const AuthedRouteWithChildren =
@@ -572,11 +559,13 @@ const AuthedRouteWithChildren =
 interface UUsernameRouteChildren {
   UUsernameFollowersRoute: typeof UUsernameFollowersRoute
   UUsernameFollowingRoute: typeof UUsernameFollowingRoute
+  UUsernameIndexRoute: typeof UUsernameIndexRoute
 }
 
 const UUsernameRouteChildren: UUsernameRouteChildren = {
   UUsernameFollowersRoute: UUsernameFollowersRoute,
   UUsernameFollowingRoute: UUsernameFollowingRoute,
+  UUsernameIndexRoute: UUsernameIndexRoute,
 }
 
 const UUsernameRouteWithChildren = UUsernameRoute._addFileChildren(

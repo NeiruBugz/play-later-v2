@@ -1,7 +1,6 @@
 import {
   DEFAULT_PLATFORMS,
   useLibraryFiltersState,
-  type LibraryAcquisition,
   type LibrarySortBy,
   type LibrarySortOrder,
   type LibraryStatus,
@@ -9,15 +8,13 @@ import {
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
 
-import { AcquisitionList } from "../acquisition-list";
+import { NotOwnedOnlyToggle } from "../not-owned-only-toggle";
 import { PlatformSelect } from "../platform-select";
+import { RatingControls } from "../rating-controls";
 import { SortSelect } from "../sort-select";
-import { StartedOnlyToggle } from "../started-only-toggle";
-import { StatusList } from "../status-list";
 
 export type {
   LibraryStatus,
-  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,
@@ -26,95 +23,73 @@ export type {
 export type LibraryFiltersProps = {
   status: LibraryStatus | undefined;
   platform: string | undefined;
-  acquisition: LibraryAcquisition | undefined;
-  startedOnly: boolean | undefined;
   minRating: number | undefined;
   sortBy: LibrarySortBy;
   sortOrder: LibrarySortOrder;
-  /**
-   * Optional per-status counts to render as count badges next to each status row.
-   * Tanstack search-param contract does not yet supply these (no `getStatusCounts`
-   * server fn ported); the rail still renders without counts when undefined.
-   */
-  counts?: LibraryStatusCounts;
   /**
    * Optional platform allow-list. Falls back to a built-in canonical list when
    * undefined (matches savepoint-app's `PLATFORM_OPTIONS`).
    */
   platforms?: ReadonlyArray<string>;
   /**
-   * Pass-through for the mobile filter bar's unrated-only toggle. Sidebar
-   * does not render this control (deferred to S18A "More" disclosure parity)
-   * but must preserve the value across navigations so picking a status here
-   * does not clobber an active mobile-side toggle.
+   * Drives the "Unrated only" switch, shared with the mobile filter bar via
+   * `RatingControls` and `useLibraryFiltersState`.
    */
   unratedOnly?: boolean;
+  notOwnedOnly?: boolean;
 };
 
 export function LibraryFilters(props: LibraryFiltersProps) {
   const {
     status,
     platform,
-    acquisition,
-    startedOnly,
     minRating,
     sortBy,
     sortOrder,
-    counts,
     platforms = DEFAULT_PLATFORMS,
     unratedOnly,
+    notOwnedOnly,
   } = props;
 
   const {
-    currentStatus,
-    currentAcquisition,
-    startedOnly: startedOnlyChecked,
     sortValue,
     platformValue,
     hasActiveFilters,
-    onStatusPick,
-    onStatusAll,
-    onAcquisitionPick,
-    onStartedOnlyChange,
+    onNotOwnedOnlyChange,
     onPlatformChange,
     onSortChange,
+    onMinRatingChange,
+    onClearMinRating,
+    onUnratedOnlyChange,
     onClearAll,
   } = useLibraryFiltersState({
     status,
     platform,
-    acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
   });
-
-  const totalCount = counts
-    ? Object.values(counts).reduce<number>(
-        (sum, n) => sum + (typeof n === "number" ? n : 0),
-        0
-      )
-    : undefined;
 
   return (
     <aside
       className="hidden w-56 shrink-0 flex-col gap-6 pt-1 md:flex"
       aria-label="Library filters"
     >
-      <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
-          Status
-        </p>
-        <StatusList
-          currentStatus={currentStatus}
-          counts={counts}
-          onPick={onStatusPick}
-          variant="sidebar"
-          onAll={onStatusAll}
-          totalCount={totalCount}
-        />
-      </section>
+      {status === "WANT" ? (
+        <section>
+          <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
+            Ownership
+          </p>
+          <NotOwnedOnlyToggle
+            id="sidebar-not-owned-only"
+            status={status}
+            checked={notOwnedOnly === true}
+            onChange={onNotOwnedOnlyChange}
+          />
+        </section>
+      ) : null}
 
       <section>
         <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
@@ -128,27 +103,14 @@ export function LibraryFilters(props: LibraryFiltersProps) {
         />
       </section>
 
-      <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
-          Acquisition
-        </p>
-        <AcquisitionList
-          current={currentAcquisition}
-          onPick={onAcquisitionPick}
-          variant="sidebar"
-        />
-      </section>
-
-      <section>
-        <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
-          Activity
-        </p>
-        <StartedOnlyToggle
-          id="sidebar-started-only"
-          checked={startedOnlyChecked}
-          onCheckedChange={onStartedOnlyChange}
-        />
-      </section>
+      <RatingControls
+        idPrefix="sidebar"
+        minRating={minRating}
+        unratedOnly={unratedOnly}
+        onMinRatingChange={onMinRatingChange}
+        onClearMinRating={onClearMinRating}
+        onUnratedOnlyChange={onUnratedOnlyChange}
+      />
 
       <section>
         <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">

@@ -8,7 +8,7 @@ import {
 } from "@/entities/library-item/model";
 import { importGameToLibraryFn } from "@/features/steam-import/api/import-game-to-library";
 import { calculateSmartStatus } from "@/features/steam-import/lib/calculate-smart-status";
-import { formatAbsoluteDate, formatPlaytimeMinutes } from "@/shared/lib/date";
+import { formatAbsoluteDate, formatHours } from "@/shared/lib/date";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
@@ -83,7 +83,7 @@ export function ImportGameModal({
           ...(manualIgdbId !== undefined && { manualIgdbId }),
         },
       });
-      toast.success("Added to library");
+      toast.success("Added");
       onImported?.();
       onClose();
     } catch (err) {
@@ -107,7 +107,7 @@ export function ImportGameModal({
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>
-            {showSearch ? "Select correct game" : "Import to library"}
+            {showSearch ? "Select correct game" : "Add game"}
           </DialogTitle>
           <DialogDescription className="truncate">
             {game.name}
@@ -118,8 +118,8 @@ export function ImportGameModal({
           <div className="space-y-4 overflow-hidden py-2">
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <p className="text-muted-foreground">
-                We couldn&apos;t auto-match this Steam game. Search IGDB and
-                pick the correct entry.
+                We couldn&apos;t auto-match this Steam game. Search and pick the
+                correct entry.
               </p>
             </div>
             <IgdbManualSearch
@@ -131,11 +131,9 @@ export function ImportGameModal({
           <div className="space-y-4 py-2">
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Playtime</span>
+                <span className="text-muted-foreground">Time played</span>
                 <span className="font-medium">
-                  {game.playtime
-                    ? formatPlaytimeMinutes(game.playtime)
-                    : "Never played"}
+                  {game.playtime ? formatHours(game.playtime) : "Never played"}
                 </span>
               </div>
               <div className="flex items-center justify-between">

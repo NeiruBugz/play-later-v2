@@ -1,28 +1,10 @@
 /**
- * Integration tests for getLoggableGamesWorker (Spec 025 Slice 3b).
+ * Integration tests for getLoggableGamesWorker (spec 026 slice 7, N6/N7).
  *
- * Imports the WORKER directly — not the createServerFn wrapper. See
- * savepoint-tanstack/FOOT-GUNS.md foot-gun #8: the wrapper requires the
- * TanStack Start server runtime which vitest doesn't load.
+ * Imports the WORKER directly (FOOT-GUNS #8).
  *
- * ============================================================
- * CONTRACT (locked here; changes require updating this block)
- * ============================================================
- *
- * Worker: getLoggableGamesWorker(userId: string | undefined): Promise<GetLibraryResult>
- * File:   features/compose-journal-entry/api/get-loggable-games.worker.ts
- *
- * Return shape (GetLibraryResult — delegated to getLibrary(userId, {})):
- *   {
- *     items: LibraryItemWithGame[];
- *     total: number;
- *   }
- *
- * Contract:
- *   - userId undefined → throws UnauthorizedError
- *   - userId provided, library is empty → returns { items: [], total: 0 }
- *   - userId provided, library has items → returns all items with game data
- *   - only the requesting user's items are returned (ownership isolation)
+ * Returns LoggableGame[] ({ gameId, slug, title, coverImage, status }): only
+ * the requesting user's library items, PLAYING first, then by title.
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -91,9 +73,7 @@ function makeLibraryItem(userId: string, gameId: string) {
     id: _itemCounter++,
     userId,
     gameId,
-    status: "SHELF" as const,
-    statusIsManual: false,
-    hasBeenPlayed: false,
+    status: "WANT" as const,
     acquisitionType: "DIGITAL" as const,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
@@ -110,65 +90,67 @@ describe("getLoggableGamesWorker", () => {
   });
 
   describe("given the user has an empty library", () => {
-    beforeEach(async () => {
+    it("returns an empty list", async () => {
       await db.prisma.user.create({ data: makeUser(USER_ID, "empty") });
-    });
 
-    it("returns an empty items array", async () => {
-      const result = await getLoggableGamesWorker(USER_ID);
-
-      expect(result.items).toEqual([]);
-    });
-
-    it("returns total of 0", async () => {
-      const result = await getLoggableGamesWorker(USER_ID);
-
-      expect(result.total).toBe(0);
+      expect(await getLoggableGamesWorker(USER_ID)).toEqual([]);
     });
   });
 
-  describe("given the user has library items", () => {
+  describe("given the user has library items in several statuses", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser(USER_ID, "owner") });
       await db.prisma.game.createMany({
-        data: [makeGame("a"), makeGame("b"), makeGame("c")],
+        data: [makeGame("a"), makeGame("b"), makeGame("c"), makeGame("d")],
       });
       await db.prisma.libraryItem.createMany({
         data: [
-          makeLibraryItem(USER_ID, "glg-game-a"),
-          makeLibraryItem(USER_ID, "glg-game-b"),
-          makeLibraryItem(USER_ID, "glg-game-c"),
+          {
+            ...makeLibraryItem(USER_ID, "glg-game-a"),
+            status: "WANT" as const,
+          },
+          {
+            ...makeLibraryItem(USER_ID, "glg-game-b"),
+            status: "DONE" as const,
+          },
+          {
+            ...makeLibraryItem(USER_ID, "glg-game-c"),
+            status: "PLAYING" as const,
+          },
+          {
+            ...makeLibraryItem(USER_ID, "glg-game-d"),
+            status: "PLAYING" as const,
+          },
         ],
       });
     });
 
-    it("returns all library items", async () => {
+    it("lists Playing first, then the rest by title", async () => {
       const result = await getLoggableGamesWorker(USER_ID);
 
-      expect(result.items).toHaveLength(3);
-      expect(result.total).toBe(3);
+      expect(result.map((game) => game.slug)).toEqual([
+        "glg-game-c",
+        "glg-game-d",
+        "glg-game-a",
+        "glg-game-b",
+      ]);
     });
 
-    it("includes game data (id, slug, title, coverImage) on each item", async () => {
-      const result = await getLoggableGamesWorker(USER_ID);
+    it("returns gameId, slug, title, coverImage and status on each game", async () => {
+      const [first] = await getLoggableGamesWorker(USER_ID);
 
-      for (const item of result.items) {
-        expect(item.game.id).toBeDefined();
-        expect(item.game.slug).toBeDefined();
-        expect(item.game.title).toBeDefined();
-        expect("coverImage" in item.game).toBe(true);
-      }
-    });
-
-    it("all returned items belong to the requesting user", async () => {
-      const result = await getLoggableGamesWorker(USER_ID);
-
-      expect(result.items.every((item) => item.userId === USER_ID)).toBe(true);
+      expect(first).toMatchObject({
+        gameId: "glg-game-c",
+        slug: "glg-game-c",
+        title: "GLG Game c",
+        coverImage: "/covers/glg-c.jpg",
+        status: "PLAYING",
+      });
     });
   });
 
   describe("given another user also has library items", () => {
-    beforeEach(async () => {
+    it("returns only the requesting user's games", async () => {
       await db.prisma.user.createMany({
         data: [makeUser(USER_ID, "iso1"), makeUser(OTHER_USER_ID, "iso2")],
       });
@@ -181,21 +163,10 @@ describe("getLoggableGamesWorker", () => {
           makeLibraryItem(OTHER_USER_ID, "glg-game-iso2"),
         ],
       });
-    });
 
-    it("returns only the requesting user's items", async () => {
       const result = await getLoggableGamesWorker(USER_ID);
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]!.userId).toBe(USER_ID);
-    });
-
-    it("does not include the other user's items", async () => {
-      const result = await getLoggableGamesWorker(USER_ID);
-
-      expect(result.items.some((item) => item.userId === OTHER_USER_ID)).toBe(
-        false
-      );
+      expect(result.map((game) => game.gameId)).toEqual(["glg-game-iso1"]);
     });
   });
 });

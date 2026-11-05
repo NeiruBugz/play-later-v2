@@ -24,8 +24,8 @@ vi.mock("@tanstack/react-router", () => ({
 const elements = {
   getNavLink: (name: string) => screen.getByRole("link", { name }),
   queryNavLink: (name: string) => screen.queryByRole("link", { name }),
-  getLogButton: () => screen.getByRole("button", { name: "Log a session" }),
-  queryLogButton: () => screen.queryByRole("button", { name: "Log a session" }),
+  getLogButton: () => screen.getByRole("button", { name: "Log" }),
+  queryLogButton: () => screen.queryByRole("button", { name: "Log" }),
   getAllLinks: () => screen.getAllByRole("link"),
   getNav: () => screen.getByRole("navigation"),
 };
@@ -51,6 +51,14 @@ describe("AppBottomNav", () => {
       // 4 destination links + 1 Log button
       expect(elements.getAllLinks()).toHaveLength(4);
       expect(elements.getLogButton()).toBeDefined();
+    });
+
+    it("does not use the Add game icon for the Log button", () => {
+      // eslint-disable-next-line testing-library/no-node-access
+      const logIcon = elements.getLogButton().querySelector("svg");
+      expect(logIcon?.getAttribute("class")).not.toContain(
+        "lucide-package-plus"
+      );
     });
 
     it("renders the Home link with href /dashboard as the first slot", () => {
@@ -123,6 +131,20 @@ describe("AppBottomNav", () => {
     });
   });
 
+  describe("given the user taps the visible Log label", () => {
+    beforeEach(async () => {
+      currentPath = "/library";
+      render(<AppBottomNav />);
+      await userEvent.click(screen.getByText("Log"));
+    });
+
+    it("opens the Log form just like the round button", () => {
+      expect(mockNavigate).toHaveBeenCalledOnce();
+      const { search } = mockNavigate.mock.calls[0][0];
+      expect(search({})).toMatchObject({ action: "log-session" });
+    });
+  });
+
   describe("given the active destination has a non-color active indicator", () => {
     beforeEach(() => {
       currentPath = "/journal";
@@ -152,13 +174,14 @@ describe("AppBottomNav", () => {
     });
 
     it("the Log button is a ≥44px circular FAB", () => {
-      const logButton = elements.getLogButton();
+      // eslint-disable-next-line testing-library/no-node-access
+      const circle = elements.getLogButton().firstElementChild!;
       // The Log FAB is a 56px circle (size-14) — a true square, satisfying the ≥44px tap-target requirement.
       expect(
-        logButton.className.includes("size-14") ||
-          logButton.className.includes("h-14")
+        circle.className.includes("size-14") ||
+          circle.className.includes("h-14")
       ).toBe(true);
-      expect(logButton.className.includes("rounded-full")).toBe(true);
+      expect(circle.className.includes("rounded-full")).toBe(true);
     });
   });
 });

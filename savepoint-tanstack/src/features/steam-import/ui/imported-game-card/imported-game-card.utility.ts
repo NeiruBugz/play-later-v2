@@ -24,7 +24,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  *
  * This is the context that explains the smart-status suggestion: a game only
  * suggests PLAYING when it was played within the last 7 days (see
- * `calculate-smart-status.ts`). Surfacing the date makes the SHELF-vs-PLAYING
+ * `calculate-smart-status.ts`). Surfacing the date makes the Want-vs-Playing
  * split self-evident instead of arbitrary.
  */
 export function formatLastPlayed(

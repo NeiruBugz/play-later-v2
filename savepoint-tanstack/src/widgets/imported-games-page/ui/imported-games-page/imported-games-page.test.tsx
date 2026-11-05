@@ -88,29 +88,29 @@ const elements = {
     screen.queryByText("Connect Steam to see your games"),
   queryEmptyNoGames: () => screen.queryByText("No games imported yet"),
   querySyncButton: () =>
-    screen.queryByRole("button", { name: /Sync from Steam/ }),
+    screen.queryByRole("button", { name: /Import from Steam/ }),
   queryConnectAction: () =>
     screen.queryByRole("link", { name: "Connect Steam" }) ??
     screen.queryByRole("button", { name: "Connect Steam" }),
   queryUnmatchedAlert: () =>
-    screen.queryByText("Some games need a manual IGDB match"),
+    screen.queryByText("Some games need a manual match"),
   queryAddButton: (name: string) =>
-    screen.queryByRole("button", { name: `Add ${name} to library` }),
+    screen.queryByRole("button", { name: `Add ${name}` }),
   querySearchIgdbButton: (name: string) =>
-    screen.queryByRole("button", { name: `Search IGDB for ${name}` }),
-  queryImportDialogTitle: () => screen.queryByText("Import to library"),
+    screen.queryByRole("button", { name: `Search for ${name}` }),
+  queryImportDialogTitle: () => screen.queryByText("Add game"),
   querySearchDialogTitle: () => screen.queryByText("Select correct game"),
   queryDismissButton: (name: string) =>
-    screen.queryByRole("button", { name: `Dismiss ${name}` }),
+    screen.queryByRole("button", { name: `Remove ${name}` }),
   getSearchInput: () =>
-    screen.getByRole("textbox", { name: "Search imported games" }),
+    screen.getByRole("textbox", { name: "Search Steam games" }),
   getSortSelect: () => screen.getByRole("combobox", { name: "Sort games" }),
   getPlaytimeStatusSelect: () =>
-    screen.getByRole("combobox", { name: "Filter by playtime status" }),
+    screen.getByRole("combobox", { name: "Filter by time played status" }),
   getPlatformSelect: () =>
     screen.getByRole("combobox", { name: "Filter by platform" }),
   getShowDismissedCheckbox: () =>
-    screen.getByRole("checkbox", { name: "Show dismissed games" }),
+    screen.getByRole("checkbox", { name: "Show removed games" }),
   queryRemoveFilterChip: (label: string) =>
     screen.queryByRole("button", { name: `Remove ${label} filter` }),
   queryNoMatchesEmptyState: () => screen.queryByText("No matches"),
@@ -168,9 +168,9 @@ describe("ImportedGamesPage", () => {
       expect(elements.queryEmptyNoGames()).not.toBeNull();
     });
 
-    it("renders a Sync-from-Steam CTA", () => {
+    it("renders a Import-from-Steam CTA", () => {
       expect(
-        screen.queryByRole("button", { name: "Sync from Steam" })
+        screen.queryByRole("button", { name: "Import from Steam" })
       ).not.toBeNull();
     });
   });
@@ -232,9 +232,7 @@ describe("ImportedGamesPage", () => {
 
     it("fires the removed-from-list toast and invalidates the router", async () => {
       await waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledWith(
-          "Removed from list"
-        );
+        expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Removed");
       });
       expect(invalidateMock).toHaveBeenCalled();
     });

@@ -4,6 +4,7 @@ import {
   House,
   Library,
   LogOut,
+  PackagePlus,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
@@ -39,7 +40,7 @@ export interface AppSidebarProps {
 const SIDEBAR_COLLAPSED_KEY = "sp:sidebar-collapsed";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/dashboard", icon: House },
+  { label: "Home", to: "/dashboard", icon: House },
   { label: "Library", to: "/library", icon: Library },
   { label: "Journal", to: "/journal", icon: BookOpen },
   { label: "Profile", to: "/profile", icon: User },
@@ -146,13 +147,23 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
         <button
           type="button"
-          aria-label="Log a session"
+          aria-label="Log"
           onClick={openLogSession}
           className={`bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
         >
           <BookOpen size={16} aria-hidden="true" />
-          {!collapsed && "Log a session"}
+          {!collapsed && "Log"}
         </button>
+
+        <Link
+          to="."
+          search={(prev) => ({ ...prev, action: "add-game" as const })}
+          aria-label="Add game"
+          className={`border-border hover:bg-accent flex w-full items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
+        >
+          <PackagePlus size={16} aria-hidden="true" />
+          {!collapsed && "Add game"}
+        </Link>
       </div>
 
       <nav className="mt-4 flex-1 overflow-y-auto px-2">

@@ -1,4 +1,4 @@
-import { BookOpen, Plus, type LucideIcon } from "lucide-react";
+import { BookOpen, type LucideIcon } from "lucide-react";
 
 import { CommandGroup, CommandItem } from "@/shared/ui/command";
 
@@ -11,31 +11,16 @@ type QuickAction = {
   onSelect: () => void;
 };
 
-/**
- * Two quick actions, ported from canonical's
- * `savepoint-app/features/command-palette/ui/palette-quick-actions-group.tsx`.
- *
- * Divergence: canonical's "New journal entry" navigates to `/journal/new`,
- * which tanstack doesn't have. We route to `/journal` (the index) and let
- * the user pick "Add entry" there. See DIVERGENCES.md → Slice 17.
- */
 export function PaletteQuickActionsGroup({
   query,
-  onFocusSearch,
-  onNewJournalEntry,
+  onNewNote,
 }: PaletteQuickActionsGroupProps) {
   const actions: QuickAction[] = [
     {
-      id: "add-game",
-      label: "Add game to library",
-      icon: Plus,
-      onSelect: onFocusSearch,
-    },
-    {
-      id: "new-journal",
-      label: "New journal entry",
+      id: "new-note",
+      label: "New note",
       icon: BookOpen,
-      onSelect: onNewJournalEntry,
+      onSelect: onNewNote,
     },
   ];
 

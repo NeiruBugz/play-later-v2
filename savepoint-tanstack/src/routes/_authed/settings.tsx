@@ -40,16 +40,16 @@ function SettingsLayout() {
 
   if (!isDesktop) {
     return (
-      <main className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6">
         {backLink}
         <PageHeader eyebrow="// SETTINGS" title="Settings" />
         {activeSegment === undefined ? <SettingsList /> : <Outlet />}
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6">
       {backLink}
       <PageHeader eyebrow="// SETTINGS" title="Settings" />
       <div className="grid gap-6 md:grid-cols-[200px_1fr]">
@@ -60,6 +60,6 @@ function SettingsLayout() {
           <Outlet />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

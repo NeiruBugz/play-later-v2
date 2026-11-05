@@ -52,33 +52,34 @@ model verification {
 }
 
 model user {
-  id                      String                 @id @default(cuid())
-  name                    String?
-  email                   String?                @unique
-  emailVerified           Boolean                @default(false)
-  image                   String?
-  password                String?
-  username                String?                @unique
-  usernameNormalized      String?                @unique
-  isPublicProfile         Boolean                @default(false)
-  profileSetupCompletedAt DateTime?
-  onboardingDismissedAt   DateTime?
-  createdAt               DateTime               @default(now())
-  updatedAt               DateTime               @updatedAt
-  steamProfileURL         String?
-  steamId64               String?
-  steamUsername           String?
-  steamAvatar             String?
-  steamConnectedAt        DateTime?
-  account                 account[]
-  session                 session[]
-  LibraryItem             LibraryItem[]
-  Review                  Review[]
-  JournalEntry            JournalEntry[]
-  IgnoredImportedGames    IgnoredImportedGames[]
-  ImportedGame            ImportedGame[]
-  followers               Follow[]               @relation("UserIsFollowed")
-  following               Follow[]               @relation("UserFollows")
+  id                       String                 @id @default(cuid())
+  name                     String?
+  email                    String?                @unique
+  emailVerified            Boolean                @default(false)
+  image                    String?
+  password                 String?
+  username                 String?                @unique
+  usernameNormalized       String?                @unique
+  isPublicProfile          Boolean                @default(false)
+  profileSetupCompletedAt  DateTime?
+  onboardingDismissedAt    DateTime?
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  steamProfileURL          String?
+  steamId64                String?
+  steamUsername            String?
+  steamAvatar              String?
+  steamConnectedAt         DateTime?
+  statusModelNoticePending Boolean                @default(false)
+  account                  account[]
+  session                  session[]
+  LibraryItem              LibraryItem[]
+  Review                   Review[]
+  JournalEntry             JournalEntry[]
+  IgnoredImportedGames     IgnoredImportedGames[]
+  ImportedGame             ImportedGame[]
+  followers                Follow[]               @relation("UserIsFollowed")
+  following                Follow[]               @relation("UserFollows")
 }
 
 // ----- Application Models ------//
@@ -108,25 +109,32 @@ model Game {
 }
 
 model LibraryItem {
-  id              Int               @id @default(autoincrement())
-  status          LibraryItemStatus @default(SHELF)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  statusChangedAt DateTime?
-  platform        String?
-  userId          String
-  acquisitionType AcquisitionType   @default(DIGITAL)
-  gameId          String
-  game            Game              @relation("GameLibraryItems", fields: [gameId], references: [id], onDelete: Cascade)
-  User            user              @relation(fields: [userId], references: [id])
-  startedAt       DateTime?
-  completedAt     DateTime?
-  hasBeenPlayed   Boolean           @default(false)
-  rating          Int?
-  statusIsManual  Boolean           @default(false)
-  JournalEntry    JournalEntry[]
-  playthroughs    Playthrough[]
+  id                      Int               @id @default(autoincrement())
+  status                  LibraryItemStatus @default(WANT)
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  statusChangedAt         DateTime?
+  platform                String?
+  userId                  String
+  acquisitionType         AcquisitionType   @default(DIGITAL)
+  gameId                  String
+  game                    Game              @relation("GameLibraryItems", fields: [gameId], references: [id], onDelete: Cascade)
+  User                    user              @relation(fields: [userId], references: [id])
+  startedAt               DateTime?
+  completedAt             DateTime?
+  hasBeenPlayed           Boolean           @default(false)
+  rating                  Int?
+  statusIsManual          Boolean           @default(false)
+  upNextPosition          Int?
+  isOwned                 Boolean           @default(true)
+  doneOutcome             DoneOutcome?
+  whyPromptDismissedAt    DateTime?
+  stayedPromptDismissedAt DateTime?
+  JournalEntry            JournalEntry[]
+  playthroughs            Playthrough[]
 
+  @@unique([userId, gameId])
+  @@unique([userId, upNextPosition])
   @@index([userId, status])
   @@index([userId, platform])
   @@index([userId, createdAt])
@@ -159,6 +167,7 @@ model JournalEntry {
   mood          JournalMood?
   playSession   Int?
   visibility    JournalVisibility @default(PRIVATE)
+  prompt        JournalPrompt?
 
   userId        String
   gameId        String?
@@ -240,11 +249,19 @@ enum Storefront {
 }
 
 enum LibraryItemStatus {
-  WISHLIST
-  SHELF
-  UP_NEXT
+  WANT
   PLAYING
-  PLAYED
+  DONE
+}
+
+enum DoneOutcome {
+  FINISHED
+  LET_GO
+}
+
+enum JournalPrompt {
+  WHY
+  STAYED
 }
 
 enum AcquisitionType {

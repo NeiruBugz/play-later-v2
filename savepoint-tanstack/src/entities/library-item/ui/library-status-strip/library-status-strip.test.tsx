@@ -13,11 +13,9 @@ const elements = {
 describe("LibraryStatusStrip", () => {
   describe("given each LibraryItemStatus value", () => {
     it.each([
+      ["WANT", "Want"],
       ["PLAYING", "Playing"],
-      ["PLAYED", "Played"],
-      ["UP_NEXT", "Up Next"],
-      ["SHELF", "Shelf"],
-      ["WISHLIST", "Wishlist"],
+      ["DONE", "Done"],
     ] as const)(
       "renders %s as the human label %s with data-status attribute",
       (status: LibraryItemStatus, label: string) => {

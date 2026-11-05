@@ -1,20 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronDown } from "lucide-react";
 
-import { getStatusEntry, getStatusLabel } from "@/entities/library-item";
+import { StatusControl } from "@/entities/library-item";
 import { Button } from "@/shared/ui/button";
 
 import type { GameDetailActionBarProps } from "./game-detail-action-bar.type";
 
 export function GameDetailActionBar({
   gameSlug,
-  gameStatus,
+  libraryStatus,
   viewerUserId,
-  onStatusClick,
 }: GameDetailActionBarProps) {
   const navigate = useNavigate();
 
-  if (!viewerUserId) return null;
+  if (!viewerUserId || !libraryStatus) return null;
 
   function openLogSession() {
     void navigate({
@@ -27,45 +25,20 @@ export function GameDetailActionBar({
     });
   }
 
-  const statusEntry = gameStatus ? getStatusEntry(gameStatus) : null;
-  const StatusIcon = statusEntry?.icon ?? null;
-  const statusLabel = gameStatus ? getStatusLabel(gameStatus) : null;
-
   return (
     <div
       data-testid="game-detail-action-bar"
-      className="pb-safe-nav bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t px-4 pt-3 backdrop-blur-sm md:hidden"
+      className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-(--bottom-nav-height) z-40 flex items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur-sm md:hidden"
     >
-      {gameStatus && statusEntry ? (
-        <button
-          type="button"
-          aria-label={`Change library status: ${statusLabel}`}
-          onClick={onStatusClick}
-          className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-semibold"
-          style={{
-            borderColor: `color-mix(in oklch, var(--status-${statusEntry.badgeVariant}) 40%, var(--border))`,
-            backgroundColor: `color-mix(in oklch, var(--status-${statusEntry.badgeVariant}) 15%, transparent)`,
-          }}
-        >
-          {StatusIcon ? (
-            <StatusIcon
-              className="h-4 w-4"
-              style={{ color: `var(--status-${statusEntry.badgeVariant})` }}
-              aria-hidden="true"
-            />
-          ) : null}
-          <span>{statusLabel}</span>
-          <ChevronDown
-            className="text-muted-foreground h-4 w-4"
-            aria-hidden="true"
-          />
-        </button>
-      ) : (
-        <span />
-      )}
+      <StatusControl
+        status={libraryStatus.status}
+        onChange={(to) => void libraryStatus.setStatus(to)}
+        disabled={libraryStatus.isPending}
+        className="py-2"
+      />
 
       <Button className="h-11 flex-1" onClick={openLogSession}>
-        Log session
+        Log time
       </Button>
     </div>
   );

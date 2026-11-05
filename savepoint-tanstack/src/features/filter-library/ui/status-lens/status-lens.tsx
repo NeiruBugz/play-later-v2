@@ -1,7 +1,7 @@
 import {
-  STATUS_ENTRIES,
+  getTotalCount,
+  STATUS_FILTER_ENTRIES,
   useLibraryFiltersState,
-  type LibraryAcquisition,
   type LibrarySortBy,
   type LibrarySortOrder,
   type LibraryStatus,
@@ -34,39 +34,32 @@ export function StatusLens({
   status,
   counts,
   platform,
-  acquisition,
-  startedOnly,
   minRating,
   unratedOnly,
+  notOwnedOnly,
   sortBy,
   sortOrder,
 }: StatusLensProps) {
-  // StatusLensProps widens status/acquisition to `string | undefined` so callers
+  // StatusLensProps widens status to `string | undefined` so callers
   // don't need to assert to the narrower unions. Cast back here before the hook.
   const { onStatusPick, onStatusAll } = useLibraryFiltersState({
     status: status as LibraryStatus | undefined,
     platform,
-    acquisition: acquisition as LibraryAcquisition | undefined,
-    startedOnly,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy: sortBy as LibrarySortBy,
     sortOrder: sortOrder as LibrarySortOrder,
   });
 
-  const totalCount = counts
-    ? Object.values(counts).reduce<number>(
-        (sum, n) => sum + (typeof n === "number" ? n : 0),
-        0
-      )
-    : undefined;
+  const totalCount = getTotalCount(counts);
 
   const chips: StatusChip[] = [
     { value: "__all__", label: "All", count: totalCount },
-    ...STATUS_ENTRIES.map((entry) => ({
+    ...STATUS_FILTER_ENTRIES.map((entry) => ({
       value: entry.value,
       label: entry.label,
-      count: counts?.[entry.value as LibraryStatus],
+      count: counts?.[entry.value],
       dotVariant: entry.badgeVariant,
     })),
   ];

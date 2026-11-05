@@ -1,0 +1,1 @@
+export const MIN_GAME_SEARCH_QUERY_LENGTH = 3;

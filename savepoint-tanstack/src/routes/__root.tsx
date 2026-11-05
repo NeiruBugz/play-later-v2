@@ -16,13 +16,16 @@ import "@/app/dev-console-error-expander";
 
 import { SavepointThemeProvider } from "@/app/providers/theme-provider";
 import { getCurrentUserFn } from "@/entities/session/api";
+import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
-import { WhatsNewModal } from "@/features/whats-new";
+import { StatusModelNotice, WhatsNewModal } from "@/features/whats-new";
 import { Toaster } from "@/shared/ui/sonner";
+import { AddFlowProvider } from "@/widgets/add-flow";
 import { AppBottomNav } from "@/widgets/app-bottom-nav";
 import { AppMobileTopbar } from "@/widgets/app-mobile-topbar";
 import { AppShell } from "@/widgets/app-shell";
 import { AppSidebar } from "@/widgets/app-sidebar";
+import { DoneFlowProvider } from "@/widgets/done-flow";
 import { GlobalActionHost } from "@/widgets/global-action-host";
 
 import appCss from "../styles.css?url";
@@ -57,7 +60,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "A library, not a backlog. Curate your collection across every platform and journal what made each game matter.",
+          "A library, not a backlog. Curate your library across every platform and journal what made each game matter.",
       },
       { property: "og:title", content: "SavePoint" },
       {
@@ -124,7 +127,7 @@ export const Route = createRootRoute({
 });
 
 export function RootShell() {
-  const { user } = Route.useLoaderData();
+  const { user, statusModelNoticePending } = Route.useLoaderData();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -141,16 +144,30 @@ export function RootShell() {
   return (
     <QueryClientProvider client={queryClient}>
       <SavepointThemeProvider defaultTheme="system">
-        <AppShell
-          sidebar={user ? <AppSidebar user={user} /> : undefined}
-          mobileTopbar={user ? <AppMobileTopbar /> : undefined}
-          mobileBottomNav={user ? <AppBottomNav /> : undefined}
-        >
-          <Outlet />
-        </AppShell>
-        {user ? <CommandPalette /> : null}
-        {user ? <GlobalActionHost /> : null}
-        {user ? <WhatsNewModal /> : null}
+        <AddFlowProvider>
+          <DoneFlowProvider>
+            <AppShell
+              sidebar={user ? <AppSidebar user={user} /> : undefined}
+              mobileTopbar={user ? <AppMobileTopbar /> : undefined}
+              mobileBottomNav={user ? <AppBottomNav /> : undefined}
+            >
+              <Outlet />
+            </AppShell>
+            {user ? (
+              <CommandPalette
+                wrapBody={(body) => (
+                  <InlineAddConfirmationHost>{body}</InlineAddConfirmationHost>
+                )}
+                renderAddAction={({ igdbId, name }) => (
+                  <AddGameAction game={{ igdbId, name, library: null }} />
+                )}
+              />
+            ) : null}
+            {user ? <GlobalActionHost /> : null}
+          </DoneFlowProvider>
+        </AddFlowProvider>
+        {user && statusModelNoticePending ? <StatusModelNotice /> : null}
+        {user && !statusModelNoticePending ? <WhatsNewModal /> : null}
         <Toaster />
         <TanStackDevtools
           config={{

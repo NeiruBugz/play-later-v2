@@ -37,7 +37,7 @@ function FollowingListPage() {
   const displayName = profile.name ?? profile.username ?? "User";
 
   return (
-    <main className="space-y-md container mx-auto max-w-2xl px-4 py-6">
+    <div className="space-y-md container mx-auto max-w-2xl px-4 py-6">
       <div className="space-y-1">
         <Button asChild variant="ghost" size="sm">
           <Link to="/u/$username" params={{ username: profile.username ?? "" }}>
@@ -54,17 +54,17 @@ function FollowingListPage() {
         entries={list.following}
         total={list.total}
       />
-    </main>
+    </div>
   );
 }
 
 function ListNotFound() {
   return (
-    <main className="container mx-auto px-4 py-16 text-center">
+    <div className="container mx-auto px-4 py-16 text-center">
       <h1 className="heading-lg mb-2">Profile not found</h1>
       <Button asChild variant="outline">
         <Link to="/">Go home</Link>
       </Button>
-    </main>
+    </div>
   );
 }

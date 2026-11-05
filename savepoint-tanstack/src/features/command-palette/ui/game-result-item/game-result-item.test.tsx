@@ -1,17 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Command, CommandList } from "@/shared/ui/command";
 
-import { quickAddToLibraryFn } from "../../api/quick-add-to-library-fn";
-import { removeLibraryItemFn } from "../../api/remove-library-item-fn";
 import { GameResultItem } from "./game-result-item";
-
-const invalidate = vi.fn();
+import type { GameResultItemProps } from "./game-result-item.type";
 
 vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ invalidate }),
   Link: ({
     to,
     params,
@@ -38,22 +33,6 @@ vi.mock("@tanstack/react-router", () => ({
   },
 }));
 
-vi.mock("../../api/quick-add-to-library-fn", () => ({
-  quickAddToLibraryFn: vi.fn(),
-}));
-vi.mock("../../api/remove-library-item-fn", () => ({
-  removeLibraryItemFn: vi.fn(),
-}));
-
-const showUndoToast = vi.fn();
-vi.mock("@/shared/ui/undo-toast", () => ({
-  showUndoToast: (opts: { message: string; onUndo: () => void }) =>
-    showUndoToast(opts),
-}));
-vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
-}));
-
 const elements = {
   getRowByName: (name: string) => screen.getByText(name),
   queryYear: (year: string) => screen.queryByText(year),
@@ -61,13 +40,7 @@ const elements = {
     document.querySelector(
       'img[src*="images.igdb.com"]'
     ) as HTMLImageElement | null,
-  getAddToUpNextButton: (name: string) =>
-    screen.getByRole("button", { name: `Add ${name} to Up Next` }),
-};
-
-const actions = {
-  clickAddToUpNext: (name: string) =>
-    userEvent.click(elements.getAddToUpNextButton(name)),
+  queryAddSlot: () => screen.queryByTestId("add-slot"),
 };
 
 const GAME = {
@@ -78,34 +51,34 @@ const GAME = {
   releaseYear: 2017,
 };
 
-type Overrides = {
-  igdbId?: number;
-  coverImageId?: string | null;
-  name?: string;
-  slug?: string;
-  releaseYear?: number | null;
-};
+type Overrides = Partial<
+  Pick<
+    GameResultItemProps,
+    "coverImageId" | "releaseYear" | "library" | "renderAddAction"
+  >
+>;
 
 function renderRow(overrides: Overrides = {}) {
   const onAfterSelect = vi.fn();
-  const props = {
-    igdbId: overrides.igdbId ?? GAME.igdbId,
-    coverImageId:
-      "coverImageId" in overrides ? overrides.coverImageId! : GAME.coverImageId,
-    name: overrides.name ?? GAME.name,
-    slug: overrides.slug ?? GAME.slug,
-    releaseYear:
-      "releaseYear" in overrides ? overrides.releaseYear! : GAME.releaseYear,
-  };
   render(
     <Command>
       <CommandList>
         <GameResultItem
-          igdbId={props.igdbId}
-          coverImageId={props.coverImageId}
-          name={props.name}
-          slug={props.slug}
-          releaseYear={props.releaseYear}
+          igdbId={GAME.igdbId}
+          coverImageId={
+            "coverImageId" in overrides
+              ? overrides.coverImageId!
+              : GAME.coverImageId
+          }
+          name={GAME.name}
+          slug={GAME.slug}
+          releaseYear={
+            "releaseYear" in overrides
+              ? overrides.releaseYear!
+              : GAME.releaseYear
+          }
+          library={overrides.library}
+          renderAddAction={overrides.renderAddAction}
           onAfterSelect={onAfterSelect}
         />
       </CommandList>
@@ -114,21 +87,37 @@ function renderRow(overrides: Overrides = {}) {
   return { onAfterSelect };
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  vi.mocked(quickAddToLibraryFn).mockResolvedValue({ id: 77 });
-  vi.mocked(removeLibraryItemFn).mockResolvedValue(undefined);
-});
+const addSlot: GameResultItemProps["renderAddAction"] = ({ igdbId, name }) => (
+  <button type="button" data-testid="add-slot">
+    slot {igdbId} {name}
+  </button>
+);
 
 describe("GameResultItem", () => {
+  describe("given a game queued in Up Next", () => {
+    it("shows 'Up Next #3' for a Want game", () => {
+      renderRow({ library: { status: "WANT", upNextPosition: 3 } });
+      expect(screen.getByText("Up Next #3")).toBeDefined();
+    });
+
+    it("shows 'Replay' for a Done game", () => {
+      renderRow({ library: { status: "DONE", upNextPosition: 1 } });
+      expect(screen.getByText("Replay")).toBeDefined();
+    });
+
+    it("shows no marker for a game outside the queue", () => {
+      renderRow({ library: { status: "WANT", upNextPosition: null } });
+      expect(screen.queryByTestId("queue-marker")).toBeNull();
+    });
+  });
+
   describe("given a game with cover, name, slug, and release year", () => {
     beforeEach(() => {
       renderRow();
     });
 
     it("renders an anchor pointing at /games/$slug", () => {
-      const row = elements.getRowByName(GAME.name);
-      const anchor = row.closest("a");
+      const anchor = elements.getRowByName(GAME.name).closest("a");
       expect(anchor?.getAttribute("href")).toBe(`/games/${GAME.slug}`);
     });
 
@@ -141,140 +130,49 @@ describe("GameResultItem", () => {
     it("renders the release year", () => {
       expect(elements.queryYear("2017")).not.toBeNull();
     });
-
-    it("offers an Add to Up Next quick action", () => {
-      expect(elements.getAddToUpNextButton(GAME.name)).toBeInTheDocument();
-    });
   });
 
-  describe("given the user clicks Add to Up Next", () => {
-    let onAfterSelect: ReturnType<typeof vi.fn>;
-
-    beforeEach(async () => {
-      ({ onAfterSelect } = renderRow());
-      await actions.clickAddToUpNext(GAME.name);
-    });
-
-    it("adds the game to the library by its IGDB id", () => {
-      expect(quickAddToLibraryFn).toHaveBeenCalledWith({
-        data: { igdbId: GAME.igdbId },
-      });
-    });
-
-    it("surfaces an Up Next confirmation with undo", () => {
-      expect(showUndoToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: `Added "${GAME.name}" to Up Next`,
-        })
+  describe("given a game outside the library and an injected add slot", () => {
+    it("renders the slot with the game's IGDB id and name", () => {
+      renderRow({ renderAddAction: addSlot });
+      expect(elements.queryAddSlot()?.textContent).toContain(
+        `slot ${GAME.igdbId} ${GAME.name}`
       );
     });
 
-    it("closes the palette after a successful add", () => {
-      expect(onAfterSelect).toHaveBeenCalled();
+    it("keeps the palette open when the slot is used", () => {
+      const { onAfterSelect } = renderRow({ renderAddAction: addSlot });
+      elements.queryAddSlot()?.click();
+      expect(onAfterSelect).not.toHaveBeenCalled();
     });
   });
 
-  describe("given the user undoes the add", () => {
-    beforeEach(async () => {
-      renderRow();
-      await actions.clickAddToUpNext(GAME.name);
-      const opts = showUndoToast.mock.calls[0]?.[0] as {
-        onUndo: () => void;
-      };
-      opts.onUndo();
+  describe("given a game already in the library", () => {
+    beforeEach(() => {
+      renderRow({
+        library: { status: "PLAYING", upNextPosition: null },
+        renderAddAction: addSlot,
+      });
     });
 
-    it("removes the just-added library item", () => {
-      expect(removeLibraryItemFn).toHaveBeenCalledWith({
-        data: { itemId: 77 },
-      });
+    it("shows In library with its status instead of the add control", () => {
+      expect(screen.getByText("In library")).toBeDefined();
+      expect(screen.getByLabelText("Status: Playing")).toBeDefined();
+      expect(elements.queryAddSlot()).toBeNull();
     });
   });
 
   describe("given a game without a release year", () => {
-    beforeEach(() => {
-      renderRow({ releaseYear: null });
-    });
-
     it("does not render any year text", () => {
+      renderRow({ releaseYear: null });
       expect(elements.queryYear("2017")).toBeNull();
     });
   });
 
   describe("given a game without a cover image id", () => {
-    beforeEach(() => {
+    it("renders no cover image", () => {
       renderRow({ coverImageId: null });
-    });
-
-    it("renders no IGDB image", () => {
       expect(elements.queryCover()).toBeNull();
-    });
-  });
-
-  describe("given quickAddToLibraryFn rejects with an Error", () => {
-    beforeEach(async () => {
-      vi.mocked(quickAddToLibraryFn).mockRejectedValue(new Error("Add failed"));
-      renderRow();
-      await actions.clickAddToUpNext(GAME.name);
-    });
-
-    it("shows the error message via toast.error", async () => {
-      const { toast } = await import("sonner");
-      expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Add failed");
-    });
-  });
-
-  describe("given quickAddToLibraryFn rejects with a non-Error", () => {
-    beforeEach(async () => {
-      vi.mocked(quickAddToLibraryFn).mockRejectedValue("raw");
-      renderRow();
-      await actions.clickAddToUpNext(GAME.name);
-    });
-
-    it("shows a fallback error message via toast.error", async () => {
-      const { toast } = await import("sonner");
-      expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Failed to add game");
-    });
-  });
-
-  describe("given the undo action succeeds", () => {
-    beforeEach(async () => {
-      renderRow();
-      await actions.clickAddToUpNext(GAME.name);
-      const opts = showUndoToast.mock.calls[0]?.[0] as {
-        onUndo: () => void;
-      };
-      opts.onUndo();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    it("fires a success toast with 'Removed'", async () => {
-      const { toast } = await import("sonner");
-      await vi.waitFor(() => {
-        expect(vi.mocked(toast.success)).toHaveBeenCalledWith("Removed", {
-          duration: 1000,
-        });
-      });
-    });
-  });
-
-  describe("given the undo removeLibraryItemFn rejects with a non-Error", () => {
-    beforeEach(async () => {
-      renderRow();
-      await actions.clickAddToUpNext(GAME.name);
-      vi.mocked(removeLibraryItemFn).mockRejectedValue("raw undo error");
-      const opts = showUndoToast.mock.calls[0]?.[0] as {
-        onUndo: () => void;
-      };
-      opts.onUndo();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    it("shows a fallback error message via toast.error for non-Error undo rejection", async () => {
-      const { toast } = await import("sonner");
-      await vi.waitFor(() => {
-        expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Failed to undo");
-      });
     });
   });
 });

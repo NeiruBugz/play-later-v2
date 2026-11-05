@@ -1,19 +1,28 @@
 import { prisma } from "@/shared/lib/db.server";
-import { NotFoundError, UnauthorizedError } from "@/shared/lib/errors";
+import {
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "@/shared/lib/errors";
 import { mapP2025ToNotFound } from "@/shared/lib/prisma";
 
-import { Prisma } from "../../../../shared/lib/prisma/client.ts";
+import type { Prisma } from "../../../../shared/lib/prisma/client.ts";
 import {
-  JOURNAL_ENTRY_GAME_SELECT,
+  JOURNAL_ENTRY_READ_ARGS,
   type JournalTimelineEntry,
 } from "../model/types";
+import { TIME_NEEDS_GAME_CODE } from "./create-journal-entry.server";
 
 export type UpdateJournalEntryInput = {
   content?: string;
-  kind?: "QUICK" | "REFLECTION";
-  gameId?: string | null;
+  playedMinutes?: number | null;
 };
 
+/**
+ * Edits a note's text and time. The result must still have text or time, time
+ * needs the note's game, and `createdAt` never changes (so the note keeps its
+ * date and place). Editing time does not touch any play's `playtimeMinutes`.
+ */
 export async function updateJournalEntry(
   userId: string,
   entryId: string,
@@ -24,7 +33,7 @@ export async function updateJournalEntry(
   });
 
   if (!existing) {
-    throw new NotFoundError("Journal entry not found", { entryId });
+    throw new NotFoundError("Note not found", { entryId });
   }
 
   if (existing.userId !== userId) {
@@ -33,31 +42,36 @@ export async function updateJournalEntry(
     });
   }
 
+  const content =
+    input.content !== undefined ? input.content.trim() : existing.content;
+  const playedMinutes =
+    input.playedMinutes !== undefined
+      ? input.playedMinutes && input.playedMinutes > 0
+        ? input.playedMinutes
+        : null
+      : existing.playedMinutes;
+
+  if (!content && !playedMinutes) {
+    throw new ValidationError("Add a note or the time you played");
+  }
+
+  if (playedMinutes && !existing.gameId) {
+    throw new ValidationError("Choose a game to log time.", {
+      code: TIME_NEEDS_GAME_CODE,
+    });
+  }
+
   const data: Prisma.JournalEntryUncheckedUpdateInput = {};
-  if (input.content !== undefined) data.content = input.content;
-  if (input.kind !== undefined) data.kind = input.kind;
-  if (input.gameId !== undefined) data.gameId = input.gameId;
+  if (input.content !== undefined) data.content = content;
+  if (input.playedMinutes !== undefined) data.playedMinutes = playedMinutes;
 
   try {
     return await prisma.journalEntry.update({
       where: { id: entryId },
       data,
-      include: { game: { select: JOURNAL_ENTRY_GAME_SELECT } },
+      ...JOURNAL_ENTRY_READ_ARGS,
     });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2003"
-    ) {
-      // Same Prisma 7 meta-probe as createJournalEntry — see that file.
-      const probe = JSON.stringify(error.meta ?? {}).toLowerCase();
-
-      if (probe.includes("game")) {
-        throw new NotFoundError("Referenced game does not exist", {
-          gameId: input.gameId ?? null,
-        });
-      }
-    }
-    mapP2025ToNotFound(error, "Journal entry not found", { entryId });
+    mapP2025ToNotFound(error, "Note not found", { entryId });
   }
 }

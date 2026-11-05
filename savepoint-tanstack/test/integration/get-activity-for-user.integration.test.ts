@@ -61,19 +61,14 @@ function makeLibraryItem(
   userId: string,
   gameId: string,
   opts: {
-    status?: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
+    status?: "WANT" | "PLAYING" | "DONE";
     createdAt?: Date;
   } = {}
 ) {
   return {
     userId,
     gameId,
-    status: (opts.status ?? "SHELF") as
-      | "WISHLIST"
-      | "SHELF"
-      | "UP_NEXT"
-      | "PLAYING"
-      | "PLAYED",
+    status: opts.status ?? "WANT",
     acquisitionType: "DIGITAL" as const,
     createdAt: opts.createdAt ?? new Date("2024-06-01T00:00:00.000Z"),
     updatedAt: opts.createdAt ?? new Date("2024-06-01T00:00:00.000Z"),
@@ -101,7 +96,7 @@ beforeEach(async () => {
   });
   await db.prisma.libraryItem.create({
     data: makeLibraryItem("gafu-user-alice", "gafu-game-b", {
-      status: "PLAYED",
+      status: "DONE",
       createdAt: new Date("2024-06-02T10:00:00.000Z"),
     }),
   });
@@ -109,7 +104,7 @@ beforeEach(async () => {
   // bob has one item.
   await db.prisma.libraryItem.create({
     data: makeLibraryItem("gafu-user-bob", "gafu-game-c", {
-      status: "SHELF",
+      status: "WANT",
       createdAt: new Date("2024-06-03T10:00:00.000Z"),
     }),
   });

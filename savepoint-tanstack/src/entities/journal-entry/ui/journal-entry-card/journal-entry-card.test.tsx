@@ -20,11 +20,9 @@ const onSelect = vi.fn();
 
 const entry: JournalEntryCardEntry = {
   id: "entry-1",
-  kind: "QUICK",
-  title: null,
   content: "Some content here.",
+  playedMinutes: null,
   createdAt: new Date("2024-01-15T12:00:00Z"),
-  updatedAt: new Date("2024-01-15T12:00:00Z"),
   game: {
     id: "game-1",
     title: "Hollow Knight",
@@ -33,7 +31,7 @@ const entry: JournalEntryCardEntry = {
   },
 };
 
-const formattedDate = new Date(entry.updatedAt).toLocaleDateString("en-US", {
+const formattedDate = new Date(entry.createdAt).toLocaleDateString("en-US", {
   month: "short",
   day: "2-digit",
   year: "numeric",
@@ -42,11 +40,11 @@ const formattedDate = new Date(entry.updatedAt).toLocaleDateString("en-US", {
 const elements = {
   queryOpener: () =>
     screen.queryByRole("button", {
-      name: `Open journal entry from ${formattedDate}`,
+      name: `Open note from ${formattedDate}`,
     }),
   getOpener: () =>
     screen.getByRole("button", {
-      name: `Open journal entry from ${formattedDate}`,
+      name: `Open note from ${formattedDate}`,
     }),
   getContent: () => screen.getByText("Some content here."),
   queryGameHeading: (title: string) =>
@@ -90,27 +88,48 @@ describe("JournalEntryCard", () => {
     });
   });
 
-  describe("given an entry with a non-null title and no game (title is the heading fallback)", () => {
+  describe("given an entry with no game", () => {
+    beforeEach(() => {
+      render(<JournalEntryCard entry={{ ...entry, game: null }} />);
+    });
+
+    it("reads No game as the card heading", () => {
+      expect(elements.getGameHeading("No game")).toBeDefined();
+    });
+  });
+
+  describe("given any entry", () => {
+    beforeEach(() => {
+      render(<JournalEntryCard entry={entry} />);
+    });
+
+    it("shows no Quick note or Reflection label", () => {
+      expect(screen.queryByText(/quick note|reflection/i)).toBeNull();
+    });
+  });
+
+  describe("given a note with 90 minutes and text", () => {
+    beforeEach(() => {
+      render(<JournalEntryCard entry={{ ...entry, playedMinutes: 90 }} />);
+    });
+
+    it("shows the time as 1.5 h next to the text", () => {
+      expect(screen.getByText("1.5 h")).toBeDefined();
+      expect(elements.getContent()).toBeDefined();
+    });
+  });
+
+  describe("given a note with time and no text", () => {
     beforeEach(() => {
       render(
         <JournalEntryCard
-          entry={{ ...entry, title: "My Reflection Title", game: null }}
+          entry={{ ...entry, content: "", playedMinutes: 90 }}
         />
       );
     });
 
-    it("renders the title text as a heading", () => {
-      expect(screen.getByText("My Reflection Title")).toBeDefined();
-    });
-  });
-
-  describe("given an entry with kind REFLECTION", () => {
-    beforeEach(() => {
-      render(<JournalEntryCard entry={{ ...entry, kind: "REFLECTION" }} />);
-    });
-
-    it("renders Reflection as the kind label", () => {
-      expect(screen.getByText("Reflection")).toBeDefined();
+    it("reads 1.5 h played instead of an empty card", () => {
+      expect(screen.getByText("1.5 h played")).toBeDefined();
     });
   });
 
@@ -147,6 +166,21 @@ describe("JournalEntryCard", () => {
 
     it("does not call onSelect when clicking the game link (stopPropagation)", () => {
       expect(onSelect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given a note that answers a prompt", () => {
+    it.each([
+      ["WHY", "Why do you want to play this?"],
+      ["STAYED", "What stayed with you?"],
+    ] as const)("heads a %s answer with its question", (prompt, question) => {
+      render(<JournalEntryCard entry={{ ...entry, prompt }} />);
+      expect(screen.getByRole("heading", { name: question })).toBeDefined();
+    });
+
+    it("shows no question heading on a plain note", () => {
+      render(<JournalEntryCard entry={{ ...entry, prompt: null }} />);
+      expect(screen.queryByText("Why do you want to play this?")).toBeNull();
     });
   });
 });

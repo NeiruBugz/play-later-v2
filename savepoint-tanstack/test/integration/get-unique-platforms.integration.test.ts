@@ -58,7 +58,7 @@ function makeLibraryItem(
     id: _itemCounter++,
     userId,
     gameId,
-    status: "SHELF" as const,
+    status: "WANT" as const,
     acquisitionType: "DIGITAL" as const,
     platform,
     rating: null,

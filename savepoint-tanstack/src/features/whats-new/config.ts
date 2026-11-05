@@ -12,7 +12,7 @@ export const ANNOUNCEMENTS: FeatureAnnouncement[] = [
     id: "steam-import-2025-01",
     title: "Steam Library Import",
     description:
-      "Connect your Steam account to import your game library automatically. Your games, playtime, and achievements will sync to your SavePoint library.",
+      "Connect your Steam account to import your game library automatically. Your games and time played will come into your SavePoint library.",
     category: "integration",
     icon: Download,
     ctaLabel: "Connect Steam",

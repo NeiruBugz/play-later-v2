@@ -1,69 +1,22 @@
-import { Link, useRouter } from "@tanstack/react-router";
-import { Loader2, Plus } from "lucide-react";
-import { useState, type MouseEvent } from "react";
-import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
-import { getErrorMessage } from "@/shared/lib/errors";
+import { InLibraryIndicator } from "@/entities/library-item";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
-import { Button } from "@/shared/ui/button";
 import { CommandItem } from "@/shared/ui/command";
-import { showUndoToast } from "@/shared/ui/undo-toast";
 
-import { quickAddToLibraryFn } from "../../api/quick-add-to-library-fn";
-import { removeLibraryItemFn } from "../../api/remove-library-item-fn";
 import type { GameResultItemProps } from "./game-result-item.type";
 
-/**
- * Games-group row. Renders cover + name + release year wrapped in a
- * statically-typed TanStack `<Link>` so back-button history works and the
- * test contract can assert on the resolved `href`.
- *
- * Also renders an "Add to Up Next" quick action (canonical's `showAddHint` +
- * `useQuickAddFromPalette`). Clicking it adds the game to the library at
- * `UP_NEXT` and surfaces an undo toast, instead of navigating.
- */
 export function GameResultItem({
   igdbId,
   coverImageId,
   name,
   slug,
   releaseYear,
+  library,
+  renderAddAction,
   onAfterSelect,
 }: GameResultItemProps) {
   const coverUrl = buildCoverImageUrl(coverImageId, "t_cover_small");
-  const router = useRouter();
-  const [isAdding, setIsAdding] = useState(false);
-
-  const handleQuickAdd = async (event: MouseEvent<HTMLButtonElement>) => {
-    // Keep the row's <Link> from navigating when the quick-add is clicked.
-    event.preventDefault();
-    event.stopPropagation();
-
-    setIsAdding(true);
-    try {
-      const { id } = await quickAddToLibraryFn({ data: { igdbId } });
-      showUndoToast({
-        message: `Added "${name}" to Up Next`,
-        onUndo: () => {
-          void (async () => {
-            try {
-              await removeLibraryItemFn({ data: { itemId: id } });
-              toast.success("Removed", { duration: 1000 });
-              await router.invalidate();
-            } catch (cause) {
-              toast.error(getErrorMessage(cause, "Failed to undo"));
-            }
-          })();
-        },
-      });
-      await router.invalidate();
-      onAfterSelect();
-    } catch (cause) {
-      toast.error(getErrorMessage(cause, "Failed to add game"));
-    } finally {
-      setIsAdding(false);
-    }
-  };
 
   return (
     <CommandItem value={`game-${slug}`} className="gap-md py-sm px-md flex">
@@ -95,23 +48,16 @@ export function GameResultItem({
         </div>
       </Link>
 
-      <Button
-        type="button"
-        size="sm"
-        variant="ghost"
-        className="text-muted-foreground gap-xs h-7 shrink-0 px-2 text-xs"
-        disabled={isAdding}
-        onClick={handleQuickAdd}
-        onMouseDown={(event) => event.preventDefault()}
-        aria-label={`Add ${name} to Up Next`}
-      >
-        {isAdding ? (
-          <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+      <div className="shrink-0" onMouseDown={(event) => event.preventDefault()}>
+        {library ? (
+          <InLibraryIndicator
+            status={library.status}
+            upNextPosition={library.upNextPosition}
+          />
         ) : (
-          <Plus className="h-3 w-3" aria-hidden="true" />
+          renderAddAction?.({ igdbId, name })
         )}
-        Add to Up Next
-      </Button>
+      </div>
     </CommandItem>
   );
 }

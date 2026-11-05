@@ -1,13 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 
-import { getServerUserId } from "@/entities/session/api/get-session.server";
-
 import {
   SEARCH_LIBRARY_AWARE_INPUT,
   searchLibraryAwareGamesWorker,
   type LibraryAwareSearchResult,
-} from "./search-library-aware-games.worker";
+} from "@/entities/library-item/api/search-library-aware-games.worker";
+import { getServerUserId } from "@/entities/session/api/get-session.server";
 
 /**
  * Library-aware IGDB search. Anonymous-allowed: search needs no auth, so we

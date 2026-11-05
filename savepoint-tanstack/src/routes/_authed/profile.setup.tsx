@@ -52,7 +52,7 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
 
   if (isUnauthorized) {
     return (
-      <main
+      <div
         role="alert"
         className="gap-md container mx-auto flex flex-col px-4 py-12"
       >
@@ -61,20 +61,20 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
         <Button asChild variant="outline">
           <Link to="/login">Go to sign in</Link>
         </Button>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main
+    <div
       role="alert"
       className="gap-md container mx-auto flex flex-col px-4 py-12"
     >
       <h1 className="text-h2">Something went wrong</h1>
       <p>We couldn't load profile setup. Please try again.</p>
       <Button asChild variant="outline">
-        <Link to="/dashboard">Back to dashboard</Link>
+        <Link to="/dashboard">Back to Home</Link>
       </Button>
-    </main>
+    </div>
   );
 }

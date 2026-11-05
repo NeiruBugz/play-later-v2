@@ -49,7 +49,7 @@ describe("PaletteNavigationGroup", () => {
       expect(elements.queryItem("Journal")).not.toBeNull();
       expect(elements.queryItem("Profile")).not.toBeNull();
       expect(elements.queryItem("Settings")).not.toBeNull();
-      expect(elements.queryItem("Dashboard")).not.toBeNull();
+      expect(elements.queryItem("Home")).not.toBeNull();
     });
 
     it("anchors each item at its registered route", () => {

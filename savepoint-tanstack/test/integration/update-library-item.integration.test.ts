@@ -22,11 +22,8 @@
  *
  * Input shape (all fields optional):
  *   type UpdateLibraryItemInput = {
- *     status?: LibraryItemStatus;
  *     rating?: number | null;
  *     platform?: string | null;
- *     startedAt?: Date | null;
- *     completedAt?: Date | null;
  *   };
  *
  * Error ordering (deliberate divergence from canonical savepoint-app):
@@ -127,12 +124,10 @@ function makeLibraryItem(userId: string, gameId: string, id: number = ITEM_ID) {
     id,
     userId,
     gameId,
-    status: "SHELF" as const,
+    status: "WANT" as const,
     acquisitionType: "DIGITAL" as const,
     platform: null,
     rating: null,
-    startedAt: null,
-    completedAt: null,
     // Pin updatedAt to the past so any real update is detectable.
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
@@ -169,14 +164,14 @@ describe("updateLibraryItem", () => {
   describe("ownership enforcement", () => {
     it("throws UnauthorizedError when the caller does not own the item", async () => {
       await expect(
-        updateLibraryItem("uli-user-other", ITEM_ID, { status: "PLAYING" })
+        updateLibraryItem("uli-user-other", ITEM_ID, { rating: 8 })
       ).rejects.toThrow(UnauthorizedError);
     });
 
     it("leaves the DB row unchanged after an UnauthorizedError", async () => {
       // Attempt mutation as the wrong user.
       await expect(
-        updateLibraryItem("uli-user-other", ITEM_ID, { status: "PLAYING" })
+        updateLibraryItem("uli-user-other", ITEM_ID, { rating: 8 })
       ).rejects.toThrow(UnauthorizedError);
 
       // Re-read the row and confirm it still has the seeded values.
@@ -184,7 +179,7 @@ describe("updateLibraryItem", () => {
         where: { id: ITEM_ID },
       });
       expect(row).not.toBeNull();
-      expect(row?.status).toBe("SHELF");
+      expect(row?.rating).toBeNull();
       expect(row?.userId).toBe("uli-user-owner");
     });
   });
@@ -199,7 +194,7 @@ describe("updateLibraryItem", () => {
 
       await expect(
         updateLibraryItem("uli-user-owner", nonExistentId, {
-          status: "PLAYING",
+          rating: 8,
         })
       ).rejects.toThrow(NotFoundError);
     });
@@ -209,61 +204,11 @@ describe("updateLibraryItem", () => {
       const nonExistentId = 99_998;
 
       const error = await updateLibraryItem("uli-user-other", nonExistentId, {
-        status: "PLAYING",
+        rating: 8,
       }).catch((e: unknown) => e);
 
       expect(error).toBeInstanceOf(NotFoundError);
       expect(error).not.toBeInstanceOf(UnauthorizedError);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // Status update
-  // -------------------------------------------------------------------------
-
-  describe("status update", () => {
-    const statuses = [
-      "WISHLIST",
-      "SHELF",
-      "UP_NEXT",
-      "PLAYING",
-      "PLAYED",
-    ] as const;
-
-    for (const newStatus of statuses) {
-      it(`changes status to ${newStatus} and returns the updated item`, async () => {
-        const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-          status: newStatus,
-        });
-
-        expect(result.status).toBe(newStatus);
-        expect(result.id).toBe(ITEM_ID);
-        expect(result.userId).toBe("uli-user-owner");
-      });
-    }
-
-    it("advances updatedAt after a status change", async () => {
-      const SEEDED_UPDATED_AT = new Date("2024-01-01T00:00:00.000Z");
-
-      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        status: "PLAYING",
-      });
-
-      expect(result.updatedAt.getTime()).toBeGreaterThan(
-        SEEDED_UPDATED_AT.getTime()
-      );
-    });
-
-    it("does not alter other fields when only status is supplied", async () => {
-      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        status: "PLAYED",
-      });
-
-      // These fields were null in the seeded row — they must remain null.
-      expect(result.rating).toBeNull();
-      expect(result.platform).toBeNull();
-      expect(result.startedAt).toBeNull();
-      expect(result.completedAt).toBeNull();
     });
   });
 
@@ -329,82 +274,33 @@ describe("updateLibraryItem", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Date field updates (startedAt, completedAt)
-  // -------------------------------------------------------------------------
-
-  describe("date field updates", () => {
-    it("sets startedAt to a Date value", async () => {
-      const startDate = new Date("2024-06-01T00:00:00.000Z");
-
-      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        startedAt: startDate,
-      });
-
-      expect(result.startedAt).toEqual(startDate);
-    });
-
-    it("clears startedAt when null is passed", async () => {
-      await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        startedAt: new Date("2024-06-01T00:00:00.000Z"),
-      });
-
-      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        startedAt: null,
-      });
-
-      expect(result.startedAt).toBeNull();
-    });
-
-    it("sets completedAt to a Date value", async () => {
-      const completedDate = new Date("2024-09-15T00:00:00.000Z");
-
-      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        completedAt: completedDate,
-      });
-
-      expect(result.completedAt).toEqual(completedDate);
-    });
-
-    it("clears completedAt when null is passed", async () => {
-      await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        completedAt: new Date("2024-09-15T00:00:00.000Z"),
-      });
-
-      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        completedAt: null,
-      });
-
-      expect(result.completedAt).toBeNull();
-    });
-  });
-
-  // -------------------------------------------------------------------------
   // Combined update — multiple fields in one call
   // -------------------------------------------------------------------------
 
   describe("combined update", () => {
-    it("updates status, rating, platform, startedAt, and completedAt in a single call", async () => {
-      const startDate = new Date("2024-05-01T00:00:00.000Z");
-      const completedDate = new Date("2024-08-30T00:00:00.000Z");
-
+    it("updates rating and platform in a single call without touching status", async () => {
       const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        status: "PLAYED",
         rating: 10,
         platform: "Nintendo Switch",
-        startedAt: startDate,
-        completedAt: completedDate,
       });
 
-      expect(result.status).toBe("PLAYED");
       expect(result.rating).toBe(10);
       expect(result.platform).toBe("Nintendo Switch");
-      expect(result.startedAt).toEqual(startDate);
-      expect(result.completedAt).toEqual(completedDate);
+      expect(result.status).toBe("WANT");
+    });
+
+    it("advances updatedAt after a rating change", async () => {
+      const result = await updateLibraryItem("uli-user-owner", ITEM_ID, {
+        rating: 5,
+      });
+
+      expect(result.updatedAt.getTime()).toBeGreaterThan(
+        new Date("2024-01-01T00:00:00.000Z").getTime()
+      );
     });
 
     it("persists the combined update to the DB", async () => {
       await updateLibraryItem("uli-user-owner", ITEM_ID, {
-        status: "PLAYED",
         rating: 7,
         platform: "PC",
       });
@@ -412,7 +308,6 @@ describe("updateLibraryItem", () => {
       const row = await db.prisma.libraryItem.findUnique({
         where: { id: ITEM_ID },
       });
-      expect(row?.status).toBe("PLAYED");
       expect(row?.rating).toBe(7);
       expect(row?.platform).toBe("PC");
     });
@@ -431,7 +326,7 @@ describe("updateLibraryItem", () => {
       expect(result.id).toBe(ITEM_ID);
       expect(result.userId).toBe("uli-user-owner");
       // All meaningful fields remain at seeded values.
-      expect(result.status).toBe("SHELF");
+      expect(result.status).toBe("WANT");
       expect(result.rating).toBeNull();
       expect(result.platform).toBeNull();
     });

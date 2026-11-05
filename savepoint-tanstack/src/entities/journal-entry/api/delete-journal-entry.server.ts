@@ -11,7 +11,7 @@ export async function deleteJournalEntry(
   });
 
   if (!existing) {
-    throw new NotFoundError("Journal entry not found", { entryId });
+    throw new NotFoundError("Note not found", { entryId });
   }
 
   if (existing.userId !== userId) {
@@ -25,6 +25,6 @@ export async function deleteJournalEntry(
       where: { id: entryId },
     });
   } catch (error) {
-    mapP2025ToNotFound(error, "Journal entry not found", { entryId });
+    mapP2025ToNotFound(error, "Note not found", { entryId });
   }
 }

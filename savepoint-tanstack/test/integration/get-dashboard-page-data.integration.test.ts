@@ -1,15 +1,7 @@
 /**
  * Integration tests for getDashboardPageDataWorker.
  *
- * Covers:
- *   - UnauthorizedError on missing userId
- *   - Empty library (hasEmptyLibrary = true, showStats = false)
- *   - showStats gate: total >= 3 enables stats card
- *   - safeName @-strip: profile.name containing "@" is ignored, falls back to username
- *   - safeName happy path: name without "@" is used as greeting
- *   - username fallback: no name, no username → "there"
- *   - quickLogGames sliced from PLAYING items
- *   - continuePlaying, upNext, recentlyAdded derivations
+ * Home payload: { playing, upNextTop3, upNextTotal, counts }.
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -65,7 +57,8 @@ function makeLibraryItem(
   userId: string,
   gameId: string,
   opts: {
-    status?: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
+    status?: "WANT" | "PLAYING" | "DONE";
+    upNextPosition?: number | null;
     createdAt?: Date;
     updatedAt?: Date;
   } = {}
@@ -74,12 +67,8 @@ function makeLibraryItem(
   return {
     userId,
     gameId,
-    status: (opts.status ?? "SHELF") as
-      | "WISHLIST"
-      | "SHELF"
-      | "UP_NEXT"
-      | "PLAYING"
-      | "PLAYED",
+    status: opts.status ?? ("WANT" as const),
+    upNextPosition: opts.upNextPosition ?? null,
     acquisitionType: "DIGITAL" as const,
     createdAt: ts,
     updatedAt: opts.updatedAt ?? ts,
@@ -105,285 +94,91 @@ describe("getDashboardPageDataWorker", () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // Empty library
-  // -------------------------------------------------------------------------
-
   describe("given a user with an empty library", () => {
-    beforeEach(async () => {
+    it("returns the payload shape with nothing in it", async () => {
       await db.prisma.user.create({ data: makeUser("empty") });
-    });
 
-    it("sets hasEmptyLibrary to true", async () => {
       const data = await getDashboardPageDataWorker("ddpd-user-empty");
 
-      expect(data.hasEmptyLibrary).toBe(true);
-    });
-
-    it("sets showStats to false (0 games below threshold of 3)", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-empty");
-
-      expect(data.showStats).toBe(false);
-    });
-
-    it("returns zero status counts for all statuses", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-empty");
-
-      expect(data.statusCounts.PLAYING).toBe(0);
-      expect(data.statusCounts.PLAYED).toBe(0);
-      expect(data.statusCounts.UP_NEXT).toBe(0);
-      expect(data.statusCounts.SHELF).toBe(0);
-      expect(data.statusCounts.WISHLIST).toBe(0);
-    });
-
-    it("returns empty quickLogGames", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-empty");
-
-      expect(data.quickLogGames).toHaveLength(0);
+      expect(Object.keys(data).sort()).toEqual([
+        "counts",
+        "playing",
+        "upNextTop3",
+        "upNextTotal",
+      ]);
+      expect(data.counts).toEqual({ WANT: 0, PLAYING: 0, DONE: 0 });
+      expect(data.playing).toEqual([]);
+      expect(data.upNextTop3).toEqual([]);
+      expect(data.upNextTotal).toBe(0);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // showStats gate: total >= 3 enables, total < 3 disables
-  // -------------------------------------------------------------------------
-
-  describe("showStats gate", () => {
-    it("sets showStats to false when total games = 2 (below threshold)", async () => {
-      await db.prisma.user.create({ data: makeUser("two-games") });
-      await db.prisma.game.createMany({
-        data: [makeGame("sg-a"), makeGame("sg-b")],
-      });
-      await db.prisma.libraryItem.createMany({
-        data: [
-          makeLibraryItem("ddpd-user-two-games", "ddpd-game-sg-a"),
-          makeLibraryItem("ddpd-user-two-games", "ddpd-game-sg-b"),
-        ],
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-two-games");
-
-      expect(data.showStats).toBe(false);
-    });
-
-    it("sets showStats to true when total games = 3 (at threshold)", async () => {
-      await db.prisma.user.create({ data: makeUser("three-games") });
-      await db.prisma.game.createMany({
-        data: [makeGame("tg-a"), makeGame("tg-b"), makeGame("tg-c")],
-      });
-      await db.prisma.libraryItem.createMany({
-        data: [
-          makeLibraryItem("ddpd-user-three-games", "ddpd-game-tg-a"),
-          makeLibraryItem("ddpd-user-three-games", "ddpd-game-tg-b"),
-          makeLibraryItem("ddpd-user-three-games", "ddpd-game-tg-c"),
-        ],
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-three-games");
-
-      expect(data.showStats).toBe(true);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // safeName / greeting derivation
-  // -------------------------------------------------------------------------
-
-  describe("username / greeting derivation", () => {
-    it("uses profile.name as greeting when name does not contain @", async () => {
-      await db.prisma.user.create({
-        data: makeUser("named", { name: "Alice" }),
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-named");
-
-      expect(data.username).toBe("Alice");
-    });
-
-    it("strips an @-containing name and falls back to username", async () => {
-      await db.prisma.user.create({
-        data: makeUser("email-as-name", {
-          name: "alice@example.com",
-          username: "alice-handle",
-        }),
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-email-as-name");
-
-      expect(data.username).toBe("alice-handle");
-    });
-
-    it("falls back to 'there' when both name and username are absent", async () => {
-      // Prisma user with null name and null username.
-      await db.prisma.user.create({
-        data: {
-          ...makeUser("no-name"),
-          name: null,
-          username: null,
-          email: "ddpd-no-name@example.com",
-          id: "ddpd-user-no-name",
-        },
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-no-name");
-
-      expect(data.username).toBe("there");
-    });
-
-    it("falls back to 'there' when the profile lookup throws (catch-null guard)", async () => {
-      // No user row exists for this userId — getProfileById will throw NotFoundError
-      // which the worker catches with .catch(() => null). The worker must still
-      // return successfully with username="there" and an empty library.
-      const data = await getDashboardPageDataWorker(
-        "ddpd-user-nonexistent-profile"
-      );
-
-      expect(data.username).toBe("there");
-      expect(data.hasEmptyLibrary).toBe(true);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // quickLogGames — top-3 PLAYING items
-  // -------------------------------------------------------------------------
-
-  describe("quickLogGames derivation", () => {
-    it("includes PLAYING games in quickLogGames (up to 3)", async () => {
-      await db.prisma.user.create({ data: makeUser("quick-log") });
-      await db.prisma.game.createMany({
-        data: [
-          makeGame("ql-a"),
-          makeGame("ql-b"),
-          makeGame("ql-c"),
-          makeGame("ql-d"),
-        ],
-      });
-      await db.prisma.libraryItem.createMany({
-        data: [
-          makeLibraryItem("ddpd-user-quick-log", "ddpd-game-ql-a", {
-            status: "PLAYING",
-          }),
-          makeLibraryItem("ddpd-user-quick-log", "ddpd-game-ql-b", {
-            status: "PLAYING",
-          }),
-          makeLibraryItem("ddpd-user-quick-log", "ddpd-game-ql-c", {
-            status: "PLAYING",
-          }),
-          makeLibraryItem("ddpd-user-quick-log", "ddpd-game-ql-d", {
-            status: "PLAYING",
-          }),
-        ],
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-quick-log");
-
-      expect(data.quickLogGames.length).toBeLessThanOrEqual(3);
-    });
-
-    it("excludes non-PLAYING games from quickLogGames", async () => {
-      await db.prisma.user.create({ data: makeUser("non-playing") });
-      await db.prisma.game.createMany({
-        data: [makeGame("np-a"), makeGame("np-b")],
-      });
-      await db.prisma.libraryItem.createMany({
-        data: [
-          makeLibraryItem("ddpd-user-non-playing", "ddpd-game-np-a", {
-            status: "PLAYED",
-          }),
-          makeLibraryItem("ddpd-user-non-playing", "ddpd-game-np-b", {
-            status: "SHELF",
-          }),
-        ],
-      });
-
-      const data = await getDashboardPageDataWorker("ddpd-user-non-playing");
-
-      expect(data.quickLogGames).toHaveLength(0);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // continuePlaying, upNext, recentlyAdded derivations
-  // -------------------------------------------------------------------------
-
-  describe("continuePlaying / upNext / recentlyAdded derivations", () => {
+  describe("given a mixed library", () => {
     beforeEach(async () => {
-      await db.prisma.user.create({ data: makeUser("derivations") });
+      await db.prisma.user.create({ data: makeUser("mixed") });
       await db.prisma.game.createMany({
-        data: [
-          makeGame("d-a"),
-          makeGame("d-b"),
-          makeGame("d-c"),
-          makeGame("d-d"),
-          makeGame("d-e"),
-          makeGame("d-f"),
-        ],
+        data: ["a", "b", "c", "d", "e", "f", "g"].map((x) =>
+          makeGame(`mx-${x}`)
+        ),
       });
+      const row = (
+        x: string,
+        status: "WANT" | "PLAYING" | "DONE",
+        upNextPosition?: number
+      ) =>
+        makeLibraryItem("ddpd-user-mixed", `ddpd-game-mx-${x}`, {
+          status,
+          upNextPosition,
+        });
       await db.prisma.libraryItem.createMany({
         data: [
-          makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-a", {
-            status: "PLAYING",
-            createdAt: new Date("2024-01-01T10:00:00.000Z"),
-          }),
-          makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-b", {
-            status: "PLAYING",
-            createdAt: new Date("2024-01-02T10:00:00.000Z"),
-          }),
-          makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-c", {
-            status: "UP_NEXT",
-            createdAt: new Date("2024-01-03T10:00:00.000Z"),
-          }),
-          makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-d", {
-            status: "UP_NEXT",
-            createdAt: new Date("2024-01-04T10:00:00.000Z"),
-          }),
-          makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-e", {
-            status: "SHELF",
-            createdAt: new Date("2024-01-05T10:00:00.000Z"),
-          }),
-          makeLibraryItem("ddpd-user-derivations", "ddpd-game-d-f", {
-            status: "PLAYED",
-            createdAt: new Date("2024-01-06T10:00:00.000Z"),
-          }),
+          row("a", "PLAYING"),
+          row("b", "PLAYING"),
+          row("c", "WANT", 4),
+          row("d", "DONE", 1),
+          row("e", "WANT", 3),
+          row("f", "WANT", 2),
+          row("g", "WANT"),
         ],
       });
     });
 
-    it("continuePlaying contains only PLAYING items", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-derivations");
+    it("lists every playing game exactly once, all PLAYING", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-mixed");
 
-      const statuses = data.continuePlaying.items.map((i) => i.status);
-      expect(statuses.every((s) => s === "PLAYING")).toBe(true);
+      expect(data.playing.map((i) => i.game.id).sort()).toEqual([
+        "ddpd-game-mx-a",
+        "ddpd-game-mx-b",
+      ]);
+      expect(data.playing.every((i) => i.status === "PLAYING")).toBe(true);
     });
 
-    it("continuePlaying.total counts all PLAYING items", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-derivations");
+    it("returns the top 3 queued games in queue order (queued Done included) with the full total", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-mixed");
 
-      expect(data.continuePlaying.total).toBe(2);
+      expect(
+        data.upNextTop3.map((i) => [i.game.id, i.status, i.upNextPosition])
+      ).toEqual([
+        ["ddpd-game-mx-d", "DONE", 1],
+        ["ddpd-game-mx-f", "WANT", 2],
+        ["ddpd-game-mx-e", "WANT", 3],
+      ]);
+      expect(data.upNextTotal).toBe(4);
     });
 
-    it("upNext contains only UP_NEXT items", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-derivations");
+    it("returns status counts across the whole library", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-mixed");
 
-      const statuses = data.upNext.items.map((i) => i.status);
-      expect(statuses.every((s) => s === "UP_NEXT")).toBe(true);
+      expect(data.counts).toEqual({ WANT: 4, PLAYING: 2, DONE: 1 });
     });
 
-    it("upNext.total counts all UP_NEXT items", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-derivations");
+    it("has no recentlyPlayed or stats-card data", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-mixed");
 
-      expect(data.upNext.total).toBe(2);
-    });
-
-    it("recentlyAdded returns items from any status", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-derivations");
-
-      expect(data.recentlyAdded.items.length).toBeGreaterThan(0);
-    });
-
-    it("hasEmptyLibrary is false when there are library items", async () => {
-      const data = await getDashboardPageDataWorker("ddpd-user-derivations");
-
-      expect(data.hasEmptyLibrary).toBe(false);
+      expect(data).not.toHaveProperty("recentlyPlayed");
+      expect(data).not.toHaveProperty("recentlyAdded");
+      expect(data).not.toHaveProperty("showStats");
+      expect(data).not.toHaveProperty("quickLogGames");
     });
   });
 });

@@ -5,21 +5,9 @@
  * consume from here to stay in lockstep.
  */
 
-export type LibraryStatus =
-  | "PLAYING"
-  | "PLAYED"
-  | "UP_NEXT"
-  | "SHELF"
-  | "WISHLIST";
+export type LibraryStatus = "WANT" | "PLAYING" | "DONE" | "UP_NEXT";
 
 export type LibrarySortBy = "updatedAt" | "createdAt" | "title";
 export type LibrarySortOrder = "asc" | "desc";
 
 export type LibraryStatusCounts = Partial<Record<LibraryStatus, number>>;
-
-/**
- * The three real `AcquisitionType` enum values. SUBSCRIPTION covers both Game
- * Pass and PS+ — the DB cannot distinguish them, so the filter keys on the
- * stored value while the per-card chip resolves the brand from platform.
- */
-export type LibraryAcquisition = "DIGITAL" | "SUBSCRIPTION" | "PHYSICAL";

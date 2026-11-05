@@ -2,9 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { LibraryStatusBadge } from "@/entities/library-item";
+import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import { searchLibraryAwareGamesFn } from "@/features/search-games/api/search-library-aware-games";
 import type { LibraryAwareSearchResult } from "@/features/search-games/api/search-library-aware-games.worker";
+import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { RatingInput } from "@/shared/ui/rating-input";
 
@@ -12,10 +13,8 @@ import type { SearchGamesResultsProps } from "./search-games-results.type";
 
 type Status = "idle" | "loading" | "success" | "error";
 
-const MIN_QUERY_LENGTH = 3;
-
 /**
- * Fetches library-aware IGDB search results for `query` and renders a grid of
+ * Fetches library-aware search results for `query` and renders a grid of
  * cards. Results the viewer already owns show their library status (and rating
  * when set) and skip the add affordance; unowned results render the
  * route-injected `renderAddAction` slot. (F08)
@@ -29,7 +28,7 @@ export function SearchGamesResults({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (query.length < MIN_QUERY_LENGTH) {
+    if (query.length < MIN_GAME_SEARCH_QUERY_LENGTH) {
       setStatus("idle");
       setResult(null);
       setErrorMessage(null);
@@ -61,7 +60,7 @@ export function SearchGamesResults({
     };
   }, [query]);
 
-  if (query.length < MIN_QUERY_LENGTH) {
+  if (query.length < MIN_GAME_SEARCH_QUERY_LENGTH) {
     return null;
   }
 
@@ -174,6 +173,12 @@ export function SearchGamesResults({
                   ) : null}
                 </div>
                 <p className="truncate text-sm font-medium">{game.name}</p>
+                {game.library !== null ? (
+                  <QueueMarker
+                    status={game.library.status}
+                    upNextPosition={game.library.upNextPosition}
+                  />
+                ) : null}
                 <div className="flex h-4 items-center gap-1">
                   {releaseYear !== null && (
                     <span className="text-muted-foreground text-xs tabular-nums">

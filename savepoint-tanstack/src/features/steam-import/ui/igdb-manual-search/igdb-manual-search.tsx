@@ -94,12 +94,12 @@ export function IgdbManualSearch({
         />
         <Input
           type="text"
-          placeholder="Search IGDB for the correct game…"
+          placeholder="Search for the correct game…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-10"
           disabled={isLoading}
-          aria-label="IGDB search query"
+          aria-label="Game search query"
         />
       </div>
 
@@ -132,7 +132,7 @@ export function IgdbManualSearch({
         <ul
           className="flex max-h-80 flex-col gap-2 overflow-y-auto"
           role="list"
-          aria-label="IGDB search results"
+          aria-label="Game search results"
         >
           {results.map((game) => {
             const coverUrl = buildCoverImageUrl(

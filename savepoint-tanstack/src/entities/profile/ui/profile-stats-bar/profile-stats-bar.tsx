@@ -11,8 +11,8 @@ export function ProfileStatsBar({
   const stats: StatItem[] = [
     { label: "In Library", value: totalGames },
     { label: "Playing", value: playing },
-    { label: "Completed", value: completed },
-    { label: "Journal Entries", value: journalEntries },
+    { label: "Done", value: completed },
+    { label: "Notes", value: journalEntries },
   ];
 
   return (

@@ -21,18 +21,21 @@ export interface CurrentUser {
  * surfaces (sidebar footer, etc.) that must avoid exposing the email.
  */
 export const getCurrentUserFn = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ user: CurrentUser | null }> => {
+  async (): Promise<{
+    user: CurrentUser | null;
+    statusModelNoticePending: boolean;
+  }> => {
     const request = getRequest();
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {
       log.info({ authed: false }, "current user resolved");
-      return { user: null };
+      return { user: null, statusModelNoticePending: false };
     }
 
     const row = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { username: true },
+      select: { username: true, statusModelNoticePending: true },
     });
 
     log.info(
@@ -46,6 +49,7 @@ export const getCurrentUserFn = createServerFn({ method: "GET" }).handler(
         username: row?.username ?? null,
         image: session.user.image ?? null,
       },
+      statusModelNoticePending: row?.statusModelNoticePending ?? false,
     };
   }
 );

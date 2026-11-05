@@ -37,13 +37,13 @@ describe("ProfileStatsBar", () => {
       expect(screen.getByText("3")).toBeDefined();
     });
 
-    it("renders the Completed count", () => {
-      expect(elements.getStatLabel("Completed")).toBeDefined();
+    it("renders the Done count", () => {
+      expect(elements.getStatLabel("Done")).toBeDefined();
       expect(screen.getByText("5")).toBeDefined();
     });
 
-    it("renders the Journal Entries count", () => {
-      expect(elements.getStatLabel("Journal Entries")).toBeDefined();
+    it("renders the Notes count", () => {
+      expect(elements.getStatLabel("Notes")).toBeDefined();
       expect(screen.getByText("7")).toBeDefined();
     });
   });

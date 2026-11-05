@@ -1,3 +1,5 @@
+import { NotebookPen } from "lucide-react";
+
 import { JournalEntryCard } from "@/entities/journal-entry/ui/journal-entry-card";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -10,7 +12,7 @@ import type {
 export type { JournalTimelineEntry };
 
 /**
- * Widget that composes journal entries into a vertical timeline with a
+ * Widget that composes notes into a vertical timeline with a
  * continuous rail line on the left and a circular game-cover node per entry.
  *
  * Layout: a thin vertical bar runs behind the column; each row is
@@ -26,8 +28,8 @@ export function JournalTimeline({
   if (entries.length === 0) {
     return (
       <EmptyState
-        title="Nothing logged yet"
-        description="Log tonight's session — a playtime count or a quick thought is enough. Reflections can come later."
+        title="No notes yet"
+        description="Log time on a game or write a note — either is enough."
       />
     );
   }
@@ -85,9 +87,13 @@ function CoverAvatar({ game }: CoverAvatarProps) {
           className="bg-muted flex size-full items-center justify-center"
           aria-hidden="true"
         >
-          <span className="text-caption text-muted-foreground font-mono select-none">
-            {game?.title?.slice(0, 2).toUpperCase() ?? "??"}
-          </span>
+          {game ? (
+            <span className="text-caption text-muted-foreground font-mono select-none">
+              {game.title.slice(0, 2).toUpperCase()}
+            </span>
+          ) : (
+            <NotebookPen className="text-muted-foreground size-4" />
+          )}
         </div>
       )}
     </div>

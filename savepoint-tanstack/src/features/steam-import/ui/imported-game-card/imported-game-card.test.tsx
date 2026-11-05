@@ -27,9 +27,9 @@ const baseGame: ImportedGame = {
 
 const elements = {
   queryAddButton: () =>
-    screen.queryByRole("button", { name: "Add Half-Life 2 to library" }),
+    screen.queryByRole("button", { name: "Add Half-Life 2" }),
   queryDismissButton: () =>
-    screen.queryByRole("button", { name: "Dismiss Half-Life 2" }),
+    screen.queryByRole("button", { name: "Remove Half-Life 2" }),
   queryRestoreButton: () =>
     screen.queryByRole("button", { name: "Restore Half-Life 2" }),
   queryName: () => screen.queryByText("Half-Life 2"),
@@ -76,6 +76,37 @@ describe("ImportedGameCard", () => {
     });
   });
 
+  describe("given the suggested-status badge", () => {
+    it("reads Want for a game that was not played recently", () => {
+      render(
+        <ImportedGameCard
+          game={baseGame}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+      expect(screen.getByLabelText("Suggested status: Want")).toHaveTextContent(
+        "Want"
+      );
+    });
+
+    it("reads Playing, not the raw enum, for a game played yesterday", () => {
+      render(
+        <ImportedGameCard
+          game={{
+            ...baseGame,
+            lastPlayedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+      const badge = screen.getByLabelText("Suggested status: Playing");
+      expect(badge).toHaveTextContent("Playing");
+      expect(badge).not.toHaveTextContent("PLAYING");
+    });
+  });
+
   describe("given a game with a last-played timestamp", () => {
     beforeEach(() => {
       const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
@@ -90,6 +121,10 @@ describe("ImportedGameCard", () => {
 
     it("surfaces when the game was last played", () => {
       expect(elements.queryLastPlayed()).not.toBeNull();
+    });
+
+    it("shows the 300 minutes of playtime as 5 h", () => {
+      expect(screen.getByText("5 h")).toBeDefined();
     });
   });
 

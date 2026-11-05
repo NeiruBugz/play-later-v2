@@ -20,9 +20,9 @@ export function LandingHero() {
         </h1>
 
         <p className="text-muted-foreground max-w-xl text-base md:text-lg">
-          Curate your collection across every platform. Journal what made each
-          game matter. SavePoint is for patient gamers who treat games as
-          worlds, not chores.
+          Curate your library across every platform. Journal what made each game
+          matter. SavePoint is for patient gamers who treat games as worlds, not
+          chores.
         </p>
 
         <div>

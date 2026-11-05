@@ -100,14 +100,14 @@ describe("getJournalEntriesForGame", () => {
           makeJournalEntry("jefg-entry-002-b", "jefg-user-002", {
             content: "Newer entry for game",
             gameId: "jefg-game-002-a",
-            createdAt: new Date("2024-01-01T10:00:00.000Z"),
+            createdAt: new Date("2024-01-02T10:00:00.000Z"),
             updatedAt: new Date("2024-01-02T10:00:00.000Z"),
           }),
         ],
       });
     });
 
-    it("returns both entries ordered by updatedAt descending", async () => {
+    it("returns both entries ordered by createdAt descending", async () => {
       const result = await getJournalEntriesForGame(
         "jefg-user-002",
         "jefg-game-002-a"

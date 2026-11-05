@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 
-import type { PlaythroughWithEntries } from "@/entities/playthrough";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
+  DoneOutcome,
   Game,
-  JournalEntry,
   LibraryItem,
-  LibraryItemStatus,
 } from "../../../../../shared/lib/prisma/client.ts";
+import type { GameNote } from "../game-notes-list";
+import type { Play } from "../play-history";
 
 export type GameDetailData = {
   /** Thin cached Game row — anchor for cross-feature reads. */
@@ -20,37 +20,20 @@ export type GameDetailData = {
    */
   igdbDetails: GameDetailsResponseItem;
   libraryEntry: LibraryItem | null;
-  journalTeaser: JournalEntry[];
-  /** True count of the viewer's journal entries — NOT capped at the teaser limit. */
-  journalCount: number;
+  /** How a Done game ended; the owner's own game only. */
+  doneOutcome?: DoneOutcome | null;
+  /** Which optional prompts to offer; both false unless the viewer owns the item. */
+  prompts?: { why: boolean; stayed: boolean };
+  /** The viewer's notes for this game, newest first. */
+  notes: GameNote[];
   /** SUM of the viewer's logged playedMinutes for this game; 0 when none. */
   playtimeTotalMinutes: number;
   /** Count of journal entries carrying non-null playedMinutes — the true denominator for average session length. */
   playtimeSessionCount: number;
   /** Recent non-null playedMinutes, oldest→newest, bounded for a rhythm chart. */
   recentSessionMinutes: number[];
-  /** Playthroughs for the viewer's library entry, newest-first. */
-  playthroughs?: PlaythroughWithEntries[];
-  /**
-   * Status derived from the viewer's runs (spec 016 §2.8).
-   * Playing > any Finished/Abandoned → Played.
-   * Falls back to the entry's current status when no playthroughs exist.
-   */
-  derivedStatus?: LibraryItemStatus;
-  /**
-   * True when the viewer has pinned a library status manually via "Set manually"
-   * and the derived status should NOT overwrite it (spec 016 §2.9).
-   */
-  statusIsManual?: boolean;
-  /**
-   * Journal entries with no associated playthrough (playthroughId = null).
-   * Covers spec 016 §2.7 (entries detached when a run is deleted) and §2.10
-   * (legacy pre-spec entries created before playthroughs existed).
-   * Only populated when the game has ≥1 run; [] otherwise (the data layer
-   * already gates this to match the JournalFeed §2.11 visibility rule).
-   * Passed as `legacyEntries` to JournalFeed — rendered with no run label.
-   */
-  unattachedJournalEntries?: JournalEntry[];
+  /** Ended plays of the viewer's library entry; owner only, empty when none. */
+  history?: Play[];
 };
 
 export type GameDetailProps = {

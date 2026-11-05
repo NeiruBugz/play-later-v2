@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { STATUS_ENTRIES } from "@/entities/library-item/model";
 import { authClient } from "@/shared/api/auth-client";
 
 import { AppSidebar } from "./app-sidebar";
@@ -12,11 +13,15 @@ const mockRouterInvalidate = vi.fn();
 const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ to, activeProps, children, ...rest }: any) => {
+  Link: ({ to, activeProps, search, children, ...rest }: any) => {
     const active = currentPath === to;
     const extra = active && activeProps ? activeProps : {};
+    const searchAttr =
+      typeof search === "function"
+        ? { "data-search": JSON.stringify(search({})) }
+        : {};
     return (
-      <a href={to} {...rest} {...extra}>
+      <a href={to} {...rest} {...extra} {...searchAttr}>
         {children}
       </a>
     );
@@ -52,9 +57,9 @@ const elements = {
   getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
   getSearchTrigger: () =>
     screen.getByRole("button", { name: "Open command palette" }),
-  getLogSessionCta: () => screen.getByRole("button", { name: "Log a session" }),
-  queryLogSessionCta: () =>
-    screen.queryByRole("button", { name: "Log a session" }),
+  getAddGameLink: () => screen.getByRole("link", { name: "Add game" }),
+  getLogSessionCta: () => screen.getByRole("button", { name: "Log" }),
+  queryLogSessionCta: () => screen.queryByRole("button", { name: "Log" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
   getUserMenuTrigger: () =>
     screen.getByRole("button", { name: "Open user menu" }),
@@ -67,6 +72,10 @@ const elements = {
     screen.getByRole("button", { name: /Collapse sidebar|Expand sidebar/ }),
   getSidebar: () => screen.getByTestId("app-sidebar"),
 };
+
+const iconClass = (control: HTMLElement) =>
+  // eslint-disable-next-line testing-library/no-node-access
+  control.querySelector("svg")?.getAttribute("class");
 
 const actions = {
   openUserMenu: async () => {
@@ -107,11 +116,8 @@ describe("AppSidebar", () => {
       elements.getSearchTrigger();
     });
 
-    it("renders a Home/Dashboard nav link with href /dashboard", () => {
-      expect(elements.getNavLink("Dashboard")).toHaveAttribute(
-        "href",
-        "/dashboard"
-      );
+    it("renders a Home nav link with href /dashboard", () => {
+      expect(elements.getNavLink("Home")).toHaveAttribute("href", "/dashboard");
     });
 
     it("renders a Library link with href /library", () => {
@@ -142,8 +148,32 @@ describe("AppSidebar", () => {
       );
     });
 
-    it("renders a prominent Log a session CTA button", () => {
+    it("renders a prominent Log CTA button", () => {
       expect(elements.getLogSessionCta()).toBeDefined();
+    });
+
+    it("renders an Add game item that opens the add search", () => {
+      expect(elements.getAddGameLink()).toHaveAttribute(
+        "data-search",
+        JSON.stringify({ action: "add-game" })
+      );
+    });
+
+    it("gives Add game and Log different icons", () => {
+      expect(iconClass(elements.getAddGameLink())).toContain("lucide-");
+      expect(iconClass(elements.getAddGameLink())).not.toBe(
+        iconClass(elements.getLogSessionCta())
+      );
+    });
+
+    it("gives Add game an icon different from every status icon", () => {
+      const addIcon = iconClass(elements.getAddGameLink());
+      for (const { icon: StatusIcon, label } of STATUS_ENTRIES) {
+        const { container, unmount } = render(<StatusIcon />);
+        const statusClass = iconClass(container as unknown as HTMLElement);
+        expect(addIcon, label).not.toBe(statusClass);
+        unmount();
+      }
     });
 
     it("renders the theme toggle", () => {
@@ -194,10 +224,8 @@ describe("AppSidebar", () => {
       );
     });
 
-    it("does not mark the Dashboard link as the current page", () => {
-      expect(elements.getNavLink("Dashboard")).not.toHaveAttribute(
-        "aria-current"
-      );
+    it("does not mark the Home link as the current page", () => {
+      expect(elements.getNavLink("Home")).not.toHaveAttribute("aria-current");
     });
   });
 
@@ -221,7 +249,7 @@ describe("AppSidebar", () => {
     });
   });
 
-  describe("given the user clicks the Log a session CTA", () => {
+  describe("given the user clicks the Log CTA", () => {
     beforeEach(async () => {
       currentPath = "/library";
       render(<AppSidebar user={stubUser} />);
@@ -292,7 +320,7 @@ describe("AppSidebar", () => {
     });
 
     it("renders nav link labels as visible text", () => {
-      expect(screen.getByText("Dashboard")).toBeDefined();
+      expect(screen.getByText("Home")).toBeDefined();
       expect(screen.getByText("Library")).toBeDefined();
     });
   });
@@ -315,7 +343,7 @@ describe("AppSidebar", () => {
     });
 
     it("nav links carry aria-label in collapsed mode so the destination is still announced", () => {
-      expect(elements.getNavLink("Dashboard")).toBeDefined();
+      expect(elements.getNavLink("Home")).toBeDefined();
       expect(elements.getNavLink("Library")).toBeDefined();
     });
 

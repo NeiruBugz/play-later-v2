@@ -17,11 +17,11 @@ vi.mock("@/features/search-games", () => ({
   ),
 }));
 
-// The route injects QuickAddButton into SearchGamesResults' add slot; its real
+// The route injects AddGameAction into SearchGamesResults' add slot; its real
 // module pulls the server-only add fn (auth env), so stub the feature barrel.
 vi.mock("@/features/add-game", () => ({
-  QuickAddButton: ({ gameTitle }: { gameTitle: string }) => (
-    <button type="button">Add {gameTitle}</button>
+  AddGameAction: ({ game }: { game: { name: string } }) => (
+    <button type="button">Add {game.name}</button>
   ),
 }));
 

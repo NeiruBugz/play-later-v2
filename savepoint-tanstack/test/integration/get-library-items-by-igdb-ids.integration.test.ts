@@ -71,7 +71,7 @@ describe("getLibraryItemsByIgdbIds", () => {
         data: {
           userId: "viewer-1",
           gameId: "g-hades",
-          status: "PLAYED",
+          status: "DONE",
           rating: 9,
           acquisitionType: "DIGITAL",
           ...baseTimestamps,
@@ -93,7 +93,11 @@ describe("getLibraryItemsByIgdbIds", () => {
     it("returns library state only for games the viewer owns, keyed by igdbId", async () => {
       const result = await getLibraryItemsByIgdbIds("viewer-1", [7777, 8888]);
 
-      expect(result.get(7777)).toEqual({ status: "PLAYED", rating: 9 });
+      expect(result.get(7777)).toEqual({
+        status: "DONE",
+        rating: 9,
+        upNextPosition: null,
+      });
       // Celeste belongs to another user — absent for this viewer.
       expect(result.has(8888)).toBe(false);
     });

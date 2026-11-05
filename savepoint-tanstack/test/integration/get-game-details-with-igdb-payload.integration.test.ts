@@ -1,7 +1,7 @@
 /**
  * Integration test for `getGameDetails` Slice 17B canonical-aligned contract:
  *
- *   - Returns `{ game, igdbDetails, libraryEntry, journalTeaser, relatedGames }`.
+ *   - Returns `{ game, igdbDetails, libraryEntry, notes, relatedGames }`.
  *   - `game` is a THIN Prisma row (title/slug/cover/releaseDate); NEVER stores
  *     summary/genres/platforms/screenshots/etc.
  *   - `igdbDetails` is the LIVE IGDB payload — the widget's source of truth

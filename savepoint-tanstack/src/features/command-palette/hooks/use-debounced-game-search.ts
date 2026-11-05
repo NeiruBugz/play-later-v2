@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-import { searchGamesFn } from "@/entities/game";
-import type { SearchResponseItem } from "@/shared/api/igdb";
+import type { LibraryAwareSearchItem } from "@/entities/library-item/api/search-library-aware-games.worker";
+
+import { searchGamesFn } from "../api/search-games-fn";
 
 interface UseDebouncedGameSearchOptions {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface UseDebouncedGameSearchOptions {
 interface UseDebouncedGameSearchResult {
   query: string;
   setQuery: (next: string) => void;
-  results: SearchResponseItem[];
+  results: LibraryAwareSearchItem[];
   isLoading: boolean;
   error: Error | null;
   shouldSearch: boolean;
@@ -34,7 +35,7 @@ export function useDebouncedGameSearch({
   minQueryLength = 1,
 }: UseDebouncedGameSearchOptions): UseDebouncedGameSearchResult {
   const [query, setQueryState] = useState("");
-  const [results, setResults] = useState<SearchResponseItem[]>([]);
+  const [results, setResults] = useState<LibraryAwareSearchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 

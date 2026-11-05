@@ -69,7 +69,7 @@ describe("updateLibraryItem — Prisma error mapping", () => {
 
     it("re-throws as NotFoundError", async () => {
       await expect(
-        updateLibraryItem(OWNER_ID, ITEM_ID, { status: "PLAYED" })
+        updateLibraryItem(OWNER_ID, ITEM_ID, { rating: 8 })
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
@@ -81,7 +81,7 @@ describe("updateLibraryItem — Prisma error mapping", () => {
 
     it("re-throws the raw Prisma error without wrapping", async () => {
       await expect(
-        updateLibraryItem(OWNER_ID, ITEM_ID, { status: "PLAYED" })
+        updateLibraryItem(OWNER_ID, ITEM_ID, { rating: 8 })
       ).rejects.toMatchObject({ code: "P2003" });
     });
   });

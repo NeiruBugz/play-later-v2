@@ -21,7 +21,6 @@ export function ProfileOverview({
   headerActions,
   librarySlot,
   activitySlot,
-  playthroughsSlot,
   hideActivityTab = false,
 }: ProfileOverviewProps) {
   // Never expose an email-shaped `name` — see README "Display-name privacy".
@@ -31,18 +30,15 @@ export function ProfileOverview({
   const usernameSlug = profile.username ?? profile.id;
   const avatarSrc = profile.image ?? DEFAULT_AVATAR_SRC;
 
-  const gameCount = Object.values(stats.statusCounts).reduce(
-    (sum, count) => sum + (count ?? 0),
-    0
-  );
-  const played = stats.statusCounts.PLAYED ?? 0;
+  const { want, playing, done } = stats;
+  const gameCount = want + playing + done;
 
-  // Compact stat row: 4 key numbers inline (design ref sp-screens-c.jsx ProfileScreen).
   const inlineStats = [
     { label: "in library", value: gameCount },
-    { label: "played", value: played },
-    { label: "completed", value: stats.completedCount ?? 0 },
-    { label: "entries", value: stats.journalCount ?? 0 },
+    { label: "want", value: want },
+    { label: "playing", value: playing },
+    { label: "done", value: done },
+    { label: "notes", value: stats.journalCount ?? 0 },
   ] as const;
 
   // Primary action renders below the identity block as a full-width button (AC PRO-2).
@@ -169,15 +165,13 @@ export function ProfileOverview({
           <div className="space-y-8">
             {stats.recentGames.length > 0 ? (
               <section data-testid="overview-recently-played">
-                <h2 className="heading-md mb-4 tracking-tight">
-                  Recently Played
-                </h2>
+                <h2 className="heading-md mb-4 tracking-tight">Playing</h2>
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
                   {stats.recentGames.map((game) => (
                     <Link
                       key={game.gameId}
                       to="/games/$slug"
-                      params={{ slug: String(game.gameId) }}
+                      params={{ slug: game.slug }}
                       className="group relative block overflow-hidden rounded-lg"
                       data-testid="overview-recently-played-entry"
                     >
@@ -207,13 +201,6 @@ export function ProfileOverview({
                 </div>
               </section>
             ) : null}
-
-            {playthroughsSlot !== undefined ? (
-              <section data-testid="overview-playthroughs">
-                <h2 className="heading-md mb-4 tracking-tight">Playthroughs</h2>
-                {playthroughsSlot}
-              </section>
-            ) : null}
           </div>
         }
         library={
@@ -234,7 +221,7 @@ export function ProfileOverview({
             <EmptyState
               data-testid="profile-activity-empty"
               title="No activity yet"
-              description="Activity will appear here once journal entries and library changes are tracked publicly."
+              description="Activity will appear here once notes and library changes are tracked publicly."
             />
           )
         }

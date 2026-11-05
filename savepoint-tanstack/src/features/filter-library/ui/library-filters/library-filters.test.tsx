@@ -14,28 +14,23 @@ vi.mock("@tanstack/react-router", () => ({
 const defaultProps = {
   status: undefined,
   platform: undefined,
-  acquisition: undefined,
-  startedOnly: undefined,
   minRating: undefined,
   sortBy: "updatedAt" as const,
   sortOrder: "desc" as const,
 };
 
 const elements = {
-  getStatusButton: (label: string) =>
-    screen.getByRole("button", { name: label }),
   queryStatusButton: (label: string) =>
     screen.queryByRole("button", { name: label }),
-  getAllStatusesButton: () =>
-    screen.getByRole("button", { name: "Show all statuses" }),
   getPlatformTrigger: () => screen.getByRole("combobox", { name: "Platform" }),
   getSortTrigger: () => screen.getByRole("combobox", { name: "Sort" }),
   getOption: (name: string) =>
     screen.getByRole("option", { name, hidden: true }),
-  getAcquisitionOption: (label: string) =>
-    screen.getByRole("button", { name: `Filter by ${label}` }),
-  getStartedSwitch: () =>
-    screen.getByRole("switch", { name: "Hide untouched games" }),
+  getNotOwnedOnlySwitch: () =>
+    screen.getByRole("switch", { name: "Not owned only" }),
+  queryNotOwnedOnlySwitch: () =>
+    screen.queryByRole("switch", { name: "Not owned only" }),
+  queryAcquisitionHeading: () => screen.queryByText("Acquisition"),
   getClearFiltersButton: () =>
     screen.getByRole("button", { name: "Clear all filters" }),
   queryClearFiltersButton: () =>
@@ -46,9 +41,6 @@ const elements = {
 };
 
 const actions = {
-  selectStatus: (label: string) =>
-    userEvent.click(elements.getStatusButton(label)),
-  clickAll: () => userEvent.click(elements.getAllStatusesButton()),
   openPlatformSelect: async () =>
     userEvent.click(elements.getPlatformTrigger()),
   pickPlatformOption: async (name: string) =>
@@ -65,23 +57,23 @@ describe("LibraryFilters", () => {
   });
 
   describe("given the component is rendered", () => {
+    it("has no status filter of its own (the chips above the grid are the only one)", () => {
+      expect(elements.queryStatusHeading()).toBeNull();
+      expect(elements.queryStatusButton("Filter by Want")).toBeNull();
+      expect(elements.queryStatusButton("Filter by Playing")).toBeNull();
+      expect(elements.queryStatusButton("Filter by Done")).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Show all statuses" })
+      ).toBeNull();
+    });
+
     beforeEach(() => {
       render(<LibraryFilters {...defaultProps} />);
     });
 
-    it("renders Status, Platform and Sort section headings", () => {
-      expect(elements.queryStatusHeading()).not.toBeNull();
+    it("renders Platform and Sort section headings", () => {
       expect(elements.queryPlatformHeading()).not.toBeNull();
       expect(elements.querySortHeading()).not.toBeNull();
-    });
-
-    it("renders all five status filter buttons and the All pill", () => {
-      expect(elements.getAllStatusesButton()).toBeDefined();
-      expect(elements.queryStatusButton("Filter by Playing")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Played")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Up Next")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Shelf")).not.toBeNull();
-      expect(elements.queryStatusButton("Filter by Wishlist")).not.toBeNull();
     });
 
     it("renders the Platform and Sort select triggers", () => {
@@ -91,119 +83,6 @@ describe("LibraryFilters", () => {
 
     it("does not render the clear-all button when no filters are active", () => {
       expect(elements.queryClearFiltersButton()).toBeNull();
-    });
-  });
-
-  describe("given a status filter is active", () => {
-    beforeEach(() => {
-      render(<LibraryFilters {...defaultProps} status="PLAYING" />);
-    });
-
-    it("shows the clear-all button and marks the active button pressed / All unpressed", () => {
-      expect(elements.getClearFiltersButton()).toBeDefined();
-      expect(elements.getStatusButton("Filter by Playing")).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
-      expect(elements.getAllStatusesButton()).toHaveAttribute(
-        "aria-pressed",
-        "false"
-      );
-    });
-  });
-
-  describe("given no status filter is active", () => {
-    beforeEach(() => {
-      render(<LibraryFilters {...defaultProps} />);
-    });
-
-    it("marks the All pill as pressed", () => {
-      expect(elements.getAllStatusesButton()).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
-    });
-  });
-
-  describe("given counts are supplied", () => {
-    beforeEach(() => {
-      render(
-        <LibraryFilters
-          {...defaultProps}
-          counts={{ PLAYING: 3, PLAYED: 2, UP_NEXT: 1, SHELF: 0, WISHLIST: 5 }}
-        />
-      );
-    });
-
-    it("renders total count on the All pill and per-status counts on each button including zero", () => {
-      // 3 + 2 + 1 + 0 + 5 = 11
-      expect(elements.getAllStatusesButton().textContent).toContain("11");
-      expect(
-        elements.getStatusButton("Filter by Playing").textContent
-      ).toContain("3");
-      expect(elements.getStatusButton("Filter by Shelf").textContent).toContain(
-        "0"
-      );
-    });
-  });
-
-  describe("given the user clicks the Playing status button", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} />);
-      await actions.selectStatus("Filter by Playing");
-    });
-
-    it("calls navigate with search.status set to PLAYING", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: "PLAYING" }),
-        })
-      );
-    });
-  });
-
-  describe("given the user clicks the Played status button", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} />);
-      await actions.selectStatus("Filter by Played");
-    });
-
-    it("calls navigate with search.status set to PLAYED", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: "PLAYED" }),
-        })
-      );
-    });
-  });
-
-  describe("given status PLAYING is active and user clicks it again", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} status="PLAYING" />);
-      await actions.selectStatus("Filter by Playing");
-    });
-
-    it("calls navigate with search.status undefined (toggle-deselect)", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: undefined }),
-        })
-      );
-    });
-  });
-
-  describe("given the user clicks the All pill", () => {
-    beforeEach(async () => {
-      render(<LibraryFilters {...defaultProps} status="PLAYING" />);
-      await actions.clickAll();
-    });
-
-    it("calls navigate with search.status undefined", () => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: expect.objectContaining({ status: undefined }),
-        })
-      );
     });
   });
 
@@ -285,8 +164,6 @@ describe("LibraryFilters", () => {
         <LibraryFilters
           status="PLAYING"
           platform="PC"
-          acquisition={undefined}
-          startedOnly={undefined}
           minRating={3.5}
           sortBy="title"
           sortOrder="asc"
@@ -310,44 +187,90 @@ describe("LibraryFilters", () => {
     });
   });
 
-  describe("given the user picks the Subscription acquisition", () => {
-    beforeEach(async () => {
+  describe("given the sidebar is rendered without a status", () => {
+    it("has no Acquisition filter", () => {
       render(<LibraryFilters {...defaultProps} />);
-      await userEvent.click(elements.getAcquisitionOption("Subscription"));
+      expect(elements.queryAcquisitionHeading()).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Filter by Physical" })
+      ).toBeNull();
     });
 
-    it("calls navigate with search.acquisition set to SUBSCRIPTION", () => {
+    it("offers no Not owned only toggle", () => {
+      render(<LibraryFilters {...defaultProps} />);
+      expect(elements.queryNotOwnedOnlySwitch()).toBeNull();
+    });
+  });
+
+  describe("given the Want filter is selected", () => {
+    it("offers the Not owned only toggle, which sets notOwnedOnly", async () => {
+      render(<LibraryFilters {...defaultProps} status="WANT" />);
+      await userEvent.click(elements.getNotOwnedOnlySwitch());
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ acquisition: "SUBSCRIPTION" }),
+          search: expect.objectContaining({
+            status: "WANT",
+            notOwnedOnly: true,
+          }),
         })
       );
     });
   });
 
-  describe("given the user enables 'Only games I've started'", () => {
-    beforeEach(async () => {
+  describe("given the desktop filters are rendered", () => {
+    beforeEach(() => {
       render(<LibraryFilters {...defaultProps} />);
-      await userEvent.click(elements.getStartedSwitch());
     });
 
-    it("calls navigate with search.startedOnly set to true", () => {
+    it("offers Minimum rating and Unrated only like the phone sheet", () => {
+      expect(
+        screen.getByRole("slider", { name: "Minimum rating filter" })
+      ).toBeDefined();
+      expect(
+        screen.getByRole("switch", { name: "Show only unrated games" })
+      ).toBeDefined();
+    });
+  });
+
+  describe("given the user toggles Unrated only", () => {
+    beforeEach(async () => {
+      render(<LibraryFilters {...defaultProps} />);
+      await userEvent.click(
+        screen.getByRole("switch", { name: "Show only unrated games" })
+      );
+    });
+
+    it("navigates with unratedOnly true, the same param the phone writes", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: expect.objectContaining({ startedOnly: true }),
+          search: expect.objectContaining({ unratedOnly: true }),
         })
       );
     });
   });
 
-  describe("given any filter change is made", () => {
+  describe("given the user picks a minimum rating", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} />);
-      await actions.selectStatus("Filter by Shelf");
+      await userEvent.click(screen.getByTestId("rating-star-4"));
     });
 
-    it("calls mockNavigate exactly once per interaction (router is the observed boundary)", () => {
-      expect(mockNavigate).toHaveBeenCalledTimes(1);
+    it("navigates with minRating in stars, the same param the phone writes", () => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.objectContaining({ minRating: 4 }),
+        })
+      );
+    });
+  });
+
+  describe("given a minimum rating is active", () => {
+    beforeEach(() => {
+      render(<LibraryFilters {...defaultProps} minRating={3} />);
+    });
+
+    it("offers Clear all filters", () => {
+      expect(elements.getClearFiltersButton()).toBeDefined();
     });
   });
 });

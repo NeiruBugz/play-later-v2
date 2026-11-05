@@ -1,11 +1,18 @@
-export { LibraryFilters, MobileFilterBar, StatusLens } from "./ui";
+export {
+  LibraryFilters,
+  NotOwnedOnlyToggle,
+  MobileFilterBar,
+  StatusLens,
+  ViewModeToggle,
+} from "./ui";
 export type {
   LibraryFiltersProps,
   StatusLensProps,
   LibraryStatus,
-  LibraryAcquisition,
   LibrarySortBy,
   LibrarySortOrder,
   LibraryStatusCounts,
   MobileFilterBarProps,
+  ViewMode,
+  ViewModeToggleProps,
 } from "./ui";

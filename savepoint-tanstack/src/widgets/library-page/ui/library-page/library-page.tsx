@@ -1,20 +1,42 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Download, Library, SearchX } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Download,
+  Library,
+  ListOrdered,
+  PackagePlus,
+  SearchX,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { isTouched, LibraryStatusBadge } from "@/entities/library-item";
+import {
+  LibraryStatusBadge,
+  NextStepButton,
+  NotOwnedTag,
+  QueueMarker,
+  StatusControl,
+} from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
-import { AddGameTrigger } from "@/features/add-game";
 import {
   LibraryFilters,
   MobileFilterBar,
   StatusLens,
+  ViewModeToggle,
   type LibraryStatusCounts,
+  type ViewMode,
 } from "@/features/filter-library";
-import { LibraryCardMenu, LibraryModal } from "@/features/manage-library-entry";
-import { AddEditPlaythroughDrawer } from "@/features/manage-playthrough";
+import {
+  LibraryCardMenu,
+  LibraryModal,
+  useSetOwnership,
+  useSetStatus,
+} from "@/features/manage-library-entry";
 import { EmptyLibraryHero } from "@/features/onboarding-first-time";
+import { UpNextQueueList } from "@/features/up-next";
+import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
+import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
+import { openGlobalAction } from "@/shared/lib/global-action";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
@@ -25,19 +47,35 @@ import type { LibraryPageProps } from "./library-page.type";
 
 /**
  * Grid-view tile: a vertical cover (status badge + per-card menu overlaid),
- * one-line title, platform, and rating beneath. The rich `LibraryItemCard`
- * (with inline quick-actions) is reserved for the list view, where its
- * full-width row has room — cramming it into a 2-up grid cell collapses it.
+ * one-line title, platform, rating, then the status control and next-step
+ * button. The rich `LibraryItemCard` row is reserved for the list view.
  */
 function LibraryGridTile({
   item,
-  menu,
+  onEdit,
 }: {
   item: LibraryItemWithGame;
-  menu: ReactNode;
+  onEdit: () => void;
 }) {
   const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_720p");
   const alt = `Cover for ${item.game.title}`;
+  const { status, setStatus, isPending } = useSetStatus({
+    id: item.id,
+    gameTitle: item.game.title,
+    status: item.status,
+    upNextPosition: item.upNextPosition,
+    rating: item.rating,
+  });
+  const ownership = useSetOwnership({
+    id: item.id,
+    gameTitle: item.game.title,
+    isOwned: item.isOwned,
+  });
+  const membership = useUpNextMembership({
+    id: item.id,
+    gameTitle: item.game.title,
+    upNextPosition: item.upNextPosition,
+  });
 
   return (
     <div className="relative" data-testid="library-grid-tile">
@@ -63,16 +101,19 @@ function LibraryGridTile({
             />
           )}
           <div className="absolute top-2 left-2">
-            <LibraryStatusBadge
-              status={item.status}
-              hasBeenPlayed={isTouched(item)}
-              className="uppercase"
-            />
+            <LibraryStatusBadge status={status} />
           </div>
         </div>
         <h3 className="mt-2 line-clamp-1 text-sm leading-tight font-medium group-hover:underline">
           {item.game.title}
         </h3>
+        <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
+          <QueueMarker
+            status={status}
+            upNextPosition={membership.upNextPosition}
+          />
+          <NotOwnedTag status={status} isOwned={ownership.isOwned} />
+        </div>
         {item.platform ? (
           <p className="text-muted-foreground mt-0.5 truncate text-xs">
             {item.platform}
@@ -83,18 +124,34 @@ function LibraryGridTile({
         className="mt-1 flex h-4 items-center"
         onClickCapture={(event) => event.stopPropagation()}
       >
-        {item.rating === null ? (
-          <span className="text-muted-foreground text-xs italic">unrated</span>
-        ) : (
-          <RatingInput
-            value={item.rating}
-            size="sm"
-            readOnly
-            aria-label={`Rating: ${item.rating / 2} out of 5 stars`}
-          />
+        {item.rating === null ? null : (
+          <RatingInput value={item.rating} size="sm" readOnly />
         )}
       </div>
-      <div className="absolute top-2 right-2 z-10">{menu}</div>
+      <div className="mt-2 flex flex-col items-start gap-2">
+        <StatusControl
+          status={status}
+          onChange={(to) => void setStatus(to)}
+          disabled={isPending}
+          className="text-xs"
+        />
+        <NextStepButton
+          status={status}
+          onStep={(to) => void setStatus(to)}
+          disabled={isPending}
+          className="w-full text-xs font-semibold"
+        />
+      </div>
+      <div className="absolute top-2 right-2 z-10">
+        <LibraryCardMenu
+          item={item}
+          onEdit={onEdit}
+          ownership={ownership}
+          extraItems={
+            <UpNextMenuActions status={status} membership={membership} />
+          }
+        />
+      </div>
     </div>
   );
 }
@@ -111,11 +168,9 @@ function computeStatusCounts(
   items: ReadonlyArray<LibraryItemWithGame>
 ): LibraryStatusCounts {
   const acc: LibraryStatusCounts = {
-    WISHLIST: 0,
-    SHELF: 0,
-    UP_NEXT: 0,
+    WANT: 0,
     PLAYING: 0,
-    PLAYED: 0,
+    DONE: 0,
   };
   for (const item of items) {
     acc[item.status] = (acc[item.status] ?? 0) + 1;
@@ -129,10 +184,9 @@ export function LibraryPage(props: LibraryPageProps) {
     total,
     status,
     platform,
-    acquisition,
-    startedOnly,
     minRating,
     unratedOnly,
+    notOwnedOnly,
     sortBy,
     sortOrder,
     platforms,
@@ -144,12 +198,8 @@ export function LibraryPage(props: LibraryPageProps) {
   const [selectedEntry, setSelectedEntry] =
     useState<LibraryItemWithGame | null>(null);
 
-  // One add-playthrough drawer at the page level so we render a single
-  // drawer instance regardless of how many cards are in the grid.
-  const [addPlaythroughLibraryItemId, setAddPlaythroughLibraryItemId] =
-    useState<number | null>(null);
-
   const navigate = useNavigate();
+  const addGame = () => openGlobalAction(navigate, "add-game");
 
   // Client-side title filter, no server roundtrip. The `/` keyboard hint
   // focuses the input when pressed outside any other input.
@@ -162,10 +212,9 @@ export function LibraryPage(props: LibraryPageProps) {
   const serverFiltersActive = Boolean(
     status ||
     platform ||
-    acquisition ||
-    startedOnly ||
     minRating !== undefined ||
-    unratedOnly === true
+    unratedOnly === true ||
+    notOwnedOnly === true
   );
   const clearFilters = () => {
     setTitleQuery("");
@@ -210,16 +259,26 @@ export function LibraryPage(props: LibraryPageProps) {
   void total;
 
   // Local view-mode toggle: "grid" (default, 2-up cover tiles) or "list"
-  // (metadata rows). State lives here so the toggle is instant with no URL round-trip.
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  // (rich rows). State lives here so the toggle is instant with no URL round-trip.
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   // Flat discriminant for the grid region, replacing a triple-nested ternary.
   // "onboarding"/"empty" are the first-run branch (library genuinely empty,
   // no active server filters); "no-results" is the filtered-out branch (items
   // exist but the active filters or title query exclude everything).
   const isFirstRunEmpty = items.length === 0 && !serverFiltersActive;
-  const renderState: "list" | "onboarding" | "empty" | "no-results" =
-    filteredItems.length > 0
+  const isUpNextView = status === "UP_NEXT";
+  const renderState:
+    | "up-next"
+    | "up-next-empty"
+    | "list"
+    | "onboarding"
+    | "empty"
+    | "no-results" = isUpNextView
+    ? items.length > 0
+      ? "up-next"
+      : "up-next-empty"
+    : filteredItems.length > 0
       ? "list"
       : isFirstRunEmpty
         ? onboarding
@@ -228,19 +287,25 @@ export function LibraryPage(props: LibraryPageProps) {
         : "no-results";
 
   return (
-    <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
+    <div className="gap-xl container mx-auto flex flex-col px-4 py-6">
       <PageHeader
         eyebrow="// LIBRARY"
         title="Library"
         actions={
-          <Link
-            to="/steam/games"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
-            aria-label="View imported Steam games"
-          >
-            <Download className="h-4 w-4" aria-hidden />
-            Imported games
-          </Link>
+          <>
+            <Link
+              to="/steam/games"
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
+              aria-label="Import from Steam"
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Import from Steam
+            </Link>
+            <Button onClick={addGame}>
+              <PackagePlus aria-hidden="true" />
+              Add game
+            </Button>
+          </>
         }
       />
 
@@ -269,52 +334,79 @@ export function LibraryPage(props: LibraryPageProps) {
         status={status}
         counts={statusCounts}
         platform={platform}
-        acquisition={acquisition}
-        startedOnly={startedOnly}
         minRating={minRating}
         unratedOnly={unratedOnly}
+        notOwnedOnly={notOwnedOnly}
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
 
-      <MobileFilterBar
-        status={status}
-        platform={platform}
-        acquisition={acquisition}
-        startedOnly={startedOnly}
-        minRating={minRating}
-        unratedOnly={unratedOnly}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        platforms={platforms}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
+      <div className="flex items-start gap-1">
+        <div className="min-w-0 flex-1 md:hidden">
+          <MobileFilterBar
+            status={status}
+            platform={platform}
+            minRating={minRating}
+            unratedOnly={unratedOnly}
+            notOwnedOnly={notOwnedOnly}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            platforms={platforms}
+          />
+        </div>
+        <ViewModeToggle
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          className="md:ml-auto"
+        />
+      </div>
 
       <div className="flex gap-6">
         <LibraryFilters
           status={status}
           platform={platform}
-          acquisition={acquisition}
-          startedOnly={startedOnly}
           minRating={minRating}
           unratedOnly={unratedOnly}
+          notOwnedOnly={notOwnedOnly}
           sortBy={sortBy}
           sortOrder={sortOrder}
-          counts={statusCounts}
           platforms={platforms}
         />
 
         <div className="min-w-0 flex-1">
-          {renderState === "onboarding" && onboarding ? (
-            <EmptyLibraryHero {...onboarding} />
+          {renderState === "up-next" ? (
+            <UpNextQueueList
+              items={items}
+              renderItem={(item) => (
+                <LibraryItemCard
+                  item={item}
+                  layout="row"
+                  menu={(upNext, ownership) => (
+                    <LibraryCardMenu
+                      item={item}
+                      onEdit={() => setSelectedEntry(item)}
+                      ownership={ownership}
+                      extraItems={upNext}
+                    />
+                  )}
+                />
+              )}
+            />
+          ) : renderState === "up-next-empty" ? (
+            <EmptyState
+              aria-label="Empty Up Next"
+              icon={ListOrdered}
+              title="Nothing queued yet — put up to 5 games in Up Next."
+            />
+          ) : renderState === "onboarding" && onboarding ? (
+            <EmptyLibraryHero {...onboarding} onAddGame={addGame} />
           ) : renderState === "empty" ? (
             <EmptyState
               aria-label="Empty library"
               icon={Library}
               title="No games yet"
-              description="Start your library by adding a game, or import your shelf from Steam."
-              action={{ label: "Browse games", to: "/games/search" }}
+              description="Start your library by adding a game, or import your games from Steam."
+              action={{ label: "Add a game", onClick: addGame }}
               secondaryAction={{
                 label: "Import from Steam",
                 to: "/steam/games",
@@ -343,23 +435,20 @@ export function LibraryPage(props: LibraryPageProps) {
                   {viewMode === "grid" ? (
                     <LibraryGridTile
                       item={item}
-                      menu={
-                        <LibraryCardMenu
-                          item={item}
-                          onEdit={() => setSelectedEntry(item)}
-                        />
-                      }
+                      onEdit={() => setSelectedEntry(item)}
                     />
                   ) : (
                     <LibraryItemCard
                       item={item}
-                      menu={
+                      layout="row"
+                      menu={(upNext, ownership) => (
                         <LibraryCardMenu
                           item={item}
                           onEdit={() => setSelectedEntry(item)}
+                          ownership={ownership}
+                          extraItems={upNext}
                         />
-                      }
-                      onAddPlaythrough={setAddPlaythroughLibraryItemId}
+                      )}
                     />
                   )}
                 </li>
@@ -368,10 +457,6 @@ export function LibraryPage(props: LibraryPageProps) {
           )}
         </div>
       </div>
-
-      {/* FAB replaces the header `Add game` button — matches canonical
-          bottom-right floating affordance. */}
-      <AddGameTrigger variant="fab" />
 
       {selectedEntry !== null ? (
         <LibraryModal
@@ -382,18 +467,6 @@ export function LibraryPage(props: LibraryPageProps) {
           }}
         />
       ) : null}
-
-      {addPlaythroughLibraryItemId !== null ? (
-        <AddEditPlaythroughDrawer
-          open={true}
-          mode="add"
-          libraryItemId={addPlaythroughLibraryItemId}
-          existingPlaythroughCount={0}
-          onOpenChange={(nextOpen) => {
-            if (!nextOpen) setAddPlaythroughLibraryItemId(null);
-          }}
-        />
-      ) : null}
-    </main>
+    </div>
   );
 }

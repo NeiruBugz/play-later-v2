@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDebouncedGameSearch } from "./use-debounced-game-search";
 
 const mockSearchGamesFn = vi.fn();
-vi.mock("@/entities/game", () => ({
+vi.mock("../api/search-games-fn", () => ({
   searchGamesFn: (...args: unknown[]) => mockSearchGamesFn(...args),
 }));
 

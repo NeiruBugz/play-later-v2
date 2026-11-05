@@ -1,25 +1,42 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { PlaythroughWithEntries } from "@/entities/playthrough";
-import { createPlaythroughFn } from "@/features/manage-playthrough/api/create-playthrough-fn";
-import { updatePlaythroughFn } from "@/features/manage-playthrough/api/update-playthrough-fn";
+import { setOwnershipFn } from "@/features/manage-library-entry/api/set-ownership-fn";
+import { setStatusFn } from "@/features/manage-library-entry/api/set-status-fn";
+import { updateLibraryItemFn } from "@/features/manage-library-entry/api/update-library-item-fn";
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
 import type {
   Game,
-  JournalEntry,
   LibraryItem,
 } from "../../../../../shared/lib/prisma/client";
+import { buildLibraryItem } from "../../../../../test/factories/builders.ts";
 import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
 const mockNavigate = vi.fn();
+const mockUseNavigate = vi.fn();
 
+vi.mock("@/features/done-follow-up/api/save-done-follow-up-fn", () => ({
+  saveDoneFollowUpFn: vi.fn(),
+}));
+vi.mock("@/features/done-follow-up/api/set-done-outcome-fn", () => ({
+  setDoneOutcomeFn: vi.fn(),
+}));
+vi.mock("@/features/library-prompts/api/answer-prompt-fn", () => ({
+  answerPromptFn: vi.fn(),
+}));
+vi.mock("@/features/library-prompts/api/dismiss-prompt-fn", () => ({
+  dismissPromptFn: vi.fn(),
+}));
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn() }),
-  useNavigate: () => mockNavigate,
+  useNavigate: (options?: unknown) => {
+    mockUseNavigate(options);
+    return mockNavigate;
+  },
   Link: ({ to, children, ...rest }: any) => (
     <a href={to} {...rest}>
       {children}
@@ -31,8 +48,16 @@ vi.mock("@/shared/lib/use-media-query", () => ({
   useIsDesktop: vi.fn(() => true),
 }));
 
-vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
-  addGameToLibraryFn: vi.fn(),
+vi.mock("@/features/add-game/api/search-games-fn", () => ({
+  searchGamesFn: vi.fn(),
+}));
+
+vi.mock("@/features/add-game/api/add-game-fn", () => ({
+  addGameFn: vi.fn(),
+}));
+
+vi.mock("@/features/add-game/api/undo-add-game-fn", () => ({
+  undoAddGameFn: vi.fn(),
 }));
 
 vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
@@ -53,46 +78,37 @@ vi.mock("@/features/manage-library-entry/api/search-platforms-fn", () => ({
   searchPlatformsFn: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock("@/features/compose-journal-entry/api/create-journal-entry-fn", () => ({
-  createJournalEntryFn: vi.fn(),
+vi.mock("@/features/compose-journal-entry/api/log-time-fn", () => ({
+  logTimeFn: vi.fn(),
 }));
-
-vi.mock(
-  "@/features/compose-journal-entry/api/get-log-session-game-data",
-  () => ({
-    getLogSessionGameDataFn: vi.fn(),
-  })
-);
 
 vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
 }));
 
-vi.mock("@/features/manage-playthrough/api/create-playthrough-fn", () => ({
-  createPlaythroughFn: vi.fn(),
+vi.mock("@/features/manage-library-entry/api/set-ownership-fn", () => ({
+  setOwnershipFn: vi.fn(),
 }));
 
-vi.mock("@/features/manage-playthrough/api/update-playthrough-fn", () => ({
-  updatePlaythroughFn: vi.fn(),
+vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
+  setStatusFn: vi.fn(),
 }));
 
-vi.mock("@/features/manage-playthrough/api/delete-playthrough-fn", () => ({
-  deletePlaythroughFn: vi.fn(),
+vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
+  undoStatusFn: vi.fn(),
 }));
 
-vi.mock(
-  "@/features/manage-playthrough/api/set-library-status-manual-fn",
-  () => ({
-    setLibraryStatusManualFn: vi.fn(),
-  })
-);
+vi.mock("@/features/up-next/api/add-to-up-next-fn", () => ({
+  addToUpNextFn: vi.fn(),
+}));
 
-vi.mock(
-  "@/features/manage-playthrough/api/clear-library-status-manual-fn",
-  () => ({
-    clearLibraryStatusManualFn: vi.fn(),
-  })
-);
+vi.mock("@/features/up-next/api/remove-from-up-next-fn", () => ({
+  removeFromUpNextFn: vi.fn(),
+}));
+
+vi.mock("sonner", () => ({
+  toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn() }),
+}));
 
 const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
@@ -123,22 +139,8 @@ const buildIgdbDetails = (
   ...overrides,
 });
 
-const buildLibraryEntry = (): LibraryItem => ({
-  id: 42,
-  status: "PLAYING",
-  createdAt: new Date("2025-01-01T00:00:00Z"),
-  updatedAt: new Date("2025-01-02T00:00:00Z"),
-  statusChangedAt: null,
-  platform: "PC",
-  userId: "user-1",
-  acquisitionType: "DIGITAL",
-  gameId: "game-1",
-  startedAt: null,
-  completedAt: null,
-  hasBeenPlayed: false,
-  statusIsManual: false,
-  rating: null,
-});
+const buildLibraryEntry = (): LibraryItem =>
+  buildLibraryItem({ id: 42, status: "PLAYING", platform: "PC" });
 
 const buildData = (
   libraryEntry: LibraryItem | null,
@@ -148,8 +150,7 @@ const buildData = (
   game: buildGame(gameOverrides),
   igdbDetails: buildIgdbDetails(igdbOverrides),
   libraryEntry,
-  journalTeaser: [],
-  journalCount: 0,
+  notes: [],
   playtimeTotalMinutes: 0,
   playtimeSessionCount: 0,
   recentSessionMinutes: [],
@@ -160,23 +161,36 @@ const elements = {
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
   queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
   queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
-  // Both the hero (md:hidden) and the desktop rail render a LibraryStatusSwitcher
-  // when a viewer is signed in, so these use queryAll and return the first match.
+  // The hero (md:hidden), the desktop rail and the phone action bar each render
+  // a status pill when a viewer is signed in, so these use queryAll.
   queryStatusPill: () =>
-    screen.queryAllByRole("button", { name: /^Change library status:/ })[0] ??
+    screen.queryAllByRole("button", { name: /^Status: .*\. Change$/ })[0] ??
     null,
+  queryStatusPillsNamed: (label: string) =>
+    screen.queryAllByRole("button", { name: `Status: ${label}. Change` }),
+  getHeaderStatusPill: (label: string) =>
+    within(document.body).getAllByRole("button", {
+      name: `Status: ${label}. Change`,
+    })[0]!,
+  getActionBarStatusPill: (label: string) =>
+    within(screen.getByTestId("game-detail-action-bar")).getByRole("button", {
+      name: `Status: ${label}. Change`,
+    }),
+  getStatusRadio: (label: string) => screen.getByRole("radio", { name: label }),
+  getStatusRadios: () => screen.getAllByRole("radio"),
+  getNextStepButton: (label: string) =>
+    screen.getAllByRole("button", { name: label })[0]!,
   queryAddToLibrary: () =>
     screen.queryAllByRole("button", { name: "Add to library" })[0] ?? null,
   queryStatusSwitcher: () =>
-    screen.queryAllByTestId("library-status-switcher")[0] ?? null,
+    screen.queryAllByTestId("game-library-controls")[0] ?? null,
   queryMoreMenuTrigger: () =>
     screen.queryAllByRole("button", { name: "More library actions" })[0] ??
     null,
   queryAllTablists: () => screen.queryAllByRole("tablist"),
   queryAllTabpanels: () => screen.queryAllByRole("tabpanel"),
   queryOverviewTab: () => screen.queryByRole("tab", { name: "Overview" }),
-  queryJournalHeading: () =>
-    screen.queryByRole("heading", { name: "// JOURNAL" }),
+  queryNotesHeading: () => screen.queryByRole("heading", { name: "// NOTES" }),
   queryRelatedSlot: () => screen.queryByTestId("related-games-slot"),
   queryTimesToBeatSlot: () => screen.queryByTestId("times-to-beat-slot"),
   querySummary: () => screen.queryByLabelText("Game summary"),
@@ -198,7 +212,15 @@ const elements = {
   queryLegacyCatalogCard: () =>
     screen.queryByTestId("game-detail-catalog-card"),
   queryEyebrow: () => screen.queryByLabelText("Release metadata"),
-  queryYourRecord: () => screen.queryByTestId("playthroughs-panel"),
+  queryYourRecord: () => screen.queryByTestId("game-rating"),
+  queryPlaythroughsPanel: () => screen.queryByTestId("playthroughs-panel"),
+  queryPlaythroughTimeline: () => screen.queryByTestId("playthrough-timeline"),
+  queryStartNewPlaythrough: () =>
+    screen.queryByRole("button", { name: /new playthrough|add playthrough/i }),
+  queryPlaythroughsJump: () =>
+    screen.queryByRole("button", { name: "Playthroughs" }),
+  queryHistoryToggle: () => screen.queryByRole("button", { name: "History" }),
+  queryRatingSlider: () => screen.queryByRole("slider", { name: /Rate|Rated/ }),
   queryThemesLabel: () => screen.queryByText("// THEMES"),
   queryEmDash: () => screen.queryByText("—"),
   queryScreenshotsRegion: () =>
@@ -212,6 +234,83 @@ const PRECEDING = Node.DOCUMENT_POSITION_PRECEDING;
 
 const precedes = (first: Element, second: Element): boolean =>
   Boolean(second.compareDocumentPosition(first) & PRECEDING);
+
+describe("GameDetail ownership", () => {
+  const renderWith = (overrides: Partial<LibraryItem>) =>
+    render(
+      <GameDetail
+        data={buildData(
+          buildLibraryItem({ id: 42, platform: "PC", ...overrides })
+        )}
+        viewerUserId="user-1"
+      />
+    );
+
+  it("tags a Want game the user does not own", () => {
+    renderWith({ status: "WANT", isOwned: false });
+    expect(screen.getAllByText("Not owned").length).toBeGreaterThan(0);
+  });
+
+  it("does not tag an owned Want game", () => {
+    renderWith({ status: "WANT", isOwned: true });
+    expect(screen.queryByText("Not owned")).toBeNull();
+  });
+
+  it("lets the user mark an owned game as not owned from More library actions", async () => {
+    vi.mocked(setOwnershipFn).mockResolvedValue({ isOwned: false });
+    renderWith({ status: "WANT", isOwned: true });
+
+    await userEvent.click(elements.queryMoreMenuTrigger()!);
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "I don't own it yet" })
+    );
+
+    expect(setOwnershipFn).toHaveBeenCalledWith({
+      data: { id: 42, isOwned: false },
+    });
+    expect((await screen.findAllByText("Not owned")).length).toBeGreaterThan(0);
+  });
+});
+
+describe("GameDetail Up Next", () => {
+  const renderWith = (overrides: Partial<LibraryItem>) =>
+    render(
+      <GameDetail
+        data={buildData(
+          buildLibraryItem({ id: 42, platform: "PC", ...overrides })
+        )}
+        viewerUserId="user-1"
+      />
+    );
+
+  const getPutIn = () =>
+    screen.queryAllByRole("button", { name: "Put in Up Next" })[0] ?? null;
+  const getRemoveFrom = () =>
+    screen.queryAllByRole("button", { name: "Remove from Up Next" })[0] ?? null;
+
+  it("offers Put in Up Next for a Want game", () => {
+    renderWith({ status: "WANT" });
+    expect(getPutIn()).not.toBeNull();
+  });
+
+  it("shows the Up Next marker and Remove for a queued Want game", () => {
+    renderWith({ status: "WANT", upNextPosition: 2 });
+    expect(screen.getAllByText("Up Next #2").length).toBeGreaterThan(0);
+    expect(getRemoveFrom()).not.toBeNull();
+  });
+
+  it("shows Replay for a queued Done game", () => {
+    renderWith({ status: "DONE", upNextPosition: 1 });
+    expect(screen.getAllByText("Replay").length).toBeGreaterThan(0);
+  });
+
+  it("offers no Up Next action and no marker for a Playing game", () => {
+    renderWith({ status: "PLAYING", upNextPosition: null });
+    expect(getPutIn()).toBeNull();
+    expect(getRemoveFrom()).toBeNull();
+    expect(screen.queryByTestId("queue-marker")).toBeNull();
+  });
+});
 
 describe("GameDetail", () => {
   describe("given an anonymous viewer with no slots", () => {
@@ -237,9 +336,9 @@ describe("GameDetail", () => {
       expect(elements.queryPlatformsLabel()).toBeNull();
     });
 
-    it("does not render the status switcher or Journal panel for anonymous viewers", () => {
+    it("does not render the library controls or Notes list for anonymous viewers", () => {
       expect(elements.queryStatusSwitcher()).toBeNull();
-      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryNotesHeading()).toBeNull();
     });
   });
 
@@ -271,7 +370,7 @@ describe("GameDetail", () => {
     it("replaces the personal panels with a single start-tracking invitation", () => {
       expect(elements.queryTrackInvite()).not.toBeNull();
       expect(elements.queryYourRecord()).toBeNull();
-      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryNotesHeading()).toBeNull();
       expect(elements.queryTimesToBeatSlot()).toBeNull();
     });
 
@@ -299,7 +398,7 @@ describe("GameDetail", () => {
 
     it("renders no personal panels", () => {
       expect(elements.queryYourRecord()).toBeNull();
-      expect(elements.queryJournalHeading()).toBeNull();
+      expect(elements.queryNotesHeading()).toBeNull();
       expect(elements.queryTimesToBeatSlot()).toBeNull();
       expect(elements.queryStatusSwitcher()).toBeNull();
     });
@@ -329,13 +428,13 @@ describe("GameDetail", () => {
 
     it("shows a status pill reflecting the current status", () => {
       expect(elements.queryStatusPill()).toHaveAccessibleName(
-        "Change library status: Playing"
+        "Status: Playing. Change"
       );
     });
 
-    it("renders the overflow menu and Journal panel", () => {
+    it("renders the overflow menu and Notes list", () => {
       expect(elements.queryMoreMenuTrigger()).not.toBeNull();
-      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryNotesHeading()).not.toBeNull();
     });
   });
 
@@ -398,7 +497,7 @@ describe("GameDetail", () => {
       expect(elements.queryGameDetailLabel()).not.toBeNull();
       expect(elements.queryGenresLabel()).not.toBeNull();
       expect(elements.queryPlatformsLabel()).not.toBeNull();
-      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryNotesHeading()).not.toBeNull();
       expect(elements.queryRelatedSlot()).not.toBeNull();
       expect(elements.queryTimesToBeatSlot()).not.toBeNull();
       expect(elements.queryAllTabpanels()).toHaveLength(0);
@@ -437,12 +536,12 @@ describe("GameDetail", () => {
       ).toBe(true);
     });
 
-    it("orders the bento cells Record, Times, About, Themes, Journal, Related", () => {
+    it("orders the bento cells Rating, Times, About, Themes, Notes, Related", () => {
       const record = elements.queryYourRecord()!;
       const times = elements.queryTimesToBeatSlot()!;
       const about = elements.queryAboutCard()!;
       const themes = elements.queryThemesTagsCard()!;
-      const journal = elements.queryJournalHeading()!;
+      const journal = elements.queryNotesHeading()!;
       const related = elements.queryRelatedSlot()!;
 
       expect(precedes(record, times)).toBe(true);
@@ -721,9 +820,9 @@ describe("GameDetail", () => {
       expect(elements.queryYourRecord()).not.toBeNull();
     });
 
-    it("renders the personal slots (Your Pace / Times to beat and Journal)", () => {
+    it("renders the personal slots (Your Pace / Times to beat and Notes)", () => {
       expect(elements.queryTimesToBeatSlot()).not.toBeNull();
-      expect(elements.queryJournalHeading()).not.toBeNull();
+      expect(elements.queryNotesHeading()).not.toBeNull();
     });
 
     it("omits every catalog surface (eyebrow, critic ring, About, Themes & Tags, Screenshots, Related)", () => {
@@ -759,7 +858,6 @@ describe("GameDetail", () => {
               { releaseDate: null }
             ),
             playtimeTotalMinutes: 600,
-            journalCount: 4,
           }}
           viewerUserId="user-1"
         />
@@ -819,205 +917,213 @@ describe("GameDetail", () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // RED: unattachedJournalEntries wiring (spec 016 §2.7 / §2.10)
-  // ---------------------------------------------------------------------------
-  // GameDetail must pass data.unattachedJournalEntries as legacyEntries to
-  // JournalFeed so that detached / legacy entries appear in the feed when the
-  // game has runs. The test fails (RED) until GameDetailData carries the field
-  // and game-detail.tsx wires it through.
-  // ---------------------------------------------------------------------------
-
-  describe("given a game with runs and unattached journal entries (spec 016 §2.7 / §2.10)", () => {
-    const legacyEntry: JournalEntry = {
-      id: "entry-legacy-gd-001",
-      kind: "QUICK",
-      title: null,
-      content: "Old note before runs existed",
+  describe("given a signed-in viewer with three notes on the game", () => {
+    const note = (id: string, content: string, day: number) => ({
+      id,
+      content,
       playedMinutes: null,
-      tags: [],
-      mood: null,
-      playSession: null,
-      visibility: "PRIVATE",
-      userId: "user-1",
-      gameId: "game-1",
-      libraryItemId: 42,
-      playthroughId: null,
-      createdAt: new Date("2023-05-01T10:00:00Z"),
-      updatedAt: new Date("2023-05-01T10:00:00Z"),
-      publishedAt: null,
-    };
-
-    const runEntry: JournalEntry = {
-      id: "entry-run-gd-001",
-      kind: "QUICK",
-      title: null,
-      content: "First run note",
-      playedMinutes: 60,
-      tags: [],
-      mood: null,
-      playSession: null,
-      visibility: "PRIVATE",
-      userId: "user-1",
-      gameId: "game-1",
-      libraryItemId: 42,
-      playthroughId: "pt-gd-001",
-      createdAt: new Date("2024-01-10T10:00:00Z"),
-      updatedAt: new Date("2024-01-10T10:00:00Z"),
-      publishedAt: null,
-    };
-
-    const firstRun: PlaythroughWithEntries = {
-      id: "pt-gd-001",
-      ordinal: 1,
-      kind: "FIRST",
-      status: "FINISHED",
-      platform: null,
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 60,
-      rating: null,
-      completion: null,
-      notes: null,
-      journalEntries: [runEntry],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-01-01"),
-      updatedAt: new Date("2024-01-01"),
-    };
+      createdAt: new Date(`2024-01-0${day}T10:00:00Z`),
+    });
 
     beforeEach(() => {
       render(
         <GameDetail
           data={{
             ...buildData(buildLibraryEntry()),
-            playthroughs: [firstRun],
-            unattachedJournalEntries: [legacyEntry],
+            notes: [
+              note("note-1", "Oldest note", 1),
+              note("note-3", "Newest note", 3),
+              note("note-2", "Middle note", 2),
+            ],
           }}
           viewerUserId="user-1"
         />
       );
     });
 
-    it("renders the legacy entry content in the journal feed", () => {
-      expect(screen.queryByText("Old note before runs existed")).not.toBeNull();
+    it("shows each note once", () => {
+      expect(screen.getAllByText("Oldest note")).toHaveLength(1);
+      expect(screen.getAllByText("Middle note")).toHaveLength(1);
+      expect(screen.getAllByText("Newest note")).toHaveLength(1);
     });
 
-    it("renders the legacy entry with no run label inside the journal feed", () => {
-      // Scope to the JournalFeed section to avoid matching "First playthrough"
-      // rendered elsewhere in the widget (e.g. PlaythroughTimeline).
-      const feed = screen.getByRole("region", { name: "Journal feed" });
-      // The run entry carries a "First playthrough" label; the legacy entry
-      // (playthroughId: null) must NOT produce a second one.
-      const labelsInFeed = within(feed).queryAllByText("First playthrough");
-      expect(labelsInFeed).toHaveLength(1);
+    it("lists the notes newest first", () => {
+      const list = screen.getByRole("list", { name: "// NOTES" });
+      const texts = within(list)
+        .getAllByRole("link")
+        .map((link) => link.textContent);
+      expect(texts[0]).toContain("Newest note");
+      expect(texts[1]).toContain("Middle note");
+      expect(texts[2]).toContain("Oldest note");
+    });
+
+    it("links every note to its note view", () => {
+      const list = screen.getByRole("list", { name: "// NOTES" });
+      expect(within(list).getAllByRole("link")).toHaveLength(3);
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Edit-playthrough routing — Finding 1 + Finding 2
-  // ---------------------------------------------------------------------------
-
-  describe("given a signed-in viewer with two existing runs", () => {
-    const runA: PlaythroughWithEntries = {
-      id: "pt-run-a",
-      ordinal: 1,
-      kind: "FIRST",
-      status: "FINISHED",
-      platform: "PC",
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 120,
-      rating: null,
-      completion: null,
-      notes: "Run A notes",
-      journalEntries: [],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-01-01"),
-      updatedAt: new Date("2024-01-01"),
-    };
-
-    const runB: PlaythroughWithEntries = {
-      id: "pt-run-b",
-      ordinal: 2,
-      kind: "REPLAY",
-      status: "PLAYING",
-      platform: "PlayStation 5",
-      startedAt: null,
-      finishedAt: null,
-      playtimeMinutes: 60,
-      rating: null,
-      completion: null,
-      notes: "Run B notes",
-      journalEntries: [],
-      libraryItemId: 42,
-      libraryItem: undefined as never,
-      createdAt: new Date("2024-06-01"),
-      updatedAt: new Date("2024-06-01"),
-    };
+  describe("given a signed-in viewer with a played game", () => {
+    const history = [
+      {
+        id: "older",
+        startedAt: new Date(2024, 0, 5),
+        finishedAt: new Date(2024, 0, 19),
+      },
+      {
+        id: "newer",
+        startedAt: new Date(2024, 2, 3),
+        finishedAt: new Date(2024, 2, 20),
+      },
+    ];
 
     beforeEach(() => {
-      vi.mocked(createPlaythroughFn).mockReset();
-      vi.mocked(createPlaythroughFn).mockResolvedValue(undefined as never);
-      vi.mocked(updatePlaythroughFn).mockReset();
-      vi.mocked(updatePlaythroughFn).mockResolvedValue(undefined as never);
+      render(
+        <GameDetail
+          data={{ ...buildData(buildLibraryEntry()), history }}
+          viewerUserId="user-1"
+        />
+      );
     });
 
-    describe("when the user clicks Edit on run A and submits the drawer", () => {
-      beforeEach(async () => {
-        render(
-          <GameDetail
-            data={{
-              ...buildData(buildLibraryEntry()),
-              playthroughs: [runA, runB],
-            }}
-            viewerUserId="user-1"
-          />
-        );
-        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
-        await userEvent.click(editRunA!);
-        await userEvent.click(
-          screen.getByRole("button", { name: "Save changes" })
-        );
-      });
+    it("shows no playthroughs panel, timeline, jump entry, or new-playthrough button", () => {
+      expect(elements.queryPlaythroughsPanel()).toBeNull();
+      expect(elements.queryPlaythroughTimeline()).toBeNull();
+      expect(elements.queryPlaythroughsJump()).toBeNull();
+      expect(elements.queryStartNewPlaythrough()).toBeNull();
+    });
 
-      it("calls updatePlaythroughFn with run A's id — not createPlaythroughFn", async () => {
-        await waitFor(() => {
-          expect(vi.mocked(updatePlaythroughFn)).toHaveBeenCalledWith(
-            expect.objectContaining({
-              data: expect.objectContaining({ id: "pt-run-a" }),
-            })
-          );
-        });
-        expect(vi.mocked(createPlaythroughFn)).not.toHaveBeenCalled();
+    it("offers a collapsed History section", () => {
+      expect(elements.queryHistoryToggle()).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      );
+    });
+
+    it("lists the plays newest first once History is expanded", async () => {
+      await userEvent.click(elements.queryHistoryToggle()!);
+      const entries = within(screen.getByTestId("play-history"))
+        .getAllByRole("listitem")
+        .map((li) => li.textContent);
+      expect(entries).toEqual([
+        "3 Mar 2024 \u2013 20 Mar 2024",
+        "5 Jan 2024 \u2013 19 Jan 2024",
+      ]);
+    });
+  });
+
+  describe("given a signed-in viewer with no ended plays", () => {
+    beforeEach(() => {
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("shows no History section", () => {
+      expect(elements.queryHistoryToggle()).toBeNull();
+    });
+  });
+
+  describe("given a signed-in viewer who rated the game 7", () => {
+    beforeEach(() => {
+      vi.mocked(updateLibraryItemFn).mockReset();
+      vi.mocked(updateLibraryItemFn).mockResolvedValue({} as never);
+      render(
+        <GameDetail
+          data={buildData(buildLibraryItem({ id: 42, rating: 7 }))}
+          viewerUserId="user-1"
+        />
+      );
+    });
+
+    it("shows a single rating of three and a half stars and no Best rating", () => {
+      expect(
+        screen.getAllByRole("slider", { name: "Rated 3.5 of 5" })
+      ).toHaveLength(1);
+      expect(screen.queryByText(/best rating/i)).toBeNull();
+    });
+
+    it("saves a changed rating through updateLibraryItemFn", async () => {
+      await userEvent.click(screen.getByTestId("rating-star-5"));
+      await waitFor(() =>
+        expect(vi.mocked(updateLibraryItemFn)).toHaveBeenCalledWith({
+          data: { itemId: 42, rating: 10 },
+        })
+      );
+    });
+  });
+
+  describe("Log time (spec 2.15)", () => {
+    const getLogTimeButtons = () =>
+      screen.queryAllByRole("button", { name: "Log time" });
+
+    it("opens the Log form with the game chosen when the viewer has the game in their library", async () => {
+      mockNavigate.mockReset();
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+
+      const [first] = getLogTimeButtons();
+      await userEvent.click(first!);
+
+      const updater = mockNavigate.mock.calls[0]![0].search as (
+        prev: Record<string, unknown>
+      ) => Record<string, unknown>;
+      expect(updater({})).toMatchObject({
+        action: "log-session",
+        game: "hollow-knight",
       });
     });
 
-    describe("when the user opens the drawer for run A then closes and opens for run B", () => {
-      beforeEach(async () => {
-        render(
-          <GameDetail
-            data={{
-              ...buildData(buildLibraryEntry()),
-              playthroughs: [runA, runB],
-            }}
-            viewerUserId="user-1"
-          />
-        );
-        const [editRunA] = screen.getAllByRole("button", { name: "Edit" });
-        await userEvent.click(editRunA!);
-        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-        const editButtons = screen.getAllByRole("button", { name: "Edit" });
-        await userEvent.click(editButtons[1]!);
-      });
+    it("navigates relative to the current page so the game page stays open", async () => {
+      mockNavigate.mockReset();
+      mockUseNavigate.mockReset();
+      render(
+        <GameDetail
+          data={buildData(buildLibraryEntry())}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
 
-      it("shows run B's notes in the Notes field — not run A's stale values", async () => {
-        const notesField = screen.getByLabelText(
-          "Notes"
-        ) as HTMLTextAreaElement;
-        expect(notesField.value).toBe("Run B notes");
-      });
+      const rail = screen.getByTestId("game-detail-detail-rail");
+      await userEvent.click(
+        within(rail).getByRole("button", { name: "Log time" })
+      );
+
+      expect(mockNavigate.mock.calls[0]![0].to).toBe(".");
+      for (const [options] of mockUseNavigate.mock.calls) {
+        expect(options?.from).toBeUndefined();
+      }
+    });
+
+    it("shows no Log time when the game is not in the viewer's library", () => {
+      render(
+        <GameDetail
+          data={buildData(null)}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+      expect(getLogTimeButtons()).toHaveLength(0);
+    });
+
+    it("shows no Log time to a signed-out visitor", () => {
+      render(
+        <GameDetail
+          data={buildData(null)}
+          viewerUserId={null}
+          gameSlug="hollow-knight"
+        />
+      );
+      expect(getLogTimeButtons()).toHaveLength(0);
     });
   });
 
@@ -1050,16 +1156,16 @@ describe("GameDetail", () => {
         expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
       });
 
-      it("renders the status switcher inside the detail rail", () => {
+      it("renders the library controls inside the detail rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
-        const switcher = within(rail).queryByTestId("library-status-switcher");
+        const switcher = within(rail).queryByTestId("game-library-controls");
         expect(switcher).not.toBeNull();
       });
 
-      it("renders a Log a session CTA inside the detail rail", () => {
+      it("renders a Log time button inside the detail rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
         const logBtn = within(rail).queryByRole("button", {
-          name: "Log a session",
+          name: "Log time",
         });
         expect(logBtn).not.toBeNull();
       });
@@ -1070,9 +1176,9 @@ describe("GameDetail", () => {
         expect(ring).not.toBeNull();
       });
 
-      it("renders a Your time summary section inside the detail rail", () => {
+      it("shows the Time played label inside the detail rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
-        expect(within(rail).queryByText("Your time")).not.toBeNull();
+        expect(within(rail).queryByText("Time played")).not.toBeNull();
       });
 
       it("renders the jump spine in the DOM (both mobile and desktop variants)", () => {
@@ -1117,12 +1223,14 @@ describe("GameDetail", () => {
         );
       });
 
-      it("shows total played time in the Your time section inside the rail", () => {
+      it("shows time played and no old labels inside the rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
-        expect(within(rail).queryByText("Total played")).not.toBeNull();
+        expect(within(rail).queryByText("Time played")).not.toBeNull();
+        expect(within(rail).queryByText("Total played")).toBeNull();
+        expect(within(rail).queryByText("Your time")).toBeNull();
       });
 
-      it("shows sessions count in the Your time section inside the rail", () => {
+      it("shows the sessions count inside the rail", () => {
         const rail = screen.getByTestId("game-detail-detail-rail");
         expect(within(rail).queryByText("Sessions")).not.toBeNull();
       });
@@ -1177,6 +1285,96 @@ describe("GameDetail", () => {
             Node.DOCUMENT_POSITION_PRECEDING
           )
         ).toBe(true);
+      });
+    });
+  });
+
+  describe("given a signed-in viewer with a played game (earlier plays)", () => {
+    const renderGame = (status: "WANT" | "PLAYING") =>
+      render(
+        <GameDetail
+          data={buildData(buildLibraryItem({ id: 42, status }))}
+          viewerUserId="user-1"
+          gameSlug="hollow-knight"
+        />
+      );
+
+    beforeEach(() => {
+      vi.mocked(setStatusFn).mockReset();
+      vi.mocked(toast.error).mockReset();
+    });
+
+    describe("when the header pill is tapped", () => {
+      beforeEach(async () => {
+        renderGame("PLAYING");
+        await userEvent.click(elements.getHeaderStatusPill("Playing"));
+      });
+
+      it("opens a picker with Want, Playing and Done", () => {
+        expect(
+          elements.getStatusRadios().map((radio) => radio.textContent)
+        ).toEqual(["Want", "Playing", "Done"]);
+      });
+
+      describe("and Done is picked", () => {
+        beforeEach(async () => {
+          vi.mocked(setStatusFn).mockResolvedValue({
+            status: "DONE",
+            upNextPosition: null,
+            undo: {} as never,
+          });
+          await userEvent.click(elements.getStatusRadio("Done"));
+        });
+
+        it("shows Done in the header pill", async () => {
+          await waitFor(() => {
+            expect(elements.getHeaderStatusPill("Done")).toBeDefined();
+          });
+        });
+
+        it("shows Done in the phone action bar pill", async () => {
+          await waitFor(() => {
+            expect(elements.getActionBarStatusPill("Done")).toBeDefined();
+          });
+        });
+      });
+    });
+
+    describe("when Start playing is tapped on a Want game", () => {
+      beforeEach(async () => {
+        vi.mocked(setStatusFn).mockResolvedValue({
+          status: "PLAYING",
+          upNextPosition: null,
+          undo: {} as never,
+        });
+        renderGame("WANT");
+        await userEvent.click(elements.getNextStepButton("Start playing"));
+      });
+
+      it("shows Playing in the header and the phone action bar", async () => {
+        await waitFor(() => {
+          expect(elements.getHeaderStatusPill("Playing")).toBeDefined();
+          expect(elements.getActionBarStatusPill("Playing")).toBeDefined();
+        });
+      });
+    });
+
+    describe("when saving the status fails", () => {
+      beforeEach(async () => {
+        vi.mocked(setStatusFn).mockRejectedValue(new Error("boom"));
+        renderGame("PLAYING");
+        await userEvent.click(elements.getHeaderStatusPill("Playing"));
+        await userEvent.click(elements.getStatusRadio("Done"));
+      });
+
+      it("keeps the previous status in the header and the phone bar", async () => {
+        await waitFor(() => {
+          expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
+            "Couldn't save. Try again."
+          );
+        });
+        expect(elements.getHeaderStatusPill("Playing")).toBeDefined();
+        expect(elements.getActionBarStatusPill("Playing")).toBeDefined();
       });
     });
   });
