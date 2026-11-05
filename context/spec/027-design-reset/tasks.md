@@ -16,7 +16,7 @@ Conventions for every slice:
 
 ---
 
-- [ ] **Slice 1: Review script produces the phase-1 "before" set and phone checks**
+- [x] **Slice 1: Review script produces the phase-1 "before" set and phone checks**
   - [x] Re-count the research-notes inventory on the post-026 code and append a dated "post-026 re-count" section to `context/spec/027-design-reset/research-notes.md`. Cover: semantic spacing/typography uses, `asChild`, trigger call sites, `onSelect`, `onInteractOutside`, cover treatments, status-chip implementations, `// LABEL` strings, `text-[10px]/[11px]`, and native `<button>`. **[Agent: react-frontend]**
   - [x] Add `@playwright/test` as an exact-pinned devDependency (dev-only, not a CI test tier) and install Chromium.
     - Create `scripts/design-review/capture.ts` and a screen list `scripts/design-review/screens.ts`. The list covers every screen in functional-spec §2.0, including the empty, loading, error and not-found states that can be reached with seeded data.
@@ -30,7 +30,7 @@ Conventions for every slice:
     - No clipped or overlapping interactive elements.
     - Write `report.json` next to the images, listing each failure with selector, screen and width. **[Agent: testing]**
   - [x] Capture the phase-1 "before" set (phone in Light and Dark; desktop in Light and Dark) and the baseline `report.json`. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Start the app (record the PID) and run the script end to end. Confirm the PNGs exist for every screen and both modes, and that `report.json` lists today's known failures, such as 14px inputs and 10–11px labels.
     - Confirm `git status` shows no files under `review/`.
     - Stop the dev server by PID. Delete any extra screenshots and traces created outside `review/before/`. **[Agent: testing]**
