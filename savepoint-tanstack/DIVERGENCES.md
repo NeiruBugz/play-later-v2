@@ -1905,3 +1905,15 @@ prints per-run deprecation diagnostics; migrate to object-selectors + `{{...}}`.
   These pre-date Slice 23 but were invisible while the linter was alias-blind;
   now surfaced and accepted as composition. The boundaries config allows
   `widgets→widgets` wholesale, so this list is the human/code-review discipline.
+
+## Spec 027 — Design reset (custom styling layer removed, Radix to Base UI)
+
+Spec 022's design-system v2 shipped a custom styling layer on top of Tailwind: semantic spacing utilities (`p-lg`, `px-xl`), semantic type utilities (`heading-md`, terminal-style section labels), a custom shadow (`shadow-paper`) and `radix-ui` based primitives. Spec 027 replaces it; earlier entries above that describe the old layer are historical and are not edited.
+
+**Resolution.**
+
+- **Custom layer to stock.** The semantic spacing, type and shadow utilities are deleted from [`src/styles.css`](./src/styles.css), which now holds only tokens (color, radius, fonts) and the few repo `@utility` blocks. Call sites use stock Tailwind utilities.
+- **Radix to Base UI.** `shared/ui/` primitives are the stock shadcn `base-maia` output built on `@base-ui/react`; `radix-ui` is no longer a primitive dependency.
+- **Stock output is the source of truth.** Pull with `shadcn view <name>` in a scratch directory outside the repo, never `shadcn init` or `shadcn apply` against the repo. Deliberate deviations (44px tap targets, no-zoom inputs, solid focus ring, sheet layout, toaster) and API-preserving additions (`Button` `loading`, `Badge`/`Alert` variants, `Separator` `decorative`, `Card` `variant`) are listed in [`src/shared/ui/README.md`](./src/shared/ui/README.md).
+- **Lint-enforced.** `eslint-plugin-better-tailwindcss` (`no-unknown-classes`, `no-conflicting-classes`, `no-restricted-classes`) plus `no-restricted-syntax` for inline colors keep the layer from returning; rule tests live in `test/eslint/`.
+- **Tooling.** `prettier-plugin-tailwindcss` 0.8.1 with `tailwindStylesheet: "./src/styles.css"` sorts classes against the v4 stylesheet; `tailwind-merge` 3.7.0 (Tailwind v4 class model) backs `cn()`, covered by `src/shared/lib/utils.test.ts`.
