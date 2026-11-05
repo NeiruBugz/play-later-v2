@@ -206,13 +206,20 @@ describe("updateProfileWorker", () => {
       });
     });
 
-    it("sets the image url on the user record", async () => {
-      const imageUrl = "https://example.com/avatar.jpg";
-      await updateProfileWorker(userId, { image: imageUrl });
+    it("ignores an image field — avatars are only set through the presigned-key flow", async () => {
+      await updateProfileWorker(userId, {
+        image: "https://evil.example.net/avatar.jpg",
+      });
       const updated = await db.prisma.user.findUnique({
         where: { id: userId },
       });
-      expect(updated?.image).toBe(imageUrl);
+      expect(updated?.image).toBeNull();
+    });
+
+    it("rejects a name longer than the cap", async () => {
+      await expect(
+        updateProfileWorker(userId, { name: "n".repeat(101) })
+      ).rejects.toThrow();
     });
   });
 });

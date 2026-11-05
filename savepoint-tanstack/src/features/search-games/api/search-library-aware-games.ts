@@ -7,6 +7,7 @@ import {
   type LibraryAwareSearchResult,
 } from "@/entities/library-item/api/search-library-aware-games.worker";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
+import { enforceSearchRateLimit } from "@/shared/api/search-rate-limit.server";
 
 /**
  * Library-aware IGDB search. Anonymous-allowed: search needs no auth, so we
@@ -17,5 +18,6 @@ export const searchLibraryAwareGamesFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => SEARCH_LIBRARY_AWARE_INPUT.parse(data))
   .handler(async ({ data }): Promise<LibraryAwareSearchResult> => {
     const userId = await getServerUserId(getRequest());
+    await enforceSearchRateLimit(userId);
     return searchLibraryAwareGamesWorker(userId, data);
   });

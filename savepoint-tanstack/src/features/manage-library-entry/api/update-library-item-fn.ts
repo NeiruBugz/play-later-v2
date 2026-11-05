@@ -14,10 +14,10 @@ import type { LibraryItem } from "../../../../shared/lib/prisma/client.ts";
  * - Explicit `null` clears the column at the entity layer; `undefined` leaves
  *   it untouched.
  */
-const UPDATE_LIBRARY_ITEM_INPUT = z.object({
+export const UPDATE_LIBRARY_ITEM_INPUT = z.object({
   itemId: z.number().int().positive(),
   rating: z.number().int().min(1).max(10).nullable().optional(),
-  platform: z.string().min(1).nullable().optional(),
+  platform: z.string().min(1).max(64).nullable().optional(),
 });
 
 export const updateLibraryItemFn = createServerFn({ method: "POST" })

@@ -1,7 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { setAvatarUrlWorker } from "@/features/upload-avatar/api/set-avatar-url.worker";
-import { UnauthorizedError } from "@/shared/lib/errors";
+import {
+  AVATAR_PATH_PREFIX,
+  buildAvatarPublicUrl,
+} from "@/shared/api/s3.server";
+import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
 
 import {
   setupIsolatedDatabase,
@@ -27,46 +31,83 @@ beforeEach(async () => {
   await db.prisma.user.deleteMany();
 });
 
+const userId = "set-avatar-url-user-001";
+const otherUserId = "set-avatar-url-user-002";
+const ownKey = `${AVATAR_PATH_PREFIX}${userId}/0b1f.png`;
+
+async function readImage() {
+  const user = await db.prisma.user.findUnique({ where: { id: userId } });
+  return user?.image;
+}
+
 describe("setAvatarUrlWorker", () => {
-  describe("given an authenticated user and a valid public URL", () => {
-    const userId = "set-avatar-url-user-001";
-    const avatarUrl =
-      "https://s3.example.com/avatars/set-avatar-url-user-001.png";
-
-    beforeEach(async () => {
-      await db.prisma.user.create({
-        data: {
-          id: userId,
-          email: "set-avatar-url-happy@example.com",
-          name: "Avatar Test User",
-          emailVerified: true,
-          username: "avatartestuser",
-          usernameNormalized: "avatartestuser",
-          image: null,
-          isPublicProfile: false,
-          createdAt: new Date("2024-01-01T00:00:00.000Z"),
-          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-        },
-      });
-
-      await setAvatarUrlWorker(userId, { url: avatarUrl });
+  beforeEach(async () => {
+    await db.prisma.user.create({
+      data: {
+        id: userId,
+        email: "set-avatar-url-happy@example.com",
+        name: "Avatar Test User",
+        emailVerified: true,
+        username: "avatartestuser",
+        usernameNormalized: "avatartestuser",
+        image: null,
+        isPublicProfile: false,
+        createdAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+      },
     });
+  });
 
-    it("persists the URL to the user image field", async () => {
-      const updated = await db.prisma.user.findUnique({
-        where: { id: userId },
-      });
+  describe("given a key under the user's own avatar prefix", () => {
+    it("persists the canonical public URL built from the key", async () => {
+      await setAvatarUrlWorker(userId, { key: ownKey });
 
-      expect(updated?.image).toBe(avatarUrl);
+      const image = await readImage();
+      expect(image).toBe(buildAvatarPublicUrl(ownKey));
+      expect(image).toContain(ownKey);
+    });
+  });
+
+  describe("given a key under another user's prefix", () => {
+    it("rejects with ValidationError and leaves the image untouched", async () => {
+      await expect(
+        setAvatarUrlWorker(userId, {
+          key: `${AVATAR_PATH_PREFIX}${otherUserId}/0b1f.png`,
+        })
+      ).rejects.toBeInstanceOf(ValidationError);
+      expect(await readImage()).toBeNull();
+    });
+  });
+
+  describe("given a key that climbs out of the user's prefix", () => {
+    it("rejects with ValidationError", async () => {
+      await expect(
+        setAvatarUrlWorker(userId, {
+          key: `${AVATAR_PATH_PREFIX}${userId}/../${otherUserId}/0b1f.png`,
+        })
+      ).rejects.toBeInstanceOf(ValidationError);
+      expect(await readImage()).toBeNull();
+    });
+  });
+
+  describe("given a URL on a foreign host instead of a key", () => {
+    it("rejects with ValidationError and persists nothing", async () => {
+      await expect(
+        setAvatarUrlWorker(userId, { url: "https://evil.example.net/a.png" })
+      ).rejects.toThrow();
+      await expect(
+        setAvatarUrlWorker(userId, {
+          key: "https://evil.example.net/a.png",
+        })
+      ).rejects.toBeInstanceOf(ValidationError);
+      expect(await readImage()).toBeNull();
     });
   });
 
   describe("given an unauthenticated request", () => {
     it("rejects with UnauthorizedError", async () => {
       await expect(
-        setAvatarUrlWorker(undefined, {
-          url: "https://s3.example.com/avatars/any.png",
-        })
+        setAvatarUrlWorker(undefined, { key: ownKey })
       ).rejects.toBeInstanceOf(UnauthorizedError);
     });
   });

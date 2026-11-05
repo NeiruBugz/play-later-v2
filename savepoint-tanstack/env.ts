@@ -71,6 +71,7 @@ export const env = createEnv({
       }),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    VERCEL: z.string().optional(),
   },
   client: {},
   shared: {
@@ -112,6 +113,7 @@ export const env = createEnv({
     S3_AVATAR_PATH_PREFIX: process.env.S3_AVATAR_PATH_PREFIX,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    VERCEL: process.env.VERCEL,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,

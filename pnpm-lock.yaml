@@ -125,6 +125,12 @@ importers:
       '@tanstack/react-start':
         specifier: 1.168.61
         version: 1.168.61(crossws@0.4.5(srvx@0.11.15))(esbuild@0.28.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rolldown@1.2.16)(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3))
+      '@upstash/ratelimit':
+        specifier: 2.2.0
+        version: 2.2.0(@upstash/redis@1.40.0)
+      '@upstash/redis':
+        specifier: 1.40.0
+        version: 1.40.0
       better-auth:
         specifier: 1.7.14
         version: 1.7.14(@prisma/client@7.10.1(prisma@7.10.1(@types/node@22.10.2)(@types/react-dom@19.2.0(@types/react@19.2.0))(@types/react@19.2.0)(magicast@0.5.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@6.0.3))(typescript@6.0.3))(@tanstack/react-start@1.168.61(crossws@0.4.5(srvx@0.11.15))(esbuild@0.28.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rolldown@1.2.16)(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3)))(mysql2@3.24.6(@types/node@22.10.2))(pg@8.20.0)(prisma@7.10.1(@types/node@22.10.2)(@types/react-dom@19.2.0(@types/react@19.2.0))(@types/react@19.2.0)(magicast@0.5.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@6.0.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(solid-js@1.9.12)(vitest@4.1.5)
@@ -142,7 +148,7 @@ importers:
         version: 0.545.0(react@19.2.0)
       nitro:
         specifier: 3.0.260522-beta
-        version: 3.0.260522-beta(@electric-sql/pglite@0.4.3)(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(lru-cache@11.3.6)(mysql2@3.24.6(@types/node@22.10.2))(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3))
+        version: 3.0.260522-beta(@electric-sql/pglite@0.4.3)(@upstash/redis@1.40.0)(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(lru-cache@11.3.6)(mysql2@3.24.6(@types/node@22.10.2))(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3))
       pg:
         specifier: 8.20.0
         version: 8.20.0
@@ -2800,6 +2806,18 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@upstash/core-analytics@0.0.10':
+    resolution: {integrity: sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==}
+    engines: {node: '>=16.0.0'}
+
+  '@upstash/ratelimit@2.2.0':
+    resolution: {integrity: sha512-gSydXspG6TJKTh71/gGGv4IGDjD9rXglQfm2jAue2kh4bcfWtEAsG1NW4OqzZd/hubJPojsbOU6AMdS6Xqh0tQ==}
+    peerDependencies:
+      '@upstash/redis': ^1.38.2
+
+  '@upstash/redis@1.40.0':
+    resolution: {integrity: sha512-F6+V7Kof2McJtGWclusZLt7hBRmIMZg+albS32/5TuNRg/92FM2nkyKPY9wWEieMj9hjyUi4iURsN1djsHNbwA==}
+
   '@visx/curve@4.0.1-alpha.0':
     resolution: {integrity: sha512-jRu61Uz274pV1zyioXmboyrLutYbnKsgjj4njSGCnhdXj5GkZvZbg+ThDb6oOzoAnJOBRLz4rzPlWvNJOzuVMg==}
 
@@ -5281,6 +5299,9 @@ packages:
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
+
+  uncrypto@0.1.3:
+    resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
 
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
@@ -8666,6 +8687,19 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
+  '@upstash/core-analytics@0.0.10':
+    dependencies:
+      '@upstash/redis': 1.40.0
+
+  '@upstash/ratelimit@2.2.0(@upstash/redis@1.40.0)':
+    dependencies:
+      '@upstash/core-analytics': 0.0.10
+      '@upstash/redis': 1.40.0
+
+  '@upstash/redis@1.40.0':
+    dependencies:
+      uncrypto: 0.1.3
+
   '@visx/curve@4.0.1-alpha.0':
     dependencies:
       '@visx/vendor': 4.0.0-alpha.0
@@ -10437,7 +10471,7 @@ snapshots:
 
   nf3@0.3.17: {}
 
-  nitro@3.0.260522-beta(@electric-sql/pglite@0.4.3)(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(lru-cache@11.3.6)(mysql2@3.24.6(@types/node@22.10.2))(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3)):
+  nitro@3.0.260522-beta(@electric-sql/pglite@0.4.3)(@upstash/redis@1.40.0)(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(lru-cache@11.3.6)(mysql2@3.24.6(@types/node@22.10.2))(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.5(srvx@0.11.15)
@@ -10452,7 +10486,7 @@ snapshots:
       rolldown: 1.0.2
       srvx: 0.11.15
       unenv: 2.0.0-rc.24
-      unstorage: 2.0.0-alpha.7(chokidar@5.0.0)(db0@0.3.4(@electric-sql/pglite@0.4.3)(mysql2@3.24.6(@types/node@22.10.2)))(lru-cache@11.3.6)(ofetch@2.0.0-alpha.3)
+      unstorage: 2.0.0-alpha.7(@upstash/redis@1.40.0)(chokidar@5.0.0)(db0@0.3.4(@electric-sql/pglite@0.4.3)(mysql2@3.24.6(@types/node@22.10.2)))(lru-cache@11.3.6)(ofetch@2.0.0-alpha.3)
     optionalDependencies:
       dotenv: 17.4.2
       giget: 3.3.1
@@ -11341,6 +11375,8 @@ snapshots:
       which-boxed-primitive: 1.1.1
     optional: true
 
+  uncrypto@0.1.3: {}
+
   undici-types@6.20.0: {}
 
   undici-types@7.16.0: {}
@@ -11386,8 +11422,9 @@ snapshots:
       '@unrs/resolver-binding-win32-ia32-msvc': 1.11.1
       '@unrs/resolver-binding-win32-x64-msvc': 1.11.1
 
-  unstorage@2.0.0-alpha.7(chokidar@5.0.0)(db0@0.3.4(@electric-sql/pglite@0.4.3)(mysql2@3.24.6(@types/node@22.10.2)))(lru-cache@11.3.6)(ofetch@2.0.0-alpha.3):
+  unstorage@2.0.0-alpha.7(@upstash/redis@1.40.0)(chokidar@5.0.0)(db0@0.3.4(@electric-sql/pglite@0.4.3)(mysql2@3.24.6(@types/node@22.10.2)))(lru-cache@11.3.6)(ofetch@2.0.0-alpha.3):
     optionalDependencies:
+      '@upstash/redis': 1.40.0
       chokidar: 5.0.0
       db0: 0.3.4(@electric-sql/pglite@0.4.3)(mysql2@3.24.6(@types/node@22.10.2))
       lru-cache: 11.3.6

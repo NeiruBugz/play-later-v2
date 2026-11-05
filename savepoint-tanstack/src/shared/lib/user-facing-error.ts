@@ -11,6 +11,7 @@ const MESSAGES_BY_APP_ERROR_CODE: Record<AppErrorCode, string> = {
 };
 
 const MESSAGES_BY_SPECIFIC_CODE: Record<string, string> = {
+  RATE_LIMITED: "Too many searches. Wait a moment and try again.",
   UP_NEXT_FULL: "Up Next holds 5 games. Remove one to add this.",
   TIME_NEEDS_GAME: "Choose a game to log time.",
   UNDO_ADD_UNAVAILABLE:

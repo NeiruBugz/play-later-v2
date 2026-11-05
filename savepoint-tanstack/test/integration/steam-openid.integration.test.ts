@@ -5,7 +5,7 @@
  * `fetch` is stubbed via `vi.stubGlobal`.
  *
  * Contract:
- *   verifyOpenIdResponse(params: Record<string, string>): Promise<string>
+ *   verifyOpenIdResponse(params: Record<string, string>, { userId }): Promise<string>
  *     - throws ValidationError when openid.mode !== "id_res"
  *     - throws ValidationError when claimed_id is missing
  *     - throws ValidationError when steamid64 cannot be extracted from claimed_id
@@ -18,21 +18,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { verifyOpenIdResponse } from "@/shared/api/steam";
 import { UpstreamError, ValidationError } from "@/shared/lib/errors";
 
-const STEAM_ID_64 = "76561198012345678";
+import {
+  buildValidOpenIdParams,
+  STEAM_ID_64,
+} from "../support/steam-openid-params.ts";
 
-const VALID_PARAMS: Record<string, string> = {
-  "openid.mode": "id_res",
-  "openid.ns": "http://specs.openid.net/auth/2.0",
-  "openid.claimed_id": `https://steamcommunity.com/openid/id/${STEAM_ID_64}`,
-  "openid.identity": `https://steamcommunity.com/openid/id/${STEAM_ID_64}`,
-  "openid.return_to": "http://localhost:6061/api/steam/callback",
-  "openid.sig": "test-signature",
-  "openid.signed":
-    "signed,op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle",
-  "openid.assoc_handle": "12345",
-  "openid.response_nonce": "2026-05-20T00:00:00Zabcdef",
-  "openid.op_endpoint": "https://steamcommunity.com/openid/login",
-};
+const USER_ID = "openid-user";
+const VALID_PARAMS = buildValidOpenIdParams(USER_ID);
 
 function makeFetchResponse(init: {
   ok: boolean;
@@ -68,7 +60,9 @@ describe("verifyOpenIdResponse", () => {
     });
 
     it("returns the verified Steam ID64", async () => {
-      const result = await verifyOpenIdResponse(VALID_PARAMS);
+      const result = await verifyOpenIdResponse(VALID_PARAMS, {
+        userId: USER_ID,
+      });
       expect(result).toBe(STEAM_ID_64);
     });
 
@@ -80,7 +74,7 @@ describe("verifyOpenIdResponse", () => {
         );
       vi.stubGlobal("fetch", spy);
 
-      await verifyOpenIdResponse(VALID_PARAMS);
+      await verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID });
       const [url, init] = spy.mock.calls[0] ?? [];
       expect(String(url)).toBe("https://steamcommunity.com/openid/login");
       expect(init?.method).toBe("POST");
@@ -92,8 +86,8 @@ describe("verifyOpenIdResponse", () => {
     });
 
     it("is idempotent — re-verifying the same params yields the same Steam ID", async () => {
-      const a = await verifyOpenIdResponse(VALID_PARAMS);
-      const b = await verifyOpenIdResponse(VALID_PARAMS);
+      const a = await verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID });
+      const b = await verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID });
       expect(a).toBe(b);
       expect(a).toBe(STEAM_ID_64);
     });
@@ -113,9 +107,9 @@ describe("verifyOpenIdResponse", () => {
     });
 
     it("throws ValidationError (forged or expired signature)", async () => {
-      await expect(verifyOpenIdResponse(VALID_PARAMS)).rejects.toBeInstanceOf(
-        ValidationError
-      );
+      await expect(
+        verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(ValidationError);
     });
   });
 
@@ -125,7 +119,10 @@ describe("verifyOpenIdResponse", () => {
       vi.stubGlobal("fetch", spy);
 
       await expect(
-        verifyOpenIdResponse({ ...VALID_PARAMS, "openid.mode": "cancel" })
+        verifyOpenIdResponse(
+          { ...VALID_PARAMS, "openid.mode": "cancel" },
+          { userId: USER_ID }
+        )
       ).rejects.toBeInstanceOf(ValidationError);
       expect(spy).not.toHaveBeenCalled();
     });
@@ -143,9 +140,9 @@ describe("verifyOpenIdResponse", () => {
       );
       const rest = { ...VALID_PARAMS };
       delete rest["openid.claimed_id"];
-      await expect(verifyOpenIdResponse(rest)).rejects.toBeInstanceOf(
-        ValidationError
-      );
+      await expect(
+        verifyOpenIdResponse(rest, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(ValidationError);
     });
   });
 
@@ -160,11 +157,14 @@ describe("verifyOpenIdResponse", () => {
           )
       );
       await expect(
-        verifyOpenIdResponse({
-          ...VALID_PARAMS,
-          "openid.claimed_id":
-            "https://steamcommunity.com/openid/notanid/banana",
-        })
+        verifyOpenIdResponse(
+          {
+            ...VALID_PARAMS,
+            "openid.claimed_id":
+              "https://steamcommunity.com/openid/notanid/banana",
+          },
+          { userId: USER_ID }
+        )
       ).rejects.toBeInstanceOf(ValidationError);
     });
   });
@@ -175,9 +175,9 @@ describe("verifyOpenIdResponse", () => {
         "fetch",
         vi.fn().mockRejectedValue(new TypeError("fetch failed"))
       );
-      await expect(verifyOpenIdResponse(VALID_PARAMS)).rejects.toBeInstanceOf(
-        UpstreamError
-      );
+      await expect(
+        verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(UpstreamError);
     });
 
     it("throws UpstreamError on non-2xx response", async () => {
@@ -189,9 +189,9 @@ describe("verifyOpenIdResponse", () => {
             makeFetchResponse({ ok: false, status: 500, body: "boom" })
           )
       );
-      await expect(verifyOpenIdResponse(VALID_PARAMS)).rejects.toBeInstanceOf(
-        UpstreamError
-      );
+      await expect(
+        verifyOpenIdResponse(VALID_PARAMS, { userId: USER_ID })
+      ).rejects.toBeInstanceOf(UpstreamError);
     });
   });
 });

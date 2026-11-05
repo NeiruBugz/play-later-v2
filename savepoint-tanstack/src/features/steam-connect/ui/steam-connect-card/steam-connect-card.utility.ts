@@ -7,12 +7,18 @@
  * signed response, which the `/steam/callback` route verifies via
  * `connectSteamFn`.
  *
+ * `state` is the signed, user-bound value from `createSteamLoginState`; it
+ * rides inside `return_to` (which Steam signs) and is checked on callback.
+ *
  * `realm` MUST be the bare origin (no path). `returnTo` MUST be on the same
  * origin/realm.
  */
-export function buildSteamOpenIdLoginUrl(returnToOrigin: string): string {
+export function buildSteamOpenIdLoginUrl(
+  returnToOrigin: string,
+  state: string
+): string {
   const realm = returnToOrigin;
-  const returnTo = `${returnToOrigin}/steam/callback`;
+  const returnTo = `${returnToOrigin}/steam/callback?state=${encodeURIComponent(state)}`;
   const params = new URLSearchParams({
     "openid.ns": "http://specs.openid.net/auth/2.0",
     "openid.mode": "checkid_setup",

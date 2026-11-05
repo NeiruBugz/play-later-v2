@@ -8,7 +8,6 @@ import type { Profile } from "../model/types";
 export interface UpdateProfileInput {
   name?: string;
   username?: string;
-  image?: string;
   isPublicProfile?: boolean;
 }
 
@@ -33,9 +32,6 @@ export async function updateProfile(
     const trimmed = input.username.trim();
     data.username = trimmed;
     data.usernameNormalized = trimmed.toLowerCase();
-  }
-  if (input.image !== undefined) {
-    data.image = input.image;
   }
   if (input.isPublicProfile !== undefined) {
     data.isPublicProfile = input.isPublicProfile;

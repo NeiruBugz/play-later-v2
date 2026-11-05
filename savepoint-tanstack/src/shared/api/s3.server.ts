@@ -51,3 +51,17 @@ export const AVATAR_MIME_ALLOW_LIST: readonly string[] = [
 
 // 10 MB — intentionally higher than canonical's 4 MB (DIVERGENCES.md §S021/2.7).
 export const AVATAR_MAX_BYTES: number = 10 * 1024 * 1024;
+
+export function buildAvatarPublicUrl(key: string): string {
+  if (env.AWS_ENDPOINT_URL) {
+    return `${env.AWS_ENDPOINT_URL}/${AVATAR_BUCKET}/${key}`;
+  }
+  return `https://${AVATAR_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${key}`;
+}
+
+export function isAvatarKeyOwnedBy(userId: string, key: string): boolean {
+  return (
+    key.startsWith(`${AVATAR_PATH_PREFIX}${userId}/`) &&
+    !key.split("/").includes("..")
+  );
+}
