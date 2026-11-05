@@ -88,7 +88,6 @@ export default defineConfig({
             "src/**/*.test.{ts,tsx}",
             "test/canary/**/*.canary.test.{ts,tsx}",
             "test/eslint/**/*.test.{ts,tsx}",
-            "scripts/codemods/**/*.test.ts",
           ],
           exclude: [
             "**/node_modules/**",
