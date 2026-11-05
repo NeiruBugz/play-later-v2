@@ -1,4 +1,3 @@
-<!-- not-user-reviewed -->
 # Tasks: Design reset (spec 027)
 
 - **Functional spec:** [functional-spec.md](./functional-spec.md)
