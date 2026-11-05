@@ -146,7 +146,7 @@ Conventions for every slice:
       - switching Light and Dark changes only colors.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 9: Every screen is on stock spacing and type, with plain section labels**
+- [x] **Slice 9: Every screen is on stock spacing and type, with plain section labels**
   - [x] Write the dev-only codemod `scripts/codemods/tailwind-semantic.ts` (ts-morph).
     - It reads the current values from `styles.css` and maps semantic spacing to numeric Tailwind steps, the type classes to stock sizes, and `shadow-paper-*` to `shadow-xs/sm/md`.
     - It touches only string literals in `className`, `cn()` and `cva()`.
@@ -159,7 +159,7 @@ Conventions for every slice:
     - Unknown URLs (`defaultNotFoundComponent`) render the not-found state with `PageHeader`, like the per-route not-found states.
     - Sign-in: its visible title uses the `PageHeader` style.
     - The review script's body-text rule treats `[data-slot=section-label]` as a label. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, assert on every screen that:
       - no text starts with `//`;
