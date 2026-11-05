@@ -256,7 +256,7 @@ export function ImportedGamesFilterBar({
               commitSearch();
             }
           }}
-          className="pr-9 pl-9"
+          className="px-8"
           aria-label="Search Steam games"
         />
         {searchValue ? (

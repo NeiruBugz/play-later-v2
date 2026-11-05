@@ -23,9 +23,7 @@ export function EmptyLibraryHero({
     <Card
       variant="outlined"
       data-testid="empty-library-hero"
-      className={cn(
-        "p-3xl gap-xl flex w-full flex-col items-center text-center"
-      )}
+      className={cn("flex w-full flex-col items-center gap-4 p-8 text-center")}
     >
       <div
         aria-hidden="true"
@@ -39,11 +37,11 @@ export function EmptyLibraryHero({
         <Sparkles className="text-primary absolute -top-2 -right-2 h-5 w-5" />
       </div>
 
-      <div className="space-y-sm max-w-md">
-        <h2 className="text-h2 font-semibold tracking-tight">
+      <div className="max-w-md space-y-1.5">
+        <h2 className="font-display text-3xl font-semibold tracking-tight">
           Start your library
         </h2>
-        <p className="text-muted-foreground text-body">
+        <p className="text-muted-foreground text-base">
           Track what you&apos;re playing, what you&apos;ve finished, and
           what&apos;s next.
         </p>

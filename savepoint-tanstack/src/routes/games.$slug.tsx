@@ -54,7 +54,7 @@ function GameDetailRoute() {
       timesToBeatSlot={
         <SectionErrorBoundary
           fallback={
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
+            <Card variant="flat" className="flex flex-col gap-2 p-4">
               <SectionErrorMessage
                 headingId="times-to-beat-heading"
                 heading="Times to beat"
@@ -65,7 +65,7 @@ function GameDetailRoute() {
         >
           <Suspense
             fallback={
-              <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <Card variant="flat" className="flex flex-col gap-2 p-4">
                 <TimesToBeatSkeleton />
               </Card>
             }
@@ -77,7 +77,7 @@ function GameDetailRoute() {
       relatedGamesSlot={
         <SectionErrorBoundary
           fallback={
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
+            <Card variant="flat" className="flex flex-col gap-2 p-4">
               <SectionErrorMessage
                 headingId="related-games-heading"
                 heading="Related games"
@@ -88,7 +88,7 @@ function GameDetailRoute() {
         >
           <Suspense
             fallback={
-              <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <Card variant="flat" className="flex flex-col gap-2 p-4">
                 <RelatedGamesSkeleton />
               </Card>
             }
@@ -116,12 +116,15 @@ function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
 
 function RelatedGamesSections({ sections }: { sections: RelatedCollection[] }) {
   return (
-    <Card variant="flat" className="gap-md p-xl flex flex-col">
+    <Card variant="flat" className="flex flex-col gap-2 p-4">
       <section
         aria-labelledby="related-games-heading"
-        className="gap-md flex flex-col"
+        className="flex flex-col gap-2"
       >
-        <h2 id="related-games-heading" className="text-h3">
+        <h2
+          id="related-games-heading"
+          className="font-display text-2xl font-semibold tracking-tight"
+        >
           Related games
         </h2>
         <RelatedGamesTabs
@@ -152,8 +155,11 @@ function SectionErrorMessage({
   message: string;
 }) {
   return (
-    <section aria-labelledby={headingId} className="gap-md flex flex-col">
-      <h2 id={headingId} className="text-h3">
+    <section aria-labelledby={headingId} className="flex flex-col gap-2">
+      <h2
+        id={headingId}
+        className="font-display text-2xl font-semibold tracking-tight"
+      >
         {heading}
       </h2>
       <div role="alert" className="text-destructive text-sm">
@@ -183,9 +189,11 @@ function GameNotFound() {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Game not found</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">
+        Game not found
+      </h1>
       <p>We couldn't find a game matching this URL.</p>
       <p>
         <Link to="/" className="underline">
@@ -204,9 +212,11 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Something went wrong</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">
+        Something went wrong
+      </h1>
       <p>An error occurred while loading this game. Please try again.</p>
       <p>
         <Link to="/" className="underline">

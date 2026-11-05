@@ -83,10 +83,10 @@ export function SearchGamesResults({
     return (
       <div
         role="alert"
-        className="text-destructive border-destructive/20 bg-destructive/5 p-2xl rounded-lg border"
+        className="text-destructive border-destructive/20 bg-destructive/5 rounded-lg border p-6"
       >
         <p className="font-medium">Search unavailable</p>
-        <p className="body-sm text-muted-foreground mt-sm">{errorMessage}</p>
+        <p className="text-muted-foreground mt-1.5 text-sm">{errorMessage}</p>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export function SearchGamesResults({
     return (
       <div
         role="status"
-        className="text-muted-foreground border-border/30 bg-muted/30 p-2xl rounded-lg border text-center"
+        className="text-muted-foreground border-border/30 bg-muted/30 rounded-lg border p-6 text-center"
       >
         No games found matching &ldquo;{query}&rdquo;. Try a different search
         term.
@@ -107,8 +107,8 @@ export function SearchGamesResults({
   }
 
   return (
-    <div aria-live="polite" aria-atomic="false" className="space-y-3xl">
-      <p className="text-muted-foreground body-sm">
+    <div aria-live="polite" aria-atomic="false" className="space-y-8">
+      <p className="text-muted-foreground text-sm">
         {games.length} result{games.length !== 1 ? "s" : ""}
         {ownedCount > 0 ? (
           <>
@@ -142,13 +142,13 @@ export function SearchGamesResults({
                       src={coverUrl}
                       alt={`Cover for ${game.name}`}
                       loading="lazy"
-                      className="shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg object-cover"
+                      className="aspect-[3/4] w-full overflow-hidden rounded-lg object-cover shadow-md"
                     />
                   ) : (
                     <div
                       role="img"
                       aria-label={`Cover for ${game.name}`}
-                      className="bg-muted shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg"
+                      className="bg-muted aspect-[3/4] w-full overflow-hidden rounded-lg shadow-md"
                     />
                   )}
                   {game.library !== null ? (

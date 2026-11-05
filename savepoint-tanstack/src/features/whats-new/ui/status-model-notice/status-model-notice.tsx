@@ -49,9 +49,9 @@ export function StatusModelNotice() {
       description="Every game is Want, Playing or Done. Up Next is a short list of what to play next."
       contentClassName="sm:max-w-md"
     >
-      <dl className="space-y-sm text-sm">
+      <dl className="space-y-1.5 text-sm">
         {STATUS_EXPLANATIONS.map(({ term, meaning }) => (
-          <div key={term} className="gap-sm flex">
+          <div key={term} className="flex gap-1.5">
             <dt className="w-20 shrink-0 font-semibold">{term}</dt>
             <dd className="text-muted-foreground">{meaning}</dd>
           </div>

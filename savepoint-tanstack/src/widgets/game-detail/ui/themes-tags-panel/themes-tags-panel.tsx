@@ -17,7 +17,7 @@ export function ThemesTagsPanel({
   }
 
   return (
-    <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-[max-content_1fr] md:items-baseline">
       {hasThemes ? (
         <>
           <TerminalLabel>{`// THEMES`}</TerminalLabel>

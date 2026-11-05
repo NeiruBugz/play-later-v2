@@ -16,7 +16,7 @@ export function UserConnectionsPage({
   const handle = profile.username ?? "user";
 
   return (
-    <div className="space-y-md container mx-auto max-w-2xl px-4 py-6">
+    <div className="container mx-auto max-w-2xl space-y-2 px-4 py-6">
       <div className="space-y-1">
         <Link
           to="/u/$username"
@@ -25,7 +25,7 @@ export function UserConnectionsPage({
         >
           ← Back to {displayName}
         </Link>
-        <h1 className="heading-lg tracking-tight">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
           {kind === "followers" ? "Followers" : "Following"}
         </h1>
         <p className="text-muted-foreground text-sm">

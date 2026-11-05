@@ -9,9 +9,12 @@ export function TimesToBeatSkeleton() {
     <section
       aria-labelledby="times-to-beat-heading-skeleton"
       aria-busy="true"
-      className="gap-md flex flex-col"
+      className="flex flex-col gap-2"
     >
-      <h2 id="times-to-beat-heading-skeleton" className="text-h3">
+      <h2
+        id="times-to-beat-heading-skeleton"
+        className="font-display text-2xl font-semibold tracking-tight"
+      >
         Times to beat
       </h2>
       <div className="grid grid-cols-2 gap-2">

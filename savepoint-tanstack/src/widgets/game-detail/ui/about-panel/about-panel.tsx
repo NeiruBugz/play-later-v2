@@ -23,14 +23,14 @@ export function AboutPanel({
       {summary ? (
         <p
           aria-label="Game summary"
-          className="text-body text-foreground/85 max-w-[720px] leading-relaxed"
+          className="text-foreground/85 max-w-[720px] text-base"
         >
           {summary}
         </p>
       ) : null}
 
       {facts.length > 0 ? (
-        <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[max-content_1fr] md:items-baseline">
           <span className="terminal-label">// ABOUT</span>
           <dl className="text-sm">
             {facts.map((fact) => (

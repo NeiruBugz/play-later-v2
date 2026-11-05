@@ -24,7 +24,7 @@ export function PlayHistory({ plays }: PlayHistoryProps) {
   const newestFirst = [...plays].sort((a, b) => endedTime(b) - endedTime(a));
 
   return (
-    <section className="gap-md flex flex-col" data-testid="play-history">
+    <section className="flex flex-col gap-2" data-testid="play-history">
       <button
         type="button"
         aria-expanded={open}
@@ -39,7 +39,7 @@ export function PlayHistory({ plays }: PlayHistoryProps) {
         />
       </button>
       {open ? (
-        <ul id="play-history-list" className="gap-xs flex flex-col text-sm">
+        <ul id="play-history-list" className="flex flex-col gap-1 text-sm">
           {newestFirst.map((play) => (
             <li key={play.id} className="tabular-nums">
               {formatRange(play)}

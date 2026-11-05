@@ -294,3 +294,28 @@ Release 1 spacing classes on each component's root element (default variants), f
 | `src/widgets/imported-games-page/ui/imported-games-filter-bar/imported-games-filter-bar.tsx:259` | `Input`         | `pr-9`                                       | `px-3xl`                  | component variant                        |
 | `src/widgets/imported-games-page/ui/imported-games-filter-bar/imported-games-filter-bar.tsx:259` | `Input`         | `pl-9`                                       | `px-3xl`                  | component variant                        |
 | `src/widgets/library-page/ui/library-page/library-page.tsx:353`                                  | `Input`         | `pr-9`                                       | `px-3xl`                  | component variant                        |
+
+### 9.2 decisions
+
+Applied by Slice 9.2 after the codemod ran on `features`, `widgets` and `routes`. Stock Maia spacing now in effect: `Card` has `py-(--card-spacing)` (24px) and `CardContent` `px-(--card-spacing)`; `SheetContent` is `px-6` with `py-6` on `SheetHeader`/`SheetFooter`; `Input` is `px-3`; `Badge` is `px-2`.
+
+| Call site | Call-site class | Decision | Why |
+| --- | --- | --- | --- |
+| `entities/game/ui/platform-badges/platform-badge.tsx:22` | `px-1.5` | removed | Release 1 rendered `Badge` `px-lg` (12px); the stock badge is `px-2`. Chips follow the primitive; Slice 12 reworks them. |
+| `entities/game/ui/platform-badges/platform-badges.tsx:29` | `px-1.5` | removed | Same as above. |
+| `entities/journal-entry/.../journal-entry-card.tsx:36` | `p-3` | removed | Release 1 rendered `CardContent` `p-2xl` (24px); stock `Card` py + `CardContent` px gives 24px all round again (Slice 7 deviation fixed). |
+| `entities/library-item/.../status-picker.tsx:134` | `p-2` `pb-4` | changed to `py-4` | Release 1 rendered `p-xl` (16px). Vertical keeps 16px; the horizontal inset falls back to the stock sheet `px-6` that Slice 8 restored, so all sheets share it. |
+| `features/add-game/.../add-game-content.tsx:115` | `pl-9` | changed to `pl-8` | Release 1 rendered `px-3xl` (32px); the search icon sits at `left-3`, so 32px clears it exactly as before. |
+| `features/steam-import/.../igdb-manual-search.tsx:100` | `pl-10` | changed to `pl-8` | Release 1 rendered 32px. Same icon position. |
+| `widgets/imported-games-page/.../imported-games-filter-bar.tsx:259` | `pr-9` `pl-9` | changed to `px-8` | Release 1 rendered 32px both sides (icon left, clear button right). |
+| `widgets/library-page/.../library-page.tsx:353` | `pr-9` | changed to `pr-8` | Release 1 rendered 32px; the `/` hint badge occupies the right 32px. |
+| `features/steam-import/.../igdb-manual-search.tsx:147` | `p-3` | removed | Release 1 rendered `CardContent` `p-2xl` (24px); stock gives 24px. |
+| `features/steam-import/.../imported-game-card.tsx:50` | `p-3` | removed | Same as above. |
+| `features/command-palette/.../command-palette.tsx:181` (sheet) | `gap-0` `p-0` | kept | Exception to the 9.2 rule, flagged. Release 1 painted the variant's `p-xl` and `gap-xl` around the palette, which fought its intent (a `Command` list edge to edge). Stock `command.tsx:52` also uses `p-0`. Check in the 9.4 browser pass. |
+| `features/command-palette/.../command-palette.tsx:196` (dialog) | `gap-0` `p-0` | kept | Same exception: Release 1 showed `p-2xl` around the list. |
+| `features/command-palette/.../palette-navigation-group.tsx:59` | `p-0` | kept | Same exception: the inner `Link` carries its own `gap-2 px-2 py-1.5`; Release 1 doubled the padding. |
+| `shared/ui/command.tsx:52` | `p-0` | kept | Stock `CommandDialog` output (Slice 8), not a call site to change. |
+| `shared/ui/responsive-modal.tsx:77` | `pb-[max(1rem,env(safe-area-inset-bottom))]` | kept | Release 1's `p-xl` bottom was 16px, the same as the `1rem` floor, so it only differs on notched devices. Slice 11 owns safe areas. |
+| `widgets/dashboard-page/.../dashboard-page.tsx:29` | `mb-3 md:mb-6` | kept | Release 1 was undetermined (two stock `mb-*` on one element). `tailwind-merge` now lets the call site win, which is the evident intent (tighter on phone). |
+
+Settings and account cards (`steam-connect-card.tsx`, `sign-out-card.tsx`): no call-site spacing override is left on `Card`, `CardHeader` or `CardContent`; the stock `Card` renders the 24px inset. Nothing to remove.

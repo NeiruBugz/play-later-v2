@@ -62,7 +62,7 @@ export function ProfileActivityTab({
   };
 
   return (
-    <div className="space-y-md" data-testid="profile-activity-tab">
+    <div className="space-y-2" data-testid="profile-activity-tab">
       <ul className="divide-border/50 divide-y">
         {items.map((item) => (
           <li

@@ -12,7 +12,7 @@ export function NotOwnedOnlyToggle({
   if (status !== "WANT") return null;
 
   return (
-    <div className="gap-sm flex items-center">
+    <div className="flex items-center gap-1.5">
       <Switch id={id} checked={checked} onCheckedChange={onChange} />
       <Label htmlFor={id} className="text-sm font-medium">
         Not owned only

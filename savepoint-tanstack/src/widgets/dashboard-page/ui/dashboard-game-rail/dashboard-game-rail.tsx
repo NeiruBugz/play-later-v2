@@ -31,13 +31,13 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
             alt={alt}
             loading="lazy"
             decoding="async"
-            className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
+            className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
           />
         ) : (
           <div
             role="img"
             aria-label={alt}
-            className="bg-muted shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)]"
+            className="bg-muted aspect-[3/4] w-full rounded-lg shadow-md"
           />
         )}
         <div className="absolute top-1.5 left-1.5">
@@ -82,7 +82,10 @@ export function DashboardGameRail({
   return (
     <section aria-labelledby="home-up-next-heading">
       <header className="mb-2 flex items-baseline justify-between">
-        <h2 id="home-up-next-heading" className="heading-xs">
+        <h2
+          id="home-up-next-heading"
+          className="text-lg font-semibold tracking-tight"
+        >
           {title}
         </h2>
         {showViewAll ? (

@@ -55,8 +55,8 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
   const visibilityId = "profile-settings-visibility";
 
   return (
-    <form onSubmit={onSubmit} className="space-y-lg" noValidate>
-      <div className="space-y-md">
+    <form onSubmit={onSubmit} className="space-y-3" noValidate>
+      <div className="space-y-2">
         <Label htmlFor={nameId}>Display name</Label>
         <Input id={nameId} {...register("name")} />
       </div>

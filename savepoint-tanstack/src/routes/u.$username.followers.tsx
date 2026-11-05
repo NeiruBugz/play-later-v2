@@ -42,7 +42,9 @@ function FollowersListPage() {
 function ListNotFound() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
-      <h1 className="heading-lg mb-2">Profile not found</h1>
+      <h1 className="font-display mb-2 text-3xl font-semibold tracking-tight">
+        Profile not found
+      </h1>
       <Link to="/" className={buttonVariants({ variant: "outline" })}>
         Go home
       </Link>

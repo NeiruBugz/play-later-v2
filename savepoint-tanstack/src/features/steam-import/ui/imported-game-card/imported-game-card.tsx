@@ -47,18 +47,18 @@ export function ImportedGameCard({
 
   return (
     <Card>
-      <CardContent className="flex items-center gap-3 p-3">
+      <CardContent className="flex items-center gap-3">
         {steamIconUrl ? (
           <img
             src={steamIconUrl}
             alt={`Cover for ${game.name}`}
-            className="h-10 w-10 shrink-0 rounded object-cover"
+            className="h-10 w-10 shrink-0 rounded-sm object-cover"
             width={40}
             height={40}
           />
         ) : (
           <div
-            className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded"
+            className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-sm"
             aria-hidden="true"
           >
             <span className="text-muted-foreground text-xs font-medium">

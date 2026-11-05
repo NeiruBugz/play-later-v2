@@ -54,9 +54,11 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
     return (
       <div
         role="alert"
-        className="gap-md container mx-auto flex flex-col px-4 py-12"
+        className="container mx-auto flex flex-col gap-2 px-4 py-12"
       >
-        <h1 className="text-h2">Sign in required</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
+          Sign in required
+        </h1>
         <p>Please sign in to finish setting up your profile.</p>
         <Link to="/login" className={buttonVariants({ variant: "outline" })}>
           Go to sign in
@@ -68,9 +70,11 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Something went wrong</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">
+        Something went wrong
+      </h1>
       <p>We couldn't load profile setup. Please try again.</p>
       <Link to="/dashboard" className={buttonVariants({ variant: "outline" })}>
         Back to Home

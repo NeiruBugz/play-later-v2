@@ -33,7 +33,7 @@ export function UserList({ variant, entries, total }: UserListProps) {
   }
 
   return (
-    <div className="space-y-md" data-testid={`user-list-${variant}`}>
+    <div className="space-y-2" data-testid={`user-list-${variant}`}>
       <p className="text-muted-foreground text-sm">
         <span className="text-foreground font-semibold tabular-nums">
           {total}

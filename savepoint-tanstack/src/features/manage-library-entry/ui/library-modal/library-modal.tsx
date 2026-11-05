@@ -79,8 +79,8 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
           <DialogDescription>Update rating and platform.</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="gap-md flex flex-col">
-          <div className="gap-xs flex flex-col text-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1 text-sm">
             <span id="library-modal-platform-label">Platform</span>
             <PlatformCombobox
               value={platform}
@@ -90,7 +90,7 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
             />
           </div>
 
-          <div className="gap-xs flex flex-col text-sm">
+          <div className="flex flex-col gap-1 text-sm">
             <span id="library-modal-rating-label">Rating</span>
             <RatingInput
               aria-label="Rating"

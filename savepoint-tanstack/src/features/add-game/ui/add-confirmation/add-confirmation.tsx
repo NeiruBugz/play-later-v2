@@ -52,9 +52,9 @@ export function AddConfirmation({
       role="status"
       aria-live="polite"
       style={{ pointerEvents: "auto" }}
-      className="bg-background text-foreground border-border gap-sm p-md flex w-full flex-col rounded-md border shadow-lg"
+      className="bg-background text-foreground border-border flex w-full flex-col gap-1.5 rounded-md border p-2 shadow-lg"
     >
-      <p className="body-sm font-medium">
+      <p className="text-sm">
         {alreadyInLibrary
           ? `${gameTitle} is already in your library`
           : `Added ${gameTitle} to ${getStatusLabel(status)}`}
@@ -63,11 +63,11 @@ export function AddConfirmation({
         <InLibraryIndicator status={status} upNextPosition={upNextPosition} />
       ) : null}
       {showWhy ? (
-        <form onSubmit={saveWhy} className="gap-xs flex flex-col">
-          <label htmlFor="add-confirmation-why" className="body-sm">
+        <form onSubmit={saveWhy} className="flex flex-col gap-1">
+          <label htmlFor="add-confirmation-why" className="text-sm">
             {PROMPT_QUESTION.WHY}
           </label>
-          <div className="gap-xs flex">
+          <div className="flex gap-1">
             <Input
               id="add-confirmation-why"
               value={why}
@@ -88,7 +88,7 @@ export function AddConfirmation({
           </div>
         </form>
       ) : null}
-      <div className="gap-xs flex flex-wrap">
+      <div className="flex flex-wrap gap-1">
         {onStartPlaying && canChangeStatus ? (
           <Button
             type="button"

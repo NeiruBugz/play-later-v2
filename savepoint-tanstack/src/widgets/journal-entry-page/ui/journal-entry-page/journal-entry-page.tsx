@@ -22,11 +22,13 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
       : null;
 
   return (
-    <article className="space-y-xl mx-auto max-w-prose">
-      <div className="gap-md flex items-start justify-between">
-        <h1 className="text-h1">Note</h1>
+    <article className="mx-auto max-w-prose space-y-4">
+      <div className="flex items-start justify-between gap-2">
+        <h1 className="font-display text-4xl font-semibold tracking-tight">
+          Note
+        </h1>
 
-        <div className="gap-sm flex shrink-0 items-center">
+        <div className="flex shrink-0 items-center gap-1.5">
           <Link
             to="/journal/$id/edit"
             params={{ id: entry.id }}
@@ -38,7 +40,7 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
         </div>
       </div>
 
-      <p className="text-caption text-muted-foreground">
+      <p className="text-muted-foreground text-xs font-medium">
         {entry.game ? (
           <Link
             to="/games/$slug"
@@ -55,15 +57,19 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
       </p>
 
       {entry.prompt ? (
-        <h2 className="text-h3">{PROMPT_QUESTION[entry.prompt]}</h2>
+        <h2 className="font-display text-2xl font-semibold tracking-tight">
+          {PROMPT_QUESTION[entry.prompt]}
+        </h2>
       ) : null}
 
       {timePlayed ? (
-        <p className="text-h3 font-mono">{timePlayed} played</p>
+        <p className="font-display text-2xl font-semibold tracking-tight">
+          {timePlayed} played
+        </p>
       ) : null}
 
       {content ? (
-        <p className="text-body whitespace-pre-wrap">{content}</p>
+        <p className="text-base whitespace-pre-wrap">{content}</p>
       ) : null}
     </article>
   );

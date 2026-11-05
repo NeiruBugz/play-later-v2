@@ -135,7 +135,7 @@ export function GameDetail({
         <Card
           id="screenshots"
           variant="flat"
-          className="gap-md p-xl mt-8 flex flex-col"
+          className="mt-8 flex flex-col gap-2 p-4"
         >
           <ScreenshotsPanel
             screenshots={igdbDetails.screenshots}
@@ -146,14 +146,10 @@ export function GameDetail({
 
       <div
         data-testid="game-detail-bento-grid"
-        className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
+        className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-[1.35fr_1fr] md:items-start"
       >
         {showPersonalPanels && libraryEntry ? (
-          <Card
-            id="rating"
-            variant="flat"
-            className="gap-md p-xl flex flex-col"
-          >
+          <Card id="rating" variant="flat" className="flex flex-col gap-2 p-4">
             <GameRating
               libraryItemId={libraryEntry.id}
               rating={libraryEntry.rating}
@@ -179,7 +175,7 @@ export function GameDetail({
             id="about"
             variant="flat"
             data-testid="game-detail-about-card"
-            className="gap-lg p-xl flex flex-col"
+            className="flex flex-col gap-3 p-4"
           >
             <AboutPanel
               summary={summary}
@@ -195,7 +191,7 @@ export function GameDetail({
             id="themes"
             variant="flat"
             data-testid="game-detail-themes-tags-card"
-            className="gap-lg p-xl flex flex-col"
+            className="flex flex-col gap-3 p-4"
           >
             <ThemesTagsPanel
               themes={themes}
@@ -206,11 +202,7 @@ export function GameDetail({
         ) : null}
 
         {showJournalPanel ? (
-          <Card
-            id="journal"
-            variant="flat"
-            className="gap-md p-xl flex flex-col"
-          >
+          <Card id="journal" variant="flat" className="flex flex-col gap-2 p-4">
             <GameNotesList notes={notes} onNewNote={openLogSession} />
           </Card>
         ) : null}
@@ -281,7 +273,7 @@ export function GameDetail({
         {/* Desktop breadcrumb — visible at md and above */}
         <nav
           aria-label="Breadcrumb"
-          className="text-caption text-muted-foreground relative z-10 hidden items-center gap-1.5 pt-3.5 md:flex"
+          className="text-muted-foreground relative z-10 hidden items-center gap-1.5 pt-3.5 text-xs font-medium md:flex"
         >
           <Link
             to="/library"
@@ -316,7 +308,7 @@ export function GameDetail({
                 {eyebrowParts.length > 0 ? (
                   <p
                     aria-label="Release metadata"
-                    className="text-caption text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 tracking-widest uppercase"
+                    className="text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 text-xs font-medium uppercase"
                   >
                     {eyebrowParts.map((part, i) => (
                       <span key={i} className="flex items-center gap-2">
@@ -332,7 +324,7 @@ export function GameDetail({
                   </p>
                 ) : null}
 
-                <h1 className="text-h1 mb-4 tracking-tight break-words">
+                <h1 className="font-display mb-4 text-4xl font-semibold tracking-tight break-words">
                   {game.title}
                 </h1>
               </div>

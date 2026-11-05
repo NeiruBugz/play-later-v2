@@ -36,12 +36,12 @@ export function ScreenshotsPanel({
     >
       <h2
         id="screenshots-heading"
-        className="text-muted-foreground mb-md font-mono text-xs tracking-wider uppercase"
+        className="text-muted-foreground mb-2 font-mono text-xs tracking-wider uppercase"
       >
         Screenshots
       </h2>
 
-      <div className="gap-sm flex overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible">
+      <div className="flex gap-1.5 overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible">
         {images.map((image, i) => (
           <button
             key={image.full}

@@ -124,7 +124,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="gap-md flex flex-col">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <GameSection
         loadStatus={loadStatus}
         games={games}
@@ -133,7 +133,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
         onClear={() => setChosenSlug(null)}
       />
 
-      <div className="gap-xs flex flex-col">
+      <div className="flex flex-col gap-1">
         <Label>Time played</Label>
         <div className="flex items-center justify-center gap-3.5 py-2">
           <button
@@ -175,7 +175,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
         ) : null}
       </div>
 
-      <div className="gap-xs flex flex-col">
+      <div className="flex flex-col gap-1">
         <Label htmlFor="log-form-note">Note</Label>
         <Textarea
           id="log-form-note"
@@ -186,7 +186,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
         />
       </div>
 
-      <div className="gap-sm flex justify-end">
+      <div className="flex justify-end gap-1.5">
         <Button
           type="button"
           variant="outline"
@@ -225,9 +225,9 @@ function GameSection({
     return (
       <div
         data-testid="selected-game-header"
-        className="bg-card border-border flex items-center gap-3 rounded-[var(--radius-btn)] border p-2.5"
+        className="bg-card border-border flex items-center gap-3 rounded-sm border p-2.5"
       >
-        <div className="bg-muted size-10 shrink-0 overflow-hidden rounded-[5px]">
+        <div className="bg-muted size-10 shrink-0 overflow-hidden rounded-sm">
           {coverUrl ? (
             <img
               src={coverUrl}

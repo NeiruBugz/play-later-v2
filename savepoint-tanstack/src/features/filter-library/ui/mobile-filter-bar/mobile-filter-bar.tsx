@@ -73,7 +73,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   );
 
   return (
-    <div className="mb-md md:hidden" aria-label="Mobile library filters">
+    <div className="mb-2 md:hidden" aria-label="Mobile library filters">
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         {/* Single row: [Filters flex-1 with count badge] */}
         <div className="flex items-center gap-1">
@@ -104,7 +104,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             ) : null}
           </SheetTrigger>
         </div>
-        <SheetContent side="bottom" className="space-y-lg">
+        <SheetContent side="bottom" className="space-y-3">
           <SheetHeader>
             <SheetTitle>Filters</SheetTitle>
             <SheetDescription>
@@ -122,7 +122,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
           </section>
 
           <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
+            <p className="text-muted-foreground mb-1.5 text-xs font-semibold tracking-wider uppercase">
               Platform
             </p>
             <PlatformSelect
@@ -134,7 +134,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
           </section>
 
           <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
+            <p className="text-muted-foreground mb-1.5 text-xs font-semibold tracking-wider uppercase">
               Sort
             </p>
             <SortSelect value={sortValue} onChange={onSortChange} />

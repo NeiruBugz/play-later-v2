@@ -18,7 +18,7 @@ export function UsernameInput({
   );
 
   return (
-    <div className="space-y-md">
+    <div className="space-y-2">
       <Label htmlFor={id}>Username</Label>
       <div className="relative">
         <Input

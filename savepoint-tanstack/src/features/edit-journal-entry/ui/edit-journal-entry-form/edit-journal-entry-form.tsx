@@ -62,8 +62,8 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="gap-md flex flex-col">
-      <label className="gap-xs flex flex-col text-sm">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2">
+      <label className="flex flex-col gap-1 text-sm">
         <span className="sr-only">Content</span>
         <Textarea
           aria-label="Content"
@@ -74,7 +74,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
       </label>
 
       {entry.gameId !== null ? (
-        <label className="gap-xs flex flex-col text-sm">
+        <label className="flex flex-col gap-1 text-sm">
           <span>Time played (hours)</span>
           <Input
             type="number"
@@ -94,7 +94,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
         </p>
       ) : null}
 
-      <div className="gap-sm flex justify-end">
+      <div className="flex justify-end gap-1.5">
         <Button
           type="button"
           variant="outline"

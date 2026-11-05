@@ -34,12 +34,12 @@ export function WhatsNewModal() {
     <Dialog open={isOpen} onOpenChange={(next) => !next && dismiss()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="mb-sm gap-sm flex items-center">
+          <div className="mb-1.5 flex items-center gap-1.5">
             <Badge variant="secondary">
               {CATEGORY_LABELS[primary.category]}
             </Badge>
           </div>
-          <DialogTitle className="gap-sm flex items-center">
+          <DialogTitle className="flex items-center gap-1.5">
             {primary.icon ? (
               <primary.icon className="text-primary h-5 w-5" />
             ) : null}
@@ -51,13 +51,13 @@ export function WhatsNewModal() {
         </DialogHeader>
 
         {announcements.length > 1 ? (
-          <ul className="space-y-md">
+          <ul className="space-y-2">
             {announcements.slice(1).map((announcement) => (
               <li
                 key={announcement.id}
-                className="border-border p-md rounded-md border"
+                className="border-border rounded-md border p-2"
               >
-                <div className="mb-xs gap-sm flex items-center">
+                <div className="mb-1 flex items-center gap-1.5">
                   <Badge variant="secondary">
                     {CATEGORY_LABELS[announcement.category]}
                   </Badge>
@@ -71,8 +71,8 @@ export function WhatsNewModal() {
           </ul>
         ) : null}
 
-        <DialogFooter className="gap-sm sm:gap-sm">
-          <div className="gap-sm flex">
+        <DialogFooter className="gap-1.5 sm:gap-1.5">
+          <div className="flex gap-1.5">
             {primary.ctaUrl && primary.ctaLabel ? (
               <a
                 href={primary.ctaUrl}

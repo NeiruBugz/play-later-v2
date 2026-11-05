@@ -45,11 +45,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
   };
 
   return (
-    <div
-      role="radiogroup"
-      aria-label={PICKER_LABEL}
-      className="gap-2xs flex flex-col"
-    >
+    <div role="radiogroup" aria-label={PICKER_LABEL} className="flex flex-col">
       {STATUS_ENTRIES.map((entry, index) => {
         const Icon = entry.icon;
         const checked = entry.value === value;
@@ -128,11 +124,7 @@ export function StatusPicker({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger render={trigger} />
-      <SheetContent
-        side="bottom"
-        aria-describedby={undefined}
-        className="p-2 pb-4"
-      >
+      <SheetContent side="bottom" aria-describedby={undefined} className="py-4">
         <SheetTitle className="mb-1.5 text-base">{PICKER_LABEL}</SheetTitle>
         <StatusRadioList value={value} onSelect={handleSelect} />
       </SheetContent>

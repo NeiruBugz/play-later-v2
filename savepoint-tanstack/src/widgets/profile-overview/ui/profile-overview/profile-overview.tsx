@@ -164,7 +164,9 @@ export function ProfileOverview({
           <div className="space-y-8">
             {stats.recentGames.length > 0 ? (
               <section data-testid="overview-recently-played">
-                <h2 className="heading-md mb-4 tracking-tight">Playing</h2>
+                <h2 className="font-display mb-4 text-2xl font-semibold tracking-tight">
+                  Playing
+                </h2>
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
                   {stats.recentGames.map((game) => (
                     <Link

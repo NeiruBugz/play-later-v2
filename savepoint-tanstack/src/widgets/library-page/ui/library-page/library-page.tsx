@@ -100,13 +100,13 @@ const LibraryGridTile = memo(function LibraryGridTile({
               alt={alt}
               loading="lazy"
               decoding="async"
-              className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
+              className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
             />
           ) : (
             <div
               role="img"
               aria-label={alt}
-              className="bg-muted shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)]"
+              className="bg-muted aspect-[3/4] w-full rounded-lg shadow-md"
             />
           )}
           <div className="absolute top-2 left-2">
@@ -320,7 +320,7 @@ export function LibraryPage(props: LibraryPageProps) {
         : "no-results";
 
   return (
-    <div className="gap-xl container mx-auto flex flex-col px-4 py-6">
+    <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
       <PageHeader
         eyebrow="// LIBRARY"
         title="Library"
@@ -350,11 +350,11 @@ export function LibraryPage(props: LibraryPageProps) {
           onChange={(event) => setTitleQuery(event.target.value)}
           placeholder="Filter library…"
           aria-label="Filter library by title"
-          className="pr-9"
+          className="pr-8"
         />
         <kbd
           aria-hidden="true"
-          className="text-muted-foreground border-border bg-muted/50 pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border px-1.5 py-0.5 text-xs font-semibold"
+          className="text-muted-foreground border-border bg-muted/50 pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border px-1.5 py-0.5 text-xs font-semibold"
         >
           /
         </kbd>

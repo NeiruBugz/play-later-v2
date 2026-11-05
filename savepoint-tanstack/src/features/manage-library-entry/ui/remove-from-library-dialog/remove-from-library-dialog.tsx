@@ -39,7 +39,7 @@ export function RemoveFromLibraryDialog({
             Journal.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-sm">
+        <DialogFooter className="gap-1.5">
           <Button
             type="button"
             variant="outline"

@@ -11,9 +11,12 @@ export function RelatedGamesSkeleton() {
     <section
       aria-labelledby="related-games-heading-skeleton"
       aria-busy="true"
-      className="gap-md flex flex-col"
+      className="flex flex-col gap-2"
     >
-      <h2 id="related-games-heading-skeleton" className="text-h3">
+      <h2
+        id="related-games-heading-skeleton"
+        className="font-display text-2xl font-semibold tracking-tight"
+      >
         Related games
       </h2>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

@@ -65,7 +65,7 @@ export function GameLibraryControls({
 
   return (
     <div
-      className="gap-sm flex flex-wrap items-center"
+      className="flex flex-wrap items-center gap-1.5"
       data-testid="game-library-controls"
     >
       {entry !== null && libraryStatus !== null && libraryOwnership !== null ? (

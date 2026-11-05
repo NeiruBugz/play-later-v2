@@ -14,7 +14,7 @@ export function LogGamePicker({ games, onSelect }: LogGamePickerProps) {
     : games;
 
   return (
-    <div className="gap-xs flex flex-col">
+    <div className="flex flex-col gap-1">
       <Input
         type="search"
         aria-label="Search your library"
@@ -37,7 +37,7 @@ export function LogGamePicker({ games, onSelect }: LogGamePickerProps) {
                 className="hover:bg-muted flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left text-sm transition-colors"
                 onClick={() => onSelect(game)}
               >
-                <span className="bg-muted size-8 shrink-0 overflow-hidden rounded-[4px]">
+                <span className="bg-muted size-8 shrink-0 overflow-hidden rounded-sm">
                   {coverUrl ? (
                     <img
                       src={coverUrl}

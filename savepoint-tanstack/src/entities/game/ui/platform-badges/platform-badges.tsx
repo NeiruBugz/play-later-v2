@@ -26,7 +26,7 @@ export function PlatformBadges({ platforms }: PlatformBadgesProps) {
               render={
                 <Badge
                   variant="subtle"
-                  className="h-5 cursor-help rounded-md px-1.5 text-[11px]"
+                  className="h-5 cursor-help rounded-md text-[11px]"
                 />
               }
             >

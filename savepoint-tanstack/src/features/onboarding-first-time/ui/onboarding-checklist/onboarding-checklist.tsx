@@ -150,7 +150,7 @@ export function OnboardingChecklist({
             <li
               key={step.id}
               className={cn(
-                "gap-md flex items-center px-4 py-3",
+                "flex items-center gap-2 px-4 py-3",
                 step.done && "opacity-60"
               )}
             >
@@ -167,12 +167,7 @@ export function OnboardingChecklist({
                   <Check role="img" aria-label="Done" className="h-3 w-3" />
                 ) : null}
               </span>
-              <span
-                className={cn(
-                  "body-sm font-medium",
-                  step.done && "line-through"
-                )}
-              >
+              <span className={cn("text-sm", step.done && "line-through")}>
                 {step.label}
               </span>
             </li>

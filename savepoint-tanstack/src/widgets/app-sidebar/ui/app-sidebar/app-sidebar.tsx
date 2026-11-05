@@ -122,7 +122,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
               aria-hidden="true"
               className="h-8 w-8 shrink-0"
             />
-            {!collapsed && <span className="text-h3">SavePoint</span>}
+            {!collapsed && (
+              <span className="font-display text-2xl font-semibold tracking-tight">
+                SavePoint
+              </span>
+            )}
           </Link>
 
           <button
@@ -143,7 +147,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
             className="border-border text-muted-foreground flex w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm"
           >
             <span>Search</span>
-            <kbd className="text-muted-foreground rounded border px-1.5 py-0.5 text-xs font-semibold">
+            <kbd className="text-muted-foreground rounded-sm border px-1.5 py-0.5 text-xs font-semibold">
               ⌘K
             </kbd>
           </button>

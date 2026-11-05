@@ -19,12 +19,12 @@ export function GameResultItem({
   const coverUrl = buildCoverImageUrl(coverImageId, "t_cover_small");
 
   return (
-    <CommandItem value={`game-${slug}`} className="gap-md py-sm px-md flex">
+    <CommandItem value={`game-${slug}`} className="flex gap-2 px-2 py-1.5">
       <Link
         to="/games/$slug"
         params={{ slug }}
         onClick={onAfterSelect}
-        className="gap-md flex min-w-0 flex-1 items-center"
+        className="flex min-w-0 flex-1 items-center gap-2"
       >
         {coverUrl ? (
           <img
@@ -32,12 +32,12 @@ export function GameResultItem({
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="h-12 w-9 flex-shrink-0 rounded object-cover"
+            className="h-12 w-9 flex-shrink-0 rounded-sm object-cover"
           />
         ) : (
           <div
             aria-hidden="true"
-            className="bg-muted h-12 w-9 flex-shrink-0 rounded"
+            className="bg-muted h-12 w-9 flex-shrink-0 rounded-sm"
           />
         )}
         <div className="min-w-0 flex-1 text-left">

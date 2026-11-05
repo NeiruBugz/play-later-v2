@@ -38,7 +38,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
         <EmptyState spacing="compact" title="No notes yet." />
       ) : (
         <ul
-          className="gap-md flex flex-col"
+          className="flex flex-col gap-2"
           aria-labelledby="game-notes-heading"
         >
           {newestFirst.map((note) => (
@@ -46,7 +46,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
               <Link
                 to="/journal/$id"
                 params={{ id: note.id }}
-                className="border-border hover:bg-muted/40 gap-2xs focus-visible:ring-ring flex flex-col border-l-2 pl-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="border-border hover:bg-muted/40 focus-visible:ring-ring flex flex-col border-l-2 pl-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="text-muted-foreground flex items-center gap-2 font-mono text-xs">
                   <time dateTime={note.createdAt.toISOString()}>

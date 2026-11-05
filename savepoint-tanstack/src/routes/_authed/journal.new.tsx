@@ -22,10 +22,12 @@ function NewNoteRoute() {
 
   return (
     <section className="container mx-auto px-4 py-6">
-      <div className="space-y-xl mx-auto max-w-3xl">
-        <header className="space-y-md">
-          <h1 className="text-h1">New note</h1>
-          <p className="text-muted-foreground body-md">
+      <div className="mx-auto max-w-3xl space-y-4">
+        <header className="space-y-2">
+          <h1 className="font-display text-4xl font-semibold tracking-tight">
+            New note
+          </h1>
+          <p className="text-muted-foreground text-base">
             Log time played or write a note about a game in your library.
           </p>
         </header>

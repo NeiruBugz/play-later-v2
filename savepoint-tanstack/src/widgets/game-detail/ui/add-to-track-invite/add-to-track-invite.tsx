@@ -15,7 +15,7 @@ export function AddToTrackInvite({
     <section
       data-testid="add-to-track-invite"
       aria-labelledby="track-invite-heading"
-      className="gap-md p-xl flex flex-col items-start"
+      className="flex flex-col items-start gap-2 p-4"
     >
       <span
         className="bg-primary/10 flex size-10 items-center justify-center rounded-full"
@@ -23,8 +23,11 @@ export function AddToTrackInvite({
       >
         <BookOpen className="text-primary h-5 w-5" />
       </span>
-      <div className="gap-2xs flex flex-col">
-        <h2 id="track-invite-heading" className="text-h3">
+      <div className="flex flex-col">
+        <h2
+          id="track-invite-heading"
+          className="font-display text-2xl font-semibold tracking-tight"
+        >
           Add {gameTitle}
         </h2>
         <p className="text-muted-foreground text-sm">

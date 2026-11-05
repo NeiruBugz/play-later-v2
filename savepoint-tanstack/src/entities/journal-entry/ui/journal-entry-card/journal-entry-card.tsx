@@ -33,7 +33,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
   const writtenOn = formatJournalDate(entry.createdAt);
 
   const body = (
-    <CardContent className="flex flex-col gap-1.5 p-3">
+    <CardContent className="flex flex-col gap-1.5">
       {/* Header: game title (prominent) + date */}
       <div className="flex items-baseline justify-between gap-2">
         <h3

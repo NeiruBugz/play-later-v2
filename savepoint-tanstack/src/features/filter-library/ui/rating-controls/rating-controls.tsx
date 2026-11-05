@@ -21,11 +21,11 @@ export function RatingControls({
 }: RatingControlsProps) {
   const unratedSwitchId = `${idPrefix}-unrated-only`;
   return (
-    <section className="space-y-sm">
+    <section className="space-y-1.5">
       <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
         Rating
       </p>
-      <div className="gap-sm flex items-center">
+      <div className="flex items-center gap-1.5">
         <Label className="text-sm font-medium">Minimum rating</Label>
         {/* `minRating` is in stars (the URL/user unit); RatingInput speaks the
             1–10 storage int internally, so convert across this boundary. */}
@@ -53,7 +53,7 @@ export function RatingControls({
           </Button>
         ) : null}
       </div>
-      <div className="gap-sm flex items-center">
+      <div className="flex items-center gap-1.5">
         <Switch
           id={unratedSwitchId}
           checked={unratedOnly === true}

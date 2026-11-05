@@ -97,7 +97,7 @@ export function IgdbManualSearch({
           placeholder="Search for the correct game…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10"
+          className="pl-8"
           disabled={isLoading}
           aria-label="Game search query"
         />
@@ -144,16 +144,16 @@ export function IgdbManualSearch({
             return (
               <li key={game.id}>
                 <Card className="hover:bg-muted/20">
-                  <CardContent className="flex items-center gap-3 p-3">
+                  <CardContent className="flex items-center gap-3">
                     {coverUrl ? (
                       <img
                         src={coverUrl}
                         alt={`Cover for ${game.name}`}
-                        className="h-12 w-10 shrink-0 rounded object-cover"
+                        className="h-12 w-10 shrink-0 rounded-sm object-cover"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="bg-muted flex h-12 w-10 shrink-0 items-center justify-center rounded">
+                      <div className="bg-muted flex h-12 w-10 shrink-0 items-center justify-center rounded-sm">
                         <span className="text-muted-foreground text-xs font-medium">
                           {game.name.charAt(0).toUpperCase()}
                         </span>

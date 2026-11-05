@@ -54,8 +54,8 @@ function PromptRow({ libraryItemId, gameTitle, kind }: PromptRowProps) {
   if (isGone) return null;
 
   return (
-    <form onSubmit={save} className="gap-2xs flex flex-col">
-      <div className="gap-xs flex items-center">
+    <form onSubmit={save} className="flex flex-col">
+      <div className="flex items-center gap-1">
         <label
           htmlFor={inputId}
           className="text-muted-foreground shrink-0 text-sm"
@@ -106,7 +106,7 @@ export function GamePrompts({
   if (status === "PLAYING") return null;
 
   return (
-    <div className="gap-xs flex flex-col">
+    <div className="flex flex-col gap-1">
       {prompts.why ? (
         <PromptRow
           libraryItemId={libraryItemId}

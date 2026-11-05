@@ -79,7 +79,7 @@ export function GameCard({
       </div>
 
       {density !== "minimal" ? (
-        <div className="p-md gap-md flex w-full flex-col">
+        <div className="flex w-full flex-col gap-2 p-2">
           <h3
             className={cn(
               gameCardTitleVariants({ clamp: true }),
@@ -91,9 +91,9 @@ export function GameCard({
           </h3>
 
           {showMeta ? (
-            <div className="gap-sm flex flex-col">
+            <div className="flex flex-col gap-1.5">
               {(releaseYear ?? null) !== null ? (
-                <span className="body-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {releaseYear}
                 </span>
               ) : null}
@@ -104,7 +104,7 @@ export function GameCard({
           ) : null}
 
           {children ? (
-            <div className="gap-md mt-auto flex flex-col">{children}</div>
+            <div className="mt-auto flex flex-col gap-2">{children}</div>
           ) : null}
         </div>
       ) : null}

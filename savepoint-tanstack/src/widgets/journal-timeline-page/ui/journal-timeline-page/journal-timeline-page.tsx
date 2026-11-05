@@ -53,7 +53,7 @@ export function JournalTimelinePage({
           }
         />
 
-        <div className="mb-lg">
+        <div className="mb-3">
           <JournalGameFilter
             options={gameOptions}
             value={selectedGame}
