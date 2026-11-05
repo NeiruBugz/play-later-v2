@@ -178,7 +178,7 @@ Conventions for every slice:
     - `no-restricted-syntax` for inline color styles.
 
     Add rule tests in `test/eslint/`. **[Agent: react-frontend]**
-  - [ ] Tooling and docs:
+  - [x] Tooling and docs:
     - bump `prettier-plugin-tailwindcss` to the v4-aware line with `tailwindStylesheet: "./src/styles.css"`;
     - upgrade `tailwind-merge` to the v3 line, with exact pins;
     - update `.claude/rules/tanstack/shared.md` and `widgets.md`, `src/shared/README.md`, `DIVERGENCES.md` and the spec-022 design README to the new rule: tokens in `styles.css`, stock `shadcn view` output as the source of truth, deviations listed in `shared/ui/README.md`. **[Agent: react-frontend]**
