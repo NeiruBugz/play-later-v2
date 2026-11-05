@@ -75,7 +75,7 @@ Conventions for every slice:
     - Compare a temporary capture with the "before" set. There must be no visible change.
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
 
-- [ ] **Slice 5: Selects run on Base UI with today's look**
+- [x] **Slice 5: Selects run on Base UI with today's look**
   - [x] Re-implement `select` on Base UI:
     - pass `items` so the trigger shows the label, not the raw value;
     - `alignItemWithTrigger={false}`;
@@ -83,7 +83,7 @@ Conventions for every slice:
 
     Update the 6 consumers to match: platform-select, sort-select, journal-game-filter, imported-games-filter-bar, import-game-modal and the select wrapper itself. Fix the `onValueChange` types for a possibly-`null` value. **[Agent: react-frontend]**
   - [x] Write behaviour tests for library sort and the journal game filter. Choosing an option changes the visible list. The trigger shows the option label. "All" resets the filter. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Change library sort and the journal game filter, at phone width and at desktop width, and confirm the list updates and the trigger label is correct.
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
