@@ -124,12 +124,12 @@ Conventions for every slice:
     - Map today's spec-022 oklch values onto the stock shadcn variable names in `:root` and `.dark`. `--primary` is today's teal, and `--accent` is the stock hover surface.
     - Keep `--success/warning/info`, `--status-want/playing/done` and the bottom-nav variables, each declared raw and as `--color-*` in `@theme inline`. Use one stock `--radius`. Delete the other non-stock tokens.
     - Add a note to `.claude/rules/tanstack/shared.md`: never run `shadcn init` or `apply` against the repo. **[Agent: react-frontend]**
-  - [ ] Re-pull each primitive with `npx shadcn@latest view <name>`, style `base-maia`, in a scratch copy, never in the repo. Diff it and replace the repo file.
+  - [x] Re-pull each primitive with `npx shadcn@latest view <name>`, style `base-maia`, in a scratch copy, never in the repo. Diff it and replace the repo file.
     - Apply the deviation table from tech spec §2.4: button sizes `h-11 md:h-9` / `h-10 md:h-8` / icon `size-11 md:size-9`; inputs, textarea, command input and select trigger at `text-base md:text-sm`; a solid focus ring at ≥3:1; `Toaster` taking `theme` from the theme provider.
     - Record the table in a new `src/shared/ui/README.md` section.
     - Restyle the non-shadcn primitives to stock tokens: empty-state, page-header, rating-input, segmented-control, responsive-modal, undo-toast, image-lightbox.
     - Add a stock `Skeleton` and replace the 11 ad hoc `animate-pulse` uses. **[Agent: react-frontend]**
-  - [ ] Rewrite the class-asserting tests as behaviour tests: `badge`, `alert`, `library-item-card:221,255`, `platform-badges:63`, `library-status-badge:61-69`, `game-card:98-106`. Drop the retired theme names from `theme-provider.test.tsx`. **[Agent: testing]**
+  - [x] Rewrite the class-asserting tests as behaviour tests: `badge`, `alert`, `library-item-card:221,255`, `platform-badges:63`, `library-status-badge:61-69`, `game-card:98-106`. Drop the retired theme names from `theme-provider.test.tsx`. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). At desktop width, confirm all of the following:
