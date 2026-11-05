@@ -29,8 +29,8 @@ export function ImageLightbox({
         onIndexChange(wrap(safeIndex - 1));
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [open, count, safeIndex, onIndexChange]);
 
   if (count === 0) return null;
