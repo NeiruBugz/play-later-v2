@@ -24,7 +24,7 @@ export function AppBottomNav() {
     <nav
       data-testid="app-bottom-nav"
       aria-label="Primary mobile tab navigation"
-      className="fixed inset-x-0 bottom-0 z-40 flex h-(--bottom-nav-height) items-stretch overflow-visible border-t bg-card/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-(--bottom-nav-height) items-stretch overflow-visible border-t bg-card/85 pb-safe backdrop-blur-md md:hidden"
     >
       {DEST_ITEMS_LEFT.map(({ label, to, icon: Icon }) => (
         <Link

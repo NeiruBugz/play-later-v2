@@ -4,8 +4,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetTitle,
   SheetTrigger,
 } from "./sheet";
@@ -15,6 +17,8 @@ const elements = {
     screen.getByRole("button", { name: "Open filters", hidden: true }),
   queryDialog: () => screen.queryByRole("dialog"),
   queryTitle: () => screen.queryByText("Filters"),
+  getBody: () => screen.getByTestId("sheet-body"),
+  getFooter: () => screen.getByTestId("sheet-footer"),
   getCloseButton: () => screen.getByRole("button", { name: "Close" }),
 };
 
@@ -24,13 +28,27 @@ const actions = {
   pressEscape: async () => userEvent.keyboard("{Escape}"),
 };
 
-function Harness({ side }: { side?: "left" | "right" | "top" | "bottom" }) {
+function Harness({
+  side,
+  withBodyAndFooter = false,
+}: {
+  side?: "left" | "right" | "top" | "bottom";
+  withBodyAndFooter?: boolean;
+}) {
   return (
     <Sheet>
       <SheetTrigger>Open filters</SheetTrigger>
       <SheetContent side={side}>
         <SheetTitle>Filters</SheetTitle>
         <SheetDescription>Refine the library list</SheetDescription>
+        {withBodyAndFooter ? (
+          <>
+            <SheetBody data-testid="sheet-body">Options</SheetBody>
+            <SheetFooter data-testid="sheet-footer">
+              <button type="button">Apply</button>
+            </SheetFooter>
+          </>
+        ) : null}
       </SheetContent>
     </Sheet>
   );
@@ -94,6 +112,33 @@ describe("Sheet", () => {
 
     it("insets the body from the left and right edges", () => {
       expect(elements.queryDialog()).toHaveClass("px-6");
+    });
+  });
+
+  // jsdom computes no layout, so the structure and classes are asserted;
+  // pinning and scrolling are verified in the browser.
+  describe("given a bottom sheet with a body and a footer", () => {
+    beforeEach(async () => {
+      render(<Harness side="bottom" withBodyAndFooter />);
+      await actions.open();
+    });
+
+    it("keeps the footer outside the scrolling body", () => {
+      expect(elements.getBody()).not.toContainElement(elements.getFooter());
+    });
+
+    it("makes the body the scroll area", () => {
+      expect(elements.getBody()).toHaveClass("flex-1", "overflow-y-auto");
+    });
+
+    it("pads the footer by the bottom safe area", () => {
+      expect(elements.getFooter()).toHaveClass("pb-safe");
+    });
+
+    it("caps the sheet height with dynamic viewport units", () => {
+      expect(elements.queryDialog()).toHaveClass(
+        "data-[side=bottom]:max-h-[90dvh]"
+      );
     });
   });
 });

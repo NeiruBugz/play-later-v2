@@ -180,6 +180,22 @@
   }
 }
 
+@utility pt-safe {
+  padding-top: max(var(--safe-floor, 0px), env(safe-area-inset-top));
+}
+
+@utility pb-safe {
+  padding-bottom: max(var(--safe-floor, 0px), env(safe-area-inset-bottom));
+}
+
+@utility pl-safe {
+  padding-left: max(var(--safe-floor, 0px), env(safe-area-inset-left));
+}
+
+@utility pr-safe {
+  padding-right: max(var(--safe-floor, 0px), env(safe-area-inset-right));
+}
+
 @utility navigation-progress-bar {
   animation: navigation-progress 1.1s ease-in-out infinite;
 }

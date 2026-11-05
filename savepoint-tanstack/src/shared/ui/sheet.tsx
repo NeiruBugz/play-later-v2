@@ -87,12 +87,22 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sheet-body"
+      className={cn("min-h-0 flex-1 overflow-y-auto", className)}
+      {...props}
+    />
+  );
+}
+
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
       className={cn(
-        "sticky bottom-0 mt-auto flex flex-col gap-2 bg-popover py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]",
+        "sticky bottom-0 mt-auto flex flex-col gap-2 bg-popover pt-6 pb-safe [--safe-floor:1.5rem]",
         className
       )}
       {...props}
@@ -129,6 +139,7 @@ export {
   SheetClose,
   SheetContent,
   SheetHeader,
+  SheetBody,
   SheetFooter,
   SheetTitle,
   SheetDescription,

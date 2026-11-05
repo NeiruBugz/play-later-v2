@@ -73,10 +73,7 @@ export function ResponsiveModal({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
-        className={cn(
-          "pb-[max(1rem,env(safe-area-inset-bottom))]",
-          contentClassName
-        )}
+        className={cn("pb-safe [--safe-floor:1rem]", contentClassName)}
         data-testid={sheetTestId}
       >
         <SheetHeader>

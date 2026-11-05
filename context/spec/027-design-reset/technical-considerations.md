@@ -26,26 +26,26 @@ Each phase is designed and accepted phone first (390 × 844, checked at 360 and 
 
 Starts only after spec 026 has shipped. Every slice ships green (`lint`, `typecheck`, `test:unit`, `test:integration`, `build`).
 
-| # | Slice | Release | Kind |
-|---|---|---|---|
-| 0 | Spike + harness: add `@base-ui/react` (exact pin), jsdom polyfill, `@playwright/test` dev dependency, review script; capture the phase-1 "before" set | — | tooling |
-| 1a–1d | Base UI swap with current visuals and compat wrappers (see 2.2) | 1 | behaviour |
-| 2 | De-compat call sites, remove `@radix-ui/*`, lint-ban `asChild` | 1 | behaviour |
-| 3 | Tokens and dead code in `styles.css`; `--font-display` binding; delete `/about` | 2 | visual (neutral) |
-| 4 | Re-pull primitives from `base-maia` with the deviation table (2.4) | 2 | visual |
-| 5 | Call-site codemod per layer (shared → features → widgets → routes); `SectionLabel`, `PageHeader` everywhere | 2 | visual (neutral) |
-| 6 | Delete remaining custom utilities; turn on guardrails (2.5) | 2 | tooling |
-| 7 | Phone baseline (2.6) | 2 | visual |
-| 8 | Landing page on the theme; off-palette colors and platform hexes removed; theme-color meta | 2 | visual |
-| 9 | Phone-first owner review (§2.8) → release phase 1 | 2 | review |
-| 10 | Options round: 2–3 accents, 2–3 title fonts, name candidates, shown as token swaps on a preview deployment, phone first | — | review |
-| 11 | Accent and title-font tokens | 3 | visual |
-| 12 | `GameCover` | 3 | visual |
-| 13 | `StatusChip` | 3 | visual |
-| 14 | `UpNextShelf` | 3 | visual |
-| 15 | Product-name constant, head/meta, manifest route, logo component and assets (assets last, after the name is chosen) | 3 | visual |
-| 16 | Address cutover (2.9) | 3 | ops |
-| 17 | Phone-first owner review → release phase 2 | 3 | review |
+| #     | Slice                                                                                                                                                 | Release | Kind             |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
+| 0     | Spike + harness: add `@base-ui/react` (exact pin), jsdom polyfill, `@playwright/test` dev dependency, review script; capture the phase-1 "before" set | —       | tooling          |
+| 1a–1d | Base UI swap with current visuals and compat wrappers (see 2.2)                                                                                       | 1       | behaviour        |
+| 2     | De-compat call sites, remove `@radix-ui/*`, lint-ban `asChild`                                                                                        | 1       | behaviour        |
+| 3     | Tokens and dead code in `styles.css`; `--font-display` binding; delete `/about`                                                                       | 2       | visual (neutral) |
+| 4     | Re-pull primitives from `base-maia` with the deviation table (2.4)                                                                                    | 2       | visual           |
+| 5     | Call-site codemod per layer (shared → features → widgets → routes); `SectionLabel`, `PageHeader` everywhere                                           | 2       | visual (neutral) |
+| 6     | Delete remaining custom utilities; turn on guardrails (2.5)                                                                                           | 2       | tooling          |
+| 7     | Phone baseline (2.6)                                                                                                                                  | 2       | visual           |
+| 8     | Landing page on the theme; off-palette colors and platform hexes removed; theme-color meta                                                            | 2       | visual           |
+| 9     | Phone-first owner review (§2.8) → release phase 1                                                                                                     | 2       | review           |
+| 10    | Options round: 2–3 accents, 2–3 title fonts, name candidates, shown as token swaps on a preview deployment, phone first                               | —       | review           |
+| 11    | Accent and title-font tokens                                                                                                                          | 3       | visual           |
+| 12    | `GameCover`                                                                                                                                           | 3       | visual           |
+| 13    | `StatusChip`                                                                                                                                          | 3       | visual           |
+| 14    | `UpNextShelf`                                                                                                                                         | 3       | visual           |
+| 15    | Product-name constant, head/meta, manifest route, logo component and assets (assets last, after the name is chosen)                                   | 3       | visual           |
+| 16    | Address cutover (2.9)                                                                                                                                 | 3       | ops              |
+| 17    | Phone-first owner review → release phase 2                                                                                                            | 3       | review           |
 
 ### 2.2 Release 1 — Radix → Base UI (no visual change)
 
@@ -53,19 +53,20 @@ Starts only after spec 026 has shipped. Every slice ships green (`lint`, `typech
 
 **Primitive map (inside `src/shared/ui`):**
 
-| Today | Base UI | Notes |
-|---|---|---|
-| `react-slot` (button, form) | `render` prop / `useRender` + `mergeProps` | No `asChild` in Base UI |
-| `react-dialog` (dialog, sheet, command, image-lightbox) | `dialog` | `Popup` inside `Portal` + `Backdrop`; `command.tsx` keeps `cmdk` inside a Base UI Dialog (spike it in slice 0) |
-| `react-popover` | `popover` | Separate `Positioner` hidden in the wrapper |
-| `react-select` | `select` | Pass `items` to the root so the value shows its label; no empty-string values (use `null`); `alignItemWithTrigger={false}`; `onValueChange` value may be `null` |
-| `react-tabs` (tabs, segmented-control) | `tabs` | `data-active`; `forceMount` → `keepMounted` |
-| `react-tooltip` | `tooltip` | `delayDuration` → `delay`; the trigger must be focusable |
-| `react-dropdown-menu` | `menu` | `onSelect` → `onClick` (+ `closeOnClick={false}` where the menu should stay open); labels live inside `Menu.Group` |
-| checkbox, switch, avatar, collapsible, separator | same-named Base UI parts | `data-checked`/`data-unchecked`; `--collapsible-panel-height` |
-| `react-label` | plain `<label>` | |
+| Today                                                   | Base UI                                    | Notes                                                                                                                                                           |
+| ------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `react-slot` (button, form)                             | `render` prop / `useRender` + `mergeProps` | No `asChild` in Base UI                                                                                                                                         |
+| `react-dialog` (dialog, sheet, command, image-lightbox) | `dialog`                                   | `Popup` inside `Portal` + `Backdrop`; `command.tsx` keeps `cmdk` inside a Base UI Dialog (spike it in slice 0)                                                  |
+| `react-popover`                                         | `popover`                                  | Separate `Positioner` hidden in the wrapper                                                                                                                     |
+| `react-select`                                          | `select`                                   | Pass `items` to the root so the value shows its label; no empty-string values (use `null`); `alignItemWithTrigger={false}`; `onValueChange` value may be `null` |
+| `react-tabs` (tabs, segmented-control)                  | `tabs`                                     | `data-active`; `forceMount` → `keepMounted`                                                                                                                     |
+| `react-tooltip`                                         | `tooltip`                                  | `delayDuration` → `delay`; the trigger must be focusable                                                                                                        |
+| `react-dropdown-menu`                                   | `menu`                                     | `onSelect` → `onClick` (+ `closeOnClick={false}` where the menu should stay open); labels live inside `Menu.Group`                                              |
+| checkbox, switch, avatar, collapsible, separator        | same-named Base UI parts                   | `data-checked`/`data-unchecked`; `--collapsible-panel-height`                                                                                                   |
+| `react-label`                                           | plain `<label>`                            |                                                                                                                                                                 |
 
 **Slices 1a–1d** re-implement each primitive on Base UI but keep the current class strings and the current public API through thin compat wrappers. For example, `asChild` maps to `render` and `onSelect` maps to `onClick`. Call sites therefore do not change, and a revert is cheap.
+
 - 1a: button, label, separator, avatar, checkbox, switch, collapsible, tabs, segmented-control.
 - 1b: tooltip, popover, dropdown-menu.
 - 1c: dialog, sheet, command, image-lightbox, responsive-modal.
@@ -76,6 +77,7 @@ Attribute selectors are translated as part of the swap: `data-[state=open]` beco
 **Outside-press guard.** The 5 `onInteractOutside` sites keep a sheet or dialog open when the user taps a toast: `responsive-modal`, `global-action-host`, `command-palette` ×2 and `done-follow-up`. They move to one helper in `shared/lib`. The helper reads `onOpenChange(open, details)` and cancels when `details.reason === "outside-press"` and the target is inside the toaster. It gets a dedicated behaviour test, because this is the most likely regression.
 
 **Slice 2: removing the compat wrappers.**
+
 - `<Button asChild><Link/></Button>` becomes `<Link className={buttonVariants(...)}>`. This keeps TanStack `Link` typing. **Assumption** (no owner input asked; standard shadcn guidance).
 - Triggers use `render={<Button …/>}`. A trigger whose element is a link also needs `nativeButton={false}`.
 - The compat wrappers are deleted.
@@ -105,23 +107,25 @@ The target is roughly 250–300 lines, in this order: imports → `:root` → `.
 
 Each primitive is pulled with `shadcn view <name>` (style `base-maia`) in a scratch copy and diffed before replacing the repo file. Deliberate deviations from stock are listed in a short table in a new `src/shared/ui/README.md` section, and are reviewed whenever a primitive is re-pulled:
 
-| Deviation | Why (spec) |
-|---|---|
-| Button sizes `h-11 md:h-9` (default), `h-11 md:h-8` (sm), icon `size-11 md:size-9`; `xs` only with an expanded hit area | 44 × 44 tap targets on phone (§2.6) |
-| Input, textarea, command input, select trigger `text-base md:text-sm`; `Input` `h-11 md:h-9` | No iOS zoom on focus (§2.6) |
-| Focus ring solid `--ring` at ≥3:1 instead of `ring-ring/50` | Focus visibility (§2.7) |
-| `SheetFooter` sticky at the bottom with `pb-safe`; the sheet scroll area is `flex-1 overflow-y-auto`; `max-h-[90dvh]` | Thumb zone, safe areas (§2.6) |
-| `Toaster` receives `theme` from the theme provider; on phone it sits above the bottom nav (`mobileOffset` = `--bottom-nav-height` + spacing) | Dark toasts (§2.2); Undo stays in the thumb zone (**assumption**) |
+| Deviation                                                                                                                                                                                                          | Why (spec)                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Button sizes `h-11 md:h-9` (default), `h-11 md:h-8` (sm), icon `size-11 md:size-9`; `xs` only with an expanded hit area                                                                                            | 44 × 44 tap targets on phone (§2.6)                               |
+| Input, textarea, command input, select trigger `text-base md:text-sm`; `Input` `h-11 md:h-9`                                                                                                                       | No iOS zoom on focus (§2.6)                                       |
+| Focus ring solid `--ring` at ≥3:1 instead of `ring-ring/50`                                                                                                                                                        | Focus visibility (§2.7)                                           |
+| `SheetFooter` sticky at the bottom with `pb-safe` (`max(var(--safe-floor, 0px), env(safe-area-inset-bottom))`, floor set per use); `SheetBody` is the sheet scroll area, `flex-1 overflow-y-auto`; `max-h-[90dvh]` | Thumb zone, safe areas (§2.6)                                     |
+| `Toaster` receives `theme` from the theme provider; on phone it sits above the bottom nav (`mobileOffset` = `--bottom-nav-height` + spacing)                                                                       | Dark toasts (§2.2); Undo stays in the thumb zone (**assumption**) |
 
 Non-shadcn primitives (empty-state, page-header, rating-input, segmented-control, responsive-modal, undo-toast, image-lightbox) are restyled to stock tokens. A stock `Skeleton` replaces 11 ad hoc `animate-pulse` uses.
 
 New shared pieces:
+
 - `SectionLabel` replaces `terminal-label` (11 uses), the local `TerminalLabel` clone and the 12 `// LABEL` strings. It uses the body font and sentence case.
 - `PageHeader` becomes the only page-title style. It uses the title font, and the profile name drops `font-serif`.
 
 ### 2.5 Call-site codemod (slice 5) and guardrails (slice 6)
 
 **Codemod.** A dev-only script, `scripts/codemods/tailwind-semantic.ts`, built on ts-morph. It rewrites string literals in `className`, `cn()` and `cva()` only.
+
 - **Spacing** (`xs…3xl` × `p/px/py/gap/space/m`): mapped 1:1 to numeric Tailwind steps, read from the current `styles.css` values before deletion, e.g. `gap-md` becomes `gap-2`. About 250 uses, fully scripted, visually neutral.
 - **Typography:** `text-caption` → `text-xs`, `body-sm` → `text-sm`, `text-body`/`body-md` → `text-base`. Page and section titles go through `PageHeader` and `SectionLabel` by hand.
 - **Shadows:** `shadow-paper-sm/paper/paper-md` → `shadow-xs/sm/md`.
@@ -134,6 +138,7 @@ New shared pieces:
 - After each layer PR: grep for the old names (template literals escape the codemod) and diff the compiled CSS for orphan classes.
 
 **Guardrails.** All versions are exact pins.
+
 - `eslint-plugin-better-tailwindcss`:
   - `no-unknown-classes`, pointed at `src/styles.css`;
   - `no-conflicting-classes`;
@@ -149,16 +154,16 @@ New shared pieces:
 
 ### 2.6 Phone baseline (slice 7)
 
-| §2.6 criterion | Approach | Where |
-|---|---|---|
-| Safe areas | Viewport meta becomes `width=device-width, initial-scale=1, viewport-fit=cover`. Without it, `env(safe-area-inset-*)` stays 0 in Safari. Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` and apply them to the mobile top bar, game-detail action bar, sheet footer, toaster offset and navigation progress bar. All of this ships in one slice, so nothing slips under the notch. | `routes/__root.tsx` `head()`, `styles.css`, 5 components |
-| Keyboard | `dvh` instead of `vh` in the sheet. Sticky sheet and form footers keep the primary button visible. 16px inputs prevent zoom. No `maximum-scale` or `user-scalable=no`. `interactive-widget` is not added (WebKit ignores it). Add a `visualViewport` adjustment only if device checks show a field hidden behind the iOS keyboard. | primitives |
-| Primary button in the thumb zone | A shared `StickyFooter` (inline on desktop) used by the sign-in, profile setup, log, journal edit and profile settings forms; sheets use `SheetFooter` | `shared/ui`, 5 forms |
-| Bottom sheets instead of dialogs | Route these through `ResponsiveModal`: Remove from library, `library-modal`, whats-new, Steam import, Steam connect. Filters, status picker, Add game, Log session and the command palette already are sheets. The image lightbox stays full-screen. | call sites |
-| Minimum text | Floor `text-xs` (12px); body `text-base md:text-sm`; replace `text-[10px]`/`[11px]` (bottom-nav labels, landing, library card, platform and status badges, profile); lint ban | call sites + lint |
-| 44 × 44 | Button sizes in 2.4; migrate ~25 native `<button>` elements to `Button` or give them `min-h-11 min-w-11` | primitives + call sites |
-| No hover-only info | Platform badge tooltip becomes a tap `Popover`; `title=` on the Steam imported-card icon buttons becomes `aria-label` + tooltip/popover | 2 call sites |
-| No sideways scroll / no clipping at 360–430 | Verified by the review script (2.10), fixed per call site | — |
+| §2.6 criterion                              | Approach                                                                                                                                                                                                                                                                                                                                                                          | Where                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Safe areas                                  | Viewport meta becomes `width=device-width, initial-scale=1, viewport-fit=cover`. Without it, `env(safe-area-inset-*)` stays 0 in Safari. Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` and apply them to the mobile top bar, game-detail action bar, sheet footer, toaster offset and navigation progress bar. All of this ships in one slice, so nothing slips under the notch. | `routes/__root.tsx` `head()`, `styles.css`, 5 components |
+| Keyboard                                    | `dvh` instead of `vh` in the sheet. Sticky sheet and form footers keep the primary button visible. 16px inputs prevent zoom. No `maximum-scale` or `user-scalable=no`. `interactive-widget` is not added (WebKit ignores it). Add a `visualViewport` adjustment only if device checks show a field hidden behind the iOS keyboard.                                                | primitives                                               |
+| Primary button in the thumb zone            | A shared `StickyFooter` (inline on desktop) used by the sign-in, profile setup, log, journal edit and profile settings forms; sheets use `SheetFooter`                                                                                                                                                                                                                            | `shared/ui`, 5 forms                                     |
+| Bottom sheets instead of dialogs            | Route these through `ResponsiveModal`: Remove from library, `library-modal`, whats-new, Steam import, Steam connect. Filters, status picker, Add game, Log session and the command palette already are sheets. The image lightbox stays full-screen.                                                                                                                              | call sites                                               |
+| Minimum text                                | Floor `text-xs` (12px); body `text-base md:text-sm`; replace `text-[10px]`/`[11px]` (bottom-nav labels, landing, library card, platform and status badges, profile); lint ban                                                                                                                                                                                                     | call sites + lint                                        |
+| 44 × 44                                     | Button sizes in 2.4; migrate ~25 native `<button>` elements to `Button` or give them `min-h-11 min-w-11`                                                                                                                                                                                                                                                                          | primitives + call sites                                  |
+| No hover-only info                          | Platform badge tooltip becomes a tap `Popover`; `title=` on the Steam imported-card icon buttons becomes `aria-label` + tooltip/popover                                                                                                                                                                                                                                           | 2 call sites                                             |
+| No sideways scroll / no clipping at 360–430 | Verified by the review script (2.10), fixed per call site                                                                                                                                                                                                                                                                                                                         | —                                                        |
 
 `useIsDesktop` starts as `false`, so the server render shows the phone variant. Keep CSS-first layouts. Only the sheet-versus-dialog decision depends on JS.
 
@@ -200,11 +205,13 @@ New shared pieces:
 ### 2.9 New address (slice 16)
 
 **Decisions (owner, 2026-11-05):**
+
 - One re-sign-in is accepted. Cookies are host-scoped, and Cognito's own session usually makes the re-sign-in a single tap.
 - The theme choice resets to System on the new address, because `localStorage` is per origin.
 - No session or theme hand-off is built.
 
 **Infra (`infra/`), all additive and in-place:**
+
 - Prod gains `additional_callback_urls`, copying dev's pattern. During the transition both origins are in the Cognito web client's `callback_urls` and `logout_urls`, which is an in-place update; the client ID and secret are unchanged.
 - S3 CORS gets the new origin through `s3_additional_allowed_origins`.
 - **Must not change** (ForceNew; data loss or an auth outage):
@@ -213,6 +220,7 @@ New shared pieces:
 - Pin `s3_bucket_name` explicitly in tfvars, and add `lifecycle { prevent_destroy = true }` to the user pool, bucket and pool domain.
 
 **App.**
+
 - `BETTER_AUTH_URL` switches to the new origin. It drives the Better Auth `baseURL`, the Steam OpenID realm and `return_to`, and the absolute og URLs.
 - Already-linked Steam accounts keep working: `steamId64` is stored, and the realm is only used during the handshake.
 - An optional `BETTER_AUTH_EXTRA_ORIGINS` (comma-separated, Zod in `env.ts`) feeds `trustedOrigins` while both hosts serve the app. It is removed after the redirect is on.
@@ -220,6 +228,7 @@ New shared pieces:
 **Vercel (dashboard, no repo file).** Add the new domain to the same project and make it primary. Once sign-in is verified, the old domain becomes a **308 redirect to the new domain that preserves path and query**. This needs no code and keeps working even when the app is broken or rolled back.
 
 **Cutover runbook.** Each step is verified before the next.
+
 1. Infra is applied additively, dev first and then prod. Verify that old-host sign-in still works.
 2. Add the new domain in Vercel. Verify TLS.
 3. Merge the rename code.
@@ -228,6 +237,7 @@ New shared pieces:
 6. After 2–4 weeks, remove the old origin from S3 CORS and `trustedOrigins`. Keep the old callback URL and the old domain redirect for at least a year.
 
 `docs/cutover-rollback.md` gets a section for this spec:
+
 - The old claim that sessions survive because the domain is the same no longer holds.
 - Rollback order: turn off the redirect, then restore `BETTER_AUTH_URL` and redeploy. This means one more re-sign-in on the old host.
 - Never detach the old domain during the transition window.
@@ -252,25 +262,26 @@ New shared pieces:
 ## 3. Impact and Risk Analysis
 
 **System dependencies.**
+
 - Spec 026 must ship first. It reshapes the dashboard, library, game page and status UI, and 027 touches the same files (`__root.tsx`, shell widgets, status components).
 - The rest of the functional behaviour (spec 025 layouts, global action host, theme provider) is preserved.
 - No database, server function or route-contract change.
 - Phase 2 depends on Vercel domain settings, the Cognito web client, S3 CORS and DNS outside the repo.
 
-| Risk | Mitigation |
-|---|---|
+| Risk                                                                                                         | Mitigation                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Base UI behaviour differs from Radix: focus return, scroll lock, outside press, Select anatomy, iOS keyboard | Release 1 ships the swap alone with today's look. The slice-0 spike runs the existing `shared/ui` tests first. The outside-press helper gets a dedicated test. Device checks on iPhone and Android. |
-| jsdom gaps with Base UI (`getAnimations`) | No-op polyfill in `test/setup/unit.ts`. Open popups with `userEvent`. |
-| Codemod misses dynamic class strings | Grep for the retired names after each layer; `no-unknown-classes` catches the rest. |
-| Phase 1 slices visibly mix the old and new look mid-way | Custom utilities keep compiling (moved to `@utility`) until slice 6. Phase 1 is released only after the full owner review. |
-| `viewport-fit=cover` without padding puts content under the notch | The viewport change and safe-area padding are in the same slice; the review script checks it. |
-| Maia defaults break phone rules (36px buttons, 14px inputs, 50% focus ring) | The deviation table (2.4) is re-checked on every re-pull. |
-| Accent fails AA as text or as fill | Separate fill and text tones; contrast checked in the options round. |
-| User pool or bucket replacement during the rename | Never change `project_name` or `domain_prefix`; `prevent_destroy`; review every plan for `-/+`. |
-| Cognito `redirect_mismatch`, Steam realm mismatch, S3 CORS failure at the switch | Register both origins before the env flip; post-switch checklist (runbook step 4). |
-| Stale link previews | Re-scrape in the Telegram and Slack debuggers after the switch. |
-| Old domain lapses, so old links break | Keep it registered and attached as a redirect for at least a year. |
-| Parallel work in the same tree | 027 starts after 026 merges. Re-count the inventory at slice 0. |
+| jsdom gaps with Base UI (`getAnimations`)                                                                    | No-op polyfill in `test/setup/unit.ts`. Open popups with `userEvent`.                                                                                                                               |
+| Codemod misses dynamic class strings                                                                         | Grep for the retired names after each layer; `no-unknown-classes` catches the rest.                                                                                                                 |
+| Phase 1 slices visibly mix the old and new look mid-way                                                      | Custom utilities keep compiling (moved to `@utility`) until slice 6. Phase 1 is released only after the full owner review.                                                                          |
+| `viewport-fit=cover` without padding puts content under the notch                                            | The viewport change and safe-area padding are in the same slice; the review script checks it.                                                                                                       |
+| Maia defaults break phone rules (36px buttons, 14px inputs, 50% focus ring)                                  | The deviation table (2.4) is re-checked on every re-pull.                                                                                                                                           |
+| Accent fails AA as text or as fill                                                                           | Separate fill and text tones; contrast checked in the options round.                                                                                                                                |
+| User pool or bucket replacement during the rename                                                            | Never change `project_name` or `domain_prefix`; `prevent_destroy`; review every plan for `-/+`.                                                                                                     |
+| Cognito `redirect_mismatch`, Steam realm mismatch, S3 CORS failure at the switch                             | Register both origins before the env flip; post-switch checklist (runbook step 4).                                                                                                                  |
+| Stale link previews                                                                                          | Re-scrape in the Telegram and Slack debuggers after the switch.                                                                                                                                     |
+| Old domain lapses, so old links break                                                                        | Keep it registered and attached as a redirect for at least a year.                                                                                                                                  |
+| Parallel work in the same tree                                                                               | 027 starts after 026 merges. Re-count the inventory at slice 0.                                                                                                                                     |
 
 ---
 
@@ -285,6 +296,7 @@ New shared pieces:
   - assertions on `data-state="…"`.
 
   They are rewritten to check roles, accessible names, visible text and `aria-expanded`/`aria-selected`/`aria-checked`. Pure presence-restate tests are dropped. `theme-provider.test.tsx` loses the retired theme names.
+
 - **Release 1.** The existing `shared/ui/*.test.tsx` suite and the ~30 test files using the affected primitives must pass unchanged in slices 1a–1d. New tests cover the outside-press helper, Select label rendering and the `null` value.
 - **Unit tests (framework and server):**
   - `head()` output: title helper, absolute og URLs, viewport string, theme-color pair;

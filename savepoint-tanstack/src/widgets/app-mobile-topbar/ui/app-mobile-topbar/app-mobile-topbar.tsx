@@ -9,7 +9,7 @@ export function AppMobileTopbar() {
     <header
       data-testid="app-mobile-topbar"
       aria-label="Primary mobile navigation"
-      className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b bg-background/85 px-3 backdrop-blur-md md:hidden"
+      className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-2 border-b bg-background/85 px-3 pt-safe backdrop-blur-md md:hidden"
     >
       <Link
         to="/"

@@ -68,7 +68,7 @@ export function ImageLightbox({
             <NavArrow side="right" onClick={goNext} />
           </div>
 
-          <div className="flex max-w-full gap-2 overflow-x-auto pb-[env(safe-area-inset-bottom)]">
+          <div className="flex max-w-full gap-2 overflow-x-auto pb-safe">
             {images.map((image, i) => (
               <button
                 key={image.src}

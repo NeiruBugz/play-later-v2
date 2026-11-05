@@ -29,9 +29,11 @@ export function NavigationProgress({
       role="progressbar"
       aria-label="Loading page"
       aria-busy="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-0.5 overflow-hidden"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[100] pt-safe"
     >
-      <div className="h-full w-1/3 navigation-progress-bar bg-primary" />
+      <div className="h-0.5 overflow-hidden">
+        <div className="h-full w-1/3 navigation-progress-bar bg-primary" />
+      </div>
     </div>
   );
 }
