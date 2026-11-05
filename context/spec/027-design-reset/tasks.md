@@ -111,7 +111,7 @@ Conventions for every slice:
     - delete the dead parts: about 114 spacing classes, 13 typography classes, unused keyframes, the duplicate reduced-motion block, the v3-shaped `--container-*`, the self-referencing `@theme` bindings, and the unused `chart-*` and `sidebar-*` tokens.
 
     Diff the compiled CSS to confirm no live class disappeared. **[Agent: react-frontend]**
-  - [ ] Delete `src/routes/about.tsx` and regenerate `routeTree.gen.ts`. Add an assertion to `src/routes/-route-tree.test.tsx` that `/about` is absent. **[Agent: tanstack-fullstack]**
+  - [x] Delete `src/routes/about.tsx` and regenerate `routeTree.gen.ts`. Add an assertion to `src/routes/-route-tree.test.tsx` that `/about` is absent. **[Agent: tanstack-fullstack]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). Open `/about` and see the standard not-found screen. Confirm in the Playwright MCP, via computed `font-family`, that the four former no-op places use Space Grotesk: log-session title, journal stats rail, journal entry card. Confirm that hovering a button at desktop changes its shadow.
