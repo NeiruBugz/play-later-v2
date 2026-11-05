@@ -35,7 +35,7 @@ Conventions for every slice:
     - Confirm `git status` shows no files under `review/`.
     - Stop the dev server by PID. Delete any extra screenshots and traces created outside `review/before/`. **[Agent: testing]**
 
-- [ ] **Slice 2: Simple primitives run on Base UI with today's look**
+- [x] **Slice 2: Simple primitives run on Base UI with today's look**
   - [x] Add `@base-ui/react` (exact pin) and add a no-op `Element.prototype.getAnimations` polyfill to `test/setup/unit.ts`.
     - Spike first: re-implement `button` on Base UI and run the whole `src/shared/ui/*.test.tsx` suite.
     - If the harness breaks, fix it here before continuing. **[Agent: react-frontend]**
@@ -43,7 +43,7 @@ Conventions for every slice:
     - Keep today's class strings and today's public API. Add thin compat wrappers where needed: `asChild` maps to `render`; `forceMount` maps to `keepMounted`.
     - Translate `data-[state=…]` selectors to `data-checked` / `data-unchecked` / `data-active`, including `related-games-tabs.tsx`. **[Agent: react-frontend]**
   - [x] Update tests in these primitives that asserted `data-state=` so they assert `aria-checked`, `aria-selected` or `aria-expanded`. Add a behaviour test showing that `tabs` keeps an inactive panel mounted where `forceMount` was used. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, toggle a switch and a checkbox in settings, switch tabs on a game page, and open a collapsible.
     - Capture the same screens with the review script into a temporary folder and compare them visually with `review/phase1/before`. There must be no visible change.
