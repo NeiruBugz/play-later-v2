@@ -171,7 +171,7 @@ Conventions for every slice:
 
 - [ ] **Slice 10: The custom styling layer cannot come back**
   - [x] Delete the remaining semantic spacing, typography and shadow utilities from `styles.css`. Confirm `styles.css` is about 300 lines and `rg` finds none of the retired names in `src/`. **[Agent: react-frontend]**
-  - [ ] Add `eslint-plugin-better-tailwindcss` (exact pin) to `eslint.config.mjs`. Rules:
+  - [x] Add `eslint-plugin-better-tailwindcss` (exact pin) to `eslint.config.mjs`. Rules:
     - `no-unknown-classes` against `src/styles.css`;
     - `no-conflicting-classes`;
     - `no-restricted-classes` banning `text-[Npx]`, hex and arbitrary colors, raw palette colors outside an allow-list, `font-serif`, `terminal-label` and the retired semantic names;
@@ -285,7 +285,7 @@ Conventions for every slice:
 - [ ] **Slice 19: One status chip everywhere, including "Let go"**
   - [ ] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
     - Map the domain status and outcome to it at the entity layer.
-    - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar and status-switcher color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
+    - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar, status-switcher and journal stats rail (`journal-stats-rail.tsx`) color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
   - [ ] Write behaviour tests: each status renders its label; "Let go" shares the Done variant attribute; contrast tokens are applied in both modes, asserted via the variant attribute and not via classes. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
