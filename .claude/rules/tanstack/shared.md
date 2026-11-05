@@ -27,6 +27,7 @@ IGDB / S3 / shadcn primitives.
 - **Rule:** `shared/ui/index.ts` is the public barrel — re-exports every primitive. **Why:** single import path (`import { Button } from "@/shared/ui"`).
 - **Rule:** UI primitives import only from `@/shared/lib/utils` + radix-ui + react. No imports from other layers. **Why:** primitives must stay platform-neutral.
 - **Rule:** styling via `cn()` + Tailwind only. No inline `style={...}` (except for dynamic CSS variables), no CSS-in-JS. **Why:** one styling pipeline.
+- **Rule:** never run `shadcn init` or `shadcn apply` against the repo (`apply --only theme` overwrites the palette in `src/styles.css`). Pull stock output with `shadcn view <name>` in a scratch directory outside the repo and diff it. **Why:** `components.json` only seeds `shadcn add`; our tokens are the source of truth.
 
 ### `shared/api/`
 
