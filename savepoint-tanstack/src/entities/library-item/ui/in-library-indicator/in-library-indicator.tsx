@@ -7,7 +7,7 @@ export function InLibraryIndicator({
   upNextPosition,
 }: InLibraryIndicatorProps) {
   return (
-    <span className="gap-xs inline-flex flex-wrap items-center justify-end">
+    <span className="inline-flex flex-wrap items-center justify-end gap-1">
       <span className="text-muted-foreground text-xs whitespace-nowrap">
         In library
       </span>

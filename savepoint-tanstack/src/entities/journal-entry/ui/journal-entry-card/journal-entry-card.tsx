@@ -33,7 +33,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
   const writtenOn = formatJournalDate(entry.createdAt);
 
   const body = (
-    <CardContent className="p-lg gap-sm flex flex-col">
+    <CardContent className="flex flex-col gap-1.5 p-3">
       {/* Header: game title (prominent) + date */}
       <div className="flex items-baseline justify-between gap-2">
         <h3
@@ -44,7 +44,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
         </h3>
         <time
           dateTime={new Date(entry.createdAt).toISOString()}
-          className="text-caption text-muted-foreground shrink-0 font-mono tracking-widest uppercase"
+          className="text-muted-foreground shrink-0 font-mono text-xs font-medium uppercase"
         >
           {writtenOn}
         </time>
@@ -55,20 +55,18 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
       ) : null}
 
       {content ? (
-        <p className="text-body text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-wrap md:italic">
+        <p className="text-muted-foreground line-clamp-3 text-base whitespace-pre-wrap md:italic">
           <span className="hidden md:inline">&ldquo;</span>
           {content}
           <span className="hidden md:inline">&rdquo;</span>
         </p>
       ) : timePlayed ? (
-        <p className="text-body text-muted-foreground leading-relaxed">
-          {timePlayed} played
-        </p>
+        <p className="text-muted-foreground text-base">{timePlayed} played</p>
       ) : null}
 
       <div className="flex items-center justify-between gap-2">
         {content && timePlayed ? (
-          <span className="text-caption text-primary/70 font-mono tracking-widest">
+          <span className="text-primary/70 font-mono text-xs font-medium">
             {timePlayed}
           </span>
         ) : (
@@ -78,7 +76,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="hover:text-primary text-caption text-muted-foreground inline-flex items-center gap-1 transition-colors"
+            className="hover:text-primary text-muted-foreground inline-flex items-center gap-1 text-xs font-medium transition-colors"
             onClick={(event) => event.stopPropagation()}
           >
             <span className="font-medium">{entry.game.title}</span>

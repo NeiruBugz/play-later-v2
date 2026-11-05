@@ -66,7 +66,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
             onClick={() => onSelect(entry.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
-              "gap-sm px-sm py-xs flex w-full items-center rounded-md text-left text-sm transition-colors",
+              "flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm transition-colors",
               "hover:bg-muted focus-visible:bg-muted focus-visible:outline-none",
               checked && "font-semibold"
             )}
@@ -118,7 +118,7 @@ export function StatusPicker({
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger render={trigger} />
-        <PopoverContent align="start" className="p-xs w-56">
+        <PopoverContent align="start" className="w-56 p-1">
           <StatusRadioList value={value} onSelect={handleSelect} />
         </PopoverContent>
       </Popover>
@@ -131,9 +131,9 @@ export function StatusPicker({
       <SheetContent
         side="bottom"
         aria-describedby={undefined}
-        className="p-md pb-xl"
+        className="p-2 pb-4"
       >
-        <SheetTitle className="mb-sm text-base">{PICKER_LABEL}</SheetTitle>
+        <SheetTitle className="mb-1.5 text-base">{PICKER_LABEL}</SheetTitle>
         <StatusRadioList value={value} onSelect={handleSelect} />
       </SheetContent>
     </Sheet>

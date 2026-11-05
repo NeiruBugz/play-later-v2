@@ -31,7 +31,7 @@ export function LibraryGrid({ games }: LibraryGridProps) {
               />
             )}
           </div>
-          <p className="body-sm mt-2 line-clamp-2 font-medium">{game.title}</p>
+          <p className="mt-2 line-clamp-2 text-sm">{game.title}</p>
         </div>
       ))}
     </div>

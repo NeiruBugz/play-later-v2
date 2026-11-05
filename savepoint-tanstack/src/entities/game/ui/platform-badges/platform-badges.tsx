@@ -16,7 +16,7 @@ export function PlatformBadges({ platforms }: PlatformBadgesProps) {
 
   return (
     <TooltipProvider>
-      <div className="gap-xs flex flex-wrap items-center">
+      <div className="flex flex-wrap items-center gap-1">
         {visible.map((name) => (
           <PlatformBadgeItem name={name} key={name} />
         ))}
@@ -26,7 +26,7 @@ export function PlatformBadges({ platforms }: PlatformBadgesProps) {
               render={
                 <Badge
                   variant="subtle"
-                  className="px-sm h-5 cursor-help rounded-md text-[11px]"
+                  className="h-5 cursor-help rounded-md px-1.5 text-[11px]"
                 />
               }
             >

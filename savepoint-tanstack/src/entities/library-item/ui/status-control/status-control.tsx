@@ -34,7 +34,7 @@ export function StatusControl({
           aria-label={`Status: ${entry.label}. Change`}
           data-status={status}
           className={cn(
-            "gap-xs px-sm py-2xs inline-flex shrink-0 items-center rounded-full border text-sm font-semibold whitespace-nowrap transition-colors",
+            "py-2xs inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 text-sm font-semibold whitespace-nowrap transition-colors",
             "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50",
             className
           )}

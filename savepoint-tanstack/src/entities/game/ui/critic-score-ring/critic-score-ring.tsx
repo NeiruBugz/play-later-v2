@@ -37,7 +37,7 @@ export function CriticScoreRing({ value }: CriticScoreRingProps) {
           </span>
         </div>
       </div>
-      <span className="text-caption text-muted-foreground tracking-wider uppercase">
+      <span className="text-muted-foreground text-xs font-medium uppercase">
         Critic score
       </span>
     </div>
