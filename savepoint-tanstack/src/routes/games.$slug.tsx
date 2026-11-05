@@ -12,10 +12,12 @@ import {
 } from "@/features/browse-related-games";
 import {
   getGameDetailPageDataFn,
-  getRelatedGamesForGameFn,
-  getTimesToBeatForGameFn,
   type RelatedCollectionSection,
 } from "@/features/game-detail/api";
+import {
+  relatedGamesQueryOptions,
+  timesToBeatQueryOptions,
+} from "@/features/game-detail/model";
 import {
   TimesToBeatSection,
   TimesToBeatSkeleton,
@@ -26,8 +28,13 @@ import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
 export const Route = createFileRoute("/games/$slug")({
-  loader: ({ params }) =>
-    getGameDetailPageDataFn({ data: { slug: params.slug } }),
+  loader: async ({ params, context }) => {
+    const view = await getGameDetailPageDataFn({ data: { slug: params.slug } });
+    const { igdbId } = view.data.game;
+    void context.queryClient.prefetchQuery(timesToBeatQueryOptions(igdbId));
+    void context.queryClient.prefetchQuery(relatedGamesQueryOptions(igdbId));
+    return view;
+  },
   component: GameDetailRoute,
   errorComponent: GameDetailErrorBoundary,
 });
@@ -99,10 +106,9 @@ function TimesToBeatSlot({
   playtimeSessionCount: number;
   recentSessionMinutes: number[];
 }) {
-  const { data: timesToBeat } = useSuspenseQuery({
-    queryKey: ["times-to-beat", igdbId],
-    queryFn: () => getTimesToBeatForGameFn({ data: { igdbId } }),
-  });
+  const { data: timesToBeat } = useSuspenseQuery(
+    timesToBeatQueryOptions(igdbId)
+  );
   return (
     <TimesToBeatSection
       timesToBeat={timesToBeat}
@@ -114,10 +120,7 @@ function TimesToBeatSlot({
 }
 
 function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
-  const { data: sections } = useSuspenseQuery({
-    queryKey: ["related-games", igdbId],
-    queryFn: () => getRelatedGamesForGameFn({ data: { igdbId } }),
-  });
+  const { data: sections } = useSuspenseQuery(relatedGamesQueryOptions(igdbId));
   if (sections.length === 0) return null;
   return <RelatedGamesSections sections={sections} />;
 }

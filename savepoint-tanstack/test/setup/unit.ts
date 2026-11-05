@@ -2,6 +2,8 @@ import "@testing-library/jest-dom";
 
 import { afterEach, beforeEach, vi } from "vitest";
 
+import { igdbResponseCache } from "@/shared/api/igdb/response-cache";
+
 // Activate the fake-timer pool configured in vitest.config.ts
 // (`toFake: ["setTimeout", "clearTimeout"]` with `shouldAdvanceTime: true`).
 // The config supplies defaults; `vi.useFakeTimers()` is what actually swaps
@@ -12,6 +14,7 @@ import { afterEach, beforeEach, vi } from "vitest";
 // no-op for tests that don't touch timers manually.
 beforeEach(() => {
   vi.useFakeTimers();
+  igdbResponseCache.clear();
 });
 
 if (typeof globalThis.ResizeObserver === "undefined") {
