@@ -170,7 +170,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
 - [ ] **Slice 10: The custom styling layer cannot come back**
-  - [ ] Delete the remaining semantic spacing, typography and shadow utilities from `styles.css`. Confirm `styles.css` is about 300 lines and `rg` finds none of the retired names in `src/`. **[Agent: react-frontend]**
+  - [x] Delete the remaining semantic spacing, typography and shadow utilities from `styles.css`. Confirm `styles.css` is about 300 lines and `rg` finds none of the retired names in `src/`. **[Agent: react-frontend]**
   - [ ] Add `eslint-plugin-better-tailwindcss` (exact pin) to `eslint.config.mjs`. Rules:
     - `no-unknown-classes` against `src/styles.css`;
     - `no-conflicting-classes`;
