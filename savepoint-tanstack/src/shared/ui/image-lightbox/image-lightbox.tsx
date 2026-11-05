@@ -1,7 +1,9 @@
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "@/shared/lib/utils";
+import { Dialog, DialogPortal } from "@/shared/ui/dialog";
 
 import type { ImageLightboxProps } from "./image-lightbox.type";
 
@@ -12,34 +14,36 @@ export function ImageLightbox({
   onOpenChange,
   onIndexChange,
 }: ImageLightboxProps) {
-  if (images.length === 0) return null;
+  const count = images.length;
+  const safeIndex = Math.min(Math.max(index, 0), Math.max(count - 1, 0));
 
-  const safeIndex = Math.min(Math.max(index, 0), images.length - 1);
+  React.useEffect(() => {
+    if (!open || count === 0) return;
+    const wrap = (next: number) => (next + count) % count;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        onIndexChange(wrap(safeIndex + 1));
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        onIndexChange(wrap(safeIndex - 1));
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, count, safeIndex, onIndexChange]);
+
+  if (count === 0) return null;
+
   const current = images[safeIndex];
-
-  const wrap = (next: number) => (next + images.length) % images.length;
-
-  const goNext = () => onIndexChange(wrap(safeIndex + 1));
-  const goPrev = () => onIndexChange(wrap(safeIndex - 1));
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "ArrowRight") {
-      event.preventDefault();
-      goNext();
-    } else if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      goPrev();
-    }
-  };
+  const goNext = () => onIndexChange((safeIndex + 1) % count);
+  const goPrev = () => onIndexChange((safeIndex - 1 + count) % count);
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/85 backdrop-blur-sm" />
-        <DialogPrimitive.Content
-          onKeyDown={handleKeyDown}
-          className="gap-lg p-2xl fixed inset-0 z-50 flex flex-col items-center justify-center focus:outline-none"
-        >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogPrimitive.Backdrop className="data-[open]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:fade-in-0 fixed inset-0 z-50 bg-black/85 backdrop-blur-sm" />
+        <DialogPrimitive.Popup className="gap-lg p-2xl fixed inset-0 z-50 flex flex-col items-center justify-center focus:outline-none">
           <DialogPrimitive.Title className="sr-only">
             {current.alt}
           </DialogPrimitive.Title>
@@ -88,9 +92,9 @@ export function ImageLightbox({
               </button>
             ))}
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        </DialogPrimitive.Popup>
+      </DialogPortal>
+    </Dialog>
   );
 }
 

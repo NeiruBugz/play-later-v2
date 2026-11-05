@@ -61,7 +61,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
 
 - [ ] **Slice 4: Dialogs, sheets and the command palette run on Base UI with today's look**
-  - [ ] Re-implement `dialog`, `sheet` (Base UI dialog), `command` (cmdk inside a Base UI Dialog), `image-lightbox` and `responsive-modal`. Keep today's classes and API. **[Agent: react-frontend]**
+  - [x] Re-implement `dialog`, `sheet` (Base UI dialog), `command` (cmdk inside a Base UI Dialog), `image-lightbox` and `responsive-modal`. Keep today's classes and API. **[Agent: react-frontend]**
   - [ ] Add a `shared/lib` helper that keeps a dialog or sheet open when the user presses the toaster. It reads `onOpenChange(open, details)` and cancels on `details.reason === "outside-press"` inside the toaster.
     - Replace the 5 `onInteractOutside` sites with it: `responsive-modal`, `global-action-host`, `command-palette` ×2 and `done-follow-up`. **[Agent: react-frontend]**
   - [ ] Write behaviour tests:

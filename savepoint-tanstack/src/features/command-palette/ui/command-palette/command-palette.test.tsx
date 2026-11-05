@@ -285,8 +285,8 @@ describe("CommandPalette", () => {
       await user.keyboard("{Escape}");
     });
 
-    it("closes the palette (search input is no longer visible)", () => {
-      expect(elements.querySearchInput()).toBeNull();
+    it("closes the palette (search input is no longer visible)", async () => {
+      await waitFor(() => expect(elements.querySearchInput()).toBeNull());
     });
   });
 
