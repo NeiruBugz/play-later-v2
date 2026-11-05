@@ -5,6 +5,7 @@ paths:
   - "savepoint-tanstack/src/entities/**/api/**/*"
   - "savepoint-tanstack/src/routes/**/*"
 ---
+
 # Rules — `createServerFn` (cross-cutting)
 
 The TanStack Start server-function shape, the `.server.ts` boundary, the
@@ -15,11 +16,11 @@ worker-split pattern, and the auth conventions. Read before writing any
 
 ```ts
 export const myFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => MyInputSchema.parse(data))
+  .validator((data: unknown) => MyInputSchema.parse(data))
   .handler(async ({ data }): Promise<MyResult> => {
-    const userId = await requireUserId();          // or getServerUserId if anonymous-allowed
-    const parsed = MyInputSchema.parse(data);      // validate-twice (see below)
-    return myWorker(userId, parsed);               // delegate to worker if non-trivial
+    const userId = await requireUserId(); // or getServerUserId if anonymous-allowed
+    const parsed = MyInputSchema.parse(data); // validate-twice (see below)
+    return myWorker(userId, parsed); // delegate to worker if non-trivial
   });
 ```
 
@@ -38,8 +39,8 @@ export const myFn = createServerFn({ method: "POST" })
 
 ## Validate-twice
 
-- **Rule:** every handler with input re-parses with the same Zod schema inside `.handler(...)`, even though `.inputValidator(...)` already parsed it. **Why:** `.inputValidator` runs only on cross-network calls; programmatic callers (other server fns, tests, route loaders calling another server fn) bypass it.
-- **Rule:** the schema is a top-level `const`, exported if the worker imports it. Never inline the schema inside `inputValidator`. **Why:** the worker needs the same schema for its own validation.
+- **Rule:** every handler with input re-parses with the same Zod schema inside `.handler(...)`, even though `.validator(...)` already parsed it. **Why:** `.validator` runs only on cross-network calls; programmatic callers (other server fns, tests, route loaders calling another server fn) bypass it.
+- **Rule:** the schema is a top-level `const`, exported if the worker imports it. Never inline the schema inside `validator`. **Why:** the worker needs the same schema for its own validation.
 
 ## Worker-split (foot-gun #8)
 
@@ -47,8 +48,13 @@ When a handler does non-trivial work (DB writes, multi-step orchestration, anyth
 
 ```ts
 // features/<name>/api/<fn-name>.worker.ts  — plain async, server-runtime-free
-export const MY_INPUT = z.object({ /* ... */ });
-export async function myWorker(userId: string | undefined, data: unknown): Promise<MyResult> {
+export const MY_INPUT = z.object({
+  /* ... */
+});
+export async function myWorker(
+  userId: string | undefined,
+  data: unknown,
+): Promise<MyResult> {
   if (!userId) throw new UnauthorizedError("Sign in required");
   const parsed = MY_INPUT.parse(data);
   // ... do the work ...
@@ -56,7 +62,7 @@ export async function myWorker(userId: string | undefined, data: unknown): Promi
 
 // features/<name>/api/<fn-name>.ts  — thin createServerFn wrapper
 export const myFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => MY_INPUT.parse(data))
+  .validator((data: unknown) => MY_INPUT.parse(data))
   .handler(async ({ data }) => {
     const userId = await requireUserId();
     return myWorker(userId, data);
