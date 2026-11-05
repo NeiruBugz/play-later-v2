@@ -11,7 +11,6 @@ import {
   DialogOverlay,
   DialogPortal,
   DialogTrigger,
-  useRegisterInteractOutside,
 } from "./dialog";
 
 const Sheet = Dialog;
@@ -42,18 +41,14 @@ const sheetVariants = cva(
 interface SheetContentProps
   extends
     React.ComponentProps<typeof SheetPrimitive.Popup>,
-    VariantProps<typeof sheetVariants> {
-  onInteractOutside?: (event: Event) => void;
-}
+    VariantProps<typeof sheetVariants> {}
 
 function SheetContent({
   side = "right",
   className,
   children,
-  onInteractOutside,
   ...props
 }: SheetContentProps) {
-  useRegisterInteractOutside(onInteractOutside);
   return (
     <SheetPortal>
       <SheetOverlay />

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { keepOpenOnToastPress } from "@/shared/lib/keep-open-on-toast-press";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 
 import {
@@ -29,8 +30,6 @@ export type ResponsiveModalProps = {
   dialogTestId?: string;
   /** `data-testid` applied to the mobile Sheet content. */
   sheetTestId?: string;
-  /** Forwarded to the Dialog/Sheet content; call `preventDefault()` to keep it open. */
-  onInteractOutside?: (event: Event) => void;
 };
 
 /**
@@ -49,17 +48,16 @@ export function ResponsiveModal({
   contentClassName,
   dialogTestId,
   sheetTestId,
-  onInteractOutside,
 }: ResponsiveModalProps) {
   const isDesktop = useIsDesktop();
+  const handleOpenChange = keepOpenOnToastPress(onOpenChange);
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           className={contentClassName}
           data-testid={dialogTestId}
-          onInteractOutside={onInteractOutside}
         >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -74,12 +72,11 @@ export function ResponsiveModal({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
         className={contentClassName}
         data-testid={sheetTestId}
-        onInteractOutside={onInteractOutside}
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>

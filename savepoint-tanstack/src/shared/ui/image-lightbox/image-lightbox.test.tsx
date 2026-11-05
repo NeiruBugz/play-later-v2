@@ -86,12 +86,12 @@ describe("ImageLightbox", () => {
 
     it("closes on the Close button", async () => {
       await actions.clickClose();
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
     });
 
     it("closes on the Escape key", async () => {
       await actions.pressEscape();
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
     });
   });
 

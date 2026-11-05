@@ -2,7 +2,6 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
 import { closeGlobalAction } from "@/shared/lib/global-action";
-import { keepOpenOnToastInteraction } from "@/shared/lib/keep-open-on-toast-interaction";
 import { ResponsiveModal } from "@/shared/ui";
 
 const AddGameContent = lazy(() =>
@@ -62,7 +61,6 @@ export function GlobalActionHost() {
       description={description}
       dialogTestId="global-action-dialog"
       sheetTestId="global-action-sheet"
-      onInteractOutside={keepOpenOnToastInteraction}
     >
       <Suspense fallback={null}>{content}</Suspense>
     </ResponsiveModal>

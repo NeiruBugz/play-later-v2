@@ -4,64 +4,7 @@ import * as React from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-type InteractOutsideHandler = (event: Event) => void;
-
-const InteractOutsideContext = React.createContext<React.RefObject<
-  InteractOutsideHandler | undefined
-> | null>(null);
-
-function Dialog({
-  onOpenChange,
-  ...props
-}: Omit<React.ComponentProps<typeof DialogPrimitive.Root>, "onOpenChange"> & {
-  onOpenChange?: (open: boolean) => void;
-}) {
-  const interactOutsideRef = React.useRef<InteractOutsideHandler | undefined>(
-    undefined
-  );
-
-  const handleOpenChange: NonNullable<
-    React.ComponentProps<typeof DialogPrimitive.Root>["onOpenChange"]
-  > = (open, details) => {
-    if (
-      !open &&
-      details.reason === "outside-press" &&
-      interactOutsideRef.current
-    ) {
-      let prevented = false;
-      interactOutsideRef.current({
-        target: details.event.target,
-        preventDefault: () => {
-          prevented = true;
-        },
-      } as unknown as Event);
-      if (prevented) {
-        details.cancel();
-        return;
-      }
-    }
-    onOpenChange?.(open);
-  };
-
-  return (
-    <InteractOutsideContext.Provider value={interactOutsideRef}>
-      <DialogPrimitive.Root {...props} onOpenChange={handleOpenChange} />
-    </InteractOutsideContext.Provider>
-  );
-}
-
-function useRegisterInteractOutside(handler?: InteractOutsideHandler) {
-  const ref = React.useContext(InteractOutsideContext);
-  React.useEffect(() => {
-    if (!ref) return;
-    ref.current = handler;
-    return () => {
-      ref.current = undefined;
-    };
-  }, [ref, handler]);
-}
-
-type InteractOutsideProps = { onInteractOutside?: InteractOutsideHandler };
+const Dialog = DialogPrimitive.Root;
 
 function DialogTrigger({
   asChild = false,
@@ -113,10 +56,8 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
-  onInteractOutside,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Popup> & InteractOutsideProps) {
-  useRegisterInteractOutside(onInteractOutside);
+}: React.ComponentProps<typeof DialogPrimitive.Popup>) {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -194,7 +135,6 @@ function DialogDescription({
 
 export {
   Dialog,
-  useRegisterInteractOutside,
   DialogPortal,
   DialogOverlay,
   DialogTrigger,

@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 
 import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { keepOpenOnToastInteraction } from "@/shared/lib/keep-open-on-toast-interaction";
+import { keepOpenOnToastPress } from "@/shared/lib/keep-open-on-toast-press";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
   Command,
@@ -160,12 +160,11 @@ export function CommandPalette({
 
   if (!isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <Sheet open={isOpen} onOpenChange={keepOpenOnToastPress(handleOpenChange)}>
         <SheetContent
           side="bottom"
           className="gap-0 p-0"
           data-testid="command-palette-mobile-sheet"
-          onInteractOutside={keepOpenOnToastInteraction}
         >
           <SheetTitle className="sr-only">Command palette</SheetTitle>
           <SheetDescription className="sr-only">
@@ -178,10 +177,9 @@ export function CommandPalette({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={keepOpenOnToastPress(handleOpenChange)}>
       <DialogContent
         className="max-w-2xl gap-0 p-0"
-        onInteractOutside={keepOpenOnToastInteraction}
       >
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <DialogDescription className="sr-only">
