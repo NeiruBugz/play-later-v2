@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const gameCardVariants = cva(
-  "group relative transition-all duration-normal",
+  "group relative transition-all duration-200",
   {
     variants: {
       layout: {
