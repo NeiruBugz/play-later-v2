@@ -95,7 +95,7 @@ Conventions for every slice:
     - menu `onSelect` becomes `onClick`.
 
     Delete the compat wrappers. Remove all 13 `@radix-ui/*` packages; `rg "@radix-ui"` must return nothing. **[Agent: react-frontend]**
-  - [ ] Add an ESLint `no-restricted-syntax` rule banning the `asChild` JSX attribute, with a test in `test/eslint/` proving it fires. **[Agent: react-frontend]**
+  - [x] Add an ESLint `no-restricted-syntax` rule banning the `asChild` JSX attribute, with a test in `test/eslint/` proving it fires. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate and `rg "@radix-ui|asChild" src`, which must be empty.
     - Start the app (record the PID). Run the full review-script capture into a temporary folder and compare it with `review/phase1/before`. There must be no visible change.
