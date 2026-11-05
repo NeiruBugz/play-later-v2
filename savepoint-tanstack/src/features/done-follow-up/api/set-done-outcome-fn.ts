@@ -9,7 +9,7 @@ import {
 } from "./set-done-outcome-fn.worker";
 
 export const setDoneOutcomeFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SET_DONE_OUTCOME_INPUT.parse(data))
+  .validator((data: unknown) => SET_DONE_OUTCOME_INPUT.parse(data))
   .handler(async ({ data }): Promise<SetDoneOutcomeResult> => {
     const userId = await requireUserId();
     return setDoneOutcomeWorker(userId, data);

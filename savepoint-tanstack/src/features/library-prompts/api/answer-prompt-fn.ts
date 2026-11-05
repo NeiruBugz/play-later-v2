@@ -9,7 +9,7 @@ import {
 } from "./answer-prompt-fn.worker";
 
 export const answerPromptFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => ANSWER_PROMPT_INPUT.parse(data))
+  .validator((data: unknown) => ANSWER_PROMPT_INPUT.parse(data))
   .handler(async ({ data }): Promise<AnswerPromptResult> => {
     const userId = await requireUserId();
     return answerPromptWorker(userId, data);

@@ -9,7 +9,7 @@ import {
 } from "./add-to-up-next-fn.worker";
 
 export const addToUpNextFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => ADD_TO_UP_NEXT_INPUT.parse(data))
+  .validator((data: unknown) => ADD_TO_UP_NEXT_INPUT.parse(data))
   .handler(async ({ data }): Promise<AddToUpNextResult> => {
     const userId = await requireUserId();
     return addToUpNextWorker(userId, data);

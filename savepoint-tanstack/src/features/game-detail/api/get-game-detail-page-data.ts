@@ -18,7 +18,7 @@ export type GameDetailPageView = {
 };
 
 export const getGameDetailPageDataFn = createServerFn({ method: "GET" })
-  .inputValidator((value: unknown) => inputSchema.parse(value))
+  .validator((value: unknown) => inputSchema.parse(value))
   .handler(async ({ data }): Promise<GameDetailPageView> => {
     const { slug } = inputSchema.parse(data);
     const request = getRequest();

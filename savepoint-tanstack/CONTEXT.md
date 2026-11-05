@@ -66,7 +66,7 @@ If the only consumer is a route loader, the call is a [loader-direct read](#load
 
 ```ts
 export const fooFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => fooSchema.parse(data))
+  .validator((data: unknown) => fooSchema.parse(data))
   .handler(async ({ data }): Promise<Foo> => {
     const parsed = fooSchema.parse(data); // re-parse — see below
     const userId = await requireUserId();
@@ -74,7 +74,7 @@ export const fooFn = createServerFn({ method: "POST" })
   });
 ```
 
-**Why the handler re-parses.** TanStack Start runs `.inputValidator` only on cross-network requests. Programmatic callers — other server fns, tests, and the test harness invoking `fooFn({ data })` directly — bypass the validator entirely. The handler's own `parse` is the only validation those call paths see. The redundancy is structural: each `parse` covers a different call path, and removing either one creates a hole.
+**Why the handler re-parses.** TanStack Start runs `.validator` only on cross-network requests. Programmatic callers — other server fns, tests, and the test harness invoking `fooFn({ data })` directly — bypass the validator entirely. The handler's own `parse` is the only validation those call paths see. The redundancy is structural: each `parse` covers a different call path, and removing either one creates a hole.
 
 Handlers never branch on whether they're under test. They never catch `getRequest()` to provide a stub fallback — that workaround belongs in the test harness, not in production handler code.
 

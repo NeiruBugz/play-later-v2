@@ -8,7 +8,7 @@ import {
 } from "./connect-steam.worker";
 
 export const connectSteamFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => CONNECT_STEAM_INPUT.parse(data))
+  .validator((data: unknown) => CONNECT_STEAM_INPUT.parse(data))
   .handler(async ({ data }): Promise<{ steamId: string }> => {
     const userId = await requireUserId();
     return connectSteamWorker(userId, data);

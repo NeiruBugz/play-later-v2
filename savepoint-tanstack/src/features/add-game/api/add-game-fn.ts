@@ -11,7 +11,7 @@ import {
 export type { AddGameResult };
 
 export const addGameFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => ADD_GAME_INPUT.parse(data))
+  .validator((data: unknown) => ADD_GAME_INPUT.parse(data))
   .handler(async ({ data }): Promise<AddGameResult> => {
     const userId = await requireUserId();
     return addGameWorker(userId, data);

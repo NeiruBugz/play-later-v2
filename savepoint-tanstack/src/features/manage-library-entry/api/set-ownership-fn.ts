@@ -9,7 +9,7 @@ import {
 } from "./set-ownership-fn.worker";
 
 export const setOwnershipFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SET_OWNERSHIP_INPUT.parse(data))
+  .validator((data: unknown) => SET_OWNERSHIP_INPUT.parse(data))
   .handler(async ({ data }): Promise<SetOwnershipResult> => {
     const userId = await requireUserId();
     return setOwnershipWorker(userId, data);
