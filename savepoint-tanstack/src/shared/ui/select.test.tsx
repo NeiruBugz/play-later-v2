@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -27,11 +27,17 @@ const actions = {
 
 const onValueChange = vi.fn();
 
+const STATUS_ITEMS = [
+  { value: "playing", label: "Playing" },
+  { value: "played", label: "Played" },
+];
+
 function ControlledHarness() {
   const [value, setValue] = React.useState<string | null>(null);
   return (
     <Select
       value={value}
+      items={STATUS_ITEMS}
       onValueChange={(v) => {
         setValue(v);
         onValueChange(v);
@@ -50,7 +56,7 @@ function ControlledHarness() {
 
 function UncontrolledHarness() {
   return (
-    <Select defaultValue="played">
+    <Select defaultValue="played" items={STATUS_ITEMS}>
       <SelectTrigger aria-label="Status">
         <SelectValue />
       </SelectTrigger>
@@ -93,8 +99,50 @@ describe("Select", () => {
       render(<UncontrolledHarness />);
     });
 
-    it("renders the default value in the trigger", () => {
+    it("renders the default value's label in the trigger, not the raw value", () => {
       expect(elements.getTrigger().textContent).toContain("Played");
+    });
+  });
+
+  describe("given the trigger is focused and the user presses Enter", () => {
+    beforeEach(async () => {
+      render(<ControlledHarness />);
+      elements.getTrigger().focus();
+      await userEvent.keyboard("{Enter}");
+    });
+
+    it("opens the listbox", () => {
+      expect(elements.queryOption("Playing")).not.toBeNull();
+    });
+
+    it("selects the highlighted option with ArrowDown then Enter", async () => {
+      await userEvent.keyboard("{ArrowDown}{Enter}");
+      expect(onValueChange).toHaveBeenCalledWith("played");
+    });
+
+    it("shows the picked option's label in the trigger", async () => {
+      await userEvent.keyboard("{ArrowDown}{Enter}");
+      expect(elements.getTrigger().textContent).toContain("Played");
+    });
+
+    it("closes on Escape and returns focus to the trigger", async () => {
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() =>
+        expect(elements.getTrigger()).toHaveAttribute("aria-expanded", "false")
+      );
+      expect(elements.getTrigger()).toHaveFocus();
+    });
+  });
+
+  describe("given the trigger is focused and the user presses ArrowDown", () => {
+    beforeEach(async () => {
+      render(<ControlledHarness />);
+      elements.getTrigger().focus();
+      await userEvent.keyboard("{ArrowDown}");
+    });
+
+    it("opens the listbox", () => {
+      expect(elements.queryOption("Played")).not.toBeNull();
     });
   });
 });

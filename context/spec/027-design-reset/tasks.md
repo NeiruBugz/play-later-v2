@@ -82,7 +82,7 @@ Conventions for every slice:
     - no empty-string values; use `null` for "all".
 
     Update the 6 consumers to match: platform-select, sort-select, journal-game-filter, imported-games-filter-bar, import-game-modal and the select wrapper itself. Fix the `onValueChange` types for a possibly-`null` value. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests for library sort and the journal game filter. Choosing an option changes the visible list. The trigger shows the option label. "All" resets the filter. **[Agent: testing]**
+  - [x] Write behaviour tests for library sort and the journal game filter. Choosing an option changes the visible list. The trigger shows the option label. "All" resets the filter. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). Change library sort and the journal game filter, at phone width and at desktop width, and confirm the list updates and the trigger label is correct.
