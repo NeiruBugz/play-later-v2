@@ -290,6 +290,26 @@ describe("CommandPalette", () => {
     });
   });
 
+  describe("given the palette is open via ⌘K and the user types Journal", () => {
+    const user = userEvent.setup({
+      advanceTimers: (ms) => vi.advanceTimersByTime(ms),
+    });
+
+    beforeEach(async () => {
+      render(<CommandPalette />);
+      await user.keyboard("{Meta>}k{/Meta}");
+      await user.type(elements.getSearchInput(), "Journal");
+    });
+
+    it("keeps the matching Journal jump target visible", () => {
+      expect(screen.queryByText("Journal")).not.toBeNull();
+    });
+
+    it("hides jump targets that do not match", () => {
+      expect(screen.queryByText("Library")).toBeNull();
+    });
+  });
+
   describe("given the palette is open with no query", () => {
     beforeEach(() => {
       render(<CommandPalette open={true} onOpenChange={vi.fn()} />);

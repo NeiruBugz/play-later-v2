@@ -6,7 +6,7 @@
 
 Conventions for every slice:
 - Paths are relative to `savepoint-tanstack/` unless they say otherwise.
-- **The gate:** `pnpm --filter savepoint-tanstack lint && typecheck && test:unit && test:integration && build`. Every slice ends with it green.
+- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && test:integration && build`. Every slice ends with it green.
 - **Starting the app for a Verify task:**
   - `docker compose up -d`, then `pnpm --filter savepoint-tanstack dev` (port 6060) in the background.
   - Record the dev-server PID when starting it, and stop the server with `kill <PID>` at the end. Never pipe a daemon's stop command into another command.
@@ -64,7 +64,7 @@ Conventions for every slice:
   - [x] Re-implement `dialog`, `sheet` (Base UI dialog), `command` (cmdk inside a Base UI Dialog), `image-lightbox` and `responsive-modal`. Keep today's classes and API. **[Agent: react-frontend]**
   - [x] Add a `shared/lib` helper that keeps a dialog or sheet open when the user presses the toaster. It reads `onOpenChange(open, details)` and cancels on `details.reason === "outside-press"` inside the toaster.
     - Replace the 5 `onInteractOutside` sites with it: `responsive-modal`, `global-action-host`, `command-palette` ×2 and `done-follow-up`. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests:
+  - [x] Write behaviour tests:
     - pressing Undo on a toast while a sheet is open keeps the sheet open;
     - pressing the backdrop closes it;
     - Escape closes it and returns focus to the trigger;
