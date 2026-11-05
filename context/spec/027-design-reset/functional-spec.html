@@ -112,7 +112,7 @@
 <div class="meta">Topic: Reset the app's look to a clean, consistent foundation built on the stock component kit, then give the product its own visual identity — new accent, title font, cover treatment, Up Next card, status chip, name and logo. &nbsp;·&nbsp; Author: Nail Badiullin</div>
 <div class="statusbar">
   <span class="status-chip">Draft</span>
-  <span class="progress">Verification: <span class="bar"><i style="width:0%"></i></span> 0 of 58 criteria verified</span>
+  <span class="progress">Verification: <span class="bar"><i style="width:0%"></i></span> 0 of 59 criteria verified</span>
 </div>
 <h2 id="glance">At a glance</h2>
 <div class="glance"><ul><li>The app's look is reset in two phases, after spec 026 ships.</li>
@@ -173,6 +173,21 @@
 <tr>
     <td>Phone first</td>
     <td>Phone look and feel in phase 1 (sheets, thumb zone, keyboard, safe areas, no hover-only); phase 2 designed on the phone first; checked at 360 / 390 / 430<span class="why">The phone is where the app is used most; 025 gave the layout, 026 fixes phone bugs, 027 makes it comfortable in the hand</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Re-sign-in at new address</td>
+    <td>Accept one re-sign-in<span class="why">Cookies are host-scoped; a session hand-off is ~2 days plus security review for a one-time event</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Theme at new address</td>
+    <td>Starts at System once<span class="why">Browser storage is per address; a hand-off page would break the simple Vercel redirect</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Platform badges</td>
+    <td>Neutral, from the palette<span class="why">Covers carry the color; removes 20 hard-coded hex values</span></td>
     <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
   </tr>
 </table>
@@ -283,8 +298,8 @@
 <p class="prose">#### 2.14 New product name and logo</p>
 <p class="prose">The product gets a new name, a new logo and a new web address, replacing &quot;SavePoint&quot;, the Save Glow mark and the current address. The product owner chooses the name inside phase 2, in the same design round as the accent and title font; the logo is designed last, for the chosen name.</p>
 <p class="prose">#### 2.15 Light, Dark and System stay</p>
-<p class="prose">The theme options remain Light, Dark and System throughout both phases; a user's existing choice is kept.</p>
-  <details class="ac"><summary>Acceptance criteria — 26 (0 verified)</summary><ul>
+<p class="prose">The theme options remain Light, Dark and System throughout both phases; a user's existing choice is kept on the same address. The choice is remembered per browser and per address, so on the first visit to the new address (2.14) it starts at System once.</p>
+  <details class="ac"><summary>Acceptance criteria — 27 (0 verified)</summary><ul>
 <li class="">When the product owner reviews the accent options, then each option is shown on the same set of screens (home screen, library, game page) in Light and in Dark, at phone width first and at desktop width once a phone favourite is picked.</li>
 <li class="">Given the new accent is applied, when the user looks at any screen, then the accent appears only on the primary button, the selected or active item, the Playing status, the keyboard focus outline and text links.</li>
 <li class="">Given the new accent is applied, when the accent is used as a button background or as text, then it meets the contrast level in 2.7 in both modes.</li>
@@ -308,9 +323,10 @@
 <li class="">When the user views the logo in Light and in Dark, then it is clearly visible on both surfaces.</li>
 <li class="">When the user adds the app to a phone home screen from the browser's &quot;Add to Home Screen&quot; option, then the icon and name shown are the new ones.</li>
 <li class="">When anyone opens an old link to any page on the current address, then they land on the same page at the new address.</li>
-<li class="">Given the user was signed in on the current address, when they first open the new address, then they sign in at most once more and their library and settings are unchanged. [NEEDS CLARIFICATION: staying signed in across a change of address is not automatic; assumed a single re-sign-in is acceptable — confirm, or require no re-sign-in.]</li>
+<li class="">Given the user was signed in on the current address, when they first open the new address, then they sign in at most once more and their library and settings are unchanged.</li>
 <li class="">When the user opens the theme menu (in the sidebar, the phone top bar or settings) after either phase, then they see exactly Light, Dark and System.</li>
-<li class="">Given the user had chosen Light, Dark or System before the change, when they open the app after either phase, then it opens in that same choice.</li>
+<li class="">Given the user had chosen Light, Dark or System before the change, when they open the app on the same address after either phase, then it opens in that same choice.</li>
+<li class="">Given the user opens the new address for the first time, when the app loads, then it follows the device setting (System), and any choice they make there is kept from then on.</li>
 </ul></details>
 </section>
 <h2 id="scope">3. Scope and Boundaries</h2>
@@ -330,9 +346,10 @@
 <li>Starting phase 1 before spec 026 has shipped.</li></ul></div></div>
 <h2>Change Log</h2>
 <p>2026-11-04 — product owner, /awos:spec session — Added phone first: new 2.6 (phone widths 360/390/430, bottom sheets, thumb zone, keyboard, safe areas, no hover-only actions, text and tap sizes), phone-first review order in 2.8, phone-first option reviews in 2.9–2.10, Up Next shelf on a phone in 2.12; gestures, installed-app mode and tablet layout out of scope. Sections from 2.6 on renumbered. Reason: the phone is the main place the app is used, so the reset designs for it first and scales up.</p>
+<p>2026-11-05 — product owner, /awos:tech session — 2.14: one re-sign-in on the new address confirmed (clarification marker removed). 2.15: the theme choice is kept on the same address and starts at System once on the new address (browser storage is per address; no hand-off built). Platform badges become neutral, so 2.4's &quot;every color from today's palette&quot; applies to them without an exception.</p>
 <footer>
   This page is a <strong>review lens</strong> — the canonical, normative contract is <code>functional-spec.md</code> in this directory; approvals bind to it, and the technical detail behind the findings lives in <code>research-notes.md</code>.<br>
-  Generated 2026-11-04 from functional-spec.md (510964aa1c9c), status <em>Draft</em> — 58 criteria, 0 verified. Rendered by AWOS (/awos:spec).
+  Generated 2026-11-05 from functional-spec.md (ab0fba0773fd), status <em>Draft</em> — 59 criteria, 0 verified. Rendered by AWOS (/awos:spec).
 </footer>
 </main>
 <script>

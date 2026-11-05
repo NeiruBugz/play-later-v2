@@ -1,5 +1,5 @@
 import { Badge } from "@/shared/ui/badge";
-import { Button } from "@/shared/ui/button";
+import { Button, buttonVariants } from "@/shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -74,9 +74,13 @@ export function WhatsNewModal() {
         <DialogFooter className="gap-sm sm:gap-sm">
           <div className="gap-sm flex">
             {primary.ctaUrl && primary.ctaLabel ? (
-              <Button asChild variant="secondary" onClick={dismiss}>
-                <a href={primary.ctaUrl}>{primary.ctaLabel}</a>
-              </Button>
+              <a
+                href={primary.ctaUrl}
+                className={buttonVariants({ variant: "secondary" })}
+                onClick={dismiss}
+              >
+                {primary.ctaLabel}
+              </a>
             ) : null}
             <Button onClick={dismiss}>Got it</Button>
           </div>

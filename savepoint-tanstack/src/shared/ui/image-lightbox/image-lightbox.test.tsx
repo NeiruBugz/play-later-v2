@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ImageLightbox } from "./image-lightbox";
 
@@ -33,6 +34,19 @@ const actions = {
   pressEscape: () => userEvent.keyboard("{Escape}"),
   jumpToThumbnail: (n: number) => userEvent.click(elements.getThumbnail(n)),
 };
+
+function StatefulLightbox({ startIndex }: { startIndex: number }) {
+  const [index, setIndex] = React.useState(startIndex);
+  return (
+    <ImageLightbox
+      images={images}
+      open
+      index={index}
+      onOpenChange={onOpenChange}
+      onIndexChange={setIndex}
+    />
+  );
+}
 
 describe("ImageLightbox", () => {
   beforeEach(() => {
@@ -86,12 +100,34 @@ describe("ImageLightbox", () => {
 
     it("closes on the Close button", async () => {
       await actions.clickClose();
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
     });
 
     it("closes on the Escape key", async () => {
       await actions.pressEscape();
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
+    });
+  });
+
+  describe("given it is open and an ancestor stops keydown propagation", () => {
+    const stopPropagation = (event: KeyboardEvent) => event.stopPropagation();
+
+    beforeEach(() => {
+      document.body.addEventListener("keydown", stopPropagation);
+      render(<StatefulLightbox startIndex={0} />);
+    });
+
+    afterEach(() => {
+      document.body.removeEventListener("keydown", stopPropagation);
+    });
+
+    it("moves the visible screenshot with real arrow key presses", async () => {
+      expect(screen.getByText("Screenshot 1 of 3")).not.toBeNull();
+      await actions.pressRight();
+      await actions.pressRight();
+      expect(screen.getByText("Screenshot 3 of 3")).not.toBeNull();
+      await actions.pressLeft();
+      expect(screen.getByText("Screenshot 2 of 3")).not.toBeNull();
     });
   });
 

@@ -39,16 +39,18 @@ export function ThemeToggle() {
     // natively — no hand-rolled handlers needed. Deliberate improvement over
     // canonical, which uses a flat <div role="menu"> with no roving tabindex.
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-label="Change theme"
-          className="gap-2"
-        >
-          <CurrentIcon className="h-4 w-4" />
-          <span>{currentLabel}</span>
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Change theme"
+            className="gap-2"
+          />
+        }
+      >
+        <CurrentIcon className="h-4 w-4" />
+        <span>{currentLabel}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         {THEMES.map(({ value, label, icon: Icon }) => {
@@ -57,7 +59,7 @@ export function ThemeToggle() {
             <DropdownMenuItem
               key={value}
               aria-current={active ? "true" : undefined}
-              onSelect={() => setTheme(value)}
+              onClick={() => setTheme(value)}
               className={
                 active
                   ? "bg-accent text-accent-foreground font-medium"

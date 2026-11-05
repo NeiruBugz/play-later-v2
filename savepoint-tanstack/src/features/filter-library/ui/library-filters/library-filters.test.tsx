@@ -118,6 +118,19 @@ describe("LibraryFilters", () => {
     });
   });
 
+  describe("given the library is sorted by title ascending", () => {
+    beforeEach(() => {
+      render(
+        <LibraryFilters {...defaultProps} sortBy="title" sortOrder="asc" />
+      );
+    });
+
+    it("shows the sort label in the trigger, not the raw value", () => {
+      expect(elements.getSortTrigger()).toHaveTextContent("Title A–Z");
+      expect(elements.getSortTrigger()).not.toHaveTextContent("title-asc");
+    });
+  });
+
   describe("given the user changes the sort to Title A–Z", () => {
     beforeEach(async () => {
       render(<LibraryFilters {...defaultProps} />);

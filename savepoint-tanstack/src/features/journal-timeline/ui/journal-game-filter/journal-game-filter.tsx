@@ -8,30 +8,37 @@ import {
 
 import type { JournalGameFilterProps } from "./journal-game-filter.type";
 
-const ALL_NOTES = "all";
 const NO_GAME = "none";
+const ALL_GAMES = "all";
 
 export function JournalGameFilter({
   options,
   value,
   onChange,
 }: JournalGameFilterProps) {
+  const items = [
+    { value: ALL_GAMES, label: "All" },
+    ...options.map((option) => ({ value: option.id, label: option.title })),
+    { value: NO_GAME, label: "No game" },
+  ];
+
   return (
     <Select
-      value={value ?? ALL_NOTES}
-      onValueChange={(next) => onChange(next === ALL_NOTES ? undefined : next)}
+      value={value ?? ALL_GAMES}
+      items={items}
+      onValueChange={(next) =>
+        onChange(next === null || next === ALL_GAMES ? undefined : next)
+      }
     >
       <SelectTrigger aria-label="Filter by game" className="w-full md:w-64">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={ALL_NOTES}>All</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option.id} value={option.id}>
-            {option.title}
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
           </SelectItem>
         ))}
-        <SelectItem value={NO_GAME}>No game</SelectItem>
       </SelectContent>
     </Select>
   );

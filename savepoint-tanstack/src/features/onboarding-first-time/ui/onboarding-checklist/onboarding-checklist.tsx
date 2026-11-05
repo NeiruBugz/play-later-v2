@@ -126,7 +126,7 @@ export function OnboardingChecklist({
         className={cn(
           "flex w-full items-center justify-between gap-2 px-4 py-3 text-left",
           "hover:bg-muted/40 focus-visible:ring-ring rounded-md focus-visible:ring-2 focus-visible:outline-none",
-          "data-[state=open]:rounded-b-none"
+          "data-[panel-open]:rounded-b-none"
         )}
         aria-label="Onboarding checklist"
       >

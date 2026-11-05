@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { keepOpenOnToastInteraction } from "@/shared/lib/keep-open-on-toast-interaction";
 import { getUserFacingErrorMessage } from "@/shared/lib/user-facing-error";
 import { Button } from "@/shared/ui/button";
 import { RatingInput } from "@/shared/ui/rating-input";
@@ -74,7 +73,6 @@ export function DoneFollowUp({
       onOpenChange={handleOpenChange}
       title={`${gameTitle} is done`}
       description="All optional."
-      onInteractOutside={keepOpenOnToastInteraction}
     >
       <div className="gap-lg flex flex-col">
         <fieldset className="gap-sm flex flex-col">

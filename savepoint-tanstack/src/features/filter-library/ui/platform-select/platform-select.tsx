@@ -8,27 +8,38 @@ import {
 
 import type { PlatformSelectProps } from "./platform-select.type";
 
+const ALL_PLATFORMS = "__all__";
+const ALL_PLATFORMS_LABEL = "All platforms";
+
 export function PlatformSelect({
   value,
   platforms,
   rawPlatform,
   onChange,
 }: PlatformSelectProps) {
+  const hasUnknownPlatform =
+    rawPlatform !== undefined && !platforms.includes(rawPlatform);
+  const items = [
+    { value: ALL_PLATFORMS, label: ALL_PLATFORMS_LABEL },
+    ...platforms.map((p) => ({ value: p, label: p })),
+    ...(hasUnknownPlatform ? [{ value: rawPlatform, label: rawPlatform }] : []),
+  ];
+
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      value={value}
+      items={items}
+      onValueChange={(next) => next !== null && onChange(next)}
+    >
       <SelectTrigger aria-label="Platform" className="h-9 w-full">
-        <SelectValue placeholder="All platforms" />
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="__all__">All platforms</SelectItem>
-        {platforms.map((p) => (
-          <SelectItem key={p} value={p}>
-            {p}
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
           </SelectItem>
         ))}
-        {rawPlatform !== undefined && !platforms.includes(rawPlatform) ? (
-          <SelectItem value={rawPlatform}>{rawPlatform}</SelectItem>
-        ) : null}
       </SelectContent>
     </Select>
   );

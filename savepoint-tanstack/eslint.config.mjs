@@ -130,6 +130,20 @@ export default tseslint.config(
       "testing-library/no-node-access": "off",
     },
   },
+  // Radix's `asChild` is gone; Base UI composes through `render`.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='asChild']",
+          message:
+            "asChild is a Radix API. Use Base UI's `render` prop (e.g. <Trigger render={<a href=... />} />), or buttonVariants() on the link itself.",
+        },
+      ],
+    },
+  },
   // FSD layer boundary enforcement — applies only to src/**
   //
   // Design (Slice 23 remediation):

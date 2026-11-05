@@ -31,8 +31,16 @@ const elements = {
   queryTab: (name: string) => screen.queryByRole("tab", { name }),
   getActiveTabPanel: () => screen.getByRole("tabpanel", { hidden: false }),
   getVisibleToggle: () => screen.getByRole("button", { name: "Show all (8)" }),
+  getPanelOf: (tabName: string) => {
+    const tabId = elements.getTab(tabName).id;
+    const panel = screen
+      .queryAllByRole("tabpanel", { hidden: true })
+      .find((candidate) => candidate.getAttribute("aria-labelledby") === tabId);
+    if (!panel) throw new Error(`No panel mounted for tab "${tabName}"`);
+    return panel;
+  },
   getGamesIn: (tabName: string) =>
-    within(screen.getByRole("tabpanel", { name: tabName, hidden: true }))
+    within(elements.getPanelOf(tabName))
       .queryAllByRole("listitem", { hidden: true })
       .map((item) => item.textContent),
 };
@@ -108,7 +116,10 @@ describe("RelatedGamesTabs", () => {
       expect(elements.getVisibleToggle()).toBeDefined();
     });
 
-    it("keeps the second collection's list mounted", () => {
+    it("keeps the second collection's list mounted but hidden from the user", () => {
+      const panel = elements.getPanelOf("Platformers");
+      expect(panel).toBeInTheDocument();
+      expect(panel).not.toBeVisible();
       expect(elements.getGamesIn("Platformers")).toHaveLength(3);
     });
   });
@@ -122,6 +133,12 @@ describe("RelatedGamesTabs", () => {
         />
       );
       await actions.switchToTab("Platformers");
+    });
+
+    it("shows the second list and hides the first while keeping it mounted", () => {
+      expect(elements.getPanelOf("Platformers")).toBeVisible();
+      expect(elements.getPanelOf("Mario series")).not.toBeVisible();
+      expect(elements.getGamesIn("Mario series")).toHaveLength(6);
     });
 
     it("marks the second tab as selected", () => {

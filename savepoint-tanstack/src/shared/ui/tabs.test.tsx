@@ -118,4 +118,37 @@ describe("Tabs", () => {
       );
     });
   });
+
+  describe("given an inactive panel", () => {
+    beforeEach(() => {
+      render(
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="journal">Journal</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">Overview panel</TabsContent>
+          <TabsContent value="journal" keepMounted>
+            Journal panel
+          </TabsContent>
+          <TabsContent value="notes">Notes panel</TabsContent>
+        </Tabs>
+      );
+    });
+
+    it("keeps the keepMounted panel in the document but not visible", () => {
+      const journalTabId = elements.getTab("Journal").id;
+      const panel = screen
+        .getAllByRole("tabpanel", { hidden: true })
+        .find((p) => p.getAttribute("aria-labelledby") === journalTabId);
+      expect(panel).toBeInTheDocument();
+      expect(panel).toHaveTextContent("Journal panel");
+      expect(panel).not.toBeVisible();
+    });
+
+    it("unmounts the panel that has no keepMounted", () => {
+      expect(screen.queryByText("Notes panel")).toBeNull();
+    });
+  });
 });

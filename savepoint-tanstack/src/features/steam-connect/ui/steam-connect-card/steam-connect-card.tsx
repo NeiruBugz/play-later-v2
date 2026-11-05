@@ -6,7 +6,7 @@ import { FaSteam } from "react-icons/fa";
 
 import { useMutationAction } from "@/shared/lib/use-mutation-action";
 import { Alert, AlertDescription } from "@/shared/ui/alert";
-import { Button } from "@/shared/ui/button";
+import { Button, buttonVariants } from "@/shared/ui/button";
 import {
   Card,
   CardContent,
@@ -74,12 +74,10 @@ export function SteamConnectCard({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild>
-            <a href={connectUrl} rel="noreferrer">
-              <SteamIcon className="h-4 w-4" />
-              Sign in with Steam
-            </a>
-          </Button>
+          <a href={connectUrl} rel="noreferrer" className={buttonVariants()}>
+            <SteamIcon className="h-4 w-4" />
+            Sign in with Steam
+          </a>
         </CardContent>
       </Card>
     );
@@ -119,12 +117,13 @@ export function SteamConnectCard({
             >
               Disconnect
             </Button>
-            <Button variant="outline" asChild>
-              <Link to="/steam/games">
-                <Download className="h-4 w-4" aria-hidden="true" />
-                Import from Steam
-              </Link>
-            </Button>
+            <Link
+              to="/steam/games"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              Import from Steam
+            </Link>
           </div>
         </CardContent>
       </Card>

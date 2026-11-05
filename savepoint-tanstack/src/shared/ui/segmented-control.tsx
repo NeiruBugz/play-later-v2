@@ -1,7 +1,7 @@
 /**
  * SegmentedControl — pill-row primitive for mutually-exclusive choices.
  *
- * Built on `@radix-ui/react-tabs` so we get arrow-key navigation, focus
+ * Built on Base UI `Tabs` so we get arrow-key navigation, focus
  * management, and active-state semantics for free. Exposes a flat
  * `<SegmentedControl value onValueChange options={[...]} />` surface so
  * call sites don't have to wire children manually.
@@ -11,7 +11,7 @@
  * bg-muted track) matches canonical; do not switch to the over-saturated
  * primary-on-primary variant.
  */
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 import * as React from "react";
 
 import { cn } from "@/shared/lib/utils";
@@ -29,7 +29,7 @@ export interface SegmentedControlOption<TValue extends string = string> {
 export interface SegmentedControlProps<
   TValue extends string = string,
 > extends Omit<
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>,
+  React.ComponentProps<typeof TabsPrimitive.Root>,
   "value" | "defaultValue" | "onValueChange" | "children"
 > {
   value: TValue | "";
@@ -37,7 +37,7 @@ export interface SegmentedControlProps<
   options: ReadonlyArray<SegmentedControlOption<TValue>>;
   size?: SegmentedControlSize;
   scrollable?: boolean;
-  /** Forwarded to the underlying Radix `<TabsList>` for screen readers. */
+  /** Forwarded to the underlying `<Tabs.List>` for screen readers. */
   ariaLabel?: string;
 }
 
@@ -66,14 +66,14 @@ function SegmentedControlImpl<TValue extends string = string>(
     ariaLabel,
     ...rootProps
   }: SegmentedControlProps<TValue>,
-  ref: React.ForwardedRef<React.ElementRef<typeof TabsPrimitive.Root>>
+  ref: React.ForwardedRef<HTMLDivElement>
 ) {
   const sizing = sizeStyles[size];
 
   return (
     <TabsPrimitive.Root
       ref={ref}
-      // Radix requires a string value; empty string means "no active tab",
+      // Empty string means "no active tab",
       // which lets us model the "not yet in library" state.
       value={value}
       onValueChange={(next) => onValueChange(next as TValue)}
@@ -96,6 +96,7 @@ function SegmentedControlImpl<TValue extends string = string>(
         )}
       >
         <TabsPrimitive.List
+          activateOnFocus
           aria-label={ariaLabel}
           className={cn(
             "bg-muted text-muted-foreground inline-flex items-center justify-start rounded-lg",
@@ -104,7 +105,7 @@ function SegmentedControlImpl<TValue extends string = string>(
           )}
         >
           {options.map((option) => (
-            <TabsPrimitive.Trigger
+            <TabsPrimitive.Tab
               key={option.value}
               value={option.value}
               disabled={option.disabled}
@@ -113,7 +114,7 @@ function SegmentedControlImpl<TValue extends string = string>(
                 "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap transition-all",
                 "[scroll-snap-align:start]",
                 "text-muted-foreground",
-                "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                "data-[active]:bg-background data-[active]:text-foreground data-[active]:shadow-sm",
                 "hover:text-foreground/80",
                 "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                 "disabled:pointer-events-none disabled:opacity-50",
@@ -126,7 +127,7 @@ function SegmentedControlImpl<TValue extends string = string>(
                 </span>
               ) : null}
               {option.label}
-            </TabsPrimitive.Trigger>
+            </TabsPrimitive.Tab>
           ))}
         </TabsPrimitive.List>
       </div>
@@ -139,7 +140,7 @@ const SegmentedControl = React.forwardRef(SegmentedControlImpl) as <
   TValue extends string = string,
 >(
   props: SegmentedControlProps<TValue> & {
-    ref?: React.ForwardedRef<React.ElementRef<typeof TabsPrimitive.Root>>;
+    ref?: React.ForwardedRef<HTMLDivElement>;
   }
 ) => ReturnType<typeof SegmentedControlImpl>;
 

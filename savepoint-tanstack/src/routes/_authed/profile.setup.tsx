@@ -7,7 +7,7 @@ import {
 
 import { getProfileSetupStatusFn } from "@/features/setup-profile/api/get-profile-setup-status";
 import { AppError } from "@/shared/lib/errors";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 import { ProfileSetupForm } from "@/widgets/profile-setup-page";
 
 /**
@@ -58,9 +58,9 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
       >
         <h1 className="text-h2">Sign in required</h1>
         <p>Please sign in to finish setting up your profile.</p>
-        <Button asChild variant="outline">
-          <Link to="/login">Go to sign in</Link>
-        </Button>
+        <Link to="/login" className={buttonVariants({ variant: "outline" })}>
+          Go to sign in
+        </Link>
       </div>
     );
   }
@@ -72,9 +72,9 @@ function ProfileSetupErrorBoundary({ error }: ErrorComponentProps) {
     >
       <h1 className="text-h2">Something went wrong</h1>
       <p>We couldn't load profile setup. Please try again.</p>
-      <Button asChild variant="outline">
-        <Link to="/dashboard">Back to Home</Link>
-      </Button>
+      <Link to="/dashboard" className={buttonVariants({ variant: "outline" })}>
+        Back to Home
+      </Link>
     </div>
   );
 }

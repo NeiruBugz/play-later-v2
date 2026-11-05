@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 
 import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { keepOpenOnToastInteraction } from "@/shared/lib/keep-open-on-toast-interaction";
+import { keepOpenOnToastPress } from "@/shared/lib/keep-open-on-toast-press";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
 import {
   Command,
@@ -119,11 +119,23 @@ export function CommandPalette({
           results.length > 0 &&
           query.trim().length >= MIN_GAME_SEARCH_QUERY_LENGTH && (
             <CommandGroup>
-              <CommandItem value="see-all-results" asChild>
+              <CommandItem
+                value="see-all-results"
+                onSelect={() => {
+                  void navigate({
+                    to: "/games/search",
+                    search: { q: query.trim() },
+                  });
+                  closeAndReset();
+                }}
+              >
                 <Link
                   to="/games/search"
                   search={{ q: query.trim() }}
-                  onClick={closeAndReset}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    closeAndReset();
+                  }}
                 >
                   See all results
                 </Link>
@@ -160,12 +172,14 @@ export function CommandPalette({
 
   if (!isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <Sheet
+        open={isOpen}
+        onOpenChange={keepOpenOnToastPress(handleOpenChange)}
+      >
         <SheetContent
           side="bottom"
           className="gap-0 p-0"
           data-testid="command-palette-mobile-sheet"
-          onInteractOutside={keepOpenOnToastInteraction}
         >
           <SheetTitle className="sr-only">Command palette</SheetTitle>
           <SheetDescription className="sr-only">
@@ -178,11 +192,8 @@ export function CommandPalette({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className="max-w-2xl gap-0 p-0"
-        onInteractOutside={keepOpenOnToastInteraction}
-      >
+    <Dialog open={isOpen} onOpenChange={keepOpenOnToastPress(handleOpenChange)}>
+      <DialogContent className="max-w-2xl gap-0 p-0">
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <DialogDescription className="sr-only">
           Search games, jump to a page, or run a quick action.
