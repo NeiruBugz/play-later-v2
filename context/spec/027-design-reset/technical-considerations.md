@@ -107,8 +107,8 @@ Each primitive is pulled with `shadcn view <name>` (style `base-maia`) in a scra
 
 | Deviation | Why (spec) |
 |---|---|
-| Button sizes `h-11 md:h-9` (default), `h-10 md:h-8` (sm), icon `size-11 md:size-9`; `xs` only with an expanded hit area | 44 × 44 tap targets on phone (§2.6) |
-| Input, textarea, command input, select trigger `text-base md:text-sm` | No iOS zoom on focus (§2.6) |
+| Button sizes `h-11 md:h-9` (default), `h-11 md:h-8` (sm), icon `size-11 md:size-9`; `xs` only with an expanded hit area | 44 × 44 tap targets on phone (§2.6) |
+| Input, textarea, command input, select trigger `text-base md:text-sm`; `Input` `h-11 md:h-9` | No iOS zoom on focus (§2.6) |
 | Focus ring solid `--ring` at ≥3:1 instead of `ring-ring/50` | Focus visibility (§2.7) |
 | `SheetFooter` sticky at the bottom with `pb-safe`; the sheet scroll area is `flex-1 overflow-y-auto`; `max-h-[90dvh]` | Thumb zone, safe areas (§2.6) |
 | `Toaster` receives `theme` from the theme provider; on phone it sits above the bottom nav (`mobileOffset` = `--bottom-nav-height` + spacing) | Dark toasts (§2.2); Undo stays in the thumb zone (**assumption**) |

@@ -107,7 +107,6 @@ export function GameLibraryControls({
                   variant="ghost"
                   size="icon"
                   aria-label="More library actions"
-                  className="h-8 w-8"
                 />
               }
             >

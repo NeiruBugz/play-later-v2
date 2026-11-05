@@ -11,6 +11,9 @@ const elements = {
     screen.queryByRole("tabpanel", { name, hidden: true }),
   getPanel: (name: string) =>
     screen.getByRole("tabpanel", { name, hidden: true }),
+  getTablist: () => screen.getByRole("tablist"),
+  // eslint-disable-next-line testing-library/no-node-access
+  getRoot: () => screen.getByRole("tablist").parentElement,
 };
 
 const actions = {
@@ -149,6 +152,66 @@ describe("Tabs", () => {
 
     it("unmounts the panel that has no keepMounted", () => {
       expect(screen.queryByText("Notes panel")).toBeNull();
+    });
+  });
+
+  // jsdom computes no layout, so the layout classes are asserted against the
+  // orientation attribute Base UI emits; real layout is verified in the browser.
+  describe("given the default horizontal orientation", () => {
+    beforeEach(() => {
+      render(<UncontrolledHarness />);
+    });
+
+    it("emits data-orientation=horizontal on the tabs root", () => {
+      expect(elements.getRoot()).toHaveAttribute(
+        "data-orientation",
+        "horizontal"
+      );
+    });
+
+    it("emits data-orientation=horizontal on the tablist", () => {
+      expect(elements.getTablist()).toHaveAttribute(
+        "data-orientation",
+        "horizontal"
+      );
+    });
+
+    it("stacks the tablist above the panels via the emitted attribute", () => {
+      expect(elements.getRoot()).toHaveClass(
+        "data-[orientation=horizontal]:flex-col"
+      );
+    });
+
+    it("sizes the tablist for a row via the emitted attribute", () => {
+      expect(elements.getTablist()).toHaveClass(
+        "group-data-[orientation=horizontal]/tabs:h-9"
+      );
+    });
+  });
+
+  describe("given vertical orientation", () => {
+    beforeEach(() => {
+      render(
+        <Tabs defaultValue="overview" orientation="vertical">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">Overview panel</TabsContent>
+        </Tabs>
+      );
+    });
+
+    it("emits data-orientation=vertical on the tablist", () => {
+      expect(elements.getTablist()).toHaveAttribute(
+        "data-orientation",
+        "vertical"
+      );
+    });
+
+    it("lays the tablist out as a column via the emitted attribute", () => {
+      expect(elements.getTablist()).toHaveClass(
+        "group-data-[orientation=vertical]/tabs:flex-col"
+      );
     });
   });
 });

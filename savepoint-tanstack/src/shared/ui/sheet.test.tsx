@@ -83,4 +83,17 @@ describe("Sheet", () => {
       expect(dialog?.className).toContain("left-0");
     });
   });
+
+  // jsdom computes no layout, so the inset is asserted as the class the popup
+  // carries; real layout is verified in the browser.
+  describe("given a bottom sheet with body content", () => {
+    beforeEach(async () => {
+      render(<Harness side="bottom" />);
+      await actions.open();
+    });
+
+    it("insets the body from the left and right edges", () => {
+      expect(elements.queryDialog()).toHaveClass("px-6");
+    });
+  });
 });

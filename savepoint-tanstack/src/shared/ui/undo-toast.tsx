@@ -47,7 +47,6 @@ export function UndoToastBody({
         type="button"
         variant="ghost"
         size="sm"
-        className="h-11 md:h-8"
         onClick={onUndo}
         aria-label="Undo"
       >
