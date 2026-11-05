@@ -22,13 +22,15 @@ export function PlatformBadges({ platforms }: PlatformBadgesProps) {
         ))}
         {remaining.length > 0 ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Badge
-                variant="subtle"
-                className="px-sm h-5 cursor-help rounded-md text-[11px]"
-              >
-                +{remaining.length}
-              </Badge>
+            <TooltipTrigger
+              render={
+                <Badge
+                  variant="subtle"
+                  className="px-sm h-5 cursor-help rounded-md text-[11px]"
+                />
+              }
+            >
+              +{remaining.length}
             </TooltipTrigger>
             <TooltipContent side="top">
               <p className="max-w-xs">{remaining.join(", ")}</p>

@@ -30,7 +30,7 @@ export function RelatedGamesTabs({
         <TabsContent
           key={section.collectionId}
           value={tabValue(section.collectionId)}
-          forceMount
+          keepMounted
           className="data-[hidden]:hidden"
         >
           <RelatedGamesList games={section.games} renderGame={renderGame} />

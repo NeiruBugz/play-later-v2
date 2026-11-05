@@ -100,23 +100,25 @@ export function GameLibraryControls({
             variant="button"
           />
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="More library actions"
-                className="h-8 w-8"
-              >
-                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-              </Button>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="More library actions"
+                  className="h-8 w-8"
+                />
+              }
+            >
+              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>
                 Edit details…
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() =>
+                onClick={() =>
                   void libraryOwnership.setOwned(!libraryOwnership.isOwned)
                 }
                 disabled={libraryOwnership.isPending}
@@ -124,7 +126,7 @@ export function GameLibraryControls({
                 {libraryOwnership.isOwned ? "I don't own it yet" : "I own it"}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() => setConfirmingRemove(true)}
+                onClick={() => setConfirmingRemove(true)}
                 className="text-destructive"
               >
                 Remove from library

@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 
 import type { JournalEntryPageProps } from "./journal-entry-page.type";
 
@@ -27,11 +27,13 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
         <h1 className="text-h1">Note</h1>
 
         <div className="gap-sm flex shrink-0 items-center">
-          <Button asChild size="sm">
-            <Link to="/journal/$id/edit" params={{ id: entry.id }}>
-              Edit
-            </Link>
-          </Button>
+          <Link
+            to="/journal/$id/edit"
+            params={{ id: entry.id }}
+            className={buttonVariants({ size: "sm" })}
+          >
+            Edit
+          </Link>
           <DeleteJournalEntryButton entryId={entry.id} />
         </div>
       </div>

@@ -5,19 +5,10 @@ import { cn } from "@/shared/lib/utils";
 
 function Switch({
   className,
-  onCheckedChange,
   ...props
-}: Omit<
-  React.ComponentProps<typeof SwitchPrimitives.Root>,
-  "onCheckedChange"
-> & {
-  onCheckedChange?: (checked: boolean) => void;
-}) {
+}: React.ComponentProps<typeof SwitchPrimitives.Root>) {
   return (
     <SwitchPrimitives.Root
-      onCheckedChange={
-        onCheckedChange && ((checked) => onCheckedChange(checked))
-      }
       className={cn(
         "peer focus-visible:ring-ring focus-visible:ring-offset-background data-[checked]:bg-primary data-[unchecked]:bg-input inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50",
         className

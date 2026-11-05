@@ -23,14 +23,14 @@ const actions = {
   clickItem: async (name: string) => userEvent.click(elements.getItem(name)),
 };
 
-const onSelect = vi.fn();
+const onClick = vi.fn();
 
 function Harness() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onSelect={onSelect}>Profile</DropdownMenuItem>
+        <DropdownMenuItem onClick={onClick}>Profile</DropdownMenuItem>
         <DropdownMenuItem>Sign out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -39,7 +39,7 @@ function Harness() {
 
 describe("DropdownMenu", () => {
   beforeEach(() => {
-    onSelect.mockReset();
+    onClick.mockReset();
   });
 
   describe("given default closed state", () => {
@@ -71,9 +71,9 @@ describe("DropdownMenu", () => {
       expect(elements.queryItem("Sign out")).not.toBeNull();
     });
 
-    it("invokes onSelect when an item is clicked", async () => {
+    it("invokes onClick when an item is clicked", async () => {
       await actions.clickItem("Profile");
-      expect(onSelect).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it("closes when Escape is pressed", async () => {

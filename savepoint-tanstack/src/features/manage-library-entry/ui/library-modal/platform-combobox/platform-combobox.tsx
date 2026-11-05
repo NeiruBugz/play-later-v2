@@ -109,19 +109,21 @@ export function PlatformCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          aria-label="Platform"
-          aria-expanded={open}
-          className="w-full justify-between font-normal"
-        >
-          <span className={cn(value === "" && "text-muted-foreground")}>
-            {value === "" ? NO_PLATFORM_LABEL : value}
-          </span>
-          <ChevronsUpDown aria-hidden="true" className="opacity-50" />
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            aria-label="Platform"
+            aria-expanded={open}
+            className="w-full justify-between font-normal"
+          />
+        }
+      >
+        <span className={cn(value === "" && "text-muted-foreground")}>
+          {value === "" ? NO_PLATFORM_LABEL : value}
+        </span>
+        <ChevronsUpDown aria-hidden="true" className="opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-(--anchor-width) p-0" align="start">
         <Command shouldFilter={false}>

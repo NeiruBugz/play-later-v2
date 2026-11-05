@@ -71,25 +71,34 @@ export function LibraryCardMenu({
           onClick={stopProp}
           onMouseDown={stopProp}
         >
-          <DropdownMenuItem asChild>
-            <Link
-              to="/games/$slug"
-              params={{ slug: item.game.slug }}
-              onClick={stopProp}
-            >
-              <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
-              View notes
-            </Link>
+          <DropdownMenuItem
+            render={
+              <Link
+                to="/games/$slug"
+                params={{ slug: item.game.slug }}
+                onClick={stopProp}
+              />
+            }
+          >
+            <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
+            View notes
           </DropdownMenuItem>
 
-          <DropdownMenuItem onSelect={onEdit} onClick={stopProp}>
+          <DropdownMenuItem
+            onClick={(event) => {
+              stopProp(event);
+              onEdit();
+            }}
+          >
             <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
             Edit Library Details
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={() => void ownership.setOwned(!ownership.isOwned)}
-            onClick={stopProp}
+            onClick={(event) => {
+              stopProp(event);
+              void ownership.setOwned(!ownership.isOwned);
+            }}
             disabled={ownership.isPending}
           >
             {ownership.isOwned ? (
@@ -104,8 +113,10 @@ export function LibraryCardMenu({
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onSelect={() => setConfirmingRemove(true)}
-            onClick={stopProp}
+            onClick={(event) => {
+              stopProp(event);
+              setConfirmingRemove(true);
+            }}
             className="text-destructive focus:text-destructive"
             disabled={isPending}
           >

@@ -3,7 +3,8 @@ import { useState, type ReactNode } from "react";
 
 import { getDisplayName } from "@/entities/profile/model";
 import { AvatarUpload } from "@/features/upload-avatar";
-import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
+import { buttonVariants } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
@@ -244,9 +245,12 @@ function PrimaryActionContent({
   }
   if (isOwnProfile) {
     return (
-      <Button asChild variant="outline" className={className}>
-        <Link to="/settings/profile">Edit Profile</Link>
-      </Button>
+      <Link
+        to="/settings/profile"
+        className={cn(buttonVariants({ variant: "outline" }), className)}
+      >
+        Edit Profile
+      </Link>
     );
   }
   return null;

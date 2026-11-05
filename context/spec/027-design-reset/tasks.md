@@ -89,7 +89,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the temporary files. **[Agent: testing]**
 
 - [ ] **Slice 6: Call sites use Base UI directly; Radix is gone (Release 1)**
-  - [ ] Migrate the call sites with a ts-morph codemod:
+  - [x] Migrate the call sites with a ts-morph codemod:
     - `<Button asChild><Link …/></Button>` becomes `<Link className={buttonVariants(...)}>`;
     - triggers with `asChild` use `render={<… />}`, adding `nativeButton={false}` when the element is a link;
     - menu `onSelect` becomes `onClick`.

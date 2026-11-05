@@ -50,15 +50,10 @@ TabsTrigger.displayName = "TabsTrigger";
 
 function TabsContent({
   className,
-  forceMount,
-  keepMounted,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Panel> & {
-  forceMount?: boolean;
-}) {
+}: React.ComponentProps<typeof TabsPrimitive.Panel>) {
   return (
     <TabsPrimitive.Panel
-      keepMounted={keepMounted ?? forceMount}
       className={cn(
         "ring-offset-background focus-visible:ring-ring mt-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
         className

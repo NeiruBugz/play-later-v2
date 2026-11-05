@@ -5,31 +5,9 @@ import { cn } from "@/shared/lib/utils";
 
 const Tooltip = TooltipPrimitive.Root;
 
-function TooltipProvider({
-  delayDuration,
-  delay = delayDuration,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider> & {
-  /** Radix-compatible alias of `delay`. */
-  delayDuration?: number;
-}) {
-  return <TooltipPrimitive.Provider delay={delay} {...props} />;
-}
+const TooltipProvider = TooltipPrimitive.Provider;
 
-function TooltipTrigger({
-  asChild = false,
-  children,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger> & {
-  asChild?: boolean;
-}) {
-  const child = asChild && React.isValidElement(children) ? children : null;
-  return child ? (
-    <TooltipPrimitive.Trigger render={child} {...props} />
-  ) : (
-    <TooltipPrimitive.Trigger {...props}>{children}</TooltipPrimitive.Trigger>
-  );
-}
+const TooltipTrigger = TooltipPrimitive.Trigger;
 
 function TooltipContent({
   className,

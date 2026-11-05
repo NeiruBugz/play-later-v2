@@ -224,21 +224,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
             {!collapsed && <span className="truncate">{displayName}</span>}
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-56">
-            <DropdownMenuItem asChild>
-              <Link to="/settings/profile">
-                <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
-                Profile settings
-              </Link>
+            <DropdownMenuItem render={<Link to="/settings/profile" />}>
+              <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
+              Profile settings
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/settings/account">
-                <UserCog className="mr-2 h-4 w-4" aria-hidden="true" />
-                Account
-              </Link>
+            <DropdownMenuItem render={<Link to="/settings/account" />}>
+              <UserCog className="mr-2 h-4 w-4" aria-hidden="true" />
+              Account
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={handleSignOut}
+              onClick={handleSignOut}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />

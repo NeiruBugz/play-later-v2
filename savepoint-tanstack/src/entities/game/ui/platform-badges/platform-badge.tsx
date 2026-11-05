@@ -15,14 +15,16 @@ export function PlatformBadgeItem({ name }: { name: string }) {
 
   return (
     <Tooltip key={name}>
-      <TooltipTrigger asChild>
-        <Badge
-          variant={variant}
-          className="gap-xs px-sm flex h-5 items-center rounded-md text-[11px]"
-        >
-          <Icon className="h-3 w-3" />
-          <span>{abbreviated}</span>
-        </Badge>
+      <TooltipTrigger
+        render={
+          <Badge
+            variant={variant}
+            className="gap-xs px-sm flex h-5 items-center rounded-md text-[11px]"
+          />
+        }
+      >
+        <Icon className="h-3 w-3" />
+        <span>{abbreviated}</span>
       </TooltipTrigger>
       {abbreviated !== name ? (
         <TooltipContent side="top">

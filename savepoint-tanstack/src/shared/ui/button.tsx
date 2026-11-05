@@ -1,5 +1,4 @@
 import { Button as BaseButton } from "@base-ui/react/button";
-import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
@@ -43,28 +42,14 @@ export interface ButtonProps
   extends
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
   loading?: boolean;
   ref?: React.Ref<HTMLButtonElement>;
-}
-
-function AsChildButton({
-  children,
-  ref,
-  ...props
-}: Omit<ButtonProps, "asChild" | "loading" | "variant" | "size">) {
-  return useRender({
-    render: React.isValidElement(children) ? children : <span />,
-    ref,
-    props,
-  });
 }
 
 function Button({
   className,
   variant,
   size,
-  asChild = false,
   loading,
   children,
   ref,
@@ -72,24 +57,6 @@ function Button({
 }: ButtonProps) {
   const classes = cn(buttonVariants({ variant, size, className }));
   const disabled = loading || props.disabled;
-
-  if (asChild) {
-    if (loading) {
-      console.warn(
-        "Button: 'loading' prop is not supported when 'asChild' is true"
-      );
-    }
-    return (
-      <AsChildButton
-        className={classes}
-        ref={ref}
-        disabled={disabled}
-        {...props}
-      >
-        {children}
-      </AsChildButton>
-    );
-  }
 
   return (
     <BaseButton className={classes} ref={ref} {...props} disabled={disabled}>

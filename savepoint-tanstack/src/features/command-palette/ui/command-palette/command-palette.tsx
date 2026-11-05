@@ -119,11 +119,23 @@ export function CommandPalette({
           results.length > 0 &&
           query.trim().length >= MIN_GAME_SEARCH_QUERY_LENGTH && (
             <CommandGroup>
-              <CommandItem value="see-all-results" asChild>
+              <CommandItem
+                value="see-all-results"
+                onSelect={() => {
+                  void navigate({
+                    to: "/games/search",
+                    search: { q: query.trim() },
+                  });
+                  closeAndReset();
+                }}
+              >
                 <Link
                   to="/games/search"
                   search={{ q: query.trim() }}
-                  onClick={closeAndReset}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    closeAndReset();
+                  }}
                 >
                   See all results
                 </Link>

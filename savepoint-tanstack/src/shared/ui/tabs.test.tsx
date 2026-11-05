@@ -129,7 +129,7 @@ describe("Tabs", () => {
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">Overview panel</TabsContent>
-          <TabsContent value="journal" forceMount>
+          <TabsContent value="journal" keepMounted>
             Journal panel
           </TabsContent>
           <TabsContent value="notes">Notes panel</TabsContent>
@@ -137,7 +137,7 @@ describe("Tabs", () => {
       );
     });
 
-    it("keeps the forceMount panel in the document but not visible", () => {
+    it("keeps the keepMounted panel in the document but not visible", () => {
       const journalTabId = elements.getTab("Journal").id;
       const panel = screen
         .getAllByRole("tabpanel", { hidden: true })
@@ -147,7 +147,7 @@ describe("Tabs", () => {
       expect(panel).not.toBeVisible();
     });
 
-    it("unmounts the panel that has no forceMount", () => {
+    it("unmounts the panel that has no keepMounted", () => {
       expect(screen.queryByText("Notes panel")).toBeNull();
     });
   });

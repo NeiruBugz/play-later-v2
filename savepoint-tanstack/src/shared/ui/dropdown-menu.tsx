@@ -21,20 +21,7 @@ const DropdownMenuPortal = MenuPrimitive.Portal;
 const DropdownMenuSub = MenuPrimitive.SubmenuRoot;
 const DropdownMenuRadioGroup = MenuPrimitive.RadioGroup;
 
-function DropdownMenuTrigger({
-  asChild = false,
-  children,
-  ...props
-}: React.ComponentProps<typeof MenuPrimitive.Trigger> & {
-  asChild?: boolean;
-}) {
-  const child = asChild && React.isValidElement(children) ? children : null;
-  return child ? (
-    <MenuPrimitive.Trigger render={child} {...props} />
-  ) : (
-    <MenuPrimitive.Trigger {...props}>{children}</MenuPrimitive.Trigger>
-  );
-}
+const DropdownMenuTrigger = MenuPrimitive.Trigger;
 
 function DropdownMenuSubTrigger({
   className,
@@ -119,47 +106,21 @@ function DropdownMenuContent({
   );
 }
 
-type DropdownMenuItemProps = Omit<
-  React.ComponentProps<typeof MenuPrimitive.Item>,
-  "render"
-> & {
-  inset?: boolean;
-  asChild?: boolean;
-  /**
-   * Radix-compatible alias of `onClick`. Cannot veto closing via
-   * `event.preventDefault()`; pass `closeOnClick={false}` to keep the menu open.
-   */
-  onSelect?: React.MouseEventHandler<HTMLElement>;
-};
-
 function DropdownMenuItem({
   className,
   inset,
-  asChild = false,
-  children,
-  onClick,
-  onSelect,
   ...props
-}: DropdownMenuItemProps) {
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    onClick?.(event as never);
-    onSelect?.(event);
-  };
-  const child = asChild && React.isValidElement(children) ? children : null;
-  const itemProps = {
-    className: cn(
-      itemClasses,
-      "gap-2 rounded-sm px-2 py-1.5 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-      inset && "pl-8",
-      className
-    ),
-    onClick: handleClick,
-    ...props,
-  };
-  return child ? (
-    <MenuPrimitive.Item render={child} {...itemProps} />
-  ) : (
-    <MenuPrimitive.Item {...itemProps}>{children}</MenuPrimitive.Item>
+}: React.ComponentProps<typeof MenuPrimitive.Item> & { inset?: boolean }) {
+  return (
+    <MenuPrimitive.Item
+      className={cn(
+        itemClasses,
+        "gap-2 rounded-sm px-2 py-1.5 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+        inset && "pl-8",
+        className
+      )}
+      {...props}
+    />
   );
 }
 

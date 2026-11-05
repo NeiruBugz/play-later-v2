@@ -5,20 +5,7 @@ import { cn } from "@/shared/lib/utils";
 
 const Popover = PopoverPrimitive.Root;
 
-function PopoverTrigger({
-  asChild = false,
-  children,
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger> & {
-  asChild?: boolean;
-}) {
-  const child = asChild && React.isValidElement(children) ? children : null;
-  return child ? (
-    <PopoverPrimitive.Trigger render={child} {...props} />
-  ) : (
-    <PopoverPrimitive.Trigger {...props}>{children}</PopoverPrimitive.Trigger>
-  );
-}
+const PopoverTrigger = PopoverPrimitive.Trigger;
 
 function PopoverContent({
   className,

@@ -117,7 +117,7 @@ export function StatusPicker({
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
-        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverTrigger render={trigger} />
         <PopoverContent align="start" className="p-xs w-56">
           <StatusRadioList value={value} onSelect={handleSelect} />
         </PopoverContent>
@@ -127,7 +127,7 @@ export function StatusPicker({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetTrigger render={trigger} />
       <SheetContent
         side="bottom"
         aria-describedby={undefined}

@@ -24,7 +24,7 @@ const actions = {
 
 function Harness() {
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delay={0}>
       <Tooltip>
         <TooltipTrigger>Hover me</TooltipTrigger>
         <TooltipContent>Tooltip text</TooltipContent>

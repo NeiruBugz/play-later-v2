@@ -6,35 +6,8 @@ import { cn } from "@/shared/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
 
-function DialogTrigger({
-  asChild = false,
-  children,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger> & {
-  asChild?: boolean;
-}) {
-  const child = asChild && React.isValidElement(children) ? children : null;
-  return child ? (
-    <DialogPrimitive.Trigger render={child} {...props} />
-  ) : (
-    <DialogPrimitive.Trigger {...props}>{children}</DialogPrimitive.Trigger>
-  );
-}
-
-function DialogClose({
-  asChild = false,
-  children,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close> & {
-  asChild?: boolean;
-}) {
-  const child = asChild && React.isValidElement(children) ? children : null;
-  return child ? (
-    <DialogPrimitive.Close render={child} {...props} />
-  ) : (
-    <DialogPrimitive.Close {...props}>{children}</DialogPrimitive.Close>
-  );
-}
+const DialogTrigger = DialogPrimitive.Trigger;
+const DialogClose = DialogPrimitive.Close;
 
 const DialogPortal = DialogPrimitive.Portal;
 
