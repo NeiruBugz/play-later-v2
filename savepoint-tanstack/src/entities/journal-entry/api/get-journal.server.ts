@@ -35,21 +35,6 @@ export async function getJournalTimeline(
 }
 
 /**
- * Returns the notes owned by `userId` for the given `gameId`, newest first by
- * `createdAt`. Ownership is enforced at the query level.
- */
-export async function getJournalEntriesForGame(
-  userId: string,
-  gameId: string
-): Promise<JournalTimelineEntry[]> {
-  return prisma.journalEntry.findMany({
-    where: { userId, gameId },
-    orderBy: { createdAt: "desc" },
-    ...JOURNAL_ENTRY_READ_ARGS,
-  });
-}
-
-/**
  * The Journal filter options: the user's games that have notes, by title.
  */
 export async function getJournalGameOptions(

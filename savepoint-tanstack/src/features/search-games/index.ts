@@ -1,4 +1,3 @@
-export { searchGamesFn } from "./api/search-games";
 export { searchLibraryAwareGamesFn } from "./api/search-library-aware-games";
 export type {
   LibraryAwareSearchItem,

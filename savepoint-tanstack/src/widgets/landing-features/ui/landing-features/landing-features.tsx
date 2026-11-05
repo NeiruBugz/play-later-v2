@@ -106,16 +106,3 @@ export function LandingPreviewCard() {
     </div>
   );
 }
-
-/**
- * Composite export — renders both the strip and the preview card in a
- * fragment. For callers that don't need to place them in separate grid cells.
- */
-export function LandingFeatures() {
-  return (
-    <>
-      <LandingFeaturesStrip />
-      <LandingPreviewCard />
-    </>
-  );
-}
