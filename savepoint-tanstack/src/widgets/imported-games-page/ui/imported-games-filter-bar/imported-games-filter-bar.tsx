@@ -53,7 +53,7 @@ const ALL = "all" as const;
 const SORT_DEFAULT = "added_desc" as const;
 
 type FilterOption = {
-  value: string | null;
+  value: string;
   label: string;
   chipLabel?: string;
 };
@@ -75,7 +75,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by time played status",
     chipPrefix: "Status: ",
     options: [
-      { value: null, label: "All" },
+      { value: ALL, label: "All" },
       { value: "played", label: "Played" },
       { value: "never_played", label: "Never Played" },
     ],
@@ -87,7 +87,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by time played range",
     chipPrefix: "Time played: ",
     options: [
-      { value: null, label: "All" },
+      { value: ALL, label: "All" },
       { value: "under_1h", label: "Under 1 hour", chipLabel: "Under 1h" },
       { value: "1_to_10h", label: "1-10 hours", chipLabel: "1-10h" },
       { value: "10_to_50h", label: "10-50 hours", chipLabel: "10-50h" },
@@ -101,7 +101,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by platform",
     chipPrefix: "Platform: ",
     options: [
-      { value: null, label: "All Platforms" },
+      { value: ALL, label: "All Platforms" },
       { value: "windows", label: "Windows" },
       { value: "mac", label: "Mac" },
       { value: "linux", label: "Linux" },
@@ -114,7 +114,7 @@ const FILTER_FIELDS: readonly FilterFieldConfig[] = [
     triggerAriaLabel: "Filter by last played date",
     chipPrefix: "Last played: ",
     options: [
-      { value: null, label: "All Time" },
+      { value: ALL, label: "All Time" },
       { value: "30_days", label: "Last 30 days" },
       { value: "1_year", label: "Last year" },
       { value: "over_1_year", label: "Over a year ago" },
@@ -201,7 +201,7 @@ export function ImportedGamesFilterBar({
   };
 
   const selectedValueFor = (key: FilterFieldConfig["paramKey"]) =>
-    filters[key] === undefined || filters[key] === ALL ? null : filters[key];
+    filters[key] ?? ALL;
 
   const chips: ChipDef[] = [];
   if (filters.q && filters.q.trim().length > 0) {
@@ -297,7 +297,7 @@ export function ImportedGamesFilterBar({
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value ?? ALL} value={option.value}>
+              <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
@@ -343,7 +343,7 @@ export function ImportedGamesFilterBar({
               </SelectTrigger>
               <SelectContent>
                 {field.options.map((option) => (
-                  <SelectItem key={option.value ?? ALL} value={option.value}>
+                  <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
                 ))}

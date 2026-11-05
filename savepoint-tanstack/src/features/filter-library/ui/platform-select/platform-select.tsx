@@ -20,23 +20,23 @@ export function PlatformSelect({
   const hasUnknownPlatform =
     rawPlatform !== undefined && !platforms.includes(rawPlatform);
   const items = [
-    { value: null, label: ALL_PLATFORMS_LABEL },
+    { value: ALL_PLATFORMS, label: ALL_PLATFORMS_LABEL },
     ...platforms.map((p) => ({ value: p, label: p })),
     ...(hasUnknownPlatform ? [{ value: rawPlatform, label: rawPlatform }] : []),
   ];
 
   return (
     <Select
-      value={value === ALL_PLATFORMS ? null : value}
+      value={value}
       items={items}
-      onValueChange={(next) => onChange(next ?? ALL_PLATFORMS)}
+      onValueChange={(next) => next !== null && onChange(next)}
     >
       <SelectTrigger aria-label="Platform" className="h-9 w-full">
-        <SelectValue placeholder={ALL_PLATFORMS_LABEL} />
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {items.map((item) => (
-          <SelectItem key={item.value ?? ALL_PLATFORMS} value={item.value}>
+          <SelectItem key={item.value} value={item.value}>
             {item.label}
           </SelectItem>
         ))}

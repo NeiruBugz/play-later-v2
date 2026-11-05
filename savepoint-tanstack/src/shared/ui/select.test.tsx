@@ -82,6 +82,16 @@ describe("Select", () => {
       expect(elements.getTrigger().textContent).toContain("Pick status");
     });
 
+    it("marks the trigger as showing a placeholder while nothing is selected", () => {
+      expect(elements.getTrigger()).toHaveAttribute("data-placeholder");
+    });
+
+    it("drops the placeholder state once an option is picked", async () => {
+      await actions.openTrigger();
+      await actions.pickOption("Playing");
+      expect(elements.getTrigger()).not.toHaveAttribute("data-placeholder");
+    });
+
     it("opens the listbox when the trigger is clicked", async () => {
       await actions.openTrigger();
       expect(elements.queryOption("Playing")).not.toBeNull();

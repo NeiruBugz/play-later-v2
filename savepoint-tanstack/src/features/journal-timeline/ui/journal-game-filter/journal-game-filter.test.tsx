@@ -80,6 +80,10 @@ describe("JournalGameFilter selection", () => {
     expect(elements.getTrigger()).toHaveTextContent("All");
   });
 
+  it("shows All as a chosen value, not as a placeholder", () => {
+    expect(elements.getTrigger()).not.toHaveAttribute("data-placeholder");
+  });
+
   describe("given a game is picked", () => {
     beforeEach(async () => {
       await userEvent.click(elements.getTrigger());
@@ -100,6 +104,7 @@ describe("JournalGameFilter selection", () => {
       it("clears the filter and the trigger shows All again", () => {
         expect(onChange).toHaveBeenLastCalledWith(undefined);
         expect(elements.getTrigger()).toHaveTextContent("All");
+        expect(elements.getTrigger()).not.toHaveAttribute("data-placeholder");
       });
     });
   });
