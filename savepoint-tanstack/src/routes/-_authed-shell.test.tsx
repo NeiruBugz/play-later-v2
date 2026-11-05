@@ -238,3 +238,27 @@ describe("__root route shell", () => {
     });
   });
 });
+
+describe("__root head", () => {
+  describe("given the document head is built", () => {
+    let viewportContent: string | undefined;
+
+    beforeEach(() => {
+      const head = (RootRoute.options.head as any)();
+      viewportContent = head.meta.find(
+        (entry: { name?: string }) => entry.name === "viewport"
+      )?.content;
+    });
+
+    it("extends the page under the notch and home indicator", () => {
+      expect(viewportContent).toBe(
+        "width=device-width, initial-scale=1, viewport-fit=cover"
+      );
+    });
+
+    it("keeps pinch zoom available", () => {
+      expect(viewportContent).not.toContain("maximum-scale");
+      expect(viewportContent).not.toContain("user-scalable");
+    });
+  });
+});
