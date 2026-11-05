@@ -1,4 +1,5 @@
-import { Slot } from "@radix-ui/react-slot";
+import { Button as BaseButton } from "@base-ui/react/button";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
@@ -44,40 +45,65 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { className, variant, size, asChild = false, loading, children, ...props },
-    ref
-  ) => {
-    const Comp = asChild ? Slot : "button";
+function AsChildButton({
+  children,
+  ref,
+  ...props
+}: Omit<ButtonProps, "asChild" | "loading" | "variant" | "size">) {
+  return useRender({
+    render: React.isValidElement(children) ? children : <span />,
+    ref,
+    props,
+  });
+}
 
-    if (asChild && loading) {
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  loading,
+  children,
+  ref,
+  ...props
+}: ButtonProps) {
+  const classes = cn(buttonVariants({ variant, size, className }));
+  const disabled = loading || props.disabled;
+
+  if (asChild) {
+    if (loading) {
       console.warn(
         "Button: 'loading' prop is not supported when 'asChild' is true"
       );
     }
-
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <AsChildButton
+        className={classes}
         ref={ref}
-        disabled={loading || props.disabled}
+        disabled={disabled}
         {...props}
       >
-        {loading && !asChild ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {children}
-          </>
-        ) : (
-          children
-        )}
-      </Comp>
+        {children}
+      </AsChildButton>
     );
   }
-);
+
+  return (
+    <BaseButton className={classes} ref={ref} {...props} disabled={disabled}>
+      {loading ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {children}
+        </>
+      ) : (
+        children
+      )}
+    </BaseButton>
+  );
+}
 Button.displayName = "Button";
 
 export { Button, buttonVariants };

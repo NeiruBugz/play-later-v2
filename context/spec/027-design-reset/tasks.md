@@ -36,7 +36,7 @@ Conventions for every slice:
     - Stop the dev server by PID. Delete any extra screenshots and traces created outside `review/before/`. **[Agent: testing]**
 
 - [ ] **Slice 2: Simple primitives run on Base UI with today's look**
-  - [ ] Add `@base-ui/react` (exact pin) and add a no-op `Element.prototype.getAnimations` polyfill to `test/setup/unit.ts`.
+  - [x] Add `@base-ui/react` (exact pin) and add a no-op `Element.prototype.getAnimations` polyfill to `test/setup/unit.ts`.
     - Spike first: re-implement `button` on Base UI and run the whole `src/shared/ui/*.test.tsx` suite.
     - If the harness breaks, fix it here before continuing. **[Agent: react-frontend]**
   - [ ] Re-implement `button`, `label` (plain `<label>`), `separator`, `avatar`, `checkbox`, `switch`, `collapsible`, `tabs` and `segmented-control` on Base UI parts.
