@@ -98,6 +98,38 @@ Spec 026 migration A (`<ts>_mindful_core_model`) swaps the `LibraryItemStatus` e
    3. Revert the Vercel deployment to the pre-026 build (promote the prior deployment, then `git revert` the merge on `main`). Reverting `main` re-runs `prisma migrate deploy`; it must find no pending 026 migration, so confirm `_prisma_migrations` was restored with the DB.
    4. Verify (see below). Writes made between the deploy and the restore are lost; note the window.
 
+## Pre-deploy for the Steam import idempotency migration (`<ts>_steam_import_idempotent`)
+
+The migration soft-deletes duplicate live `ImportedGame` rows (keeping the most recently updated per `(userId, storefront, storefrontGameId)`), then builds a **partial unique index** on live rows, drops redundant indexes, and switches three `user` foreign keys (`LibraryItem`, `ImportedGame`, `IgnoredImportedGames`) from RESTRICT to CASCADE. Nothing is hard-deleted, so a Vercel revert is safe; the unique index only makes the old app's duplicate inserts fail, so revert the app together with `DROP INDEX "ImportedGame_live_userId_storefront_storefrontGameId_key"` if the old import path must be restored.
+
+1. **Branch production.** Create a Neon branch named `pre-steam-idempotent-<yyyy-mm-dd>` from production (same steps as the spec 026 section above).
+2. **Duplicate pre-check.** Run against the Neon branch. Rows returned are the groups the migration will dedupe (all but the newest are soft-deleted). Review that the volume looks plausible; zero rows is also fine.
+
+   ```sql
+   SELECT "userId", "storefront", "storefrontGameId", COUNT(*) AS live_copies
+   FROM "ImportedGame"
+   WHERE "deletedAt" IS NULL AND "storefrontGameId" IS NOT NULL
+   GROUP BY "userId", "storefront", "storefrontGameId"
+   HAVING COUNT(*) > 1;
+   ```
+
+3. **Dry run on the branch.** Point `POSTGRES_PRISMA_URL` / `POSTGRES_URL_NON_POOLING` at the branch and run `pnpm --filter savepoint-tanstack prisma:migrate:deploy`. Then both queries must return zero rows:
+
+   ```sql
+   -- no live duplicates left
+   SELECT "userId", "storefront", "storefrontGameId", COUNT(*)
+   FROM "ImportedGame"
+   WHERE "deletedAt" IS NULL AND "storefrontGameId" IS NOT NULL
+   GROUP BY 1, 2, 3 HAVING COUNT(*) > 1;
+
+   -- the partial unique index exists (expect one row)
+   SELECT indexdef FROM pg_indexes
+   WHERE indexname = 'ImportedGame_live_userId_storefront_storefrontGameId_key';
+   ```
+
+4. **Deploy**, then keep the branch for a few days.
+5. **Rollback.** Revert the Vercel deployment. Rows the migration soft-deleted can be restored from the branch (`UPDATE "ImportedGame" SET "deletedAt" = NULL WHERE id IN (...)` using ids that are live on the branch but deleted in production), but only after dropping the unique index.
+
 ## Decision checklist
 
 ### When to roll back (triggers)

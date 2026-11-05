@@ -1,9 +1,8 @@
 /**
  * Shared prop shape for the Steam error-state cards.
  *
- * The 4 typed-error cards (`SteamPrivacyErrorCard`,
- * `SteamApiUnavailableErrorCard`, `SteamProfileNotFoundErrorCard`,
- * `SteamRateLimitErrorCard`) accept the same `{ message, onRetry? }` shape.
+ * The 3 typed-error cards (`SteamPrivacyErrorCard`,
+ * `SteamApiUnavailableErrorCard`, `SteamRateLimitErrorCard`) accept the same `{ message, onRetry? }` shape.
  * Lives alongside the cards because the type axis is the variant identity.
  */
 export type SteamErrorCardProps = {
