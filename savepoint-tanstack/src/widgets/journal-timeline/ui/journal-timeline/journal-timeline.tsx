@@ -45,7 +45,7 @@ export function JournalTimeline({
       {/* Continuous vertical rail line behind the nodes */}
       <li
         aria-hidden="true"
-        className="bg-border/70 pointer-events-none absolute top-1.5 bottom-1.5 left-[17px] w-0.5"
+        className="pointer-events-none absolute top-1.5 bottom-1.5 left-[17px] w-0.5 bg-border/70"
       />
 
       {entries.map((entry) => (
@@ -75,7 +75,7 @@ function CoverAvatar({ game }: CoverAvatarProps) {
     : null;
 
   return (
-    <div className="border-background size-9 overflow-hidden rounded-full border-2 shadow-xs">
+    <div className="size-9 overflow-hidden rounded-full border-2 border-background shadow-xs">
       {coverUrl ? (
         <img
           src={coverUrl}
@@ -84,15 +84,15 @@ function CoverAvatar({ game }: CoverAvatarProps) {
         />
       ) : (
         <div
-          className="bg-muted flex size-full items-center justify-center"
+          className="flex size-full items-center justify-center bg-muted"
           aria-hidden="true"
         >
           {game ? (
-            <span className="text-muted-foreground font-mono text-xs font-medium select-none">
+            <span className="font-mono text-xs font-medium text-muted-foreground select-none">
               {game.title.slice(0, 2).toUpperCase()}
             </span>
           ) : (
-            <NotebookPen className="text-muted-foreground size-4" />
+            <NotebookPen className="size-4 text-muted-foreground" />
           )}
         </div>
       )}

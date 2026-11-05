@@ -125,7 +125,7 @@ function ProfileNotFound() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
       <PageHeader title="Profile not found" className="mb-2 justify-center" />
-      <p className="text-muted-foreground mb-6">
+      <p className="mb-6 text-muted-foreground">
         We couldn't find that profile, or it isn't public.
       </p>
       <Link to="/" className={buttonVariants({ variant: "outline" })}>

@@ -43,7 +43,7 @@ function SearchResultRow({ game }: { game: SearchResultGame }) {
           <div
             role="img"
             aria-label={`Cover for ${game.name}`}
-            className="bg-muted aspect-[3/4] w-10 rounded-sm shadow-sm"
+            className="aspect-[3/4] w-10 rounded-sm bg-muted shadow-sm"
           />
         )}
       </div>
@@ -56,7 +56,7 @@ function SearchResultRow({ game }: { game: SearchResultGame }) {
           {game.name}
         </Link>
         {releaseYear !== null ? (
-          <p className="text-muted-foreground text-xs tabular-nums">
+          <p className="text-xs text-muted-foreground tabular-nums">
             {releaseYear}
           </p>
         ) : null}
@@ -104,7 +104,7 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
         <form onSubmit={handleSubmit} className="relative flex items-center">
           <Search
             aria-hidden="true"
-            className="text-muted-foreground pointer-events-none absolute left-3 h-4 w-4"
+            className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground"
           />
           <Input
             type="search"
@@ -120,20 +120,20 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
           <p
             role="status"
             aria-live="polite"
-            className="text-muted-foreground text-sm"
+            className="text-sm text-muted-foreground"
           >
             Searching...
           </p>
         ) : null}
 
         {search.phase === "error" ? (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             Search is unavailable. Try again.
           </p>
         ) : null}
 
         {search.phase === "done" && search.games.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No results found</p>
+          <p className="text-sm text-muted-foreground">No results found</p>
         ) : null}
 
         {search.phase === "done" && search.games.length > 0 ? (
@@ -147,7 +147,7 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
               to="/games/search"
               search={{ q: debouncedQuery }}
               onClick={onSeeAll}
-              className="text-primary text-sm font-medium underline-offset-4 hover:underline"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
               See all results
             </Link>

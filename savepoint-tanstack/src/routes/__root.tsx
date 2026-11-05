@@ -186,7 +186,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="selection:bg-primary/25 font-sans wrap-anywhere antialiased">
+      <body className="font-sans wrap-anywhere antialiased selection:bg-primary/25">
         {children}
         <Scripts />
       </body>

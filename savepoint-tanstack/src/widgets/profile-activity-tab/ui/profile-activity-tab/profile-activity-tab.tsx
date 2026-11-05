@@ -63,7 +63,7 @@ export function ProfileActivityTab({
 
   return (
     <div className="space-y-2" data-testid="profile-activity-tab">
-      <ul className="divide-border/50 divide-y">
+      <ul className="divide-y divide-border/50">
         {items.map((item) => (
           <li
             key={item.id}
@@ -71,7 +71,7 @@ export function ProfileActivityTab({
             data-testid="profile-activity-entry"
           >
             <p className="text-foreground">{activityLine(item)}</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {formatLocaleDate(item.activityTimestamp)}
             </p>
           </li>

@@ -58,10 +58,10 @@ export function ImportedGameCard({
           />
         ) : (
           <div
-            className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-sm"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-muted"
             aria-hidden="true"
           >
-            <span className="text-muted-foreground text-xs font-medium">
+            <span className="text-xs font-medium text-muted-foreground">
               {game.name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -77,7 +77,7 @@ export function ImportedGameCard({
               {getStatusLabel(smartStatus)}
             </Badge>
           </div>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
             <span>
               {game.playtime ? formatHours(game.playtime) : "Never played"}
             </span>

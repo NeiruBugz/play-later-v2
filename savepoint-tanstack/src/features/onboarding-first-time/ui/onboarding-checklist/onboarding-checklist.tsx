@@ -120,31 +120,31 @@ export function OnboardingChecklist({
   return (
     <Collapsible
       defaultOpen
-      className="bg-card text-card-foreground rounded-md border"
+      className="rounded-md border bg-card text-card-foreground"
     >
       <CollapsibleTrigger
         className={cn(
           "flex w-full items-center justify-between gap-2 px-4 py-3 text-left",
-          "hover:bg-muted/40 focus-visible:ring-ring rounded-md focus-visible:ring-2 focus-visible:outline-none",
+          "rounded-md hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           "data-[panel-open]:rounded-b-none"
         )}
         aria-label="Onboarding checklist"
       >
         <span className="flex flex-col gap-0.5">
           <span className="text-sm font-semibold">Getting started</span>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-muted-foreground">
             {doneCount} of {steps.length} complete
           </span>
         </span>
         <ChevronDown
           aria-hidden="true"
-          className="text-muted-foreground h-4 w-4 transition-transform data-[state=open]:rotate-180"
+          className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180"
         />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <ul
           aria-label="Onboarding checklist steps"
-          className="divide-border divide-y border-t"
+          className="divide-y divide-border border-t"
         >
           {steps.map((step) => (
             <li
@@ -160,7 +160,7 @@ export function OnboardingChecklist({
                   "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
                   step.done
                     ? "bg-primary text-primary-foreground"
-                    : "border-border border"
+                    : "border border-border"
                 )}
               >
                 {step.done ? (

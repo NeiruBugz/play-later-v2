@@ -66,7 +66,7 @@ export function ProfileOverview({
                 alt={displayName}
                 width={80}
                 height={80}
-                className="ring-background h-20 w-20 rounded-full object-cover ring-4 md:h-28 md:w-28"
+                className="h-20 w-20 rounded-full object-cover ring-4 ring-background md:h-28 md:w-28"
               />
               {isOwnProfile ? (
                 <div className="absolute inset-x-0 bottom-0 rounded-b-full bg-black/60 px-2 py-1 text-center text-xs text-white">
@@ -99,15 +99,15 @@ export function ProfileOverview({
           followerCount !== undefined &&
           followingCount !== undefined ? (
             <p
-              className="text-muted-foreground mt-1 text-sm"
+              className="mt-1 text-sm text-muted-foreground"
               data-testid="profile-social-counts"
             >
               <Link
                 to="/u/$username/followers"
                 params={{ username: profile.username }}
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-foreground"
               >
-                <span className="text-foreground font-medium tabular-nums">
+                <span className="font-medium text-foreground tabular-nums">
                   {followerCount}
                 </span>{" "}
                 Followers
@@ -118,9 +118,9 @@ export function ProfileOverview({
               <Link
                 to="/u/$username/following"
                 params={{ username: profile.username }}
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-foreground"
               >
-                <span className="text-foreground font-medium tabular-nums">
+                <span className="font-medium text-foreground tabular-nums">
                   {followingCount}
                 </span>{" "}
                 Following
@@ -132,10 +132,10 @@ export function ProfileOverview({
           <div data-testid="profile-stat-row" className="mt-3 flex gap-5">
             {inlineStats.map(({ label, value }) => (
               <div key={label} data-testid="profile-stat-item">
-                <span className="text-foreground text-base font-bold tabular-nums">
+                <span className="text-base font-bold text-foreground tabular-nums">
                   {value}
                 </span>
-                <p className="text-muted-foreground text-xs">{label}</p>
+                <p className="text-xs text-muted-foreground">{label}</p>
               </div>
             ))}
           </div>
@@ -180,7 +180,7 @@ export function ProfileOverview({
                           className="aspect-[3/4] w-full object-cover transition-transform group-hover:scale-105"
                         />
                       ) : (
-                        <div className="bg-muted aspect-[3/4] w-full" />
+                        <div className="aspect-[3/4] w-full bg-muted" />
                       )}
                       <div
                         aria-hidden="true"
@@ -289,7 +289,7 @@ function ProfileOverviewTabs({
       {/* Sticky tab strip sits directly above content (AC PRO-1) */}
       <div
         data-testid="profile-tab-strip"
-        className="bg-background/90 sticky top-0 z-10 px-4 py-2 backdrop-blur-sm md:px-6"
+        className="sticky top-0 z-10 bg-background/90 px-4 py-2 backdrop-blur-sm md:px-6"
       >
         <SegmentedControl<ProfileTabValue>
           value={value}

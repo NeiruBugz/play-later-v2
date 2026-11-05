@@ -141,7 +141,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
             aria-label="Decrease time played by 0.5 hours"
             onClick={() => setHours((prev) => addHours(prev, -HOURS_STEP))}
             disabled={hours <= 0}
-            className="border-border bg-card text-foreground flex h-11 w-11 items-center justify-center rounded-full border transition-opacity disabled:opacity-40"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-opacity disabled:opacity-40"
           >
             <Minus size={20} aria-hidden />
           </button>
@@ -154,22 +154,22 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
             tabIndex={0}
             className="min-w-24 text-center"
           >
-            <span className="text-foreground font-display text-[2.2rem] leading-none font-bold">
+            <span className="font-display text-[2.2rem] leading-none font-bold text-foreground">
               {hours}
             </span>
-            <span className="text-muted-foreground ml-1 text-base">h</span>
+            <span className="ml-1 text-base text-muted-foreground">h</span>
           </div>
           <button
             type="button"
             aria-label="Increase time played by 0.5 hours"
             onClick={() => setHours((prev) => addHours(prev, HOURS_STEP))}
-            className="bg-primary text-primary-foreground flex h-11 w-11 items-center justify-center rounded-full transition-opacity"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity"
           >
             <Plus size={20} aria-hidden />
           </button>
         </div>
         {timeNeedsGame ? (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             {TIME_NEEDS_GAME_MESSAGE}
           </p>
         ) : null}
@@ -225,9 +225,9 @@ function GameSection({
     return (
       <div
         data-testid="selected-game-header"
-        className="bg-card border-border flex items-center gap-3 rounded-sm border p-2.5"
+        className="flex items-center gap-3 rounded-sm border border-border bg-card p-2.5"
       >
-        <div className="bg-muted size-10 shrink-0 overflow-hidden rounded-sm">
+        <div className="size-10 shrink-0 overflow-hidden rounded-sm bg-muted">
           {coverUrl ? (
             <img
               src={coverUrl}
@@ -236,7 +236,7 @@ function GameSection({
             />
           ) : null}
         </div>
-        <div className="text-foreground min-w-0 flex-1 text-sm leading-snug font-semibold">
+        <div className="min-w-0 flex-1 text-sm leading-snug font-semibold text-foreground">
           {chosenGame.title}
         </div>
         <Button type="button" variant="ghost" size="sm" onClick={onClear}>
@@ -247,12 +247,12 @@ function GameSection({
   }
 
   if (loadStatus === "loading") {
-    return <div className="text-muted-foreground py-4 text-sm">Loading…</div>;
+    return <div className="py-4 text-sm text-muted-foreground">Loading…</div>;
   }
 
   if (loadStatus === "error") {
     return (
-      <div className="text-destructive py-4 text-sm">
+      <div className="py-4 text-sm text-destructive">
         Could not load your library. Please try again.
       </div>
     );
@@ -260,7 +260,7 @@ function GameSection({
 
   if (games.length === 0) {
     return (
-      <p className="text-muted-foreground py-2 text-sm">
+      <p className="py-2 text-sm text-muted-foreground">
         Add a game to your library to log time.
       </p>
     );

@@ -27,10 +27,10 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
         <dl className="flex flex-wrap gap-4">
           {entries.map((entry) => (
             <div key={entry.label} className="flex flex-col">
-              <dt className="text-muted-foreground text-xs font-medium uppercase">
+              <dt className="text-xs font-medium text-muted-foreground uppercase">
                 {entry.label}
               </dt>
-              <dd className="text-foreground font-mono text-lg font-semibold">
+              <dd className="font-mono text-lg font-semibold text-foreground">
                 {formatHours(entry.seconds / SECONDS_PER_MINUTE)}
               </dd>
             </div>

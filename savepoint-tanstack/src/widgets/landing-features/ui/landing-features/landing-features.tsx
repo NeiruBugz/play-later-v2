@@ -12,14 +12,14 @@ export function LandingFeaturesStrip() {
   ];
 
   return (
-    <div className="border-border/30 border-t pt-6">
+    <div className="border-t border-border/30 pt-6">
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {items.map((item) => (
           <li key={item.title} className="space-y-1">
-            <p className="text-foreground text-sm font-semibold">
+            <p className="text-sm font-semibold text-foreground">
               {item.title}
             </p>
-            <p className="text-muted-foreground text-xs">{item.body}</p>
+            <p className="text-xs text-muted-foreground">{item.body}</p>
           </li>
         ))}
       </ul>
@@ -35,8 +35,8 @@ export function LandingFeaturesStrip() {
 export function LandingPreviewCard() {
   return (
     <div className="relative">
-      <div className="border-border/40 bg-card/40 relative overflow-hidden rounded-3xl border p-5 shadow-2xl backdrop-blur-sm">
-        <div className="from-primary relative h-56 overflow-hidden rounded-2xl bg-gradient-to-br via-fuchsia-500 to-rose-500">
+      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/40 p-5 shadow-2xl backdrop-blur-sm">
+        <div className="relative h-56 overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-fuchsia-500 to-rose-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_60%)]" />
           <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/20 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.16em] text-white/90 uppercase backdrop-blur-sm">
             <span
@@ -56,7 +56,7 @@ export function LandingPreviewCard() {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
+          <p className="text-[11px] tracking-[0.16em] text-muted-foreground uppercase">
             SESSION 12 · 47H TOTAL
           </p>
           <div
@@ -67,28 +67,28 @@ export function LandingPreviewCard() {
               <Star
                 key={i}
                 aria-hidden="true"
-                className="fill-primary text-primary h-3.5 w-3.5"
+                className="h-3.5 w-3.5 fill-primary text-primary"
               />
             ))}
             <Star
               aria-hidden="true"
-              className="text-muted-foreground/40 h-3.5 w-3.5"
+              className="h-3.5 w-3.5 text-muted-foreground/40"
             />
           </div>
         </div>
 
-        <div className="border-border/40 bg-background/40 mt-4 rounded-xl border p-4">
-          <p className="text-muted-foreground text-[10px] font-medium tracking-[0.18em] uppercase">
+        <div className="mt-4 rounded-xl border border-border/40 bg-background/40 p-4">
+          <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
             APR 22 · NOTE
           </p>
-          <p className="text-foreground/90 mt-2 text-sm leading-relaxed italic">
+          <p className="mt-2 text-sm leading-relaxed text-foreground/90 italic">
             &ldquo;Took five tries on Hornet — finally read the dash pattern.
             The arena lighting in this fight is unreal.&rdquo;
           </p>
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-muted-foreground text-[11px] font-medium tracking-[0.18em] uppercase">
+          <p className="text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
             UP NEXT
           </p>
           <div className="flex items-center gap-2" aria-hidden="true">
@@ -99,7 +99,7 @@ export function LandingPreviewCard() {
         </div>
       </div>
 
-      <div className="border-border/40 bg-background/80 text-muted-foreground absolute right-4 -bottom-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] backdrop-blur-sm">
+      <div className="absolute right-4 -bottom-3 inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/80 px-3 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
         <span aria-hidden="true">↳</span>
         <span>218 in your library</span>
       </div>

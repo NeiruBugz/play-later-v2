@@ -42,12 +42,12 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
         }
       />
 
-      <p className="text-muted-foreground text-xs font-medium">
+      <p className="text-xs font-medium text-muted-foreground">
         {entry.game ? (
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="hover:text-foreground transition-colors"
+            className="transition-colors hover:text-foreground"
           >
             {entry.game.title}
           </Link>

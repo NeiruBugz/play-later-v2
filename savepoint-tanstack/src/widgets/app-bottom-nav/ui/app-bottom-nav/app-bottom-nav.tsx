@@ -24,7 +24,7 @@ export function AppBottomNav() {
     <nav
       data-testid="app-bottom-nav"
       aria-label="Primary mobile tab navigation"
-      className="bg-card/85 fixed inset-x-0 bottom-0 z-40 flex h-(--bottom-nav-height) items-stretch overflow-visible border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-(--bottom-nav-height) items-stretch overflow-visible border-t bg-card/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
       {DEST_ITEMS_LEFT.map(({ label, to, icon: Icon }) => (
         <Link
@@ -35,7 +35,7 @@ export function AppBottomNav() {
             className:
               "text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium",
           }}
-          className="text-muted-foreground hover:text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium"
+          className="flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground"
         >
           <Icon size={20} aria-hidden="true" />
           {label}
@@ -50,13 +50,13 @@ export function AppBottomNav() {
       >
         <span
           aria-hidden="true"
-          className="bg-primary text-primary-foreground flex aspect-square size-14 shrink-0 -translate-y-3 items-center justify-center rounded-full shadow-lg"
+          className="flex aspect-square size-14 shrink-0 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
         >
           <Plus size={26} />
         </span>
         <span
           aria-hidden="true"
-          className="text-muted-foreground -mt-1 text-[11px] font-medium"
+          className="-mt-1 text-[11px] font-medium text-muted-foreground"
         >
           Log
         </span>
@@ -71,7 +71,7 @@ export function AppBottomNav() {
             className:
               "text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium",
           }}
-          className="text-muted-foreground hover:text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium"
+          className="flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground"
         >
           <Icon size={20} aria-hidden="true" />
           {label}

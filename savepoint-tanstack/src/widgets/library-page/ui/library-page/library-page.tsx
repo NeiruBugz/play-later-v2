@@ -106,7 +106,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
             <div
               role="img"
               aria-label={alt}
-              className="bg-muted aspect-[3/4] w-full rounded-lg shadow-md"
+              className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
             />
           )}
           <div className="absolute top-2 left-2">
@@ -124,7 +124,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
           <NotOwnedTag status={status} isOwned={ownership.isOwned} />
         </div>
         {item.platform ? (
-          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {item.platform}
           </p>
         ) : null}
@@ -327,7 +327,7 @@ export function LibraryPage(props: LibraryPageProps) {
           <>
             <Link
               to="/steam/games"
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
               aria-label="Import from Steam"
             >
               <Download className="h-4 w-4" aria-hidden />
@@ -353,7 +353,7 @@ export function LibraryPage(props: LibraryPageProps) {
         />
         <kbd
           aria-hidden="true"
-          className="text-muted-foreground border-border bg-muted/50 pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border px-1.5 py-0.5 text-xs font-semibold"
+          className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border border-border bg-muted/50 px-1.5 py-0.5 text-xs font-semibold text-muted-foreground"
         >
           /
         </kbd>

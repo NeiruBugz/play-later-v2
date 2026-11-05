@@ -38,7 +38,7 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
           <div
             role="img"
             aria-label={alt}
-            className="bg-muted aspect-[3/4] w-full rounded-lg shadow-md"
+            className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
           />
         )}
         <div className="absolute top-1.5 left-1.5">
@@ -54,7 +54,7 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
         className="mt-1"
       />
       {item.platform ? (
-        <p className="text-muted-foreground mt-0.5 truncate text-xs">
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
           {item.platform}
         </p>
       ) : null}
@@ -88,7 +88,7 @@ export function DashboardGameRail({
           <Link
             to="/library"
             search={viewAll}
-            className="text-muted-foreground hover:text-foreground group inline-flex items-center text-xs font-medium"
+            className="group inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             {viewAllLabel}
             <ChevronRight
@@ -116,7 +116,7 @@ export function DashboardGameRail({
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground text-sm">{emptyMessage}</p>
+        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       )}
     </section>
   );

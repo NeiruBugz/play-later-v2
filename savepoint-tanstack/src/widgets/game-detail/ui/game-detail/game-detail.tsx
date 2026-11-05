@@ -258,14 +258,14 @@ export function GameDetail({
           <Link
             to="/library"
             aria-label="Back"
-            className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-muted-foreground"
           >
             <ArrowLeft size={20} aria-hidden="true" />
           </Link>
           <button
             type="button"
             aria-label="More"
-            className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-muted-foreground"
           >
             <MoreHorizontal size={20} aria-hidden="true" />
           </button>
@@ -274,23 +274,23 @@ export function GameDetail({
         {/* Desktop breadcrumb — visible at md and above */}
         <nav
           aria-label="Breadcrumb"
-          className="text-muted-foreground relative z-10 hidden items-center gap-1.5 pt-3.5 text-xs font-medium md:flex"
+          className="relative z-10 hidden items-center gap-1.5 pt-3.5 text-xs font-medium text-muted-foreground md:flex"
         >
           <Link
             to="/library"
-            className="hover:text-foreground transition-colors"
+            className="transition-colors hover:text-foreground"
           >
             Library
           </Link>
           <span className="opacity-50">/</span>
           <Link
             to="/library"
-            className="hover:text-foreground transition-colors"
+            className="transition-colors hover:text-foreground"
           >
             Games
           </Link>
           <span className="opacity-50">/</span>
-          <span className="text-foreground max-w-[280px] truncate font-medium">
+          <span className="max-w-[280px] truncate font-medium text-foreground">
             {game.title}
           </span>
         </nav>
@@ -309,14 +309,14 @@ export function GameDetail({
                 {eyebrowParts.length > 0 ? (
                   <p
                     aria-label="Release metadata"
-                    className="text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 text-xs font-medium uppercase"
+                    className="mb-2.5 flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground uppercase"
                   >
                     {eyebrowParts.map((part, i) => (
                       <span key={i} className="flex items-center gap-2">
                         {i > 0 ? (
                           <span
                             aria-hidden="true"
-                            className="bg-muted-foreground inline-block h-[3px] w-[3px] rounded-full"
+                            className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground"
                           />
                         ) : null}
                         {part}

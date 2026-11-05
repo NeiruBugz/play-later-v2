@@ -34,13 +34,13 @@ export function UserList({ variant, entries, total }: UserListProps) {
 
   return (
     <div className="space-y-2" data-testid={`user-list-${variant}`}>
-      <p className="text-muted-foreground text-sm">
-        <span className="text-foreground font-semibold tabular-nums">
+      <p className="text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground tabular-nums">
           {total}
         </span>{" "}
         {variant === "followers" ? "followers" : "following"}
       </p>
-      <ul className="divide-border/50 divide-y">
+      <ul className="divide-y divide-border/50">
         {entries.map((entry) => {
           const displayName = entry.name ?? entry.username ?? "Unknown";
           const initial = displayName.charAt(0).toUpperCase();
@@ -58,20 +58,20 @@ export function UserList({ variant, entries, total }: UserListProps) {
                     alt={`${displayName}'s avatar`}
                     width={40}
                     height={40}
-                    className="ring-border/50 h-10 w-10 rounded-full object-cover ring-1"
+                    className="h-10 w-10 rounded-full object-cover ring-1 ring-border/50"
                   />
                 ) : (
-                  <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                     {initial}
                   </div>
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-foreground truncate text-sm font-medium">
+                <p className="truncate text-sm font-medium text-foreground">
                   {displayName}
                 </p>
                 {entry.username ? (
-                  <p className="text-muted-foreground truncate text-xs">
+                  <p className="truncate text-xs text-muted-foreground">
                     @{entry.username}
                   </p>
                 ) : null}
@@ -85,7 +85,7 @@ export function UserList({ variant, entries, total }: UserListProps) {
                 <Link
                   to="/u/$username"
                   params={{ username: entry.username }}
-                  className="hover:bg-muted/50 -mx-1 block rounded-md transition-colors"
+                  className="-mx-1 block rounded-md transition-colors hover:bg-muted/50"
                 >
                   {inner}
                 </Link>

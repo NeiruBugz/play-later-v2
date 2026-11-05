@@ -87,7 +87,7 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
       />
 
       {serverError ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {serverError}
         </p>
       ) : null}

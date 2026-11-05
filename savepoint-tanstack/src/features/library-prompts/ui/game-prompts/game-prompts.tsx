@@ -58,7 +58,7 @@ function PromptRow({ libraryItemId, gameTitle, kind }: PromptRowProps) {
       <div className="flex items-center gap-1">
         <label
           htmlFor={inputId}
-          className="text-muted-foreground shrink-0 text-sm"
+          className="shrink-0 text-sm text-muted-foreground"
         >
           {question}
         </label>
@@ -84,7 +84,7 @@ function PromptRow({ libraryItemId, gameTitle, kind }: PromptRowProps) {
         </Button>
       </div>
       {errorMessage ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {errorMessage}
         </p>
       ) : null}

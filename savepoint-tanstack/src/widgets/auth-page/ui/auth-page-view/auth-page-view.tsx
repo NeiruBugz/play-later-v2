@@ -20,7 +20,7 @@ export function AuthPageView({
           <p className="font-display text-5xl font-bold tracking-tight">
             SavePoint
           </p>
-          <p className="text-muted-foreground mt-1.5 text-xs font-medium">
+          <p className="mt-1.5 text-xs font-medium text-muted-foreground">
             Your games and the things you&apos;ve thought about them.
           </p>
         </div>
@@ -35,11 +35,11 @@ export function AuthPageView({
           {credentialsForm ? (
             <>
               <div className="relative flex items-center gap-2">
-                <div className="bg-border h-px flex-1" />
-                <span className="text-muted-foreground text-xs font-medium">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs font-medium text-muted-foreground">
                   or
                 </span>
-                <div className="bg-border h-px flex-1" />
+                <div className="h-px flex-1 bg-border" />
               </div>
               {credentialsForm}
             </>

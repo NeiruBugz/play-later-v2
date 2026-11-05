@@ -52,7 +52,7 @@ function RatingStar({
   return (
     <span className={cn("relative inline-block", sizeClass)} aria-hidden="true">
       <Star
-        className={cn("text-muted-foreground/40 absolute inset-0", sizeClass)}
+        className={cn("absolute inset-0 text-muted-foreground/40", sizeClass)}
         strokeWidth={1.5}
       />
       {fill !== "empty" && (
@@ -204,7 +204,7 @@ export function RatingInput({
         "inline-flex items-center",
         gapClasses[size],
         interactive &&
-          "focus-visible:ring-ring cursor-pointer rounded-sm focus-visible:ring-2 focus-visible:outline-none",
+          "cursor-pointer rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         className
       )}
     >

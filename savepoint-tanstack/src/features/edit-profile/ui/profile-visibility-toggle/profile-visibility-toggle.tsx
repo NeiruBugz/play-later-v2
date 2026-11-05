@@ -15,7 +15,7 @@ export function ProfileVisibilityToggle({
         <Label htmlFor={id} className="text-sm">
           Public profile
         </Label>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Allow other users to see your profile and gaming activity
         </p>
       </div>

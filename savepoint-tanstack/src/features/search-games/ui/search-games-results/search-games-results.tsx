@@ -73,7 +73,7 @@ export function SearchGamesResults({
       >
         <Loader2
           aria-hidden="true"
-          className="text-muted-foreground h-6 w-6 animate-spin"
+          className="h-6 w-6 animate-spin text-muted-foreground"
         />
       </div>
     );
@@ -83,10 +83,10 @@ export function SearchGamesResults({
     return (
       <div
         role="alert"
-        className="text-destructive border-destructive/20 bg-destructive/5 rounded-lg border p-6"
+        className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-destructive"
       >
         <p className="font-medium">Search unavailable</p>
-        <p className="text-muted-foreground mt-1.5 text-sm">{errorMessage}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">{errorMessage}</p>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export function SearchGamesResults({
     return (
       <div
         role="status"
-        className="text-muted-foreground border-border/30 bg-muted/30 rounded-lg border p-6 text-center"
+        className="rounded-lg border border-border/30 bg-muted/30 p-6 text-center text-muted-foreground"
       >
         No games found matching &ldquo;{query}&rdquo;. Try a different search
         term.
@@ -108,12 +108,12 @@ export function SearchGamesResults({
 
   return (
     <div aria-live="polite" aria-atomic="false" className="space-y-8">
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {games.length} result{games.length !== 1 ? "s" : ""}
         {ownedCount > 0 ? (
           <>
             {" · "}
-            <span className="text-foreground font-medium">
+            <span className="font-medium text-foreground">
               {ownedCount} in your library
             </span>
           </>
@@ -148,7 +148,7 @@ export function SearchGamesResults({
                     <div
                       role="img"
                       aria-label={`Cover for ${game.name}`}
-                      className="bg-muted aspect-[3/4] w-full overflow-hidden rounded-lg shadow-md"
+                      className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted shadow-md"
                     />
                   )}
                   {game.library !== null ? (
@@ -181,7 +181,7 @@ export function SearchGamesResults({
                 ) : null}
                 <div className="flex h-4 items-center gap-1">
                   {releaseYear !== null && (
-                    <span className="text-muted-foreground text-xs tabular-nums">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {releaseYear}
                     </span>
                   )}

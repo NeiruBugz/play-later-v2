@@ -89,9 +89,9 @@ function SegmentedControlImpl<TValue extends string = string>(
             "[scrollbar-width:none]",
             "[&::-webkit-scrollbar]:hidden",
             "before:pointer-events-none before:absolute before:top-0 before:bottom-0 before:left-0 before:z-10 before:w-6",
-            "before:from-background before:bg-gradient-to-r before:to-transparent",
+            "before:bg-gradient-to-r before:from-background before:to-transparent",
             "after:pointer-events-none after:absolute after:top-0 after:right-0 after:bottom-0 after:z-10 after:w-6",
-            "after:from-background after:bg-gradient-to-l after:to-transparent",
+            "after:bg-gradient-to-l after:from-background after:to-transparent",
           ]
         )}
       >
@@ -99,7 +99,7 @@ function SegmentedControlImpl<TValue extends string = string>(
           activateOnFocus
           aria-label={ariaLabel}
           className={cn(
-            "bg-muted text-muted-foreground inline-flex items-center justify-start rounded-lg",
+            "inline-flex items-center justify-start rounded-lg bg-muted text-muted-foreground",
             sizing.list,
             scrollable && "flex-nowrap"
           )}
@@ -116,7 +116,7 @@ function SegmentedControlImpl<TValue extends string = string>(
                 "text-muted-foreground",
                 "data-[active]:bg-background data-[active]:text-foreground data-[active]:shadow-sm",
                 "hover:text-foreground/80",
-                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                 "disabled:pointer-events-none disabled:opacity-50",
                 sizing.trigger
               )}

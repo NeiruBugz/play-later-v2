@@ -17,10 +17,10 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   return (
-    <div className="dark bg-background text-foreground relative flex min-h-screen flex-col overflow-hidden">
+    <div className="dark relative flex min-h-screen flex-col overflow-hidden bg-background text-foreground">
       <div
         aria-hidden="true"
-        className="bg-primary/20 pointer-events-none absolute -top-32 -left-24 h-[480px] w-[480px] rounded-full blur-3xl"
+        className="pointer-events-none absolute -top-32 -left-24 h-[480px] w-[480px] rounded-full bg-primary/20 blur-3xl"
       />
       <div
         aria-hidden="true"
@@ -39,13 +39,13 @@ function LandingPage() {
             aria-hidden="true"
             className="h-8 w-8 shrink-0"
           />
-          <span className="text-foreground text-base font-semibold tracking-tight">
+          <span className="text-base font-semibold tracking-tight text-foreground">
             SavePoint
           </span>
         </Link>
         <Link
           to="/login"
-          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           Sign in
         </Link>

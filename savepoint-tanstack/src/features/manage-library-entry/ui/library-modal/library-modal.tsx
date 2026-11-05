@@ -101,7 +101,7 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
           </div>
 
           {error !== null ? (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {error}
             </p>
           ) : null}

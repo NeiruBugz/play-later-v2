@@ -93,7 +93,7 @@ export function GameCard({
           {showMeta ? (
             <div className="flex flex-col gap-1.5">
               {(releaseYear ?? null) !== null ? (
-                <span className="text-muted-foreground text-sm">
+                <span className="text-sm text-muted-foreground">
                   {releaseYear}
                 </span>
               ) : null}
@@ -116,7 +116,7 @@ export function GameCard({
       <Link
         to="/games/$slug"
         params={{ slug }}
-        className="focus-visible:ring-primary block rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="block rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
         aria-label={`View ${title}`}
       >
         {card}

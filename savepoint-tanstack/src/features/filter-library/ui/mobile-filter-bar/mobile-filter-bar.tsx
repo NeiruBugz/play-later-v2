@@ -91,14 +91,14 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             <span className="ml-1.5">Filters</span>
             {activeStatusEntry ? (
-              <span className="text-muted-foreground ml-1.5 text-xs">
+              <span className="ml-1.5 text-xs text-muted-foreground">
                 · {activeStatusEntry.label}
               </span>
             ) : null}
             {activeFilterCount > 0 ? (
               <span
                 aria-label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
-                className="bg-primary text-primary-foreground ml-auto rounded-full px-1.5 text-xs tabular-nums"
+                className="ml-auto rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums"
               >
                 {activeFilterCount}
               </span>

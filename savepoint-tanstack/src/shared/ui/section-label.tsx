@@ -16,7 +16,7 @@ export function SectionLabel({
   return (
     <Element
       data-slot="section-label"
-      className={cn("text-muted-foreground text-sm font-medium", className)}
+      className={cn("text-sm font-medium text-muted-foreground", className)}
       {...props}
     />
   );

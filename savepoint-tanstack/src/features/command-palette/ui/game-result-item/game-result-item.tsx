@@ -37,13 +37,13 @@ export function GameResultItem({
         ) : (
           <div
             aria-hidden="true"
-            className="bg-muted h-12 w-9 flex-shrink-0 rounded-sm"
+            className="h-12 w-9 flex-shrink-0 rounded-sm bg-muted"
           />
         )}
         <div className="min-w-0 flex-1 text-left">
           <p className="truncate text-sm font-medium">{name}</p>
           {releaseYear !== null && (
-            <p className="text-muted-foreground text-xs">{releaseYear}</p>
+            <p className="text-xs text-muted-foreground">{releaseYear}</p>
           )}
         </div>
       </Link>

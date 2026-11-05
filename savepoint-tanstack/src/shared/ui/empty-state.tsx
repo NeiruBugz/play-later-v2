@@ -168,7 +168,7 @@ export function EmptyState({
         </h2>
         {description && (
           <p
-            className="text-muted-foreground text-base"
+            className="text-base text-muted-foreground"
             id="empty-state-description"
           >
             {description}

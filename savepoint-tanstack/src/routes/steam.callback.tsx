@@ -65,7 +65,7 @@ function SteamCallbackError({ error }: { error: unknown }) {
       <h2 className="mb-2 text-2xl font-semibold">
         Could not connect Steam account
       </h2>
-      <p className="text-muted-foreground mb-6">{message}</p>
+      <p className="mb-6 text-muted-foreground">{message}</p>
       <a
         href="/settings/account"
         className="text-primary underline-offset-4 hover:underline"

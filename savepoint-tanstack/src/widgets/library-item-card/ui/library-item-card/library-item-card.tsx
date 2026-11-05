@@ -109,7 +109,7 @@ export function LibraryItemCard({
 
         <div
           className={cn(
-            "text-muted-foreground mt-0 flex h-4 items-center gap-1.5 truncate text-[11px] leading-none",
+            "mt-0 flex h-4 items-center gap-1.5 truncate text-[11px] leading-none text-muted-foreground",
             !isRow && "md:mt-1"
           )}
           data-testid="library-item-card-metadata"

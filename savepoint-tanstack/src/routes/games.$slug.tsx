@@ -154,7 +154,7 @@ function SectionErrorMessage({
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
       <SectionLabel id={headingId}>{heading}</SectionLabel>
-      <div role="alert" className="text-destructive text-sm">
+      <div role="alert" className="text-sm text-destructive">
         {message}
       </div>
     </section>

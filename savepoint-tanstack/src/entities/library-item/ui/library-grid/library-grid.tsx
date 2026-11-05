@@ -26,7 +26,7 @@ export function LibraryGrid({ games }: LibraryGridProps) {
               />
             ) : (
               <div
-                className="bg-muted aspect-[3/4] w-full"
+                className="aspect-[3/4] w-full bg-muted"
                 aria-hidden="true"
               />
             )}

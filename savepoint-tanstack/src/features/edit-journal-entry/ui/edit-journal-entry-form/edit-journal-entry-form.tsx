@@ -89,7 +89,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
       ) : null}
 
       {error !== null ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       ) : null}

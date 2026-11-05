@@ -93,8 +93,8 @@ export function StatusLens({
             className={cn(
               "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium whitespace-nowrap transition-colors",
               active
-                ? "bg-primary text-primary-foreground border-transparent"
-                : "bg-card text-foreground border-border hover:bg-muted"
+                ? "border-transparent bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground hover:bg-muted"
             )}
           >
             {chip.dotVariant && !active ? (

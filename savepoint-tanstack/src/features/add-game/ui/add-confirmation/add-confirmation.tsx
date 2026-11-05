@@ -52,7 +52,7 @@ export function AddConfirmation({
       role="status"
       aria-live="polite"
       style={{ pointerEvents: "auto" }}
-      className="bg-background text-foreground border-border flex w-full flex-col gap-1.5 rounded-md border p-2 shadow-lg"
+      className="flex w-full flex-col gap-1.5 rounded-md border border-border bg-background p-2 text-foreground shadow-lg"
     >
       <p className="text-sm">
         {alreadyInLibrary

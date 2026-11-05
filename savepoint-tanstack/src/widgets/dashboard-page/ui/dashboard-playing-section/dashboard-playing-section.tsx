@@ -16,7 +16,7 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
   const alt = `Cover for ${game.title}`;
 
   return (
-    <li className="bg-card flex items-center gap-3 rounded-xl border p-3 shadow-md">
+    <li className="flex items-center gap-3 rounded-xl border bg-card p-3 shadow-md">
       {coverUrl ? (
         <img
           src={coverUrl}
@@ -29,7 +29,7 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
         <div
           role="img"
           aria-label={alt}
-          className="bg-muted aspect-[3/4] w-12 shrink-0 rounded-lg"
+          className="aspect-[3/4] w-12 shrink-0 rounded-lg bg-muted"
         />
       )}
       <div className="min-w-0 flex-1">
@@ -41,7 +41,7 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
           {game.title}
         </Link>
         {item.platform ? (
-          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {item.platform}
           </p>
         ) : null}

@@ -83,17 +83,17 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
       <form onSubmit={handleSubmit} noValidate>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <p className="text-foreground text-sm">Profile Image (Optional)</p>
+            <p className="text-sm text-foreground">Profile Image (Optional)</p>
             <AvatarUpload />
           </div>
           <div className="space-y-2">
             <UsernameInput value={username} onChange={setUsername} />
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
             </p>
           </div>
           {serverError ? (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {serverError}
             </p>
           ) : null}

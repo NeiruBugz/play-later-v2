@@ -119,7 +119,7 @@ export function ImportGameModal({
 
         {showSearch ? (
           <div className="space-y-4 overflow-hidden py-2">
-            <div className="bg-muted/50 rounded-lg p-3 text-sm">
+            <div className="rounded-lg bg-muted/50 p-3 text-sm">
               <p className="text-muted-foreground">
                 We couldn&apos;t auto-match this Steam game. Search and pick the
                 correct entry.
@@ -169,7 +169,7 @@ export function ImportGameModal({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 Smart default: {getStatusLabel(smartStatus)}
               </p>
             </div>

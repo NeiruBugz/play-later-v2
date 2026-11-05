@@ -25,7 +25,7 @@ export function AboutPanel({
       {summary ? (
         <p
           aria-label="Game summary"
-          className="text-foreground/85 max-w-[720px] text-base"
+          className="max-w-[720px] text-base text-foreground/85"
         >
           {summary}
         </p>
@@ -37,7 +37,7 @@ export function AboutPanel({
           <dl className="text-sm">
             {facts.map((fact) => (
               <div key={fact.term} className="flex gap-2">
-                <dt className="text-muted-foreground w-24">{fact.term}</dt>
+                <dt className="w-24 text-muted-foreground">{fact.term}</dt>
                 <dd className="text-foreground">{fact.value}</dd>
               </div>
             ))}

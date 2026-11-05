@@ -35,7 +35,7 @@ export function StatusControl({
           data-status={status}
           className={cn(
             "inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 text-sm font-semibold whitespace-nowrap transition-colors",
-            "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50",
+            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50",
             className
           )}
           style={{

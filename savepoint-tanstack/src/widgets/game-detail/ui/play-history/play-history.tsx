@@ -32,7 +32,7 @@ export function PlayHistory({ plays }: PlayHistoryProps) {
           aria-expanded={open}
           aria-controls="play-history-list"
           onClick={() => setOpen((current) => !current)}
-          className="focus-visible:ring-ring flex items-center gap-2 text-left focus-visible:ring-2 focus-visible:outline-none"
+          className="flex items-center gap-2 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           History
           <ChevronDown

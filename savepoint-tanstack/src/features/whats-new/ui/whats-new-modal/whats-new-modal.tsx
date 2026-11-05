@@ -41,7 +41,7 @@ export function WhatsNewModal() {
           </div>
           <DialogTitle className="flex items-center gap-1.5">
             {primary.icon ? (
-              <primary.icon className="text-primary h-5 w-5" />
+              <primary.icon className="h-5 w-5 text-primary" />
             ) : null}
             {primary.title}
           </DialogTitle>
@@ -55,7 +55,7 @@ export function WhatsNewModal() {
             {announcements.slice(1).map((announcement) => (
               <li
                 key={announcement.id}
-                className="border-border rounded-md border p-2"
+                className="rounded-md border border-border p-2"
               >
                 <div className="mb-1 flex items-center gap-1.5">
                   <Badge variant="secondary">
@@ -63,7 +63,7 @@ export function WhatsNewModal() {
                   </Badge>
                 </div>
                 <p className="text-sm font-semibold">{announcement.title}</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {announcement.description}
                 </p>
               </li>

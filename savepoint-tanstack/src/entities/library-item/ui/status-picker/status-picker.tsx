@@ -81,7 +81,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
             </span>
             <span className="flex-1">{entry.label}</span>
             {checked ? (
-              <Check className="text-primary h-4 w-4" aria-hidden="true" />
+              <Check className="h-4 w-4 text-primary" aria-hidden="true" />
             ) : null}
           </button>
         );

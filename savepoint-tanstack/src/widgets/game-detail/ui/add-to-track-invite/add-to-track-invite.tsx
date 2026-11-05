@@ -19,14 +19,14 @@ export function AddToTrackInvite({
       className="flex flex-col items-start gap-2 p-4"
     >
       <span
-        className="bg-primary/10 flex size-10 items-center justify-center rounded-full"
+        className="flex size-10 items-center justify-center rounded-full bg-primary/10"
         aria-hidden="true"
       >
-        <BookOpen className="text-primary h-5 w-5" />
+        <BookOpen className="h-5 w-5 text-primary" />
       </span>
       <div className="flex flex-col">
         <SectionLabel id="track-invite-heading">Add {gameTitle}</SectionLabel>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {isSignedIn
             ? "Add this to your library to log time, rate it, and keep notes."
             : "Sign in and add this to your library to log time, rate it, and keep notes."}

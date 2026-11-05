@@ -29,19 +29,19 @@ export function EmptyLibraryHero({
         aria-hidden="true"
         className={cn(
           "relative flex h-24 w-24 items-center justify-center rounded-2xl",
-          "from-primary/15 via-primary/5 bg-gradient-to-br to-transparent",
-          "border-primary/20 border"
+          "bg-gradient-to-br from-primary/15 via-primary/5 to-transparent",
+          "border border-primary/20"
         )}
       >
-        <Library className="text-primary/80 h-10 w-10" />
-        <Sparkles className="text-primary absolute -top-2 -right-2 h-5 w-5" />
+        <Library className="h-10 w-10 text-primary/80" />
+        <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-primary" />
       </div>
 
       <div className="max-w-md space-y-1.5">
         <h2 className="text-xl font-semibold tracking-tight">
           Start your library
         </h2>
-        <p className="text-muted-foreground text-base">
+        <p className="text-base text-muted-foreground">
           Track what you&apos;re playing, what you&apos;ve finished, and
           what&apos;s next.
         </p>

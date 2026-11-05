@@ -46,7 +46,7 @@ export function ScreenshotsPanel({
             type="button"
             aria-label={`Open screenshot ${i + 1}`}
             onClick={() => setActiveIndex(i)}
-            className="ring-offset-background focus-visible:ring-ring w-48 shrink-0 overflow-hidden rounded-md leading-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:w-auto"
+            className="w-48 shrink-0 overflow-hidden rounded-md leading-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:w-auto"
           >
             <img
               src={image.thumb}

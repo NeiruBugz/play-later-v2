@@ -119,7 +119,7 @@ export function DoneFollowUp({
         </div>
 
         {errorMessage !== null ? (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             {errorMessage}
           </p>
         ) : null}

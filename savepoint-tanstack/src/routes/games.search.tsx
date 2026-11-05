@@ -31,7 +31,7 @@ function GameSearchRoute() {
           {query.length === 0 ? (
             <p
               role="status"
-              className="text-muted-foreground border-border/30 bg-muted/30 rounded-lg border p-6 text-center"
+              className="rounded-lg border border-border/30 bg-muted/30 p-6 text-center text-muted-foreground"
             >
               Start typing to search for games...
             </p>

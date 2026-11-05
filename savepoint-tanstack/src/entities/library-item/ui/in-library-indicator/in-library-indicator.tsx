@@ -8,7 +8,7 @@ export function InLibraryIndicator({
 }: InLibraryIndicatorProps) {
   return (
     <span className="inline-flex flex-wrap items-center justify-end gap-1">
-      <span className="text-muted-foreground text-xs whitespace-nowrap">
+      <span className="text-xs whitespace-nowrap text-muted-foreground">
         In library
       </span>
       <LibraryStatusBadge status={status} />
