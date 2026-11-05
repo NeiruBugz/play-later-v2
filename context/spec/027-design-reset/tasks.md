@@ -153,7 +153,7 @@ Conventions for every slice:
     - Where one element ends up with two conflicting spacing classes (a `Card` variant plus a call-site override; see the Slice 7 accepted deviation), keep one stock value on purpose. Release 1 showed the variant's value (e.g. `p-2xl`, 24px), not the call site's.
     - Run it on `src/shared` and `src/entities`, then run the gate. **[Agent: react-frontend]**
   - [x] Run the codemod on `src/features`, then on `src/widgets` and `src/routes`, running the gate after each layer. Grep for retired names left in template literals and fix them by hand. Fix bare `rounded` and arbitrary radius values per file. **[Agent: react-frontend]**
-  - [ ] Add `SectionLabel` (body font, sentence case) to `shared/ui`. Replace `terminal-label`, the local `TerminalLabel` clone and every `// LABEL` string with it. Make `PageHeader` the only page-title style, on every screen in §2.0. Remove `font-serif` from the profile name. Replace the last `text-foreground-body` (`journal-stats-rail.tsx`) with a stock color and delete `--foreground-body` (task 8.1 kept it because that file still reads it). **[Agent: react-frontend]**
+  - [x] Add `SectionLabel` (body font, sentence case) to `shared/ui`. Replace `terminal-label`, the local `TerminalLabel` clone and every `// LABEL` string with it. Make `PageHeader` the only page-title style, on every screen in §2.0. Remove `font-serif` from the profile name. Replace the last `text-foreground-body` (`journal-stats-rail.tsx`) with a stock color and delete `--foreground-body` (task 8.1 kept it because that file still reads it). **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, assert on every screen that:
