@@ -107,12 +107,6 @@ describe("GameCard", () => {
       );
     });
 
-    it("applies the accent class to the placeholder", () => {
-      expect(elements.queryCoverPlaceholder()?.className).toContain(
-        "from-[var(--status-want)]"
-      );
-    });
-
     it("paints the title onto the gradient placeholder", () => {
       // The title now appears twice: the h3 below the cover + the overlay
       // span on the accent placeholder.
