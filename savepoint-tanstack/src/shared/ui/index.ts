@@ -21,6 +21,7 @@ export type {
   SegmentedControlSize,
 } from "./segmented-control";
 export { Separator } from "./separator";
+export { Skeleton } from "./skeleton";
 export { Textarea } from "./textarea";
 export { showUndoToast, UndoToastBody } from "./undo-toast";
 export type { ShowUndoToastOptions, UndoToastBodyProps } from "./undo-toast";

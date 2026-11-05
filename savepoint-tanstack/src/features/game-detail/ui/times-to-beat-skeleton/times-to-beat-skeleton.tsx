@@ -1,3 +1,5 @@
+import { Skeleton } from "@/shared/ui/skeleton";
+
 /**
  * Suspense fallback for `TimesToBeatSection`. Two shimmer rows with the
  * same vertical rhythm so the section header doesn't reflow on resolution.
@@ -12,12 +14,12 @@ export function TimesToBeatSkeleton() {
       <h2 id="times-to-beat-heading-skeleton" className="text-h3">
         Times to beat
       </h2>
-      <dl className="grid grid-cols-2 gap-2 text-sm">
-        <dt className="bg-muted h-4 w-24 animate-pulse rounded" />
-        <dd className="bg-muted h-4 w-16 animate-pulse rounded" />
-        <dt className="bg-muted h-4 w-28 animate-pulse rounded" />
-        <dd className="bg-muted h-4 w-16 animate-pulse rounded" />
-      </dl>
+      <div className="grid grid-cols-2 gap-2">
+        <Skeleton className="h-4 w-24 rounded-md" />
+        <Skeleton className="h-4 w-16 rounded-md" />
+        <Skeleton className="h-4 w-28 rounded-md" />
+        <Skeleton className="h-4 w-16 rounded-md" />
+      </div>
     </section>
   );
 }

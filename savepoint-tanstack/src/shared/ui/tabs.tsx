@@ -1,67 +1,80 @@
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
-import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/shared/lib/utils";
 
-const Tabs = TabsPrimitive.Root;
+function Tabs({
+  className,
+  orientation = "horizontal",
+  ...props
+}: TabsPrimitive.Root.Props) {
+  return (
+    <TabsPrimitive.Root
+      data-slot="tabs"
+      data-orientation={orientation}
+      className={cn(
+        "group/tabs flex gap-2 data-horizontal:flex-col",
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+const tabsListVariants = cva(
+  "group/tabs-list inline-flex w-fit items-center justify-center rounded-4xl p-[3px] text-muted-foreground group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col group-data-vertical/tabs:rounded-2xl data-[variant=line]:rounded-none",
+  {
+    variants: {
+      variant: {
+        default: "bg-muted",
+        line: "gap-1 bg-transparent",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 
 function TabsList({
   className,
-  activateOnFocus = true,
+  variant = "default",
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
-      activateOnFocus={activateOnFocus}
-      className={cn(
-        "text-muted-foreground gap-xl relative inline-flex items-center",
-        "before:bg-border before:absolute before:right-0 before:bottom-0 before:left-0 before:h-px",
-        className
-      )}
+      data-slot="tabs-list"
+      data-variant={variant}
+      className={cn(tabsListVariants({ variant }), className)}
       {...props}
     />
   );
 }
-TabsList.displayName = "TabsList";
 
-function TabsTrigger({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Tab>) {
+function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
     <TabsPrimitive.Tab
+      data-slot="tabs-trigger"
       className={cn(
-        "group pb-lg relative cursor-pointer text-sm font-normal whitespace-nowrap transition-colors",
-        "text-muted-foreground hover:text-foreground/80",
-        "data-[active]:text-foreground data-[active]:font-medium",
-        "after:absolute after:right-0 after:bottom-0 after:left-0 after:h-[2px]",
-        "after:bg-primary after:origin-left after:scale-x-0 after:transition-transform after:duration-200 after:ease-out",
-        "hover:after:bg-border hover:after:scale-x-100",
-        "data-[active]:after:bg-primary data-[active]:after:scale-x-100",
-        "focus-visible:ring-ring focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-        "disabled:pointer-events-none disabled:opacity-50",
+        "text-foreground/60 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring focus-visible:outline-ring dark:text-muted-foreground dark:hover:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start group-data-vertical/tabs:px-2.5 group-data-vertical/tabs:py-1.5 focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
+        "data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground",
+        "after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
         className
       )}
       {...props}
     />
   );
 }
-TabsTrigger.displayName = "TabsTrigger";
 
-function TabsContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Panel>) {
+function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
     <TabsPrimitive.Panel
-      className={cn(
-        "ring-offset-background focus-visible:ring-ring mt-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-        className
-      )}
+      data-slot="tabs-content"
+      className={cn("flex-1 text-sm outline-none", className)}
       {...props}
     />
   );
 }
-TabsContent.displayName = "TabsContent";
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants };

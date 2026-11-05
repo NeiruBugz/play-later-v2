@@ -19,9 +19,9 @@ const emptyStateVariants = cva(
   {
     variants: {
       spacing: {
-        compact: "gap-lg px-lg py-3xl",
-        comfortable: "gap-xl px-lg py-4xl",
-        spacious: "gap-2xl px-lg py-5xl",
+        compact: "gap-3 px-3 py-8",
+        comfortable: "gap-4 px-3 py-12",
+        spacious: "gap-6 px-3 py-24",
       },
     },
     defaultVariants: {
@@ -159,13 +159,16 @@ export function EmptyState({
         </div>
       )}
 
-      <div className={cn("gap-md flex flex-col", maxWidthClasses[maxWidth])}>
-        <h2 className="heading-lg" id="empty-state-title">
+      <div className={cn("flex flex-col gap-2", maxWidthClasses[maxWidth])}>
+        <h2
+          className="text-xl font-semibold tracking-tight"
+          id="empty-state-title"
+        >
           {title}
         </h2>
         {description && (
           <p
-            className="body-md text-muted-foreground"
+            className="text-muted-foreground text-base"
             id="empty-state-description"
           >
             {description}
@@ -175,7 +178,7 @@ export function EmptyState({
 
       {action && (
         <div
-          className="gap-sm mt-md flex flex-wrap items-center justify-center"
+          className="mt-2 flex flex-wrap items-center justify-center gap-1.5"
           role="group"
           aria-labelledby="empty-state-title"
         >

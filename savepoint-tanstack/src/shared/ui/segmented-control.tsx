@@ -46,12 +46,12 @@ const sizeStyles: Record<
   { list: string; trigger: string }
 > = {
   sm: {
-    list: "h-8 gap-0.5 p-0.5",
-    trigger: "px-2.5 py-0.5 text-xs",
+    list: "h-11 gap-0.5 p-0.5 md:h-8",
+    trigger: "h-full px-3 text-xs md:px-2.5",
   },
   md: {
-    list: "h-9 gap-1 p-1",
-    trigger: "px-3 py-1 text-sm",
+    list: "h-11 gap-1 p-1 md:h-9",
+    trigger: "h-full px-3 text-sm",
   },
 };
 
@@ -111,12 +111,12 @@ function SegmentedControlImpl<TValue extends string = string>(
               disabled={option.disabled}
               aria-label={option.ariaLabel}
               className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap transition-all",
+                "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap transition-colors",
                 "[scroll-snap-align:start]",
                 "text-muted-foreground",
                 "data-[active]:bg-background data-[active]:text-foreground data-[active]:shadow-sm",
                 "hover:text-foreground/80",
-                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
                 "disabled:pointer-events-none disabled:opacity-50",
                 sizing.trigger
               )}

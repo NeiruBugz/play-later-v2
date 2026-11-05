@@ -52,7 +52,7 @@
   --border: oklch(0.86 0.018 82);
   --input: oklch(0.86 0.018 82);
   --ring: var(--primary);
-  --radius: 0.1875rem;
+  --radius: 0.625rem;
   --radius-cover: 0.625rem;
   --radius-btn: 0.1875rem;
   /* Custom font sizes with line-height and letter-spacing */
@@ -229,10 +229,13 @@
   --color-status-done: var(--status-done);
   --color-status-done-foreground: var(--status-done-foreground);
   /* Border radius */
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @keyframes navigation-progress {

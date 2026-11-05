@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { keepOpenOnToastPress } from "@/shared/lib/keep-open-on-toast-press";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
+import { cn } from "@/shared/lib/utils";
 
 import {
   Dialog,
@@ -72,7 +73,10 @@ export function ResponsiveModal({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
-        className={contentClassName}
+        className={cn(
+          "pb-[max(1rem,env(safe-area-inset-bottom))]",
+          contentClassName
+        )}
         data-testid={sheetTestId}
       >
         <SheetHeader>

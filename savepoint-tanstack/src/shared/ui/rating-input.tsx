@@ -204,7 +204,7 @@ export function RatingInput({
         "inline-flex items-center",
         gapClasses[size],
         interactive &&
-          "focus:ring-ring cursor-pointer rounded-sm focus:ring-2 focus:outline-none",
+          "focus-visible:ring-ring cursor-pointer rounded-sm focus-visible:ring-2 focus-visible:outline-none",
         className
       )}
     >
@@ -220,7 +220,14 @@ export function RatingInput({
             }
           : {};
         return (
-          <span key={starIndex} {...starProps} className="inline-block">
+          <span
+            key={starIndex}
+            {...starProps}
+            className={cn(
+              "inline-flex items-center justify-center",
+              interactive && "min-h-11 min-w-11 md:min-h-0 md:min-w-0"
+            )}
+          >
             <RatingStar
               fill={getStarFill(starIndex, displayValue)}
               sizeClass={sizeClass}

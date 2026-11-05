@@ -1,28 +1,23 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { X } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/shared/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border px-xl py-lg text-sm transition-all duration-normal",
+  "group/alert relative grid w-full gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-card border-border text-foreground",
-        // `destructive` and `error` are aliases for the same visual treatment.
-        // Canonical (`savepoint-app`) uses `destructive`; the tanstack rewrite
-        // exposes `error` as the public name while keeping `destructive` for
-        // parity with existing call-sites.
+        default: "bg-card text-card-foreground",
         destructive:
-          "bg-destructive/10 border-destructive/30 text-destructive [&>svg]:text-destructive",
+          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
         error:
-          "alert-error bg-destructive/10 border-destructive/30 text-destructive [&>svg]:text-destructive",
+          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
         success:
-          "bg-success/10 border-success/30 text-success [&>svg]:text-success",
+          "bg-card text-success *:data-[slot=alert-description]:text-success/90 *:[svg]:text-current",
         warning:
-          "bg-warning/10 border-warning/30 text-warning [&>svg]:text-warning",
-        info: "bg-info/10 border-info/30 text-info [&>svg]:text-info",
+          "bg-card text-warning *:data-[slot=alert-description]:text-warning/90 *:[svg]:text-current",
+        info: "bg-card text-info *:data-[slot=alert-description]:text-info/90 *:[svg]:text-current",
       },
     },
     defaultVariants: {
@@ -31,78 +26,59 @@ const alertVariants = cva(
   }
 );
 
-export interface AlertProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {
-  dismissible?: boolean;
-  onDismiss?: () => void;
+type AlertProps = React.ComponentProps<"div"> &
+  VariantProps<typeof alertVariants>;
+
+function Alert({ className, variant, ...props }: AlertProps) {
+  return (
+    <div
+      data-slot="alert"
+      data-variant={variant ?? "default"}
+      role="alert"
+      className={cn(alertVariants({ variant }), className)}
+      {...props}
+    />
+  );
 }
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  (
-    { className, variant, dismissible = false, onDismiss, children, ...props },
-    ref
-  ) => {
-    const [isDismissed, setIsDismissed] = React.useState(false);
+function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-title"
+      className={cn(
+        "[&_a]:hover:text-foreground font-medium group-has-[>svg]/alert:col-start-2 [&_a]:underline [&_a]:underline-offset-3",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
-    const handleDismiss = () => {
-      setIsDismissed(true);
-      onDismiss?.();
-    };
+function AlertDescription({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-description"
+      className={cn(
+        "text-muted-foreground [&_a]:hover:text-foreground text-sm text-balance md:text-pretty [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
-    if (isDismissed) {
-      return null;
-    }
+function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-action"
+      className={cn("absolute top-2.5 right-3", className)}
+      {...props}
+    />
+  );
+}
 
-    return (
-      <div
-        ref={ref}
-        role="alert"
-        className={cn(alertVariants({ variant }), className)}
-        {...props}
-      >
-        <div className="gap-lg flex items-start">
-          {children}
-          {dismissible && (
-            <button
-              type="button"
-              onClick={handleDismiss}
-              className="ml-auto shrink-0 opacity-70 transition-opacity hover:opacity-100"
-              aria-label="Close alert"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
-);
-Alert.displayName = "Alert";
-
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-xs leading-none font-medium tracking-tight", className)}
-    {...props}
-  />
-));
-AlertTitle.displayName = "AlertTitle";
-
-const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props}
-  />
-));
-AlertDescription.displayName = "AlertDescription";
-
-export { Alert, AlertDescription, AlertTitle };
+export { Alert, AlertTitle, AlertDescription, AlertAction };
+export type { AlertProps };
