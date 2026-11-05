@@ -130,6 +130,11 @@ Conventions for every slice:
     - Restyle the non-shadcn primitives to stock tokens: empty-state, page-header, rating-input, segmented-control, responsive-modal, undo-toast, image-lightbox.
     - Add a stock `Skeleton` and replace the 11 ad hoc `animate-pulse` uses. **[Agent: react-frontend]**
   - [x] Rewrite the class-asserting tests as behaviour tests: `badge`, `alert`, `library-item-card:221,255`, `platform-badges:63`, `library-status-badge:61-69`, `game-card:98-106`. Drop the retired theme names from `theme-provider.test.tsx`. **[Agent: testing]**
+  - [x] Fix what the first Slice 8 verify found:
+    - Tabs: stock `tabs.tsx` (and `separator.tsx`) key their layout off `data-horizontal`/`data-vertical`, but Base UI emits `data-orientation`, so the related-games tablist renders as a tall column. Make the orientation styles match what Base UI emits.
+    - Sheets: stock `SheetContent` has no body padding, so the Add game and Log time sheets are edge to edge on phone. Restore the side inset.
+    - 44px on phone (owner, 2026-11-05: everything at 44px, per §2.6): `Input` `h-11 md:h-9`, Button `sm` `h-11 md:h-8`, and drop the `h-8 w-8` override on the game page "More library actions" icon button. Update the deviation table in `src/shared/ui/README.md` and tech spec §2.4.
+    Cover the tabs and sheet fixes with behaviour tests. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). At desktop width, confirm all of the following:
