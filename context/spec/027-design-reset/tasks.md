@@ -189,7 +189,7 @@ Conventions for every slice:
 
 - [ ] **Slice 11: Phone screens respect the notch, the home indicator and the keyboard**
   - [x] Change the viewport meta in `routes/__root.tsx` `head()` to `width=device-width, initial-scale=1, viewport-fit=cover`. No `maximum-scale` or `user-scalable`. Add a unit test for the `head()` viewport string. **[Agent: tanstack-fullstack]**
-  - [ ] Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` using `env(safe-area-inset-*)`. Apply them to the mobile top bar, the game-detail action bar, the navigation progress bar and the sheet.
+  - [x] Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` using `env(safe-area-inset-*)`. Apply them to the mobile top bar, the game-detail action bar, the navigation progress bar and the sheet.
     - `SheetContent`: switch to `max-h-[90dvh]`; the scroll area becomes `flex-1 overflow-y-auto`; add a sticky `SheetFooter` with `pb-safe`.
     - Phone `Toaster`: `mobileOffset` above `--bottom-nav-height`. **[Agent: react-frontend]**
   - [ ] Add a `StickyFooter` primitive: pinned at the bottom with `pb-safe` on phone, inline from `md` up.
