@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { PlatformBadges } from "./platform-badges";
@@ -6,9 +7,18 @@ import { PlatformBadges } from "./platform-badges";
 const elements = {
   queryChip: (label: string) => screen.queryByText(label),
   queryOverflowChip: () => screen.queryByText(/^\+\d+$/),
+  getChipButton: (label: string) => screen.getByRole("button", { name: label }),
+  queryChipButton: (label: string) =>
+    screen.queryByRole("button", { name: label }),
+  findText: (text: string) => screen.findByText(text),
   getChipStyle: (label: string) =>
     // eslint-disable-next-line testing-library/no-node-access
     screen.getByText(label).closest("[data-variant]")?.className,
+};
+
+const actions = {
+  tapChip: async (label: string) =>
+    userEvent.click(elements.getChipButton(label)),
 };
 
 describe("PlatformBadges", () => {
@@ -103,6 +113,49 @@ describe("PlatformBadges", () => {
 
     it("collapses the overflow into a single chip showing the remaining count", () => {
       expect(elements.queryOverflowChip()?.textContent).toBe("+2");
+    });
+  });
+
+  describe("given an abbreviated platform badge", () => {
+    beforeEach(async () => {
+      render(<PlatformBadges platforms={["PlayStation 5"]} />);
+      await actions.tapChip("PS5");
+    });
+
+    it("shows the full platform name after tapping the badge", async () => {
+      expect(await elements.findText("PlayStation 5")).toBeVisible();
+    });
+  });
+
+  describe("given a badge whose label already is the full name", () => {
+    beforeEach(() => {
+      render(<PlatformBadges platforms={["Atari Jaguar"]} />);
+    });
+
+    it("offers nothing to tap", () => {
+      expect(elements.queryChipButton("Atari Jaguar")).toBeNull();
+    });
+  });
+
+  describe("given more than four platforms and the overflow chip is tapped", () => {
+    beforeEach(async () => {
+      render(
+        <PlatformBadges
+          platforms={[
+            "Xbox Series X|S",
+            "PlayStation 4",
+            "PC (Microsoft Windows)",
+            "PlayStation 5",
+            "Nintendo Switch",
+            "Linux",
+          ]}
+        />
+      );
+      await actions.tapChip("+2");
+    });
+
+    it("lists the hidden platform names", async () => {
+      expect(await elements.findText("Nintendo Switch, Linux")).toBeVisible();
     });
   });
 });
