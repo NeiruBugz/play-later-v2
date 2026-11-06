@@ -15,7 +15,7 @@ export function GameDetailJumpSpine({ sections }: GameDetailJumpSpineProps) {
       data-testid="game-detail-jump-spine"
       className={cn(
         "sticky top-0 z-20 -mx-6 overflow-x-auto",
-        "bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur-sm",
+        "bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80",
         "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         "border-b"
       )}
@@ -26,7 +26,7 @@ export function GameDetailJumpSpine({ sections }: GameDetailJumpSpineProps) {
             key={id}
             type="button"
             onClick={() => scrollTo(id)}
-            className="text-muted-foreground hover:text-foreground rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+            className="min-h-11 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
           >
             {label}
           </button>

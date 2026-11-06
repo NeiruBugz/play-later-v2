@@ -14,7 +14,6 @@ import { useUpNextMembership } from "@/features/up-next/model/use-up-next-member
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { cn } from "@/shared/lib/utils";
 import { RatingInput } from "@/shared/ui/rating-input";
-import { TooltipProvider } from "@/shared/ui/tooltip";
 import { GameCard } from "@/widgets/game-card";
 
 import type { LibraryItemCardProps } from "./library-item-card.type";
@@ -109,16 +108,12 @@ export function LibraryItemCard({
 
         <div
           className={cn(
-            "text-muted-foreground mt-0 flex h-4 items-center gap-1.5 truncate text-[11px] leading-none",
+            "mt-0 flex h-4 items-center gap-1.5 text-xs leading-none text-muted-foreground",
             !isRow && "md:mt-1"
           )}
           data-testid="library-item-card-metadata"
         >
-          {hasPlatform ? (
-            <TooltipProvider>
-              <PlatformBadgeItem name={item.platform!} />
-            </TooltipProvider>
-          ) : null}
+          {hasPlatform ? <PlatformBadgeItem name={item.platform!} /> : null}
         </div>
 
         <div

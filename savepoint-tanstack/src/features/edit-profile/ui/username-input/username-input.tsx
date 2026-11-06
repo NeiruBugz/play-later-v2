@@ -18,7 +18,7 @@ export function UsernameInput({
   );
 
   return (
-    <div className="space-y-md">
+    <div className="space-y-2">
       <Label htmlFor={id}>Username</Label>
       <div className="relative">
         <Input
@@ -33,31 +33,31 @@ export function UsernameInput({
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
           {validationStatus === "validating" && (
             <Loader2
-              className="text-muted-foreground h-4 w-4 animate-spin"
+              className="h-4 w-4 animate-spin text-muted-foreground"
               aria-label="Validating username"
             />
           )}
           {validationStatus === "available" && (
             <Check
-              className="text-success h-4 w-4"
+              className="h-4 w-4 text-success"
               aria-label="Username available"
             />
           )}
           {validationStatus === "error" && (
             <X
-              className="text-destructive h-4 w-4"
+              className="h-4 w-4 text-destructive"
               aria-label="Username error"
             />
           )}
         </div>
       </div>
       {validationStatus === "error" && (
-        <p className="text-destructive text-sm" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {validationMessage}
         </p>
       )}
       {validationStatus === "available" && (
-        <p className="text-success text-sm" role="status">
+        <p className="text-sm text-success" role="status">
           {validationMessage}
         </p>
       )}

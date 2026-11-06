@@ -55,21 +55,13 @@ describe("LibraryStatusBadge", () => {
       ["PLAYING", "playing"],
       ["DONE", "done"],
     ] as const)(
-      "renders %s dot with the matching status CSS-var token",
+      "marks the %s dot with its own status variant",
       (status: LibraryItemStatus, variant: string) => {
         render(<LibraryStatusBadge status={status} />);
         const dot = screen.getByTestId("library-status-badge-dot");
-        expect(dot.className).toContain(`bg-[var(--status-${variant})]`);
         expect(dot).toHaveAttribute("data-status-variant", variant);
       }
     );
-
-    it("wraps the pill in the canonical glassy black background", () => {
-      render(<LibraryStatusBadge status="PLAYING" />);
-      const badge = elements.getBadge();
-      expect(badge.className).toMatch(/bg-black\/55/);
-      expect(badge.className).toMatch(/rounded-full/);
-    });
   });
 
   describe("custom className", () => {

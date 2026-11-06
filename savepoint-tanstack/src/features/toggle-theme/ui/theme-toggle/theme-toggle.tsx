@@ -62,7 +62,7 @@ export function ThemeToggle() {
               onClick={() => setTheme(value)}
               className={
                 active
-                  ? "bg-accent text-accent-foreground font-medium"
+                  ? "bg-accent font-medium text-accent-foreground"
                   : "text-muted-foreground"
               }
             >

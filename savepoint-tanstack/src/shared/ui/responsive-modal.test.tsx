@@ -84,3 +84,18 @@ describe.each([
     });
   });
 });
+
+describe("ResponsiveModal as a sheet with body content", () => {
+  beforeEach(async () => {
+    mocks.isDesktop = false;
+    render(<Harness />);
+    await actions.open();
+    await elements.findDialog();
+  });
+
+  // jsdom computes no layout, so the inset is asserted as the class the popup
+  // carries; real layout is verified in the browser.
+  it("insets the body from the left and right edges", () => {
+    expect(elements.queryDialog()).toHaveClass("px-6");
+  });
+});

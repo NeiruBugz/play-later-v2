@@ -4,6 +4,7 @@ import { EditJournalEntryForm } from "@/features/edit-journal-entry";
 import { getJournalEntryPageDataFn } from "@/features/journal-timeline";
 import { AppError } from "@/shared/lib/errors";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 
 /**
  * `/journal/$id/edit` — full-page edit form (Slice 23 page restore).
@@ -36,7 +37,7 @@ function EditJournalEntryRoute() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-h1 mb-xl">Edit note</h1>
+        <PageHeader title="Edit note" className="mb-4" />
         <EditJournalEntryForm
           entry={{
             id: entry.id,
@@ -54,9 +55,9 @@ function EditJournalEntryErrorBoundary() {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Something went wrong</h1>
+      <PageHeader title="Something went wrong" className="mb-0" />
       <p>An error occurred while loading this note. Please try again.</p>
       <Link to="/journal" className={buttonVariants({ variant: "outline" })}>
         Back to journal
@@ -69,9 +70,9 @@ function JournalEntryNotFound() {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Note not found</h1>
+      <PageHeader title="Note not found" className="mb-0" />
       <p>We couldn't find a note matching this URL.</p>
       <Link to="/journal" className={buttonVariants({ variant: "outline" })}>
         Back to journal

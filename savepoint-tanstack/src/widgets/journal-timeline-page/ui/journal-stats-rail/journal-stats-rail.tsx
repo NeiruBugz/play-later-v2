@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { openGlobalAction } from "@/shared/lib/global-action";
 import { Button } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 /**
  * Desktop-only stats rail for the journal page.
@@ -18,14 +19,14 @@ export function JournalStatsRail() {
   return (
     <aside aria-label="Log tonight" className="flex flex-col gap-4">
       <div
-        className="border-primary/22 bg-card rounded-xl border p-[18px]"
+        className="rounded-xl border border-primary/22 bg-card p-[18px]"
         style={{
           background: "color-mix(in oklch, var(--primary) 6%, var(--card))",
           borderColor: "color-mix(in oklch, var(--primary) 22%, transparent)",
         }}
       >
-        <div className="terminal-label mb-2">// LOG TONIGHT</div>
-        <p className="text-foreground-body mb-4 text-sm leading-relaxed">
+        <SectionLabel className="mb-2">Log tonight</SectionLabel>
+        <p className="mb-4 text-sm leading-relaxed text-foreground">
           Time played is enough — a note is optional.
         </p>
         <Button

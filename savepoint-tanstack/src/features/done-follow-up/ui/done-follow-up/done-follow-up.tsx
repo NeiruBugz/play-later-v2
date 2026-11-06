@@ -74,14 +74,14 @@ export function DoneFollowUp({
       title={`${gameTitle} is done`}
       description="All optional."
     >
-      <div className="gap-lg flex flex-col">
-        <fieldset className="gap-sm flex flex-col">
+      <div className="flex flex-col gap-3">
+        <fieldset className="flex flex-col gap-1.5">
           <legend className="text-sm font-medium">How did it end?</legend>
-          <div className="gap-lg flex">
+          <div className="flex gap-3">
             {OUTCOME_OPTIONS.map((option) => (
               <label
                 key={option.value}
-                className="gap-sm flex items-center text-sm"
+                className="flex items-center gap-1.5 text-sm"
               >
                 <input
                   type="radio"
@@ -96,7 +96,7 @@ export function DoneFollowUp({
           </div>
         </fieldset>
 
-        <div className="gap-sm flex flex-col">
+        <div className="flex flex-col gap-1.5">
           <span className="text-sm font-medium">Rating</span>
           <RatingInput
             value={rating}
@@ -107,7 +107,7 @@ export function DoneFollowUp({
           />
         </div>
 
-        <div className="gap-sm flex flex-col">
+        <div className="flex flex-col gap-1.5">
           <label htmlFor="done-stayed" className="text-sm font-medium">
             What stayed with you?
           </label>
@@ -119,12 +119,12 @@ export function DoneFollowUp({
         </div>
 
         {errorMessage !== null ? (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             {errorMessage}
           </p>
         ) : null}
 
-        <div className="gap-sm flex justify-end">
+        <div className="flex justify-end gap-1.5">
           <Button
             type="button"
             variant="ghost"

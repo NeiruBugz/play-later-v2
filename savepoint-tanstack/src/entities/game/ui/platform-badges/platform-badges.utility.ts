@@ -3,15 +3,6 @@ import { BsNintendoSwitch, BsXbox } from "react-icons/bs";
 import { SiApple, SiLinux, SiPlaystation, SiSteam } from "react-icons/si";
 import { TbBrandWindows, TbDeviceGamepad2 } from "react-icons/tb";
 
-import type { BadgeProps } from "@/shared/ui/badge";
-
-export type PlatformFamily =
-  | "playstation"
-  | "xbox"
-  | "nintendo"
-  | "pc"
-  | "other";
-
 const isPlaystation = (lowerName: string): boolean =>
   lowerName.includes("playstation") ||
   lowerName.includes("vita") ||
@@ -59,19 +50,8 @@ const MOBILE_KEYWORDS = ["windows phone", "windows mobile", "ios", "android"];
 const isMobile = (lowerName: string): boolean =>
   MOBILE_KEYWORDS.some((keyword) => lowerName.includes(keyword));
 
-const isPc = (lowerName: string): boolean =>
-  lowerName.includes("windows") ||
-  lowerName.includes("mac") ||
-  lowerName.includes("macos") ||
-  lowerName.includes("linux") ||
-  lowerName.includes("steam") ||
-  lowerName.includes("dos") ||
-  /\bpc\b/.test(lowerName);
-
 // Mirrors savepoint-app `shared/lib/platform/get-platform-icon.tsx` so the
 // game-detail platform row renders identical brand glyphs across both apps.
-// Keyword cascade is shared with `getPlatformFamily` so a badge's glyph and
-// brand color always agree.
 export function getPlatformIcon(platformName: string): IconType {
   const lowerName = platformName.toLowerCase();
   if (isPlaystation(lowerName)) {
@@ -102,35 +82,6 @@ export function getPlatformIcon(platformName: string): IconType {
     return TbDeviceGamepad2;
   }
   return TbDeviceGamepad2;
-}
-
-// Maps an IGDB platform name to its brand family. The cascade order and
-// keywords mirror `getPlatformIcon`; mobile is checked before pc so
-// "Windows Phone" classifies as `other`, not pc.
-export function getPlatformFamily(platformName: string): PlatformFamily {
-  const lowerName = platformName.toLowerCase();
-  if (isPlaystation(lowerName)) {
-    return "playstation";
-  }
-  if (isXbox(lowerName)) {
-    return "xbox";
-  }
-  if (isNintendo(lowerName)) {
-    return "nintendo";
-  }
-  if (isMobile(lowerName)) {
-    return "other";
-  }
-  if (isPc(lowerName)) {
-    return "pc";
-  }
-  return "other";
-}
-
-type BadgeVariant = NonNullable<BadgeProps["variant"]>;
-
-export function getPlatformBadgeVariant(family: PlatformFamily): BadgeVariant {
-  return family === "other" ? "subtle" : family;
 }
 
 // Mirrors savepoint-app `shared/components/platform-badges.tsx`

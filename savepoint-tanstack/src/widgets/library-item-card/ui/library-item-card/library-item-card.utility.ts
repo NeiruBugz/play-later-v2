@@ -7,9 +7,9 @@ import {
 type LibraryItemStatus = LibraryItemWithGame["status"];
 
 const COVER_ACCENT_GRADIENT: Record<StatusBadgeVariant, string> = {
-  want: "bg-gradient-to-br from-[var(--status-want)] to-background",
-  playing: "bg-gradient-to-br from-[var(--status-playing)] to-background",
-  done: "bg-gradient-to-br from-[var(--status-done)] to-background",
+  want: "bg-gradient-to-br from-[var(--status-want)] to-scrim",
+  playing: "bg-gradient-to-br from-[var(--status-playing)] to-scrim",
+  done: "bg-gradient-to-br from-[var(--status-done)] to-scrim",
 };
 
 export function getStatusCoverAccent(status: LibraryItemStatus): string {

@@ -89,7 +89,7 @@ export function IgdbManualSearch({
     <div className="flex flex-col gap-4">
       <div className="relative">
         <Search
-          className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+          className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
         />
         <Input
@@ -97,7 +97,7 @@ export function IgdbManualSearch({
           placeholder="Search for the correct game…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10"
+          className="pl-8"
           disabled={isLoading}
           aria-label="Game search query"
         />
@@ -105,7 +105,7 @@ export function IgdbManualSearch({
 
       {isSearching ? (
         <div
-          className="text-muted-foreground flex items-center justify-center py-8"
+          className="flex items-center justify-center py-8 text-muted-foreground"
           role="status"
           aria-live="polite"
         >
@@ -115,7 +115,7 @@ export function IgdbManualSearch({
 
       {error ? (
         <div
-          className="text-destructive flex items-center justify-center py-4 text-sm"
+          className="flex items-center justify-center py-4 text-sm text-destructive"
           role="alert"
         >
           {error}
@@ -123,7 +123,7 @@ export function IgdbManualSearch({
       ) : null}
 
       {showNoResults ? (
-        <div className="text-muted-foreground flex items-center justify-center py-8">
+        <div className="flex items-center justify-center py-8 text-muted-foreground">
           No games found
         </div>
       ) : null}
@@ -144,24 +144,24 @@ export function IgdbManualSearch({
             return (
               <li key={game.id}>
                 <Card className="hover:bg-muted/20">
-                  <CardContent className="flex items-center gap-3 p-3">
+                  <CardContent className="flex items-center gap-3">
                     {coverUrl ? (
                       <img
                         src={coverUrl}
                         alt={`Cover for ${game.name}`}
-                        className="h-12 w-10 shrink-0 rounded object-cover"
+                        className="h-12 w-10 shrink-0 rounded-sm object-cover"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="bg-muted flex h-12 w-10 shrink-0 items-center justify-center rounded">
-                        <span className="text-muted-foreground text-xs font-medium">
+                      <div className="flex h-12 w-10 shrink-0 items-center justify-center rounded-sm bg-muted">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {game.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate font-medium">{game.name}</h3>
-                      <div className="text-muted-foreground flex gap-2 text-sm">
+                      <div className="flex gap-2 text-sm text-muted-foreground">
                         <span>{year}</span>
                         <span aria-hidden>•</span>
                         <span className="truncate">{platforms}</span>

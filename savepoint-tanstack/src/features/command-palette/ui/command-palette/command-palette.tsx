@@ -81,13 +81,13 @@ export function CommandPalette({
           <div className="flex items-center justify-center py-8">
             <Loader2
               aria-hidden="true"
-              className="text-muted-foreground h-6 w-6 animate-spin"
+              className="h-6 w-6 animate-spin text-muted-foreground"
             />
           </div>
         )}
 
         {error && shouldSearch && !isLoading && (
-          <div className="text-muted-foreground py-8 text-center text-sm">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             Failed to search games. Please try again.
           </div>
         )}
@@ -121,6 +121,7 @@ export function CommandPalette({
             <CommandGroup>
               <CommandItem
                 value="see-all-results"
+                className="p-0"
                 onSelect={() => {
                   void navigate({
                     to: "/games/search",
@@ -132,6 +133,7 @@ export function CommandPalette({
                 <Link
                   to="/games/search"
                   search={{ q: query.trim() }}
+                  className="flex min-h-11 w-full items-center px-3 py-2 md:min-h-0"
                   onClick={(event) => {
                     event.stopPropagation();
                     closeAndReset();
@@ -154,13 +156,13 @@ export function CommandPalette({
         />
 
         {showNoResults && (
-          <div className="text-muted-foreground py-8 text-center text-sm">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             No games found for &ldquo;{query}&rdquo;
           </div>
         )}
 
         {showEmptyHint && !isLoading && (
-          <div className="text-muted-foreground py-8 text-center text-sm">
+          <div className="py-8 text-center text-sm text-muted-foreground">
             Start typing to search for games...
           </div>
         )}
@@ -178,7 +180,7 @@ export function CommandPalette({
       >
         <SheetContent
           side="bottom"
-          className="gap-0 p-0"
+          className="gap-0 p-0 [&_[data-slot=command-input-wrapper]]:pr-14"
           data-testid="command-palette-mobile-sheet"
         >
           <SheetTitle className="sr-only">Command palette</SheetTitle>

@@ -66,7 +66,7 @@ export function GameCard({
             )}
           >
             {coverAccentClassName ? (
-              <span className="line-clamp-3 text-center text-lg font-bold tracking-wide text-white uppercase">
+              <span className="line-clamp-3 text-center text-lg font-bold tracking-wide text-scrim-foreground uppercase">
                 {title}
               </span>
             ) : null}
@@ -79,7 +79,7 @@ export function GameCard({
       </div>
 
       {density !== "minimal" ? (
-        <div className="p-md gap-md flex w-full flex-col">
+        <div className="flex w-full flex-col gap-2 p-2">
           <h3
             className={cn(
               gameCardTitleVariants({ clamp: true }),
@@ -91,9 +91,9 @@ export function GameCard({
           </h3>
 
           {showMeta ? (
-            <div className="gap-sm flex flex-col">
+            <div className="flex flex-col gap-1.5">
               {(releaseYear ?? null) !== null ? (
-                <span className="body-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {releaseYear}
                 </span>
               ) : null}
@@ -104,7 +104,7 @@ export function GameCard({
           ) : null}
 
           {children ? (
-            <div className="gap-md mt-auto flex flex-col">{children}</div>
+            <div className="mt-auto flex flex-col gap-2">{children}</div>
           ) : null}
         </div>
       ) : null}
@@ -116,7 +116,7 @@ export function GameCard({
       <Link
         to="/games/$slug"
         params={{ slug }}
-        className="focus-visible:ring-primary block rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="block rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
         aria-label={`View ${title}`}
       >
         {card}

@@ -38,14 +38,14 @@ export function JournalTimeline({
     // `role="list"` is implicit on <ul>; aria-label satisfies the a11y requirement
     // and gives RTL a findable landmark.
     <ul
-      className="gap-md relative flex flex-col"
+      className="relative flex flex-col gap-2"
       aria-label="Journal timeline"
       role="list"
     >
       {/* Continuous vertical rail line behind the nodes */}
       <li
         aria-hidden="true"
-        className="bg-border/70 pointer-events-none absolute top-1.5 bottom-1.5 left-[17px] w-0.5"
+        className="pointer-events-none absolute top-1.5 bottom-1.5 left-[17px] w-0.5 bg-border/70"
       />
 
       {entries.map((entry) => (
@@ -75,7 +75,7 @@ function CoverAvatar({ game }: CoverAvatarProps) {
     : null;
 
   return (
-    <div className="border-background shadow-paper-sm size-9 overflow-hidden rounded-full border-2">
+    <div className="size-9 overflow-hidden rounded-full border-2 border-background shadow-xs">
       {coverUrl ? (
         <img
           src={coverUrl}
@@ -84,15 +84,15 @@ function CoverAvatar({ game }: CoverAvatarProps) {
         />
       ) : (
         <div
-          className="bg-muted flex size-full items-center justify-center"
+          className="flex size-full items-center justify-center bg-muted"
           aria-hidden="true"
         >
           {game ? (
-            <span className="text-caption text-muted-foreground font-mono select-none">
+            <span className="font-mono text-xs font-medium text-muted-foreground select-none">
               {game.title.slice(0, 2).toUpperCase()}
             </span>
           ) : (
-            <NotebookPen className="text-muted-foreground size-4" />
+            <NotebookPen className="size-4 text-muted-foreground" />
           )}
         </div>
       )}

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { AddGameAction } from "@/features/add-game";
 import { SearchGamesInput, SearchGamesResults } from "@/features/search-games";
+import { PageHeader } from "@/shared/ui/page-header";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -19,19 +20,18 @@ function GameSearchRoute() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="space-y-xl">
-        <div className="space-y-sm">
-          <h1 className="heading-lg">Search Games</h1>
-          <p className="text-muted-foreground text-sm">
-            Find games to add to your SavePoint library
-          </p>
-        </div>
-        <div className="space-y-3xl">
+      <div className="space-y-4">
+        <PageHeader
+          title="Search Games"
+          sub="Find games to add to your SavePoint library"
+          className="mb-4"
+        />
+        <div className="space-y-8">
           <SearchGamesInput initialQuery={query} />
           {query.length === 0 ? (
             <p
               role="status"
-              className="text-muted-foreground border-border/30 bg-muted/30 p-2xl rounded-lg border text-center"
+              className="rounded-lg border border-border/30 bg-muted/30 p-6 text-center text-muted-foreground"
             >
               Start typing to search for games...
             </p>

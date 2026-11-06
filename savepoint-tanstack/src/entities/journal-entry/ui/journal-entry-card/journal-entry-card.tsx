@@ -33,18 +33,18 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
   const writtenOn = formatJournalDate(entry.createdAt);
 
   const body = (
-    <CardContent className="p-lg gap-sm flex flex-col">
+    <CardContent className="flex flex-col gap-1.5">
       {/* Header: game title (prominent) + date */}
       <div className="flex items-baseline justify-between gap-2">
         <h3
           id={headingId}
-          className="md:font-display text-sm leading-snug font-semibold md:text-base"
+          className="text-sm leading-snug font-semibold md:font-display md:text-base"
         >
           {cardHeading}
         </h3>
         <time
           dateTime={new Date(entry.createdAt).toISOString()}
-          className="text-caption text-muted-foreground shrink-0 font-mono tracking-widest uppercase"
+          className="shrink-0 font-mono text-xs font-medium text-muted-foreground uppercase"
         >
           {writtenOn}
         </time>
@@ -55,20 +55,18 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
       ) : null}
 
       {content ? (
-        <p className="text-body text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-wrap md:italic">
+        <p className="line-clamp-3 text-base whitespace-pre-wrap text-muted-foreground md:italic">
           <span className="hidden md:inline">&ldquo;</span>
           {content}
           <span className="hidden md:inline">&rdquo;</span>
         </p>
       ) : timePlayed ? (
-        <p className="text-body text-muted-foreground leading-relaxed">
-          {timePlayed} played
-        </p>
+        <p className="text-base text-muted-foreground">{timePlayed} played</p>
       ) : null}
 
       <div className="flex items-center justify-between gap-2">
         {content && timePlayed ? (
-          <span className="text-caption text-primary/70 font-mono tracking-widest">
+          <span className="font-mono text-xs font-medium text-primary">
             {timePlayed}
           </span>
         ) : (
@@ -78,7 +76,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="hover:text-primary text-caption text-muted-foreground inline-flex items-center gap-1 transition-colors"
+            className="-my-3 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary md:my-0 md:min-h-0"
             onClick={(event) => event.stopPropagation()}
           >
             <span className="font-medium">{entry.game.title}</span>
@@ -98,7 +96,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
             aria-label={`Open note from ${writtenOn}`}
             className={cn(
               "block w-full cursor-pointer text-left",
-              "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             )}
           >
             {body}

@@ -14,3 +14,4 @@ Providers, root router wiring, global styles, and the root error boundary.
 | `providers/`      | React context providers, theme wiring            |
 | `styles/`         | Global CSS, font imports                         |
 | `error-boundary/` | Root error boundary branching on `AppError.code` |
+| `not-found/`      | Root not-found page for unknown URLs             |

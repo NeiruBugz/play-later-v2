@@ -92,6 +92,19 @@ describe("ProfileOverview", () => {
       expect(screen.getByText("Change avatar")).toBeDefined();
     });
 
+    it("separates each social count from its label with a space", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          followerCount={1}
+          followingCount={2}
+        />
+      );
+      expect(screen.getByRole("link", { name: "1 Followers" })).toBeDefined();
+      expect(screen.getByRole("link", { name: "2 Following" })).toBeDefined();
+    });
+
     it("renders the Edit Profile button linking to /settings/profile", () => {
       render(
         <ProfileOverview profile={stubProfile} stats={stubStats} isOwnProfile />
@@ -161,10 +174,9 @@ describe("ProfileOverview", () => {
       expect(elements.queryRecentlyPlayed()).not.toBeNull();
     });
 
-    it("renders the hero banner with a gradient background", () => {
+    it("renders the hero banner without an inline color style", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      const style = elements.getHeroBanner().getAttribute("style") ?? "";
-      expect(style).toContain("linear-gradient");
+      expect(elements.getHeroBanner()).not.toHaveAttribute("style");
     });
 
     it("renders five inline stat items in the compact header stat row", () => {

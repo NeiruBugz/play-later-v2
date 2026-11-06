@@ -6,9 +6,10 @@ import { AvatarUpload } from "@/features/upload-avatar";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { PageHeader } from "@/shared/ui/page-header";
+import { SectionLabel } from "@/shared/ui/section-label";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
-import { deriveBannerGradient } from "../../lib/derive-banner-gradient";
 import { formatRelativeTime } from "../../lib/format-relative-time";
 import type { ProfileOverviewProps } from "./profile-overview.type";
 
@@ -26,7 +27,6 @@ export function ProfileOverview({
   hideActivityTab = false,
 }: ProfileOverviewProps) {
   const displayName = getDisplayName(profile, "User");
-  const usernameSlug = profile.username ?? profile.id;
   const avatarSrc = profile.image ?? DEFAULT_AVATAR_SRC;
 
   const { want, playing, done } = stats;
@@ -50,8 +50,7 @@ export function ProfileOverview({
         <div
           data-testid="profile-hero-banner"
           aria-hidden="true"
-          className="relative h-20 w-full md:h-36"
-          style={{ background: deriveBannerGradient(usernameSlug) }}
+          className="relative h-20 w-full bg-gradient-to-br from-primary/30 to-muted md:h-36"
         />
 
         {/* Identity block: avatar + name + handle + stat row + primary action */}
@@ -64,10 +63,10 @@ export function ProfileOverview({
                 alt={displayName}
                 width={80}
                 height={80}
-                className="ring-background h-20 w-20 rounded-full object-cover ring-4 md:h-28 md:w-28"
+                className="h-20 w-20 rounded-full object-cover ring-4 ring-background md:h-28 md:w-28"
               />
               {isOwnProfile ? (
-                <div className="absolute inset-x-0 bottom-0 rounded-b-full bg-black/60 px-2 py-1 text-center text-xs text-white">
+                <div className="absolute inset-x-0 bottom-0 rounded-b-full bg-scrim/60 px-2 py-1 text-center text-xs text-scrim-foreground">
                   <AvatarUpload label="Change avatar" />
                 </div>
               ) : null}
@@ -86,32 +85,31 @@ export function ProfileOverview({
           </div>
 
           {/* Name + handle */}
-          <h1 className="font-serif text-2xl tracking-tight md:text-4xl">
-            {displayName}
-          </h1>
-          {profile.username ? (
-            <p className="text-muted-foreground mt-0.5 text-sm">
-              @{profile.username}
-            </p>
-          ) : null}
+          <PageHeader
+            title={displayName}
+            sub={profile.username ? `@${profile.username}` : undefined}
+            className="mb-0"
+          />
 
           {/* Follower / following counts */}
           {profile.username &&
           followerCount !== undefined &&
           followingCount !== undefined ? (
             <p
-              className="text-muted-foreground mt-1 text-sm"
+              className="mt-1 flex flex-wrap items-center text-sm text-muted-foreground"
               data-testid="profile-social-counts"
             >
               <Link
                 to="/u/$username/followers"
                 params={{ username: profile.username }}
-                className="hover:text-foreground transition-colors"
+                className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
               >
-                <span className="text-foreground font-medium tabular-nums">
-                  {followerCount}
-                </span>{" "}
-                Followers
+                <span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {followerCount}
+                  </span>{" "}
+                  Followers
+                </span>
               </Link>
               <span aria-hidden="true" className="mx-1">
                 ·
@@ -119,12 +117,14 @@ export function ProfileOverview({
               <Link
                 to="/u/$username/following"
                 params={{ username: profile.username }}
-                className="hover:text-foreground transition-colors"
+                className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
               >
-                <span className="text-foreground font-medium tabular-nums">
-                  {followingCount}
-                </span>{" "}
-                Following
+                <span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {followingCount}
+                  </span>{" "}
+                  Following
+                </span>
               </Link>
             </p>
           ) : null}
@@ -133,10 +133,12 @@ export function ProfileOverview({
           <div data-testid="profile-stat-row" className="mt-3 flex gap-5">
             {inlineStats.map(({ label, value }) => (
               <div key={label} data-testid="profile-stat-item">
-                <span className="text-foreground text-base font-bold tabular-nums">
+                <span className="text-base font-bold text-foreground tabular-nums">
                   {value}
                 </span>
-                <p className="text-muted-foreground text-xs">{label}</p>
+                <span className="block text-xs text-muted-foreground">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -164,7 +166,7 @@ export function ProfileOverview({
           <div className="space-y-8">
             {stats.recentGames.length > 0 ? (
               <section data-testid="overview-recently-played">
-                <h2 className="heading-md mb-4 tracking-tight">Playing</h2>
+                <SectionLabel className="mb-4">Playing</SectionLabel>
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
                   {stats.recentGames.map((game) => (
                     <Link
@@ -181,19 +183,19 @@ export function ProfileOverview({
                           className="aspect-[3/4] w-full object-cover transition-transform group-hover:scale-105"
                         />
                       ) : (
-                        <div className="bg-muted aspect-[3/4] w-full" />
+                        <div className="aspect-[3/4] w-full bg-muted" />
                       )}
                       <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+                        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-scrim/90 via-scrim/40 to-transparent"
                       />
-                      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2 text-white">
-                        <p className="line-clamp-2 text-xs leading-tight font-medium">
+                      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2 text-scrim-foreground">
+                        <span className="line-clamp-2 block text-xs leading-tight font-medium">
                           {game.title}
-                        </p>
-                        <p className="text-[10px] text-white/80">
+                        </span>
+                        <span className="block text-xs text-scrim-foreground/80">
                           {formatRelativeTime(new Date(game.lastPlayed))}
-                        </p>
+                        </span>
                       </div>
                     </Link>
                   ))}
@@ -290,7 +292,7 @@ function ProfileOverviewTabs({
       {/* Sticky tab strip sits directly above content (AC PRO-1) */}
       <div
         data-testid="profile-tab-strip"
-        className="bg-background/90 sticky top-0 z-10 px-4 py-2 backdrop-blur-sm md:px-6"
+        className="sticky top-0 z-10 bg-background/90 px-4 py-2 backdrop-blur-sm md:px-6"
       >
         <SegmentedControl<ProfileTabValue>
           value={value}

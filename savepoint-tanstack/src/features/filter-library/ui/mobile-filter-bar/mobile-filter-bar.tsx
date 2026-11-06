@@ -7,10 +7,13 @@ import {
   useLibraryFiltersState,
 } from "@/features/filter-library/lib";
 import { Button } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -73,7 +76,7 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
   );
 
   return (
-    <div className="mb-md md:hidden" aria-label="Mobile library filters">
+    <div className="mb-2 md:hidden" aria-label="Mobile library filters">
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         {/* Single row: [Filters flex-1 with count badge] */}
         <div className="flex items-center gap-1">
@@ -90,21 +93,21 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             <span className="ml-1.5">Filters</span>
             {activeStatusEntry ? (
-              <span className="text-muted-foreground ml-1.5 text-xs">
+              <span className="ml-1.5 text-xs text-muted-foreground">
                 · {activeStatusEntry.label}
               </span>
             ) : null}
             {activeFilterCount > 0 ? (
               <span
                 aria-label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
-                className="bg-primary text-primary-foreground ml-auto rounded-full px-1.5 text-xs tabular-nums"
+                className="ml-auto rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums"
               >
                 {activeFilterCount}
               </span>
             ) : null}
           </SheetTrigger>
         </div>
-        <SheetContent side="bottom" className="space-y-lg">
+        <SheetContent side="bottom">
           <SheetHeader>
             <SheetTitle>Filters</SheetTitle>
             <SheetDescription>
@@ -112,57 +115,61 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
             </SheetDescription>
           </SheetHeader>
 
-          <section>
-            <NotOwnedOnlyToggle
-              id="mobile-not-owned-only"
-              status={status}
-              checked={notOwnedOnly === true}
-              onChange={onNotOwnedOnlyChange}
+          <SheetBody className="space-y-3">
+            <section>
+              <NotOwnedOnlyToggle
+                id="mobile-not-owned-only"
+                status={status}
+                checked={notOwnedOnly === true}
+                onChange={onNotOwnedOnlyChange}
+              />
+            </section>
+
+            <section>
+              <SectionLabel as="p" className="mb-1.5">
+                Platform
+              </SectionLabel>
+              <PlatformSelect
+                value={platformValue}
+                platforms={platforms}
+                rawPlatform={platform}
+                onChange={onPlatformChange}
+              />
+            </section>
+
+            <section>
+              <SectionLabel as="p" className="mb-1.5">
+                Sort
+              </SectionLabel>
+              <SortSelect value={sortValue} onChange={onSortChange} />
+            </section>
+
+            <RatingControls
+              idPrefix="mobile"
+              minRating={minRating}
+              unratedOnly={unratedOnly}
+              onMinRatingChange={onMinRatingChange}
+              onClearMinRating={onClearMinRating}
+              onUnratedOnlyChange={onUnratedOnlyChange}
             />
-          </section>
-
-          <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
-              Platform
-            </p>
-            <PlatformSelect
-              value={platformValue}
-              platforms={platforms}
-              rawPlatform={platform}
-              onChange={onPlatformChange}
-            />
-          </section>
-
-          <section>
-            <p className="text-muted-foreground mb-sm text-xs font-semibold tracking-wider uppercase">
-              Sort
-            </p>
-            <SortSelect value={sortValue} onChange={onSortChange} />
-          </section>
-
-          <RatingControls
-            idPrefix="mobile"
-            minRating={minRating}
-            unratedOnly={unratedOnly}
-            onMinRatingChange={onMinRatingChange}
-            onClearMinRating={onClearMinRating}
-            onUnratedOnlyChange={onUnratedOnlyChange}
-          />
+          </SheetBody>
 
           {hasActiveFilters ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                onClearAll({ onAfterClear: () => setSheetOpen(false) })
-              }
-              aria-label="Clear all filters"
-              className="w-full"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-              <span className="ml-1">Clear all filters</span>
-            </Button>
+            <SheetFooter>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  onClearAll({ onAfterClear: () => setSheetOpen(false) })
+                }
+                aria-label="Clear all filters"
+                className="w-full"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                <span className="ml-1">Clear all filters</span>
+              </Button>
+            </SheetFooter>
           ) : null}
         </SheetContent>
       </Sheet>

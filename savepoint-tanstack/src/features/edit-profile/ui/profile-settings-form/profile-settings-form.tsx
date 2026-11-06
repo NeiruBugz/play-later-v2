@@ -9,6 +9,7 @@ import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { StickyFooter } from "@/shared/ui/sticky-footer";
 
 import { updateProfileFn } from "../../api/update-profile";
 import { ProfileVisibilityToggle } from "../profile-visibility-toggle";
@@ -55,8 +56,8 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
   const visibilityId = "profile-settings-visibility";
 
   return (
-    <form onSubmit={onSubmit} className="space-y-lg" noValidate>
-      <div className="space-y-md">
+    <form onSubmit={onSubmit} className="space-y-3" noValidate>
+      <div className="space-y-2">
         <Label htmlFor={nameId}>Display name</Label>
         <Input id={nameId} {...register("name")} />
       </div>
@@ -87,14 +88,16 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
       />
 
       {serverError ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {serverError}
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isSubmitting}>
-        Save changes
-      </Button>
+      <StickyFooter aboveBottomNav>
+        <Button type="submit" disabled={isSubmitting}>
+          Save changes
+        </Button>
+      </StickyFooter>
     </form>
   );
 }

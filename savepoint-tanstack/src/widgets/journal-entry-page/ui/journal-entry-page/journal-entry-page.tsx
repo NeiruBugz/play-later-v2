@@ -4,6 +4,8 @@ import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { DeleteJournalEntryButton } from "@/features/delete-journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { buttonVariants } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { JournalEntryPageProps } from "./journal-entry-page.type";
 
@@ -22,28 +24,30 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
       : null;
 
   return (
-    <article className="space-y-xl mx-auto max-w-prose">
-      <div className="gap-md flex items-start justify-between">
-        <h1 className="text-h1">Note</h1>
+    <article className="mx-auto max-w-prose space-y-4">
+      <PageHeader
+        title="Note"
+        className="mb-4"
+        actions={
+          <>
+            <Link
+              to="/journal/$id/edit"
+              params={{ id: entry.id }}
+              className={buttonVariants({ size: "sm" })}
+            >
+              Edit
+            </Link>
+            <DeleteJournalEntryButton entryId={entry.id} />
+          </>
+        }
+      />
 
-        <div className="gap-sm flex shrink-0 items-center">
-          <Link
-            to="/journal/$id/edit"
-            params={{ id: entry.id }}
-            className={buttonVariants({ size: "sm" })}
-          >
-            Edit
-          </Link>
-          <DeleteJournalEntryButton entryId={entry.id} />
-        </div>
-      </div>
-
-      <p className="text-caption text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         {entry.game ? (
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="hover:text-foreground transition-colors"
+            className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
           >
             {entry.game.title}
           </Link>
@@ -55,15 +59,15 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
       </p>
 
       {entry.prompt ? (
-        <h2 className="text-h3">{PROMPT_QUESTION[entry.prompt]}</h2>
+        <SectionLabel>{PROMPT_QUESTION[entry.prompt]}</SectionLabel>
       ) : null}
 
       {timePlayed ? (
-        <p className="text-h3 font-mono">{timePlayed} played</p>
+        <SectionLabel as="p">{timePlayed} played</SectionLabel>
       ) : null}
 
       {content ? (
-        <p className="text-body whitespace-pre-wrap">{content}</p>
+        <p className="text-base whitespace-pre-wrap">{content}</p>
       ) : null}
     </article>
   );

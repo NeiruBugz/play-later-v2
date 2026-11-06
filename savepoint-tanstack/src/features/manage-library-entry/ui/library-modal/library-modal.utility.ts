@@ -8,7 +8,7 @@ import { getErrorMessage } from "@/shared/lib/errors";
 import { updateLibraryItemFn } from "../../api/update-library-item-fn";
 
 export const inputClasses =
-  "h-10 rounded-lg border border-border bg-card px-md text-sm text-foreground shadow-paper-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+  "h-10 rounded-lg border border-border bg-card px-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 type UseLibraryModalFormOptions = {
   entry: LibraryItemWithGame;

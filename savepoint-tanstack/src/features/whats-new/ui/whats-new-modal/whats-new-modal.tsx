@@ -1,13 +1,10 @@
 import { Badge } from "@/shared/ui/badge";
 import { Button, buttonVariants } from "@/shared/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+  ModalBody,
+  ModalFooter,
+  ResponsiveModal,
+} from "@/shared/ui/responsive-modal";
 
 import { getActiveAnnouncements } from "../../config";
 import type { AnnouncementCategory } from "../../model/types";
@@ -31,61 +28,60 @@ export function WhatsNewModal() {
   if (!primary) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(next) => !next && dismiss()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="mb-sm gap-sm flex items-center">
-            <Badge variant="secondary">
-              {CATEGORY_LABELS[primary.category]}
-            </Badge>
-          </div>
-          <DialogTitle className="gap-sm flex items-center">
-            {primary.icon ? (
-              <primary.icon className="text-primary h-5 w-5" />
-            ) : null}
-            {primary.title}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed">
-            {primary.description}
-          </DialogDescription>
-        </DialogHeader>
-
-        {announcements.length > 1 ? (
-          <ul className="space-y-md">
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={(next) => !next && dismiss()}
+      eyebrow={
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <Badge variant="secondary">{CATEGORY_LABELS[primary.category]}</Badge>
+        </div>
+      }
+      title={
+        <span className="flex items-center gap-1.5">
+          {primary.icon ? (
+            <primary.icon className="h-5 w-5 text-primary" />
+          ) : null}
+          {primary.title}
+        </span>
+      }
+      description={primary.description}
+      contentClassName="sm:max-w-md"
+    >
+      {announcements.length > 1 ? (
+        <ModalBody>
+          <ul className="space-y-2">
             {announcements.slice(1).map((announcement) => (
               <li
                 key={announcement.id}
-                className="border-border p-md rounded-md border"
+                className="rounded-md border border-border p-2"
               >
-                <div className="mb-xs gap-sm flex items-center">
+                <div className="mb-1 flex items-center gap-1.5">
                   <Badge variant="secondary">
                     {CATEGORY_LABELS[announcement.category]}
                   </Badge>
                 </div>
                 <p className="text-sm font-semibold">{announcement.title}</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {announcement.description}
                 </p>
               </li>
             ))}
           </ul>
-        ) : null}
+        </ModalBody>
+      ) : null}
 
-        <DialogFooter className="gap-sm sm:gap-sm">
-          <div className="gap-sm flex">
-            {primary.ctaUrl && primary.ctaLabel ? (
-              <a
-                href={primary.ctaUrl}
-                className={buttonVariants({ variant: "secondary" })}
-                onClick={dismiss}
-              >
-                {primary.ctaLabel}
-              </a>
-            ) : null}
-            <Button onClick={dismiss}>Got it</Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <ModalFooter>
+        {primary.ctaUrl && primary.ctaLabel ? (
+          <a
+            href={primary.ctaUrl}
+            className={buttonVariants({ variant: "secondary" })}
+            onClick={dismiss}
+          >
+            {primary.ctaLabel}
+          </a>
+        ) : null}
+        <Button onClick={dismiss}>Got it</Button>
+      </ModalFooter>
+    </ResponsiveModal>
   );
 }

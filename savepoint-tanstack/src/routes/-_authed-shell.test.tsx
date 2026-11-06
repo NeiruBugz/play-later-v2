@@ -9,7 +9,7 @@ import {
   type CurrentUser,
 } from "@/entities/session/api/get-current-user";
 
-import { Route as RootRoute, RootShell } from "./__root";
+import { Route as RootRoute, RootShell, ThemeColorMetas } from "./__root";
 import { Route as AuthedRoute } from "./_authed";
 
 void RootRoute;
@@ -235,6 +235,60 @@ describe("__root route shell", () => {
     it("shows What's New and no status notice", () => {
       expect(screen.getByTestId("whats-new-modal")).toBeDefined();
       expect(screen.queryByTestId("status-model-notice")).toBeNull();
+    });
+  });
+});
+
+describe("__root head", () => {
+  describe("given the document head is built", () => {
+    let viewportContent: string | undefined;
+
+    beforeEach(() => {
+      const head = (RootRoute.options.head as any)();
+      viewportContent = head.meta.find(
+        (entry: { name?: string }) => entry.name === "viewport"
+      )?.content;
+    });
+
+    it("extends the page under the notch and home indicator", () => {
+      expect(viewportContent).toBe(
+        "width=device-width, initial-scale=1, viewport-fit=cover"
+      );
+    });
+
+    it("keeps pinch zoom available", () => {
+      expect(viewportContent).not.toContain("maximum-scale");
+      expect(viewportContent).not.toContain("user-scalable");
+    });
+  });
+});
+
+describe("__root theme-color", () => {
+  describe("given the document head renders the theme-color metas", () => {
+    it("keeps one meta per colour scheme with its own colour", () => {
+      render(<ThemeColorMetas />);
+      const metas = [
+        // eslint-disable-next-line testing-library/no-node-access
+        ...document.head.querySelectorAll('meta[name="theme-color"]'),
+      ];
+      expect(
+        metas.map((meta) => [
+          meta.getAttribute("media"),
+          meta.getAttribute("content"),
+        ])
+      ).toEqual([
+        ["(prefers-color-scheme: light)", "#f6f1e7"],
+        ["(prefers-color-scheme: dark)", "#120f0c"],
+      ]);
+    });
+
+    it("leaves none of them to the name-deduped head() meta list", () => {
+      const head = (RootRoute.options.head as any)();
+      expect(
+        head.meta.filter(
+          (entry: { name?: string }) => entry.name === "theme-color"
+        )
+      ).toEqual([]);
     });
   });
 });

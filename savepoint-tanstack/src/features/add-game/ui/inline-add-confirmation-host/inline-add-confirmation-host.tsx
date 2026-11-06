@@ -25,7 +25,7 @@ export function InlineAddConfirmationHost({
     <InlineAddConfirmationProvider value={present}>
       {children}
       {presented ? (
-        <div key={presented.id} className="p-md">
+        <div key={presented.id} className="p-2">
           {presented.content}
         </div>
       ) : null}

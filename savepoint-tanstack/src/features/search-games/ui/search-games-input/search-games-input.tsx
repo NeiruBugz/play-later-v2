@@ -36,7 +36,7 @@ export function SearchGamesInput({
       onChange={(e) => setQuery(e.target.value)}
       placeholder="Search for games (minimum 3 characters)..."
       aria-label="Search for games by name"
-      className="body-md h-12"
+      className="h-12 text-base"
     />
   );
 }

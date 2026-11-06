@@ -1,3 +1,5 @@
+> **Superseded in part by spec 027 (design reset).** The token and typography layer described in this bundle (custom spacing, type and shadow utilities, terminal labels, serif display) no longer exists. Tokens now live in `savepoint-tanstack/src/styles.css`; primitives are the stock shadcn `base-maia` output, with deliberate deviations listed in `savepoint-tanstack/src/shared/ui/README.md`. The text below is kept as the historical handoff.
+
 # CODING AGENTS: READ THIS FIRST
 
 This is a **handoff bundle** from Claude Design (claude.ai/design).

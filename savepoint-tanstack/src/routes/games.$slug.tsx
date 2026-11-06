@@ -21,6 +21,8 @@ import {
 } from "@/features/game-detail/ui";
 import { AppError, NotFoundError } from "@/shared/lib/errors";
 import { Card } from "@/shared/ui/card";
+import { PageHeader } from "@/shared/ui/page-header";
+import { SectionLabel } from "@/shared/ui/section-label";
 import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
@@ -54,7 +56,7 @@ function GameDetailRoute() {
       timesToBeatSlot={
         <SectionErrorBoundary
           fallback={
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
+            <Card variant="flat" className="flex flex-col gap-2 p-4">
               <SectionErrorMessage
                 headingId="times-to-beat-heading"
                 heading="Times to beat"
@@ -65,7 +67,7 @@ function GameDetailRoute() {
         >
           <Suspense
             fallback={
-              <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <Card variant="flat" className="flex flex-col gap-2 p-4">
                 <TimesToBeatSkeleton />
               </Card>
             }
@@ -77,7 +79,7 @@ function GameDetailRoute() {
       relatedGamesSlot={
         <SectionErrorBoundary
           fallback={
-            <Card variant="flat" className="gap-md p-xl flex flex-col">
+            <Card variant="flat" className="flex flex-col gap-2 p-4">
               <SectionErrorMessage
                 headingId="related-games-heading"
                 heading="Related games"
@@ -88,7 +90,7 @@ function GameDetailRoute() {
         >
           <Suspense
             fallback={
-              <Card variant="flat" className="gap-md p-xl flex flex-col">
+              <Card variant="flat" className="flex flex-col gap-2 p-4">
                 <RelatedGamesSkeleton />
               </Card>
             }
@@ -116,14 +118,12 @@ function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
 
 function RelatedGamesSections({ sections }: { sections: RelatedCollection[] }) {
   return (
-    <Card variant="flat" className="gap-md p-xl flex flex-col">
+    <Card variant="flat" className="flex flex-col gap-2 p-4">
       <section
         aria-labelledby="related-games-heading"
-        className="gap-md flex flex-col"
+        className="flex flex-col gap-2"
       >
-        <h2 id="related-games-heading" className="text-h3">
-          Related games
-        </h2>
+        <SectionLabel id="related-games-heading">Related games</SectionLabel>
         <RelatedGamesTabs
           sections={sections}
           renderGame={(game) => (
@@ -152,11 +152,9 @@ function SectionErrorMessage({
   message: string;
 }) {
   return (
-    <section aria-labelledby={headingId} className="gap-md flex flex-col">
-      <h2 id={headingId} className="text-h3">
-        {heading}
-      </h2>
-      <div role="alert" className="text-destructive text-sm">
+    <section aria-labelledby={headingId} className="flex flex-col gap-2">
+      <SectionLabel id={headingId}>{heading}</SectionLabel>
+      <div role="alert" className="text-sm text-destructive">
         {message}
       </div>
     </section>
@@ -183,9 +181,9 @@ function GameNotFound() {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Game not found</h1>
+      <PageHeader title="Game not found" className="mb-0" />
       <p>We couldn't find a game matching this URL.</p>
       <p>
         <Link to="/" className="underline">
@@ -204,9 +202,9 @@ function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
   return (
     <div
       role="alert"
-      className="gap-md container mx-auto flex flex-col px-4 py-12"
+      className="container mx-auto flex flex-col gap-2 px-4 py-12"
     >
-      <h1 className="text-h2">Something went wrong</h1>
+      <PageHeader title="Something went wrong" className="mb-0" />
       <p>An error occurred while loading this game. Please try again.</p>
       <p>
         <Link to="/" className="underline">

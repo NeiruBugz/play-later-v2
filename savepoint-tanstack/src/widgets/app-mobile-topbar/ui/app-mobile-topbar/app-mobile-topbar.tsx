@@ -9,11 +9,11 @@ export function AppMobileTopbar() {
     <header
       data-testid="app-mobile-topbar"
       aria-label="Primary mobile navigation"
-      className="bg-background/85 sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b px-3 backdrop-blur-md md:hidden"
+      className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-2 border-b bg-background/85 px-3 pt-safe backdrop-blur-md md:hidden"
     >
       <Link
         to="/"
-        className="flex items-center gap-2 rounded-md px-1 py-1"
+        className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md"
         aria-label="SavePoint"
       >
         <img
@@ -29,7 +29,7 @@ export function AppMobileTopbar() {
           type="button"
           aria-label="Search games"
           onClick={openCommandPalette}
-          className="hover:bg-accent inline-flex h-11 w-11 items-center justify-center rounded-md"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md hover:bg-accent"
         >
           <Search aria-hidden="true" className="h-5 w-5" />
         </button>

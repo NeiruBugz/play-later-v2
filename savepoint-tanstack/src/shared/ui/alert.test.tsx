@@ -37,8 +37,8 @@ describe("Alert", () => {
       render(<Alert variant="info">Info message</Alert>);
     });
 
-    it("applies the info class hook", () => {
-      expect(elements.getAlert().className).toContain("info");
+    it("exposes the info variant", () => {
+      expect(elements.getAlert()).toHaveAttribute("data-variant", "info");
     });
   });
 
@@ -47,8 +47,8 @@ describe("Alert", () => {
       render(<Alert variant="warning">Warning message</Alert>);
     });
 
-    it("applies the warning class hook", () => {
-      expect(elements.getAlert().className).toContain("warning");
+    it("exposes the warning variant", () => {
+      expect(elements.getAlert()).toHaveAttribute("data-variant", "warning");
     });
   });
 
@@ -57,8 +57,8 @@ describe("Alert", () => {
       render(<Alert variant="error">Error message</Alert>);
     });
 
-    it("applies the error class hook", () => {
-      expect(elements.getAlert().className).toContain("error");
+    it("exposes the error variant", () => {
+      expect(elements.getAlert()).toHaveAttribute("data-variant", "error");
     });
   });
 
@@ -67,8 +67,8 @@ describe("Alert", () => {
       render(<Alert variant="success">Success message</Alert>);
     });
 
-    it("applies the success class hook", () => {
-      expect(elements.getAlert().className).toContain("success");
+    it("exposes the success variant", () => {
+      expect(elements.getAlert()).toHaveAttribute("data-variant", "success");
     });
   });
 

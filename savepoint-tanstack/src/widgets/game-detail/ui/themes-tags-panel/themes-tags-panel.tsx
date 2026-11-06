@@ -1,5 +1,6 @@
 import { PlatformBadges } from "@/entities/game";
 import { Badge } from "@/shared/ui/badge";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { ThemesTagsPanelProps } from "./themes-tags-panel.type";
 
@@ -17,10 +18,10 @@ export function ThemesTagsPanel({
   }
 
   return (
-    <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-[max-content_1fr] md:items-baseline">
       {hasThemes ? (
         <>
-          <TerminalLabel>{`// THEMES`}</TerminalLabel>
+          <SectionLabel>Themes</SectionLabel>
           <ul aria-label="Themes" className="flex flex-wrap gap-1.5 text-sm">
             {themes.map((theme) => (
               <li key={theme}>
@@ -35,7 +36,7 @@ export function ThemesTagsPanel({
 
       {hasGenres ? (
         <>
-          <TerminalLabel>{`// GENRES`}</TerminalLabel>
+          <SectionLabel>Genres</SectionLabel>
           <ul aria-label="Genres" className="flex flex-wrap gap-1.5 text-sm">
             {genres.map((genre) => (
               <li key={genre}>
@@ -50,20 +51,12 @@ export function ThemesTagsPanel({
 
       {hasPlatforms ? (
         <>
-          <TerminalLabel>{`// PLATFORMS`}</TerminalLabel>
+          <SectionLabel>Platforms</SectionLabel>
           <div aria-label="Platforms">
             <PlatformBadges platforms={platforms} />
           </div>
         </>
       ) : null}
     </div>
-  );
-}
-
-function TerminalLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
-      {children}
-    </span>
   );
 }

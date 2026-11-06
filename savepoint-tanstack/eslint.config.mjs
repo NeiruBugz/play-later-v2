@@ -1,11 +1,95 @@
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
+import betterTailwindcss from "eslint-plugin-better-tailwindcss";
 import boundaries from "eslint-plugin-boundaries";
 import jestDom from "eslint-plugin-jest-dom";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import testingLibrary from "eslint-plugin-testing-library";
 import tseslint from "typescript-eslint";
+
+// Class restrictions are regexes matched against a single class token. START
+// lets a restriction match through variants (`md:`, `hover:`) and `!`.
+const START = "(?:^|[:!])";
+const COLOR_UTILITIES =
+  "(?:bg|text|border|border-[xytblrse]|ring|ring-offset|outline|fill|stroke|from|via|to|shadow|accent|caret|decoration|divide|placeholder)";
+const PALETTE =
+  "(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)";
+const SPACING_UTILITIES =
+  "(?:p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y)";
+
+// Raw palette colors the design may still use. Empty on purpose: the last one
+// (rating-input amber) is retired by spec 027 slice 13. `black`/`white` are not
+// palette colors here: they are the scrim and over-cover text colors.
+const ALLOWED_PALETTE_CLASSES = [];
+const PALETTE_ALLOW_LIST = ALLOWED_PALETTE_CLASSES.length
+  ? `(?!(?:${ALLOWED_PALETTE_CLASSES.join("|")})(?:$|/))`
+  : "";
+
+const PIXEL_FONT_SIZE = {
+  pattern: `${START}text-\\[\\d*\\.?\\d+px\\]`,
+  message:
+    "Arbitrary pixel font sizes are banned. Use the text-xs floor or a stock text-* size.",
+};
+const ARBITRARY_COLOR = {
+  pattern: `${START}${COLOR_UTILITIES}-\\[(?:color:)?(?:#|oklch|oklab|rgba?|hsla?|hwb|lab|lch|color\\()`,
+  message:
+    "Hex and arbitrary color values are banned. Use a semantic token from src/styles.css.",
+};
+const PALETTE_COLOR = {
+  pattern: `${START}${PALETTE_ALLOW_LIST}${COLOR_UTILITIES}-${PALETTE}-\\d{2,3}(?:/\\d+)?$`,
+  message:
+    "Raw palette colors are banned. Use a semantic token from src/styles.css.",
+};
+const RETIRED_CLASSES = [
+  {
+    pattern: `${START}-?${SPACING_UTILITIES}-(?:xs|sm|md|lg|xl|2xl|3xl|4xl|5xl)$`,
+    message:
+      "Retired semantic spacing. Use the stock numeric scale (p-4, gap-2, ...).",
+  },
+  {
+    pattern: `${START}(?:heading-[\\w-]+|body-[\\w-]+|text-display|text-h[123]|text-body|text-caption)$`,
+    message:
+      "Retired semantic type class. Use stock text-* sizes and font-* weights.",
+  },
+  {
+    pattern: `${START}shadow-paper[\\w-]*$`,
+    message: "Retired shadow. Use a stock shadow-* utility.",
+  },
+  {
+    pattern: `${START}duration-(?:normal|slow)$`,
+    message: "Retired duration. Use a stock duration-* value.",
+  },
+  {
+    pattern: `${START}(?:font-serif|terminal-label)$`,
+    message:
+      "Retired class. Section labels are plain sentence-case text; there is no serif face.",
+  },
+];
+
+const noRestrictedClasses = (...restrictions) => [
+  "error",
+  { restrict: [...RETIRED_CLASSES, ...restrictions] },
+];
+
+// `no-restricted-syntax` is one rule, so every selector lives in this list and
+// the per-file exemptions below repeat the parts they keep.
+const AS_CHILD_RESTRICTION = {
+  selector: "JSXAttribute[name.name='asChild']",
+  message:
+    "asChild is a Radix API. Use Base UI's `render` prop (e.g. <Trigger render={<a href=... />} />), or buttonVariants() on the link itself.",
+};
+const INLINE_COLOR_STYLE_RESTRICTION = {
+  selector:
+    "JSXAttribute[name.name='style'] ObjectExpression > Property[key.name=/^(color|background|backgroundColor|borderColor|fill|stroke)$/][value.type='Literal']:not([value.value=/^var\\(/])",
+  message:
+    "Inline color styles are banned. Use a semantic token class, or a CSS-variable-only style such as { color: `var(--status-${x})` }.",
+};
+const noRestrictedSyntax = (...restrictions) => [
+  "error",
+  AS_CHILD_RESTRICTION,
+  ...restrictions,
+];
 
 export default tseslint.config(
   {
@@ -130,18 +214,59 @@ export default tseslint.config(
       "testing-library/no-node-access": "off",
     },
   },
-  // Radix's `asChild` is gone; Base UI composes through `render`.
+  // Radix's `asChild` is gone; Base UI composes through `render`. Inline color
+  // styles are banned too (CSS-variable-only dynamic styles stay allowed).
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: {
-      "no-restricted-syntax": [
+      "no-restricted-syntax": noRestrictedSyntax(
+        INLINE_COLOR_STYLE_RESTRICTION
+      ),
+    },
+  },
+  // Tailwind class guardrails (spec 027). `styles.css` carries stock tokens
+  // only; these rules keep the retired custom layer, arbitrary type sizes and
+  // hard-coded colors from coming back. Default callee/attribute detection
+  // already covers className, cn, cva, clsx and twMerge.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
+    plugins: { "better-tailwindcss": betterTailwindcss },
+    settings: {
+      "better-tailwindcss": { entryPoint: "src/styles.css" },
+    },
+    rules: {
+      "better-tailwindcss/no-unknown-classes": [
         "error",
         {
-          selector: "JSXAttribute[name.name='asChild']",
-          message:
-            "asChild is a Radix API. Use Base UI's `render` prop (e.g. <Trigger render={<a href=... />} />), or buttonVariants() on the link itself.",
+          // Marker classes consumed by selectors, not generated by Tailwind:
+          // `dark` is matched by the `dark` custom variant, `toaster` by sonner.
+          ignore: ["^dark$", "^toaster$"],
         },
       ],
+      "better-tailwindcss/no-conflicting-classes": "error",
+      "better-tailwindcss/no-restricted-classes": noRestrictedClasses(
+        PIXEL_FONT_SIZE,
+        ARBITRARY_COLOR,
+        PALETTE_COLOR
+      ),
+    },
+  },
+  // Existing violations owned by later spec 027 slices. Each override keeps
+  // every restriction except the one its slice retires, so a file can only
+  // regress on the rules it is not already exempt from. Delete an entry when
+  // its slice lands; do not add files.
+  //
+  // Slice 19 (one status chip): color-mix tinted surfaces on the game page hero
+  // and the journal "Log tonight" card are replaced with token-based chips and
+  // surfaces.
+  {
+    files: [
+      "src/widgets/game-detail/ui/game-detail/game-detail.tsx",
+      "src/widgets/journal-timeline-page/ui/journal-stats-rail/journal-stats-rail.tsx",
+    ],
+    rules: {
+      "no-restricted-syntax": noRestrictedSyntax(),
     },
   },
   // FSD layer boundary enforcement — applies only to src/**

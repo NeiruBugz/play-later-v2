@@ -100,20 +100,20 @@ const LibraryGridTile = memo(function LibraryGridTile({
               alt={alt}
               loading="lazy"
               decoding="async"
-              className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
+              className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
             />
           ) : (
             <div
               role="img"
               aria-label={alt}
-              className="bg-muted shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)]"
+              className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
             />
           )}
           <div className="absolute top-2 left-2">
             <LibraryStatusBadge status={status} />
           </div>
         </div>
-        <h3 className="mt-2 line-clamp-1 text-sm leading-tight font-medium group-hover:underline">
+        <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
           {item.game.title}
         </h3>
         <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
@@ -124,9 +124,9 @@ const LibraryGridTile = memo(function LibraryGridTile({
           <NotOwnedTag status={status} isOwned={ownership.isOwned} />
         </div>
         {item.platform ? (
-          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
             {item.platform}
-          </p>
+          </span>
         ) : null}
       </Link>
       <div
@@ -320,15 +320,14 @@ export function LibraryPage(props: LibraryPageProps) {
         : "no-results";
 
   return (
-    <div className="gap-xl container mx-auto flex flex-col px-4 py-6">
+    <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
       <PageHeader
-        eyebrow="// LIBRARY"
         title="Library"
         actions={
           <>
             <Link
               to="/steam/games"
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline md:min-h-0"
               aria-label="Import from Steam"
             >
               <Download className="h-4 w-4" aria-hidden />
@@ -350,11 +349,11 @@ export function LibraryPage(props: LibraryPageProps) {
           onChange={(event) => setTitleQuery(event.target.value)}
           placeholder="Filter library…"
           aria-label="Filter library by title"
-          className="pr-9"
+          className="pr-8"
         />
         <kbd
           aria-hidden="true"
-          className="text-muted-foreground border-border bg-muted/50 pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border px-1.5 py-0.5 text-xs font-semibold"
+          className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border border-border bg-muted/50 px-1.5 py-0.5 text-xs font-semibold text-muted-foreground"
         >
           /
         </kbd>

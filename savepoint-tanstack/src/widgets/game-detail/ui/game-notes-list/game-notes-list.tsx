@@ -4,6 +4,7 @@ import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { GameNote, GameNotesListProps } from "./game-notes-list.type";
 
@@ -26,9 +27,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
   return (
     <>
       <div className="flex items-center justify-between gap-2">
-        <h2 id="game-notes-heading" className="terminal-label">
-          // NOTES
-        </h2>
+        <SectionLabel id="game-notes-heading">Notes</SectionLabel>
         <Button type="button" size="sm" variant="outline" onClick={onNewNote}>
           New note
         </Button>
@@ -38,7 +37,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
         <EmptyState spacing="compact" title="No notes yet." />
       ) : (
         <ul
-          className="gap-md flex flex-col"
+          className="flex flex-col gap-2"
           aria-labelledby="game-notes-heading"
         >
           {newestFirst.map((note) => (
@@ -46,9 +45,9 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
               <Link
                 to="/journal/$id"
                 params={{ id: note.id }}
-                className="border-border hover:bg-muted/40 gap-2xs focus-visible:ring-ring flex flex-col border-l-2 pl-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="flex min-h-11 flex-col justify-center border-l-2 border-border pl-3 transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
-                <span className="text-muted-foreground flex items-center gap-2 font-mono text-xs">
+                <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                   <time dateTime={note.createdAt.toISOString()}>
                     {formatJournalDate(note.createdAt)}
                   </time>

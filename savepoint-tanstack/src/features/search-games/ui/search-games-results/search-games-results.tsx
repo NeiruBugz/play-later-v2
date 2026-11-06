@@ -73,7 +73,7 @@ export function SearchGamesResults({
       >
         <Loader2
           aria-hidden="true"
-          className="text-muted-foreground h-6 w-6 animate-spin"
+          className="h-6 w-6 animate-spin text-muted-foreground"
         />
       </div>
     );
@@ -83,10 +83,12 @@ export function SearchGamesResults({
     return (
       <div
         role="alert"
-        className="text-destructive border-destructive/20 bg-destructive/5 p-2xl rounded-lg border"
+        className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-destructive"
       >
         <p className="font-medium">Search unavailable</p>
-        <p className="body-sm text-muted-foreground mt-sm">{errorMessage}</p>
+        <p className="mt-1.5 text-base text-muted-foreground md:text-sm">
+          {errorMessage}
+        </p>
       </div>
     );
   }
@@ -98,7 +100,7 @@ export function SearchGamesResults({
     return (
       <div
         role="status"
-        className="text-muted-foreground border-border/30 bg-muted/30 p-2xl rounded-lg border text-center"
+        className="rounded-lg border border-border/30 bg-muted/30 p-6 text-center text-muted-foreground"
       >
         No games found matching &ldquo;{query}&rdquo;. Try a different search
         term.
@@ -107,13 +109,13 @@ export function SearchGamesResults({
   }
 
   return (
-    <div aria-live="polite" aria-atomic="false" className="space-y-3xl">
-      <p className="text-muted-foreground body-sm">
+    <div aria-live="polite" aria-atomic="false" className="space-y-8">
+      <p className="text-base text-muted-foreground md:text-sm">
         {games.length} result{games.length !== 1 ? "s" : ""}
         {ownedCount > 0 ? (
           <>
             {" · "}
-            <span className="text-foreground font-medium">
+            <span className="font-medium text-foreground">
               {ownedCount} in your library
             </span>
           </>
@@ -142,13 +144,13 @@ export function SearchGamesResults({
                       src={coverUrl}
                       alt={`Cover for ${game.name}`}
                       loading="lazy"
-                      className="shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg object-cover"
+                      className="aspect-[3/4] w-full overflow-hidden rounded-lg object-cover shadow-md"
                     />
                   ) : (
                     <div
                       role="img"
                       aria-label={`Cover for ${game.name}`}
-                      className="bg-muted shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-lg"
+                      className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted shadow-md"
                     />
                   )}
                   {game.library !== null ? (
@@ -172,7 +174,9 @@ export function SearchGamesResults({
                     </div>
                   ) : null}
                 </div>
-                <p className="truncate text-sm font-medium">{game.name}</p>
+                <p className="truncate text-base font-medium md:text-sm">
+                  {game.name}
+                </p>
                 {game.library !== null ? (
                   <QueueMarker
                     status={game.library.status}
@@ -181,7 +185,7 @@ export function SearchGamesResults({
                 ) : null}
                 <div className="flex h-4 items-center gap-1">
                   {releaseYear !== null && (
-                    <span className="text-muted-foreground text-xs tabular-nums">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {releaseYear}
                     </span>
                   )}

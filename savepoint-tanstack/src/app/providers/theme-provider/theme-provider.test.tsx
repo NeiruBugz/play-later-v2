@@ -9,8 +9,8 @@
  *   system → resolved via prefers-color-scheme
  *
  * Spec 022 Slice 2: the theme system is consolidated to Light / Dark / System.
- * A stored retired theme (e.g. "cartridge", "aurora") is no longer valid and
- * falls back to the configured default; the provider only ever toggles `dark`.
+ * A stored value that is not light/dark/system is no longer valid and falls
+ * back to the configured default; the provider only ever toggles `dark`.
  *
  * Slice 19 GREEN: the provider is hand-rolled (NOT `next-themes`). See
  * DIVERGENCES.md for rationale. The wrapper config below mirrors the canonical
@@ -81,14 +81,6 @@ describe("ThemeProvider (html class application)", () => {
     it("does not apply the dark class to <html>", () => {
       expect(getHtmlClasses()).not.toContain("dark");
     });
-
-    it("does not apply the cartridge class to <html>", () => {
-      expect(getHtmlClasses()).not.toContain("cartridge");
-    });
-
-    it("does not apply the aurora class to <html>", () => {
-      expect(getHtmlClasses()).not.toContain("aurora");
-    });
   });
 
   describe("given theme is dark", () => {
@@ -106,47 +98,37 @@ describe("ThemeProvider (html class application)", () => {
     });
   });
 
-  describe("given a retired theme 'cartridge' is stored in localStorage", () => {
-    beforeEach(() => {
-      stubMatchMedia(false);
-      localStorage.setItem("theme", "cartridge");
-      render(
-        <SavepointThemeProvider defaultTheme="system">
-          <div />
-        </SavepointThemeProvider>
-      );
+  describe("given an unrecognised theme is stored in localStorage", () => {
+    describe("and the system prefers dark", () => {
+      beforeEach(() => {
+        stubMatchMedia(true);
+        localStorage.setItem("theme", "sepia");
+        render(
+          <SavepointThemeProvider defaultTheme="system">
+            <div />
+          </SavepointThemeProvider>
+        );
+      });
+
+      it("falls back to system and applies the dark class", () => {
+        expect(getHtmlClasses()).toContain("dark");
+      });
     });
 
-    it("does not apply a cartridge class to <html> (falls back to system)", () => {
-      expect(getHtmlClasses()).not.toContain("cartridge");
-    });
+    describe("and the system prefers light", () => {
+      beforeEach(() => {
+        stubMatchMedia(false);
+        localStorage.setItem("theme", "sepia");
+        render(
+          <SavepointThemeProvider defaultTheme="system">
+            <div />
+          </SavepointThemeProvider>
+        );
+      });
 
-    it("only ever toggles the dark class, never a retired theme class", () => {
-      const classes = getHtmlClasses();
-      expect(classes).not.toContain("cartridge");
-      expect(classes).not.toContain("aurora");
-      expect(classes).not.toContain("y2k");
-      expect(classes).not.toContain("jewel");
-    });
-  });
-
-  describe("given a retired theme 'aurora' is stored in localStorage", () => {
-    beforeEach(() => {
-      stubMatchMedia(true);
-      localStorage.setItem("theme", "aurora");
-      render(
-        <SavepointThemeProvider defaultTheme="system">
-          <div />
-        </SavepointThemeProvider>
-      );
-    });
-
-    it("does not apply an aurora class to <html> (falls back to system)", () => {
-      expect(getHtmlClasses()).not.toContain("aurora");
-    });
-
-    it("resolves to system — applies the dark class when system prefers dark", () => {
-      expect(getHtmlClasses()).toContain("dark");
+      it("falls back to system and leaves the dark class off", () => {
+        expect(getHtmlClasses()).not.toContain("dark");
+      });
     });
   });
 

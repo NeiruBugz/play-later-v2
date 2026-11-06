@@ -31,7 +31,7 @@ export function UpNextQueueRow({
       {dragHandle}
       <span
         aria-hidden="true"
-        className="text-muted-foreground w-6 shrink-0 text-center text-lg font-semibold tabular-nums"
+        className="w-6 shrink-0 text-center text-lg font-semibold text-muted-foreground tabular-nums"
       >
         {number}
       </span>

@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
 
 export const gameCardVariants = cva(
-  "group relative transition-all duration-normal",
+  "group relative transition-all duration-200",
   {
     variants: {
       layout: {
-        horizontal: "flex gap-xl",
+        horizontal: "flex gap-4",
         vertical: "flex flex-col",
         "vertical-compact": "flex flex-col",
       },
@@ -28,12 +28,12 @@ export const gameCardVariants = cva(
       {
         layout: ["vertical", "vertical-compact"],
         density: "minimal",
-        className: "gap-md",
+        className: "gap-2",
       },
       {
         layout: ["vertical", "vertical-compact"],
         density: ["standard", "detailed"],
-        className: "gap-lg",
+        className: "gap-3",
       },
     ],
     defaultVariants: {
@@ -64,9 +64,9 @@ export const gameCardCoverVariants = cva(
 export const gameCardTitleVariants = cva("font-semibold leading-tight", {
   variants: {
     size: {
-      sm: "body-sm",
-      md: "body-md",
-      lg: "heading-sm",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-xl font-semibold tracking-tight",
     },
     clamp: {
       true: "line-clamp-2",

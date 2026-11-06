@@ -6,7 +6,7 @@ import { AboutPanel } from "./about-panel";
 const elements = {
   querySummary: () => screen.queryByLabelText("Game summary"),
   getSummary: () => screen.getByLabelText("Game summary"),
-  queryFactsLabel: () => screen.queryByText("// ABOUT"),
+  queryFactsLabel: () => screen.queryByRole("heading", { name: "About" }),
   queryReleaseYearTerm: () => screen.queryByText("Release year"),
   queryReleaseYearValue: () => screen.queryByText("2017"),
   queryDeveloperTerm: () => screen.queryByText("Developer"),
@@ -34,7 +34,7 @@ describe("AboutPanel", () => {
       );
     });
 
-    it("renders the // ABOUT facts label", () => {
+    it("renders the About facts label", () => {
       expect(elements.queryFactsLabel()).not.toBeNull();
     });
 

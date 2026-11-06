@@ -15,7 +15,7 @@ export function QueueMarker({
     <span
       data-testid="queue-marker"
       className={cn(
-        "bg-primary/10 text-primary inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex items-center rounded-full bg-primary/5 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-primary",
         className
       )}
     >

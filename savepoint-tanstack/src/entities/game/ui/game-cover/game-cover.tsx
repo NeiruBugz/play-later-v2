@@ -21,7 +21,7 @@ export function GameCover({
         loading={eager ? "eager" : "lazy"}
         decoding="async"
         className={cn(
-          "shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-cover)] object-cover",
+          "aspect-[3/4] w-full overflow-hidden rounded-lg object-cover shadow-md",
           className
         )}
       />
@@ -33,7 +33,7 @@ export function GameCover({
       role="img"
       aria-label={alt}
       className={cn(
-        "bg-muted shadow-paper-md aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-cover)]",
+        "aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted shadow-md",
         className
       )}
     />

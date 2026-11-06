@@ -91,10 +91,10 @@ export function StatusLens({
             data-state={active ? "active" : "inactive"}
             onClick={() => handlePick(chip.value)}
             className={cn(
-              "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium whitespace-nowrap transition-colors",
+              "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium whitespace-nowrap transition-colors md:h-8",
               active
-                ? "bg-primary text-primary-foreground border-transparent"
-                : "bg-card text-foreground border-border hover:bg-muted"
+                ? "border-transparent bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground hover:bg-muted"
             )}
           >
             {chip.dotVariant && !active ? (
@@ -109,7 +109,7 @@ export function StatusLens({
               <span
                 className={cn(
                   "tabular-nums",
-                  active ? "opacity-80" : "text-muted-foreground"
+                  !active && "text-muted-foreground"
                 )}
               >
                 {chip.count}

@@ -48,7 +48,7 @@ export function resolveTheme(theme: Theme): ResolvedTheme {
 
 /**
  * Imperatively apply a theme to <html>: swap classes, set data-theme, set
- * color-scheme. Mirrors the pre-hydration THEME_INIT_SCRIPT in __root.tsx.
+ * color-scheme. Mirrors the pre-hydration THEME_INIT_SCRIPT (shared/lib/theme).
  */
 export function applyThemeToHtml(theme: Theme): void {
   if (typeof document === "undefined") return;

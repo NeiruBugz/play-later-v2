@@ -1,22 +1,24 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { PlatformBadges } from "./platform-badges";
 
-const badgeClassNameFor = (text: HTMLElement | null): string => {
-  // The Badge <div> carries the variant classes; the abbreviation/count text
-  // lives inside it. Walking to the nearest classed ancestor reaches the Badge.
-  // eslint-disable-next-line testing-library/no-node-access
-  const badge = text?.closest("[class]");
-  return badge?.className ?? "";
-};
-
 const elements = {
   queryChip: (label: string) => screen.queryByText(label),
   queryOverflowChip: () => screen.queryByText(/^\+\d+$/),
-  chipVariantClass: (label: string) =>
-    badgeClassNameFor(screen.queryByText(label)),
-  overflowVariantClass: () => badgeClassNameFor(screen.queryByText(/^\+\d+$/)),
+  getChipButton: (label: string) => screen.getByRole("button", { name: label }),
+  queryChipButton: (label: string) =>
+    screen.queryByRole("button", { name: label }),
+  findText: (text: string) => screen.findByText(text),
+  getChipStyle: (label: string) =>
+    // eslint-disable-next-line testing-library/no-node-access
+    screen.getByText(label).closest("[data-variant]")?.className,
+};
+
+const actions = {
+  tapChip: async (label: string) =>
+    userEvent.click(elements.getChipButton(label)),
 };
 
 describe("PlatformBadges", () => {
@@ -50,40 +52,11 @@ describe("PlatformBadges", () => {
       );
     });
 
-    it("colors the PlayStation chip with the playstation brand variant", () => {
-      expect(elements.chipVariantClass("PS5")).toContain("text-[#0070d1]");
-    });
-
-    it("colors the Xbox chip with the xbox brand variant", () => {
-      expect(elements.chipVariantClass("XSX")).toContain("text-[#107c10]");
-    });
-
-    it("keeps an unrecognised platform on the neutral subtle variant", () => {
-      const className = elements.chipVariantClass("Sega Genesis");
-      expect(className).toContain("text-muted-foreground");
-      expect(className).not.toContain("text-[#0070d1]");
-    });
-  });
-
-  describe("given an overflow of platforms", () => {
-    beforeEach(() => {
-      render(
-        <PlatformBadges
-          platforms={[
-            "PlayStation 5",
-            "Xbox Series X|S",
-            "Nintendo Switch",
-            "PC (Microsoft Windows)",
-            "Sega Genesis",
-          ]}
-        />
-      );
-    });
-
-    it("keeps the overflow '+N' chip on the neutral subtle variant", () => {
-      expect(elements.overflowVariantClass()).toContain(
-        "text-muted-foreground"
-      );
+    it("styles PlayStation, Xbox and unrecognised chips the same", () => {
+      const playstation = elements.getChipStyle("PS5");
+      expect(playstation).toBeDefined();
+      expect(elements.getChipStyle("XSX")).toBe(playstation);
+      expect(elements.getChipStyle("Sega Genesis")).toBe(playstation);
     });
   });
 
@@ -140,6 +113,49 @@ describe("PlatformBadges", () => {
 
     it("collapses the overflow into a single chip showing the remaining count", () => {
       expect(elements.queryOverflowChip()?.textContent).toBe("+2");
+    });
+  });
+
+  describe("given an abbreviated platform badge", () => {
+    beforeEach(async () => {
+      render(<PlatformBadges platforms={["PlayStation 5"]} />);
+      await actions.tapChip("PS5");
+    });
+
+    it("shows the full platform name after tapping the badge", async () => {
+      expect(await elements.findText("PlayStation 5")).toBeVisible();
+    });
+  });
+
+  describe("given a badge whose label already is the full name", () => {
+    beforeEach(() => {
+      render(<PlatformBadges platforms={["Atari Jaguar"]} />);
+    });
+
+    it("offers nothing to tap", () => {
+      expect(elements.queryChipButton("Atari Jaguar")).toBeNull();
+    });
+  });
+
+  describe("given more than four platforms and the overflow chip is tapped", () => {
+    beforeEach(async () => {
+      render(
+        <PlatformBadges
+          platforms={[
+            "Xbox Series X|S",
+            "PlayStation 4",
+            "PC (Microsoft Windows)",
+            "PlayStation 5",
+            "Nintendo Switch",
+            "Linux",
+          ]}
+        />
+      );
+      await actions.tapChip("+2");
+    });
+
+    it("lists the hidden platform names", async () => {
+      expect(await elements.findText("Nintendo Switch, Linux")).toBeVisible();
     });
   });
 });

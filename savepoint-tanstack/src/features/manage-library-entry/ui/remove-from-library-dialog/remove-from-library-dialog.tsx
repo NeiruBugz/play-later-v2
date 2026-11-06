@@ -1,12 +1,5 @@
 import { Button } from "@/shared/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+import { ModalFooter, ResponsiveModal } from "@/shared/ui/responsive-modal";
 
 type RemoveFromLibraryDialogProps = {
   open: boolean;
@@ -27,19 +20,18 @@ export function RemoveFromLibraryDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        onClick={(event) => event.stopPropagation()}
-        onMouseDown={(event) => event.stopPropagation()}
+    <div
+      className="contents"
+      onClick={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
+    >
+      <ResponsiveModal
+        open={open}
+        onOpenChange={onOpenChange}
+        title={`Remove ${gameTitle} from your library?`}
+        description="Its play history and rating will be deleted. Your notes stay in your Journal."
       >
-        <DialogHeader>
-          <DialogTitle>{`Remove ${gameTitle} from your library?`}</DialogTitle>
-          <DialogDescription>
-            Its play history and rating will be deleted. Your notes stay in your
-            Journal.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-sm">
+        <ModalFooter>
           <Button
             type="button"
             variant="outline"
@@ -50,8 +42,8 @@ export function RemoveFromLibraryDialog({
           <Button type="button" variant="destructive" onClick={handleConfirm}>
             Remove
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </ModalFooter>
+      </ResponsiveModal>
+    </div>
   );
 }

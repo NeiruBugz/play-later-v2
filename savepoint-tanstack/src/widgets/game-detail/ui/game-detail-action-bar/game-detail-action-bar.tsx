@@ -28,7 +28,7 @@ export function GameDetailActionBar({
   return (
     <div
       data-testid="game-detail-action-bar"
-      className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-(--bottom-nav-height) z-40 flex items-center justify-between gap-3 border-t px-4 py-3 backdrop-blur-sm md:hidden"
+      className="fixed inset-x-0 bottom-(--bottom-nav-height) z-40 flex items-center justify-between gap-3 border-t bg-background/95 py-3 pr-safe pl-safe backdrop-blur-sm [--safe-floor:1rem] supports-[backdrop-filter]:bg-background/80 md:hidden"
     >
       <StatusControl
         status={libraryStatus.status}

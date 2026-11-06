@@ -1,7 +1,13 @@
-import type { ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 
 import { keepOpenOnToastPress } from "@/shared/lib/keep-open-on-toast-press";
 import { useIsDesktop } from "@/shared/lib/use-media-query";
+import { cn } from "@/shared/lib/utils";
 
 import {
   Dialog,
@@ -12,17 +18,52 @@ import {
 } from "./dialog";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "./sheet";
 
+const ModalVariantContext = createContext<"dialog" | "sheet">("dialog");
+
+/** Scroll area of a modal body: the sheet's `SheetBody` on phone, a plain block in the dialog. */
+export function ModalBody({ className, ...props }: ComponentProps<"div">) {
+  const variant = useContext(ModalVariantContext);
+  if (variant === "sheet") {
+    return <SheetBody className={className} {...props} />;
+  }
+  return <div className={className} {...props} />;
+}
+
+/** Action row of a modal: the sticky safe-area `SheetFooter` on phone, a right-aligned row in the dialog. */
+export function ModalFooter({ className, ...props }: ComponentProps<"div">) {
+  const variant = useContext(ModalVariantContext);
+  if (variant === "sheet") {
+    return (
+      <SheetFooter
+        className={cn("flex-row justify-end gap-1.5 pb-0!", className)}
+        {...props}
+      />
+    );
+  }
+  return (
+    <div
+      data-slot="dialog-actions"
+      className={cn("flex justify-end gap-1.5", className)}
+      {...props}
+    />
+  );
+}
+
 export type ResponsiveModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
+  title: ReactNode;
   description?: string;
+  /** Content shown above the title inside the header (for example a category badge). */
+  eyebrow?: ReactNode;
   children: ReactNode;
   /** Extra classes applied to the content container of both variants. */
   contentClassName?: string;
@@ -44,6 +85,7 @@ export function ResponsiveModal({
   onOpenChange,
   title,
   description,
+  eyebrow,
   children,
   contentClassName,
   dialogTestId,
@@ -56,7 +98,8 @@ export function ResponsiveModal({
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className={contentClassName} data-testid={dialogTestId}>
-          <DialogHeader>
+          <DialogHeader className="pr-8">
+            {eyebrow}
             <DialogTitle>{title}</DialogTitle>
             {description !== undefined ? (
               <DialogDescription>{description}</DialogDescription>
@@ -72,16 +115,19 @@ export function ResponsiveModal({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
-        className={contentClassName}
+        className={cn("pb-safe [--safe-floor:1rem]", contentClassName)}
         data-testid={sheetTestId}
       >
         <SheetHeader>
+          {eyebrow}
           <SheetTitle>{title}</SheetTitle>
           {description !== undefined ? (
             <SheetDescription>{description}</SheetDescription>
           ) : null}
         </SheetHeader>
-        {children}
+        <ModalVariantContext.Provider value="sheet">
+          {children}
+        </ModalVariantContext.Provider>
       </SheetContent>
     </Sheet>
   );
