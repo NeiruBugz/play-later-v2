@@ -24,7 +24,7 @@ function GameSearchRoute() {
         <PageHeader
           title="Search Games"
           sub="Find games to add to your SavePoint library"
-          className="mb-0"
+          className="mb-4"
         />
         <div className="space-y-8">
           <SearchGamesInput initialQuery={query} />

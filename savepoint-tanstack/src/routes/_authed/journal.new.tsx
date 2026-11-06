@@ -27,7 +27,7 @@ function NewNoteRoute() {
         <PageHeader
           title="New note"
           sub="Log time played or write a note about a game in your library."
-          className="mb-0"
+          className="mb-4"
         />
         <LogFormHost
           gameSlug={game}

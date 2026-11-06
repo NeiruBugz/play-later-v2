@@ -27,7 +27,7 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
     <article className="mx-auto max-w-prose space-y-4">
       <PageHeader
         title="Note"
-        className="mb-0"
+        className="mb-4"
         actions={
           <>
             <Link

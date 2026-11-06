@@ -104,10 +104,12 @@ export function ProfileOverview({
                 params={{ username: profile.username }}
                 className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
               >
-                <span className="font-medium text-foreground tabular-nums">
-                  {followerCount}
-                </span>{" "}
-                Followers
+                <span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {followerCount}
+                  </span>{" "}
+                  Followers
+                </span>
               </Link>
               <span aria-hidden="true" className="mx-1">
                 ·
@@ -117,10 +119,12 @@ export function ProfileOverview({
                 params={{ username: profile.username }}
                 className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
               >
-                <span className="font-medium text-foreground tabular-nums">
-                  {followingCount}
-                </span>{" "}
-                Following
+                <span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {followingCount}
+                  </span>{" "}
+                  Following
+                </span>
               </Link>
             </p>
           ) : null}

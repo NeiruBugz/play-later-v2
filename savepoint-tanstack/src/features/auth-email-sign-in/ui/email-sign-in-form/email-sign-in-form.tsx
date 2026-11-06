@@ -44,7 +44,7 @@ export function EmailSignInForm({ enabled }: EmailSignInFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className="space-y-1.5">
         <FormField
           control={form.control}
           name="email"
