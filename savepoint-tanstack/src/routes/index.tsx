@@ -30,7 +30,7 @@ function LandingPage() {
             aria-hidden="true"
             className="h-8 w-8 shrink-0"
           />
-          <span className="text-base font-semibold tracking-tight text-foreground">
+          <span className="font-display text-base font-bold tracking-tight text-foreground">
             SavePoint
           </span>
         </Link>

@@ -16,6 +16,7 @@ export function NextStepButton({
   return (
     <Button
       type="button"
+      variant="outline"
       size={size}
       disabled={disabled}
       className={className}

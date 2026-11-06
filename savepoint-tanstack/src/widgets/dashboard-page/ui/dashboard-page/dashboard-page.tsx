@@ -52,8 +52,9 @@ export function DashboardPage({ data }: DashboardPageProps) {
                     label: "Pick from Up Next",
                     to: "/library",
                     search: { status: "UP_NEXT" },
+                    variant: "outline",
                   }
-                : { label: "Add a game", onClick: addGame }
+                : { label: "Add a game", onClick: addGame, variant: "outline" }
             }
           />
         )}

@@ -45,7 +45,9 @@ export function EmptyLibraryHero({
           Track what you&apos;re playing, what you&apos;ve finished, and
           what&apos;s next.
         </p>
-        <Button onClick={onAddGame}>Add a game</Button>
+        <Button variant="outline" onClick={onAddGame}>
+          Add a game
+        </Button>
       </div>
 
       <div className="w-full max-w-md text-left">

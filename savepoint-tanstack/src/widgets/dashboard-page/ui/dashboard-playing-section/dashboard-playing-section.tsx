@@ -48,6 +48,7 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
       </div>
       <Button
         type="button"
+        variant="outline"
         size="sm"
         onClick={() => openGlobalAction(navigate, "log-session", game.slug)}
       >

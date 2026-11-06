@@ -30,6 +30,7 @@ export function JournalStatsRail() {
           Time played is enough — a note is optional.
         </p>
         <Button
+          variant="outline"
           className="w-full"
           onClick={() => openGlobalAction(navigate, "log-session")}
         >

@@ -438,7 +438,11 @@ export function LibraryPage(props: LibraryPageProps) {
               icon={Library}
               title="No games yet"
               description="Start your library by adding a game, or import your games from Steam."
-              action={{ label: "Add a game", onClick: addGame }}
+              action={{
+                label: "Add a game",
+                onClick: addGame,
+                variant: "outline",
+              }}
               secondaryAction={{
                 label: "Import from Steam",
                 to: "/steam/games",
@@ -451,7 +455,11 @@ export function LibraryPage(props: LibraryPageProps) {
               icon={SearchX}
               title="Nothing matches these filters"
               description="No games in your library match the current filters."
-              action={{ label: "Clear filters", onClick: clearFilters }}
+              action={{
+                label: "Clear filters",
+                onClick: clearFilters,
+                variant: "outline",
+              }}
             />
           ) : (
             <ul
