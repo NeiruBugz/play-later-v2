@@ -276,7 +276,7 @@ Conventions for every slice:
     Each option is a token or font swap behind a dev-only query switch, `?preview=accent-b&font=c`, that is removed in Slice 17. **[Agent: react-frontend]**
   - [ ] Capture home, library and game page for each option with the review script: phone first, Light and Dark. Capture desktop only for the option the owner favours on the phone. Present them together with the owner's list of name candidates. If every option is rejected, prepare a new set. **[Agent: testing]**
 
-    Owner choice (2026-11-06, phone captures in `review/phase2/options.html`): accent **B, Plum** (`oklch(0.48 0.13 340)` Light / `oklch(0.72 0.11 340)` Dark) and title font **C, Zilla Slab** (500/700). Product name: pending; the owner asked for candidate names.
+    Owner choice (2026-11-06, phone captures in `review/phase2/options.html`): accent **B, Plum** (`oklch(0.48 0.13 340)` Light / `oklch(0.72 0.11 340)` Dark) and title font **C, Zilla Slab** (500/700). Product name: **"Continue?"** — with the question mark in the logo, header, tab title and landing; without it in running text and in the address (chosen in the address slice). Recorded in `functional-spec.md` Change Log.
   - [ ] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
 
 - [ ] **Slice 17: The app shows the new accent and title font**
