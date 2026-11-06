@@ -301,7 +301,7 @@ Conventions for every slice:
     Slice notes (2026-11-06): the app-wide Log action (desktop sidebar, phone bottom-nav centre) is navigation, not a screen's primary button; the selected "All" status tab in Plum is a §2.9 selected item. `/steam/games` has no filled primary (its "Import from Steam" is outline).
 
 **Slice 18: Covers look the same everywhere**
-  - [ ] Move `entities/game/ui/game-cover/` to `shared/ui/game-cover/` with the API `{ src, name, size, priority }`.
+  - [x] Move `entities/game/ui/game-cover/` to `shared/ui/game-cover/` with the API `{ src, name, size, priority }`.
     - Look: `aspect-[2/3]`, one radius, shadow and ring.
     - Placeholder: the game name in `line-clamp-3` with "…".
     - Hover feedback comes from the parent link via `group-hover`; IGDB URLs still come from `shared/lib/igdb-image`.
