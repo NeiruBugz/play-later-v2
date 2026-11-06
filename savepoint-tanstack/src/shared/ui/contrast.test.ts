@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { STATUS_VARIANTS_WITH_CONTRAST_CHECK } from "./contrast-status-variants";
+
 type Rgb = [number, number, number];
 type Mode = "light" | "dark";
 
@@ -154,11 +156,14 @@ describe.each(modes)("contrast in %s", (mode) => {
     }
   );
 
-  it.each(["want", "playing", "done"])("status %s chip text", (status) => {
-    expect(
-      contrast(at(`status-${status}-foreground`), at(`status-${status}`))
-    ).toBeGreaterThanOrEqual(TEXT);
-  });
+  it.each(STATUS_VARIANTS_WITH_CONTRAST_CHECK)(
+    "status %s chip text",
+    (status) => {
+      expect(
+        contrast(at(`status-${status}-foreground`), at(`status-${status}`))
+      ).toBeGreaterThanOrEqual(TEXT);
+    }
+  );
 
   it.each(["background", "card", "popover"])(
     "accent text (links) on %s",
