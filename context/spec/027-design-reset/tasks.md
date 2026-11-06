@@ -268,16 +268,17 @@ Conventions for every slice:
     - Copy `review/phase1/after` to `review/phase2/before`, since the phase 2 "before" is the shipped phase 1.
     - Release 2 can ship after this. **[Agent: testing]**
 
-- [ ] **Slice 16: Owner picks the accent, the title font and the name from options shown on a phone**
+- [x] **Slice 16: Owner picks the accent, the title font and the name from options shown on a phone**
   - [x] Prepare 2–3 accent options and 2–3 title-font options:
     - accents suit the warm surfaces, lie outside hue 170°–220°, and each has fill and text tones meeting AA in both modes;
     - fonts load with at most 2 weights and `display=swap`.
 
     Each option is a token or font swap behind a dev-only query switch, `?preview=accent-b&font=c`, that is removed in Slice 17. **[Agent: react-frontend]**
-  - [ ] Capture home, library and game page for each option with the review script: phone first, Light and Dark. Capture desktop only for the option the owner favours on the phone. Present them together with the owner's list of name candidates. If every option is rejected, prepare a new set. **[Agent: testing]**
+  - [x] Capture home, library and game page for each option with the review script: phone first, Light and Dark. Capture desktop only for the option the owner favours on the phone. Present them together with the owner's list of name candidates. If every option is rejected, prepare a new set. **[Agent: testing]**
 
     Owner choice (2026-11-06, phone captures in `review/phase2/options.html`): accent **B, Plum** (`oklch(0.48 0.13 340)` Light / `oklch(0.72 0.11 340)` Dark) and title font **C, Zilla Slab** (500/700). Product name: **"Continue?"** — with the question mark in the logo, header, tab title and landing; without it in running text and in the address (chosen in the address slice). Recorded in `functional-spec.md` Change Log.
-  - [ ] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
+    The owner approved Plum + Zilla Slab together on phone and desktop (`review/phase2/chosen.html`). The unchosen option captures (accent-a, accent-c, font-a, font-b) are deleted; baseline, accent-b, font-c and chosen remain.
+  - [x] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
 
 - [ ] **Slice 17: The app shows the new accent and title font**
   - [ ] Apply the chosen accent as `--primary` / `--primary-foreground`, add `--accent-text` (with `--color-accent-text`), and set `--ring`.
