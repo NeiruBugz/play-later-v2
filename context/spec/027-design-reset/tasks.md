@@ -286,7 +286,7 @@ Conventions for every slice:
     - Swap Space Grotesk for the chosen font in the Google Fonts `<link>` and `--font-display`, with a preload for the main weight.
     - Remove the preview switch.
     - Apply the font to `PageHeader`, `DialogTitle`, the game-page name, the landing h1 and the header product name only. **[Agent: react-frontend]**
-  - [ ] Fix what the first Slice 17 verify found:
+  - [x] Fix what the first Slice 17 verify found:
     - The landing header product name (`routes/index.tsx`) renders in Geist; give it the title font like the sidebar and sign-in wordmarks.
     - Library and home render a filled primary button on every card (Mark done / Start playing / Play again), against §2.0's one primary button per screen or dialog. Owner decision (2026-11-06): per-card actions become outline (secondary) buttons; only a screen's main action stays primary. **[Agent: react-frontend]**
   - [ ] Verify:
