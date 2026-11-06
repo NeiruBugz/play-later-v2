@@ -355,7 +355,7 @@ Conventions for every slice:
     - Remove the old `logo.svg` and `og-image.svg`. **[Agent: react-frontend]**
 
     Owner choice (2026-11-06): mark B "Open loop" (`review/phase2/logo-options/option-b-mark.svg`); `LogoWordmark` is live Zilla Slab 700 text "Continue?", not an SVG wordmark; static images are rendered with Zilla Slab at export.
-  - [ ] Write unit tests:
+  - [x] Write unit tests:
     - `head()` output: title helper, absolute og URLs, theme-color pair;
     - the manifest route payload: name, short name, icons, colors;
     - `BETTER_AUTH_EXTRA_ORIGINS` parsing;
