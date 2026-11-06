@@ -322,7 +322,7 @@ Conventions for every slice:
 
     Slice notes (2026-11-06): chips match on library (grid and list), game page, home and search — 20px, 2px 8px, fully rounded, 12px/500, labels Want / Playing / Done / Let go; Playing equals `--primary`; Let go uses the Done colour; text contrast 5.05–8.24. The public profile library shows no status at all (it didn't before either), so it has no chip. The list-view toggle is desktop-only, so the list was measured at 1440.
 
-- [ ] **Slice 20: Up Next is a shelf of covers on the home screen**
+- [x] **Slice 20: Up Next is a shelf of covers on the home screen**
   - [x] Add `widgets/up-next-shelf/`: a horizontal scroll-snap row in queue order.
     - The first cover is larger, capped at about 60% of the phone width so the next one peeks.
     - Use `overscroll-x-contain` and `min-w-0` on parents, so the page never scrolls sideways.
@@ -330,7 +330,7 @@ Conventions for every slice:
     - Replace the presentation of the spec-026 Up Next block on home. Its data and actions are unchanged. **[Agent: react-frontend]**
   - [x] Show the whole Up Next queue (up to 5) on Home instead of the top 3 (owner, 2026-11-06; supersedes spec 026's "top 3 on Home"). Data change in the home dashboard worker; run integration. **[Agent: tanstack-fullstack]**
   - [x] Write behaviour tests: covers render in queue order and the first is marked as next; the empty state's button opens the command palette. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). With 5 games queued, at 360, 390 and 430 and at desktop width, confirm:
       - the shelf is the first and largest element above the fold;
@@ -339,6 +339,8 @@ Conventions for every slice:
       - the shelf scrolls sideways while `document.scrollingElement.scrollWidth <= innerWidth`.
     - Empty the queue and confirm the empty state.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+    Slice notes (2026-11-06): with 5 queued the shelf follows the page header and is the largest block above the fold at 360/390/430/1440; the first cover is larger (234×454 vs 144×291 at 390); the second peeks at phone widths; the shelf scrolls while the page does not. At 1440 the five covers fit, so the shelf doesn't scroll (§2.12's sideways criterion is for phone width). The empty outline matches the first cover's height and position.
 
 - [ ] **Slice 21: The app, link previews and the home-screen icon show the new name and logo**
   - [ ] Complete `shared/config/site.ts` (`PRODUCT_NAME`, `PRODUCT_TAGLINE`, `PRODUCT_DESCRIPTION`, `OG_IMAGE_PATH`) and add a `pageTitle(part?)` helper.
