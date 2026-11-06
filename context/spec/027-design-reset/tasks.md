@@ -296,18 +296,16 @@ Conventions for every slice:
     - Check accent fill and text contrast in both modes.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] 
-
     Slice notes (2026-11-06): the app-wide Log action (desktop sidebar, phone bottom-nav centre) is navigation, not a screen's primary button; the selected "All" status tab in Plum is a §2.9 selected item. `/steam/games` has no filled primary (its "Import from Steam" is outline).
 
-**Slice 18: Covers look the same everywhere**
+- [x] **Slice 18: Covers look the same everywhere**
   - [x] Move `entities/game/ui/game-cover/` to `shared/ui/game-cover/` with the API `{ src, name, size, priority }`.
     - Look: `aspect-[2/3]`, one radius, shadow and ring.
     - Placeholder: the game name in `line-clamp-3` with "…".
     - Hover feedback comes from the parent link via `group-hover`; IGDB URLs still come from `shared/lib/igdb-image`.
     - Replace the inline cover treatments on home, Up Next, library, search results, the Add game sheet, profile and game page. **[Agent: react-frontend]**
   - [x] Write behaviour tests for `GameCover`: an image with the game name as its accessible name; the placeholder when `src` is missing; a long name clamped to three lines. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, measure covers on every listed screen at phone and desktop width and confirm they share aspect ratio, radius, shadow and border, and the same hover change at desktop. Use a seeded game without art to check the placeholder.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
