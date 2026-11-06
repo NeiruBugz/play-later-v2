@@ -257,23 +257,6 @@ export default tseslint.config(
   // regress on the rules it is not already exempt from. Delete an entry when
   // its slice lands; do not add files.
   //
-  // Slice 12 (readable text): the last `text-[10px]` / `text-[11px]` uses.
-  {
-    files: [
-      "src/entities/game/ui/platform-badges/platform-badge.tsx",
-      "src/entities/game/ui/platform-badges/platform-badges.tsx",
-      "src/entities/library-item/ui/library-status-badge/library-status-badge.tsx",
-      "src/widgets/app-bottom-nav/ui/app-bottom-nav/app-bottom-nav.tsx",
-      "src/widgets/library-item-card/ui/library-item-card/library-item-card.tsx",
-      "src/widgets/profile-overview/ui/profile-overview/profile-overview.tsx",
-    ],
-    rules: {
-      "better-tailwindcss/no-restricted-classes": noRestrictedClasses(
-        ARBITRARY_COLOR,
-        PALETTE_COLOR
-      ),
-    },
-  },
   // Slice 13 (only today's palette): raw palette colors on the landing page and
   // the rating stars.
   {
@@ -285,7 +268,7 @@ export default tseslint.config(
       ),
     },
   },
-  // Slices 12 and 13: landing widgets carry both `text-[Npx]` and palette colors.
+  // Slice 13: landing widgets carry palette colors.
   {
     files: [
       "src/widgets/landing-features/ui/landing-features/landing-features.tsx",

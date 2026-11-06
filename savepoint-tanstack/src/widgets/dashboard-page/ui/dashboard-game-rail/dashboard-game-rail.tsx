@@ -45,7 +45,7 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
           <LibraryStatusBadge status={item.status} />
         </div>
       </div>
-      <p className="mt-2 truncate text-sm leading-tight font-medium group-hover:underline">
+      <p className="mt-2 truncate text-base leading-tight font-medium group-hover:underline md:text-sm">
         {item.game.title}
       </p>
       <QueueMarker
@@ -54,9 +54,9 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
         className="mt-1"
       />
       {item.platform ? (
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
           {item.platform}
-        </p>
+        </span>
       ) : null}
     </Link>
   );
@@ -116,7 +116,9 @@ export function DashboardGameRail({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+        <p className="text-base text-muted-foreground md:text-sm">
+          {emptyMessage}
+        </p>
       )}
     </section>
   );

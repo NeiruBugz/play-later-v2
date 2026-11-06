@@ -31,7 +31,9 @@ export function PageHeader({
           {title}
         </h1>
         {sub ? (
-          <p className="mt-1.5 text-sm text-muted-foreground">{sub}</p>
+          <p className="mt-1.5 text-base text-muted-foreground md:text-sm">
+            {sub}
+          </p>
         ) : null}
       </div>
       {actions ? (

@@ -8,7 +8,7 @@ export function LandingHero() {
   return (
     <div className="space-y-10">
       <div className="space-y-6">
-        <span className="inline-flex items-center gap-2 rounded-full border border-border/40 bg-primary/5 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-muted-foreground uppercase">
+        <span className="inline-flex items-center gap-2 rounded-full border border-border/40 bg-primary/5 px-3 py-1 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
           <span
             aria-hidden="true"
             className="h-1.5 w-1.5 rounded-full bg-primary"
@@ -36,7 +36,7 @@ export function LandingHero() {
           </Link>
         </div>
 
-        <ul className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+        <ul className="flex flex-wrap items-center gap-x-3 gap-y-2 text-base text-muted-foreground md:text-sm">
           <li className="inline-flex items-center gap-1.5">
             <Check
               aria-hidden="true"

@@ -113,7 +113,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
             <LibraryStatusBadge status={status} />
           </div>
         </div>
-        <h3 className="mt-2 line-clamp-1 text-sm leading-tight font-medium group-hover:underline">
+        <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
           {item.game.title}
         </h3>
         <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
@@ -124,9 +124,9 @@ const LibraryGridTile = memo(function LibraryGridTile({
           <NotOwnedTag status={status} isOwned={ownership.isOwned} />
         </div>
         {item.platform ? (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
             {item.platform}
-          </p>
+          </span>
         ) : null}
       </Link>
       <div

@@ -33,9 +33,9 @@ export function AppBottomNav() {
           activeProps={{
             "aria-current": "page" as const,
             className:
-              "text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium",
+              "text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium",
           }}
-          className="flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground"
+          className="flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           <Icon size={20} aria-hidden="true" />
           {label}
@@ -56,7 +56,7 @@ export function AppBottomNav() {
         </span>
         <span
           aria-hidden="true"
-          className="-mt-1 text-[11px] font-medium text-muted-foreground"
+          className="-mt-1 text-xs font-medium text-muted-foreground"
         >
           Log
         </span>
@@ -69,9 +69,9 @@ export function AppBottomNav() {
           activeProps={{
             "aria-current": "page" as const,
             className:
-              "text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium",
+              "text-foreground flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium",
           }}
-          className="flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground"
+          className="flex h-11 min-h-11 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           <Icon size={20} aria-hidden="true" />
           {label}

@@ -19,7 +19,7 @@ export function PlatformBadgeItem({ name }: { name: string }) {
         render={
           <Badge
             variant={variant}
-            className="flex h-5 items-center gap-1 rounded-md text-[11px]"
+            className="flex h-5 items-center gap-1 rounded-md"
           />
         }
       >

@@ -20,7 +20,7 @@ export function AuthPageView({
           <p className="font-display text-5xl font-bold tracking-tight">
             SavePoint
           </p>
-          <p className="mt-1.5 text-xs font-medium text-muted-foreground">
+          <p className="mt-1.5 text-base font-medium text-muted-foreground md:text-sm">
             Your games and the things you&apos;ve thought about them.
           </p>
         </div>

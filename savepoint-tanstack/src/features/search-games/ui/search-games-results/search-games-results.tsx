@@ -86,7 +86,9 @@ export function SearchGamesResults({
         className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-destructive"
       >
         <p className="font-medium">Search unavailable</p>
-        <p className="mt-1.5 text-sm text-muted-foreground">{errorMessage}</p>
+        <p className="mt-1.5 text-base text-muted-foreground md:text-sm">
+          {errorMessage}
+        </p>
       </div>
     );
   }
@@ -108,7 +110,7 @@ export function SearchGamesResults({
 
   return (
     <div aria-live="polite" aria-atomic="false" className="space-y-8">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground md:text-sm">
         {games.length} result{games.length !== 1 ? "s" : ""}
         {ownedCount > 0 ? (
           <>
@@ -172,7 +174,9 @@ export function SearchGamesResults({
                     </div>
                   ) : null}
                 </div>
-                <p className="truncate text-sm font-medium">{game.name}</p>
+                <p className="truncate text-base font-medium md:text-sm">
+                  {game.name}
+                </p>
                 {game.library !== null ? (
                   <QueueMarker
                     status={game.library.status}

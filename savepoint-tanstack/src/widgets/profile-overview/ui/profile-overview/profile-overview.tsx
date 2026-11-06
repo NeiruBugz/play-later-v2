@@ -135,7 +135,9 @@ export function ProfileOverview({
                 <span className="text-base font-bold text-foreground tabular-nums">
                   {value}
                 </span>
-                <p className="text-xs text-muted-foreground">{label}</p>
+                <span className="block text-xs text-muted-foreground">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -187,12 +189,12 @@ export function ProfileOverview({
                         className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
                       />
                       <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2 text-white">
-                        <p className="line-clamp-2 text-xs leading-tight font-medium">
+                        <span className="line-clamp-2 block text-xs leading-tight font-medium">
                           {game.title}
-                        </p>
-                        <p className="text-[10px] text-white/80">
+                        </span>
+                        <span className="block text-xs text-white/80">
                           {formatRelativeTime(new Date(game.lastPlayed))}
-                        </p>
+                        </span>
                       </div>
                     </Link>
                   ))}

@@ -41,9 +41,9 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
           {game.title}
         </Link>
         {item.platform ? (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
             {item.platform}
-          </p>
+          </span>
         ) : null}
       </div>
       <Button

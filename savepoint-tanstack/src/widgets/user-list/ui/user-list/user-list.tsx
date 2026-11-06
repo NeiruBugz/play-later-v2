@@ -34,7 +34,7 @@ export function UserList({ variant, entries, total }: UserListProps) {
 
   return (
     <div className="space-y-2" data-testid={`user-list-${variant}`}>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground md:text-sm">
         <span className="font-semibold text-foreground tabular-nums">
           {total}
         </span>{" "}
@@ -67,13 +67,13 @@ export function UserList({ variant, entries, total }: UserListProps) {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">
+                <p className="truncate text-base font-medium text-foreground md:text-sm">
                   {displayName}
                 </p>
                 {entry.username ? (
-                  <p className="truncate text-xs text-muted-foreground">
+                  <span className="block truncate text-xs text-muted-foreground">
                     @{entry.username}
-                  </p>
+                  </span>
                 ) : null}
               </div>
             </div>
