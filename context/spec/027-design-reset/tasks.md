@@ -376,7 +376,7 @@ Conventions for every slice:
     - Pin `s3_bucket_name` in tfvars and add `lifecycle { prevent_destroy = true }` to the user pool, bucket and pool domain.
     - Do not change `project_name` or `domain_prefix`.
     - `terraform plan` must show only in-place updates. The owner applies dev, then prod. **[Agent: aws-infra]**
-  - [ ] Add a "Spec 027 phase 2 — address change" section to `docs/cutover-rollback.md`. It covers the cutover runbook from tech spec §2.9 with a verification and rollback for each step, the re-sign-in and theme-reset notes, and the rule never to detach the old domain. Correct the claim that sessions survive the change. **[Agent: aws-infra]**
+  - [x] Add a "Spec 027 phase 2 — address change" section to `docs/cutover-rollback.md`. It covers the cutover runbook from tech spec §2.9 with a verification and rollback for each step, the re-sign-in and theme-reset notes, and the rule never to detach the old domain. Correct the claim that sessions survive the change. **[Agent: aws-infra]**
   - [ ] Guide the owner through the Vercel steps in order, one at a time, without changing Vercel state yourself:
     1. add the new domain;
     2. verify TLS;
