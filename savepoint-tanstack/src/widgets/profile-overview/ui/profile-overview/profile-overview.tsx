@@ -99,13 +99,13 @@ export function ProfileOverview({
           followerCount !== undefined &&
           followingCount !== undefined ? (
             <p
-              className="mt-1 text-sm text-muted-foreground"
+              className="mt-1 flex flex-wrap items-center text-sm text-muted-foreground"
               data-testid="profile-social-counts"
             >
               <Link
                 to="/u/$username/followers"
                 params={{ username: profile.username }}
-                className="transition-colors hover:text-foreground"
+                className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
               >
                 <span className="font-medium text-foreground tabular-nums">
                   {followerCount}
@@ -118,7 +118,7 @@ export function ProfileOverview({
               <Link
                 to="/u/$username/following"
                 params={{ username: profile.username }}
-                className="transition-colors hover:text-foreground"
+                className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
               >
                 <span className="font-medium text-foreground tabular-nums">
                   {followingCount}

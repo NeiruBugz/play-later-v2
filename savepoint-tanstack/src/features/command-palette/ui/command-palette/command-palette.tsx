@@ -121,6 +121,7 @@ export function CommandPalette({
             <CommandGroup>
               <CommandItem
                 value="see-all-results"
+                className="p-0"
                 onSelect={() => {
                   void navigate({
                     to: "/games/search",
@@ -132,6 +133,7 @@ export function CommandPalette({
                 <Link
                   to="/games/search"
                   search={{ q: query.trim() }}
+                  className="flex min-h-11 w-full items-center px-3 py-2 md:min-h-0"
                   onClick={(event) => {
                     event.stopPropagation();
                     closeAndReset();

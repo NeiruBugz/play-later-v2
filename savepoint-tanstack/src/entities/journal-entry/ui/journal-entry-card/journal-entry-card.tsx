@@ -76,7 +76,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="-my-3 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary md:my-0 md:min-h-0"
             onClick={(event) => event.stopPropagation()}
           >
             <span className="font-medium">{entry.game.title}</span>

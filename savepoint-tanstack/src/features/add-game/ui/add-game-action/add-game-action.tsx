@@ -46,7 +46,7 @@ export function AddGameAction({ game, variant = "icon" }: AddGameActionProps) {
       disabled={isAdding}
       aria-busy={isAdding}
       aria-label={`Add ${game.name}`}
-      className="size-8 rounded-full"
+      className="rounded-full md:size-8"
       onClick={() => void add()}
     >
       {icon}

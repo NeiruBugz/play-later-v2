@@ -31,7 +31,7 @@ function SettingsLayout() {
   const backLink = (
     <Link
       to="/profile"
-      className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+      className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground hover:text-foreground md:mb-6 md:min-h-0"
     >
       <ArrowLeft className="h-4 w-4" aria-hidden="true" />
       Back to profile

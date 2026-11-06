@@ -25,7 +25,7 @@ export function ViewModeToggle({
         <Button
           key={mode}
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           aria-label={label}
           aria-pressed={viewMode === mode}
           onClick={() => onViewModeChange(mode)}

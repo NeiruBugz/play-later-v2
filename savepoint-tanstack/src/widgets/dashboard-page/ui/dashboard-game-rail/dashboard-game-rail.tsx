@@ -88,7 +88,7 @@ export function DashboardGameRail({
           <Link
             to="/library"
             search={viewAll}
-            className="group inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="group -my-3 inline-flex min-h-11 items-center text-xs font-medium text-muted-foreground hover:text-foreground md:my-0 md:min-h-0"
           >
             {viewAllLabel}
             <ChevronRight

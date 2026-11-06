@@ -45,7 +45,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
               <Link
                 to="/journal/$id"
                 params={{ id: note.id }}
-                className="flex flex-col border-l-2 border-border pl-3 transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="flex min-h-11 flex-col justify-center border-l-2 border-border pl-3 transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                   <time dateTime={note.createdAt.toISOString()}>

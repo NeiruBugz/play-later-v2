@@ -13,7 +13,7 @@ export function AppMobileTopbar() {
     >
       <Link
         to="/"
-        className="flex items-center gap-2 rounded-md px-1 py-1"
+        className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md"
         aria-label="SavePoint"
       >
         <img

@@ -184,7 +184,7 @@ describe("Tabs", () => {
 
     it("sizes the tablist for a row via the emitted attribute", () => {
       expect(elements.getTablist()).toHaveClass(
-        "group-data-[orientation=horizontal]/tabs:h-9"
+        "md:group-data-[orientation=horizontal]/tabs:h-9"
       );
     });
   });

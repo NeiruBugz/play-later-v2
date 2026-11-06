@@ -62,7 +62,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
             onClick={() => onSelect(entry.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
-              "flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm transition-colors",
+              "flex min-h-11 w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm transition-colors md:min-h-0",
               "hover:bg-muted focus-visible:bg-muted focus-visible:outline-none",
               checked && "font-semibold"
             )}

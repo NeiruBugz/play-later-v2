@@ -36,7 +36,7 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
         <Link
           to="/games/$slug"
           params={{ slug: game.slug }}
-          className="line-clamp-2 text-sm leading-tight font-medium hover:underline"
+          className="-my-3.5 line-clamp-2 py-3.5 text-sm leading-tight font-medium hover:underline md:my-0 md:py-0"
         >
           {game.title}
         </Link>

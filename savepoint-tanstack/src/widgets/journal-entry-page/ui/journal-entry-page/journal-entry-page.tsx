@@ -47,7 +47,7 @@ export function JournalEntryPage({ entry }: JournalEntryPageProps) {
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="transition-colors hover:text-foreground"
+            className="-my-3 inline-flex min-h-11 items-center transition-colors hover:text-foreground md:my-0 md:min-h-0"
           >
             {entry.game.title}
           </Link>

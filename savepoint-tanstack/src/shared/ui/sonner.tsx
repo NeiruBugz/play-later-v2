@@ -32,6 +32,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
         } as React.CSSProperties
       }
       mobileOffset={{ bottom: "calc(var(--bottom-nav-height) + 0.5rem)" }}
+      toastOptions={{
+        classNames: {
+          actionButton: "max-md:h-11! max-md:min-w-11! max-md:px-3!",
+        },
+      }}
       {...props}
     />
   );

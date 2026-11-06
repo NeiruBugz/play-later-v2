@@ -31,7 +31,7 @@ function LandingPage() {
         <Link
           to="/"
           aria-label="SavePoint"
-          className="group flex items-center gap-3 no-underline"
+          className="group flex min-h-11 items-center gap-3 no-underline"
         >
           <img
             src="/logo.svg"
@@ -45,7 +45,7 @@ function LandingPage() {
         </Link>
         <Link
           to="/login"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           Sign in
         </Link>

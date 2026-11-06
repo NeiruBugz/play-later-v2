@@ -46,11 +46,11 @@ const sizeStyles: Record<
   { list: string; trigger: string }
 > = {
   sm: {
-    list: "h-11 gap-0.5 p-0.5 md:h-8",
+    list: "h-12 gap-0.5 p-0.5 md:h-8",
     trigger: "h-full px-3 text-xs md:px-2.5",
   },
   md: {
-    list: "h-11 gap-1 p-1 md:h-9",
+    list: "h-[52px] gap-1 p-1 md:h-9",
     trigger: "h-full px-3 text-sm",
   },
 };

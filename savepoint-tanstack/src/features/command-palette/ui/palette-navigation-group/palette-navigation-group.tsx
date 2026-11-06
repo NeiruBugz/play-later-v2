@@ -61,7 +61,7 @@ export function PaletteNavigationGroup({
             <Link
               to={item.to}
               onClick={onAfterSelect}
-              className="flex w-full items-center gap-2 px-2 py-1.5"
+              className="flex min-h-11 w-full items-center gap-2 px-2 py-1.5 md:min-h-0"
             >
               <Icon className="text-muted-foreground" aria-hidden />
               <span className="text-sm">{item.label}</span>

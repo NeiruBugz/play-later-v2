@@ -61,9 +61,11 @@ export function LibraryCardMenu({
           disabled={isPending}
           onClick={stop}
           onMouseDown={stop}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none disabled:opacity-50"
+          className="group/menu-trigger -m-2 inline-flex min-h-11 min-w-11 items-center justify-center outline-none disabled:opacity-50 md:m-0 md:min-h-0 md:min-w-0"
         >
-          <MoreVertical className="h-4 w-4" aria-hidden="true" />
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-black/60 text-white backdrop-blur-sm transition-colors group-hover/menu-trigger:bg-black/75 group-focus-visible/menu-trigger:ring-2 group-focus-visible/menu-trigger:ring-white/70">
+            <MoreVertical className="h-4 w-4" aria-hidden="true" />
+          </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"

@@ -26,7 +26,7 @@ export function GameDetailJumpSpine({ sections }: GameDetailJumpSpineProps) {
             key={id}
             type="button"
             onClick={() => scrollTo(id)}
-            className="rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
+            className="min-h-11 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
           >
             {label}
           </button>

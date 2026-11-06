@@ -32,18 +32,20 @@ export function DashboardStatusStrip({ counts }: DashboardStatusStripProps) {
               key={entry.value}
               to="/library"
               search={{ status: entry.value }}
-              className="flex shrink-0 items-center gap-1 rounded-full border border-border/60 bg-card px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              className="group/status flex min-h-11 shrink-0 items-center text-xs text-muted-foreground md:min-h-0"
             >
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{
-                  backgroundColor: `var(--status-${entry.badgeVariant})`,
-                }}
-                aria-hidden="true"
-              />
-              {entry.label}{" "}
-              <span className="font-medium text-foreground tabular-nums">
-                {count}
+              <span className="flex items-center gap-1 rounded-full border border-border/60 bg-card px-2.5 py-0.5 transition-colors group-hover/status:text-foreground">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    backgroundColor: `var(--status-${entry.badgeVariant})`,
+                  }}
+                  aria-hidden="true"
+                />
+                {entry.label}{" "}
+                <span className="font-medium text-foreground tabular-nums">
+                  {count}
+                </span>
               </span>
             </Link>
           );
