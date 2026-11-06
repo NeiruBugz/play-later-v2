@@ -5,6 +5,7 @@ import { formatHours } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 
 import { calculateSmartStatus } from "../../lib/calculate-smart-status";
 import type { ImportedGameCardProps } from "./imported-game-card.type";
@@ -92,17 +93,23 @@ export function ImportedGameCard({
 
         <div className="flex shrink-0 gap-2">
           {!isIgnored && onAddToLibrary ? (
-            <Button
-              type="button"
-              variant="default"
-              size="icon"
-              onClick={onAddToLibrary}
-              disabled={isPending}
-              aria-label={`Add ${game.name}`}
-              title="Add"
-            >
-              <Plus />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="icon"
+                    onClick={onAddToLibrary}
+                    disabled={isPending}
+                    aria-label={`Add ${game.name}`}
+                  />
+                }
+              >
+                <Plus />
+              </TooltipTrigger>
+              <TooltipContent>Add to library</TooltipContent>
+            </Tooltip>
           ) : null}
 
           {isIgnored && onAddToLibrary ? (
@@ -119,17 +126,23 @@ export function ImportedGameCard({
           ) : null}
 
           {!isIgnored && onDismiss ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onDismiss}
-              disabled={isPending}
-              aria-label={`Remove ${game.name}`}
-              title="Remove game"
-            >
-              <X />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={onDismiss}
+                    disabled={isPending}
+                    aria-label={`Remove ${game.name}`}
+                  />
+                }
+              >
+                <X />
+              </TooltipTrigger>
+              <TooltipContent>Remove game</TooltipContent>
+            </Tooltip>
           ) : null}
         </div>
       </CardContent>
