@@ -228,7 +228,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the temporary report and screenshots. **[Agent: testing]**
 
 - [ ] **Slice 13: The landing page follows the theme and only today's palette is used**
-  - [ ] Remove the forced `class="dark"` and the decorative blobs and gradients from `routes/index.tsx` and the landing widgets, and move them onto shared components and tokens.
+  - [x] Remove the forced `class="dark"` and the decorative blobs and gradients from `routes/index.tsx` and the landing widgets, and move them onto shared components and tokens.
     - Add `THEME_COLORS` to `shared/config/site.ts` (today's `--background` for each mode). Use it for the `theme-color` meta and the manifest colors, replacing the retired `#f6f1e7` / `#120f0c`.
     - Unit-test `THEME_INIT_SCRIPT` in jsdom with a stubbed `matchMedia`, for a stored choice, no choice and an invalid value. **[Agent: tanstack-fullstack]**
   - [ ] Make the platform badges neutral: one palette color, the platform name as text. Delete the 20 hexes and the platform tokens. Replace the remaining raw palette colors: `rating-input` amber, `bg-black/55` overlays, landing emerald and fuchsia. Replace the runtime oklch in `derive-banner-gradient.ts` with tokens. **[Agent: react-frontend]**
