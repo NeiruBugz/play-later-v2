@@ -306,7 +306,7 @@ Conventions for every slice:
     - Placeholder: the game name in `line-clamp-3` with "…".
     - Hover feedback comes from the parent link via `group-hover`; IGDB URLs still come from `shared/lib/igdb-image`.
     - Replace the inline cover treatments on home, Up Next, library, search results, the Add game sheet, profile and game page. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests for `GameCover`: an image with the game name as its accessible name; the placeholder when `src` is missing; a long name clamped to three lines. **[Agent: testing]**
+  - [x] Write behaviour tests for `GameCover`: an image with the game name as its accessible name; the placeholder when `src` is missing; a long name clamped to three lines. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, measure covers on every listed screen at phone and desktop width and confirm they share aspect ratio, radius, shadow and border, and the same hover change at desktop. Use a seeded game without art to check the placeholder.
