@@ -350,7 +350,7 @@ Conventions for every slice:
     - Set per-route `og:url` and titles on the landing page and `/games/$slug`.
     - Replace `public/manifest.json` with a server route `routes/manifest[.]json.ts` built from `site.ts`, with `start_url: "/"`.
     - Add an optional `BETTER_AUTH_EXTRA_ORIGINS` to `env.ts` (Zod, comma-separated) feeding Better Auth `trustedOrigins`. **[Agent: tanstack-fullstack]**
-  - [ ] Add `shared/ui/logo.tsx` (`LogoMark`, `LogoWordmark`) as an inline `currentColor` SVG for the chosen name. It replaces the three `<img src="/logo.svg">` uses and the auth page's text wordmark.
+  - [x] Add `shared/ui/logo.tsx` (`LogoMark`, `LogoWordmark`) as an inline `currentColor` SVG for the chosen name. It replaces the three `<img src="/logo.svg">` uses and the auth page's text wordmark.
     - Export the static assets: `favicon.svg` and `.ico`, `apple-touch-icon`, `icon-192` and `icon-512`, the maskable icons and `og-image.png`.
     - Remove the old `logo.svg` and `og-image.svg`. **[Agent: react-frontend]**
 
