@@ -6,6 +6,7 @@ import { QueueMarker, toStatusChipStatus } from "@/entities/library-item";
 import { searchLibraryAwareGamesFn } from "@/features/search-games/api/search-library-aware-games";
 import type { LibraryAwareSearchResult } from "@/features/search-games/api/search-library-aware-games.worker";
 import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
+import { cn } from "@/shared/lib/utils";
 import { GameCover } from "@/shared/ui/game-cover";
 import { RatingInput } from "@/shared/ui/rating-input";
 import { StatusChip } from "@/shared/ui/status-chip";
@@ -127,7 +128,7 @@ export function SearchGamesResults({
           const releaseYear = game.first_release_date
             ? new Date(game.first_release_date * 1000).getFullYear()
             : null;
-          const owned = game.library !== null;
+          const showAddAction = game.library === null && renderAddAction;
           return (
             <li key={game.id} className="relative">
               <Link
@@ -143,21 +144,6 @@ export function SearchGamesResults({
                       />
                     </div>
                   ) : null}
-                  {!owned && renderAddAction ? (
-                    // Add affordance overlays the cover bottom-right. It sits
-                    // inside the navigating <Link>; the bubble-phase handler
-                    // stops the click from reaching the link so a tap adds the
-                    // game without navigating to its detail page.
-                    <div
-                      className="absolute right-1.5 bottom-1.5"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                      }}
-                    >
-                      {renderAddAction({ igdbId: game.id, name: game.name })}
-                    </div>
-                  ) : null}
                 </GameCover>
                 <p className="truncate text-base font-medium md:text-sm">
                   {game.name}
@@ -168,9 +154,14 @@ export function SearchGamesResults({
                     upNextPosition={game.library.upNextPosition}
                   />
                 ) : null}
-                <div className="flex h-4 items-center gap-1">
+                <div
+                  className={cn(
+                    "flex items-center justify-between gap-1",
+                    showAddAction ? "min-h-11" : "h-4"
+                  )}
+                >
                   {releaseYear !== null && (
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="min-w-0 truncate text-xs text-muted-foreground tabular-nums">
                       {releaseYear}
                     </span>
                   )}
@@ -181,6 +172,20 @@ export function SearchGamesResults({
                       readOnly
                       aria-label={`Your rating: ${game.library.rating / 2} out of 5 stars`}
                     />
+                  ) : null}
+                  {showAddAction ? (
+                    // The add control sits inside the navigating <Link>; the
+                    // bubble-phase handler stops the click from reaching the
+                    // link so a tap adds the game without navigating.
+                    <div
+                      className="ml-auto shrink-0"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
+                      {renderAddAction({ igdbId: game.id, name: game.name })}
+                    </div>
                   ) : null}
                 </div>
               </Link>

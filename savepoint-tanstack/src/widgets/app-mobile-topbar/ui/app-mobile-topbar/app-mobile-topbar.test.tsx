@@ -49,6 +49,11 @@ describe("AppMobileTopbar", () => {
       expect(elements.getBrandLink()).toHaveAttribute("href", "/");
     });
 
+    it("shows the product name next to the mark inside the single brand link", () => {
+      expect(elements.getBrandLink()).toHaveTextContent("Continue?");
+      expect(screen.getAllByRole("link")).toHaveLength(1);
+    });
+
     it("renders a search button (not a link to /games/search)", () => {
       expect(elements.getSearchButton()).toBeDefined();
     });
