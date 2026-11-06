@@ -311,7 +311,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
 - [ ] **Slice 19: One status chip everywhere, including "Let go"**
-  - [ ] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
+  - [x] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
     - Map the domain status and outcome to it at the entity layer.
     - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar, status-switcher and journal stats rail (`journal-stats-rail.tsx`) color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
   - [ ] Write behaviour tests: each status renders its label; "Let go" shares the Done variant attribute; contrast tokens are applied in both modes, asserted via the variant attribute and not via classes. **[Agent: testing]**
