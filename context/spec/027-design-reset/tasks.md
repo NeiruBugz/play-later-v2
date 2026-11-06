@@ -280,7 +280,7 @@ Conventions for every slice:
     The owner approved Plum + Zilla Slab together on phone and desktop (`review/phase2/chosen.html`). The unchosen option captures (accent-a, accent-c, font-a, font-b) are deleted; baseline, accent-b, font-c and chosen remain.
   - [x] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
 
-- [ ] **Slice 17: The app shows the new accent and title font**
+- [x] **Slice 17: The app shows the new accent and title font**
   - [x] Apply the chosen accent as `--primary` / `--primary-foreground`, add `--accent-text` (with `--color-accent-text`), and set `--ring`.
     - Restrict accent classes with `no-restricted-classes` to the primary button, selected or active items, Playing, focus and links.
     - Swap Space Grotesk for the chosen font in the Google Fonts `<link>` and `--font-display`, with a preload for the main weight.
@@ -289,14 +289,18 @@ Conventions for every slice:
   - [x] Fix what the first Slice 17 verify found:
     - The landing header product name (`routes/index.tsx`) renders in Geist; give it the title font like the sidebar and sign-in wordmarks.
     - Library and home render a filled primary button on every card (Mark done / Start playing / Play again), against §2.0's one primary button per screen or dialog. Owner decision (2026-11-06): per-card actions become outline (secondary) buttons; only a screen's main action stays primary. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, scan computed colors on the §2.0 screens and confirm the accent appears only in the allowed places.
     - Confirm that page titles, dialog titles, the game name, the landing headline and the header name use the new font, while card and list game names use Geist.
     - Check accent fill and text contrast in both modes.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 18: Covers look the same everywhere**
+- [ ] 
+
+    Slice notes (2026-11-06): the app-wide Log action (desktop sidebar, phone bottom-nav centre) is navigation, not a screen's primary button; the selected "All" status tab in Plum is a §2.9 selected item. `/steam/games` has no filled primary (its "Import from Steam" is outline).
+
+**Slice 18: Covers look the same everywhere**
   - [ ] Move `entities/game/ui/game-cover/` to `shared/ui/game-cover/` with the API `{ src, name, size, priority }`.
     - Look: `aspect-[2/3]`, one radius, shadow and ring.
     - Placeholder: the game name in `line-clamp-3` with "…".
