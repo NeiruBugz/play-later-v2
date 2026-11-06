@@ -227,7 +227,7 @@ Conventions for every slice:
     - In the Playwright MCP, open each of the five dialogs at 390 and confirm they open as bottom sheets.
     - Stop the server by PID and delete the temporary report and screenshots. **[Agent: testing]**
 
-- [ ] **Slice 13: The landing page follows the theme and only today's palette is used**
+- [x] **Slice 13: The landing page follows the theme and only today's palette is used**
   - [x] Remove the forced `class="dark"` and the decorative blobs and gradients from `routes/index.tsx` and the landing widgets, and move them onto shared components and tokens.
     - Add `THEME_COLORS` to `shared/config/site.ts` (today's `--background` for each mode). Use it for the `theme-color` meta and the manifest colors, replacing the retired `#f6f1e7` / `#120f0c`.
     - Unit-test `THEME_INIT_SCRIPT` in jsdom with a stubbed `matchMedia`, for a stored choice, no choice and an invalid value. **[Agent: tanstack-fullstack]**
@@ -235,7 +235,7 @@ Conventions for every slice:
   - [x] Fix what the first Slice 13 verify found: only the dark `theme-color` meta reaches the HTML; the light one declared in `__root.tsx` `head()` is dropped (likely de-duplicated by `name`). Both per-scheme metas must render. Cover it with a test of the rendered head.
 
     Accepted (owner rule via tech spec §2.5): stock `shadow-xs/sm/md` cast black-alpha shadows; they are part of the stock look and count as palette for the color scan.
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Signed out, in the Playwright MCP:
       - `emulateMedia({ colorScheme: "light" })` shows Light;
