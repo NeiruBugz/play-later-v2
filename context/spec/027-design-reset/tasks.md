@@ -218,7 +218,7 @@ Conventions for every slice:
   - [x] Replace every `text-[10px]` and `text-[11px]`: bottom-nav labels, landing, library card, platform and status badges, profile. The floor is `text-xs`; body text is `text-base md:text-sm`. **[Agent: react-frontend]**
   - [x] Bring every tappable element to at least 44×44 at phone width. Migrate the remaining native `<button>` elements to `Button`, or give them `min-h-11 min-w-11 md:min-h-0 md:min-w-0`. Extend the hit area of small icon controls. Known from the Slice 8 verify: the toast "Undo" action is sonner's own action button (24px; style it through the `Toaster`'s `toastOptions.classNames.actionButton`, the `Button` inside `UndoToastBody` is not on that path), the Grid/List view toggles are 42 px wide, the game page tabs are 32 px, the status chip and status-picker rows are under 44. **[Agent: react-frontend]**
   - [x] Make hover-only information reachable by tap. Platform badges open a `Popover` on tap; the Steam imported-card icon buttons replace `title=` with `aria-label` plus a tooltip or popover. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests:
+  - [x] Write behaviour tests:
     - Remove from library opens as a sheet when `useIsDesktop` is false and as a dialog when it is true;
     - tapping a platform badge shows the platform name. **[Agent: testing]**
   - [ ] Verify:
