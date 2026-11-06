@@ -394,8 +394,10 @@ Conventions for every slice:
     - Delete any captured files except the review set.
     - Release 3 is done after this. After 2–4 weeks, a follow-up removes the old origin from S3 CORS and `BETTER_AUTH_EXTRA_ORIGINS`. **[Agent: testing]**
 
-- [ ] **Slice 23: Feature Testing & Regression**
+- [x] **Slice 23: Feature Testing & Regression**
 
   > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
-  - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 027-design-reset` and `@regression` if suitable for long-term regression. **[Agent: testing]**
-  - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+  - [x] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 027-design-reset` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [x] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+
+  Slice notes (2026-11-06): 27 new tests in `test/brand/design-reset.acceptance.test.ts` and `src/shared/lib/auth/trusted-origins.acceptance.test.ts`, each shown RED by a temporary break; the other criteria map to existing tests. Tap size, sheets and focus contrast stay with the review script and owner review (no CI visual regression by spec).
