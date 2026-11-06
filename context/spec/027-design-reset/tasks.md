@@ -256,7 +256,9 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
 - [ ] **Slice 15: Owner approves phase 1 phone first, then desktop (Release 2)**
-  - [ ] Capture `review/phase1/after/phone` in Light and Dark with the review script. Assemble the before/after pairs with `report.json`, and list any content or control present before but missing after, other than the items removed in §2.3–2.4. Present the phone pairs to the owner. **[Agent: testing]**
+  - [x] Capture `review/phase1/after/phone` in Light and Dark with the review script. Assemble the before/after pairs with `report.json`, and list any content or control present before but missing after, other than the items removed in §2.3–2.4. Present the phone pairs to the owner. **[Agent: testing]**
+
+    Owner approved all 46 phone pairs on 2026-11-06 (`review/phase1/compare-phone.html`; phone checks 1395 → 2, both the Up Next shelf). The landing's uppercase marketing labels stay as they are.
   - [ ] After the owner approves every phone pair, capture `review/phase1/after/desktop` and present the desktop pairs. Rework any rejected pair in a follow-up task and show it again. **[Agent: testing]**
   - [ ] Verify:
     - Confirm the owner approved every phone pair and every desktop pair. Run the gate one last time.
