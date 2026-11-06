@@ -19,7 +19,7 @@
   --popover: oklch(0.99 0.008 85);
   --popover-foreground: oklch(0.2 0.02 60);
   /* Primary — sage accent (light tone) */
-  --primary: oklch(0.52 0.085 195);
+  --primary: oklch(0.5 0.085 195);
   --primary-foreground: oklch(0.99 0.01 85);
   /* Secondary — warm second surface */
   --secondary: oklch(0.93 0.015 85);
@@ -31,15 +31,15 @@
   --accent: oklch(0.91 0.018 82);
   --accent-foreground: oklch(0.2 0.02 60);
   /* Destructive */
-  --destructive: oklch(0.55 0.2 25);
+  --destructive: oklch(0.48 0.2 25);
   /* Success */
-  --success: oklch(0.52 0.12 150);
+  --success: oklch(0.5 0.12 150);
   --success-foreground: oklch(0.99 0.002 150);
   /* Warning */
-  --warning: oklch(0.6 0.13 70);
+  --warning: oklch(0.51 0.13 70);
   --warning-foreground: oklch(0.2 0.02 60);
   /* Info */
-  --info: oklch(0.52 0.13 250);
+  --info: oklch(0.5 0.13 250);
   --info-foreground: oklch(0.99 0.002 250);
   /* Scrim — stays dark in both themes: it sits over imagery, never over the page */
   --scrim: oklch(0.12 0.01 70);
@@ -83,7 +83,7 @@
   --accent: oklch(0.27 0.012 72);
   --accent-foreground: oklch(0.94 0.008 85);
   /* Destructive */
-  --destructive: oklch(0.62 0.2 25);
+  --destructive: oklch(0.74 0.2 25);
   /* Success */
   --success: oklch(0.72 0.13 150);
   --success-foreground: oklch(0.16 0.012 70);

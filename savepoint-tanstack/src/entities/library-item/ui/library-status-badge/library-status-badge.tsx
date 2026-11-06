@@ -29,7 +29,7 @@ export function LibraryStatusBadge({
       data-status={status}
       className={cn(
         "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs leading-none font-medium whitespace-nowrap text-scrim-foreground",
-        "bg-scrim/55 ring-1 ring-scrim-foreground/10 backdrop-blur-sm",
+        "bg-scrim/60 ring-1 ring-scrim-foreground/10 backdrop-blur-sm",
         className
       )}
     >
