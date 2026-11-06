@@ -353,6 +353,8 @@ Conventions for every slice:
   - [ ] Add `shared/ui/logo.tsx` (`LogoMark`, `LogoWordmark`) as an inline `currentColor` SVG for the chosen name. It replaces the three `<img src="/logo.svg">` uses and the auth page's text wordmark.
     - Export the static assets: `favicon.svg` and `.ico`, `apple-touch-icon`, `icon-192` and `icon-512`, the maskable icons and `og-image.png`.
     - Remove the old `logo.svg` and `og-image.svg`. **[Agent: react-frontend]**
+
+    Owner choice (2026-11-06): mark B "Open loop" (`review/phase2/logo-options/option-b-mark.svg`); `LogoWordmark` is live Zilla Slab 700 text "Continue?", not an SVG wordmark; static images are rendered with Zilla Slab at export.
   - [ ] Write unit tests:
     - `head()` output: title helper, absolute og URLs, theme-color pair;
     - the manifest route payload: name, short name, icons, colors;
