@@ -42,7 +42,7 @@ export function ImageLightbox({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:animate-in data-[open]:fade-in-0" />
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-scrim/85 backdrop-blur-sm data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:animate-in data-[open]:fade-in-0" />
         <DialogPrimitive.Popup className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 p-6 focus:outline-none">
           <DialogPrimitive.Title className="sr-only">
             {current.alt}

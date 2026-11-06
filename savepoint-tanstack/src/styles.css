@@ -41,6 +41,9 @@
   /* Info */
   --info: oklch(0.52 0.13 250);
   --info-foreground: oklch(0.99 0.002 250);
+  /* Scrim — stays dark in both themes: it sits over imagery, never over the page */
+  --scrim: oklch(0.12 0.01 70);
+  --scrim-foreground: oklch(0.97 0.008 85);
   /* Borders and inputs */
   --border: oklch(0.86 0.018 82);
   --input: oklch(0.86 0.018 82);
@@ -90,6 +93,9 @@
   /* Info */
   --info: oklch(0.7 0.13 250);
   --info-foreground: oklch(0.16 0.012 70);
+  /* Scrim — stays dark in both themes: it sits over imagery, never over the page */
+  --scrim: oklch(0.12 0.01 70);
+  --scrim-foreground: oklch(0.97 0.008 85);
   /* Borders and inputs */
   --border: oklch(0.28 0.01 72);
   --input: oklch(0.28 0.01 72);
@@ -135,6 +141,8 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-scrim: var(--scrim);
+  --color-scrim-foreground: var(--scrim-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

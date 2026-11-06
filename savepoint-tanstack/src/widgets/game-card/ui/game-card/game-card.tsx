@@ -66,7 +66,7 @@ export function GameCard({
             )}
           >
             {coverAccentClassName ? (
-              <span className="line-clamp-3 text-center text-lg font-bold tracking-wide text-white uppercase">
+              <span className="line-clamp-3 text-center text-lg font-bold tracking-wide text-scrim-foreground uppercase">
                 {title}
               </span>
             ) : null}

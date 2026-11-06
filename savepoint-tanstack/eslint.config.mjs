@@ -257,16 +257,6 @@ export default tseslint.config(
   // regress on the rules it is not already exempt from. Delete an entry when
   // its slice lands; do not add files.
   //
-  // Slice 13 (only today's palette): raw palette colors on the rating stars.
-  {
-    files: ["src/shared/ui/rating-input.tsx"],
-    rules: {
-      "better-tailwindcss/no-restricted-classes": noRestrictedClasses(
-        PIXEL_FONT_SIZE,
-        ARBITRARY_COLOR
-      ),
-    },
-  },
   // Slice 19 (one status chip): color-mix tinted surfaces on the game page hero
   // and the journal "Log tonight" card are replaced with token-based chips and
   // surfaces.

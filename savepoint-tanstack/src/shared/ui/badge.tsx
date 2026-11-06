@@ -20,10 +20,6 @@ const badgeVariants = cva(
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
         subtle: "bg-muted text-muted-foreground",
-        playstation: "bg-muted text-muted-foreground",
-        xbox: "bg-muted text-muted-foreground",
-        nintendo: "bg-muted text-muted-foreground",
-        pc: "bg-muted text-muted-foreground",
         want: "bg-[var(--status-want)] text-[var(--status-want-foreground)]",
         playing:
           "bg-[var(--status-playing)] text-[var(--status-playing-foreground)]",

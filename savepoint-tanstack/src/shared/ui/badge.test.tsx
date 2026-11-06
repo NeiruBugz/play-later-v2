@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 
 import { Badge } from "./badge";
 
-const PLATFORM_VARIANTS = ["playstation", "xbox", "nintendo", "pc"] as const;
 const STATUS_VARIANTS = ["want", "playing", "done"] as const;
 
 const elements = {
@@ -53,16 +52,6 @@ describe("Badge", () => {
     it("styles want, playing and done differently from each other", () => {
       const classNames = actions.renderVariants(STATUS_VARIANTS);
       expect(new Set(classNames).size).toBe(STATUS_VARIANTS.length);
-    });
-  });
-
-  describe("given a platform variant", () => {
-    it("styles every platform exactly like the neutral subtle variant", () => {
-      const [subtle, ...platforms] = actions.renderVariants([
-        "subtle",
-        ...PLATFORM_VARIANTS,
-      ]);
-      expect(platforms).toEqual(platforms.map(() => subtle));
     });
   });
 

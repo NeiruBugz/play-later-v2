@@ -10,7 +10,6 @@ import { PageHeader } from "@/shared/ui/page-header";
 import { SectionLabel } from "@/shared/ui/section-label";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
-import { deriveBannerGradient } from "../../lib/derive-banner-gradient";
 import { formatRelativeTime } from "../../lib/format-relative-time";
 import type { ProfileOverviewProps } from "./profile-overview.type";
 
@@ -28,7 +27,6 @@ export function ProfileOverview({
   hideActivityTab = false,
 }: ProfileOverviewProps) {
   const displayName = getDisplayName(profile, "User");
-  const usernameSlug = profile.username ?? profile.id;
   const avatarSrc = profile.image ?? DEFAULT_AVATAR_SRC;
 
   const { want, playing, done } = stats;
@@ -52,8 +50,7 @@ export function ProfileOverview({
         <div
           data-testid="profile-hero-banner"
           aria-hidden="true"
-          className="relative h-20 w-full md:h-36"
-          style={{ background: deriveBannerGradient(usernameSlug) }}
+          className="relative h-20 w-full bg-gradient-to-br from-primary/30 to-muted md:h-36"
         />
 
         {/* Identity block: avatar + name + handle + stat row + primary action */}
@@ -69,7 +66,7 @@ export function ProfileOverview({
                 className="h-20 w-20 rounded-full object-cover ring-4 ring-background md:h-28 md:w-28"
               />
               {isOwnProfile ? (
-                <div className="absolute inset-x-0 bottom-0 rounded-b-full bg-black/60 px-2 py-1 text-center text-xs text-white">
+                <div className="absolute inset-x-0 bottom-0 rounded-b-full bg-scrim/60 px-2 py-1 text-center text-xs text-scrim-foreground">
                   <AvatarUpload label="Change avatar" />
                 </div>
               ) : null}
@@ -186,13 +183,13 @@ export function ProfileOverview({
                       )}
                       <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+                        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-scrim/90 via-scrim/40 to-transparent"
                       />
-                      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2 text-white">
+                      <div className="absolute inset-x-0 bottom-0 space-y-0.5 p-2 text-scrim-foreground">
                         <span className="line-clamp-2 block text-xs leading-tight font-medium">
                           {game.title}
                         </span>
-                        <span className="block text-xs text-white/80">
+                        <span className="block text-xs text-scrim-foreground/80">
                           {formatRelativeTime(new Date(game.lastPlayed))}
                         </span>
                       </div>

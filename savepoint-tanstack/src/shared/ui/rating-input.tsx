@@ -63,7 +63,7 @@ function RatingStar({
           )}
         >
           <Star
-            className={cn("fill-amber-400 text-amber-400", sizeClass)}
+            className={cn("fill-warning text-warning", sizeClass)}
             strokeWidth={1.5}
           />
         </span>

@@ -161,10 +161,9 @@ describe("ProfileOverview", () => {
       expect(elements.queryRecentlyPlayed()).not.toBeNull();
     });
 
-    it("renders the hero banner with a gradient background", () => {
+    it("renders the hero banner without an inline color style", () => {
       render(<ProfileOverview profile={stubProfile} stats={stubStats} />);
-      const style = elements.getHeroBanner().getAttribute("style") ?? "";
-      expect(style).toContain("linear-gradient");
+      expect(elements.getHeroBanner()).not.toHaveAttribute("style");
     });
 
     it("renders five inline stat items in the compact header stat row", () => {
