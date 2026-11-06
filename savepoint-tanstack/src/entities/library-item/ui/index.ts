@@ -1,7 +1,5 @@
 export { LibraryGrid } from "./library-grid";
 export type { LibraryGridGame, LibraryGridProps } from "./library-grid";
-export { LibraryStatusBadge } from "./library-status-badge";
-export type { LibraryStatusBadgeProps } from "./library-status-badge";
 export { StatusPicker } from "./status-picker";
 export type { StatusPickerProps } from "./status-picker";
 export { StatusControl } from "./status-control";

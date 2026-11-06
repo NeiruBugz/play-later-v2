@@ -1,4 +1,5 @@
 import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SearchGamesResults } from "./search-games-results";
@@ -212,9 +213,7 @@ describe("SearchGamesResults", () => {
     });
 
     it("renders a placeholder img div with the game name in aria-label", () => {
-      expect(
-        screen.getByRole("img", { name: "Cover for No Cover Game" })
-      ).toBeDefined();
+      expect(screen.getByRole("img", { name: "No Cover Game" })).toBeDefined();
     });
   });
 
@@ -313,7 +312,7 @@ describe("SearchGamesResults", () => {
     });
 
     it("shows the library status on an owned result", () => {
-      expect(screen.getByLabelText("Status: Done")).toBeInTheDocument();
+      expect(screen.getByText("Done")).toHaveAttribute("data-status", "done");
     });
 
     it("renders the add affordance only for unowned results", () => {
@@ -321,6 +320,53 @@ describe("SearchGamesResults", () => {
         screen.getByRole("button", { name: "Add Sword of Hades" })
       ).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Add Hades" })).toBeNull();
+    });
+  });
+
+  describe("given the viewer taps the add control of an unowned result", () => {
+    const onAdd = vi.fn();
+    const onNavigate = vi.fn((event: Event) => event.preventDefault());
+
+    beforeEach(async () => {
+      onAdd.mockClear();
+      mockSearchGamesFn.mockResolvedValue({
+        games: [
+          makeIgdbGame(2, "Sword of Hades", "sword-of-hades", {
+            library: null,
+            firstReleaseDate: 1600000000,
+          }),
+        ],
+        count: 1,
+        ownedCount: 0,
+      });
+      render(
+        <SearchGamesResults
+          query="hades"
+          renderAddAction={({ name }) => (
+            <button type="button" onClick={onAdd}>
+              Add {name}
+            </button>
+          )}
+        />
+      );
+      await act(async () => {});
+      document.addEventListener("click", onNavigate);
+      await userEvent.click(
+        screen.getByRole("button", { name: "Add Sword of Hades" })
+      );
+      document.removeEventListener("click", onNavigate);
+    });
+
+    it("adds the game", () => {
+      expect(onAdd).toHaveBeenCalledOnce();
+    });
+
+    it("does not navigate to the game page", () => {
+      expect(onNavigate).not.toHaveBeenCalled();
+    });
+
+    it("keeps the release year visible next to the control", () => {
+      expect(screen.getByText("2020")).toBeInTheDocument();
     });
   });
 

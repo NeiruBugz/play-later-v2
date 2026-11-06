@@ -23,6 +23,10 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
 }));
 
+vi.mock("@/features/command-palette", () => ({
+  openCommandPalette: vi.fn(),
+}));
+
 vi.mock("@/shared/lib/igdb-image", () => ({
   buildCoverImageUrl: () => "https://images.igdb.com/cover.jpg",
   buildCoverImageProps: () => ({
@@ -60,7 +64,7 @@ function makeData(
 ): DashboardPageData {
   return {
     playing: [],
-    upNextTop3: [],
+    upNextQueue: [],
     upNextTotal: 0,
     counts: { WANT: 0, PLAYING: 0, DONE: 0 },
     ...overrides,
@@ -92,7 +96,7 @@ describe("DashboardPage", () => {
         <DashboardPage
           data={makeData({
             playing: [makeItem("p1", "Elden Ring")],
-            upNextTop3: [
+            upNextQueue: [
               makeQueued(1, "Hades"),
               makeQueued(2, "Celeste"),
               makeQueued(3, "Hollow Knight"),
@@ -150,13 +154,13 @@ describe("DashboardPage", () => {
       expect(elements.getEmptyStates()).toHaveLength(0);
     });
 
-    it("lays out only Playing then Up Next below the counts, so Up Next needs no scrolling on a phone", () => {
+    it("lays out Up Next first, then Playing, so Up Next is the first thing on a phone", () => {
       const sections = screen
         .getAllByRole("region")
         .map((el) => el.getAttribute("aria-labelledby"));
       expect(sections).toEqual([
-        "home-playing-heading",
         "home-up-next-heading",
+        "home-playing-heading",
       ]);
       expect(
         within(elements.getPlayingSection()).getAllByRole("listitem")
@@ -200,7 +204,7 @@ describe("DashboardPage", () => {
       render(
         <DashboardPage
           data={makeData({
-            upNextTop3: [makeQueued(1, "Hades")],
+            upNextQueue: [makeQueued(1, "Hades")],
             upNextTotal: 1,
             counts: { WANT: 1, PLAYING: 0, DONE: 0 },
           })}
@@ -245,10 +249,10 @@ describe("DashboardPage", () => {
       expect(search({})).toEqual({ action: "add-game", game: undefined });
     });
 
-    it("explains the empty queue once, inside the single empty state", () => {
+    it("explains the empty queue once, inside the Up Next section", () => {
       expect(screen.getAllByText(QUEUE_EMPTY_COPY)).toHaveLength(1);
       expect(
-        within(elements.getEmptyStates()[0]).getByText(QUEUE_EMPTY_COPY)
+        within(elements.getUpNextSection()).getByText(QUEUE_EMPTY_COPY)
       ).toBeVisible();
       expect(screen.queryByRole("link", { name: /see all/i })).toBeNull();
     });

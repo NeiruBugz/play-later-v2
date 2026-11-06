@@ -1,5 +1,5 @@
 // Pre-hydration theme script. Runs in <head> before React mounts to prevent
-// FOUC. Must stay in sync with the hand-rolled SavepointThemeProvider —
+// FOUC. Must stay in sync with the hand-rolled ThemeProvider —
 // theme value === CSS class name: light→"", dark→"dark", system→resolved via
 // prefers-color-scheme. A stored retired theme (e.g. "cartridge") fails the
 // validThemes check and falls back to 'system'. See DIVERGENCES.md → Slice 19

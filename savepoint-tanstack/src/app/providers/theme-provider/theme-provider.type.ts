@@ -3,7 +3,7 @@ import { type PropsWithChildren } from "react";
 import type { Theme } from "@/shared/lib/theme";
 
 /**
- * Props for `SavepointThemeProvider`. Types for `Theme`, `ResolvedTheme`,
+ * Props for `ThemeProvider`. Types for `Theme`, `ResolvedTheme`,
  * and `ThemeContextValue` live in `@/shared/lib/theme` so lower-layer slices
  * can consume them without importing from `app/`.
  */

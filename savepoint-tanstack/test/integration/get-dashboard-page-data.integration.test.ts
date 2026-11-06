@@ -1,7 +1,7 @@
 /**
  * Integration tests for getDashboardPageDataWorker.
  *
- * Home payload: { playing, upNextTop3, upNextTotal, counts }.
+ * Home payload: { playing, upNextQueue, upNextTotal, counts }.
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -103,12 +103,12 @@ describe("getDashboardPageDataWorker", () => {
       expect(Object.keys(data).sort()).toEqual([
         "counts",
         "playing",
-        "upNextTop3",
+        "upNextQueue",
         "upNextTotal",
       ]);
       expect(data.counts).toEqual({ WANT: 0, PLAYING: 0, DONE: 0 });
       expect(data.playing).toEqual([]);
-      expect(data.upNextTop3).toEqual([]);
+      expect(data.upNextQueue).toEqual([]);
       expect(data.upNextTotal).toBe(0);
     });
   });
@@ -117,7 +117,7 @@ describe("getDashboardPageDataWorker", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("mixed") });
       await db.prisma.game.createMany({
-        data: ["a", "b", "c", "d", "e", "f", "g"].map((x) =>
+        data: ["a", "b", "c", "d", "e", "f", "g", "h"].map((x) =>
           makeGame(`mx-${x}`)
         ),
       });
@@ -139,6 +139,7 @@ describe("getDashboardPageDataWorker", () => {
           row("e", "WANT", 3),
           row("f", "WANT", 2),
           row("g", "WANT"),
+          row("h", "WANT", 5),
         ],
       });
     });
@@ -153,23 +154,25 @@ describe("getDashboardPageDataWorker", () => {
       expect(data.playing.every((i) => i.status === "PLAYING")).toBe(true);
     });
 
-    it("returns the top 3 queued games in queue order (queued Done included) with the full total", async () => {
+    it("returns the whole queue (5) in queue order, queued Done included", async () => {
       const data = await getDashboardPageDataWorker("ddpd-user-mixed");
 
       expect(
-        data.upNextTop3.map((i) => [i.game.id, i.status, i.upNextPosition])
+        data.upNextQueue.map((i) => [i.game.id, i.status, i.upNextPosition])
       ).toEqual([
         ["ddpd-game-mx-d", "DONE", 1],
         ["ddpd-game-mx-f", "WANT", 2],
         ["ddpd-game-mx-e", "WANT", 3],
+        ["ddpd-game-mx-c", "WANT", 4],
+        ["ddpd-game-mx-h", "WANT", 5],
       ]);
-      expect(data.upNextTotal).toBe(4);
+      expect(data.upNextTotal).toBe(5);
     });
 
     it("returns status counts across the whole library", async () => {
       const data = await getDashboardPageDataWorker("ddpd-user-mixed");
 
-      expect(data.counts).toEqual({ WANT: 4, PLAYING: 2, DONE: 1 });
+      expect(data.counts).toEqual({ WANT: 5, PLAYING: 2, DONE: 1 });
     });
 
     it("has no recentlyPlayed or stats-card data", async () => {

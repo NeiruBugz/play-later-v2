@@ -64,6 +64,21 @@ describe("buildCoverImageProps", () => {
     });
   });
 
+  it("serves t_cover_small with a t_cover_big candidate for dense displays", () => {
+    expect(buildCoverImageProps("co9wzc", "t_cover_small")).toEqual({
+      src: "https://images.igdb.com/igdb/image/upload/t_cover_small/co9wzc.jpg",
+      srcSet:
+        "https://images.igdb.com/igdb/image/upload/t_cover_small/co9wzc.jpg 1x, https://images.igdb.com/igdb/image/upload/t_cover_big/co9wzc.jpg 2x",
+    });
+  });
+
+  it("serves t_cover_big_2x as a single candidate", () => {
+    expect(buildCoverImageProps("co9wzc", "t_cover_big_2x")).toEqual({
+      src: "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9wzc.jpg",
+      srcSet: undefined,
+    });
+  });
+
   it("leaves non-IGDB URLs as a single candidate", () => {
     expect(buildCoverImageProps("https://cdn.example.com/foo.jpg")).toEqual({
       src: "https://cdn.example.com/foo.jpg",

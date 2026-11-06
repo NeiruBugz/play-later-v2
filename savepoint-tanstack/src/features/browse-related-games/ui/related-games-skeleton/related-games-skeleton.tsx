@@ -20,7 +20,7 @@ export function RelatedGamesSkeleton() {
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {Array.from({ length: PLACEHOLDER_COUNT }).map((_, index) => (
           <li key={index} className="flex flex-col gap-2">
-            <Skeleton className="aspect-[3/4] w-full rounded-md" />
+            <Skeleton className="aspect-[2/3] w-full rounded-lg" />
             <Skeleton className="h-4 w-3/4 rounded-md" />
           </li>
         ))}

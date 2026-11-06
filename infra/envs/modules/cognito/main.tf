@@ -18,6 +18,10 @@ resource "aws_cognito_user_pool" "this" {
       priority = 1
     }
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 locals {
@@ -75,4 +79,8 @@ resource "aws_cognito_user_pool_client" "web" {
 resource "aws_cognito_user_pool_domain" "this" {
   domain       = "${var.domain_prefix}-${var.environment}"
   user_pool_id = aws_cognito_user_pool.this.id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }

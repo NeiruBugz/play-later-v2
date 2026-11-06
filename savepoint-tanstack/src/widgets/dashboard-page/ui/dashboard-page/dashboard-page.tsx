@@ -5,19 +5,17 @@ import { openGlobalAction } from "@/shared/lib/global-action";
 import { PageHeader } from "@/shared/ui";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { UpNextShelf } from "@/widgets/up-next-shelf";
 
-import { DashboardGameRail } from "../dashboard-game-rail";
 import { DashboardPlayingSection } from "../dashboard-playing-section";
 import { DashboardStatusStrip } from "../dashboard-status-strip";
 import type { DashboardPageProps } from "./dashboard-page.type";
-
-const EMPTY_QUEUE_COPY = "Nothing queued yet — put up to 5 games in Up Next.";
 
 export function DashboardPage({ data }: DashboardPageProps) {
   const navigate = useNavigate();
   const total = data.counts.WANT + data.counts.PLAYING + data.counts.DONE;
   const hasPlaying = data.playing.length > 0;
-  const hasQueue = data.upNextTop3.length > 0;
+  const hasQueue = data.upNextQueue.length > 0;
 
   function addGame() {
     openGlobalAction(navigate, "add-game");
@@ -36,6 +34,10 @@ export function DashboardPage({ data }: DashboardPageProps) {
         }
       />
 
+      <div className="mb-4 min-w-0">
+        <UpNextShelf items={data.upNextQueue} />
+      </div>
+
       {total > 0 ? <DashboardStatusStrip counts={data.counts} /> : null}
 
       <div className="flex flex-col gap-4">
@@ -45,28 +47,18 @@ export function DashboardPage({ data }: DashboardPageProps) {
           <EmptyState
             spacing="compact"
             title="Nothing playing right now"
-            description={hasQueue ? undefined : EMPTY_QUEUE_COPY}
             action={
               hasQueue
                 ? {
                     label: "Pick from Up Next",
                     to: "/library",
                     search: { status: "UP_NEXT" },
+                    variant: "outline",
                   }
-                : { label: "Add a game", onClick: addGame }
+                : { label: "Add a game", onClick: addGame, variant: "outline" }
             }
           />
         )}
-
-        {hasPlaying || hasQueue ? (
-          <DashboardGameRail
-            title="Up Next"
-            items={data.upNextTop3}
-            viewAll={{ status: "UP_NEXT" }}
-            viewAllLabel="See all"
-            emptyMessage={EMPTY_QUEUE_COPY}
-          />
-        ) : null}
       </div>
     </div>
   );

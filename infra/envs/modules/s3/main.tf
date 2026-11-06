@@ -13,6 +13,10 @@ locals {
 
 resource "aws_s3_bucket" "this" {
   bucket = local.resolved_bucket_name
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_versioning" "this" {

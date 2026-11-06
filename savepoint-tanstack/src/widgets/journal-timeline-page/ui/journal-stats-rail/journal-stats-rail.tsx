@@ -18,18 +18,13 @@ export function JournalStatsRail() {
 
   return (
     <aside aria-label="Log tonight" className="flex flex-col gap-4">
-      <div
-        className="rounded-xl border border-primary/22 bg-card p-[18px]"
-        style={{
-          background: "color-mix(in oklch, var(--primary) 6%, var(--card))",
-          borderColor: "color-mix(in oklch, var(--primary) 22%, transparent)",
-        }}
-      >
+      <div className="rounded-xl border bg-card p-[18px]">
         <SectionLabel className="mb-2">Log tonight</SectionLabel>
         <p className="mb-4 text-sm leading-relaxed text-foreground">
           Time played is enough — a note is optional.
         </p>
         <Button
+          variant="outline"
           className="w-full"
           onClick={() => openGlobalAction(navigate, "log-session")}
         >

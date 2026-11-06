@@ -140,6 +140,7 @@ From [`tsconfig.json`](./tsconfig.json):
 - `@/*` → `src/*` (preferred)
 - `#/*` → `src/*` (alternative — also wired in `package.json` `imports`; both resolve identically; may be consolidated later)
 - `@env` → root [`env.ts`](./env.ts) (typed env from `@t3-oss/env-core`). **Never read `process.env.*` outside `env.ts`.**
+  - `BETTER_AUTH_EXTRA_ORIGINS` (optional, comma-separated URLs, reduced to origins) is appended to Better Auth `trustedOrigins`; used during an address change to keep the old origin trusted.
 
 ## Where to look first
 

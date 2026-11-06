@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
+import { PRODUCT_NAME_PLAIN } from "@/shared/config/site";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { buttonVariants } from "@/shared/ui/button";
@@ -15,19 +16,20 @@ export function LandingHero() {
         >
           <span
             aria-hidden="true"
-            className="h-1.5 w-1.5 rounded-full bg-primary"
+            className="h-1.5 w-1.5 rounded-full bg-foreground"
           />
           FOR PATIENT GAMERS
         </Badge>
 
-        <h1 className="text-5xl leading-[1.05] font-semibold tracking-tight text-foreground md:text-6xl lg:text-7xl">
-          A library, <span className="text-primary">not a backlog.</span>
+        <h1 className="font-display text-5xl leading-[1.05] font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
+          A library,{" "}
+          <span className="text-muted-foreground">not a backlog.</span>
         </h1>
 
         <p className="max-w-xl text-base text-muted-foreground md:text-lg">
           Curate your library across every platform. Journal what made each game
-          matter. SavePoint is for patient gamers who treat games as worlds, not
-          chores.
+          matter. {PRODUCT_NAME_PLAIN} is for patient gamers who treat games as
+          worlds, not chores.
         </p>
 
         <div>
@@ -44,7 +46,7 @@ export function LandingHero() {
           <li className="inline-flex items-center gap-1.5">
             <Check
               aria-hidden="true"
-              className="h-4 w-4 text-primary"
+              className="h-4 w-4 text-foreground"
               strokeWidth={2.5}
             />
             <span>Free to start</span>

@@ -56,7 +56,7 @@ const stubUser = {
 const elements = {
   getNavLink: (name: string) => screen.getByRole("link", { name }),
   queryNavLink: (name: string) => screen.queryByRole("link", { name }),
-  getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
+  getBrandLink: () => screen.getByRole("link", { name: "Continue?" }),
   getSearchTrigger: () =>
     screen.getByRole("button", { name: "Open command palette" }),
   getAddGameLink: () => screen.getByRole("link", { name: "Add game" }),
@@ -97,11 +97,11 @@ const actions = {
 describe("AppSidebar", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
-    window.localStorage.removeItem("sp:sidebar-collapsed");
+    window.localStorage.removeItem("app:sidebar-collapsed");
   });
 
   afterEach(() => {
-    window.localStorage.removeItem("sp:sidebar-collapsed");
+    window.localStorage.removeItem("app:sidebar-collapsed");
   });
 
   describe("given the sidebar is rendered", () => {
@@ -350,13 +350,36 @@ describe("AppSidebar", () => {
     });
 
     it("persists collapsed=true to localStorage", () => {
-      expect(window.localStorage.getItem("sp:sidebar-collapsed")).toBe("true");
+      expect(window.localStorage.getItem("app:sidebar-collapsed")).toBe("true");
+    });
+  });
+
+  describe("given only the old sp: key has sidebar-collapsed=true on mount", () => {
+    beforeEach(() => {
+      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+    });
+
+    afterEach(() => {
+      window.localStorage.removeItem("sp:sidebar-collapsed");
+    });
+
+    it("mounts in collapsed state (w-16 class)", () => {
+      expect(elements.getSidebar().className).toMatch(/w-16/);
+    });
+
+    it("moves the choice to the new key and deletes the old one", () => {
+      expect([
+        window.localStorage.getItem("app:sidebar-collapsed"),
+        window.localStorage.getItem("sp:sidebar-collapsed"),
+      ]).toEqual(["true", null]);
     });
   });
 
   describe("given localStorage has sidebar-collapsed=true on mount", () => {
     beforeEach(() => {
-      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      window.localStorage.setItem("app:sidebar-collapsed", "true");
       currentPath = "/dashboard";
       render(<AppSidebar user={stubUser} />);
     });
@@ -380,7 +403,7 @@ describe("AppSidebar", () => {
       recoverableErrors.length = 0;
       currentPath = "/dashboard";
       const serverHtml = renderToString(<AppSidebar user={stubUser} />);
-      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      window.localStorage.setItem("app:sidebar-collapsed", "true");
       container = document.createElement("div");
       container.innerHTML = serverHtml;
       document.body.appendChild(container);
@@ -406,10 +429,10 @@ describe("AppSidebar", () => {
 
   describe("given the stored preference is expanded and the user collapses then reloads", () => {
     it("keeps the stored preference untouched by merely mounting", () => {
-      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      window.localStorage.setItem("app:sidebar-collapsed", "true");
       currentPath = "/dashboard";
       render(<AppSidebar user={stubUser} />);
-      expect(window.localStorage.getItem("sp:sidebar-collapsed")).toBe("true");
+      expect(window.localStorage.getItem("app:sidebar-collapsed")).toBe("true");
     });
   });
 });

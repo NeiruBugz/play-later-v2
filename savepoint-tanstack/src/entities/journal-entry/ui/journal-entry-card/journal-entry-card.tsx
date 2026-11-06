@@ -38,7 +38,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
       <div className="flex items-baseline justify-between gap-2">
         <h3
           id={headingId}
-          className="text-sm leading-snug font-semibold md:font-display md:text-base"
+          className="text-sm leading-snug font-semibold md:text-base"
         >
           {cardHeading}
         </h3>
@@ -66,7 +66,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
 
       <div className="flex items-center justify-between gap-2">
         {content && timePlayed ? (
-          <span className="font-mono text-xs font-medium text-primary">
+          <span className="font-mono text-xs font-medium text-foreground">
             {timePlayed}
           </span>
         ) : (
@@ -76,7 +76,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
           <Link
             to="/games/$slug"
             params={{ slug: entry.game.slug }}
-            className="-my-3 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary md:my-0 md:min-h-0"
+            className="-my-3 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground md:my-0 md:min-h-0"
             onClick={(event) => event.stopPropagation()}
           >
             <span className="font-medium">{entry.game.title}</span>

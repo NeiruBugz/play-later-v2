@@ -31,6 +31,16 @@ describe("NextStepButton", () => {
     });
   });
 
+  describe("given any status", () => {
+    beforeEach(() => {
+      render(<NextStepButton status="WANT" onStep={onStep} />);
+    });
+
+    it("is not the screen's primary action", () => {
+      expect(elements.getButton("Start playing")).not.toHaveClass("bg-primary");
+    });
+  });
+
   describe("given it is disabled", () => {
     beforeEach(async () => {
       render(<NextStepButton status="WANT" onStep={onStep} disabled />);

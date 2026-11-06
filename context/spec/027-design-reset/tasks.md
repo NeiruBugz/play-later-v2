@@ -268,58 +268,69 @@ Conventions for every slice:
     - Copy `review/phase1/after` to `review/phase2/before`, since the phase 2 "before" is the shipped phase 1.
     - Release 2 can ship after this. **[Agent: testing]**
 
-- [ ] **Slice 16: Owner picks the accent, the title font and the name from options shown on a phone**
-  - [ ] Prepare 2–3 accent options and 2–3 title-font options:
+- [x] **Slice 16: Owner picks the accent, the title font and the name from options shown on a phone**
+  - [x] Prepare 2–3 accent options and 2–3 title-font options:
     - accents suit the warm surfaces, lie outside hue 170°–220°, and each has fill and text tones meeting AA in both modes;
     - fonts load with at most 2 weights and `display=swap`.
 
     Each option is a token or font swap behind a dev-only query switch, `?preview=accent-b&font=c`, that is removed in Slice 17. **[Agent: react-frontend]**
-  - [ ] Capture home, library and game page for each option with the review script: phone first, Light and Dark. Capture desktop only for the option the owner favours on the phone. Present them together with the owner's list of name candidates. If every option is rejected, prepare a new set. **[Agent: testing]**
-  - [ ] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
+  - [x] Capture home, library and game page for each option with the review script: phone first, Light and Dark. Capture desktop only for the option the owner favours on the phone. Present them together with the owner's list of name candidates. If every option is rejected, prepare a new set. **[Agent: testing]**
 
-- [ ] **Slice 17: The app shows the new accent and title font**
-  - [ ] Apply the chosen accent as `--primary` / `--primary-foreground`, add `--accent-text` (with `--color-accent-text`), and set `--ring`.
+    Owner choice (2026-11-06, phone captures in `review/phase2/options.html`): accent **B, Plum** (`oklch(0.48 0.13 340)` Light / `oklch(0.72 0.11 340)` Dark) and title font **C, Zilla Slab** (500/700). Product name: **"Continue?"** — with the question mark in the logo, header, tab title and landing; without it in running text and in the address (chosen in the address slice). Recorded in `functional-spec.md` Change Log.
+    The owner approved Plum + Zilla Slab together on phone and desktop (`review/phase2/chosen.html`). The unchosen option captures (accent-a, accent-c, font-a, font-b) are deleted; baseline, accent-b, font-c and chosen remain.
+  - [x] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
+
+- [x] **Slice 17: The app shows the new accent and title font**
+  - [x] Apply the chosen accent as `--primary` / `--primary-foreground`, add `--accent-text` (with `--color-accent-text`), and set `--ring`.
     - Restrict accent classes with `no-restricted-classes` to the primary button, selected or active items, Playing, focus and links.
     - Swap Space Grotesk for the chosen font in the Google Fonts `<link>` and `--font-display`, with a preload for the main weight.
     - Remove the preview switch.
     - Apply the font to `PageHeader`, `DialogTitle`, the game-page name, the landing h1 and the header product name only. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Fix what the first Slice 17 verify found:
+    - The landing header product name (`routes/index.tsx`) renders in Geist; give it the title font like the sidebar and sign-in wordmarks.
+    - Library and home render a filled primary button on every card (Mark done / Start playing / Play again), against §2.0's one primary button per screen or dialog. Owner decision (2026-11-06): per-card actions become outline (secondary) buttons; only a screen's main action stays primary. **[Agent: react-frontend]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, scan computed colors on the §2.0 screens and confirm the accent appears only in the allowed places.
     - Confirm that page titles, dialog titles, the game name, the landing headline and the header name use the new font, while card and list game names use Geist.
     - Check accent fill and text contrast in both modes.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 18: Covers look the same everywhere**
-  - [ ] Move `entities/game/ui/game-cover/` to `shared/ui/game-cover/` with the API `{ src, name, size, priority }`.
+    Slice notes (2026-11-06): the app-wide Log action (desktop sidebar, phone bottom-nav centre) is navigation, not a screen's primary button; the selected "All" status tab in Plum is a §2.9 selected item. `/steam/games` has no filled primary (its "Import from Steam" is outline).
+
+- [x] **Slice 18: Covers look the same everywhere**
+  - [x] Move `entities/game/ui/game-cover/` to `shared/ui/game-cover/` with the API `{ src, name, size, priority }`.
     - Look: `aspect-[2/3]`, one radius, shadow and ring.
     - Placeholder: the game name in `line-clamp-3` with "…".
     - Hover feedback comes from the parent link via `group-hover`; IGDB URLs still come from `shared/lib/igdb-image`.
     - Replace the inline cover treatments on home, Up Next, library, search results, the Add game sheet, profile and game page. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests for `GameCover`: an image with the game name as its accessible name; the placeholder when `src` is missing; a long name clamped to three lines. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Write behaviour tests for `GameCover`: an image with the game name as its accessible name; the placeholder when `src` is missing; a long name clamped to three lines. **[Agent: testing]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, measure covers on every listed screen at phone and desktop width and confirm they share aspect ratio, radius, shadow and border, and the same hover change at desktop. Use a seeded game without art to check the placeholder.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 19: One status chip everywhere, including "Let go"**
-  - [ ] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
+- [x] **Slice 19: One status chip everywhere, including "Let go"**
+  - [x] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
     - Map the domain status and outcome to it at the entity layer.
     - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar, status-switcher and journal stats rail (`journal-stats-rail.tsx`) color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests: each status renders its label; "Let go" shares the Done variant attribute; contrast tokens are applied in both modes, asserted via the variant attribute and not via classes. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Write behaviour tests: each status renders its label; "Let go" shares the Done variant attribute; contrast tokens are applied in both modes, asserted via the variant attribute and not via classes. **[Agent: testing]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Confirm the chips on all five surfaces match in shape, size, wording and casing. Confirm Playing uses the accent and a Let go game reads "Let go" in the Done color. Check chip text contrast in both modes.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 20: Up Next is a shelf of covers on the home screen**
-  - [ ] Add `widgets/up-next-shelf/`: a horizontal scroll-snap row in queue order.
+    Slice notes (2026-11-06): chips match on library (grid and list), game page, home and search — 20px, 2px 8px, fully rounded, 12px/500, labels Want / Playing / Done / Let go; Playing equals `--primary`; Let go uses the Done colour; text contrast 5.05–8.24. The public profile library shows no status at all (it didn't before either), so it has no chip. The list-view toggle is desktop-only, so the list was measured at 1440.
+
+- [x] **Slice 20: Up Next is a shelf of covers on the home screen**
+  - [x] Add `widgets/up-next-shelf/`: a horizontal scroll-snap row in queue order.
     - The first cover is larger, capped at about 60% of the phone width so the next one peeks.
     - Use `overscroll-x-contain` and `min-w-0` on parents, so the page never scrolls sideways.
     - The empty state keeps the outline and position, with a button that opens the command palette.
     - Replace the presentation of the spec-026 Up Next block on home. Its data and actions are unchanged. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests: covers render in queue order and the first is marked as next; the empty state's button opens the command palette. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Show the whole Up Next queue (up to 5) on Home instead of the top 3 (owner, 2026-11-06; supersedes spec 026's "top 3 on Home"). Data change in the home dashboard worker; run integration. **[Agent: tanstack-fullstack]**
+  - [x] Write behaviour tests: covers render in queue order and the first is marked as next; the empty state's button opens the command palette. **[Agent: testing]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). With 5 games queued, at 360, 390 and 430 and at desktop width, confirm:
       - the shelf is the first and largest element above the fold;
@@ -329,37 +340,45 @@ Conventions for every slice:
     - Empty the queue and confirm the empty state.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 21: The app, link previews and the home-screen icon show the new name and logo**
-  - [ ] Complete `shared/config/site.ts` (`PRODUCT_NAME`, `PRODUCT_TAGLINE`, `PRODUCT_DESCRIPTION`, `OG_IMAGE_PATH`) and add a `pageTitle(part?)` helper.
+    Slice notes (2026-11-06): with 5 queued the shelf follows the page header and is the largest block above the fold at 360/390/430/1440; the first cover is larger (234×454 vs 144×291 at 390); the second peeks at phone widths; the shelf scrolls while the page does not. At 1440 the five covers fit, so the shelf doesn't scroll (§2.12's sideways criterion is for phone width). The empty outline matches the first cover's height and position.
+
+- [x] **Slice 21: The app, link previews and the home-screen icon show the new name and logo**
+  - [x] Complete `shared/config/site.ts` (`PRODUCT_NAME`, `PRODUCT_TAGLINE`, `PRODUCT_DESCRIPTION`, `OG_IMAGE_PATH`) and add a `pageTitle(part?)` helper.
     - Use them in the `__root.tsx` head, landing, `games.search.tsx`, `app-sidebar`, `app-mobile-topbar`, `auth-page-view`, `landing-hero`, `settings-list` and `whats-new/config.ts`.
     - Rename the internal identifiers: the `savepoint:command-palette:open` event, `SavepointThemeProvider` and the `sp:` storage prefix.
     - Build absolute `og:url`, `og:image` and `twitter:image` from `BETTER_AUTH_URL`, through a root loader server function and route context, not from client env.
     - Set per-route `og:url` and titles on the landing page and `/games/$slug`.
     - Replace `public/manifest.json` with a server route `routes/manifest[.]json.ts` built from `site.ts`, with `start_url: "/"`.
     - Add an optional `BETTER_AUTH_EXTRA_ORIGINS` to `env.ts` (Zod, comma-separated) feeding Better Auth `trustedOrigins`. **[Agent: tanstack-fullstack]**
-  - [ ] Add `shared/ui/logo.tsx` (`LogoMark`, `LogoWordmark`) as an inline `currentColor` SVG for the chosen name. It replaces the three `<img src="/logo.svg">` uses and the auth page's text wordmark.
+  - [x] Add `shared/ui/logo.tsx` (`LogoMark`, `LogoWordmark`) as an inline `currentColor` SVG for the chosen name. It replaces the three `<img src="/logo.svg">` uses and the auth page's text wordmark.
     - Export the static assets: `favicon.svg` and `.ico`, `apple-touch-icon`, `icon-192` and `icon-512`, the maskable icons and `og-image.png`.
     - Remove the old `logo.svg` and `og-image.svg`. **[Agent: react-frontend]**
-  - [ ] Write unit tests:
+
+    Owner choice (2026-11-06): mark B "Open loop" (`review/phase2/logo-options/option-b-mark.svg`); `LogoWordmark` is live Zilla Slab 700 text "Continue?", not an SVG wordmark; static images are rendered with Zilla Slab at export.
+  - [x] Write unit tests:
     - `head()` output: title helper, absolute og URLs, theme-color pair;
     - the manifest route payload: name, short name, icons, colors;
     - `BETTER_AUTH_EXTRA_ORIGINS` parsing;
     - a scan of `src/` and `public/` asserting the old name "SavePoint" appears nowhere user-visible. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID).
       - Confirm the sidebar, phone top bar, landing, sign-in, tab title and tab icon show only the new name and logo, and the logo is visible in Light and Dark.
       - `curl` `/manifest.json` and the landing and game-page HTML to confirm the og tags are absolute and carry the new name and image.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
+    Slice notes (2026-11-06): gate green incl. integration; signed out at 390/1440, Light/Dark — landing, sign-in and a game page show only "Continue?" and the Open-loop mark (0 "SavePoint" in text, attributes or HTML; logo 16:1); titles "Continue?" / "Hades · Continue?"; favicons, manifest, icons and absolute og tags verified with curl, og-image 1200×630. The signed-in surfaces (sidebar expanded/collapsed, phone top bar, home, search) were not opened live — reading the audit credentials was blocked by the permission classifier; the owner deferred them to the phase 2 review captures in Slice 22 (they are covered by unit tests and the old-name scan).
+
 - [ ] **Slice 22: Owner approves phase 2, and old links land on the new address (Release 3)**
-  - [ ] Capture `review/phase2/after/phone` in Light and Dark and present the pairs to the owner, together with a comparison against the same-named competitor's home, library, profile and game pages for the Up Next shelf (§2.12). After phone approval, capture and present desktop. Rework any rejected pair and show it again. **[Agent: testing]**
-  - [ ] Infra:
+  - [x] Capture `review/phase2/after/phone` in Light and Dark and present the pairs to the owner, together with a comparison against the same-named competitor's home, library, profile and game pages for the Up Next shelf (§2.12). After phone approval, capture and present desktop. Rework any rejected pair and show it again. **[Agent: testing]**
+    Owner approved all 46 phone and 44 desktop pairs on 2026-11-06 (`review/phase2/compare-phone.html`, `compare-desktop.html`; after 8f49a5b7). Phone checks 0 failures at 360/390/430. Slice 21 signed-in checks seen OK on the captures (collapsed sidebar not captured; unit-tested). Competitor comparison: no shelf or queue on their side, cyan + Bungee vs our Plum + Zilla Slab; reads as distinct.
+  - [x] Rework what the owner's phase 2 phone review found: move the search-result quick-add "+" off the cover into the year row as an outline icon button, and show the "Continue?" wordmark in the signed-in phone top bar. Re-capture phone and desktop. **[Agent: react-frontend]**
+  - [x] Infra:
     - Add `additional_callback_urls` to `infra/envs/prod` (dev already has it) and the new origin to the Cognito callback and logout URLs and to `s3_additional_allowed_origins`.
     - Pin `s3_bucket_name` in tfvars and add `lifecycle { prevent_destroy = true }` to the user pool, bucket and pool domain.
     - Do not change `project_name` or `domain_prefix`.
     - `terraform plan` must show only in-place updates. The owner applies dev, then prod. **[Agent: aws-infra]**
-  - [ ] Add a "Spec 027 phase 2 — address change" section to `docs/cutover-rollback.md`. It covers the cutover runbook from tech spec §2.9 with a verification and rollback for each step, the re-sign-in and theme-reset notes, and the rule never to detach the old domain. Correct the claim that sessions survive the change. **[Agent: aws-infra]**
+  - [x] Add a "Spec 027 phase 2 — address change" section to `docs/cutover-rollback.md`. It covers the cutover runbook from tech spec §2.9 with a verification and rollback for each step, the re-sign-in and theme-reset notes, and the rule never to detach the old domain. Correct the claim that sessions survive the change. **[Agent: aws-infra]**
   - [ ] Guide the owner through the Vercel steps in order, one at a time, without changing Vercel state yourself:
     1. add the new domain;
     2. verify TLS;
@@ -375,8 +394,10 @@ Conventions for every slice:
     - Delete any captured files except the review set.
     - Release 3 is done after this. After 2–4 weeks, a follow-up removes the old origin from S3 CORS and `BETTER_AUTH_EXTRA_ORIGINS`. **[Agent: testing]**
 
-- [ ] **Slice 23: Feature Testing & Regression**
+- [x] **Slice 23: Feature Testing & Regression**
 
   > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
-  - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 027-design-reset` and `@regression` if suitable for long-term regression. **[Agent: testing]**
-  - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+  - [x] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 027-design-reset` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [x] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+
+  Slice notes (2026-11-06): 27 new tests in `test/brand/design-reset.acceptance.test.ts` and `src/shared/lib/auth/trusted-origins.acceptance.test.ts`, each shown RED by a temporary break; the other criteria map to existing tests. Tap size, sheets and focus contrast stay with the review script and owner review (no CI visual regression by spec).

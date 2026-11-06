@@ -44,7 +44,7 @@ variable "google_client_secret" {
 
 variable "s3_bucket_name" {
   type        = string
-  description = "Optional explicit S3 bucket name override for this env"
+  description = "Optional explicit S3 bucket name. Empty keeps the derived <project>-<env>-<account_id>-<region>. Pin it in tfvars to decouple the bucket from project_name"
   default     = ""
 }
 
@@ -62,6 +62,6 @@ variable "s3_ecs_task_role_name" {
 
 variable "additional_callback_urls" {
   type        = list(string)
-  description = "Additional callback URLs for OAuth (e.g., Vercel preview deployments)"
+  description = "Additional app origins allowed as Cognito callback and logout URLs (e.g., Vercel preview deployments, or the previous origin during an address cutover)"
   default     = []
 }

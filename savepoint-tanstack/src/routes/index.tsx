@@ -1,5 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
+import { PRODUCT_NAME, socialMeta } from "@/shared/config/site";
+import { LogoWordmark } from "@/shared/ui/logo";
 import {
   LandingFeaturesStrip,
   LandingPreviewCard,
@@ -12,6 +14,9 @@ export const Route = createFileRoute("/")({
       throw redirect({ to: "/dashboard" });
     }
   },
+  head: ({ match }) => ({
+    meta: socialMeta({ siteOrigin: match.context.siteOrigin, pathname: "/" }),
+  }),
   component: LandingPage,
 });
 
@@ -21,18 +26,10 @@ function LandingPage() {
       <header className="flex items-center justify-between px-6 py-5 sm:px-10 lg:px-16 xl:px-24 2xl:px-32">
         <Link
           to="/"
-          aria-label="SavePoint"
+          aria-label={PRODUCT_NAME}
           className="group flex min-h-11 items-center gap-3 no-underline"
         >
-          <img
-            src="/logo.svg"
-            alt=""
-            aria-hidden="true"
-            className="h-8 w-8 shrink-0"
-          />
-          <span className="text-base font-semibold tracking-tight text-foreground">
-            SavePoint
-          </span>
+          <LogoWordmark className="gap-3 text-base" markClassName="size-8" />
         </Link>
         <Link
           to="/login"

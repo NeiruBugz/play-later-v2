@@ -8,6 +8,7 @@ import type { GameDetailActionBarProps } from "./game-detail-action-bar.type";
 export function GameDetailActionBar({
   gameSlug,
   libraryStatus,
+  doneOutcome = null,
   viewerUserId,
 }: GameDetailActionBarProps) {
   const navigate = useNavigate();
@@ -32,9 +33,9 @@ export function GameDetailActionBar({
     >
       <StatusControl
         status={libraryStatus.status}
+        outcome={doneOutcome}
         onChange={(to) => void libraryStatus.setStatus(to)}
         disabled={libraryStatus.isPending}
-        className="py-2"
       />
 
       <Button className="h-11 flex-1" onClick={openLogSession}>

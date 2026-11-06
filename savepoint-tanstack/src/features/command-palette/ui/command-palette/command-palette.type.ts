@@ -6,7 +6,7 @@ export interface CommandPaletteProps {
   /**
    * Optional external open-state control. If omitted the component owns its
    * own state and binds ⌘K / Ctrl+K plus the
-   * `savepoint:command-palette:open` event.
+   * `app:command-palette:open` event.
    */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;

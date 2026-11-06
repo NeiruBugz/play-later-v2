@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight, Settings, UserCircle2 } from "lucide-react";
 
 import { ThemeToggle } from "@/features/toggle-theme";
+import { PRODUCT_NAME } from "@/shared/config/site";
 import { cn } from "@/shared/lib/utils";
 import { SectionLabel } from "@/shared/ui/section-label";
 
@@ -102,7 +103,7 @@ export function SettingsList({ activeSegment }: SettingsListProps) {
         <SettingsRowLink
           to="/settings/profile"
           icon={UserCircle2}
-          iconBg="var(--primary)"
+          iconBg="var(--muted-foreground)"
           label="Profile"
           isActive={activeSegment === "profile"}
         />
@@ -117,7 +118,7 @@ export function SettingsList({ activeSegment }: SettingsListProps) {
       </SettingsGroup>
 
       <footer className="mt-8 text-center text-xs text-muted-foreground">
-        SavePoint · for patient gamers
+        {PRODUCT_NAME} · for patient gamers
       </footer>
     </nav>
   );

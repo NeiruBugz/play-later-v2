@@ -4,9 +4,10 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import type { LibraryAwareSearchItem as SearchResultGame } from "@/entities/library-item/api/search-library-aware-games.worker";
 import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { cn } from "@/shared/lib/utils";
+import { buttonVariants } from "@/shared/ui/button";
+import { GameCover } from "@/shared/ui/game-cover";
 import { Input } from "@/shared/ui/input";
 
 import { searchGamesFn } from "../../api/search-games-fn";
@@ -21,32 +22,13 @@ type SearchState =
   | { phase: "done"; games: SearchResultGame[] };
 
 function SearchResultRow({ game }: { game: SearchResultGame }) {
-  const coverUrl = buildCoverImageUrl(
-    game.cover?.image_id ?? null,
-    "t_cover_small"
-  );
   const releaseYear = game.first_release_date
     ? new Date(game.first_release_date * 1000).getFullYear()
     : null;
 
   return (
     <li className="flex items-center gap-3">
-      <div className="shrink-0">
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={`Cover for ${game.name}`}
-            loading="lazy"
-            className="aspect-[3/4] w-10 rounded-sm object-cover shadow-sm"
-          />
-        ) : (
-          <div
-            role="img"
-            aria-label={`Cover for ${game.name}`}
-            className="aspect-[3/4] w-10 rounded-sm bg-muted shadow-sm"
-          />
-        )}
-      </div>
+      <GameCover src={game.cover?.image_id} name={game.name} size="xs" />
       <div className="min-w-0 flex-1">
         <Link
           to="/games/$slug"
@@ -147,7 +129,7 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
               to="/games/search"
               search={{ q: debouncedQuery }}
               onClick={onSeeAll}
-              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              className={buttonVariants({ variant: "link", size: "sm" })}
             >
               See all results
             </Link>

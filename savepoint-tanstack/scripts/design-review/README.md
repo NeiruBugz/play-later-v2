@@ -24,6 +24,8 @@ Runs on Node's built-in TypeScript support (Node >= 22.18). First time only: `pn
 | `--desktop`  | Also capture 1440x900. Phone (390x844) is always captured.                                  |
 | `--out`      | Output directory. Default `context/spec/027-design-reset/review/<phase>/<set>/` (repo root) |
 | `--base-url` | Default `http://localhost:6060`                                                             |
+| `--screens`  | Comma-separated screen ids to capture, e.g. `home,library,game-in-library`. Default: all.   |
+| `--query`    | Query string appended to every page URL, e.g. `--query "theme=x"`.                          |
 
 ## Reseeding
 

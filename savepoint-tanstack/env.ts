@@ -15,6 +15,8 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+import { extraOriginsSchema } from "./src/shared/config/extra-origins";
+
 export const env = createEnv({
   clientPrefix: "VITE_",
   server: {
@@ -28,6 +30,7 @@ export const env = createEnv({
     AUTH_COGNITO_DOMAIN: z.string().optional(),
     BETTER_AUTH_SECRET: z.string({ message: "BETTER_AUTH_SECRET is required" }),
     BETTER_AUTH_URL: z.url({ message: "BETTER_AUTH_URL is required" }),
+    BETTER_AUTH_EXTRA_ORIGINS: extraOriginsSchema.optional(),
     AUTH_MIGRATION_CUTOVER_AT: z.iso
       .datetime({
         offset: true,
@@ -87,6 +90,7 @@ export const env = createEnv({
     AUTH_COGNITO_DOMAIN: process.env.AUTH_COGNITO_DOMAIN,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    BETTER_AUTH_EXTRA_ORIGINS: process.env.BETTER_AUTH_EXTRA_ORIGINS,
     AUTH_MIGRATION_CUTOVER_AT: process.env.AUTH_MIGRATION_CUTOVER_AT,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,

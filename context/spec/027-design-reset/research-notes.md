@@ -121,7 +121,6 @@ NOT CONFIGURED — no `context/sources/sources.md`; the user skipped the sources
 - Spec-022 design README calls uppercase tracked metadata and `// TERMINAL` eyebrows a signature; the user now wants distance from exactly that look.
 - Spec-022 README says "covers 2px"; the token is 10px; screens use 1–10px.
 
-
 ## Post-026 re-count (2026-11-05)
 
 Taken on `feat/design-reset` at `6d847d56` (spec 026 shipped). Scope: `src/**/*.{ts,tsx}` minus `*.test.*` (788 non-test files, was 773). Paths relative to `savepoint-tanstack/`. Commands use ripgrep with `-g '*.{ts,tsx}' -g '!*.test.*' src`; "delta" is against the numbers above and in `technical-considerations.md`. Earlier numbers may have used slightly different regexes, so small deltas are indicative.
@@ -172,16 +171,16 @@ Taken on `feat/design-reset` at `6d847d56` (spec 026 shipped). Scope: `src/**/*.
 
 Now **8 distinct treatments** (was ~7 radii plus shadow variations):
 
-| Treatment | Where |
-|---|---|
-| 10px (`--radius-cover`) + `shadow-paper-md` | `game-cover.tsx:24,36` (game detail hero), `library-page.tsx:97-109` (inline copy), `dashboard-game-rail.tsx:28-40` (inline copy) |
-| 10px, no shadow | `dashboard-playing-section.tsx:20-31` (w-12) |
-| `rounded-lg` (5px) + `shadow-paper-md` | `search-games-results.tsx:141-151` |
-| `rounded` (4px) + `shadow-paper` | `add-game-content.tsx:36-46` (w-10) |
-| `rounded-md` (`--radius`) in `gameCardCoverVariants`, no shadow | `game-card.variants.ts:49` via `game-card.tsx:51` (all library cards) |
-| `rounded` 4px, no shadow | `igdb-manual-search.tsx:149`, `game-result-item.tsx:30`, `related-games-skeleton.tsx:20`, `imported-game-card.tsx:52` (h-10 w-10) |
-| `rounded-[5px]` / `rounded-[4px]` thumbnails | `log-form.tsx:230`, `log-game-picker.tsx:40` |
-| none (square) | `profile-overview.tsx:177-183`, `library-grid.tsx:22-29` |
+| Treatment                                                       | Where                                                                                                                             |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 10px (`--radius-cover`) + `shadow-paper-md`                     | `game-cover.tsx:24,36` (game detail hero), `library-page.tsx:97-109` (inline copy), `dashboard-game-rail.tsx:28-40` (inline copy) |
+| 10px, no shadow                                                 | `dashboard-playing-section.tsx:20-31` (w-12)                                                                                      |
+| `rounded-lg` (5px) + `shadow-paper-md`                          | `search-games-results.tsx:141-151`                                                                                                |
+| `rounded` (4px) + `shadow-paper`                                | `add-game-content.tsx:36-46` (w-10)                                                                                               |
+| `rounded-md` (`--radius`) in `gameCardCoverVariants`, no shadow | `game-card.variants.ts:49` via `game-card.tsx:51` (all library cards)                                                             |
+| `rounded` 4px, no shadow                                        | `igdb-manual-search.tsx:149`, `game-result-item.tsx:30`, `related-games-skeleton.tsx:20`, `imported-game-card.tsx:52` (h-10 w-10) |
+| `rounded-[5px]` / `rounded-[4px]` thumbnails                    | `log-form.tsx:230`, `log-game-picker.tsx:40`                                                                                      |
+| none (square)                                                   | `profile-overview.tsx:177-183`, `library-grid.tsx:22-29`                                                                          |
 
 Only `game-detail.tsx:311` uses the `GameCover` entity component; the other 10px sites copy its classes. The jump-back-in, continue-list and quick-log covers are gone.
 
@@ -212,7 +211,6 @@ Removed by 026: `RunStatusBadge` (fully inline), lifecycle-strip, action-bar col
 - `black`/`white` color utilities: 22 uses; outside `shared/ui` 19 across `library-status-badge`, `game-card:69`, `landing-features`, `profile-overview` (`:69,187-193`), `settings-list:65`, `library-card-menu:64`; inside `shared/ui` `dialog`, `sheet`, `image-lightbox` overlays.
 - Runtime color literals: 1 `oklch(` string in ts/tsx (`landing-features.tsx:40` radial gradient) plus `derive-banner-gradient.ts` (oklch built from numbers).
 - Inline `style={{`: **15** (was 32) in 11 files; `game-detail` 3, `status-picker` 2, `status-control` 2, the rest 1 each.
-
 
 ## Slice 9 spacing conflicts
 
@@ -299,23 +297,71 @@ Release 1 spacing classes on each component's root element (default variants), f
 
 Applied by Slice 9.2 after the codemod ran on `features`, `widgets` and `routes`. Stock Maia spacing now in effect: `Card` has `py-(--card-spacing)` (24px) and `CardContent` `px-(--card-spacing)`; `SheetContent` is `px-6` with `py-6` on `SheetHeader`/`SheetFooter`; `Input` is `px-3`; `Badge` is `px-2`.
 
-| Call site | Call-site class | Decision | Why |
-| --- | --- | --- | --- |
-| `entities/game/ui/platform-badges/platform-badge.tsx:22` | `px-1.5` | removed | Release 1 rendered `Badge` `px-lg` (12px); the stock badge is `px-2`. Chips follow the primitive; Slice 12 reworks them. |
-| `entities/game/ui/platform-badges/platform-badges.tsx:29` | `px-1.5` | removed | Same as above. |
-| `entities/journal-entry/.../journal-entry-card.tsx:36` | `p-3` | removed | Release 1 rendered `CardContent` `p-2xl` (24px); stock `Card` py + `CardContent` px gives 24px all round again (Slice 7 deviation fixed). |
-| `entities/library-item/.../status-picker.tsx:134` | `p-2` `pb-4` | changed to `py-4` | Release 1 rendered `p-xl` (16px). Vertical keeps 16px; the horizontal inset falls back to the stock sheet `px-6` that Slice 8 restored, so all sheets share it. |
-| `features/add-game/.../add-game-content.tsx:115` | `pl-9` | changed to `pl-8` | Release 1 rendered `px-3xl` (32px); the search icon sits at `left-3`, so 32px clears it exactly as before. |
-| `features/steam-import/.../igdb-manual-search.tsx:100` | `pl-10` | changed to `pl-8` | Release 1 rendered 32px. Same icon position. |
-| `widgets/imported-games-page/.../imported-games-filter-bar.tsx:259` | `pr-9` `pl-9` | changed to `px-8` | Release 1 rendered 32px both sides (icon left, clear button right). |
-| `widgets/library-page/.../library-page.tsx:353` | `pr-9` | changed to `pr-8` | Release 1 rendered 32px; the `/` hint badge occupies the right 32px. |
-| `features/steam-import/.../igdb-manual-search.tsx:147` | `p-3` | removed | Release 1 rendered `CardContent` `p-2xl` (24px); stock gives 24px. |
-| `features/steam-import/.../imported-game-card.tsx:50` | `p-3` | removed | Same as above. |
-| `features/command-palette/.../command-palette.tsx:181` (sheet) | `gap-0` `p-0` | kept | Exception to the 9.2 rule, flagged. Release 1 painted the variant's `p-xl` and `gap-xl` around the palette, which fought its intent (a `Command` list edge to edge). Stock `command.tsx:52` also uses `p-0`. Check in the 9.4 browser pass. |
-| `features/command-palette/.../command-palette.tsx:196` (dialog) | `gap-0` `p-0` | kept | Same exception: Release 1 showed `p-2xl` around the list. |
-| `features/command-palette/.../palette-navigation-group.tsx:59` | `p-0` | kept | Same exception: the inner `Link` carries its own `gap-2 px-2 py-1.5`; Release 1 doubled the padding. |
-| `shared/ui/command.tsx:52` | `p-0` | kept | Stock `CommandDialog` output (Slice 8), not a call site to change. |
-| `shared/ui/responsive-modal.tsx:77` | `pb-[max(1rem,env(safe-area-inset-bottom))]` | kept | Release 1's `p-xl` bottom was 16px, the same as the `1rem` floor, so it only differs on notched devices. Slice 11 owns safe areas. |
-| `widgets/dashboard-page/.../dashboard-page.tsx:29` | `mb-3 md:mb-6` | kept | Release 1 was undetermined (two stock `mb-*` on one element). `tailwind-merge` now lets the call site win, which is the evident intent (tighter on phone). |
+| Call site                                                           | Call-site class                              | Decision          | Why                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------- | -------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `entities/game/ui/platform-badges/platform-badge.tsx:22`            | `px-1.5`                                     | removed           | Release 1 rendered `Badge` `px-lg` (12px); the stock badge is `px-2`. Chips follow the primitive; Slice 12 reworks them.                                                                                                                    |
+| `entities/game/ui/platform-badges/platform-badges.tsx:29`           | `px-1.5`                                     | removed           | Same as above.                                                                                                                                                                                                                              |
+| `entities/journal-entry/.../journal-entry-card.tsx:36`              | `p-3`                                        | removed           | Release 1 rendered `CardContent` `p-2xl` (24px); stock `Card` py + `CardContent` px gives 24px all round again (Slice 7 deviation fixed).                                                                                                   |
+| `entities/library-item/.../status-picker.tsx:134`                   | `p-2` `pb-4`                                 | changed to `py-4` | Release 1 rendered `p-xl` (16px). Vertical keeps 16px; the horizontal inset falls back to the stock sheet `px-6` that Slice 8 restored, so all sheets share it.                                                                             |
+| `features/add-game/.../add-game-content.tsx:115`                    | `pl-9`                                       | changed to `pl-8` | Release 1 rendered `px-3xl` (32px); the search icon sits at `left-3`, so 32px clears it exactly as before.                                                                                                                                  |
+| `features/steam-import/.../igdb-manual-search.tsx:100`              | `pl-10`                                      | changed to `pl-8` | Release 1 rendered 32px. Same icon position.                                                                                                                                                                                                |
+| `widgets/imported-games-page/.../imported-games-filter-bar.tsx:259` | `pr-9` `pl-9`                                | changed to `px-8` | Release 1 rendered 32px both sides (icon left, clear button right).                                                                                                                                                                         |
+| `widgets/library-page/.../library-page.tsx:353`                     | `pr-9`                                       | changed to `pr-8` | Release 1 rendered 32px; the `/` hint badge occupies the right 32px.                                                                                                                                                                        |
+| `features/steam-import/.../igdb-manual-search.tsx:147`              | `p-3`                                        | removed           | Release 1 rendered `CardContent` `p-2xl` (24px); stock gives 24px.                                                                                                                                                                          |
+| `features/steam-import/.../imported-game-card.tsx:50`               | `p-3`                                        | removed           | Same as above.                                                                                                                                                                                                                              |
+| `features/command-palette/.../command-palette.tsx:181` (sheet)      | `gap-0` `p-0`                                | kept              | Exception to the 9.2 rule, flagged. Release 1 painted the variant's `p-xl` and `gap-xl` around the palette, which fought its intent (a `Command` list edge to edge). Stock `command.tsx:52` also uses `p-0`. Check in the 9.4 browser pass. |
+| `features/command-palette/.../command-palette.tsx:196` (dialog)     | `gap-0` `p-0`                                | kept              | Same exception: Release 1 showed `p-2xl` around the list.                                                                                                                                                                                   |
+| `features/command-palette/.../palette-navigation-group.tsx:59`      | `p-0`                                        | kept              | Same exception: the inner `Link` carries its own `gap-2 px-2 py-1.5`; Release 1 doubled the padding.                                                                                                                                        |
+| `shared/ui/command.tsx:52`                                          | `p-0`                                        | kept              | Stock `CommandDialog` output (Slice 8), not a call site to change.                                                                                                                                                                          |
+| `shared/ui/responsive-modal.tsx:77`                                 | `pb-[max(1rem,env(safe-area-inset-bottom))]` | kept              | Release 1's `p-xl` bottom was 16px, the same as the `1rem` floor, so it only differs on notched devices. Slice 11 owns safe areas.                                                                                                          |
+| `widgets/dashboard-page/.../dashboard-page.tsx:29`                  | `mb-3 md:mb-6`                               | kept              | Release 1 was undetermined (two stock `mb-*` on one element). `tailwind-merge` now lets the call site win, which is the evident intent (tighter on phone).                                                                                  |
 
 Settings and account cards (`steam-connect-card.tsx`, `sign-out-card.tsx`): no call-site spacing override is left on `Card`, `CardHeader` or `CardContent`; the stock `Card` renders the 24px inset. Nothing to remove.
+
+## Phase 2 options (slice 16, 2026-11-06)
+
+Preview with `?preview=accent-<a|b|c>&font=<a|b|c>` on the dev server (dev-only; removed in slice 17). Each accent replaces only `--primary` (`--ring` and `--status-playing` follow it; `--primary-foreground` stays the current cream in Light and charcoal in Dark). `--accent` is a neutral hover surface and stays. Ratios use the oklch to sRGB math from `src/shared/ui/contrast.test.ts` (channels clamped); all values are in the sRGB gamut, so the clamp changes nothing.
+
+### Accent options
+
+| Option | Name | Light `--primary`      | Dark `--primary`       | Hue | Why it suits the warm surfaces                                                                                                                                                                                                                                   |
+| ------ | ---- | ---------------------- | ---------------------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A      | Clay | `oklch(0.5 0.125 45)`  | `oklch(0.72 0.115 45)` | 45  | Same warm family as the cream and charcoal (hue 70-85), so it reads as an ink on the same paper. Risk: 20 degrees from `--destructive` (hue 25), kept apart by lower chroma (0.125 vs 0.2) and by the rule that destructive appears only on destructive actions. |
+| B      | Plum | `oklch(0.48 0.13 340)` | `oklch(0.72 0.11 340)` | 340 | Cool-warm contrast against the cream, far from every status hue (info 250, destructive 25, warning 70, success 150), so Playing never collides with another state. Most distinctive of the three.                                                                |
+| C      | Moss | `oklch(0.5 0.1 125)`   | `oklch(0.72 0.1 125)`  | 125 | Earthy and quiet, closest to the old sage intent. Risk: 25 degrees from `--success` and Done (hue 150); lower chroma (0.10 vs 0.12-0.13) and yellower hue separate them, but verify on the library screen where Playing and Done chips sit together.             |
+
+All three are outside 170-220. Light and Dark lightness is shared with today's teal (0.5 / 0.72), so the contrast headroom is the same shape.
+
+| Pair                                                 | Need | A Light | A Dark | B Light | B Dark | C Light | C Dark |
+| ---------------------------------------------------- | ---- | ------- | ------ | ------- | ------ | ------- | ------ |
+| `primary-foreground` on `primary`                    | 4.5  | 6.14    | 7.53   | 6.83    | 7.43   | 5.66    | 8.04   |
+| `primary-foreground` on `primary/90` over background | 4.5  | 5.06    | 6.28   | 5.55    | 6.21   | 4.62    | 6.69   |
+| `primary` text on `background`                       | 4.5  | 5.63    | 7.42   | 6.26    | 7.32   | 5.19    | 7.92   |
+| `primary` text on `card`                             | 4.5  | 6.14    | 6.95   | 6.83    | 6.86   | 5.66    | 7.42   |
+| QueueMarker `primary` on `primary/5` over background | 4.5  | 5.25    | 6.99   | 5.82    | 6.90   | 4.86    | 7.44   |
+| QueueMarker `primary` on `primary/5` over card       | 4.5  | 5.72    | 6.48   | 6.34    | 6.40   | 5.30    | 6.89   |
+| focus ring on `background`                           | 3    | 5.63    | 7.42   | 6.26    | 7.32   | 5.19    | 7.92   |
+| focus ring on `card`                                 | 3    | 6.14    | 6.95   | 6.83    | 6.86   | 5.66    | 7.42   |
+| focus ring on `popover`                              | 3    | 6.14    | 6.95   | 6.83    | 6.86   | 5.66    | 7.42   |
+| focus ring on `accent`                               | 3    | 4.84    | 5.85   | 5.38    | 5.77   | 4.46    | 6.25   |
+| focus ring on `muted`/`secondary`                    | 3    | 5.14    | 6.21   | 5.72    | 6.13   | 4.74    | 6.63   |
+
+Every row passes in both modes for all three options. Tightest margins: C Light (`primary/90` hover 4.62 vs 4.5; QueueMarker on background 4.86).
+
+### Title-font options
+
+All are Google Fonts under the SIL Open Font License, loaded with `display=swap` and at most two weights. Geist stays the body font. None is a geometric grotesk (Space Grotesk and its kin are excluded by the spec).
+
+| Option | Family      | Weights             | URL query                        | What it brings                                                                                                                         |
+| ------ | ----------- | ------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A      | Fraunces    | 500, 700            | `family=Fraunces:wght@500;700`   | Soft, old-style "wonky" serif. Warm and bookish: the library-shelf voice, pairs naturally with the cream surfaces.                     |
+| B      | Young Serif | 400 (single weight) | `family=Young+Serif`             | Sturdy, slightly chunky humanist serif with one weight only (lightest payload). Reads as a confident label, close to a game-box title. |
+| C      | Zilla Slab  | 500, 700            | `family=Zilla+Slab:wght@500;700` | Mozilla's friendly slab. Most "game-shelf" and least literary; stays legible at the small dialog-title size.                           |
+
+Preview applies the family through `--font-display`, so only the elements that already use `font-display` change (page titles, dialog titles, game-page name, landing h1, header name).
+
+### Preview mechanism (delete in slice 17)
+
+- `savepoint-tanstack/src/app/dev-preview/dev-preview.ts`, `dev-preview.css`, `dev-preview.test.ts` (the whole folder).
+- The one import line in `src/routes/__root.tsx`: `if (import.meta.env.DEV) void import("@/app/dev-preview/dev-preview");`
+- The `--query` option in `scripts/design-review/capture.ts` and its row in `scripts/design-review/README.md` may stay (generic) or go with it.

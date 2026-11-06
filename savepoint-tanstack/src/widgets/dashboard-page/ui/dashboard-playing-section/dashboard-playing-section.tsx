@@ -3,8 +3,8 @@ import { Play } from "lucide-react";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
+import { GameCover } from "@/shared/ui/game-cover";
 import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { DashboardPlayingSectionProps } from "./dashboard-playing-section.type";
@@ -12,26 +12,10 @@ import type { DashboardPlayingSectionProps } from "./dashboard-playing-section.t
 function PlayingRow({ item }: { item: LibraryItemWithGame }) {
   const navigate = useNavigate();
   const { game } = item;
-  const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_small");
-  const alt = `Cover for ${game.title}`;
 
   return (
     <li className="flex items-center gap-3 rounded-xl border bg-card p-3 shadow-md">
-      {coverUrl ? (
-        <img
-          src={coverUrl}
-          alt={alt}
-          width={48}
-          height={64}
-          className="aspect-[3/4] w-12 shrink-0 rounded-lg object-cover"
-        />
-      ) : (
-        <div
-          role="img"
-          aria-label={alt}
-          className="aspect-[3/4] w-12 shrink-0 rounded-lg bg-muted"
-        />
-      )}
+      <GameCover src={game.coverImage} name={game.title} size="xs" />
       <div className="min-w-0 flex-1">
         <Link
           to="/games/$slug"
@@ -48,6 +32,7 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
       </div>
       <Button
         type="button"
+        variant="outline"
         size="sm"
         onClick={() => openGlobalAction(navigate, "log-session", game.slug)}
       >

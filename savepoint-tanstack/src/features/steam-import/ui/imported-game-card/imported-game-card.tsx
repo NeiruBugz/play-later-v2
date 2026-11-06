@@ -98,7 +98,7 @@ export function ImportedGameCard({
                 render={
                   <Button
                     type="button"
-                    variant="default"
+                    variant="outline"
                     size="icon"
                     onClick={onAddToLibrary}
                     disabled={isPending}

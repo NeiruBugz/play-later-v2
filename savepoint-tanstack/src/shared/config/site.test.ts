@@ -2,7 +2,13 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { THEME_COLORS } from "./site";
+import {
+  buildManifest,
+  pageTitle,
+  PRODUCT_NAME,
+  socialMeta,
+  THEME_COLORS,
+} from "./site";
 
 const appRoot = resolve(__dirname, "../../..");
 
@@ -51,10 +57,58 @@ describe("THEME_COLORS", () => {
   });
 
   it("is what the web manifest uses, in its Light value", () => {
-    const manifest = JSON.parse(
-      readFileSync(resolve(appRoot, "public/manifest.json"), "utf8")
-    );
+    const manifest = buildManifest();
     expect(manifest.theme_color).toBe(THEME_COLORS.light);
     expect(manifest.background_color).toBe(THEME_COLORS.light);
+  });
+});
+
+describe("pageTitle", () => {
+  it("is the product name alone without a part", () => {
+    expect(pageTitle()).toBe("Continue?");
+  });
+
+  it("puts the part before the product name", () => {
+    expect(pageTitle("Hades")).toBe("Hades · Continue?");
+  });
+});
+
+describe("buildManifest", () => {
+  it("opens the app at the root", () => {
+    expect(buildManifest().start_url).toBe("/");
+  });
+
+  it("names the app with the product name", () => {
+    expect(buildManifest()).toMatchObject({
+      name: PRODUCT_NAME,
+      short_name: PRODUCT_NAME,
+    });
+  });
+});
+
+describe("socialMeta", () => {
+  const meta = socialMeta({
+    siteOrigin: "https://example.test",
+    pathname: "/games/hades",
+    title: "Hades",
+  });
+  const content = (key: string) =>
+    meta.find((tag) => ("property" in tag ? tag.property : tag.name) === key)
+      ?.content;
+
+  it("builds absolute og:url, og:image and twitter:image", () => {
+    expect([
+      content("og:url"),
+      content("og:image"),
+      content("twitter:image"),
+    ]).toEqual([
+      "https://example.test/games/hades",
+      "https://example.test/og-image.png",
+      "https://example.test/og-image.png",
+    ]);
+  });
+
+  it("titles the page through pageTitle", () => {
+    expect(content("og:title")).toBe("Hades · Continue?");
   });
 });

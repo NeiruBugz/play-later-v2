@@ -42,6 +42,7 @@ export function AddGameAction({ game, variant = "icon" }: AddGameActionProps) {
   return (
     <Button
       type="button"
+      variant="outline"
       size="icon"
       disabled={isAdding}
       aria-busy={isAdding}

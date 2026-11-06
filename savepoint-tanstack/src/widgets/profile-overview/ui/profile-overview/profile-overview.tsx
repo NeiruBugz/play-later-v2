@@ -6,6 +6,7 @@ import { AvatarUpload } from "@/features/upload-avatar";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { GameCover } from "@/shared/ui/game-cover";
 import { PageHeader } from "@/shared/ui/page-header";
 import { SectionLabel } from "@/shared/ui/section-label";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
@@ -50,7 +51,7 @@ export function ProfileOverview({
         <div
           data-testid="profile-hero-banner"
           aria-hidden="true"
-          className="relative h-20 w-full bg-gradient-to-br from-primary/30 to-muted md:h-36"
+          className="relative h-20 w-full bg-gradient-to-br from-accent to-muted md:h-36"
         />
 
         {/* Identity block: avatar + name + handle + stat row + primary action */}
@@ -176,15 +177,7 @@ export function ProfileOverview({
                       className="group relative block overflow-hidden rounded-lg"
                       data-testid="overview-recently-played-entry"
                     >
-                      {game.coverImage ? (
-                        <img
-                          src={game.coverImage}
-                          alt={`Cover for ${game.title}`}
-                          className="aspect-[3/4] w-full object-cover transition-transform group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="aspect-[3/4] w-full bg-muted" />
-                      )}
+                      <GameCover src={game.coverImage} name={game.title} />
                       <div
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-scrim/90 via-scrim/40 to-transparent"

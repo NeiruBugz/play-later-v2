@@ -3,7 +3,7 @@
 # =============================================================================
 
 module "cognito" {
-  source                = "../../modules/cognito"
+  source                = "../modules/cognito"
   name_prefix           = var.project_name
   environment           = var.environment
   region                = var.region
@@ -12,13 +12,15 @@ module "cognito" {
   google_client_id      = var.google_client_id
   google_client_secret  = var.google_client_secret
 
-  callback_urls = [
-    "${var.app_url}/api/auth/callback/cognito"
-  ]
+  callback_urls = concat(
+    ["${var.app_url}/api/auth/callback/cognito"],
+    [for url in var.additional_callback_urls : "${url}/api/auth/callback/cognito"]
+  )
 
-  logout_urls = [
-    var.app_url
-  ]
+  logout_urls = concat(
+    [var.app_url],
+    var.additional_callback_urls
+  )
 }
 
 # =============================================================================
@@ -26,7 +28,7 @@ module "cognito" {
 # =============================================================================
 
 module "s3" {
-  source      = "../../modules/s3"
+  source      = "../modules/s3"
   name_prefix = var.project_name
   environment = var.environment
 

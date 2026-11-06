@@ -45,6 +45,20 @@ describe("StatusControl", () => {
     });
   });
 
+  describe("given a Done item that was let go", () => {
+    beforeEach(() => {
+      render(
+        <StatusControl status="DONE" outcome="LET_GO" onChange={onChange} />
+      );
+    });
+
+    it("shows the Let go chip in the Done variant", () => {
+      const chip = screen.getByText("Let go");
+      expect(chip).toHaveAttribute("data-status", "let-go");
+      expect(chip).toHaveAttribute("data-variant", "done");
+    });
+  });
+
   describe("given it is disabled", () => {
     beforeEach(async () => {
       render(<StatusControl status="WANT" onChange={onChange} disabled />);

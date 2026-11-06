@@ -16,11 +16,11 @@ import {
 } from "react";
 
 import {
-  LibraryStatusBadge,
   NextStepButton,
   NotOwnedTag,
   QueueMarker,
   StatusControl,
+  toStatusChipStatus,
 } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import {
@@ -42,12 +42,13 @@ import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { buildCoverImageProps } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { GameCover } from "@/shared/ui/game-cover";
 import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { StatusChip } from "@/shared/ui/status-chip";
 import { LibraryItemCard } from "@/widgets/library-item-card";
 
 import type { LibraryPageProps } from "./library-page.type";
@@ -64,8 +65,6 @@ const LibraryGridTile = memo(function LibraryGridTile({
   item: LibraryItemWithGame;
   onEdit: (item: LibraryItemWithGame) => void;
 }) {
-  const cover = buildCoverImageProps(item.game.coverImage);
-  const alt = `Cover for ${item.game.title}`;
   const { status, setStatus, isPending } = useSetStatus({
     id: item.id,
     gameTitle: item.game.title,
@@ -92,27 +91,11 @@ const LibraryGridTile = memo(function LibraryGridTile({
         aria-label={`View ${item.game.title}`}
         className="group block"
       >
-        <div className="relative">
-          {cover ? (
-            <img
-              src={cover.src}
-              srcSet={cover.srcSet}
-              alt={alt}
-              loading="lazy"
-              decoding="async"
-              className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
-            />
-          ) : (
-            <div
-              role="img"
-              aria-label={alt}
-              className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
-            />
-          )}
+        <GameCover src={item.game.coverImage} name={item.game.title}>
           <div className="absolute top-2 left-2">
-            <LibraryStatusBadge status={status} />
+            <StatusChip status={toStatusChipStatus(status, item.doneOutcome)} />
           </div>
-        </div>
+        </GameCover>
         <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
           {item.game.title}
         </h3>
@@ -140,9 +123,9 @@ const LibraryGridTile = memo(function LibraryGridTile({
       <div className="mt-2 flex flex-col items-start gap-2">
         <StatusControl
           status={status}
+          outcome={item.doneOutcome}
           onChange={(to) => void setStatus(to)}
           disabled={isPending}
-          className="text-xs"
         />
         <NextStepButton
           status={status}
@@ -438,7 +421,11 @@ export function LibraryPage(props: LibraryPageProps) {
               icon={Library}
               title="No games yet"
               description="Start your library by adding a game, or import your games from Steam."
-              action={{ label: "Add a game", onClick: addGame }}
+              action={{
+                label: "Add a game",
+                onClick: addGame,
+                variant: "outline",
+              }}
               secondaryAction={{
                 label: "Import from Steam",
                 to: "/steam/games",
@@ -451,7 +438,11 @@ export function LibraryPage(props: LibraryPageProps) {
               icon={SearchX}
               title="Nothing matches these filters"
               description="No games in your library match the current filters."
-              action={{ label: "Clear filters", onClick: clearFilters }}
+              action={{
+                label: "Clear filters",
+                onClick: clearFilters,
+                variant: "outline",
+              }}
             />
           ) : (
             <ul

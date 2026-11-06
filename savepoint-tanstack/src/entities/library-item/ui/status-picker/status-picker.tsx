@@ -10,9 +10,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/sheet";
+import { StatusChip } from "@/shared/ui/status-chip";
 
 import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.ts";
-import { STATUS_ENTRIES } from "../../model";
+import { STATUS_ENTRIES, toStatusChipStatus } from "../../model";
 import type { StatusPickerProps } from "./status-picker.type";
 
 const PICKER_LABEL = "Set status";
@@ -47,7 +48,6 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
   return (
     <div role="radiogroup" aria-label={PICKER_LABEL} className="flex flex-col">
       {STATUS_ENTRIES.map((entry, index) => {
-        const Icon = entry.icon;
         const checked = entry.value === value;
         return (
           <button
@@ -67,19 +67,9 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
               checked && "font-semibold"
             )}
           >
-            <span
-              className="flex size-7 shrink-0 items-center justify-center rounded-full"
-              style={{
-                backgroundColor: `color-mix(in oklch, var(--status-${entry.badgeVariant}) 16%, transparent)`,
-              }}
-            >
-              <Icon
-                className="h-4 w-4"
-                style={{ color: `var(--status-${entry.badgeVariant})` }}
-                aria-hidden="true"
-              />
+            <span className="flex-1">
+              <StatusChip status={toStatusChipStatus(entry.value)} />
             </span>
-            <span className="flex-1">{entry.label}</span>
             {checked ? (
               <Check className="h-4 w-4 text-primary" aria-hidden="true" />
             ) : null}

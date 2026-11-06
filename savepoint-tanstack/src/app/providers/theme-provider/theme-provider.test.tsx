@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Theme } from "@/shared/lib/theme";
 
-import { SavepointThemeProvider } from "./theme-provider";
+import { ThemeProvider } from "./theme-provider";
 
 function getHtmlClasses(): string[] {
   return Array.from(document.documentElement.classList);
@@ -36,9 +36,9 @@ function ThemeHarness({
   // forcedTheme locks the value and triggers an imperative apply on mount —
   // exactly the user-observable shape we want to assert against.
   return (
-    <SavepointThemeProvider defaultTheme={theme} forcedTheme={theme}>
+    <ThemeProvider defaultTheme={theme} forcedTheme={theme}>
       {children}
-    </SavepointThemeProvider>
+    </ThemeProvider>
   );
 }
 
@@ -104,9 +104,9 @@ describe("ThemeProvider (html class application)", () => {
         stubMatchMedia(true);
         localStorage.setItem("theme", "sepia");
         render(
-          <SavepointThemeProvider defaultTheme="system">
+          <ThemeProvider defaultTheme="system">
             <div />
-          </SavepointThemeProvider>
+          </ThemeProvider>
         );
       });
 
@@ -120,9 +120,9 @@ describe("ThemeProvider (html class application)", () => {
         stubMatchMedia(false);
         localStorage.setItem("theme", "sepia");
         render(
-          <SavepointThemeProvider defaultTheme="system">
+          <ThemeProvider defaultTheme="system">
             <div />
-          </SavepointThemeProvider>
+          </ThemeProvider>
         );
       });
 
@@ -162,7 +162,7 @@ describe("ThemeProvider (html class application)", () => {
     });
   });
 
-  describe("SavepointThemeProvider wrapper (smoke test)", () => {
+  describe("ThemeProvider wrapper (smoke test)", () => {
     beforeEach(() => {
       stubMatchMedia(false);
     });
@@ -170,9 +170,9 @@ describe("ThemeProvider (html class application)", () => {
     it("renders its children without throwing", () => {
       expect(() =>
         render(
-          <SavepointThemeProvider>
+          <ThemeProvider>
             <div data-testid="child">hello</div>
-          </SavepointThemeProvider>
+          </ThemeProvider>
         )
       ).not.toThrow();
     });

@@ -2,10 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import {
-  SavepointThemeProvider,
-  type Theme,
-} from "@/app/providers/theme-provider";
+import { ThemeProvider, type Theme } from "@/app/providers/theme-provider";
 
 import { ThemeToggle } from "./theme-toggle";
 
@@ -17,9 +14,9 @@ import { ThemeToggle } from "./theme-toggle";
 
 function Harness({ defaultTheme = "system" }: { defaultTheme?: Theme }) {
   return (
-    <SavepointThemeProvider defaultTheme={defaultTheme}>
+    <ThemeProvider defaultTheme={defaultTheme}>
       <ThemeToggle />
-    </SavepointThemeProvider>
+    </ThemeProvider>
   );
 }
 
