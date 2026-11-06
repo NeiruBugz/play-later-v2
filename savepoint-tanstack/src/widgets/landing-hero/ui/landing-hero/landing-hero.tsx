@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
+import { PRODUCT_NAME_PLAIN } from "@/shared/config/site";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { buttonVariants } from "@/shared/ui/button";
@@ -27,8 +28,8 @@ export function LandingHero() {
 
         <p className="max-w-xl text-base text-muted-foreground md:text-lg">
           Curate your library across every platform. Journal what made each game
-          matter. SavePoint is for patient gamers who treat games as worlds, not
-          chores.
+          matter. {PRODUCT_NAME_PLAIN} is for patient gamers who treat games as
+          worlds, not chores.
         </p>
 
         <div>

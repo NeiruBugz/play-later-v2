@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
@@ -45,6 +46,11 @@ const AuthedRoute = AuthedRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManifestDotjsonRoute = ManifestDotjsonRouteImport.update({
+  id: '/manifest.json',
+  path: '/manifest.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
@@ -151,6 +157,7 @@ const AuthedJournalIdEditRoute = AuthedJournalIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/manifest.json': typeof ManifestDotjsonRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/library': typeof AuthedLibraryRoute
   '/settings': typeof AuthedSettingsRouteWithChildren
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/manifest.json': typeof ManifestDotjsonRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/library': typeof AuthedLibraryRoute
   '/settings': typeof AuthedSettingsRouteWithChildren
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
+  '/manifest.json': typeof ManifestDotjsonRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/settings': typeof AuthedSettingsRouteWithChildren
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/manifest.json'
     | '/dashboard'
     | '/library'
     | '/settings'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/manifest.json'
     | '/dashboard'
     | '/library'
     | '/settings'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/login'
+    | '/manifest.json'
     | '/_authed/dashboard'
     | '/_authed/library'
     | '/_authed/settings'
@@ -300,6 +312,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ManifestDotjsonRoute: typeof ManifestDotjsonRoute
   GamesSlugRoute: typeof GamesSlugRoute
   GamesSearchRoute: typeof GamesSearchRoute
   SteamCallbackRoute: typeof SteamCallbackRoute
@@ -328,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manifest.json': {
+      id: '/manifest.json'
+      path: '/manifest.json'
+      fullPath: '/manifest.json'
+      preLoaderRoute: typeof ManifestDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/dashboard': {
@@ -536,6 +556,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ManifestDotjsonRoute: ManifestDotjsonRoute,
   GamesSlugRoute: GamesSlugRoute,
   GamesSearchRoute: GamesSearchRoute,
   SteamCallbackRoute: SteamCallbackRoute,

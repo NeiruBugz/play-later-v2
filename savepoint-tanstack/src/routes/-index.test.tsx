@@ -71,7 +71,7 @@ describe("index route", () => {
     });
 
     it("renders the brand link to /", () => {
-      expect(screen.getByRole("link", { name: "SavePoint" })).toHaveAttribute(
+      expect(screen.getByRole("link", { name: "Continue?" })).toHaveAttribute(
         "href",
         "/"
       );

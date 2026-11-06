@@ -47,6 +47,7 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
   basePath: "/api/auth",
+  trustedOrigins: env.BETTER_AUTH_EXTRA_ORIGINS ?? [],
 
   database: prismaAdapter(prisma, {
     provider: "postgresql",

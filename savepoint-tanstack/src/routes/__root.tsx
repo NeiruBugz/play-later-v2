@@ -13,12 +13,13 @@ import { ErrorBoundary, NotFoundPage } from "@/app";
 
 import "@/app/dev-console-error-expander";
 
-import { SavepointThemeProvider } from "@/app/providers/theme-provider";
+import { ThemeProvider } from "@/app/providers/theme-provider";
 import { currentUserQueryOptions } from "@/entities/session/api/current-user-query";
 import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
 import { StatusModelNotice, WhatsNewModal } from "@/features/whats-new";
-import { THEME_COLORS } from "@/shared/config/site";
+import { getSiteOriginFn } from "@/shared/api/get-site-origin";
+import { MANIFEST_PATH, socialMeta, THEME_COLORS } from "@/shared/config/site";
 import { THEME_INIT_SCRIPT } from "@/shared/lib/theme/theme-init-script";
 import { Toaster } from "@/shared/ui/sonner";
 import { AddFlowProvider } from "@/widgets/add-flow";
@@ -35,6 +36,16 @@ import appCss from "../styles.css?url";
 const FONTS_STYLESHEET =
   "https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Zilla+Slab:wght@500;700&display=swap";
 
+let siteOriginPromise: Promise<string> | undefined;
+
+function getSiteOrigin(): Promise<string> {
+  siteOriginPromise ??= getSiteOriginFn().catch((error: unknown) => {
+    siteOriginPromise = undefined;
+    throw error;
+  });
+  return siteOriginPromise;
+}
+
 const rootSearchSchema = z.object({
   action: z.enum(["log-session", "add-game"]).optional(),
   game: z.string().min(1).optional(),
@@ -44,7 +55,7 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   validateSearch: rootSearchSchema,
-  head: () => ({
+  head: ({ loaderData }: { loaderData?: { siteOrigin: string } }) => ({
     meta: [
       {
         charSet: "utf-8",
@@ -53,33 +64,14 @@ export const Route = createRootRouteWithContext<{
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover",
       },
-      {
-        title: "SavePoint",
-      },
-      {
-        name: "description",
-        content:
-          "A library, not a backlog. Curate your library across every platform and journal what made each game matter.",
-      },
-      { property: "og:title", content: "SavePoint" },
-      {
-        property: "og:description",
-        content: "A library, not a backlog. For patient gamers.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:image", content: "/og-image.png" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "SavePoint" },
-      {
-        name: "twitter:description",
-        content: "A library, not a backlog. For patient gamers.",
-      },
-      { name: "twitter:image", content: "/og-image.png" },
+      ...socialMeta({
+        siteOrigin: loaderData?.siteOrigin ?? "",
+      }),
     ],
     links: [
       {
         rel: "manifest",
-        href: "/manifest.json",
+        href: MANIFEST_PATH,
       },
       {
         rel: "icon",
@@ -115,10 +107,15 @@ export const Route = createRootRouteWithContext<{
     ],
   }),
   beforeLoad: async ({ context }) => {
-    const { user, statusModelNoticePending } =
-      await context.queryClient.fetchQuery(currentUserQueryOptions);
-    return { user, statusModelNoticePending };
+    const [{ user, statusModelNoticePending }, siteOrigin] = await Promise.all([
+      context.queryClient.fetchQuery(currentUserQueryOptions),
+      getSiteOrigin(),
+    ]);
+    return { user, statusModelNoticePending, siteOrigin };
   },
+  loader: async (): Promise<{ siteOrigin: string }> => ({
+    siteOrigin: await getSiteOrigin(),
+  }),
   component: RootShell,
   shellComponent: RootDocument,
   errorComponent: ErrorBoundary,
@@ -129,7 +126,7 @@ export function RootShell() {
   const { user, statusModelNoticePending } = Route.useRouteContext();
 
   return (
-    <SavepointThemeProvider defaultTheme="system">
+    <ThemeProvider defaultTheme="system">
       <NavigationProgress />
       <AddFlowProvider>
         <DoneFlowProvider>
@@ -167,7 +164,7 @@ export function RootShell() {
           },
         ]}
       />
-    </SavepointThemeProvider>
+    </ThemeProvider>
   );
 }
 

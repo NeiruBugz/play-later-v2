@@ -23,7 +23,7 @@ vi.mock("@/features/command-palette", () => ({
 }));
 
 const elements = {
-  getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
+  getBrandLink: () => screen.getByRole("link", { name: "Continue?" }),
   getSearchButton: () => screen.getByRole("button", { name: "Search games" }),
   querySearchLink: () => screen.queryByRole("link", { name: "Search games" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),

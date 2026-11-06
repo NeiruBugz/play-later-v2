@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 
 import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
+import { PRODUCT_NAME } from "@/shared/config/site";
 
 export function AppMobileTopbar() {
   return (
@@ -14,7 +15,7 @@ export function AppMobileTopbar() {
       <Link
         to="/"
         className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md"
-        aria-label="SavePoint"
+        aria-label={PRODUCT_NAME}
       >
         <img
           src="/logo.svg"

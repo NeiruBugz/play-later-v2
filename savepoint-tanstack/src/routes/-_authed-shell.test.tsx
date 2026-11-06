@@ -83,6 +83,10 @@ vi.mock("@/entities/session/api/get-current-user", () => ({
   getCurrentUserFn: vi.fn(),
 }));
 
+vi.mock("@/shared/api/get-site-origin", () => ({
+  getSiteOriginFn: async () => "https://example.test",
+}));
+
 // useRouteContextMock is hoisted so the vi.mock factory can close over it,
 // and individual describe blocks can reconfigure it via mockReturnValue.
 const { useRouteContextMock } = vi.hoisted(() => ({
@@ -158,7 +162,10 @@ describe("__root beforeLoad", () => {
   });
 
   it("puts the current user and notice flag into the route context", async () => {
-    await expect(runBeforeLoad(new QueryClient())).resolves.toEqual(signedIn);
+    await expect(runBeforeLoad(new QueryClient())).resolves.toEqual({
+      ...signedIn,
+      siteOrigin: "https://example.test",
+    });
   });
 
   it("resolves the session once across repeated navigations", async () => {
@@ -244,7 +251,9 @@ describe("__root head", () => {
     let viewportContent: string | undefined;
 
     beforeEach(() => {
-      const head = (RootRoute.options.head as any)();
+      const head = (RootRoute.options.head as any)({
+        loaderData: { siteOrigin: "https://example.test" },
+      });
       viewportContent = head.meta.find(
         (entry: { name?: string }) => entry.name === "viewport"
       )?.content;
@@ -283,7 +292,9 @@ describe("__root theme-color", () => {
     });
 
     it("leaves none of them to the name-deduped head() meta list", () => {
-      const head = (RootRoute.options.head as any)();
+      const head = (RootRoute.options.head as any)({
+        loaderData: { siteOrigin: "https://example.test" },
+      });
       expect(
         head.meta.filter(
           (entry: { name?: string }) => entry.name === "theme-color"

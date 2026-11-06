@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from "react";
  * that should not depend on a feature's API. The event seam keeps the FSD
  * direction clean: widgets emit; the feature listens.
  */
-export const COMMAND_PALETTE_OPEN_EVENT = "savepoint:command-palette:open";
+export const COMMAND_PALETTE_OPEN_EVENT = "app:command-palette:open";
 
 interface UseCommandPaletteReturn {
   isOpen: boolean;

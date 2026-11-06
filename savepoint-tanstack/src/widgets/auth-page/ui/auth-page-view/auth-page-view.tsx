@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from "@/shared/config/site";
 import { PageHeader } from "@/shared/ui/page-header";
 
 type AuthPageViewProps = {
@@ -18,10 +19,10 @@ export function AuthPageView({
       <div className="mx-auto w-full max-w-md">
         <div className="mb-6">
           <p className="font-display text-5xl font-bold tracking-tight">
-            SavePoint
+            {PRODUCT_NAME}
           </p>
           <p className="mt-1.5 text-base font-medium text-muted-foreground md:text-sm">
-            Your games and the things you&apos;ve thought about them.
+            {PRODUCT_TAGLINE}
           </p>
         </div>
 

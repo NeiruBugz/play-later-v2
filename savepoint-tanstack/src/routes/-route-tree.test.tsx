@@ -38,6 +38,10 @@ vi.mock("@env", () => ({
   ),
 }));
 
+vi.mock("@/shared/api/get-site-origin", () => ({
+  getSiteOriginFn: async () => "https://example.test",
+}));
+
 vi.mock("@/entities/session/api/get-current-user", () => ({
   getCurrentUserFn: async () => {
     counts.currentUser += 1;
