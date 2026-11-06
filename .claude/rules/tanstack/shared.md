@@ -42,7 +42,8 @@ IGDB / S3 / shadcn primitives. Design tokens live in `src/styles.css`.
 
 ### `shared/config/`
 
-- **Rule:** `shared/config/` is reserved for per-layer env subsets if needed. Currently unused; either populate or delete. **Why:** nothing rots faster than empty directories.
+- ~~**Rule:** `shared/config/` is reserved for per-layer env subsets if needed. Currently unused; either populate or delete. **Why:** nothing rots faster than empty directories.~~ — superseded 2026-11-06 (spec 027 design reset):
+- **Rule:** `shared/config/` holds static site config and per-layer env subsets if needed. Today: `site.ts` (`THEME_COLORS`, the hex of each mode's `--background`, used by the `theme-color` meta and the manifest). **Why:** one source for values that can't live in CSS.
 
 ## Documented exceptions
 

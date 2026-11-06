@@ -18,6 +18,8 @@ import { currentUserQueryOptions } from "@/entities/session/api/current-user-que
 import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
 import { StatusModelNotice, WhatsNewModal } from "@/features/whats-new";
+import { THEME_COLORS } from "@/shared/config/site";
+import { THEME_INIT_SCRIPT } from "@/shared/lib/theme/theme-init-script";
 import { Toaster } from "@/shared/ui/sonner";
 import { AddFlowProvider } from "@/widgets/add-flow";
 import { AppBottomNav } from "@/widgets/app-bottom-nav";
@@ -29,14 +31,6 @@ import { GlobalActionHost } from "@/widgets/global-action-host";
 import { NavigationProgress } from "@/widgets/navigation-progress";
 
 import appCss from "../styles.css?url";
-
-// Pre-hydration theme script. Runs in <head> before React mounts to prevent
-// FOUC. Must stay in sync with the hand-rolled SavepointThemeProvider —
-// theme value === CSS class name: light→"", dark→"dark", system→resolved via
-// prefers-color-scheme. A stored retired theme (e.g. "cartridge") fails the
-// validThemes check and falls back to 'system'. See DIVERGENCES.md → Slice 19
-// for why this lives inline instead of inside `next-themes`.
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var validThemes=['light','dark','system'];var mode=validThemes.indexOf(stored)!==-1?stored:'system';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var classMap={light:'',dark:'dark'};var resolved=mode==='system'?(prefersDark?'dark':'light'):mode;var nextClass=classMap[resolved];var root=document.documentElement;root.classList.remove('dark');if(nextClass){root.classList.add(nextClass)}if(mode==='system'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=(resolved==='dark')?'dark':'light';}catch(e){}})();`;
 
 const rootSearchSchema = z.object({
   action: z.enum(["log-session", "add-game"]).optional(),
@@ -80,12 +74,12 @@ export const Route = createRootRouteWithContext<{
       { name: "twitter:image", content: "/og-image.png" },
       {
         name: "theme-color",
-        content: "#f6f1e7",
+        content: THEME_COLORS.light,
         media: "(prefers-color-scheme: light)",
       },
       {
         name: "theme-color",
-        content: "#120f0c",
+        content: THEME_COLORS.dark,
         media: "(prefers-color-scheme: dark)",
       },
     ],

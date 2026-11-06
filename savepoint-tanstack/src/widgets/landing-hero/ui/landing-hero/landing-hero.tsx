@@ -2,19 +2,23 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
+import { Badge } from "@/shared/ui/badge";
 import { buttonVariants } from "@/shared/ui/button";
 
 export function LandingHero() {
   return (
     <div className="space-y-10">
       <div className="space-y-6">
-        <span className="inline-flex items-center gap-2 rounded-full border border-border/40 bg-primary/5 px-3 py-1 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
+        <Badge
+          variant="subtle"
+          className="h-auto gap-2 px-3 py-1 tracking-[0.14em] uppercase"
+        >
           <span
             aria-hidden="true"
             className="h-1.5 w-1.5 rounded-full bg-primary"
           />
           FOR PATIENT GAMERS
-        </span>
+        </Badge>
 
         <h1 className="text-5xl leading-[1.05] font-semibold tracking-tight text-foreground md:text-6xl lg:text-7xl">
           A library, <span className="text-primary">not a backlog.</span>
@@ -40,7 +44,7 @@ export function LandingHero() {
           <li className="inline-flex items-center gap-1.5">
             <Check
               aria-hidden="true"
-              className="h-4 w-4 text-emerald-400"
+              className="h-4 w-4 text-primary"
               strokeWidth={2.5}
             />
             <span>Free to start</span>

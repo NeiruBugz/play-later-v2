@@ -257,26 +257,14 @@ export default tseslint.config(
   // regress on the rules it is not already exempt from. Delete an entry when
   // its slice lands; do not add files.
   //
-  // Slice 13 (only today's palette): raw palette colors on the landing page and
-  // the rating stars.
+  // Slice 13 (only today's palette): raw palette colors on the rating stars.
   {
-    files: ["src/routes/index.tsx", "src/shared/ui/rating-input.tsx"],
+    files: ["src/shared/ui/rating-input.tsx"],
     rules: {
       "better-tailwindcss/no-restricted-classes": noRestrictedClasses(
         PIXEL_FONT_SIZE,
         ARBITRARY_COLOR
       ),
-    },
-  },
-  // Slice 13: landing widgets carry palette colors.
-  {
-    files: [
-      "src/widgets/landing-features/ui/landing-features/landing-features.tsx",
-      "src/widgets/landing-hero/ui/landing-hero/landing-hero.tsx",
-    ],
-    rules: {
-      "better-tailwindcss/no-restricted-classes":
-        noRestrictedClasses(ARBITRARY_COLOR),
     },
   },
   // Slice 19 (one status chip): color-mix tinted surfaces on the game page hero

@@ -13,7 +13,7 @@ Infrastructure primitives shared across all layers. No domain logic lives here.
 | --------- | ---------------------------------------------------------------------------- |
 | `lib/`    | Prisma singleton (`db`), logger (pino), `AppError` taxonomy, auth instance   |
 | `ui/`     | Stock shadcn `base-maia` primitives (Base UI) and repo-owned base components |
-| `config/` | Zod-validated env (`env` from `@env`)                                        |
+| `config/` | Site constants (`THEME_COLORS`); env lives in `env.ts` (`@env`)              |
 | `api/`    | Low-level external clients: S3, IGDB — no business logic                     |
 
 ## Styling
