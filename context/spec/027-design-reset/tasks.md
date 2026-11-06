@@ -342,7 +342,7 @@ Conventions for every slice:
 
     Slice notes (2026-11-06): with 5 queued the shelf follows the page header and is the largest block above the fold at 360/390/430/1440; the first cover is larger (234×454 vs 144×291 at 390); the second peeks at phone widths; the shelf scrolls while the page does not. At 1440 the five covers fit, so the shelf doesn't scroll (§2.12's sideways criterion is for phone width). The empty outline matches the first cover's height and position.
 
-- [ ] **Slice 21: The app, link previews and the home-screen icon show the new name and logo**
+- [x] **Slice 21: The app, link previews and the home-screen icon show the new name and logo**
   - [x] Complete `shared/config/site.ts` (`PRODUCT_NAME`, `PRODUCT_TAGLINE`, `PRODUCT_DESCRIPTION`, `OG_IMAGE_PATH`) and add a `pageTitle(part?)` helper.
     - Use them in the `__root.tsx` head, landing, `games.search.tsx`, `app-sidebar`, `app-mobile-topbar`, `auth-page-view`, `landing-hero`, `settings-list` and `whats-new/config.ts`.
     - Rename the internal identifiers: the `savepoint:command-palette:open` event, `SavepointThemeProvider` and the `sp:` storage prefix.
@@ -360,12 +360,14 @@ Conventions for every slice:
     - the manifest route payload: name, short name, icons, colors;
     - `BETTER_AUTH_EXTRA_ORIGINS` parsing;
     - a scan of `src/` and `public/` asserting the old name "SavePoint" appears nowhere user-visible. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID).
       - Confirm the sidebar, phone top bar, landing, sign-in, tab title and tab icon show only the new name and logo, and the logo is visible in Light and Dark.
       - `curl` `/manifest.json` and the landing and game-page HTML to confirm the og tags are absolute and carry the new name and image.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+    Slice notes (2026-11-06): gate green incl. integration; signed out at 390/1440, Light/Dark — landing, sign-in and a game page show only "Continue?" and the Open-loop mark (0 "SavePoint" in text, attributes or HTML; logo 16:1); titles "Continue?" / "Hades · Continue?"; favicons, manifest, icons and absolute og tags verified with curl, og-image 1200×630. The signed-in surfaces (sidebar expanded/collapsed, phone top bar, home, search) were not opened live — reading the audit credentials was blocked by the permission classifier; the owner deferred them to the phase 2 review captures in Slice 22 (they are covered by unit tests and the old-name scan).
 
 - [ ] **Slice 22: Owner approves phase 2, and old links land on the new address (Release 3)**
   - [ ] Capture `review/phase2/after/phone` in Light and Dark and present the pairs to the owner, together with a comparison against the same-named competitor's home, library, profile and game pages for the Up Next shelf (§2.12). After phone approval, capture and present desktop. Rework any rejected pair and show it again. **[Agent: testing]**
