@@ -88,6 +88,7 @@ export default defineConfig({
             "src/**/*.test.{ts,tsx}",
             "test/canary/**/*.canary.test.{ts,tsx}",
             "test/eslint/**/*.test.{ts,tsx}",
+            "test/brand/**/*.test.{ts,tsx}",
           ],
           exclude: [
             "**/node_modules/**",

@@ -21,3 +21,18 @@ describe("extraOriginsSchema", () => {
     );
   });
 });
+
+describe("extraOriginsSchema edge inputs", () => {
+  it("yields no origins for an empty value", () => {
+    expect(extraOriginsSchema.parse("")).toEqual([]);
+  });
+
+  it("yields no origins for blanks and stray commas", () => {
+    expect(extraOriginsSchema.parse(" , ,")).toEqual([]);
+  });
+
+  it("names the offending entry in the error", () => {
+    const result = extraOriginsSchema.safeParse("https://a.test,nope");
+    expect(result.error?.issues[0]?.message).toContain("nope");
+  });
+});
