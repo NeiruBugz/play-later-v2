@@ -310,15 +310,17 @@ Conventions for every slice:
     - Start the app (record the PID). In the Playwright MCP, measure covers on every listed screen at phone and desktop width and confirm they share aspect ratio, radius, shadow and border, and the same hover change at desktop. Use a seeded game without art to check the placeholder.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 19: One status chip everywhere, including "Let go"**
+- [x] **Slice 19: One status chip everywhere, including "Let go"**
   - [x] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
     - Map the domain status and outcome to it at the entity layer.
     - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar, status-switcher and journal stats rail (`journal-stats-rail.tsx`) color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
   - [x] Write behaviour tests: each status renders its label; "Let go" shares the Done variant attribute; contrast tokens are applied in both modes, asserted via the variant attribute and not via classes. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Confirm the chips on all five surfaces match in shape, size, wording and casing. Confirm Playing uses the accent and a Let go game reads "Let go" in the Done color. Check chip text contrast in both modes.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+    Slice notes (2026-11-06): chips match on library (grid and list), game page, home and search — 20px, 2px 8px, fully rounded, 12px/500, labels Want / Playing / Done / Let go; Playing equals `--primary`; Let go uses the Done colour; text contrast 5.05–8.24. The public profile library shows no status at all (it didn't before either), so it has no chip. The list-view toggle is desktop-only, so the list was measured at 1440.
 
 - [ ] **Slice 20: Up Next is a shelf of covers on the home screen**
   - [ ] Add `widgets/up-next-shelf/`: a horizontal scroll-snap row in queue order.
