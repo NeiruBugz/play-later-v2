@@ -1,6 +1,3 @@
-export { DashboardGameRail } from "./dashboard-game-rail";
-export type { DashboardGameRailProps } from "./dashboard-game-rail";
-
 export { DashboardPage } from "./dashboard-page";
 export type { DashboardPageProps } from "./dashboard-page";
 
