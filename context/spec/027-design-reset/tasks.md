@@ -213,7 +213,7 @@ Conventions for every slice:
     - no zoom on focus on any input or the search field;
     - a status-change toast sits above the bottom nav.
 
-- [ ] **Slice 12: Phone screens use bottom sheets, readable text and thumb-sized targets**
+- [x] **Slice 12: Phone screens use bottom sheets, readable text and thumb-sized targets**
   - [x] Route Remove from library, `library-modal`, whats-new, the Steam import modal and Steam connect through `ResponsiveModal`, so they open as bottom sheets on phone with a visible close button. The sheet close button must not overlap the header text (Slice 8 verify: on the Log time sheet it covers the end of the description). **[Agent: react-frontend]**
   - [x] Replace every `text-[10px]` and `text-[11px]`: bottom-nav labels, landing, library card, platform and status badges, profile. The floor is `text-xs`; body text is `text-base md:text-sm`. **[Agent: react-frontend]**
   - [x] Bring every tappable element to at least 44×44 at phone width. Migrate the remaining native `<button>` elements to `Button`, or give them `min-h-11 min-w-11 md:min-h-0 md:min-w-0`. Extend the hit area of small icon controls. Known from the Slice 8 verify: the toast "Undo" action is sonner's own action button (24px; style it through the `Toaster`'s `toastOptions.classNames.actionButton`, the `Button` inside `UndoToastBody` is not on that path), the Grid/List view toggles are 42 px wide, the game page tabs are 32 px, the status chip and status-picker rows are under 44. **[Agent: react-frontend]**
@@ -221,7 +221,7 @@ Conventions for every slice:
   - [x] Write behaviour tests:
     - Remove from library opens as a sheet when `useIsDesktop` is false and as a dialog when it is true;
     - tapping a platform badge shows the platform name. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Run the review script's phone checks at 360, 390 and 430. `report.json` must show no overflow, no target under 44×44, no text under 12px and no body text under 15px on any §2.0 screen.
     - In the Playwright MCP, open each of the five dialogs at 390 and confirm they open as bottom sheets.
