@@ -37,6 +37,8 @@ Both envs use identical module composition. Differences are only in variable val
 ## State Backend
 No remote backend. State files are local (`.terraform/` + `terraform.tfstate`) inside each env directory. Do not run `terraform apply` from two machines simultaneously.
 
+**No state in this checkout (found 2026-11-06).** Neither `envs/dev` nor `envs/prod` has a `terraform.tfstate`, and the owner changes the live Cognito client URLs, S3 CORS and Google OAuth client by hand in the consoles. A `plan` here would propose creating a new pool and bucket. Do not `plan`/`apply` against the live account until the state is found or the resources are imported (`terraform import`); make address/origin changes in the consoles (see `docs/cutover-rollback.md` § Spec 027 phase 2).
+
 ## App Env Mapping (Outputs → .env.local)
 ```
 cognito_user_pool_client_id     → AUTH_COGNITO_ID
