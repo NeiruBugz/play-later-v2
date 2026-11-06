@@ -6,7 +6,12 @@ import { GameCover } from "./game-cover";
 const elements = {
   queryImg: (name: string) => screen.queryByAltText(name),
   getPlaceholder: (name: string) => screen.getByRole("img", { name }),
+  getNamedImage: (name: string) => screen.getByRole("img", { name }),
+  getVisibleName: (name: string) => screen.getByText(name),
 };
+
+const LONG_NAME =
+  "The Legend of Zelda: Breath of the Wild - Nintendo Switch Special Limited Collector's Edition with Expansion Pass";
 
 describe("GameCover", () => {
   describe("given an IGDB image id", () => {
@@ -16,6 +21,10 @@ describe("GameCover", () => {
 
     it("renders an <img> named after the game", () => {
       expect(elements.queryImg("Hollow Knight")).not.toBeNull();
+    });
+
+    it("exposes the game name as the image's accessible name", () => {
+      expect(elements.getNamedImage("Hollow Knight")).toBeInTheDocument();
     });
 
     it("builds the IGDB URL through the shared helper", () => {
@@ -79,16 +88,78 @@ describe("GameCover", () => {
     });
 
     it("shows the game name on the placeholder", () => {
-      expect(screen.getByText("Hollow Knight")).toBeDefined();
+      expect(elements.getVisibleName("Hollow Knight")).toBeInTheDocument();
+    });
+  });
+
+  describe("given src is undefined", () => {
+    beforeEach(() => {
+      render(<GameCover src={undefined} name="Celeste" />);
+    });
+
+    it("does not render an <img>", () => {
+      expect(elements.queryImg("Celeste")).toBeNull();
+    });
+
+    it("renders a placeholder named after the game", () => {
+      expect(elements.getPlaceholder("Celeste")).toBeInTheDocument();
+    });
+
+    it("shows the game name as visible text", () => {
+      expect(elements.getVisibleName("Celeste")).toBeInTheDocument();
+    });
+  });
+
+  describe("given src is an empty string", () => {
+    beforeEach(() => {
+      render(<GameCover src="" name="Celeste" />);
+    });
+
+    it("does not render an <img>", () => {
+      expect(elements.queryImg("Celeste")).toBeNull();
+    });
+
+    it("renders a placeholder named after the game", () => {
+      expect(elements.getPlaceholder("Celeste")).toBeInTheDocument();
+    });
+
+    it("shows the game name as visible text", () => {
+      expect(elements.getVisibleName("Celeste")).toBeInTheDocument();
+    });
+  });
+
+  describe("given a name too long for the cover", () => {
+    beforeEach(() => {
+      render(<GameCover src={null} name={LONG_NAME} />);
+    });
+
+    it("keeps the full name as the accessible name", () => {
+      expect(elements.getPlaceholder(LONG_NAME)).toBeInTheDocument();
+    });
+
+    // jsdom has no layout: this pins the clamp contract only. The real
+    // three-line rendering is verified by the Slice 18 browser Verify task.
+    it("clamps the visible name to three lines", () => {
+      expect(elements.getVisibleName(LONG_NAME)).toHaveClass("line-clamp-3");
     });
   });
 
   describe("given the image fails to load", () => {
-    it("falls back to the placeholder", () => {
+    beforeEach(() => {
       render(<GameCover src="co9wzc" name="Hollow Knight" />);
       fireEvent.error(elements.queryImg("Hollow Knight")!);
+    });
+
+    it("removes the <img>", () => {
       expect(elements.queryImg("Hollow Knight")).toBeNull();
-      expect(elements.getPlaceholder("Hollow Knight")).toBeDefined();
+    });
+
+    it("falls back to a placeholder named after the game", () => {
+      expect(elements.getPlaceholder("Hollow Knight")).toBeInTheDocument();
+    });
+
+    it("shows the game name as visible text", () => {
+      expect(elements.getVisibleName("Hollow Knight")).toBeInTheDocument();
     });
   });
 
