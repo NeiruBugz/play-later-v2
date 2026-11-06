@@ -328,7 +328,7 @@ Conventions for every slice:
     - Use `overscroll-x-contain` and `min-w-0` on parents, so the page never scrolls sideways.
     - The empty state keeps the outline and position, with a button that opens the command palette.
     - Replace the presentation of the spec-026 Up Next block on home. Its data and actions are unchanged. **[Agent: react-frontend]**
-  - [ ] Show the whole Up Next queue (up to 5) on Home instead of the top 3 (owner, 2026-11-06; supersedes spec 026's "top 3 on Home"). Data change in the home dashboard worker; run integration. **[Agent: tanstack-fullstack]**
+  - [x] Show the whole Up Next queue (up to 5) on Home instead of the top 3 (owner, 2026-11-06; supersedes spec 026's "top 3 on Home"). Data change in the home dashboard worker; run integration. **[Agent: tanstack-fullstack]**
   - [ ] Write behaviour tests: covers render in queue order and the first is marked as next; the empty state's button opens the command palette. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.
