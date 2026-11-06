@@ -72,16 +72,6 @@ export const Route = createRootRouteWithContext<{
         content: "A library, not a backlog. For patient gamers.",
       },
       { name: "twitter:image", content: "/og-image.png" },
-      {
-        name: "theme-color",
-        content: THEME_COLORS.light,
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        name: "theme-color",
-        content: THEME_COLORS.dark,
-        media: "(prefers-color-scheme: dark)",
-      },
     ],
     links: [
       {
@@ -173,12 +163,30 @@ export function RootShell() {
   );
 }
 
+export function ThemeColorMetas() {
+  return (
+    <>
+      <meta
+        name="theme-color"
+        media="(prefers-color-scheme: light)"
+        content={THEME_COLORS.light}
+      />
+      <meta
+        name="theme-color"
+        media="(prefers-color-scheme: dark)"
+        content={THEME_COLORS.dark}
+      />
+    </>
+  );
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
+        <ThemeColorMetas />
       </head>
       <body className="font-sans wrap-anywhere antialiased selection:bg-primary/25">
         {children}
