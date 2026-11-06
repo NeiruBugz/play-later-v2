@@ -31,6 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import { LogoMark, LogoWordmark } from "@/shared/ui/logo";
 
 export type AppSidebarUser = {
   id: string;
@@ -121,16 +122,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
             className="flex items-center gap-2 rounded-md px-1 py-1"
             aria-label={PRODUCT_NAME}
           >
-            <img
-              src="/logo.svg"
-              alt=""
-              aria-hidden="true"
-              className="h-8 w-8 shrink-0"
-            />
-            {!collapsed && (
-              <span className="font-display text-2xl font-bold tracking-tight">
-                {PRODUCT_NAME}
-              </span>
+            {collapsed ? (
+              <LogoMark className="size-8" />
+            ) : (
+              <LogoWordmark className="text-2xl" markClassName="size-8" />
             )}
           </Link>
 

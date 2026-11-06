@@ -12,6 +12,7 @@ export { GameCover } from "./game-cover";
 export type { GameCoverProps, GameCoverSize } from "./game-cover";
 export { ImageLightbox } from "./image-lightbox";
 export type { ImageLightboxProps, LightboxImage } from "./image-lightbox";
+export { LogoMark, LogoWordmark } from "./logo";
 export { PageHeader } from "./page-header";
 export type { PageHeaderProps } from "./page-header";
 export { ModalBody, ModalFooter, ResponsiveModal } from "./responsive-modal";

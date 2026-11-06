@@ -1,6 +1,6 @@
 # entities layer
 
-Domain nouns: the core business objects of SavePoint.
+Domain nouns: the core business objects of the app.
 
 ## Import rules
 

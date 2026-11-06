@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 import { PRODUCT_NAME, socialMeta } from "@/shared/config/site";
+import { LogoWordmark } from "@/shared/ui/logo";
 import {
   LandingFeaturesStrip,
   LandingPreviewCard,
@@ -28,15 +29,7 @@ function LandingPage() {
           aria-label={PRODUCT_NAME}
           className="group flex min-h-11 items-center gap-3 no-underline"
         >
-          <img
-            src="/logo.svg"
-            alt=""
-            aria-hidden="true"
-            className="h-8 w-8 shrink-0"
-          />
-          <span className="font-display text-base font-bold tracking-tight text-foreground">
-            {PRODUCT_NAME}
-          </span>
+          <LogoWordmark className="gap-3 text-base" markClassName="size-8" />
         </Link>
         <Link
           to="/login"
