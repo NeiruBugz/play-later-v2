@@ -60,8 +60,10 @@ export function ModalFooter({ className, ...props }: ComponentProps<"div">) {
 export type ResponsiveModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
+  title: ReactNode;
   description?: string;
+  /** Content shown above the title inside the header (for example a category badge). */
+  eyebrow?: ReactNode;
   children: ReactNode;
   /** Extra classes applied to the content container of both variants. */
   contentClassName?: string;
@@ -83,6 +85,7 @@ export function ResponsiveModal({
   onOpenChange,
   title,
   description,
+  eyebrow,
   children,
   contentClassName,
   dialogTestId,
@@ -95,7 +98,8 @@ export function ResponsiveModal({
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className={contentClassName} data-testid={dialogTestId}>
-          <DialogHeader>
+          <DialogHeader className="pr-8">
+            {eyebrow}
             <DialogTitle>{title}</DialogTitle>
             {description !== undefined ? (
               <DialogDescription>{description}</DialogDescription>
@@ -115,6 +119,7 @@ export function ResponsiveModal({
         data-testid={sheetTestId}
       >
         <SheetHeader>
+          {eyebrow}
           <SheetTitle>{title}</SheetTitle>
           {description !== undefined ? (
             <SheetDescription>{description}</SheetDescription>

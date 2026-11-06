@@ -178,7 +178,7 @@ export function CommandPalette({
       >
         <SheetContent
           side="bottom"
-          className="gap-0 p-0"
+          className="gap-0 p-0 [&_[data-slot=command-input-wrapper]]:pr-14"
           data-testid="command-palette-mobile-sheet"
         >
           <SheetTitle className="sr-only">Command palette</SheetTitle>

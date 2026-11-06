@@ -14,14 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+import { ModalFooter, ResponsiveModal } from "@/shared/ui/responsive-modal";
 
 import { disconnectSteamFn } from "../../api/disconnect-steam";
 import type { SteamConnectCardProps } from "./steam-connect-card.type";
@@ -34,7 +27,7 @@ import type { SteamConnectCardProps } from "./steam-connect-card.type";
  *   - Steam glyph (`FaSteam`) beside both titles.
  *   - Copy parity: "Connect Steam Account" / "Steam Account Connected", the
  *     longer connect description, and the "Import from Steam" link.
- *   - Disconnect is gated behind a confirmation Dialog with canonical's
+ *   - Disconnect is gated behind a confirmation modal with canonical's
  *     "imported games will be preserved" explanatory copy.
  *
  * Documented divergences (kept):
@@ -128,38 +121,30 @@ export function SteamConnectCard({
         </CardContent>
       </Card>
 
-      <Dialog
+      <ResponsiveModal
         open={showDisconnectDialog}
         onOpenChange={setShowDisconnectDialog}
+        title="Disconnect Steam Account"
+        description="Are you sure you want to disconnect your Steam account? Your games you already imported will stay in your library, but you will need to reconnect to import new games or update your Steam data."
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Disconnect Steam Account</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to disconnect your Steam account? Your games
-              you already imported will stay in your library, but you will need
-              to reconnect to import new games or update your Steam data.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDisconnectDialog(false)}
-              disabled={pending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDisconnect}
-              disabled={pending}
-            >
-              Disconnect
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <ModalFooter>
+          <Button
+            variant="outline"
+            onClick={() => setShowDisconnectDialog(false)}
+            disabled={pending}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDisconnect}
+            disabled={pending}
+          >
+            Disconnect
+          </Button>
+        </ModalFooter>
+      </ResponsiveModal>
     </>
   );
 }

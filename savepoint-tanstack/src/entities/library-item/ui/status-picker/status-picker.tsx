@@ -125,7 +125,9 @@ export function StatusPicker({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger render={trigger} />
       <SheetContent side="bottom" aria-describedby={undefined} className="py-4">
-        <SheetTitle className="mb-1.5 text-base">{PICKER_LABEL}</SheetTitle>
+        <SheetTitle className="mb-1.5 pr-11 text-base">
+          {PICKER_LABEL}
+        </SheetTitle>
         <StatusRadioList value={value} onSelect={handleSelect} />
       </SheetContent>
     </Sheet>
