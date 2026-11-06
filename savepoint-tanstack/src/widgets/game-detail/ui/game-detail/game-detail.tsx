@@ -229,23 +229,10 @@ export function GameDetail({
             }}
           />
         ) : (
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, color-mix(in oklch, var(--primary) 20%, transparent), transparent 60%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-muted to-transparent to-60%" />
         )}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: [
-              "linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--background) 40%, transparent) 55%, var(--background) 88%, var(--background) 100%)",
-              "linear-gradient(90deg, color-mix(in oklch, var(--background) 60%, transparent) 0%, transparent 40%)",
-            ].join(", "),
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 via-55% to-background to-88%" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent to-40%" />
       </div>
 
       <div className="relative px-6 pb-16 md:px-12">
@@ -395,6 +382,7 @@ export function GameDetail({
         <GameDetailActionBar
           gameSlug={gameSlug}
           libraryStatus={sharedLibraryStatus}
+          doneOutcome={doneOutcome}
           viewerUserId={viewerUserId}
         />
       ) : null}

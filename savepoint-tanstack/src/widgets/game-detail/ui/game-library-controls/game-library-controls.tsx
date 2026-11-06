@@ -72,6 +72,7 @@ export function GameLibraryControls({
         <>
           <StatusControl
             status={libraryStatus.status}
+            outcome={doneOutcome}
             onChange={(to) => void libraryStatus.setStatus(to)}
             disabled={libraryStatus.isPending}
           />

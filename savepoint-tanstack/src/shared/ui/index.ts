@@ -26,6 +26,8 @@ export type {
 } from "./segmented-control";
 export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
+export { StatusChip } from "./status-chip";
+export type { StatusChipProps, StatusChipStatus } from "./status-chip";
 export { StickyFooter } from "./sticky-footer";
 export type { StickyFooterProps } from "./sticky-footer";
 export { Textarea } from "./textarea";

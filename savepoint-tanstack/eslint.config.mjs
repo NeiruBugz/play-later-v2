@@ -50,7 +50,7 @@ const ACCENT_CLASS = {
 };
 // Every file allowed to draw with the accent, and why (functional spec 2.9).
 const ACCENT_ALLOWED_FILES = [
-  // primary button, link and Playing variants
+  // primary button and link variants
   "src/shared/ui/button.tsx",
   "src/shared/ui/badge.tsx",
   // selected state
@@ -288,23 +288,6 @@ export default tseslint.config(
         ARBITRARY_COLOR,
         PALETTE_COLOR
       ),
-    },
-  },
-  // Existing violations owned by later spec 027 slices. Each override keeps
-  // every restriction except the one its slice retires, so a file can only
-  // regress on the rules it is not already exempt from. Delete an entry when
-  // its slice lands; do not add files.
-  //
-  // Slice 19 (one status chip): color-mix tinted surfaces on the game page hero
-  // and the journal "Log tonight" card are replaced with token-based chips and
-  // surfaces.
-  {
-    files: [
-      "src/widgets/game-detail/ui/game-detail/game-detail.tsx",
-      "src/widgets/journal-timeline-page/ui/journal-stats-rail/journal-stats-rail.tsx",
-    ],
-    rules: {
-      "no-restricted-syntax": noRestrictedSyntax(),
     },
   },
   // FSD layer boundary enforcement — applies only to src/**

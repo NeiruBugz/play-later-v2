@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
-import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
+import { QueueMarker, toStatusChipStatus } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { GameCover } from "@/shared/ui/game-cover";
 import { SectionLabel } from "@/shared/ui/section-label";
+import { StatusChip } from "@/shared/ui/status-chip";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
 
@@ -23,7 +24,9 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
     >
       <GameCover src={item.game.coverImage} name={item.game.title}>
         <div className="absolute top-1.5 left-1.5">
-          <LibraryStatusBadge status={item.status} />
+          <StatusChip
+            status={toStatusChipStatus(item.status, item.doneOutcome)}
+          />
         </div>
       </GameCover>
       <p className="mt-2 truncate text-base leading-tight font-medium group-hover:underline md:text-sm">

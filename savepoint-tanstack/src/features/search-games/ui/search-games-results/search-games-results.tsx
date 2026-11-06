@@ -2,12 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
+import { QueueMarker, toStatusChipStatus } from "@/entities/library-item";
 import { searchLibraryAwareGamesFn } from "@/features/search-games/api/search-library-aware-games";
 import type { LibraryAwareSearchResult } from "@/features/search-games/api/search-library-aware-games.worker";
 import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
 import { GameCover } from "@/shared/ui/game-cover";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { StatusChip } from "@/shared/ui/status-chip";
 
 import type { SearchGamesResultsProps } from "./search-games-results.type";
 
@@ -137,7 +138,9 @@ export function SearchGamesResults({
                 <GameCover src={game.cover?.image_id} name={game.name}>
                   {game.library !== null ? (
                     <div className="absolute top-1 left-1">
-                      <LibraryStatusBadge status={game.library.status} />
+                      <StatusChip
+                        status={toStatusChipStatus(game.library.status)}
+                      />
                     </div>
                   ) : null}
                   {!owned && renderAddAction ? (

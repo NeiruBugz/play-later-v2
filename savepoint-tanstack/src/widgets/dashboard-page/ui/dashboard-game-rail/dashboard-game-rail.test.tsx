@@ -30,9 +30,7 @@ vi.mock("@/shared/lib/igdb-image", () => ({
 }));
 
 vi.mock("@/entities/library-item", () => ({
-  LibraryStatusBadge: ({ status }: { status: string }) => (
-    <span data-testid="status-badge">{status}</span>
-  ),
+  toStatusChipStatus: (status: string) => status.toLowerCase(),
   QueueMarker: ({
     status,
     upNextPosition,

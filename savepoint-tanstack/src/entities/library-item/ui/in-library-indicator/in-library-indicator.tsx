@@ -1,4 +1,6 @@
-import { LibraryStatusBadge } from "../library-status-badge";
+import { StatusChip } from "@/shared/ui/status-chip";
+
+import { toStatusChipStatus } from "../../model";
 import { QueueMarker } from "../queue-marker";
 import type { InLibraryIndicatorProps } from "./in-library-indicator.type";
 
@@ -11,7 +13,7 @@ export function InLibraryIndicator({
       <span className="text-xs whitespace-nowrap text-muted-foreground">
         In library
       </span>
-      <LibraryStatusBadge status={status} />
+      <StatusChip status={toStatusChipStatus(status)} />
       <QueueMarker status={status} upNextPosition={upNextPosition} />
     </span>
   );

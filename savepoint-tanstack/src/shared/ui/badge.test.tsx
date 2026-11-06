@@ -3,25 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import { Badge } from "./badge";
 
-const STATUS_VARIANTS = ["want", "playing", "done"] as const;
-
 const elements = {
   getBadge: (text: string) => screen.getByText(text),
-};
-
-const actions = {
-  renderVariants: (variants: readonly string[]) => {
-    render(
-      <>
-        {variants.map((variant) => (
-          <Badge key={variant} variant={variant as "subtle"}>
-            {variant}
-          </Badge>
-        ))}
-      </>
-    );
-    return variants.map((variant) => elements.getBadge(variant).className);
-  },
 };
 
 describe("Badge", () => {
@@ -37,21 +20,6 @@ describe("Badge", () => {
         "data-variant",
         "default"
       );
-    });
-  });
-
-  describe("given a status variant", () => {
-    it("exposes the playing variant", () => {
-      render(<Badge variant="playing">Playing</Badge>);
-      expect(elements.getBadge("Playing")).toHaveAttribute(
-        "data-variant",
-        "playing"
-      );
-    });
-
-    it("styles want, playing and done differently from each other", () => {
-      const classNames = actions.renderVariants(STATUS_VARIANTS);
-      expect(new Set(classNames).size).toBe(STATUS_VARIANTS.length);
     });
   });
 

@@ -111,7 +111,13 @@ const elements = {
   queryCoverImage: (title: string) => screen.queryByAltText(title),
   queryCoverPlaceholder: (title: string) =>
     screen.queryByRole("img", { name: title }),
-  getStatusBadge: (label: string) => screen.getByLabelText(`Status: ${label}`),
+  getStatusBadge: (label: string) => {
+    const [coverChip] = screen
+      .getAllByText(label)
+      .filter((node) => node.getAttribute("data-slot") === "badge");
+    if (!coverChip) throw new Error(`No status chip reads ${label}`);
+    return coverChip;
+  },
   getStatusControl: (label: string) =>
     screen.getByRole("button", { name: `Status: ${label}. Change` }),
   getNextStep: (name: string) => screen.getByRole("button", { name }),
@@ -383,21 +389,23 @@ describe("LibraryItemCard", () => {
       });
     });
 
-    describe("status pill shape (canonical pill + leading dot)", () => {
-      beforeEach(() => {
+    describe("status chip", () => {
+      it("marks the Playing chip with its status and variant", () => {
         render(<LibraryItemCard item={buildItem({ status: "PLAYING" })} />);
+        const chip = elements.getStatusBadge("Playing");
+        expect(chip).toHaveAttribute("data-status", "playing");
+        expect(chip).toHaveAttribute("data-variant", "playing");
       });
 
-      it("renders a glassy rounded pill with a colored leading dot", () => {
-        const dot = screen.getByTestId("library-status-badge-dot");
-        expect(dot).toBeDefined();
-        expect(dot).toHaveAttribute("data-status-variant", "playing");
-      });
-
-      it("keeps the label title case and never truncated", () => {
-        const badge = screen.getByLabelText("Status: Playing");
-        expect(badge.className).not.toMatch(/\buppercase\b/);
-        expect(badge.className).toMatch(/whitespace-nowrap/);
+      it("reads Let go in the Done variant for a Done game that was let go", () => {
+        render(
+          <LibraryItemCard
+            item={buildItem({ status: "DONE", doneOutcome: "LET_GO" })}
+          />
+        );
+        const chip = elements.getStatusBadge("Let go");
+        expect(chip).toHaveAttribute("data-status", "let-go");
+        expect(chip).toHaveAttribute("data-variant", "done");
       });
     });
   });

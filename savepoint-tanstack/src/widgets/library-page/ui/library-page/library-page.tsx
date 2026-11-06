@@ -16,11 +16,11 @@ import {
 } from "react";
 
 import {
-  LibraryStatusBadge,
   NextStepButton,
   NotOwnedTag,
   QueueMarker,
   StatusControl,
+  toStatusChipStatus,
 } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import {
@@ -48,6 +48,7 @@ import { GameCover } from "@/shared/ui/game-cover";
 import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { StatusChip } from "@/shared/ui/status-chip";
 import { LibraryItemCard } from "@/widgets/library-item-card";
 
 import type { LibraryPageProps } from "./library-page.type";
@@ -92,7 +93,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
       >
         <GameCover src={item.game.coverImage} name={item.game.title}>
           <div className="absolute top-2 left-2">
-            <LibraryStatusBadge status={status} />
+            <StatusChip status={toStatusChipStatus(status, item.doneOutcome)} />
           </div>
         </GameCover>
         <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
@@ -122,9 +123,9 @@ const LibraryGridTile = memo(function LibraryGridTile({
       <div className="mt-2 flex flex-col items-start gap-2">
         <StatusControl
           status={status}
+          outcome={item.doneOutcome}
           onChange={(to) => void setStatus(to)}
           disabled={isPending}
-          className="text-xs"
         />
         <NextStepButton
           status={status}

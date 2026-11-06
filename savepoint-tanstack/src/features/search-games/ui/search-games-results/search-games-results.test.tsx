@@ -311,7 +311,7 @@ describe("SearchGamesResults", () => {
     });
 
     it("shows the library status on an owned result", () => {
-      expect(screen.getByLabelText("Status: Done")).toBeInTheDocument();
+      expect(screen.getByText("Done")).toHaveAttribute("data-status", "done");
     });
 
     it("renders the add affordance only for unowned results", () => {
