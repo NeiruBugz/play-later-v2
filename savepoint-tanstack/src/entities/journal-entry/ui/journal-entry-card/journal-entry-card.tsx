@@ -66,7 +66,7 @@ export function JournalEntryCard({ entry, onSelect }: JournalEntryCardProps) {
 
       <div className="flex items-center justify-between gap-2">
         {content && timePlayed ? (
-          <span className="font-mono text-xs font-medium text-primary/70">
+          <span className="font-mono text-xs font-medium text-primary">
             {timePlayed}
           </span>
         ) : (

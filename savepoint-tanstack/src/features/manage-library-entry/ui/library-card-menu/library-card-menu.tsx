@@ -63,7 +63,7 @@ export function LibraryCardMenu({
           onMouseDown={stop}
           className="group/menu-trigger -m-2 inline-flex min-h-11 min-w-11 items-center justify-center outline-none disabled:opacity-50 md:m-0 md:min-h-0 md:min-w-0"
         >
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-scrim/60 text-scrim-foreground backdrop-blur-sm transition-colors group-hover/menu-trigger:bg-scrim/75 group-focus-visible/menu-trigger:ring-2 group-focus-visible/menu-trigger:ring-scrim-foreground/70">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-scrim/60 text-scrim-foreground backdrop-blur-sm transition-colors group-hover/menu-trigger:bg-scrim/75 group-focus-visible/menu-trigger:shadow-[0_0_0_2px_var(--scrim-foreground),0_0_0_4px_var(--scrim)]">
             <MoreVertical className="h-4 w-4" aria-hidden="true" />
           </span>
         </DropdownMenuTrigger>

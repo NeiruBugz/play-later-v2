@@ -63,6 +63,9 @@ WCAG 2.x ratios computed from the `styles.css` tokens (oklch to sRGB, channels c
 | `game-card` accent-cover title (`scrim-foreground`) on `status -> scrim` at 40 / 50 / 60 percent          | 9.65 to 13.56             | 4.5   |
 | `fill-warning` rating stars on `card` / `background`                                                      | 5.73 / 5.25               | 3     |
 | Focus ring (`ring`) against `background` / `card` / `popover`                                             | 5.12 / 5.59 / 5.59        | 3     |
+| `QueueMarker` (`primary` on `primary/5`) over `background` / `card`                                       | 4.78 / 5.21               | 4.5   |
+| Status-lens active chip count (`primary-foreground` on `primary`, no alpha)                               | 5.59                      | 4.5   |
+| Journal entry hours (`primary`, no alpha) on `background` / `card`                                        | 5.12 / 5.59               | 4.5   |
 | Focus ring against `accent` / `muted` / `secondary`                                                       | 4.40 / 4.68 / 4.68        | 3     |
 
 ### Dark
@@ -88,6 +91,9 @@ WCAG 2.x ratios computed from the `styles.css` tokens (oklch to sRGB, channels c
 | `game-card` accent-cover title (`scrim-foreground`) on `status -> scrim` at 40 / 50 / 60 percent | 5.78 to 10.25             | 4.5   |
 | `fill-warning` rating stars on `card` / `background`                                             | 8.76 / 9.35               | 3     |
 | Focus ring (`ring`) against `background` / `card` / `popover`                                    | 8.00 / 7.49 / 7.49        | 3     |
+| `QueueMarker` (`primary` on `primary/5`) over `background` / `card`                              | 7.52 / 6.97               | 4.5   |
+| Status-lens active chip count (`primary-foreground` on `primary`, no alpha)                      | 8.12                      | 4.5   |
+| Journal entry hours (`primary`, no alpha) on `background` / `card`                               | 8.00 / 7.49               | 4.5   |
 | Focus ring against `accent` / `muted` / `secondary`                                              | 6.31 / 6.70 / 6.70        | 3     |
 
 ### Changes (slice 14, hues unchanged)
@@ -110,5 +116,17 @@ Call-site changes (alpha and gradient, not tokens):
 | `badge.tsx` destructive                                                                                                    | `dark:bg-destructive/20 [a]:hover:bg-destructive/20`                          | `dark:bg-destructive/15 [a]:hover:bg-destructive/15 dark:[a]:hover:bg-destructive/20` |
 | `library-status-badge.tsx` (text over a cover; was 4.17 over a white cover)                                                | `bg-scrim/55`                                                                 | `bg-scrim/60`                                                                         |
 | `library-item-card.utility.ts` accent-cover gradient (light title on a gradient ending in cream was 1.03 to 1.71 in Light) | `to-background`                                                               | `to-scrim`                                                                            |
+| `queue-marker.tsx` (was 4.46 in Light)                                                                                     | `bg-primary/10`                                                               | `bg-primary/5`                                                                        |
+| `status-lens.tsx` active chip count (was 4.17 in Light)                                                                    | `opacity-80`                                                                  | no alpha                                                                              |
+| `journal-entry-card.tsx` hours (was 3.15 Light, 4.28 Dark)                                                                 | `text-primary/70`                                                             | `text-primary`                                                                        |
+| `game-detail.tsx` breadcrumb "/" (2.1 to 2.4; decorative)                                                                  | `opacity-50`                                                                  | kept, plus `aria-hidden="true"`                                                       |
 
 Unused pair: `--warning-foreground` on `--warning` (nothing uses `bg-warning`); re-check it if a filled warning surface is added.
+
+### Focus indicator
+
+One base rule in `styles.css` (`@layer base`) gives every focusable element `outline: 2px solid var(--ring)` with a 2px offset, so raw `<a>` and `<button>` elements no longer fall back to the browser's `outline: auto` (was 2.1 to 2.8 once recoloured by `outline-ring/50`). The outline is drawn on the surrounding surface, so the ratios above for `ring` against `background` / `card` / `popover` / `accent` / `muted` / `secondary` apply, including for elements filled with `primary`.
+
+Components that draw their own ring (`Button`, `Input`, `Textarea`, `Select`, `Checkbox`, `Switch`, `TabsTrigger`, `RatingInput`, `SegmentedControl`) keep `outline-none` plus `focus-visible:ring-*`; a utility beats the base layer, so nothing is doubled. A new component needs one of the two: nothing (the base outline) or `outline-none` with its own ring. Never `outline-none` with no ring. `TabsContent` is focusable on purpose (keyboard users reach a scrollable panel), so it relies on the base outline.
+
+Over cover art the library card menu trigger uses a two-tone box-shadow (2px `scrim-foreground` inside, 2px `scrim` outside). A single colour cannot hold 3:1 against every cover; the pair does, because `scrim` is near-black and `scrim-foreground` near-white. The worst case is a mid-grey cover (relative luminance about 0.17) at 4.38, where both bands are about equally distant; the test sweeps greys from black to white.

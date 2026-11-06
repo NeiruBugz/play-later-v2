@@ -282,14 +282,18 @@ export function GameDetail({
           >
             Library
           </Link>
-          <span className="opacity-50">/</span>
+          <span aria-hidden="true" className="opacity-50">
+            /
+          </span>
           <Link
             to="/library"
             className="transition-colors hover:text-foreground"
           >
             Games
           </Link>
-          <span className="opacity-50">/</span>
+          <span aria-hidden="true" className="opacity-50">
+            /
+          </span>
           <span className="max-w-[280px] truncate font-medium text-foreground">
             {game.title}
           </span>

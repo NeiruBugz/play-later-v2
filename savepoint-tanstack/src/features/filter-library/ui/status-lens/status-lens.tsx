@@ -109,7 +109,7 @@ export function StatusLens({
               <span
                 className={cn(
                   "tabular-nums",
-                  active ? "opacity-80" : "text-muted-foreground"
+                  !active && "text-muted-foreground"
                 )}
               >
                 {chip.count}
