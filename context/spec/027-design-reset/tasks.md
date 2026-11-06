@@ -281,7 +281,7 @@ Conventions for every slice:
   - [x] Verify: confirm the owner's choice of accent, font and product name is recorded in the slice notes and in `functional-spec.md`'s Change Log. Delete the option captures that were not chosen. **[Agent: testing]**
 
 - [ ] **Slice 17: The app shows the new accent and title font**
-  - [ ] Apply the chosen accent as `--primary` / `--primary-foreground`, add `--accent-text` (with `--color-accent-text`), and set `--ring`.
+  - [x] Apply the chosen accent as `--primary` / `--primary-foreground`, add `--accent-text` (with `--color-accent-text`), and set `--ring`.
     - Restrict accent classes with `no-restricted-classes` to the primary button, selected or active items, Playing, focus and links.
     - Swap Space Grotesk for the chosen font in the Google Fonts `<link>` and `--font-display`, with a preload for the main weight.
     - Remove the preview switch.
