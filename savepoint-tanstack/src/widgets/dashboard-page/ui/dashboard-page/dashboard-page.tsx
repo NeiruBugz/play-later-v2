@@ -15,7 +15,7 @@ export function DashboardPage({ data }: DashboardPageProps) {
   const navigate = useNavigate();
   const total = data.counts.WANT + data.counts.PLAYING + data.counts.DONE;
   const hasPlaying = data.playing.length > 0;
-  const hasQueue = data.upNextTop3.length > 0;
+  const hasQueue = data.upNextQueue.length > 0;
 
   function addGame() {
     openGlobalAction(navigate, "add-game");
@@ -35,7 +35,7 @@ export function DashboardPage({ data }: DashboardPageProps) {
       />
 
       <div className="mb-4 min-w-0">
-        <UpNextShelf items={data.upNextTop3} />
+        <UpNextShelf items={data.upNextQueue} />
       </div>
 
       {total > 0 ? <DashboardStatusStrip counts={data.counts} /> : null}

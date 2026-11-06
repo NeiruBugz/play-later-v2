@@ -64,7 +64,7 @@ function makeData(
 ): DashboardPageData {
   return {
     playing: [],
-    upNextTop3: [],
+    upNextQueue: [],
     upNextTotal: 0,
     counts: { WANT: 0, PLAYING: 0, DONE: 0 },
     ...overrides,
@@ -96,7 +96,7 @@ describe("DashboardPage", () => {
         <DashboardPage
           data={makeData({
             playing: [makeItem("p1", "Elden Ring")],
-            upNextTop3: [
+            upNextQueue: [
               makeQueued(1, "Hades"),
               makeQueued(2, "Celeste"),
               makeQueued(3, "Hollow Knight"),
@@ -204,7 +204,7 @@ describe("DashboardPage", () => {
       render(
         <DashboardPage
           data={makeData({
-            upNextTop3: [makeQueued(1, "Hades")],
+            upNextQueue: [makeQueued(1, "Hades")],
             upNextTotal: 1,
             counts: { WANT: 1, PLAYING: 0, DONE: 0 },
           })}

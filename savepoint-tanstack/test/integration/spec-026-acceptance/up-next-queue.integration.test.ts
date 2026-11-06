@@ -113,7 +113,7 @@ describe("given a full queue of 5 (AC 2.4)", () => {
     ]);
   });
 
-  it("keeps the order when rating or ownership changes, and Home shows the top 3", async () => {
+  it("keeps the order when rating or ownership changes, and Home shows the whole queue", async () => {
     const { user, items } = await seedFullQueue();
 
     await setRating(user.id, items[1]!.id, 8);
@@ -127,12 +127,14 @@ describe("given a full queue of 5 (AC 2.4)", () => {
       "4:D",
       "5:E",
     ]);
-    // 2.4: Home shows the first 3 queued games in queue order with a See all total
+    // 2.4: Home shows the whole queue in queue order
     const home = await getDashboardPageDataWorker(user.id);
-    expect(home.upNextTop3.map((item) => item.game.title)).toEqual([
+    expect(home.upNextQueue.map((item) => item.game.title)).toEqual([
       "A",
       "B",
       "C",
+      "D",
+      "E",
     ]);
     expect(home.upNextTotal).toBe(5);
   });
