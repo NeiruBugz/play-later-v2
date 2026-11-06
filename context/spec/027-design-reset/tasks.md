@@ -343,7 +343,7 @@ Conventions for every slice:
     Slice notes (2026-11-06): with 5 queued the shelf follows the page header and is the largest block above the fold at 360/390/430/1440; the first cover is larger (234×454 vs 144×291 at 390); the second peeks at phone widths; the shelf scrolls while the page does not. At 1440 the five covers fit, so the shelf doesn't scroll (§2.12's sideways criterion is for phone width). The empty outline matches the first cover's height and position.
 
 - [ ] **Slice 21: The app, link previews and the home-screen icon show the new name and logo**
-  - [ ] Complete `shared/config/site.ts` (`PRODUCT_NAME`, `PRODUCT_TAGLINE`, `PRODUCT_DESCRIPTION`, `OG_IMAGE_PATH`) and add a `pageTitle(part?)` helper.
+  - [x] Complete `shared/config/site.ts` (`PRODUCT_NAME`, `PRODUCT_TAGLINE`, `PRODUCT_DESCRIPTION`, `OG_IMAGE_PATH`) and add a `pageTitle(part?)` helper.
     - Use them in the `__root.tsx` head, landing, `games.search.tsx`, `app-sidebar`, `app-mobile-topbar`, `auth-page-view`, `landing-hero`, `settings-list` and `whats-new/config.ts`.
     - Rename the internal identifiers: the `savepoint:command-palette:open` event, `SavepointThemeProvider` and the `sp:` storage prefix.
     - Build absolute `og:url`, `og:image` and `twitter:image` from `BETTER_AUTH_URL`, through a root loader server function and route context, not from client env.
