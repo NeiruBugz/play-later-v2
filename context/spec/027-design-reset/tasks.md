@@ -260,6 +260,7 @@ Conventions for every slice:
 
     Owner approved all 46 phone pairs on 2026-11-06 (`review/phase1/compare-phone.html`; phone checks 1395 → 2, both the Up Next shelf). The landing's uppercase marketing labels stay as they are.
   - [ ] After the owner approves every phone pair, capture `review/phase1/after/desktop` and present the desktop pairs. Rework any rejected pair in a follow-up task and show it again. **[Agent: testing]**
+  - [ ] Rework what the desktop compare found before showing it to the owner: profile counts read "1Followers · 1Following" (missing space, own and public profile, both modes and likely phone too); spacing below the page sub-text is tighter than before on search results and journal compose, below the "Note" title on journal entry, and between the sign-in fields. Restore the before spacing with stock steps and re-capture the affected phone and desktop pairs. **[Agent: react-frontend]**
   - [ ] Verify:
     - Confirm the owner approved every phone pair and every desktop pair. Run the gate one last time.
     - Copy `review/phase1/after` to `review/phase2/before`, since the phase 2 "before" is the shipped phase 1.
