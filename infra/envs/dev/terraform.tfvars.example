@@ -10,13 +10,23 @@ enable_cognito_native = false
 # google_client_id     = "..."
 # google_client_secret = "..."
 
-# --- S3 (Production-like) ---
-# Optional explicit bucket name (defaults to "${project_name}-${environment}")
-# s3_bucket_name = "savepoint-dev"
+# --- Address cutover ---
+# app_url becomes the NEW origin. The old origin stays in Cognito callback and
+# logout URLs (as <origin>/api/auth/callback/cognito and <origin>).
+# app_url = "https://<new>.vercel.app"
+# additional_callback_urls = ["https://<old>.vercel.app"]
+# Never change project_name or domain_prefix (ForceNew).
 
-# Additional CORS origins (app_url is always included)
+# --- S3 (Production-like) ---
+# Pin the EXISTING bucket name so a future project_name change cannot replace the bucket.
+# Copy it from `terraform output s3_bucket_name` (or `terraform state show module.s3.aws_s3_bucket.this`).
+# Left empty, the name is derived as "${project_name}-${environment}-${account_id}-${region}".
+# s3_bucket_name = "<existing bucket name>"
+
+# Additional CORS origins (app_url is always included).
+# Address cutover: keep the old origin allowed until the old host redirects.
 # s3_additional_allowed_origins = [
-#   "http://127.0.0.1:6060"
+#   "https://<old>.vercel.app"
 # ]
 
 # Optional: attach S3 access policy to an existing ECS task role by name

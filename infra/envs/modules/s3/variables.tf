@@ -10,7 +10,7 @@ variable "environment" {
 
 variable "bucket_name" {
   type        = string
-  description = "Optional explicit S3 bucket name; defaults to <name_prefix>-<environment>"
+  description = "Optional explicit S3 bucket name; defaults to <name_prefix>-<environment>-<account_id>-<region>"
   default     = ""
 }
 
