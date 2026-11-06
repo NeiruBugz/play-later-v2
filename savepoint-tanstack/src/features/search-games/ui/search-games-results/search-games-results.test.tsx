@@ -212,9 +212,7 @@ describe("SearchGamesResults", () => {
     });
 
     it("renders a placeholder img div with the game name in aria-label", () => {
-      expect(
-        screen.getByRole("img", { name: "Cover for No Cover Game" })
-      ).toBeDefined();
+      expect(screen.getByRole("img", { name: "No Cover Game" })).toBeDefined();
     });
   });
 

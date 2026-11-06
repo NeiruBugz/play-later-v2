@@ -42,9 +42,9 @@ import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { buildCoverImageProps } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { GameCover } from "@/shared/ui/game-cover";
 import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
 import { RatingInput } from "@/shared/ui/rating-input";
@@ -64,8 +64,6 @@ const LibraryGridTile = memo(function LibraryGridTile({
   item: LibraryItemWithGame;
   onEdit: (item: LibraryItemWithGame) => void;
 }) {
-  const cover = buildCoverImageProps(item.game.coverImage);
-  const alt = `Cover for ${item.game.title}`;
   const { status, setStatus, isPending } = useSetStatus({
     id: item.id,
     gameTitle: item.game.title,
@@ -92,27 +90,11 @@ const LibraryGridTile = memo(function LibraryGridTile({
         aria-label={`View ${item.game.title}`}
         className="group block"
       >
-        <div className="relative">
-          {cover ? (
-            <img
-              src={cover.src}
-              srcSet={cover.srcSet}
-              alt={alt}
-              loading="lazy"
-              decoding="async"
-              className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
-            />
-          ) : (
-            <div
-              role="img"
-              aria-label={alt}
-              className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
-            />
-          )}
+        <GameCover src={item.game.coverImage} name={item.game.title}>
           <div className="absolute top-2 left-2">
             <LibraryStatusBadge status={status} />
           </div>
-        </div>
+        </GameCover>
         <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
           {item.game.title}
         </h3>

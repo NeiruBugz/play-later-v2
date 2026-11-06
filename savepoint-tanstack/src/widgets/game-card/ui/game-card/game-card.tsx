@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
 
 import { PlatformBadges } from "@/entities/game";
-import { buildCoverImageProps } from "@/shared/lib/igdb-image";
 import { cn } from "@/shared/lib/utils";
+import { GameCover } from "@/shared/ui/game-cover";
 
 import {
-  gameCardCoverVariants,
   gameCardTitleVariants,
   gameCardVariants,
 } from "../../lib/game-card.variants";
@@ -21,13 +20,11 @@ export function GameCard({
   children,
   badges,
   overlay,
-  coverAccentClassName,
   titleClassName,
   className,
   ...props
 }: GameCardProps) {
   const { slug, title, coverImageId, releaseYear, platforms = [] } = game;
-  const cover = buildCoverImageProps(coverImageId);
   const showMeta =
     density === "detailed" &&
     ((releaseYear ?? null) !== null || platforms.length > 0);
@@ -46,37 +43,12 @@ export function GameCard({
       onClick={!asLink ? onClick : undefined}
       {...props}
     >
-      <div className={cn(gameCardCoverVariants(), "w-full")}>
-        {cover ? (
-          <img
-            src={cover.src}
-            srcSet={cover.srcSet}
-            alt={`Cover for ${title}`}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div
-            role="img"
-            aria-label={`Cover for ${title}`}
-            className={cn(
-              "flex h-full w-full items-center justify-center p-4",
-              coverAccentClassName ?? "bg-muted"
-            )}
-          >
-            {coverAccentClassName ? (
-              <span className="line-clamp-3 text-center text-lg font-bold tracking-wide text-scrim-foreground uppercase">
-                {title}
-              </span>
-            ) : null}
-          </div>
-        )}
+      <GameCover src={coverImageId} name={title}>
         {badges ? (
           <div className="pointer-events-none absolute inset-0">{badges}</div>
         ) : null}
         {overlay ? <div className="absolute inset-0">{overlay}</div> : null}
-      </div>
+      </GameCover>
 
       {density !== "minimal" ? (
         <div className="flex w-full flex-col gap-2 p-2">

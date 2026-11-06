@@ -41,9 +41,9 @@ const baseGame = {
 const elements = {
   getTitle: () =>
     screen.getByRole("heading", { level: 3, name: "Hollow Knight" }),
-  queryCover: () => screen.queryByAltText("Cover for Hollow Knight"),
+  queryCover: () => screen.queryByAltText("Hollow Knight"),
   queryCoverPlaceholder: () =>
-    screen.queryByRole("img", { name: "Cover for Hollow Knight" }),
+    screen.queryByRole("img", { name: "Hollow Knight" }),
   getLink: () => screen.getByRole("link", { name: /View Hollow Knight/ }),
   queryLink: () => screen.queryByRole("link", { name: /View Hollow Knight/ }),
   getBadge: () => screen.getByText("NEW"),
@@ -93,24 +93,6 @@ describe("GameCard", () => {
 
     it("renders a role=img placeholder with the title in its accessible name", () => {
       expect(elements.queryCoverPlaceholder()).not.toBeNull();
-    });
-  });
-
-  describe("given no coverImageId and a cover accent", () => {
-    beforeEach(() => {
-      render(
-        <GameCard
-          game={{ ...baseGame, coverImageId: null }}
-          coverAccentClassName="bg-gradient-to-br from-[var(--status-want)] to-scrim"
-          asLink={false}
-        />
-      );
-    });
-
-    it("paints the title onto the gradient placeholder", () => {
-      // The title now appears twice: the h3 below the cover + the overlay
-      // span on the accent placeholder.
-      expect(screen.getAllByText("Hollow Knight").length).toBeGreaterThan(1);
     });
   });
 

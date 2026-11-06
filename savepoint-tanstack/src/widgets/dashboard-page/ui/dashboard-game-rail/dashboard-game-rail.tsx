@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
-import { buildCoverImageProps } from "@/shared/lib/igdb-image";
+import { GameCover } from "@/shared/ui/game-cover";
 import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
@@ -15,36 +15,17 @@ import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
  * forced into a narrow rail slot).
  */
 function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
-  const cover = buildCoverImageProps(item.game.coverImage);
-  const alt = `Cover for ${item.game.title}`;
-
   return (
     <Link
       to="/games/$slug"
       params={{ slug: item.game.slug }}
       className="group w-32 shrink-0 snap-start md:w-auto"
     >
-      <div className="relative">
-        {cover ? (
-          <img
-            src={cover.src}
-            srcSet={cover.srcSet}
-            alt={alt}
-            loading="lazy"
-            decoding="async"
-            className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
-          />
-        ) : (
-          <div
-            role="img"
-            aria-label={alt}
-            className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
-          />
-        )}
+      <GameCover src={item.game.coverImage} name={item.game.title}>
         <div className="absolute top-1.5 left-1.5">
           <LibraryStatusBadge status={item.status} />
         </div>
-      </div>
+      </GameCover>
       <p className="mt-2 truncate text-base leading-tight font-medium group-hover:underline md:text-sm">
         {item.game.title}
       </p>

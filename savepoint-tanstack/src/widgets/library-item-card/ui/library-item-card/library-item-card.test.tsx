@@ -108,10 +108,9 @@ const elements = {
     screen.getByRole("link", { name: `View ${title}` }),
   queryCardLink: (title: string) =>
     screen.queryByRole("link", { name: `View ${title}` }),
-  queryCoverImage: (title: string) =>
-    screen.queryByAltText(`Cover for ${title}`),
+  queryCoverImage: (title: string) => screen.queryByAltText(title),
   queryCoverPlaceholder: (title: string) =>
-    screen.queryByRole("img", { name: `Cover for ${title}` }),
+    screen.queryByRole("img", { name: title }),
   getStatusBadge: (label: string) => screen.getByLabelText(`Status: ${label}`),
   getStatusControl: (label: string) =>
     screen.getByRole("button", { name: `Status: ${label}. Change` }),
@@ -152,7 +151,7 @@ describe("LibraryItemCard", () => {
       render(<LibraryItemCard item={buildItem({ coverImage: "co9wzc" })} />);
     });
 
-    it("builds a full IGDB URL at t_cover_big with the 'Cover for' alt prefix", () => {
+    it("builds a full IGDB URL at t_cover_big with the game name as alt", () => {
       const img = elements.queryCoverImage("Hollow Knight");
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toBe(

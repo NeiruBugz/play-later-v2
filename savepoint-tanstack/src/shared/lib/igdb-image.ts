@@ -34,15 +34,23 @@ export interface CoverImageProps {
   srcSet: string | undefined;
 }
 
+const DENSE_DISPLAY_SIZE: Partial<Record<IgdbCoverSize, IgdbCoverSize>> = {
+  t_cover_small: "t_cover_big",
+  t_cover_big: "t_cover_big_2x",
+};
+
 export function buildCoverImageProps(
-  coverImage: string | null | undefined
+  coverImage: string | null | undefined,
+  size: IgdbCoverSize = "t_cover_big"
 ): CoverImageProps | null {
-  const src = buildCoverImageUrl(coverImage, "t_cover_big");
+  const src = buildCoverImageUrl(coverImage, size);
   if (!src) return null;
-  const src2x = buildCoverImageUrl(coverImage, "t_cover_big_2x");
+  const denseSize = DENSE_DISPLAY_SIZE[size];
+  const srcDense = denseSize ? buildCoverImageUrl(coverImage, denseSize) : null;
   return {
     src,
-    srcSet: src2x && src2x !== src ? `${src} 1x, ${src2x} 2x` : undefined,
+    srcSet:
+      srcDense && srcDense !== src ? `${src} 1x, ${srcDense} 2x` : undefined,
   };
 }
 

@@ -45,22 +45,6 @@ export const gameCardVariants = cva(
   }
 );
 
-export const gameCardCoverVariants = cva(
-  "relative overflow-hidden bg-muted rounded-md",
-  {
-    variants: {
-      aspectRatio: {
-        square: "aspect-square",
-        portrait: "aspect-[3/4]",
-        landscape: "aspect-video",
-      },
-    },
-    defaultVariants: {
-      aspectRatio: "portrait",
-    },
-  }
-);
-
 export const gameCardTitleVariants = cva("font-semibold leading-tight", {
   variants: {
     size: {

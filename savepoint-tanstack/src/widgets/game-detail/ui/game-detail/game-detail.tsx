@@ -1,14 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 
-import { CriticScoreRing, GameCover } from "@/entities/game";
+import { CriticScoreRing } from "@/entities/game";
 import { useSetOwnership, useSetStatus } from "@/features/manage-library-entry";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import {
-  buildCoverImageUrl,
-  buildScreenshotUrl,
-} from "@/shared/lib/igdb-image";
+import { buildScreenshotUrl } from "@/shared/lib/igdb-image";
 import { Card } from "@/shared/ui/card";
+import { GameCover } from "@/shared/ui/game-cover";
 import { PageHeader } from "@/shared/ui/page-header";
 
 import { AboutPanel } from "../about-panel";
@@ -48,8 +46,6 @@ export function GameDetail({
   function openLogSession() {
     openGlobalAction(navigate, "log-session", gameSlug);
   }
-
-  const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
   const releaseYear = game.releaseDate
     ? game.releaseDate.getUTCFullYear().toString()
@@ -304,9 +300,12 @@ export function GameDetail({
           id="hero"
           className="grid grid-cols-1 items-end gap-7 pt-36 md:grid-cols-[200px_1fr] md:pt-44"
         >
-          <div className="w-32 md:w-[200px]">
-            <GameCover src={coverUrl} alt={`Cover for ${game.title}`} eager />
-          </div>
+          <GameCover
+            src={game.coverImage}
+            name={game.title}
+            size="lg"
+            priority
+          />
           <div className="min-w-0 pb-1.5">
             <div className="flex items-start justify-between gap-6">
               <div className="min-w-0 flex-1">

@@ -8,6 +8,8 @@ export {
 } from "./collapsible";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
+export { GameCover } from "./game-cover";
+export type { GameCoverProps, GameCoverSize } from "./game-cover";
 export { ImageLightbox } from "./image-lightbox";
 export type { ImageLightboxProps, LightboxImage } from "./image-lightbox";
 export { PageHeader } from "./page-header";

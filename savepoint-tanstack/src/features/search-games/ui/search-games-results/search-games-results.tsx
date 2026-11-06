@@ -6,7 +6,7 @@ import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import { searchLibraryAwareGamesFn } from "@/features/search-games/api/search-library-aware-games";
 import type { LibraryAwareSearchResult } from "@/features/search-games/api/search-library-aware-games.worker";
 import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { GameCover } from "@/shared/ui/game-cover";
 import { RatingInput } from "@/shared/ui/rating-input";
 
 import type { SearchGamesResultsProps } from "./search-games-results.type";
@@ -123,10 +123,6 @@ export function SearchGamesResults({
       </p>
       <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
         {games.map((game) => {
-          const coverUrl = buildCoverImageUrl(
-            game.cover?.image_id ?? null,
-            "t_cover_big"
-          );
           const releaseYear = game.first_release_date
             ? new Date(game.first_release_date * 1000).getFullYear()
             : null;
@@ -136,23 +132,9 @@ export function SearchGamesResults({
               <Link
                 to="/games/$slug"
                 params={{ slug: game.slug }}
-                className="block space-y-1"
+                className="group block space-y-1"
               >
-                <div className="relative">
-                  {coverUrl ? (
-                    <img
-                      src={coverUrl}
-                      alt={`Cover for ${game.name}`}
-                      loading="lazy"
-                      className="aspect-[3/4] w-full overflow-hidden rounded-lg object-cover shadow-md"
-                    />
-                  ) : (
-                    <div
-                      role="img"
-                      aria-label={`Cover for ${game.name}`}
-                      className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted shadow-md"
-                    />
-                  )}
+                <GameCover src={game.cover?.image_id} name={game.name}>
                   {game.library !== null ? (
                     <div className="absolute top-1 left-1">
                       <LibraryStatusBadge status={game.library.status} />
@@ -173,7 +155,7 @@ export function SearchGamesResults({
                       {renderAddAction({ igdbId: game.id, name: game.name })}
                     </div>
                   ) : null}
-                </div>
+                </GameCover>
                 <p className="truncate text-base font-medium md:text-sm">
                   {game.name}
                 </p>

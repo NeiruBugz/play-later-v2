@@ -17,7 +17,6 @@ import { RatingInput } from "@/shared/ui/rating-input";
 import { GameCard } from "@/widgets/game-card";
 
 import type { LibraryItemCardProps } from "./library-item-card.type";
-import { getStatusCoverAccent } from "./library-item-card.utility";
 
 export function LibraryItemCard({
   item,
@@ -69,7 +68,6 @@ export function LibraryItemCard({
           }}
           asLink
           density="minimal"
-          coverAccentClassName={getStatusCoverAccent(status)}
           badges={
             <div
               className={cn(
