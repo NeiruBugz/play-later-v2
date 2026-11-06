@@ -3,7 +3,7 @@
 # =============================================================================
 
 module "cognito" {
-  source                = "../../modules/cognito"
+  source                = "../modules/cognito"
   name_prefix           = var.project_name
   environment           = var.environment
   region                = var.region
@@ -26,7 +26,7 @@ module "cognito" {
 # =============================================================================
 
 module "s3" {
-  source      = "../../modules/s3"
+  source      = "../modules/s3"
   name_prefix = var.project_name
   environment = var.environment
 
