@@ -19,7 +19,7 @@ export function JournalStatsRail() {
   return (
     <aside aria-label="Log tonight" className="flex flex-col gap-4">
       <div
-        className="rounded-xl border border-primary/22 bg-card p-[18px]"
+        className="rounded-xl border bg-card p-[18px]"
         style={{
           background: "color-mix(in oklch, var(--primary) 6%, var(--card))",
           borderColor: "color-mix(in oklch, var(--primary) 22%, transparent)",

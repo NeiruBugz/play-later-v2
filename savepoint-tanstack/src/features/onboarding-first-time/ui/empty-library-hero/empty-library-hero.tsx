@@ -29,12 +29,12 @@ export function EmptyLibraryHero({
         aria-hidden="true"
         className={cn(
           "relative flex h-24 w-24 items-center justify-center rounded-2xl",
-          "bg-gradient-to-br from-primary/15 via-primary/5 to-transparent",
-          "border border-primary/20"
+          "bg-gradient-to-br from-muted via-muted/50 to-transparent",
+          "border border-border"
         )}
       >
-        <Library className="h-10 w-10 text-primary/80" />
-        <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-primary" />
+        <Library className="h-10 w-10 text-muted-foreground" />
+        <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-foreground" />
       </div>
 
       <div className="max-w-md space-y-1.5">

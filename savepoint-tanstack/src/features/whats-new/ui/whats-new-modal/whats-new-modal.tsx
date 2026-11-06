@@ -39,7 +39,7 @@ export function WhatsNewModal() {
       title={
         <span className="flex items-center gap-1.5">
           {primary.icon ? (
-            <primary.icon className="h-5 w-5 text-primary" />
+            <primary.icon className="h-5 w-5 text-foreground" />
           ) : null}
           {primary.title}
         </span>

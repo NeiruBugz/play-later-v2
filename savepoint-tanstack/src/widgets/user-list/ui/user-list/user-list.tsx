@@ -61,7 +61,7 @@ export function UserList({ variant, entries, total }: UserListProps) {
                     className="h-10 w-10 rounded-full object-cover ring-1 ring-border/50"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
                     {initial}
                   </div>
                 )}

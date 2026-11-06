@@ -41,6 +41,33 @@ const PALETTE_COLOR = {
   message:
     "Raw palette colors are banned. Use a semantic token from src/styles.css.",
 };
+const ACCENT_UTILITIES =
+  "(?:bg|text|border|ring|ring-offset|outline|fill|stroke|from|via|to|decoration|divide|shadow|caret|accent)";
+const ACCENT_CLASS = {
+  pattern: `${START}${ACCENT_UTILITIES}-(?:primary|accent-text)(?:-foreground)?(?:/[\\w.]+)?$`,
+  message:
+    "Accent classes are reserved for the primary button, selected or active items, Playing, focus and links (spec 027 2.9). Use a neutral token, or add the file to ACCENT_ALLOWED_FILES in eslint.config.mjs with that reason.",
+};
+// Every file allowed to draw with the accent, and why (functional spec 2.9).
+const ACCENT_ALLOWED_FILES = [
+  // primary button, link and Playing variants
+  "src/shared/ui/button.tsx",
+  "src/shared/ui/badge.tsx",
+  // selected state
+  "src/shared/ui/checkbox.tsx",
+  "src/shared/ui/switch.tsx",
+  // primary action: the centre "Log" button and the sidebar "Log" button
+  "src/widgets/app-bottom-nav/ui/app-bottom-nav/app-bottom-nav.tsx",
+  "src/widgets/app-sidebar/ui/app-sidebar/app-sidebar.tsx",
+  // selected or active filter chip, active-filter count, active toggle
+  "src/features/filter-library/ui/status-lens/status-lens.tsx",
+  "src/features/filter-library/ui/mobile-filter-bar/mobile-filter-bar.tsx",
+  "src/features/filter-library/lib/status-config.ts",
+  // Up Next marker (active queue position) and the selected status check
+  "src/entities/library-item/ui/queue-marker/queue-marker.tsx",
+  "src/entities/library-item/ui/status-picker/status-picker.tsx",
+];
+
 const RETIRED_CLASSES = [
   {
     pattern: `${START}-?${SPACING_UTILITIES}-(?:xs|sm|md|lg|xl|2xl|3xl|4xl|5xl)$`,
@@ -245,6 +272,17 @@ export default tseslint.config(
         },
       ],
       "better-tailwindcss/no-conflicting-classes": "error",
+      "better-tailwindcss/no-restricted-classes": noRestrictedClasses(
+        PIXEL_FONT_SIZE,
+        ARBITRARY_COLOR,
+        PALETTE_COLOR,
+        ACCENT_CLASS
+      ),
+    },
+  },
+  {
+    files: ACCENT_ALLOWED_FILES,
+    rules: {
       "better-tailwindcss/no-restricted-classes": noRestrictedClasses(
         PIXEL_FONT_SIZE,
         ARBITRARY_COLOR,

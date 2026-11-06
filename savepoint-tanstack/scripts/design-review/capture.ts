@@ -149,8 +149,8 @@ function reseedAuditAccounts(): void {
   console.log(`reseeded audit accounts via ${DB_CONTAINER}`);
 }
 
-// --query ("preview=accent-b&font=c") rides on every page.goto, so dev-only
-// preview options survive each full navigation.
+// --query rides on every page.goto, so a query-driven state survives each full
+// navigation.
 function withQuery(page: Page): Page {
   const query = args.query?.replace(/^\?/, "");
   if (!query) return page;
@@ -179,38 +179,7 @@ async function signIn(context: BrowserContext): Promise<void> {
 
 async function settle(page: Page): Promise<void> {
   await page.waitForLoadState("networkidle");
-  await awaitPreviewApplied(page);
   await page.evaluate(() => document.fonts.ready);
-}
-
-// The slice 16 preview switch applies after a dynamic import, so wait for its
-// html data attributes and the preview font before trusting document.fonts.
-async function awaitPreviewApplied(page: Page): Promise<void> {
-  const params = new URLSearchParams(args.query?.replace(/^\?/, ""));
-  const wantsAccent = params.get("preview")?.startsWith("accent-");
-  const wantsFont = params.has("font");
-  if (!wantsAccent && !wantsFont) return;
-  try {
-    await page.waitForFunction(
-      ([accent, font]) => {
-        const root = document.documentElement;
-        if (accent && !root.dataset.previewAccent) return false;
-        if (!font) return true;
-        if (!root.dataset.previewFont) return false;
-        const family = getComputedStyle(root)
-          .getPropertyValue("--font-display")
-          .split(",")[0]
-          .trim();
-        return document.fonts
-          .load(`700 16px ${family}`)
-          .then((faces) => faces.length > 0);
-      },
-      [wantsAccent, wantsFont],
-      { timeout: ANIMATION_WAIT_MS }
-    );
-  } catch {
-    console.log(`  preview not applied after ${ANIMATION_WAIT_MS}ms`);
-  }
 }
 
 // Dialogs, sheets and the command palette animate in; a screenshot taken

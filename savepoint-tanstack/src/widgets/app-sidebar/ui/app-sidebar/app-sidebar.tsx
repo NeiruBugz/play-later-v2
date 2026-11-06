@@ -123,7 +123,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               className="h-8 w-8 shrink-0"
             />
             {!collapsed && (
-              <span className="font-display text-2xl font-semibold tracking-tight">
+              <span className="font-display text-2xl font-bold tracking-tight">
                 SavePoint
               </span>
             )}

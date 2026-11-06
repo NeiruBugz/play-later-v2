@@ -50,7 +50,7 @@ export function ProfileOverview({
         <div
           data-testid="profile-hero-banner"
           aria-hidden="true"
-          className="relative h-20 w-full bg-gradient-to-br from-primary/30 to-muted md:h-36"
+          className="relative h-20 w-full bg-gradient-to-br from-accent to-muted md:h-36"
         />
 
         {/* Identity block: avatar + name + handle + stat row + primary action */}

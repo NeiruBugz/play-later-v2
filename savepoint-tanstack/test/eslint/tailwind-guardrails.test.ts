@@ -18,10 +18,12 @@ beforeAll(() => {
   });
 });
 
-async function messagesFor(ruleId: string, code: string) {
-  const [result] = await eslint.lintText(code, {
-    filePath: syntheticFilePath,
-  });
+async function messagesFor(
+  ruleId: string,
+  code: string,
+  filePath = syntheticFilePath
+) {
+  const [result] = await eslint.lintText(code, { filePath });
   return result.messages.filter((m) => m.ruleId === ruleId);
 }
 
@@ -104,7 +106,7 @@ describe("no-restricted-classes", () => {
     "max-w-sm",
     "blur-sm",
     "px-4",
-    "bg-primary",
+    "bg-secondary",
     "text-muted-foreground",
     "bg-black/60",
     "text-white",
@@ -114,6 +116,78 @@ describe("no-restricted-classes", () => {
     const messages = await messagesFor(rule, classNameSnippet(className));
 
     expect(messages).toHaveLength(0);
+  });
+});
+
+describe("accent classes", () => {
+  const rule = "better-tailwindcss/no-restricted-classes";
+  const featureFile = path.join(projectRoot, "src/features/x/ui/x.tsx");
+  const allowedFile = path.join(
+    projectRoot,
+    "src/features/filter-library/ui/status-lens/status-lens.tsx"
+  );
+
+  it.each([
+    "bg-primary",
+    "text-primary",
+    "text-accent-text",
+    "border-primary/20",
+    "ring-primary",
+    "fill-primary",
+    "from-primary/15",
+    "hover:text-primary",
+    "data-checked:bg-primary",
+    "text-primary-foreground",
+  ])("reports %s in a file outside the allow-list", async (className) => {
+    const messages = await messagesFor(
+      rule,
+      classNameSnippet(className),
+      featureFile
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0].message).toContain("Accent classes");
+  });
+
+  it.each(["bg-primary text-primary-foreground", "text-accent-text"])(
+    "allows %s in an allow-listed file",
+    async (className) => {
+      const messages = await messagesFor(
+        rule,
+        classNameSnippet(className),
+        allowedFile
+      );
+
+      expect(messages).toHaveLength(0);
+    }
+  );
+
+  it.each([
+    "bg-secondary",
+    "text-muted-foreground",
+    "ring-ring",
+    "bg-status-playing",
+    "text-status-playing-foreground",
+    "bg-accent",
+    "text-accent-foreground",
+  ])("allows %s everywhere", async (className) => {
+    const messages = await messagesFor(
+      rule,
+      classNameSnippet(className),
+      featureFile
+    );
+
+    expect(messages).toHaveLength(0);
+  });
+
+  it("still applies the other restrictions in an allow-listed file", async () => {
+    const messages = await messagesFor(
+      rule,
+      classNameSnippet("bg-red-500"),
+      allowedFile
+    );
+
+    expect(messages).toHaveLength(1);
   });
 });
 

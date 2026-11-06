@@ -18,9 +18,13 @@
   --card-foreground: oklch(0.2 0.02 60);
   --popover: oklch(0.99 0.008 85);
   --popover-foreground: oklch(0.2 0.02 60);
-  /* Primary — sage accent (light tone) */
-  --primary: oklch(0.5 0.085 195);
+  /* Primary — plum accent (light tone). Fill; accent-coloured text uses
+     --accent-text. Both are one value while plum holds 4.5:1 as a fill and as
+     text on cream; the second token lets a future accent split them without
+     touching call sites. */
+  --primary: oklch(0.48 0.13 340);
   --primary-foreground: oklch(0.99 0.01 85);
+  --accent-text: var(--primary);
   /* Secondary — warm second surface */
   --secondary: oklch(0.93 0.015 85);
   --secondary-foreground: oklch(0.2 0.02 60);
@@ -71,9 +75,10 @@
   --card-foreground: oklch(0.94 0.008 85);
   --popover: oklch(0.205 0.009 70);
   --popover-foreground: oklch(0.94 0.008 85);
-  /* Primary — sage accent (dark tone) */
-  --primary: oklch(0.72 0.085 195);
+  /* Primary — plum accent (dark tone) */
+  --primary: oklch(0.72 0.11 340);
   --primary-foreground: oklch(0.16 0.012 70);
+  --accent-text: var(--primary);
   /* Secondary / muted — surface-2 */
   --secondary: oklch(0.25 0.01 70);
   --secondary-foreground: oklch(0.94 0.008 85);
@@ -115,7 +120,7 @@
 @theme {
   --font-sans: "Geist", system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
-  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-display: "Zilla Slab", Georgia, serif;
 }
 
 @theme inline {
@@ -128,6 +133,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-accent-text: var(--accent-text);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);

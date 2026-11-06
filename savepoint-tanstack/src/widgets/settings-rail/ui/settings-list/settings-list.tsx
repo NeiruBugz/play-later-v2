@@ -102,7 +102,7 @@ export function SettingsList({ activeSegment }: SettingsListProps) {
         <SettingsRowLink
           to="/settings/profile"
           icon={UserCircle2}
-          iconBg="var(--primary)"
+          iconBg="var(--muted-foreground)"
           label="Profile"
           isActive={activeSegment === "profile"}
         />

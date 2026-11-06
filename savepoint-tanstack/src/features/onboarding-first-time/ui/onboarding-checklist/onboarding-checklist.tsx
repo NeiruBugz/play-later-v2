@@ -159,7 +159,7 @@ export function OnboardingChecklist({
                 className={cn(
                   "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
                   step.done
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-status-done text-status-done-foreground"
                     : "border border-border"
                 )}
               >

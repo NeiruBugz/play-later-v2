@@ -160,8 +160,20 @@ describe.each(modes)("contrast in %s", (mode) => {
     ).toBeGreaterThanOrEqual(TEXT);
   });
 
-  it.each(["background", "card"])("primary link text on %s", (surface) => {
-    expect(contrast(at("primary"), at(surface))).toBeGreaterThanOrEqual(TEXT);
+  it.each(["background", "card", "popover"])(
+    "accent text (links) on %s",
+    (surface) => {
+      expect(contrast(at("accent-text"), at(surface))).toBeGreaterThanOrEqual(
+        TEXT
+      );
+    }
+  );
+
+  it("primary fill against the page, as a graphic", () => {
+    expect(contrast(at("primary"), at("background"))).toBeGreaterThanOrEqual(
+      GRAPHIC
+    );
+    expect(contrast(at("primary"), at("card"))).toBeGreaterThanOrEqual(GRAPHIC);
   });
 
   it("text over the 60 percent scrim on a white cover", () => {
@@ -178,10 +190,10 @@ describe.each(modes)("contrast in %s", (mode) => {
   });
 
   it.each(["background", "card"])(
-    "queue marker: primary text on primary/5 over %s",
+    "queue marker: accent text on primary/5 over %s",
     (surface) => {
       expect(
-        contrast(at("primary"), tint("primary", surface, 0.05))
+        contrast(at("accent-text"), tint("primary", surface, 0.05))
       ).toBeGreaterThanOrEqual(TEXT);
     }
   );
@@ -191,13 +203,6 @@ describe.each(modes)("contrast in %s", (mode) => {
       contrast(at("primary-foreground"), at("primary"))
     ).toBeGreaterThanOrEqual(TEXT);
   });
-
-  it.each(["background", "card"])(
-    "journal entry hours: primary text on %s",
-    (surface) => {
-      expect(contrast(at("primary"), at(surface))).toBeGreaterThanOrEqual(TEXT);
-    }
-  );
 
   it("card menu trigger focus: scrim-foreground ring plus scrim outer ring hold 3:1 on any cover", () => {
     for (let level = 0; level <= 100; level += 1) {

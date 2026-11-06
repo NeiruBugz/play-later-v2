@@ -34,7 +34,7 @@ Primitives are the stock shadcn `base-maia` output (`shadcn view <name>` / `shad
 
 ## Repo-owned primitives (not shadcn)
 
-`SectionLabel`: the one section-label style (`text-muted-foreground text-sm font-medium`, body font, sentence case). Renders an `h2` by default; `as` switches to `h3`, `h4`, `p` or `span`. `PageHeader`: the one page-title style (`font-display`, `h1`) with optional `sub` and `actions`; no eyebrow. `StickyFooter`: the primary action row of a page form. Phone: `fixed inset-x-0` at the viewport bottom (`bottom-0` with `pb-safe`, `0.75rem` floor) with a `bg-background` top border and `px-4`, so the primary button is always in the thumb zone and stays put while the page scrolls, even on short forms. It renders an `aria-hidden` in-flow spacer (`md:hidden`) before the bar, sized to the bar's measured height via `ResizeObserver` (`h-17` until measured), so the last field is never covered. `aboveBottomNav` lifts the bar to `bottom-(--bottom-nav-height)` on screens that show the bottom nav (it already covers the home indicator). From `md` up it is a plain inline block with no border or background. Do not use `-mx-*` or `bg-*` overrides on phone; the bar is full width. Keep the submit inside the `<form>`; no ancestor of the bar may use `transform`, `filter` or `contain` (it would become the fixed containing block). Inside a sheet use `SheetFooter` instead, never both. `ModalBody` / `ModalFooter`: for content shared by both `ResponsiveModal` variants; they render `SheetBody` / `SheetFooter` (right-aligned row) on phone and a plain block / right-aligned row in the dialog.
+`SectionLabel`: the one section-label style (`text-muted-foreground text-sm font-medium`, body font, sentence case). Renders an `h2` by default; `as` switches to `h3`, `h4`, `p` or `span`. `PageHeader`: the one page-title style (`font-display`, `h1`; `font-display` is Zilla Slab and appears only on page titles, `DialogTitle`, `SheetTitle`, the landing headline and the product name) with optional `sub` and `actions`; no eyebrow. `StickyFooter`: the primary action row of a page form. Phone: `fixed inset-x-0` at the viewport bottom (`bottom-0` with `pb-safe`, `0.75rem` floor) with a `bg-background` top border and `px-4`, so the primary button is always in the thumb zone and stays put while the page scrolls, even on short forms. It renders an `aria-hidden` in-flow spacer (`md:hidden`) before the bar, sized to the bar's measured height via `ResizeObserver` (`h-17` until measured), so the last field is never covered. `aboveBottomNav` lifts the bar to `bottom-(--bottom-nav-height)` on screens that show the bottom nav (it already covers the home indicator). From `md` up it is a plain inline block with no border or background. Do not use `-mx-*` or `bg-*` overrides on phone; the bar is full width. Keep the submit inside the `<form>`; no ancestor of the bar may use `transform`, `filter` or `contain` (it would become the fixed containing block). Inside a sheet use `SheetFooter` instead, never both. `ModalBody` / `ModalFooter`: for content shared by both `ResponsiveModal` variants; they render `SheetBody` / `SheetFooter` (right-aligned row) on phone and a plain block / right-aligned row in the dialog.
 
 ## Contrast
 
@@ -48,7 +48,7 @@ WCAG 2.x ratios computed from the `styles.css` tokens (oklch to sRGB, channels c
 | `muted-foreground` on `background` / `card` / `popover` (muted, `SectionLabel`)                           | 5.84 / 6.38 / 6.38        | 4.5   |
 | `muted-foreground` on `muted` / `secondary` / `accent` (`subtle` badge, hover)                            | 5.34 / 5.34 / 5.02        | 4.5   |
 | Placeholder (`muted-foreground`) on `input/30` over `background` / `card`                                 | 5.34 / 5.69               | 4.5   |
-| `primary-foreground` on `primary`; on `primary/90` (hover)                                                | 5.59; 4.68                | 4.5   |
+| `primary-foreground` on `primary`; on `primary/90` (hover)                                                | 6.83; 5.55                | 4.5   |
 | `secondary-foreground` on `secondary`                                                                     | 14.77                     | 4.5   |
 | `foreground` on `accent` / `muted` (outline and ghost hover)                                              | 13.88 / 14.77             | 4.5   |
 | `destructive` on `destructive/10` over `card`; on `/15` hover over `card` / `background`                  | 5.76; 5.23 / 4.81         | 4.5   |
@@ -56,17 +56,17 @@ WCAG 2.x ratios computed from the `styles.css` tokens (oklch to sRGB, channels c
 | `destructive` on `card` / `background`                                                                    | 6.94 / 6.36               | 4.5   |
 | Alert text on `card`: `success` / `warning` / `info`                                                      | 5.51 / 5.73 / 5.83        | 4.5   |
 | Alert description (`/90`) on `card`: `success` / `warning` / `info` / `destructive`                       | 4.52 / 4.67 / 4.77 / 6.20 | 4.5   |
-| `status-want/playing/done-foreground` on its status fill                                                  | 5.35 / 5.59 / 5.06        | 4.5   |
-| `primary` link text on `background` / `card`                                                              | 5.12 / 5.59               | 4.5   |
+| `status-want/playing/done-foreground` on its status fill                                                  | 5.35 / 6.83 / 5.06        | 4.5   |
+| `accent-text` (links) on `background` / `card` / `popover`                                                | 6.26 / 6.83 / 6.83        | 4.5   |
+| `primary` fill against `background` / `card` (graphic)                                                    | 6.26 / 6.83               | 3     |
 | `scrim-foreground` on `scrim/60` over a white cover (library status badge, profile caption, menu trigger) | 5.00                      | 4.5   |
 | `scrim-foreground/80` on the profile cover gradient (`from-scrim/90`) over white                          | 12.35                     | 4.5   |
 | `game-card` accent-cover title (`scrim-foreground`) on `status -> scrim` at 40 / 50 / 60 percent          | 9.65 to 13.56             | 4.5   |
 | `fill-warning` rating stars on `card` / `background`                                                      | 5.73 / 5.25               | 3     |
-| Focus ring (`ring`) against `background` / `card` / `popover`                                             | 5.12 / 5.59 / 5.59        | 3     |
-| `QueueMarker` (`primary` on `primary/5`) over `background` / `card`                                       | 4.78 / 5.21               | 4.5   |
-| Status-lens active chip count (`primary-foreground` on `primary`, no alpha)                               | 5.59                      | 4.5   |
-| Journal entry hours (`primary`, no alpha) on `background` / `card`                                        | 5.12 / 5.59               | 4.5   |
-| Focus ring against `accent` / `muted` / `secondary`                                                       | 4.40 / 4.68 / 4.68        | 3     |
+| Focus ring (`ring`) against `background` / `card` / `popover`                                             | 6.26 / 6.83 / 6.83        | 3     |
+| `QueueMarker` (`accent-text` on `primary/5`) over `background` / `card`                                   | 5.82 / 6.34               | 4.5   |
+| Status-lens active chip count (`primary-foreground` on `primary`, no alpha)                               | 6.83                      | 4.5   |
+| Focus ring against `accent` / `muted` / `secondary`                                                       | 5.38 / 5.72 / 5.72        | 3     |
 
 ### Dark
 
@@ -76,7 +76,7 @@ WCAG 2.x ratios computed from the `styles.css` tokens (oklch to sRGB, channels c
 | `muted-foreground` on `background` / `card` / `popover` (muted, `SectionLabel`)                  | 6.15 / 5.76 / 5.76        | 4.5   |
 | `muted-foreground` on `muted` / `secondary` / `accent` (`subtle` badge, hover)                   | 5.15 / 5.15 / 4.85        | 4.5   |
 | Placeholder (`muted-foreground`) on `input/30` over `background` / `card`                        | 5.76 / 5.46               | 4.5   |
-| `primary-foreground` on `primary`; on `primary/90` (hover)                                       | 8.12; 6.75                | 4.5   |
+| `primary-foreground` on `primary`; on `primary/90` (hover)                                       | 7.43; 6.21                | 4.5   |
 | `secondary-foreground` on `secondary`                                                            | 13.43                     | 4.5   |
 | `foreground` on `accent` / `muted` (outline and ghost hover)                                     | 12.65 / 13.43             | 4.5   |
 | `destructive` on `destructive/15` over `card`; on `/20` hover over `card` / `background`         | 5.22; 4.76 / 5.18         | 4.5   |
@@ -84,17 +84,23 @@ WCAG 2.x ratios computed from the `styles.css` tokens (oklch to sRGB, channels c
 | `destructive` on `card` / `background`                                                           | 6.50 / 6.93               | 4.5   |
 | Alert text on `card`: `success` / `warning` / `info`                                             | 7.62 / 8.76 / 6.74        | 4.5   |
 | Alert description (`/90`) on `card`: `success` / `warning` / `info` / `destructive`              | 6.38 / 7.31 / 5.68 / 5.47 | 4.5   |
-| `status-want/playing/done-foreground` on its status fill                                         | 7.31 / 8.12 / 8.25        | 4.5   |
-| `primary` link text on `background` / `card`                                                     | 8.00 / 7.49               | 4.5   |
+| `status-want/playing/done-foreground` on its status fill                                         | 7.31 / 7.43 / 8.25        | 4.5   |
+| `accent-text` (links) on `background` / `card` / `popover`                                       | 7.32 / 6.86 / 6.86        | 4.5   |
+| `primary` fill against `background` / `card` (graphic)                                           | 7.32 / 6.86               | 3     |
 | `scrim-foreground` on `scrim/60` over a white cover                                              | 5.00                      | 4.5   |
 | `scrim-foreground/80` on the profile cover gradient (`from-scrim/90`) over white                 | 12.35                     | 4.5   |
 | `game-card` accent-cover title (`scrim-foreground`) on `status -> scrim` at 40 / 50 / 60 percent | 5.78 to 10.25             | 4.5   |
 | `fill-warning` rating stars on `card` / `background`                                             | 8.76 / 9.35               | 3     |
-| Focus ring (`ring`) against `background` / `card` / `popover`                                    | 8.00 / 7.49 / 7.49        | 3     |
-| `QueueMarker` (`primary` on `primary/5`) over `background` / `card`                              | 7.52 / 6.97               | 4.5   |
-| Status-lens active chip count (`primary-foreground` on `primary`, no alpha)                      | 8.12                      | 4.5   |
-| Journal entry hours (`primary`, no alpha) on `background` / `card`                               | 8.00 / 7.49               | 4.5   |
-| Focus ring against `accent` / `muted` / `secondary`                                              | 6.31 / 6.70 / 6.70        | 3     |
+| Focus ring (`ring`) against `background` / `card` / `popover`                                    | 7.32 / 6.86 / 6.86        | 3     |
+| `QueueMarker` (`accent-text` on `primary/5`) over `background` / `card`                          | 6.90 / 6.40               | 4.5   |
+| Status-lens active chip count (`primary-foreground` on `primary`, no alpha)                      | 7.43                      | 4.5   |
+| Focus ring against `accent` / `muted` / `secondary`                                              | 5.77 / 6.13 / 6.13        | 3     |
+
+### Accent (slice 17, Plum)
+
+`--primary` is `oklch(0.48 0.13 340)` in Light and `oklch(0.72 0.11 340)` in Dark; `--primary-foreground` and `--ring` are unchanged in role (`ring` follows `primary`). `--accent-text` is the token for accent-coloured text and is `var(--primary)` in both modes, because plum already holds 4.5:1 as a fill and as text on `background`, `card`, `popover` and the `primary/5` tint. It is a separate token so a future accent can split text from fill without editing call sites. Use `text-accent-text` for text and `bg-primary` / `ring-ring` for fills and focus.
+
+The accent classes (`bg|text|border|ring|fill|...-primary`, `-accent-text`, `-primary-foreground`) are lint-restricted (`no-restricted-classes`, `ACCENT_ALLOWED_FILES` in `eslint.config.mjs`) to the primary button, selected or active items, Playing and links. Anything else uses a neutral token. Add a file to the allow-list only with one of those reasons. The Journal-entry hours and decorative icons moved to neutral tokens, so their old pairs are no longer listed.
 
 ### Changes (slice 14, hues unchanged)
 

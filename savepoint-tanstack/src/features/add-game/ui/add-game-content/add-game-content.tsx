@@ -7,6 +7,7 @@ import { MIN_GAME_SEARCH_QUERY_LENGTH } from "@/shared/lib/game-search";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { cn } from "@/shared/lib/utils";
+import { buttonVariants } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 
 import { searchGamesFn } from "../../api/search-games-fn";
@@ -147,7 +148,7 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
               to="/games/search"
               search={{ q: debouncedQuery }}
               onClick={onSeeAll}
-              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              className={buttonVariants({ variant: "link", size: "sm" })}
             >
               See all results
             </Link>

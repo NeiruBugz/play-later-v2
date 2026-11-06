@@ -116,7 +116,7 @@ export function GameCard({
       <Link
         to="/games/$slug"
         params={{ slug }}
-        className="block rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
         aria-label={`View ${title}`}
       >
         {card}

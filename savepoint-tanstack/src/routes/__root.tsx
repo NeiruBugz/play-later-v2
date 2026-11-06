@@ -32,7 +32,8 @@ import { NavigationProgress } from "@/widgets/navigation-progress";
 
 import appCss from "../styles.css?url";
 
-if (import.meta.env.DEV) void import("@/app/dev-preview/dev-preview");
+const FONTS_STYLESHEET =
+  "https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Zilla+Slab:wght@500;700&display=swap";
 
 const rootSearchSchema = z.object({
   action: z.enum(["log-session", "add-game"]).optional(),
@@ -99,8 +100,13 @@ export const Route = createRootRouteWithContext<{
         crossOrigin: "anonymous",
       },
       {
+        rel: "preload",
+        as: "style",
+        href: FONTS_STYLESHEET,
+      },
+      {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        href: FONTS_STYLESHEET,
       },
       {
         rel: "stylesheet",
@@ -190,7 +196,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
         <ThemeColorMetas />
       </head>
-      <body className="font-sans wrap-anywhere antialiased selection:bg-primary/25">
+      <body className="font-sans wrap-anywhere antialiased selection:bg-foreground/20">
         {children}
         <Scripts />
       </body>

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { connectSteamFn } from "@/features/steam-connect";
 import { AppError } from "@/shared/lib/errors";
+import { buttonVariants } from "@/shared/ui/button";
 
 /**
  * `/steam/callback` — Steam OpenID return-to landing.
@@ -68,7 +69,7 @@ function SteamCallbackError({ error }: { error: unknown }) {
       <p className="mb-6 text-muted-foreground">{message}</p>
       <a
         href="/settings/account"
-        className="text-primary underline-offset-4 hover:underline"
+        className={buttonVariants({ variant: "link", size: "sm" })}
       >
         Back to account settings
       </a>
