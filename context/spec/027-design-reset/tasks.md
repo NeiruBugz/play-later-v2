@@ -231,7 +231,7 @@ Conventions for every slice:
   - [x] Remove the forced `class="dark"` and the decorative blobs and gradients from `routes/index.tsx` and the landing widgets, and move them onto shared components and tokens.
     - Add `THEME_COLORS` to `shared/config/site.ts` (today's `--background` for each mode). Use it for the `theme-color` meta and the manifest colors, replacing the retired `#f6f1e7` / `#120f0c`.
     - Unit-test `THEME_INIT_SCRIPT` in jsdom with a stubbed `matchMedia`, for a stored choice, no choice and an invalid value. **[Agent: tanstack-fullstack]**
-  - [ ] Make the platform badges neutral: one palette color, the platform name as text. Delete the 20 hexes and the platform tokens. Replace the remaining raw palette colors: `rating-input` amber, `bg-black/55` overlays, landing emerald and fuchsia. Replace the runtime oklch in `derive-banner-gradient.ts` with tokens. **[Agent: react-frontend]**
+  - [x] Make the platform badges neutral: one palette color, the platform name as text. Delete the 20 hexes and the platform tokens. Replace the remaining raw palette colors: `rating-input` amber, `bg-black/55` overlays, landing emerald and fuchsia. Replace the runtime oklch in `derive-banner-gradient.ts` with tokens. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). Signed out, in the Playwright MCP:
@@ -242,7 +242,7 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
 - [ ] **Slice 14: Readability and focus meet the baseline in both modes**
-  - [ ] Check contrast in Light and Dark for body, label, button, placeholder, muted, toast and over-cover text, and for the focus ring. Adjust token values until text reaches 4.5:1 (3:1 for large text) and the focus ring reaches 3:1, without changing hues. Write the measured ratios into `src/shared/ui/README.md`. **[Agent: react-frontend]**
+  - [ ] Check contrast in Light and Dark for body, label, button, placeholder, muted, toast and over-cover text, and for the focus ring. Adjust token values until text reaches 4.5:1 (3:1 for large text) and the focus ring reaches 3:1, without changing hues. Write the measured ratios into `src/shared/ui/README.md`. Known from 13.2: check `text-scrim-foreground` over bright covers, `fill-warning` rating stars in Light, and the `game-card` accent-cover title (light text on a gradient ending in the cream `--background`) in Light. **[Agent: react-frontend]**
   - [ ] Verify:
     - Start the app (record the PID).
     - In the Playwright MCP, compute contrast ratios for the listed text types on home, library, game page, journal and settings in both modes. Tab through each screen and confirm the focused element has a visible outline at ≥3:1.
