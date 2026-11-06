@@ -244,13 +244,13 @@ Conventions for every slice:
     - Scan the computed colors of every element on the §2.0 screens and confirm each is a palette token, excluding covers, screenshots and avatars. `rg` for hex and raw palette classes must be clean.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 14: Readability and focus meet the baseline in both modes**
+- [x] **Slice 14: Readability and focus meet the baseline in both modes**
   - [x] Check contrast in Light and Dark for body, label, button, placeholder, muted, toast and over-cover text, and for the focus ring. Adjust token values until text reaches 4.5:1 (3:1 for large text) and the focus ring reaches 3:1, without changing hues. Write the measured ratios into `src/shared/ui/README.md`. Known from 13.2: check `text-scrim-foreground` over bright covers, `fill-warning` rating stars in Light, and the `game-card` accent-cover title (light text on a gradient ending in the cream `--background`) in Light. **[Agent: react-frontend]**
   - [x] Fix what the first Slice 14 verify found:
     - Focus: 670 of 1308 focus stops show only the browser default outline recoloured by `* { outline-ring/50 }` (`styles.css:177`), 2.1–2.8:1. Give every focusable element a visible ≥2px indicator at ≥3:1 (a base `:focus-visible` rule on `--ring` without the `/50`). The library card menu trigger ring over cover art (`ring-scrim-foreground/70`) falls to 1.2:1 on some covers, and the game-page tab panel has `outline-none` with no replacement.
     - Text below 4.5:1: `QueueMarker` (`bg-primary/10 text-primary`, Light 4.46), the active status-lens chip count (`opacity-80`, Light 4.17), journal entry card hours (`text-primary/70`, Light 3.15, Dark 4.28). The breadcrumb separator (`opacity-50`, 2.1–2.4) is fine only if it is decorative and hidden from assistive tech.
     - Extend `contrast.test.ts` to cover tinted and alpha text pairs like these. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Start the app (record the PID).
     - In the Playwright MCP, compute contrast ratios for the listed text types on home, library, game page, journal and settings in both modes. Tab through each screen and confirm the focused element has a visible outline at ≥3:1.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
