@@ -371,7 +371,7 @@ Conventions for every slice:
 
 - [ ] **Slice 22: Owner approves phase 2, and old links land on the new address (Release 3)**
   - [ ] Capture `review/phase2/after/phone` in Light and Dark and present the pairs to the owner, together with a comparison against the same-named competitor's home, library, profile and game pages for the Up Next shelf (§2.12). After phone approval, capture and present desktop. Rework any rejected pair and show it again. **[Agent: testing]**
-  - [ ] Infra:
+  - [x] Infra:
     - Add `additional_callback_urls` to `infra/envs/prod` (dev already has it) and the new origin to the Cognito callback and logout URLs and to `s3_additional_allowed_origins`.
     - Pin `s3_bucket_name` in tfvars and add `lifecycle { prevent_destroy = true }` to the user pool, bucket and pool domain.
     - Do not change `project_name` or `domain_prefix`.
