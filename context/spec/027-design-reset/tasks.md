@@ -323,7 +323,7 @@ Conventions for every slice:
     Slice notes (2026-11-06): chips match on library (grid and list), game page, home and search — 20px, 2px 8px, fully rounded, 12px/500, labels Want / Playing / Done / Let go; Playing equals `--primary`; Let go uses the Done colour; text contrast 5.05–8.24. The public profile library shows no status at all (it didn't before either), so it has no chip. The list-view toggle is desktop-only, so the list was measured at 1440.
 
 - [ ] **Slice 20: Up Next is a shelf of covers on the home screen**
-  - [ ] Add `widgets/up-next-shelf/`: a horizontal scroll-snap row in queue order.
+  - [x] Add `widgets/up-next-shelf/`: a horizontal scroll-snap row in queue order.
     - The first cover is larger, capped at about 60% of the phone width so the next one peeks.
     - Use `overscroll-x-contain` and `min-w-0` on parents, so the page never scrolls sideways.
     - The empty state keeps the outline and position, with a button that opens the command palette.
