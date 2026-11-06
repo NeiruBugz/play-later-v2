@@ -269,7 +269,7 @@ Conventions for every slice:
     - Release 2 can ship after this. **[Agent: testing]**
 
 - [ ] **Slice 16: Owner picks the accent, the title font and the name from options shown on a phone**
-  - [ ] Prepare 2–3 accent options and 2–3 title-font options:
+  - [x] Prepare 2–3 accent options and 2–3 title-font options:
     - accents suit the warm surfaces, lie outside hue 170°–220°, and each has fill and text tones meeting AA in both modes;
     - fonts load with at most 2 weights and `display=swap`.
 
