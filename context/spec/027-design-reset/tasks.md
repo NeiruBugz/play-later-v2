@@ -6,7 +6,7 @@
 
 Conventions for every slice:
 - Paths are relative to `savepoint-tanstack/` unless they say otherwise.
-- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && test:integration && build`. Every slice ends with it green.
+- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && build`, plus `test:integration` only when the diff touches server/DB paths (`git diff --name-only | rg '/api/|\.server\.|\.worker\.|prisma/|test/integration/|test/setup/|env\.ts|shared/lib/(db|auth|logger|errors|prisma)'` prints something). Integration also runs once before each release PR; CI runs it on every PR. Every slice ends with it green. (Owner, 2026-11-06: the integration suite only imports server layers, and Release 2 touches none of them.)
 - **Starting the app for a Verify task:**
   - `docker compose up -d`, then `pnpm --filter savepoint-tanstack dev` (port 6060) in the background.
   - Record the dev-server PID when starting it, and stop the server with `kill <PID>` at the end. Never pipe a daemon's stop command into another command.
