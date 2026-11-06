@@ -56,6 +56,7 @@ const { values: args } = parseArgs({
     reseed: { type: "boolean", default: false },
     out: { type: "string" },
     query: { type: "string" },
+    screens: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
   },
 });
@@ -178,7 +179,38 @@ async function signIn(context: BrowserContext): Promise<void> {
 
 async function settle(page: Page): Promise<void> {
   await page.waitForLoadState("networkidle");
+  await awaitPreviewApplied(page);
   await page.evaluate(() => document.fonts.ready);
+}
+
+// The slice 16 preview switch applies after a dynamic import, so wait for its
+// html data attributes and the preview font before trusting document.fonts.
+async function awaitPreviewApplied(page: Page): Promise<void> {
+  const params = new URLSearchParams(args.query?.replace(/^\?/, ""));
+  const wantsAccent = params.get("preview")?.startsWith("accent-");
+  const wantsFont = params.has("font");
+  if (!wantsAccent && !wantsFont) return;
+  try {
+    await page.waitForFunction(
+      ([accent, font]) => {
+        const root = document.documentElement;
+        if (accent && !root.dataset.previewAccent) return false;
+        if (!font) return true;
+        if (!root.dataset.previewFont) return false;
+        const family = getComputedStyle(root)
+          .getPropertyValue("--font-display")
+          .split(",")[0]
+          .trim();
+        return document.fonts
+          .load(`700 16px ${family}`)
+          .then((faces) => faces.length > 0);
+      },
+      [wantsAccent, wantsFont],
+      { timeout: ANIMATION_WAIT_MS }
+    );
+  } catch {
+    console.log(`  preview not applied after ${ANIMATION_WAIT_MS}ms`);
+  }
 }
 
 // Dialogs, sheets and the command palette animate in; a screenshot taken
@@ -379,6 +411,10 @@ async function main(): Promise<void> {
   if (args.reseed) reseedAuditAccounts();
 
   const viewports = args.desktop ? [PHONE, DESKTOP] : [PHONE];
+  const screenIds = args.screens?.split(",");
+  const selectedScreens = screenIds
+    ? SCREENS.filter((screen) => screenIds.includes(screen.id))
+    : SCREENS;
   const whatsNewVersion = currentWhatsNewVersion();
   const browser = await chromium.launch();
   const results: Array<ScreenResult & { viewport: string; theme: Theme }> = [];
@@ -403,7 +439,7 @@ async function main(): Promise<void> {
         const anonPage = withQuery(await anon.newPage());
         const ctx = await discoverContext(authedPage);
 
-        for (const screen of SCREENS) {
+        for (const screen of selectedScreens) {
           const page = screen.auth ? authedPage : anonPage;
           const result = await captureScreen(
             page,
