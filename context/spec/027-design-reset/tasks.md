@@ -232,6 +232,9 @@ Conventions for every slice:
     - Add `THEME_COLORS` to `shared/config/site.ts` (today's `--background` for each mode). Use it for the `theme-color` meta and the manifest colors, replacing the retired `#f6f1e7` / `#120f0c`.
     - Unit-test `THEME_INIT_SCRIPT` in jsdom with a stubbed `matchMedia`, for a stored choice, no choice and an invalid value. **[Agent: tanstack-fullstack]**
   - [x] Make the platform badges neutral: one palette color, the platform name as text. Delete the 20 hexes and the platform tokens. Replace the remaining raw palette colors: `rating-input` amber, `bg-black/55` overlays, landing emerald and fuchsia. Replace the runtime oklch in `derive-banner-gradient.ts` with tokens. **[Agent: react-frontend]**
+  - [ ] Fix what the first Slice 13 verify found: only the dark `theme-color` meta reaches the HTML; the light one declared in `__root.tsx` `head()` is dropped (likely de-duplicated by `name`). Both per-scheme metas must render. Cover it with a test of the rendered head.
+
+    Accepted (owner rule via tech spec §2.5): stock `shadow-xs/sm/md` cast black-alpha shadows; they are part of the stock look and count as palette for the color scan.
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). Signed out, in the Playwright MCP:
