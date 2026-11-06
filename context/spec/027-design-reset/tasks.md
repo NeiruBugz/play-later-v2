@@ -206,6 +206,13 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots.
     - Then ask the owner to do the real-device check on an iPhone and an Android phone: notch and home indicator, the keyboard over text fields, no zoom on focus. Record the result in the slice notes. **[Agent: testing]**
 
+    Slice notes (2026-11-06): the gate and the Playwright part pass (second run, after the `StickyFooter` fix): primary buttons at 724–788 px of 844 on every form and sheet at any scroll, last field never covered, toasts above the bottom nav, `.pt-safe`/`.pb-safe` reference `env(safe-area-inset-*)`, desktop unchanged. The owner's real-device check is deferred to the Release 2 Vercel preview, together with Slice 12. Check on iPhone (Safari and home screen) and Android Chrome:
+    - top bar and navigation progress bar clear the notch; bottom nav, sheet footers and the lightbox strip clear the home indicator; game-page action bar insets in landscape;
+    - sign-in, profile setup, settings profile and journal edit: the primary button sits at the bottom and is not under the bottom nav;
+    - the keyboard over text fields (sign-in, profile setup, Log time note, journal edit, settings name and username): the focused field stays visible; does the pinned button ride above the iOS keyboard or get covered (decides whether a `visualViewport` adjustment is needed); on Android, does the bottom nav jump above the keyboard;
+    - no zoom on focus on any input or the search field;
+    - a status-change toast sits above the bottom nav.
+
 - [ ] **Slice 12: Phone screens use bottom sheets, readable text and thumb-sized targets**
   - [ ] Route Remove from library, `library-modal`, whats-new, the Steam import modal and Steam connect through `ResponsiveModal`, so they open as bottom sheets on phone with a visible close button. The sheet close button must not overlap the header text (Slice 8 verify: on the Log time sheet it covers the end of the description). **[Agent: react-frontend]**
   - [ ] Replace every `text-[10px]` and `text-[11px]`: bottom-nav labels, landing, library card, platform and status badges, profile. The floor is `text-xs`; body text is `text-base md:text-sm`. **[Agent: react-frontend]**
