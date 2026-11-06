@@ -32,6 +32,8 @@ import { NavigationProgress } from "@/widgets/navigation-progress";
 
 import appCss from "../styles.css?url";
 
+if (import.meta.env.DEV) void import("@/app/dev-preview/dev-preview");
+
 const rootSearchSchema = z.object({
   action: z.enum(["log-session", "add-game"]).optional(),
   game: z.string().min(1).optional(),

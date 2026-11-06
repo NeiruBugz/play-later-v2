@@ -55,6 +55,7 @@ const { values: args } = parseArgs({
     checks: { type: "boolean", default: false },
     reseed: { type: "boolean", default: false },
     out: { type: "string" },
+    query: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
   },
 });
@@ -145,6 +146,22 @@ function reseedAuditAccounts(): void {
     );
   }
   console.log(`reseeded audit accounts via ${DB_CONTAINER}`);
+}
+
+// --query ("preview=accent-b&font=c") rides on every page.goto, so dev-only
+// preview options survive each full navigation.
+function withQuery(page: Page): Page {
+  const query = args.query?.replace(/^\?/, "");
+  if (!query) return page;
+  const goto = page.goto.bind(page);
+  page.goto = (url, options) => {
+    const target = new URL(url, baseURL);
+    for (const [key, value] of new URLSearchParams(query)) {
+      target.searchParams.set(key, value);
+    }
+    return goto(target.toString(), options);
+  };
+  return page;
 }
 
 async function signIn(context: BrowserContext): Promise<void> {
@@ -382,8 +399,8 @@ async function main(): Promise<void> {
           whatsNewVersion
         );
         await signIn(authed);
-        const authedPage = await authed.newPage();
-        const anonPage = await anon.newPage();
+        const authedPage = withQuery(await authed.newPage());
+        const anonPage = withQuery(await anon.newPage());
         const ctx = await discoverContext(authedPage);
 
         for (const screen of SCREENS) {

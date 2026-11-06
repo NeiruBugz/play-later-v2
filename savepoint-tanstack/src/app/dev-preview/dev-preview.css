@@ -1,0 +1,33 @@
+/* Spec 027 slice 16 options. Imported only from dev-preview.ts, which the root
+   route loads under import.meta.env.DEV; removed in slice 17. */
+
+html[data-preview-accent="a"] {
+  --primary: oklch(0.5 0.125 45);
+}
+html.dark[data-preview-accent="a"] {
+  --primary: oklch(0.72 0.115 45);
+}
+
+html[data-preview-accent="b"] {
+  --primary: oklch(0.48 0.13 340);
+}
+html.dark[data-preview-accent="b"] {
+  --primary: oklch(0.72 0.11 340);
+}
+
+html[data-preview-accent="c"] {
+  --primary: oklch(0.5 0.1 125);
+}
+html.dark[data-preview-accent="c"] {
+  --primary: oklch(0.72 0.1 125);
+}
+
+html[data-preview-font="a"] {
+  --font-display: "Fraunces", Georgia, serif;
+}
+html[data-preview-font="b"] {
+  --font-display: "Young Serif", Georgia, serif;
+}
+html[data-preview-font="c"] {
+  --font-display: "Zilla Slab", Georgia, serif;
+}
