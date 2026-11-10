@@ -55,15 +55,6 @@ export const FILTER_TOGGLE_STYLE: { active: string; inactive: string } = {
   inactive: IDLE,
 };
 
-export const STATUS_FILTER_STYLES: Record<
-  StatusBadgeVariant,
-  { active: string; inactive: string }
-> = {
-  want: { active: ACTIVE, inactive: IDLE },
-  playing: { active: ACTIVE, inactive: IDLE },
-  done: { active: ACTIVE, inactive: IDLE },
-};
-
 export type StatusFilterEntry = {
   value: LibraryStatus;
   label: string;

@@ -17,7 +17,6 @@ import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as SteamCallbackRouteImport } from './routes/steam.callback'
 import { Route as GamesSearchRouteImport } from './routes/games.search'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
-import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
@@ -72,11 +71,6 @@ const GamesSearchRoute = GamesSearchRouteImport.update({
 const GamesSlugRoute = GamesSlugRouteImport.update({
   id: '/games/$slug',
   path: '/games/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevIgdbSearchRoute = DevIgdbSearchRouteImport.update({
-  id: '/dev/igdb-search',
-  path: '/dev/igdb-search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
@@ -167,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthedDashboardRoute
   '/library': typeof AuthedLibraryRoute
   '/settings': typeof AuthedSettingsRouteWithChildren
-  '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
@@ -193,7 +186,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthedDashboardRoute
   '/library': typeof AuthedLibraryRoute
   '/settings': typeof AuthedSettingsRouteWithChildren
-  '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
@@ -220,7 +212,6 @@ export interface FileRoutesById {
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/settings': typeof AuthedSettingsRouteWithChildren
-  '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
@@ -248,7 +239,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/library'
     | '/settings'
-    | '/dev/igdb-search'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
@@ -274,7 +264,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/library'
     | '/settings'
-    | '/dev/igdb-search'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
@@ -300,7 +289,6 @@ export interface FileRouteTypes {
     | '/_authed/dashboard'
     | '/_authed/library'
     | '/_authed/settings'
-    | '/dev/igdb-search'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
@@ -325,7 +313,6 @@ export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
-  DevIgdbSearchRoute: typeof DevIgdbSearchRoute
   GamesSlugRoute: typeof GamesSlugRoute
   GamesSearchRoute: typeof GamesSearchRoute
   SteamCallbackRoute: typeof SteamCallbackRoute
@@ -389,13 +376,6 @@ declare module '@tanstack/react-router' {
       path: '/games/$slug'
       fullPath: '/games/$slug'
       preLoaderRoute: typeof GamesSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dev/igdb-search': {
-      id: '/dev/igdb-search'
-      path: '/dev/igdb-search'
-      fullPath: '/dev/igdb-search'
-      preLoaderRoute: typeof DevIgdbSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/settings': {
@@ -577,7 +557,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
   AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
-  DevIgdbSearchRoute: DevIgdbSearchRoute,
   GamesSlugRoute: GamesSlugRoute,
   GamesSearchRoute: GamesSearchRoute,
   SteamCallbackRoute: SteamCallbackRoute,

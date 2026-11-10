@@ -1,9 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import {
-  getProfileById,
-  getProfileByUsername,
-} from "@/entities/profile/api/get-profile.server";
+import { getProfileById } from "@/entities/profile/api/get-profile.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import {
@@ -62,45 +59,6 @@ describe("profile entity reads", () => {
       await expect(getProfileById("missing-user-id")).rejects.toBeInstanceOf(
         NotFoundError
       );
-    });
-  });
-
-  describe("given a user exists with a known username", () => {
-    const username = "slice3-test-user";
-
-    beforeEach(async () => {
-      await db.prisma.user.create({
-        data: {
-          id: "slice3-test-user-id-002",
-          email: "slice3-by-username@example.com",
-          name: "Slice Three Username User",
-          emailVerified: true,
-          username: username,
-          usernameNormalized: username,
-          image: null,
-          isPublicProfile: true,
-          createdAt: new Date("2024-01-01T00:00:00.000Z"),
-          updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-        },
-      });
-    });
-
-    it("getProfileByUsername returns the user record", async () => {
-      const profile = await getProfileByUsername(username);
-
-      expect(profile.id).toBe("slice3-test-user-id-002");
-      expect(profile.name).toBe("Slice Three Username User");
-      expect(profile.username).toBe(username);
-      expect(profile.image).toBeNull();
-      expect(profile.isPublicProfile).toBe(true);
-    });
-  });
-
-  describe("given no user exists with the given username", () => {
-    it("getProfileByUsername throws NotFoundError", async () => {
-      await expect(
-        getProfileByUsername("nonexistent-username")
-      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 });

@@ -1,19 +1,9 @@
-/**
- * Server-only worker for avatar presigned URL issuance.
- *
- * Exposed for direct test calls (the integration test imports this file
- * via the `node` env, where `*.server.*` import protection does not run).
- * The client-importable companion `get-avatar-presigned-url.ts` re-implements
- * the same logic inline inside `createServerFn().handler(...)` so the
- * Start Vite plugin can AST-strip it from the client bundle.
- */
 import { randomUUID } from "node:crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@env";
 import { z, ZodError } from "zod";
 
-import { requireUserId } from "@/entities/session/api/require-user-id";
 import {
   AVATAR_BUCKET,
   AVATAR_MAX_BYTES,
@@ -21,18 +11,22 @@ import {
   AVATAR_PATH_PREFIX,
   s3Client,
 } from "@/shared/api/s3.server";
-import { ValidationError } from "@/shared/lib/errors";
+import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
+import { createLogger } from "@/shared/lib/logger";
 
+const log = createLogger({ scope: "presign-avatar" });
 const PRESIGN_EXPIRES_SECONDS = 300;
 
-const INPUT_SCHEMA = z.object({
+const AVATAR_PRESIGN_INPUT = z.object({
   contentType: z.enum(
     AVATAR_MIME_ALLOW_LIST as unknown as [string, ...string[]]
   ),
   contentLength: z.number().int().positive().max(AVATAR_MAX_BYTES),
 });
 
-type Input = z.infer<typeof INPUT_SCHEMA>;
+type AvatarPresignInput = z.infer<typeof AVATAR_PRESIGN_INPUT>;
+
+export type AvatarPresignResult = { uploadUrl: string; publicUrl: string };
 
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -41,9 +35,9 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/webp": "webp",
 };
 
-function parseInputOrThrow(data: unknown): Input {
+export function parseAvatarPresignInput(data: unknown): AvatarPresignInput {
   try {
-    return INPUT_SCHEMA.parse(data);
+    return AVATAR_PRESIGN_INPUT.parse(data);
   } catch (error) {
     if (error instanceof ZodError) {
       throw new ValidationError(
@@ -67,11 +61,15 @@ function buildPublicUrl(key: string): string {
   return `https://${AVATAR_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${key}`;
 }
 
-export async function getAvatarPresignedUrl(
+export async function getAvatarPresignedUrlWorker(
+  userId: string | undefined,
   data: unknown
-): Promise<{ uploadUrl: string; publicUrl: string }> {
-  const parsed = parseInputOrThrow(data);
-  const userId = await requireUserId();
+): Promise<AvatarPresignResult> {
+  if (!userId) {
+    throw new UnauthorizedError("Sign in required");
+  }
+
+  const parsed = parseAvatarPresignInput(data);
   const key = buildAvatarKey(userId, parsed.contentType);
 
   const command = new PutObjectCommand({
@@ -85,5 +83,13 @@ export async function getAvatarPresignedUrl(
     expiresIn: PRESIGN_EXPIRES_SECONDS,
   });
 
+  log.info(
+    {
+      contentType: parsed.contentType,
+      contentLength: parsed.contentLength,
+      key,
+    },
+    "presigned url issued"
+  );
   return { uploadUrl, publicUrl: buildPublicUrl(key) };
 }
