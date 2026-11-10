@@ -1,3 +1,7 @@
+export function escapeIgdbString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export class QueryBuilder {
   private query: string = "";
 
@@ -27,7 +31,7 @@ export class QueryBuilder {
   }
 
   search(term: string): this {
-    this.query += `search "${term}";`;
+    this.query += `search "${escapeIgdbString(term)}";`;
     return this;
   }
 
