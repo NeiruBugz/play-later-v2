@@ -17,6 +17,15 @@ const RAW_PRISMA_TEXT =
   "Invalid `prisma.libraryItem.update()` invocation: P2002 Unique constraint failed";
 
 describe("getUserFacingErrorMessage", () => {
+  describe("given a rate-limited ValidationError", () => {
+    it("tells the user to wait and try again", () => {
+      const message = getUserFacingErrorMessage(
+        new ValidationError("raw: limit", { code: "RATE_LIMITED" })
+      );
+      expect(message).toBe("Too many searches. Wait a moment and try again.");
+    });
+  });
+
   describe("given an AppError", () => {
     it.each([
       ["NotFoundError", new NotFoundError("raw: item 7 missing")],

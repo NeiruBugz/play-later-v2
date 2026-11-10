@@ -2,6 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
   Link,
+  notFound,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { Component, Suspense, type ReactNode } from "react";
@@ -18,14 +19,19 @@ import {
   TimesToBeatSection,
   TimesToBeatSkeleton,
 } from "@/features/game-detail/ui";
-import { AppError } from "@/shared/lib/errors";
+import { AppError, NotFoundError } from "@/shared/lib/errors";
 import { Card } from "@/shared/ui/card";
 import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
 export const Route = createFileRoute("/games/$slug")({
   loader: async ({ params, context }) => {
-    const view = await getGameDetailPageDataFn({ data: { slug: params.slug } });
+    const view = await getGameDetailPageDataFn({
+      data: { slug: params.slug },
+    }).catch((error: unknown) => {
+      if (error instanceof NotFoundError) throw notFound();
+      throw error;
+    });
     const { igdbId } = view.data.game;
     void context.queryClient.prefetchQuery(timesToBeatQueryOptions(igdbId));
     void context.queryClient.prefetchQuery(relatedGamesQueryOptions(igdbId));
@@ -33,6 +39,7 @@ export const Route = createFileRoute("/games/$slug")({
   },
   component: GameDetailRoute,
   errorComponent: GameDetailErrorBoundary,
+  notFoundComponent: GameNotFound,
 });
 
 function GameDetailRoute() {
@@ -172,24 +179,26 @@ class SectionErrorBoundary extends Component<
   }
 }
 
-function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
-  const isNotFound = error instanceof AppError && error.code === "NOT_FOUND";
+function GameNotFound() {
+  return (
+    <div
+      role="alert"
+      className="gap-md container mx-auto flex flex-col px-4 py-12"
+    >
+      <h1 className="text-h2">Game not found</h1>
+      <p>We couldn't find a game matching this URL.</p>
+      <p>
+        <Link to="/" className="underline">
+          Go home
+        </Link>
+      </p>
+    </div>
+  );
+}
 
-  if (isNotFound) {
-    return (
-      <div
-        role="alert"
-        className="gap-md container mx-auto flex flex-col px-4 py-12"
-      >
-        <h1 className="text-h2">Game not found</h1>
-        <p>We couldn't find a game matching this URL.</p>
-        <p>
-          <Link to="/" className="underline">
-            Go home
-          </Link>
-        </p>
-      </div>
-    );
+function GameDetailErrorBoundary({ error }: ErrorComponentProps) {
+  if (error instanceof AppError && error.code === "NOT_FOUND") {
+    return <GameNotFound />;
   }
 
   return (

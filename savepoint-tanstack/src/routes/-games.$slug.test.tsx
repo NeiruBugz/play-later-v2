@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { isNotFound } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
 import type { ComponentType, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -298,20 +299,37 @@ describe("/games/$slug route", () => {
     });
   });
 
-  describe("given the loader throws NotFoundError", () => {
-    beforeEach(() => {
-      const ErrorComponent = Route.options.errorComponent as ComponentType<{
-        error: Error;
-      }>;
-      render(<ErrorComponent error={new NotFoundError("Game not found")} />);
+  describe("given the game does not exist", () => {
+    it("turns the NotFoundError into the router's notFound so the response is a 404", async () => {
+      const { getGameDetailPageDataFn } =
+        await import("@/features/game-detail/api");
+      vi.mocked(getGameDetailPageDataFn).mockRejectedValue(
+        new NotFoundError("Game not found")
+      );
+      const loader = Route.options.loader as (args: any) => Promise<unknown>;
+
+      const thrown = await loader({
+        params: { slug: "no-such-game" },
+        context: { queryClient: new QueryClient() },
+      }).catch((error: unknown) => error);
+
+      expect(isNotFound(thrown)).toBe(true);
     });
 
-    it("renders the friendly 404 surface", () => {
-      expect(elements.getNotFoundHeading()).toBeDefined();
-    });
+    describe("when the not-found surface renders", () => {
+      beforeEach(() => {
+        const NotFoundComponent = Route.options
+          .notFoundComponent as ComponentType;
+        render(<NotFoundComponent />);
+      });
 
-    it("renders a link back home", () => {
-      expect(elements.getHomeLink()).toHaveAttribute("href", "/");
+      it("renders the friendly 404 surface", () => {
+        expect(elements.getNotFoundHeading()).toBeDefined();
+      });
+
+      it("renders a link back home", () => {
+        expect(elements.getHomeLink()).toHaveAttribute("href", "/");
+      });
     });
   });
 

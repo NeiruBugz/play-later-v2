@@ -33,7 +33,7 @@ export function AvatarUpload({
 
     await run(
       async () => {
-        const { uploadUrl, publicUrl } = await getAvatarPresignedUrlFn({
+        const { uploadUrl, key } = await getAvatarPresignedUrlFn({
           data: { contentType: file.type, contentLength: file.size },
         });
 
@@ -46,7 +46,7 @@ export function AvatarUpload({
           throw new Error(`S3 PUT failed with status ${response.status}`);
         }
 
-        await setAvatarUrlFn({ data: { url: publicUrl } });
+        await setAvatarUrlFn({ data: { key } });
       },
       {
         successMessage: "Avatar updated",

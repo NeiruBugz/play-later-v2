@@ -2,7 +2,8 @@
 import { describe, expect, it } from "vitest";
 
 import { sendErrorThroughServerFn as callServerFnThatThrows } from "../../../test/support/server-fn-error-transport";
-import { ConflictError, NotFoundError } from "./errors";
+import { appErrorSerializationAdapter } from "./app-error-serialization";
+import { ConflictError, NotFoundError, ValidationError } from "./errors";
 import { getUserFacingErrorMessage } from "./user-facing-error";
 
 describe("AppError over the real server-fn handler and client fetcher", () => {
@@ -36,5 +37,36 @@ describe("AppError over the real server-fn handler and client fetcher", () => {
 
     expect(received).toBeInstanceOf(Error);
     expect(received.message).toBe("boom");
+  });
+});
+
+describe("appErrorSerializationAdapter.toSerializable", () => {
+  it("emits only code and message, dropping server-side context", () => {
+    const serialized = appErrorSerializationAdapter.toSerializable(
+      new ValidationError("Bad input", {
+        userId: "u1",
+        query: 'fields name; search "secret";',
+        issues: [{ path: ["name"], message: "Required" }],
+      })
+    );
+
+    expect(serialized).toEqual({ code: "VALIDATION", message: "Bad input" });
+    expect(JSON.stringify(serialized)).not.toContain("u1");
+    expect(JSON.stringify(serialized)).not.toContain("secret");
+  });
+
+  it("keeps only the string context.code the client branches on", () => {
+    const serialized = appErrorSerializationAdapter.toSerializable(
+      new ConflictError("Up Next is full", {
+        code: "UP_NEXT_FULL",
+        userId: "u1",
+      })
+    );
+
+    expect(serialized).toEqual({
+      code: "CONFLICT",
+      message: "Up Next is full",
+      context: { code: "UP_NEXT_FULL" },
+    });
   });
 });

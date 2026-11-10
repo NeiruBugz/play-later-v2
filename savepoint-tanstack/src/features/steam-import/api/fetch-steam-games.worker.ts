@@ -22,7 +22,7 @@ export const FETCH_STEAM_GAMES_INPUT = z
     includeMatched: z.boolean().optional(),
     page: z.number().int().positive().optional(),
     limit: z.number().int().positive().max(100).optional(),
-    search: z.string().optional(),
+    search: z.string().max(200).optional(),
     playtimeStatus: z.enum(["all", "played", "never_played"]).optional(),
     playtimeRange: z
       .enum(["all", "under_1h", "1_to_10h", "10_to_50h", "over_50h"])

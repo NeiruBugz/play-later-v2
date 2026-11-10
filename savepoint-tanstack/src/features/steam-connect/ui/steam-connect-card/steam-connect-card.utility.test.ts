@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { buildSteamOpenIdLoginUrl } from "./steam-connect-card.utility";
 
+const STATE = "1700000000000.signature";
+
 describe("buildSteamOpenIdLoginUrl", () => {
   describe("given a localhost origin", () => {
     const origin = "http://localhost:3000";
-    const url = buildSteamOpenIdLoginUrl(origin);
+    const url = buildSteamOpenIdLoginUrl(origin, STATE);
     const parsed = new URL(url);
     const params = parsed.searchParams;
 
@@ -22,8 +24,10 @@ describe("buildSteamOpenIdLoginUrl", () => {
       expect(params.get("openid.mode")).toBe("checkid_setup");
     });
 
-    it("sets openid.return_to to origin + /steam/callback", () => {
-      expect(params.get("openid.return_to")).toBe(`${origin}/steam/callback`);
+    it("sets openid.return_to to origin + /steam/callback carrying the state", () => {
+      expect(params.get("openid.return_to")).toBe(
+        `${origin}/steam/callback?state=${STATE}`
+      );
     });
 
     it("sets openid.realm to the bare origin", () => {
@@ -45,13 +49,13 @@ describe("buildSteamOpenIdLoginUrl", () => {
 
   describe("given a production HTTPS origin", () => {
     const origin = "https://app.example.com";
-    const url = buildSteamOpenIdLoginUrl(origin);
+    const url = buildSteamOpenIdLoginUrl(origin, STATE);
     const parsed = new URL(url);
     const params = parsed.searchParams;
 
     it("uses the production origin in return_to", () => {
       expect(params.get("openid.return_to")).toBe(
-        "https://app.example.com/steam/callback"
+        `https://app.example.com/steam/callback?state=${STATE}`
       );
     });
 

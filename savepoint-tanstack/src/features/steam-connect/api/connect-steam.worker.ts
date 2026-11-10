@@ -17,8 +17,19 @@ import { UnauthorizedError } from "@/shared/lib/errors";
  * Idempotent — re-running with the same params is a no-op (the write is
  * value-equivalent).
  */
+const MAX_OPENID_PARAMS = 40;
+const MAX_OPENID_KEY_LENGTH = 128;
+const MAX_OPENID_VALUE_LENGTH = 2048;
+
 export const CONNECT_STEAM_INPUT = z.object({
-  params: z.record(z.string(), z.string()),
+  params: z
+    .record(
+      z.string().max(MAX_OPENID_KEY_LENGTH),
+      z.string().max(MAX_OPENID_VALUE_LENGTH)
+    )
+    .refine((params) => Object.keys(params).length <= MAX_OPENID_PARAMS, {
+      message: `At most ${MAX_OPENID_PARAMS} parameters`,
+    }),
 });
 
 export async function connectSteamWorker(
@@ -31,7 +42,7 @@ export async function connectSteamWorker(
 
   const { params } = CONNECT_STEAM_INPUT.parse(data);
 
-  const steamId = await verifyOpenIdResponse(params);
+  const steamId = await verifyOpenIdResponse(params, { userId });
 
   await prisma.user.update({
     where: { id: userId },
