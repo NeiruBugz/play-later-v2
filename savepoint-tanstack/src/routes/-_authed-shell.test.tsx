@@ -98,7 +98,7 @@ vi.mock("@/features/whats-new", () => ({
 }));
 
 vi.mock("@tanstack/react-router", () => ({
-  createRootRoute: (opts: any) => ({
+  createRootRouteWithContext: () => (opts: any) => ({
     options: opts,
     useLoaderData: useLoaderDataMock,
   }),

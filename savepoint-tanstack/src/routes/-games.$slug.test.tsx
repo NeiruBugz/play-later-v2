@@ -340,14 +340,73 @@ describe("/games/$slug route", () => {
         await import("@/features/game-detail/api");
       vi.mocked(getGameDetailPageDataFn).mockResolvedValue(buildView());
 
-      const loader = Route.options.loader as (args: {
-        params: { slug: string };
-      }) => Promise<unknown>;
-      await loader({ params: { slug: "celeste" } });
+      const loader = Route.options.loader as (args: any) => Promise<unknown>;
+      await loader({
+        params: { slug: "celeste" },
+        context: { queryClient: new QueryClient() },
+      });
 
       expect(getGameDetailPageDataFn).toHaveBeenCalledWith({
         data: { slug: "celeste" },
       });
     });
+  });
+});
+
+describe("/games/$slug loader prefetch", () => {
+  const runLoader = async (view: GameDetailPageView) => {
+    const api = await import("@/features/game-detail/api");
+    vi.mocked(api.getGameDetailPageDataFn).mockResolvedValue(view);
+    vi.mocked(api.getTimesToBeatForGameFn).mockResolvedValue({
+      mainStory: 1,
+    } as any);
+    vi.mocked(api.getRelatedGamesForGameFn).mockResolvedValue([]);
+    vi.mocked(api.getTimesToBeatForGameFn).mockClear();
+    vi.mocked(api.getRelatedGamesForGameFn).mockClear();
+    const queryClient = new QueryClient();
+    const loader = Route.options.loader as (args: any) => Promise<unknown>;
+    const result = await loader({
+      params: { slug: "celeste" },
+      context: { queryClient },
+    });
+    return { api, queryClient, result };
+  };
+
+  it("returns the page data without waiting on the slot queries", async () => {
+    const api = await import("@/features/game-detail/api");
+    vi.mocked(api.getTimesToBeatForGameFn).mockReturnValue(
+      new Promise(() => undefined) as any
+    );
+    vi.mocked(api.getRelatedGamesForGameFn).mockReturnValue(
+      new Promise(() => undefined) as any
+    );
+    vi.mocked(api.getGameDetailPageDataFn).mockResolvedValue(buildView());
+    const loader = Route.options.loader as (args: any) => Promise<unknown>;
+    const result = await loader({
+      params: { slug: "celeste" },
+      context: { queryClient: new QueryClient() },
+    });
+    expect(result).toEqual(buildView());
+  });
+
+  it("prefetches times-to-beat into the query client once", async () => {
+    const { api, queryClient } = await runLoader(buildView());
+    await vi.waitFor(() => {
+      expect(queryClient.getQueryData(["times-to-beat", 1234])).toEqual({
+        mainStory: 1,
+      });
+    });
+    expect(api.getTimesToBeatForGameFn).toHaveBeenCalledTimes(1);
+    expect(api.getTimesToBeatForGameFn).toHaveBeenCalledWith({
+      data: { igdbId: 1234 },
+    });
+  });
+
+  it("prefetches related-games into the query client once", async () => {
+    const { api, queryClient } = await runLoader(buildView());
+    await vi.waitFor(() => {
+      expect(queryClient.getQueryData(["related-games", 1234])).toEqual([]);
+    });
+    expect(api.getRelatedGamesForGameFn).toHaveBeenCalledTimes(1);
   });
 });

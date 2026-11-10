@@ -1,13 +1,12 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import {
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { useState } from "react";
 import { z } from "zod";
 
 import { ErrorBoundary } from "@/app";
@@ -43,7 +42,9 @@ const rootSearchSchema = z.object({
   game: z.string().min(1).optional(),
 });
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   validateSearch: rootSearchSchema,
   head: () => ({
     meta: [
@@ -128,60 +129,46 @@ export const Route = createRootRoute({
 
 export function RootShell() {
   const { user, statusModelNoticePending } = Route.useLoaderData();
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60_000,
-            refetchOnWindowFocus: false,
-            retry: 1,
-          },
-        },
-      })
-  );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SavepointThemeProvider defaultTheme="system">
-        <AddFlowProvider>
-          <DoneFlowProvider>
-            <AppShell
-              sidebar={user ? <AppSidebar user={user} /> : undefined}
-              mobileTopbar={user ? <AppMobileTopbar /> : undefined}
-              mobileBottomNav={user ? <AppBottomNav /> : undefined}
-            >
-              <Outlet />
-            </AppShell>
-            {user ? (
-              <CommandPalette
-                wrapBody={(body) => (
-                  <InlineAddConfirmationHost>{body}</InlineAddConfirmationHost>
-                )}
-                renderAddAction={({ igdbId, name }) => (
-                  <AddGameAction game={{ igdbId, name, library: null }} />
-                )}
-              />
-            ) : null}
-            {user ? <GlobalActionHost /> : null}
-          </DoneFlowProvider>
-        </AddFlowProvider>
-        {user && statusModelNoticePending ? <StatusModelNotice /> : null}
-        {user && !statusModelNoticePending ? <WhatsNewModal /> : null}
-        <Toaster />
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-      </SavepointThemeProvider>
-    </QueryClientProvider>
+    <SavepointThemeProvider defaultTheme="system">
+      <AddFlowProvider>
+        <DoneFlowProvider>
+          <AppShell
+            sidebar={user ? <AppSidebar user={user} /> : undefined}
+            mobileTopbar={user ? <AppMobileTopbar /> : undefined}
+            mobileBottomNav={user ? <AppBottomNav /> : undefined}
+          >
+            <Outlet />
+          </AppShell>
+          {user ? (
+            <CommandPalette
+              wrapBody={(body) => (
+                <InlineAddConfirmationHost>{body}</InlineAddConfirmationHost>
+              )}
+              renderAddAction={({ igdbId, name }) => (
+                <AddGameAction game={{ igdbId, name, library: null }} />
+              )}
+            />
+          ) : null}
+          {user ? <GlobalActionHost /> : null}
+        </DoneFlowProvider>
+      </AddFlowProvider>
+      {user && statusModelNoticePending ? <StatusModelNotice /> : null}
+      {user && !statusModelNoticePending ? <WhatsNewModal /> : null}
+      <Toaster />
+      <TanStackDevtools
+        config={{
+          position: "bottom-right",
+        }}
+        plugins={[
+          {
+            name: "Tanstack Router",
+            render: <TanStackRouterDevtoolsPanel />,
+          },
+        ]}
+      />
+    </SavepointThemeProvider>
   );
 }
 

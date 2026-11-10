@@ -1,5 +1,7 @@
 /**
- * Internal IGDB REST helper. Single attempt, no retry, no Bottleneck.
+ * Internal IGDB REST helper. Every response goes through `igdbResponseCache`.
+ * One recovery retry: a 401 refreshes the Twitch token, a 429 waits
+ * 300–600 ms. Each attempt is bounded by an 8 s abort signal.
  *
  * On non-2xx, reads the response body once, parses IGDB's `[{ title, status,
  * cause }]` envelope when present, and throws `IgdbHttpError` carrying the
@@ -22,13 +24,26 @@ import {
   parseIgdbErrorBody,
   type IgdbHttpErrorContext,
 } from "./errors";
-import { getAccessToken } from "./token";
+import { igdbResponseCache } from "./response-cache";
+import { forceRefresh, getAccessToken } from "./token";
 
 const logger = createLogger({ service: "igdb-fetch" });
 
 const IGDB_BASE_URL = "https://api.igdb.com/v4";
+const IGDB_TIMEOUT_MS = 8_000;
+const RATE_LIMIT_RETRY_MIN_DELAY_MS = 300;
+const RATE_LIMIT_RETRY_JITTER_MS = 300;
 
 export async function igdbFetch(
+  resource: string,
+  body: string
+): Promise<unknown> {
+  return igdbResponseCache.getOrLoad(`${resource}\n${body}`, () =>
+    fetchWithRecovery(resource, body)
+  );
+}
+
+async function fetchWithRecovery(
   resource: string,
   body: string
 ): Promise<unknown> {
@@ -38,9 +53,41 @@ export async function igdbFetch(
 
   callLogger.debug({ query: body }, "IGDB request start");
 
+  let res = await sendOnce(resource, body);
+
+  if (res.status === 401) {
+    callLogger.warn("IGDB rejected the access token; refreshing and retrying");
+    forceRefresh();
+    res = await sendOnce(resource, body);
+  } else if (res.status === 429) {
+    callLogger.warn("IGDB rate limit hit; retrying once after a delay");
+    await waitForRateLimitRetry();
+    res = await sendOnce(resource, body);
+  }
+
+  const durationMs = Date.now() - startedAt;
+
+  if (!res.ok) {
+    const error = await toIgdbHttpError(res, { resource, body, requestId });
+    callLogger.error(
+      { ...error.context, durationMs },
+      `IGDB request failed: ${error.message}`
+    );
+    throw error;
+  }
+
+  callLogger.debug(
+    { durationMs, cfRay: res.headers?.get("cf-ray") ?? undefined },
+    "IGDB request ok"
+  );
+
+  return res.json();
+}
+
+async function sendOnce(resource: string, body: string): Promise<Response> {
   const token = await getAccessToken();
 
-  const res = await fetch(`${IGDB_BASE_URL}${resource}`, {
+  return fetch(`${IGDB_BASE_URL}${resource}`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -48,40 +95,37 @@ export async function igdbFetch(
       "Client-ID": env.IGDB_CLIENT_ID,
     },
     body,
+    signal: AbortSignal.timeout(IGDB_TIMEOUT_MS),
   });
+}
 
-  const durationMs = Date.now() - startedAt;
-  const cfRay = res.headers?.get("cf-ray") ?? undefined;
-  const xRequestId = res.headers?.get("x-request-id") ?? undefined;
+function waitForRateLimitRetry(): Promise<void> {
+  const delayMs =
+    RATE_LIMIT_RETRY_MIN_DELAY_MS + Math.random() * RATE_LIMIT_RETRY_JITTER_MS;
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
 
-  if (!res.ok) {
-    const raw =
-      typeof res.text === "function" ? await res.text().catch(() => "") : "";
-    const envelope = parseIgdbErrorBody(raw);
+async function toIgdbHttpError(
+  res: Response,
+  call: { resource: string; body: string; requestId: string }
+): Promise<IgdbHttpError> {
+  const raw =
+    typeof res.text === "function" ? await res.text().catch(() => "") : "";
+  const envelope = parseIgdbErrorBody(raw);
 
-    const context: IgdbHttpErrorContext = {
-      status: res.status,
-      statusText: res.statusText,
-      resource,
-      query: body,
-      requestId,
-      cfRay,
-      xRequestId,
-      ...envelope,
-    };
+  const context: IgdbHttpErrorContext = {
+    status: res.status,
+    statusText: res.statusText,
+    resource: call.resource,
+    query: call.body,
+    requestId: call.requestId,
+    cfRay: res.headers?.get("cf-ray") ?? undefined,
+    xRequestId: res.headers?.get("x-request-id") ?? undefined,
+    ...envelope,
+  };
 
-    callLogger.error(
-      { ...context, durationMs },
-      `IGDB request failed: ${res.status} ${envelope.igdbTitle ?? res.statusText ?? ""}`.trim()
-    );
-
-    throw new IgdbHttpError(
-      `IGDB ${res.status} ${envelope.igdbTitle ?? res.statusText ?? ""}`.trim(),
-      context
-    );
-  }
-
-  callLogger.debug({ durationMs, cfRay }, "IGDB request ok");
-
-  return res.json();
+  return new IgdbHttpError(
+    `IGDB ${res.status} ${envelope.igdbTitle ?? res.statusText ?? ""}`.trim(),
+    context
+  );
 }
