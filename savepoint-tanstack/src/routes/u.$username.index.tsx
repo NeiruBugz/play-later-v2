@@ -9,7 +9,7 @@ import {
   getActivityForUserFn,
 } from "@/features/view-activity-feed/api";
 import { NotFoundError } from "@/shared/lib/errors";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 import { ProfileActivityTab, ProfileOverview } from "@/widgets";
 
 /**
@@ -127,9 +127,9 @@ function ProfileNotFound() {
       <p className="text-muted-foreground mb-6">
         We couldn't find that profile, or it isn't public.
       </p>
-      <Button asChild variant="outline">
-        <Link to="/">Go home</Link>
-      </Button>
+      <Link to="/" className={buttonVariants({ variant: "outline" })}>
+        Go home
+      </Link>
     </div>
   );
 }

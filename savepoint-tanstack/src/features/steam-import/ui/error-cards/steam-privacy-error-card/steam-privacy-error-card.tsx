@@ -1,7 +1,7 @@
 import { AlertCircle, ExternalLink } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
-import { Button } from "@/shared/ui/button";
+import { Button, buttonVariants } from "@/shared/ui/button";
 
 import type { SteamErrorCardProps } from "../steam-error-card.type";
 
@@ -36,16 +36,15 @@ export function SteamPrivacyErrorCard({
           </div>
         </AlertDescription>
         <div className="mt-2 flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <a
-              href={STEAM_PRIVACY_SETTINGS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Open Privacy Settings
-            </a>
-          </Button>
+          <a
+            href={STEAM_PRIVACY_SETTINGS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ExternalLink className="h-4 w-4" />
+            Open Privacy Settings
+          </a>
           {onRetry && (
             <Button variant="outline" size="sm" onClick={onRetry}>
               Try Again

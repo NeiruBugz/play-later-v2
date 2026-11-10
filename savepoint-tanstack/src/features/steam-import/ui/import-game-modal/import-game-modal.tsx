@@ -31,7 +31,10 @@ import type { LibraryItemStatus } from "../../../../../shared/lib/prisma/client.
 import { IgdbManualSearch } from "../igdb-manual-search";
 import type { ImportGameModalProps } from "./import-game-modal.type";
 
-const STATUS_OPTIONS = LIBRARY_STATUS_VALUES;
+const STATUS_ITEMS = LIBRARY_STATUS_VALUES.map((value) => ({
+  value,
+  label: getStatusLabel(value),
+}));
 
 function formatLastPlayed(date: Date | null | undefined): string {
   if (!date) return "Never";
@@ -152,15 +155,16 @@ export function ImportGameModal({
               </label>
               <Select
                 value={status}
-                onValueChange={(v) => setStatus(v as LibraryItemStatus)}
+                items={STATUS_ITEMS}
+                onValueChange={(v) => v !== null && setStatus(v)}
               >
                 <SelectTrigger id="import-status-select">
-                  <SelectValue>{getStatusLabel(status)}</SelectValue>
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {STATUS_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {getStatusLabel(opt)}
+                  {STATUS_ITEMS.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

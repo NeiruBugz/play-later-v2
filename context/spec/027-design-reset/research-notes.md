@@ -120,3 +120,95 @@ NOT CONFIGURED — no `context/sources/sources.md`; the user skipped the sources
 
 - Spec-022 design README calls uppercase tracked metadata and `// TERMINAL` eyebrows a signature; the user now wants distance from exactly that look.
 - Spec-022 README says "covers 2px"; the token is 10px; screens use 1–10px.
+
+
+## Post-026 re-count (2026-11-05)
+
+Taken on `feat/design-reset` at `6d847d56` (spec 026 shipped). Scope: `src/**/*.{ts,tsx}` minus `*.test.*` (788 non-test files, was 773). Paths relative to `savepoint-tanstack/`. Commands use ripgrep with `-g '*.{ts,tsx}' -g '!*.test.*' src`; "delta" is against the numbers above and in `technical-considerations.md`. Earlier numbers may have used slightly different regexes, so small deltas are indicative.
+
+### What 026 removed or reshaped (changes the plan)
+
+- Gone: `dashboard-jump-back-in-hero`, the continue-list, the quick-log hero, `RunStatusBadge` (`run-status-badge.tsx`), lifecycle-strip, the game-detail action bar, `journal-stats-rail` and `log-session-content` `font-display` use, `// IGDB RESULTS` and `// THIS MONTH` labels, `DatePicker`/`Calendar`, `GameCardSkeleton`, `LibraryStatusStrip`, `ProfileHeader`/`ProfileStatsBar`, `GameMetadata`, `/dev/igdb-search`. So three of the earlier cover radii (4px continue-list, 1px quick-log, 10px jump-back-in) and two of the ~8 status-chip implementations no longer exist.
+- Still present: `src/routes/about.tsx` (starter leftover), `derive-banner-gradient.ts` (oklch literal), `font-display` no-op (`--font-display` is declared in `:root` at `styles.css:53,220` but is not bound in `@theme inline`, which only has `--font-sans/serif/mono`).
+- **Up Next** now lives in `src/features/up-next/` (`ui/up-next-queue-list/{up-next-queue-list,sortable-up-next-queue,up-next-queue-row}.tsx`, `ui/up-next-menu-actions/`) with `entities/library-item/ui/queue-marker/`. It is rendered by the dashboard (`widgets/dashboard-page/ui/dashboard-game-rail/`, `dashboard-playing-section/`, `dashboard-status-strip/`) and the library (`widgets/library-page/ui/library-page/library-page.tsx`). Slices that restyle "Up Next" touch the feature slice plus these widgets.
+- `src/styles.css`: **1369 lines** (unchanged). 026 did not touch the token layer.
+
+### Spacing (semantic custom classes)
+
+- Command: `rg -P -o '(?<![\w])-?(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y)-(?:xs|sm|md|lg|xl|2xl|3xl|4xl|5xl|compact|comfortable|spacious)(?![\w-])'`.
+- **255 uses in 77 files, 50 distinct classes** (was 273; -18). Numeric Tailwind spacing (`p-4`, `gap-2`, `px-[..]`): **521** (was 637). **35 files mix both** (was 44).
+- By layer: shared 87 (was 72), features 80 (69), widgets 45 (51), routes 27 (22), entities 16 (9), app 0. The shared/features/routes/entities rise is mostly a methodology difference (this count includes `space-x/space-y` and `-m` negatives); widgets fell because 026 deleted the hero, continue-list and quick-log blocks.
+- Most used: `gap-md` 45, `gap-sm` 30, `gap-xs` 18, `p-xl` 17, `gap-lg` 13, `space-y-md` 10, `px-md` 9, `px-lg` 9, `p-2xl` 8, `gap-xl` 8, `py-sm` 7. Rarely used: `px-3xl` 2 (`input.tsx`, `textarea.tsx`, still 32px horizontal padding), `space-y-3xl` 2.
+- Variant-prefixed (silent no-ops in v4, `@layer utilities`): 3 left, `dialog.tsx:71`, `sheet.tsx:93` (`sm:space-x-md`), `whats-new-modal.tsx:74` (`sm:gap-sm`). Was ~15 tokens across 9 sites; `command.tsx`/`select.tsx` no-ops are still in the file as plain (non-variant) uses.
+- Densest files: `shared/ui/card.tsx` 9, `routes/games.$slug.tsx` 9, `shared/ui/command.tsx` 8, `shared/ui/select.tsx` 7, `whats-new-modal.tsx` 7, `done-follow-up.tsx` 7, `widgets/game-detail/.../game-detail.tsx` 6.
+- Mixing files (35): entities `journal-entry-card`; features `add-game-content`, `related-games-skeleton`, `palette-navigation-group`, `log-form`, `log-game-picker`, `username-input`, `mobile-filter-bar`, `times-to-beat-skeleton`, `onboarding-checklist`, `search-games-results`; routes `journal.$id.edit`, `journal.$id.index`, `journal.new`, `profile.setup`, `games.$slug`, `games.search`; shared/ui `card`, `command`, `image-lightbox`, `page-header`, `select`; widgets `auth-page-view`, `game-card`, `about-panel`, `game-detail`, `game-notes-list`, `play-history`, `themes-tags-panel`, `journal-timeline-page`, `journal-timeline`, `library-page`, `profile-activity-tab`, `user-connections-page`, `user-list`.
+
+### Typography (custom classes)
+
+- Command: `rg -P -o '(?<![\w-])(?:[a-z-]+:)*<class>(?![\w-])'` per class.
+- Total custom typography uses: **74 in 41 files** (was 97; -23). Stock `text-{xs..9xl}`: 204 (was 267).
+- Per class (was): `body-sm` 15 (14), `text-h2` 12 (12), `text-caption` 11 (19), `heading-*` 11 = `heading-lg` 6 (7), `heading-sm` 2 (2), `heading-xs` 2 (2), `heading-md` 1 (3), `text-h3` 9 (8), `text-h1` 6 (7), `text-body` 5 (6), `body-md` 4 (4), `text-display` 1 (2). Zero uses: `body-lg`, `body-xs`, `display-2xl/xl/lg`, `overline`, `subheading-*`.
+- Page `h1` sites now: `text-h1` at `routes/_authed/journal.$id.edit.tsx:39`, `journal.new.tsx:27`, `shared/ui/page-header.tsx:35`, `journal-entry-page.tsx:27`, `game-detail.tsx:335`, `auth-page-view.tsx:19` (sr-only); `heading-lg` at `routes/u.$username.{index:126,followers:45,following:45}.tsx`, `games.search.tsx:24`, `user-connections-page.tsx:26`, `empty-state.tsx:158` (h2); `text-display` at `auth-page-view.tsx:18` (wordmark `<p>`).
+- `terminal-label`: **6 class uses** (was 11): `game-rating.tsx:36`, `play-history.tsx:33`, `page-header.tsx:33`, `journal-stats-rail.tsx:27`, `game-notes-list.tsx:29`, `about-panel.tsx:34`. Plus the local `TerminalLabel` clone in `themes-tags-panel.tsx:23,38,53,63` (3 uses + definition).
+- `// LABEL` literal strings: **10 matches in 9 lines / 7 distinct labels** (was 12): `settings.tsx:45,54` (`// SETTINGS` x2), `game-rating.tsx:36` (`// RATING`), `themes-tags-panel.tsx:23,38,53` (`// THEMES`, `// GENRES`, `// PLATFORMS`), `journal-timeline-page.tsx:46` (`// JOURNAL`), `journal-stats-rail.tsx:27` (`// LOG TONIGHT`), `library-page.tsx:325` (`// LIBRARY`), `about-panel.tsx:34` (`// ABOUT`). Gone: `// IGDB RESULTS`, `// THIS MONTH`.
+- `font-display`: 2 uses (`journal-entry-card.tsx:41` `md:font-display`, `log-form.tsx:157`), still a no-op.
+- Arbitrary text sizes: `text-[11px]` 14 (was 15), `text-[10px]` 3 (was 6), `text-[2.2rem]` 1; **18 total** (was 24). Files: `landing-features` 6, `app-bottom-nav` 5, `profile-overview` 1 (`:193`), `library-item-card` 1, `landing-hero` 1, `log-form` 1, `library-status-badge` 1, `platform-badges` 1, `platform-badge` 1. 13 other `text-[...]` are colors/vars; `tracking-[..]` arbitrary 6. `technical-considerations.md` says 17 for `[10px]/[11px]`; actual is 17 (14+3), consistent.
+
+### Shadows and radii
+
+- `shadow-paper-*`: **21 uses** (was 23): `shadow-paper-md` 10 (11), `shadow-paper` 6 (7), `shadow-paper-sm` 5 (5), `-lg` 0. Sites: `game-cover.tsx:24,36`, `search-games-results.tsx:145,151`, `library-modal.utility.ts:11`, `button.tsx:14,16,20` (+ `hover:shadow-paper` no-ops), `journal-timeline.tsx:78`, `card.tsx:13`, `add-game-content.tsx:40,46`, `library-page.tsx:103,109`, `dashboard-playing-section.tsx:18`, `dashboard-game-rail.tsx:34,40`. Stock `shadow-*`: 19 (unchanged).
+
+### Radix, `asChild` and overlay props
+
+- `@radix-ui` imports: **only in `src/shared/ui`** (confirmed; 0 outside). 20 import statements in 18 files, 13 distinct packages in `package.json`. `Slot` is used by `button.tsx:1` and `form.tsx:2`.
+- `asChild`: **40 occurrences in 29 files** (unchanged vs 40/29). 32 outside `shared/ui` in 26 files; 8 inside (`button.tsx` 6, `select.tsx` 1, `empty-state.tsx` 1). Outside files: `app-sidebar` 2, `profile.setup` 2, `journal.$id.index` 2, `journal.$id.edit` 2, `steam-connect-card` 2, `status-picker.tsx` 2 (+1 in `status-picker.type.ts`), and 1 each in `user-connections-page`, `profile-overview`, `landing-hero`, `journal-entry-page`, `game-library-controls`, `done-outcome-label`, `add-to-track-invite`, `routes/u.$username.{index,following,followers}`, `whats-new-modal`, `theme-toggle`, `steam-privacy-error-card`, `platform-combobox`, `library-card-menu`, `mobile-filter-bar`, `command-palette`, `platform-badges`, `platform-badge`.
+- Trigger call sites outside `shared/ui` (`<XTrigger`): **19** (technical-considerations estimated ~61; that figure appears to have counted tests and shared/ui definitions; including tests the JSX count is 31): `SelectTrigger` 6 (`platform-select`, `sort-select`, `journal-game-filter`, `import-game-modal`, `imported-games-filter-bar` x2), `DropdownMenuTrigger` 5 (`app-sidebar:208`, `theme-toggle:42`, `done-outcome-label:51`, `game-library-controls:103`, `library-card-menu:59`), `TooltipTrigger` 2 (`platform-badges:25`, `platform-badge:18`), `PopoverTrigger` 2 (`status-picker:120`, `platform-combobox:112`), `SheetTrigger` 2 (`status-picker:130`, `mobile-filter-bar:80`), `CollapsibleTrigger` 1 (`onboarding-checklist:125`), `TabsTrigger` 1 (`related-games-tabs:21`), `DialogTrigger` 0.
+- `onSelect=`: **21 occurrences**, of which 15 are Radix menu/command handlers (10 `DropdownMenuItem`: `app-sidebar:241`, `theme-toggle:60`, `up-next-menu-actions:39`, `game-library-controls:115,119,127`, `library-card-menu:85,91,107`, `done-outcome-label:65`; 5 `CommandItem`: `platform-combobox:138,153,178,197`, `palette-quick-actions-group:42`) and 6 are plain callback props on app components (`status-control:27`, `status-picker:122,137`, `journal-timeline:60`, `log-form:269`, `import-game-modal:126`). Was 13 menu handlers; the recount includes `CommandItem`.
+- `onInteractOutside`: **7 lines / 4 call sites** (was 5): `responsive-modal.tsx:33,52,62,82` (prop plumbing), `global-action-host.tsx:65`, `done-follow-up.tsx:77`, `command-palette.tsx:168,184` (all `keepOpenOnToastInteraction`).
+- `forceMount`: **1** (`related-games-tabs.tsx:33`, with `data-[state=inactive]:hidden` at `:34`). No `onPointerDownOutside`, `onEscapeKeyDown`, `onOpenAutoFocus`, `onCloseAutoFocus`.
+- `data-[state=`: **82** (78 inside `shared/ui`, 4 outside). Outside: `app-sidebar.tsx:211` (`open`), `related-games-tabs.tsx:34` (`inactive`), `onboarding-checklist.tsx:129,141` (`open`). Inside, by file: `sheet` 7, `dropdown-menu` 3, `dialog` 3, `switch` 2, `tabs` 2, 1 each in `select`, `checkbox`, `segmented-control`, `tooltip`, `popover`, `image-lightbox`. Other Radix-attribute selectors (`data-[side|disabled|highlighted|orientation|motion|swipe|placeholder|checked|unchecked|selected]`): 37.
+
+### Cover treatments (render sites for a game cover image)
+
+Now **8 distinct treatments** (was ~7 radii plus shadow variations):
+
+| Treatment | Where |
+|---|---|
+| 10px (`--radius-cover`) + `shadow-paper-md` | `game-cover.tsx:24,36` (game detail hero), `library-page.tsx:97-109` (inline copy), `dashboard-game-rail.tsx:28-40` (inline copy) |
+| 10px, no shadow | `dashboard-playing-section.tsx:20-31` (w-12) |
+| `rounded-lg` (5px) + `shadow-paper-md` | `search-games-results.tsx:141-151` |
+| `rounded` (4px) + `shadow-paper` | `add-game-content.tsx:36-46` (w-10) |
+| `rounded-md` (`--radius`) in `gameCardCoverVariants`, no shadow | `game-card.variants.ts:49` via `game-card.tsx:51` (all library cards) |
+| `rounded` 4px, no shadow | `igdb-manual-search.tsx:149`, `game-result-item.tsx:30`, `related-games-skeleton.tsx:20`, `imported-game-card.tsx:52` (h-10 w-10) |
+| `rounded-[5px]` / `rounded-[4px]` thumbnails | `log-form.tsx:230`, `log-game-picker.tsx:40` |
+| none (square) | `profile-overview.tsx:177-183`, `library-grid.tsx:22-29` |
+
+Only `game-detail.tsx:311` uses the `GameCover` entity component; the other 10px sites copy its classes. The jump-back-in, continue-list and quick-log covers are gone.
+
+### Status chips (implementations)
+
+**8 implementations** (was ~8; two removed, two found):
+
+1. `shared/ui/badge.tsx:26-29` `want/playing/done` variants: still 0 production uses.
+2. `LibraryStatusBadge` (`library-status-badge.tsx:31-49`): black glass pill `bg-black/55 ring-white/10 backdrop-blur-sm` with `--status-*` dot and `text-[11px]`.
+3. `StatusPicker` trigger (`status-picker.tsx:77-82`): inline `color-mix(..., --status-X 16%, transparent)`.
+4. `StatusControl` (`status-control.tsx:42-48`): inline `color-mix` 40% border and 15% fill.
+5. `DashboardStatusStrip` (`dashboard-status-strip.tsx:40`): pill with inline `--status-*` dot.
+6. `StatusLens` (`status-lens.tsx:104`): library filter chips with inline dot.
+7. Cover accent gradients (`library-item-card.utility.ts:10-12`): `from-[var(--status-*)] to-background`.
+8. `DoneOutcomeLabel` (`done-outcome-label.tsx`) and `QueueMarker` (`entities/library-item/ui/queue-marker/queue-marker.tsx`): outcome/queue labels, hand-rolled.
+
+Removed by 026: `RunStatusBadge` (fully inline), lifecycle-strip, action-bar color-mix.
+
+### Native controls
+
+- Native `<button>` in entities/features/widgets/routes: **19** in 17 files (was 25): `app-sidebar` 4, `log-form` 2, and 1 each in `imported-games-filter-bar`, `screenshots-panel`, `play-history`, `game-detail`, `game-detail-jump-spine`, `app-mobile-topbar`, `app-bottom-nav`, `avatar-upload`, `sortable-up-next-queue`, `status-lens`, `done-follow-up`, `log-game-picker`, `status-picker`, `status-control`, `journal-entry-card`.
+- Native `<input>`: **2** (was 4): `avatar-upload.tsx:61` (file input), `done-follow-up.tsx:88`. `<textarea>`/`<select>`: 0. `shared/ui` primitives wrap 4 more native tags (`input.tsx`, `alert.tsx`, `image-lightbox` x2).
+
+### Raw colors outside `shared/ui`
+
+- Hex literals in ts/tsx: **2** (`routes/__root.tsx:83` `#f6f1e7`, `:88` `#120f0c`). In `shared/ui`: 20 (all `badge.tsx` platform colors). `public/{logo,favicon}.svg` and `og-image.svg` still hold `#2f8a82` (2+2+3).
+- Tailwind palette colors (`bg|text|border|from|via|to|fill-<hue>-<shade>`): **10 uses in 4 files** (was 45 in 16 files, which also counted black/white overlays): `routes/index.tsx:27` `bg-fuchsia-500/10`, `landing-hero.tsx:41` `text-emerald-400`, `landing-features.tsx:39,95,96,97` (fuchsia, rose, orange, emerald, teal, violet, indigo gradients), `shared/ui/rating-input.tsx:66` `fill-amber-400 text-amber-400` (the only one inside `shared/ui`).
+- `black`/`white` color utilities: 22 uses; outside `shared/ui` 19 across `library-status-badge`, `game-card:69`, `landing-features`, `profile-overview` (`:69,187-193`), `settings-list:65`, `library-card-menu:64`; inside `shared/ui` `dialog`, `sheet`, `image-lightbox` overlays.
+- Runtime color literals: 1 `oklch(` string in ts/tsx (`landing-features.tsx:40` radial gradient) plus `derive-banner-gradient.ts` (oklch built from numbers).
+- Inline `style={{`: **15** (was 32) in 11 files; `game-detail` 3, `status-picker` 2, `status-control` 2, the rest 1 each.

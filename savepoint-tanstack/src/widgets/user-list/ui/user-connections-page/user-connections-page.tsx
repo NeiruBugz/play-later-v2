@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { getDisplayName } from "@/entities/profile/model";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 
 import { UserList } from "../user-list";
 import type { UserConnectionsPageProps } from "./user-connections-page.type";
@@ -18,11 +18,13 @@ export function UserConnectionsPage({
   return (
     <div className="space-y-md container mx-auto max-w-2xl px-4 py-6">
       <div className="space-y-1">
-        <Button asChild variant="ghost" size="sm">
-          <Link to="/u/$username" params={{ username: profile.username ?? "" }}>
-            ← Back to {displayName}
-          </Link>
-        </Button>
+        <Link
+          to="/u/$username"
+          params={{ username: profile.username ?? "" }}
+          className={buttonVariants({ variant: "ghost", size: "sm" })}
+        >
+          ← Back to {displayName}
+        </Link>
         <h1 className="heading-lg tracking-tight">
           {kind === "followers" ? "Followers" : "Following"}
         </h1>

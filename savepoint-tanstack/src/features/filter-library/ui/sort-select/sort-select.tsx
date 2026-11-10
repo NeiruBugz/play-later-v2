@@ -11,7 +11,11 @@ import type { SortSelectProps } from "./sort-select.type";
 
 export function SortSelect({ value, onChange }: SortSelectProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      value={value}
+      items={SORT_OPTIONS}
+      onValueChange={(next) => next !== null && onChange(next)}
+    >
       <SelectTrigger aria-label="Sort" className="h-9 w-full">
         <SelectValue placeholder="Sort by" />
       </SelectTrigger>

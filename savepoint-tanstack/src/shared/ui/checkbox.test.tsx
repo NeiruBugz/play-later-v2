@@ -74,7 +74,7 @@ describe("Checkbox", () => {
       render(<Checkbox onCheckedChange={onCheckedChange} />);
 
       await actions.clickCheckbox();
-      expect(onCheckedChange).toHaveBeenCalledWith(true);
+      expect(onCheckedChange).toHaveBeenCalledWith(true, expect.anything());
     });
   });
 

@@ -48,21 +48,23 @@ export function DoneOutcomeLabel({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-label={`${getDoneLabel(displayed)}, change how it ended`}
-        >
-          {getDoneLabel(displayed)}
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-label={`${getDoneLabel(displayed)}, change how it ended`}
+          />
+        }
+      >
+        {getDoneLabel(displayed)}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {CHOICES.map((choice) => (
           <DropdownMenuItem
             key={choice.label}
-            onSelect={() => void choose(choice.outcome)}
+            onClick={() => void choose(choice.outcome)}
           >
             {choice.label}
           </DropdownMenuItem>

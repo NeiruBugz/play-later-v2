@@ -77,29 +77,31 @@ export function MobileFilterBar(props: MobileFilterBarProps) {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         {/* Single row: [Filters flex-1 with count badge] */}
         <div className="flex items-center gap-1">
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 justify-start"
-              aria-label="Open filters"
-            >
-              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-              <span className="ml-1.5">Filters</span>
-              {activeStatusEntry ? (
-                <span className="text-muted-foreground ml-1.5 text-xs">
-                  · {activeStatusEntry.label}
-                </span>
-              ) : null}
-              {activeFilterCount > 0 ? (
-                <span
-                  aria-label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
-                  className="bg-primary text-primary-foreground ml-auto rounded-full px-1.5 text-xs tabular-nums"
-                >
-                  {activeFilterCount}
-                </span>
-              ) : null}
-            </Button>
+          <SheetTrigger
+            render={
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 justify-start"
+                aria-label="Open filters"
+              />
+            }
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            <span className="ml-1.5">Filters</span>
+            {activeStatusEntry ? (
+              <span className="text-muted-foreground ml-1.5 text-xs">
+                · {activeStatusEntry.label}
+              </span>
+            ) : null}
+            {activeFilterCount > 0 ? (
+              <span
+                aria-label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
+                className="bg-primary text-primary-foreground ml-auto rounded-full px-1.5 text-xs tabular-nums"
+              >
+                {activeFilterCount}
+              </span>
+            ) : null}
           </SheetTrigger>
         </div>
         <SheetContent side="bottom" className="space-y-lg">

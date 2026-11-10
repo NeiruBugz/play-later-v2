@@ -36,7 +36,7 @@ export function UpNextMenuActions({
   }
 
   return (
-    <DropdownMenuItem disabled={isPending} onSelect={run}>
+    <DropdownMenuItem disabled={isPending} onClick={run}>
       <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
       {label}
     </DropdownMenuItem>

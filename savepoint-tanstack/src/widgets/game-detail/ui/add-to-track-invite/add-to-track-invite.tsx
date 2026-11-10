@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
 
 import { AddGameAction } from "@/features/add-game";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 
 import type { AddToTrackInviteProps } from "./add-to-track-invite.type";
 
@@ -39,9 +39,9 @@ export function AddToTrackInvite({
           variant="labelled"
         />
       ) : (
-        <Button asChild>
-          <Link to="/login">Sign in</Link>
-        </Button>
+        <Link to="/login" className={buttonVariants()}>
+          Sign in
+        </Link>
       )}
     </section>
   );

@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { listConnectionsFn } from "@/features/social-discovery/api";
 import { NotFoundError } from "@/shared/lib/errors";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 import { UserConnectionsPage } from "@/widgets";
 
 /**
@@ -43,9 +43,9 @@ function ListNotFound() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
       <h1 className="heading-lg mb-2">Profile not found</h1>
-      <Button asChild variant="outline">
-        <Link to="/">Go home</Link>
-      </Button>
+      <Link to="/" className={buttonVariants({ variant: "outline" })}>
+        Go home
+      </Link>
     </div>
   );
 }

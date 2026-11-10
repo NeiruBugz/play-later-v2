@@ -35,6 +35,10 @@ if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
 
+if (typeof Element !== "undefined" && !Element.prototype.getAnimations) {
+  Element.prototype.getAnimations = () => [];
+}
+
 vi.mock("@/shared/lib/db.server", () => ({
   prisma: {
     $transaction: vi.fn(),

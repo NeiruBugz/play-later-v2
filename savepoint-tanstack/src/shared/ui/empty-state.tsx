@@ -5,7 +5,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-import { Button, type ButtonProps } from "./button";
+import { Button, buttonVariants, type ButtonProps } from "./button";
 
 /**
  * Ported from `savepoint-app/shared/components/ui/empty-state.tsx`.
@@ -87,11 +87,16 @@ export interface EmptyStateProps
 function ActionButton({ action }: { action: EmptyStateAction }) {
   if (action.to && !action.disabled) {
     return (
-      <Button asChild variant={action.variant} size={action.size}>
-        <Link to={action.to} search={action.search as never}>
-          {action.label}
-        </Link>
-      </Button>
+      <Link
+        to={action.to}
+        search={action.search as never}
+        className={buttonVariants({
+          variant: action.variant,
+          size: action.size,
+        })}
+      >
+        {action.label}
+      </Link>
     );
   }
   return (

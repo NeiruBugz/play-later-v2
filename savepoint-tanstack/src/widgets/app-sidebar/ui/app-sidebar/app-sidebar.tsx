@@ -208,7 +208,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <DropdownMenuTrigger
             type="button"
             aria-label="Open user menu"
-            className={`hover:bg-accent data-[state=open]:bg-accent flex w-full items-center rounded-md py-1.5 text-sm ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
+            className={`hover:bg-accent data-[popup-open]:bg-accent flex w-full items-center rounded-md py-1.5 text-sm ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
           >
             <Avatar className="h-7 w-7">
               {user.image ? (
@@ -224,21 +224,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
             {!collapsed && <span className="truncate">{displayName}</span>}
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-56">
-            <DropdownMenuItem asChild>
-              <Link to="/settings/profile">
-                <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
-                Profile settings
-              </Link>
+            <DropdownMenuItem render={<Link to="/settings/profile" />}>
+              <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
+              Profile settings
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/settings/account">
-                <UserCog className="mr-2 h-4 w-4" aria-hidden="true" />
-                Account
-              </Link>
+            <DropdownMenuItem render={<Link to="/settings/account" />}>
+              <UserCog className="mr-2 h-4 w-4" aria-hidden="true" />
+              Account
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={handleSignOut}
+              onClick={handleSignOut}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />

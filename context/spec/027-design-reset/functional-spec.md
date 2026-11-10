@@ -189,15 +189,16 @@ The product gets a new name, a new logo and a new web address, replacing "SavePo
   - [ ] When the user views the logo in Light and in Dark, then it is clearly visible on both surfaces.
   - [ ] When the user adds the app to a phone home screen from the browser's "Add to Home Screen" option, then the icon and name shown are the new ones.
   - [ ] When anyone opens an old link to any page on the current address, then they land on the same page at the new address.
-  - [ ] Given the user was signed in on the current address, when they first open the new address, then they sign in at most once more and their library and settings are unchanged. [NEEDS CLARIFICATION: staying signed in across a change of address is not automatic; assumed a single re-sign-in is acceptable — confirm, or require no re-sign-in.]
+  - [ ] Given the user was signed in on the current address, when they first open the new address, then they sign in at most once more and their library and settings are unchanged.
 
 #### 2.15 Light, Dark and System stay
 
-The theme options remain Light, Dark and System throughout both phases; a user's existing choice is kept.
+The theme options remain Light, Dark and System throughout both phases; a user's existing choice is kept on the same address. The choice is remembered per browser and per address, so on the first visit to the new address (2.14) it starts at System once.
 
 - **Acceptance Criteria:**
   - [ ] When the user opens the theme menu (in the sidebar, the phone top bar or settings) after either phase, then they see exactly Light, Dark and System.
-  - [ ] Given the user had chosen Light, Dark or System before the change, when they open the app after either phase, then it opens in that same choice.
+  - [ ] Given the user had chosen Light, Dark or System before the change, when they open the app on the same address after either phase, then it opens in that same choice.
+  - [ ] Given the user opens the new address for the first time, when the app loads, then it follows the device setting (System), and any choice they make there is kept from then on.
 
 ---
 
@@ -228,3 +229,4 @@ The theme options remain Light, Dark and System throughout both phases; a user's
 ## Change Log
 
 - 2026-11-04 — product owner, /awos:spec session — Added phone first: new 2.6 (phone widths 360/390/430, bottom sheets, thumb zone, keyboard, safe areas, no hover-only actions, text and tap sizes), phone-first review order in 2.8, phone-first option reviews in 2.9–2.10, Up Next shelf on a phone in 2.12; gestures, installed-app mode and tablet layout out of scope. Sections from 2.6 on renumbered. Reason: the phone is the main place the app is used, so the reset designs for it first and scales up.
+- 2026-11-05 — product owner, /awos:tech session — 2.14: one re-sign-in on the new address confirmed (clarification marker removed). 2.15: the theme choice is kept on the same address and starts at System once on the new address (browser storage is per address; no hand-off built). Platform badges become neutral, so 2.4's "every color from today's palette" applies to them without an exception.

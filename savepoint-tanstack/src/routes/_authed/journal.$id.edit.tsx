@@ -3,7 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { EditJournalEntryForm } from "@/features/edit-journal-entry";
 import { getJournalEntryPageDataFn } from "@/features/journal-timeline";
 import { AppError } from "@/shared/lib/errors";
-import { Button } from "@/shared/ui/button";
+import { buttonVariants } from "@/shared/ui/button";
 
 /**
  * `/journal/$id/edit` — full-page edit form (Slice 23 page restore).
@@ -58,9 +58,9 @@ function EditJournalEntryErrorBoundary() {
     >
       <h1 className="text-h2">Something went wrong</h1>
       <p>An error occurred while loading this note. Please try again.</p>
-      <Button asChild variant="outline">
-        <Link to="/journal">Back to journal</Link>
-      </Button>
+      <Link to="/journal" className={buttonVariants({ variant: "outline" })}>
+        Back to journal
+      </Link>
     </div>
   );
 }
@@ -73,9 +73,9 @@ function JournalEntryNotFound() {
     >
       <h1 className="text-h2">Note not found</h1>
       <p>We couldn't find a note matching this URL.</p>
-      <Button asChild variant="outline">
-        <Link to="/journal">Back to journal</Link>
-      </Button>
+      <Link to="/journal" className={buttonVariants({ variant: "outline" })}>
+        Back to journal
+      </Link>
     </div>
   );
 }

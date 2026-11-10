@@ -52,7 +52,11 @@ import type {
 const ALL = "all" as const;
 const SORT_DEFAULT = "added_desc" as const;
 
-type FilterOption = { value: string; label: string; chipLabel?: string };
+type FilterOption = {
+  value: string;
+  label: string;
+  chipLabel?: string;
+};
 
 type FilterFieldConfig = {
   paramKey: "playtimeStatus" | "playtimeRange" | "platform" | "lastPlayed";
@@ -178,9 +182,11 @@ export function ImportedGamesFilterBar({
     K extends "playtimeStatus" | "playtimeRange" | "platform" | "lastPlayed",
   >(
     key: K,
-    value: string
+    value: string | null
   ) => {
-    update({ [key]: value === ALL ? undefined : (value as never) });
+    update({
+      [key]: value === null || value === ALL ? undefined : (value as never),
+    });
   };
 
   const commitSearch = () => {
@@ -276,10 +282,11 @@ export function ImportedGamesFilterBar({
         </Label>
         <Select
           value={filters.sortBy ?? SORT_DEFAULT}
+          items={SORT_OPTIONS}
           onValueChange={(value) =>
             update({
               sortBy:
-                value === SORT_DEFAULT
+                value === null || value === SORT_DEFAULT
                   ? undefined
                   : (value as ImportedGamesFilters["sortBy"]),
             })
@@ -325,6 +332,7 @@ export function ImportedGamesFilterBar({
             </Label>
             <Select
               value={selectedValueFor(field.paramKey)}
+              items={field.options}
               onValueChange={(v) => setEnum(field.paramKey, v)}
             >
               <SelectTrigger

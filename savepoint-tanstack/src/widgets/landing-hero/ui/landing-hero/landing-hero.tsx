@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
-import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
+import { buttonVariants } from "@/shared/ui/button";
 
 export function LandingHero() {
   return (
@@ -26,12 +27,13 @@ export function LandingHero() {
         </p>
 
         <div>
-          <Button asChild size="lg" className="rounded-full px-6">
-            <Link to="/login">
-              <span>Start your library</span>
-              <ArrowRight aria-hidden="true" className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
+          <Link
+            to="/login"
+            className={cn(buttonVariants({ size: "lg" }), "rounded-full px-6")}
+          >
+            <span>Start your library</span>
+            <ArrowRight aria-hidden="true" className="ml-1 h-4 w-4" />
+          </Link>
         </div>
 
         <ul className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
