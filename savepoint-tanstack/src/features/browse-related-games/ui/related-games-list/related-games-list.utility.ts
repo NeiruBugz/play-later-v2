@@ -1,0 +1,1 @@
+export const RELATED_GAMES_PREVIEW_SIZE = 6;

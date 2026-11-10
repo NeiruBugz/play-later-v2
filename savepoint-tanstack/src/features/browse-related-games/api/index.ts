@@ -1,6 +1,2 @@
-export { getRelatedGamesFn } from "./get-related-games";
-export type {
-  GetRelatedGamesParams,
-  GetRelatedGamesResult,
-  RelatedGame,
-} from "@/entities/game/api";
+export { getRelatedCollectionsFn } from "./get-related-collections";
+export type { RelatedCollection, RelatedGame } from "@/entities/game/api";

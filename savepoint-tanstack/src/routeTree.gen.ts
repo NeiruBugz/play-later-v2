@@ -9,34 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UUsernameRouteImport } from './routes/u.$username'
-import { Route as SteamCallbackRouteImport } from './routes/steam.callback'
-import { Route as GamesSearchRouteImport } from './routes/games.search'
-import { Route as GamesSlugRouteImport } from './routes/games.$slug'
-import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
-import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
+import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
-import { Route as UUsernameIndexRouteImport } from './routes/u.$username.index'
-import { Route as AuthedProfileIndexRouteImport } from './routes/_authed/profile.index'
+import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
+import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
+import { Route as GamesSlugRouteImport } from './routes/games.$slug'
+import { Route as GamesSearchRouteImport } from './routes/games.search'
+import { Route as SteamCallbackRouteImport } from './routes/steam.callback'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as AuthedJournalIndexRouteImport } from './routes/_authed/journal.index'
-import { Route as UUsernameFollowingRouteImport } from './routes/u.$username.following'
-import { Route as UUsernameFollowersRouteImport } from './routes/u.$username.followers'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AuthedSteamGamesRouteImport } from './routes/_authed/steam/games'
-import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
-import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
-import { Route as AuthedProfileSetupRouteImport } from './routes/_authed/profile.setup'
 import { Route as AuthedJournalNewRouteImport } from './routes/_authed/journal.new'
+import { Route as AuthedProfileIndexRouteImport } from './routes/_authed/profile.index'
+import { Route as AuthedProfileSetupRouteImport } from './routes/_authed/profile.setup'
+import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
+import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
+import { Route as AuthedSteamGamesRouteImport } from './routes/_authed/steam/games'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as UUsernameIndexRouteImport } from './routes/u.$username.index'
+import { Route as UUsernameFollowersRouteImport } from './routes/u.$username.followers'
+import { Route as UUsernameFollowingRouteImport } from './routes/u.$username.following'
 import { Route as AuthedJournalIdIndexRouteImport } from './routes/_authed/journal.$id.index'
 import { Route as AuthedJournalIdEditRouteImport } from './routes/_authed/journal.$id.edit'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -44,38 +48,14 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedRoute = AuthedRouteImport.update({
-  id: '/_authed',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UUsernameRoute = UUsernameRouteImport.update({
-  id: '/u/$username',
-  path: '/u/$username',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SteamCallbackRoute = SteamCallbackRouteImport.update({
-  id: '/steam/callback',
-  path: '/steam/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesSearchRoute = GamesSearchRouteImport.update({
-  id: '/games/search',
-  path: '/games/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesSlugRoute = GamesSlugRouteImport.update({
-  id: '/games/$slug',
-  path: '/games/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedLibraryRoute = AuthedLibraryRouteImport.update({
@@ -83,29 +63,74 @@ const AuthedLibraryRoute = AuthedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthedRoute,
 } as any)
-const UUsernameIndexRoute = UUsernameIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => UUsernameRoute,
+const GamesSlugRoute = GamesSlugRouteImport.update({
+  id: '/games/$slug',
+  path: '/games/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedProfileIndexRoute = AuthedProfileIndexRouteImport.update({
-  id: '/profile/',
-  path: '/profile/',
-  getParentRoute: () => AuthedRoute,
+const GamesSearchRoute = GamesSearchRouteImport.update({
+  id: '/games/search',
+  path: '/games/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SteamCallbackRoute = SteamCallbackRouteImport.update({
+  id: '/steam/callback',
+  path: '/steam/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedJournalIndexRoute = AuthedJournalIndexRouteImport.update({
   id: '/journal/',
   path: '/journal/',
   getParentRoute: () => AuthedRoute,
 } as any)
-const UUsernameFollowingRoute = UUsernameFollowingRouteImport.update({
-  id: '/following',
-  path: '/following',
+const AuthedJournalNewRoute = AuthedJournalNewRouteImport.update({
+  id: '/journal/new',
+  path: '/journal/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProfileIndexRoute = AuthedProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProfileSetupRoute = AuthedProfileSetupRouteImport.update({
+  id: '/profile/setup',
+  path: '/profile/setup',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSettingsAccountRoute = AuthedSettingsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthedSettingsRoute,
+} as any)
+const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthedSettingsRoute,
+} as any)
+const AuthedSteamGamesRoute = AuthedSteamGamesRouteImport.update({
+  id: '/steam/games',
+  path: '/steam/games',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UUsernameIndexRoute = UUsernameIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => UUsernameRoute,
 } as any)
 const UUsernameFollowersRoute = UUsernameFollowersRouteImport.update({
@@ -113,35 +138,10 @@ const UUsernameFollowersRoute = UUsernameFollowersRouteImport.update({
   path: '/followers',
   getParentRoute: () => UUsernameRoute,
 } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthedSteamGamesRoute = AuthedSteamGamesRouteImport.update({
-  id: '/steam/games',
-  path: '/steam/games',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthedSettingsRoute,
-} as any)
-const AuthedSettingsAccountRoute = AuthedSettingsAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => AuthedSettingsRoute,
-} as any)
-const AuthedProfileSetupRoute = AuthedProfileSetupRouteImport.update({
-  id: '/profile/setup',
-  path: '/profile/setup',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedJournalNewRoute = AuthedJournalNewRouteImport.update({
-  id: '/journal/new',
-  path: '/journal/new',
-  getParentRoute: () => AuthedRoute,
+const UUsernameFollowingRoute = UUsernameFollowingRouteImport.update({
+  id: '/following',
+  path: '/following',
+  getParentRoute: () => UUsernameRoute,
 } as any)
 const AuthedJournalIdIndexRoute = AuthedJournalIdIndexRouteImport.update({
   id: '/journal/$id/',
@@ -322,18 +322,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed': {
@@ -343,46 +336,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/u/$username': {
-      id: '/u/$username'
-      path: '/u/$username'
-      fullPath: '/u/$username'
-      preLoaderRoute: typeof UUsernameRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/steam/callback': {
-      id: '/steam/callback'
-      path: '/steam/callback'
-      fullPath: '/steam/callback'
-      preLoaderRoute: typeof SteamCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/search': {
-      id: '/games/search'
-      path: '/games/search'
-      fullPath: '/games/search'
-      preLoaderRoute: typeof GamesSearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/$slug': {
-      id: '/games/$slug'
-      path: '/games/$slug'
-      fullPath: '/games/$slug'
-      preLoaderRoute: typeof GamesSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authed/settings': {
-      id: '/_authed/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthedSettingsRouteImport
+    '/_authed/dashboard': {
+      id: '/_authed/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/library': {
@@ -392,26 +364,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedLibraryRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/dashboard': {
-      id: '/_authed/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthedDashboardRouteImport
+    '/_authed/settings': {
+      id: '/_authed/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthedSettingsRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/u/$username/': {
-      id: '/u/$username/'
-      path: '/'
-      fullPath: '/u/$username/'
-      preLoaderRoute: typeof UUsernameIndexRouteImport
-      parentRoute: typeof UUsernameRoute
+    '/games/$slug': {
+      id: '/games/$slug'
+      path: '/games/$slug'
+      fullPath: '/games/$slug'
+      preLoaderRoute: typeof GamesSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authed/profile/': {
-      id: '/_authed/profile/'
-      path: '/profile'
-      fullPath: '/profile/'
-      preLoaderRoute: typeof AuthedProfileIndexRouteImport
-      parentRoute: typeof AuthedRoute
+    '/games/search': {
+      id: '/games/search'
+      path: '/games/search'
+      fullPath: '/games/search'
+      preLoaderRoute: typeof GamesSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/steam/callback': {
+      id: '/steam/callback'
+      path: '/steam/callback'
+      fullPath: '/steam/callback'
+      preLoaderRoute: typeof SteamCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authed/journal/': {
       id: '/_authed/journal/'
@@ -420,11 +406,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedJournalIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/u/$username/following': {
-      id: '/u/$username/following'
-      path: '/following'
-      fullPath: '/u/$username/following'
-      preLoaderRoute: typeof UUsernameFollowingRouteImport
+    '/_authed/journal/new': {
+      id: '/_authed/journal/new'
+      path: '/journal/new'
+      fullPath: '/journal/new'
+      preLoaderRoute: typeof AuthedJournalNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/profile/': {
+      id: '/_authed/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof AuthedProfileIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/profile/setup': {
+      id: '/_authed/profile/setup'
+      path: '/profile/setup'
+      fullPath: '/profile/setup'
+      preLoaderRoute: typeof AuthedProfileSetupRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/settings/account': {
+      id: '/_authed/settings/account'
+      path: '/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof AuthedSettingsAccountRouteImport
+      parentRoute: typeof AuthedSettingsRoute
+    }
+    '/_authed/settings/profile': {
+      id: '/_authed/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof AuthedSettingsProfileRouteImport
+      parentRoute: typeof AuthedSettingsRoute
+    }
+    '/_authed/steam/games': {
+      id: '/_authed/steam/games'
+      path: '/steam/games'
+      fullPath: '/steam/games'
+      preLoaderRoute: typeof AuthedSteamGamesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$username/': {
+      id: '/u/$username/'
+      path: '/'
+      fullPath: '/u/$username/'
+      preLoaderRoute: typeof UUsernameIndexRouteImport
       parentRoute: typeof UUsernameRoute
     }
     '/u/$username/followers': {
@@ -434,47 +469,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameFollowersRouteImport
       parentRoute: typeof UUsernameRoute
     }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authed/steam/games': {
-      id: '/_authed/steam/games'
-      path: '/steam/games'
-      fullPath: '/steam/games'
-      preLoaderRoute: typeof AuthedSteamGamesRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/settings/profile': {
-      id: '/_authed/settings/profile'
-      path: '/profile'
-      fullPath: '/settings/profile'
-      preLoaderRoute: typeof AuthedSettingsProfileRouteImport
-      parentRoute: typeof AuthedSettingsRoute
-    }
-    '/_authed/settings/account': {
-      id: '/_authed/settings/account'
-      path: '/account'
-      fullPath: '/settings/account'
-      preLoaderRoute: typeof AuthedSettingsAccountRouteImport
-      parentRoute: typeof AuthedSettingsRoute
-    }
-    '/_authed/profile/setup': {
-      id: '/_authed/profile/setup'
-      path: '/profile/setup'
-      fullPath: '/profile/setup'
-      preLoaderRoute: typeof AuthedProfileSetupRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/journal/new': {
-      id: '/_authed/journal/new'
-      path: '/journal/new'
-      fullPath: '/journal/new'
-      preLoaderRoute: typeof AuthedJournalNewRouteImport
-      parentRoute: typeof AuthedRoute
+    '/u/$username/following': {
+      id: '/u/$username/following'
+      path: '/following'
+      fullPath: '/u/$username/following'
+      preLoaderRoute: typeof UUsernameFollowingRouteImport
+      parentRoute: typeof UUsernameRoute
     }
     '/_authed/journal/$id/': {
       id: '/_authed/journal/$id/'
