@@ -1,10 +1,29 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CURRENT_USER_QUERY_KEY } from "@/entities/session/api/invalidate-current-user";
 import { updateProfileFn } from "@/features/edit-profile";
 
 import { ProfileSetupForm } from "./profile-setup-form";
+
+const queryClient = new QueryClient();
+const currentUserKey = CURRENT_USER_QUERY_KEY;
+
+const renderWithClient = (ui: React.ReactElement) =>
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+
+const isCurrentUserInvalidated = () =>
+  queryClient.getQueryState(currentUserKey)?.isInvalidated === true;
+
+beforeEach(() => {
+  queryClient.clear();
+  queryClient.setQueryData(currentUserKey, {
+    user: { id: "u1", name: "Ada", username: "ada", image: null },
+    statusModelNoticePending: true,
+  });
+});
 
 const navigate = vi.fn();
 
@@ -61,7 +80,7 @@ describe("ProfileSetupForm", () => {
 
   describe("given a suggested username is provided", () => {
     beforeEach(() => {
-      render(<ProfileSetupForm defaultUsername="adalovelace" />);
+      renderWithClient(<ProfileSetupForm defaultUsername="adalovelace" />);
     });
 
     it("pre-fills the username field with the suggestion", () => {
@@ -79,7 +98,7 @@ describe("ProfileSetupForm", () => {
         isPublicProfile: false,
       });
 
-      render(<ProfileSetupForm defaultUsername="adalovelace" />);
+      renderWithClient(<ProfileSetupForm defaultUsername="adalovelace" />);
       await actions.submit();
     });
 
@@ -87,6 +106,10 @@ describe("ProfileSetupForm", () => {
       expect(vi.mocked(updateProfileFn)).toHaveBeenCalledWith({
         data: { username: "adalovelace" },
       });
+    });
+
+    it("marks the cached current user stale so the new username shows", () => {
+      expect(isCurrentUserInvalidated()).toBe(true);
     });
 
     it("navigates to the dashboard on success", () => {
@@ -104,7 +127,7 @@ describe("ProfileSetupForm", () => {
         isPublicProfile: false,
       });
 
-      render(<ProfileSetupForm defaultUsername="adalovelace" />);
+      renderWithClient(<ProfileSetupForm defaultUsername="adalovelace" />);
       await actions.setUsername("ada-the-coder");
       await actions.submit();
     });
@@ -122,7 +145,7 @@ describe("ProfileSetupForm", () => {
         new Error("Username is already taken")
       );
 
-      render(<ProfileSetupForm defaultUsername="adalovelace" />);
+      renderWithClient(<ProfileSetupForm defaultUsername="adalovelace" />);
       await actions.submit();
     });
 
@@ -134,6 +157,10 @@ describe("ProfileSetupForm", () => {
 
     it("does not navigate away", () => {
       expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("leaves the cached current user alone", () => {
+      expect(isCurrentUserInvalidated()).toBe(false);
     });
   });
 });

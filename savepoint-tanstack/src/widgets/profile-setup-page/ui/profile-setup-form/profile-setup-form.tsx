@@ -1,7 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import { invalidateCurrentUser } from "@/entities/session/api/invalidate-current-user";
 import { updateProfileFn, UsernameInput } from "@/features/edit-profile";
 import { AvatarUpload } from "@/features/upload-avatar";
 import {
@@ -39,6 +41,7 @@ import type { ProfileSetupFormProps } from "./profile-setup-form.type";
  */
 export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [username, setUsername] = useState(defaultUsername ?? "");
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +59,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     setIsSubmitting(true);
     try {
       await updateProfileFn({ data: { username: trimmedUsername } });
+      await invalidateCurrentUser(queryClient);
       toast.success("Profile setup complete!");
       router.navigate({ to: "/dashboard" });
     } catch (err) {

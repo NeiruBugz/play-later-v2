@@ -24,6 +24,7 @@ import {
 import {
   upsertGameFromIgdb,
   upsertGameFromIgdbPayload,
+  upsertThinGameFromIgdbDetailsPayload,
 } from "@/entities/game/api/upsert-game.server";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 
@@ -245,6 +246,41 @@ describe("upsertGameFromIgdb", () => {
       // Returns the existing row, not the payload's new name
       expect(result.title).toBe("Cached Game");
       expect(result.slug).toBe("cached-game");
+    });
+  });
+
+  describe("concurrent first upserts", () => {
+    const payload = {
+      id: 424242,
+      name: "Race Game",
+      slug: "race-game",
+      first_release_date: 1645747200,
+    };
+
+    it("resolves both payload upserts to the same row without error", async () => {
+      const results = await Promise.all([
+        upsertGameFromIgdbPayload(payload),
+        upsertGameFromIgdbPayload(payload),
+        upsertGameFromIgdbPayload(payload),
+      ]);
+
+      expect(new Set(results.map((game) => game.id)).size).toBe(1);
+      expect(
+        await db.prisma.game.count({ where: { igdbId: payload.id } })
+      ).toBe(1);
+    });
+
+    it("resolves both thin-details upserts to the same row without error", async () => {
+      const results = await Promise.all([
+        upsertThinGameFromIgdbDetailsPayload(payload as never),
+        upsertThinGameFromIgdbDetailsPayload(payload as never),
+        upsertThinGameFromIgdbDetailsPayload(payload as never),
+      ]);
+
+      expect(new Set(results.map((game) => game.id)).size).toBe(1);
+      expect(
+        await db.prisma.game.count({ where: { igdbId: payload.id } })
+      ).toBe(1);
     });
   });
 

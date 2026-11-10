@@ -108,11 +108,11 @@ Canonical example: `getUsernameAvailability(username)` powers the live hint as t
 
 Two distinct shapes for "I need the signed-in user ID," with different intents:
 
-| Concept                   | Module                      | Behaviour                                                                              | Used in                                                                |
-| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **Handler helper**        | `requireUserId()`           | Reads `getRequest()`, calls `auth.api.getSession`, throws `UnauthorizedError` on miss. | Inside `createServerFn` handlers.                                      |
-| **Route-guard server fn** | `requireUserIdOrRedirectFn` | Same lookup; throws `redirect({ to: "/login" })` on miss.                              | `beforeLoad` of `_authed.tsx` and other guarded route groups.          |
-| **Low-level reader**      | `getServerUserId(request)`  | Returns `string \| undefined`. Never throws.                                           | Tests; rare conditional-read paths where "no user" is a normal branch. |
+| Concept              | Module                     | Behaviour                                                                                                                         | Used in                                                                |
+| -------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Handler helper**   | `requireUserId()`          | Reads `getRequest()`, calls `auth.api.getSession`, throws `UnauthorizedError` on miss.                                            | Inside `createServerFn` handlers.                                      |
+| **Route guard**      | `context.user`             | Root `beforeLoad` caches `getCurrentUserFn` (`currentUserQueryOptions`); `_authed` throws `redirect({ to: "/login" })` when null. | `beforeLoad` of `_authed.tsx`, `/`, `/login`.                          |
+| **Low-level reader** | `getServerUserId(request)` | Returns `string \| undefined`. Never throws.                                                                                      | Tests; rare conditional-read paths where "no user" is a normal branch. |
 
 **Rule:** authed feature handlers and authed loaders call `requireUserId()`. They do **not** call `getServerUserId` directly — doing so re-introduces the four-line null-check ritual the helper exists to remove.
 

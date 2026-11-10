@@ -14,7 +14,7 @@ import { ErrorBoundary } from "@/app";
 import "@/app/dev-console-error-expander";
 
 import { SavepointThemeProvider } from "@/app/providers/theme-provider";
-import { getCurrentUserFn } from "@/entities/session/api";
+import { currentUserQueryOptions } from "@/entities/session/api/current-user-query";
 import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
 import { StatusModelNotice, WhatsNewModal } from "@/features/whats-new";
@@ -121,14 +121,18 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  loader: () => getCurrentUserFn(),
+  beforeLoad: async ({ context }) => {
+    const { user, statusModelNoticePending } =
+      await context.queryClient.fetchQuery(currentUserQueryOptions);
+    return { user, statusModelNoticePending };
+  },
   component: RootShell,
   shellComponent: RootDocument,
   errorComponent: ErrorBoundary,
 });
 
 export function RootShell() {
-  const { user, statusModelNoticePending } = Route.useLoaderData();
+  const { user, statusModelNoticePending } = Route.useRouteContext();
 
   return (
     <SavepointThemeProvider defaultTheme="system">

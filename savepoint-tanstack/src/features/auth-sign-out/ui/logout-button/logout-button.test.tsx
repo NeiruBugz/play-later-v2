@@ -1,8 +1,28 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CURRENT_USER_QUERY_KEY } from "@/entities/session/api/invalidate-current-user";
+
 import { LogoutButton } from "./logout-button";
+
+const queryClient = new QueryClient();
+const currentUserKey = CURRENT_USER_QUERY_KEY;
+
+const renderWithClient = (ui: React.ReactElement) =>
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+
+const isCurrentUserInvalidated = () =>
+  queryClient.getQueryState(currentUserKey)?.isInvalidated === true;
+
+beforeEach(() => {
+  queryClient.clear();
+  queryClient.setQueryData(currentUserKey, {
+    user: { id: "u1", name: "Ada", username: "ada", image: null },
+    statusModelNoticePending: true,
+  });
+});
 
 const mockRouterInvalidate = vi.fn();
 
@@ -35,7 +55,7 @@ describe("LogoutButton", () => {
 
   describe("given the component is rendered", () => {
     beforeEach(() => {
-      render(<LogoutButton />);
+      renderWithClient(<LogoutButton />);
     });
 
     it("renders the Sign out button", () => {
@@ -50,12 +70,16 @@ describe("LogoutButton", () => {
           opts?.fetchOptions?.onSuccess?.();
         }
       );
-      render(<LogoutButton />);
+      renderWithClient(<LogoutButton />);
       await actions.clickSignOut();
     });
 
     it("calls authClient.signOut", () => {
       expect(mockSignOut).toHaveBeenCalledOnce();
+    });
+
+    it("drops the cached current user before the router re-runs its guards", () => {
+      expect(isCurrentUserInvalidated()).toBe(true);
     });
 
     it("calls router.invalidate inside the onSuccess callback", () => {

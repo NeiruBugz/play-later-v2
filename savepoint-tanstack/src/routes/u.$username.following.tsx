@@ -1,27 +1,20 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
-import { getDisplayName } from "@/entities/profile/model";
-import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
-import { listFollowingFn } from "@/features/social-discovery/api";
+import { listConnectionsFn } from "@/features/social-discovery/api";
 import { NotFoundError } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
-import { UserList } from "@/widgets";
+import { UserConnectionsPage } from "@/widgets";
 
 /**
- * Public following list for `/u/$username/following`.
- *
- * Anonymous-allowed. Privacy enforced at the entity layer.
+ * Public following list for `/u/$username/following`. Anonymous-allowed. One RPC resolves
+ * the privacy-gated profile and lists; missing or denied maps to notFound().
  */
 export const Route = createFileRoute("/u/$username/following")({
   loader: async ({ params }) => {
     try {
-      const pageData = await getPublicProfilePageDataFn({
-        data: { username: params.username },
+      return await listConnectionsFn({
+        data: { username: params.username, kind: "following" },
       });
-      const list = await listFollowingFn({
-        data: { targetUserId: pageData.profile.id },
-      });
-      return { profile: pageData.profile, list };
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw notFound();
@@ -34,28 +27,15 @@ export const Route = createFileRoute("/u/$username/following")({
 });
 
 function FollowingListPage() {
-  const { profile, list } = Route.useLoaderData();
-  const displayName = getDisplayName(profile, "User");
+  const { profile, entries, total } = Route.useLoaderData();
 
   return (
-    <div className="space-y-md container mx-auto max-w-2xl px-4 py-6">
-      <div className="space-y-1">
-        <Button asChild variant="ghost" size="sm">
-          <Link to="/u/$username" params={{ username: profile.username ?? "" }}>
-            ← Back to {displayName}
-          </Link>
-        </Button>
-        <h1 className="heading-lg tracking-tight">Following</h1>
-        <p className="text-muted-foreground text-sm">
-          People @{profile.username ?? "user"} follows
-        </p>
-      </div>
-      <UserList
-        variant="following"
-        entries={list.following}
-        total={list.total}
-      />
-    </div>
+    <UserConnectionsPage
+      kind="following"
+      profile={profile}
+      entries={entries}
+      total={total}
+    />
   );
 }
 

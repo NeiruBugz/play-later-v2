@@ -41,7 +41,8 @@ There are exactly **5 subclasses** in `src/shared/lib/errors.ts`:
 
 Auth paths use a SPECIFIC split. Don't mix:
 
-- **Rule:** in `beforeLoad` (route guards), use `requireUserIdOrRedirectFn` from `entities/session/api/` — it calls `redirect({ to: "/login" })`. **Why:** redirects belong in guards.
+- ~~**Rule:** in `beforeLoad` (route guards), use `requireUserIdOrRedirectFn` from `entities/session/api/` — it calls `redirect({ to: "/login" })`. **Why:** redirects belong in guards.~~ — superseded 2026-11-04 (root `beforeLoad` caches the current user):
+- **Rule:** in `beforeLoad` (route guards), check `context.user` and `throw redirect({ to: "/login" })`. **Why:** redirects belong in guards; no server call needed.
 - **Rule:** in a handler body (`createServerFn` handler), use `requireUserId()` from `entities/session/api/` — it throws `UnauthorizedError`. **Why:** redirects don't compose inside handlers; throws bubble up the call stack.
 - **Rule:** the low-level `getServerUserId(request)` returns `string | undefined`; use it ONLY for anonymous-allowed reads (e.g., `getPublicProfile`, `checkUsername`) or for the session entity itself. **Why:** narrow exception; everywhere else, use the throw/redirect helpers.
 

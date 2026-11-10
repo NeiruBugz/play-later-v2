@@ -2,13 +2,7 @@ import { render, screen } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getCurrentUserFn } from "@/entities/session/api/get-current-user";
-
 import { Route } from "./index";
-
-vi.mock("@/entities/session/api/get-current-user", () => ({
-  getCurrentUserFn: vi.fn(),
-}));
 
 vi.mock("@/widgets/landing-hero", () => ({
   LandingHero: () => <div data-testid="landing-hero" />,
@@ -34,44 +28,27 @@ vi.mock("@tanstack/react-router", async () => ({
   ),
 }));
 
-const syntheticBeforeLoadArgs = {
-  context: {},
-  location: {} as never,
-  params: {},
-  search: {},
-  cause: "enter",
-} as never;
-
-const actions = {
-  invokeBeforeLoad: () => Route.options.beforeLoad?.(syntheticBeforeLoadArgs),
-};
+const beforeLoadWith = (user: unknown) =>
+  Route.options.beforeLoad?.({
+    context: { user },
+    location: {} as never,
+    params: {},
+    search: {},
+    cause: "enter",
+  } as never);
 
 describe("index route", () => {
   describe("given the user is authenticated", () => {
-    beforeEach(() => {
-      vi.mocked(getCurrentUserFn).mockResolvedValue({
-        user: { id: "u1", name: "Ada", username: "ada", image: null },
-        statusModelNoticePending: false,
-      });
-    });
-
-    it("redirects to /dashboard", async () => {
-      await expect(actions.invokeBeforeLoad()).rejects.toMatchObject({
-        options: { to: "/dashboard" },
-      });
+    it("redirects to /dashboard", () => {
+      expect(() => beforeLoadWith({ id: "u1", username: "ada" })).toThrowError(
+        expect.objectContaining({ options: { to: "/dashboard" } })
+      );
     });
   });
 
   describe("given the user is anonymous", () => {
-    beforeEach(() => {
-      vi.mocked(getCurrentUserFn).mockResolvedValue({
-        user: null,
-        statusModelNoticePending: false,
-      });
-    });
-
-    it("resolves without throwing", async () => {
-      await expect(actions.invokeBeforeLoad()).resolves.not.toThrow();
+    it("lets the landing page render", () => {
+      expect(() => beforeLoadWith(null)).not.toThrow();
     });
   });
 
