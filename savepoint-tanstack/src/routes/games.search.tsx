@@ -23,7 +23,7 @@ function GameSearchRoute() {
       <div className="space-y-4">
         <PageHeader
           title="Search Games"
-          sub="Find games to add to your SavePoint library"
+          sub="Find games to add to your library"
           className="mb-4"
         />
         <div className="space-y-8">

@@ -39,7 +39,6 @@ const iconVariants = cva("shrink-0", {
     },
     variant: {
       default: "text-muted-foreground",
-      primary: "text-primary",
       muted: "text-muted-foreground/80",
     },
   },

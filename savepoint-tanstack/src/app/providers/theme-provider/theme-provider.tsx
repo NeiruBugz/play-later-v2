@@ -31,7 +31,7 @@ import {
  *   • While the user is on "system", react to OS preference changes via
  *     matchMedia.
  */
-export function SavepointThemeProvider({
+export function ThemeProvider({
   children,
   defaultTheme = "system",
   forcedTheme,

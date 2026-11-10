@@ -19,10 +19,10 @@ export function AddToTrackInvite({
       className="flex flex-col items-start gap-2 p-4"
     >
       <span
-        className="flex size-10 items-center justify-center rounded-full bg-primary/10"
+        className="flex size-10 items-center justify-center rounded-full bg-muted"
         aria-hidden="true"
       >
-        <BookOpen className="h-5 w-5 text-primary" />
+        <BookOpen className="h-5 w-5 text-muted-foreground" />
       </span>
       <div className="flex flex-col">
         <SectionLabel id="track-invite-heading">Add {gameTitle}</SectionLabel>

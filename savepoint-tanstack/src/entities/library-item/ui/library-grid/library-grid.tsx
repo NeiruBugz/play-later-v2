@@ -1,3 +1,5 @@
+import { GameCover } from "@/shared/ui/game-cover";
+
 import type { LibraryGridProps } from "./library-grid.type";
 
 export function LibraryGrid({ games }: LibraryGridProps) {
@@ -17,20 +19,7 @@ export function LibraryGrid({ games }: LibraryGridProps) {
           aria-label={game.title}
           className="group relative block"
         >
-          <div className="relative overflow-hidden rounded-lg">
-            {game.coverImage ? (
-              <img
-                src={game.coverImage}
-                alt={game.title}
-                className="aspect-[3/4] w-full object-cover"
-              />
-            ) : (
-              <div
-                className="aspect-[3/4] w-full bg-muted"
-                aria-hidden="true"
-              />
-            )}
-          </div>
+          <GameCover src={game.coverImage} name={game.title} />
           <p className="mt-2 line-clamp-2 text-sm">{game.title}</p>
         </div>
       ))}

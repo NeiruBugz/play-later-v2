@@ -27,7 +27,7 @@ export function PageHeader({
       {...props}
     >
       <div className="min-w-0">
-        <h1 className="font-display text-2xl font-semibold tracking-tight break-words md:text-3xl">
+        <h1 className="font-display text-2xl font-bold tracking-tight break-words md:text-3xl">
           {title}
         </h1>
         {sub ? (

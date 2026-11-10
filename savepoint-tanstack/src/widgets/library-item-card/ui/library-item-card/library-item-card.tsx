@@ -1,10 +1,10 @@
 import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
-  LibraryStatusBadge,
   NextStepButton,
   NotOwnedTag,
   QueueMarker,
   StatusControl,
+  toStatusChipStatus,
 } from "@/entities/library-item";
 import {
   useSetOwnership,
@@ -14,10 +14,10 @@ import { useUpNextMembership } from "@/features/up-next/model/use-up-next-member
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { cn } from "@/shared/lib/utils";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { StatusChip } from "@/shared/ui/status-chip";
 import { GameCard } from "@/widgets/game-card";
 
 import type { LibraryItemCardProps } from "./library-item-card.type";
-import { getStatusCoverAccent } from "./library-item-card.utility";
 
 export function LibraryItemCard({
   item,
@@ -69,7 +69,6 @@ export function LibraryItemCard({
           }}
           asLink
           density="minimal"
-          coverAccentClassName={getStatusCoverAccent(status)}
           badges={
             <div
               className={cn(
@@ -77,7 +76,9 @@ export function LibraryItemCard({
                 !isRow && "md:top-2 md:bottom-auto"
               )}
             >
-              <LibraryStatusBadge status={status} />
+              <StatusChip
+                status={toStatusChipStatus(status, item.doneOutcome)}
+              />
             </div>
           }
         />
@@ -131,9 +132,9 @@ export function LibraryItemCard({
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <StatusControl
             status={status}
+            outcome={item.doneOutcome}
             onChange={(to) => void setStatus(to)}
             disabled={isPending}
-            className="text-xs"
           />
           <NextStepButton
             status={status}

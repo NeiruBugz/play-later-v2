@@ -55,6 +55,8 @@ const { values: args } = parseArgs({
     checks: { type: "boolean", default: false },
     reseed: { type: "boolean", default: false },
     out: { type: "string" },
+    query: { type: "string" },
+    screens: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
   },
 });
@@ -145,6 +147,22 @@ function reseedAuditAccounts(): void {
     );
   }
   console.log(`reseeded audit accounts via ${DB_CONTAINER}`);
+}
+
+// --query rides on every page.goto, so a query-driven state survives each full
+// navigation.
+function withQuery(page: Page): Page {
+  const query = args.query?.replace(/^\?/, "");
+  if (!query) return page;
+  const goto = page.goto.bind(page);
+  page.goto = (url, options) => {
+    const target = new URL(url, baseURL);
+    for (const [key, value] of new URLSearchParams(query)) {
+      target.searchParams.set(key, value);
+    }
+    return goto(target.toString(), options);
+  };
+  return page;
 }
 
 async function signIn(context: BrowserContext): Promise<void> {
@@ -362,6 +380,10 @@ async function main(): Promise<void> {
   if (args.reseed) reseedAuditAccounts();
 
   const viewports = args.desktop ? [PHONE, DESKTOP] : [PHONE];
+  const screenIds = args.screens?.split(",");
+  const selectedScreens = screenIds
+    ? SCREENS.filter((screen) => screenIds.includes(screen.id))
+    : SCREENS;
   const whatsNewVersion = currentWhatsNewVersion();
   const browser = await chromium.launch();
   const results: Array<ScreenResult & { viewport: string; theme: Theme }> = [];
@@ -382,11 +404,11 @@ async function main(): Promise<void> {
           whatsNewVersion
         );
         await signIn(authed);
-        const authedPage = await authed.newPage();
-        const anonPage = await anon.newPage();
+        const authedPage = withQuery(await authed.newPage());
+        const anonPage = withQuery(await anon.newPage());
         const ctx = await discoverContext(authedPage);
 
-        for (const screen of SCREENS) {
+        for (const screen of selectedScreens) {
           const page = screen.auth ? authedPage : anonPage;
           const result = await captureScreen(
             page,

@@ -69,7 +69,7 @@ describe("AddGameContent", () => {
   });
 
   it("searches as the user types, without pressing Enter", async () => {
-    expect(await screen.findByText("Tunic")).toBeDefined();
+    expect(await screen.findByRole("link", { name: "Tunic" })).toBeDefined();
     expect(searchGamesFnMock).toHaveBeenCalledWith({ data: { name: "game" } });
   });
 
@@ -79,7 +79,7 @@ describe("AddGameContent", () => {
   });
 
   it("offers no add button for games already in the library", async () => {
-    await screen.findByText("Tunic");
+    await screen.findByRole("link", { name: "Tunic" });
     expect(screen.queryByRole("button", { name: "Add Hades" })).toBeNull();
     expect(screen.getAllByText("In library")).toHaveLength(2);
   });
@@ -98,7 +98,7 @@ describe("AddGameContent", () => {
   });
 
   it("never shows the technical source name", async () => {
-    await screen.findByText("Tunic");
+    await screen.findByRole("link", { name: "Tunic" });
     expect(document.body.textContent).not.toContain("IGDB");
   });
 });

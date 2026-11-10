@@ -9,6 +9,7 @@ export {
   getStatusLabel,
   libraryItemStatusSchema,
 } from "./status";
+export { toStatusChipStatus } from "./status-chip";
 export type { StatusBadgeVariant, StatusEntry } from "./status";
 export type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
 export type {

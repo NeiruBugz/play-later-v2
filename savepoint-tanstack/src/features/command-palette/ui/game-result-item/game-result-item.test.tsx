@@ -157,7 +157,10 @@ describe("GameResultItem", () => {
 
     it("shows In library with its status instead of the add control", () => {
       expect(screen.getByText("In library")).toBeDefined();
-      expect(screen.getByLabelText("Status: Playing")).toBeDefined();
+      expect(screen.getByText("Playing")).toHaveAttribute(
+        "data-status",
+        "playing"
+      );
       expect(elements.queryAddSlot()).toBeNull();
     });
   });

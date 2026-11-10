@@ -159,7 +159,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
               tabIndex={0}
               className="min-w-24 text-center"
             >
-              <span className="font-display text-[2.2rem] leading-none font-bold text-foreground">
+              <span className="text-[2.2rem] leading-none font-bold text-foreground">
                 {hours}
               </span>
               <span className="ml-1 text-base text-muted-foreground">h</span>
@@ -168,7 +168,7 @@ export function LogForm({ gameSlug, onClose }: LogFormProps) {
               type="button"
               aria-label="Increase time played by 0.5 hours"
               onClick={() => setHours((prev) => addHours(prev, HOURS_STEP))}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-opacity"
             >
               <Plus size={20} aria-hidden />
             </button>

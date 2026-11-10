@@ -61,6 +61,10 @@ describe("ImportedGameCard", () => {
       expect(elements.queryAddButton()).not.toBeNull();
     });
 
+    it("keeps the row Add action secondary, not the page primary", () => {
+      expect(elements.queryAddButton()).toHaveClass("border-border");
+    });
+
     it("renders the dismiss button", () => {
       expect(elements.queryDismissButton()).not.toBeNull();
     });

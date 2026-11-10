@@ -18,6 +18,11 @@ import { getDisplayName } from "@/entities/profile/model";
 import { openCommandPalette } from "@/features/command-palette";
 import { ThemeToggle } from "@/features/toggle-theme";
 import { authClient } from "@/shared/api/auth-client";
+import { PRODUCT_NAME } from "@/shared/config/site";
+import {
+  readMigratingItem,
+  writeMigratingItem,
+} from "@/shared/lib/storage/migrating-storage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
   DropdownMenu,
@@ -26,6 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import { LogoMark, LogoWordmark } from "@/shared/ui/logo";
 
 export type AppSidebarUser = {
   id: string;
@@ -38,7 +44,8 @@ export interface AppSidebarProps {
   user: AppSidebarUser;
 }
 
-const SIDEBAR_COLLAPSED_KEY = "sp:sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "app:sidebar-collapsed";
+const LEGACY_SIDEBAR_COLLAPSED_KEY = "sp:sidebar-collapsed";
 
 const NAV_ITEMS = [
   { label: "Home", to: "/dashboard", icon: House },
@@ -49,19 +56,18 @@ const NAV_ITEMS = [
 ] as const;
 
 function readCollapsedFromStorage(): boolean {
-  try {
-    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
-  } catch {
-    return false;
-  }
+  return (
+    readMigratingItem(SIDEBAR_COLLAPSED_KEY, LEGACY_SIDEBAR_COLLAPSED_KEY) ===
+    "true"
+  );
 }
 
 function writeCollapsedToStorage(collapsed: boolean) {
-  try {
-    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
-  } catch {
-    // Storage unavailable (private mode / blocked); the preference stays in-memory.
-  }
+  writeMigratingItem(
+    SIDEBAR_COLLAPSED_KEY,
+    LEGACY_SIDEBAR_COLLAPSED_KEY,
+    String(collapsed)
+  );
 }
 
 export function AppSidebar({ user }: AppSidebarProps) {
@@ -114,18 +120,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <Link
             to="/dashboard"
             className="flex items-center gap-2 rounded-md px-1 py-1"
-            aria-label="SavePoint"
+            aria-label={PRODUCT_NAME}
           >
-            <img
-              src="/logo.svg"
-              alt=""
-              aria-hidden="true"
-              className="h-8 w-8 shrink-0"
-            />
-            {!collapsed && (
-              <span className="font-display text-2xl font-semibold tracking-tight">
-                SavePoint
-              </span>
+            {collapsed ? (
+              <LogoMark className="size-8" />
+            ) : (
+              <LogoWordmark className="text-2xl" markClassName="size-8" />
             )}
           </Link>
 

@@ -8,8 +8,11 @@ export {
 } from "./collapsible";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
+export { GameCover } from "./game-cover";
+export type { GameCoverProps, GameCoverSize } from "./game-cover";
 export { ImageLightbox } from "./image-lightbox";
 export type { ImageLightboxProps, LightboxImage } from "./image-lightbox";
+export { LogoMark, LogoWordmark } from "./logo";
 export { PageHeader } from "./page-header";
 export type { PageHeaderProps } from "./page-header";
 export { ModalBody, ModalFooter, ResponsiveModal } from "./responsive-modal";
@@ -24,6 +27,8 @@ export type {
 } from "./segmented-control";
 export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
+export { StatusChip } from "./status-chip";
+export type { StatusChipProps, StatusChipStatus } from "./status-chip";
 export { StickyFooter } from "./sticky-footer";
 export type { StickyFooterProps } from "./sticky-footer";
 export { Textarea } from "./textarea";

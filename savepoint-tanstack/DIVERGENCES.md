@@ -1900,6 +1900,8 @@ prints per-run deprecation diagnostics; migrate to object-selectors + `{{...}}`.
 
 - `widgets/dashboard-page/` → `widgets/library-item-card/` — the dashboard
   game-section composes library cards (composition, not coincidence).
+- `widgets/dashboard-page/` → `widgets/up-next-shelf/` — spec 027 slice 20: the
+  home page composes the Up Next shelf as its first block.
 - `widgets/journal-timeline-page/` → `widgets/journal-timeline/` — the page
   widget wraps the timeline widget and owns the compose/detail navigation.
   These pre-date Slice 23 but were invisible while the linter was alias-blind;

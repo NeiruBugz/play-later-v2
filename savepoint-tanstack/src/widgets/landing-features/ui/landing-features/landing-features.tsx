@@ -42,14 +42,14 @@ export function LandingPreviewCard() {
   return (
     <div className="relative">
       <Card className="gap-4 p-5">
-        <div className="relative h-56 overflow-hidden rounded-2xl bg-primary text-primary-foreground">
+        <div className="relative h-56 overflow-hidden rounded-2xl bg-status-playing text-status-playing-foreground">
           <Badge
             variant="secondary"
             className="absolute top-4 left-4 h-auto gap-2 px-2.5 py-0.5 tracking-[0.12em] uppercase"
           >
             <span
               aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full bg-primary"
+              className="h-1.5 w-1.5 rounded-full bg-status-playing"
             />
             CURRENTLY EXPLORING
           </Badge>
@@ -78,7 +78,7 @@ export function LandingPreviewCard() {
               <Star
                 key={i}
                 aria-hidden="true"
-                className="h-3.5 w-3.5 fill-primary text-primary"
+                className="h-3.5 w-3.5 fill-warning text-warning"
               />
             ))}
             <Star

@@ -30,7 +30,7 @@ const elements = {
     screen.getByTestId("settings-group-header-appearance"),
   getAccountHeader: () => screen.getByTestId("settings-group-header-account"),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
-  getFooter: () => screen.getByText("SavePoint · for patient gamers"),
+  getFooter: () => screen.getByText("Continue? · for patient gamers"),
 };
 
 describe("SettingsList", () => {

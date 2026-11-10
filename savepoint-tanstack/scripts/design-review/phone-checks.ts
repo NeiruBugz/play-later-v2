@@ -198,9 +198,28 @@ function collectPhoneFailures(): Failure[] {
   const isDisabled = (el: Element) =>
     el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true";
 
+  const insideHorizontalScroller = (el: Element): boolean => {
+    for (
+      let node = el.parentElement;
+      node && node !== document.documentElement;
+      node = node.parentElement
+    ) {
+      const { overflowX } = getComputedStyle(node);
+      if (
+        (overflowX === "auto" || overflowX === "scroll") &&
+        node.scrollWidth > node.clientWidth
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const clippedBy = (el: Element): string | null => {
     const rect = el.getBoundingClientRect();
-    if (rect.left < -1 || rect.right > window.innerWidth + 1) {
+    const outsideViewportX =
+      rect.left < -1 || rect.right > window.innerWidth + 1;
+    if (outsideViewportX && !insideHorizontalScroller(el)) {
       return "extends beyond the viewport";
     }
     for (
@@ -271,7 +290,11 @@ function collectPhoneFailures(): Failure[] {
 
   for (const el of interactive) {
     if (isDisabled(el)) continue;
-    el.scrollIntoView({ block: "center", inline: "nearest" });
+    el.scrollIntoView({
+      block: "center",
+      inline: "nearest",
+      behavior: "instant",
+    });
     el.setAttribute(PROBE_ATTRIBUTE, "");
     const verdict = checkClickable({
       selectors: [`[${PROBE_ATTRIBUTE}]`],
@@ -294,7 +317,12 @@ function collectPhoneFailures(): Failure[] {
       });
     }
   }
-  window.scrollTo(0, 0);
+  for (const scroller of document.querySelectorAll<HTMLElement>("*")) {
+    if (scroller.scrollLeft !== 0 || scroller.scrollTop !== 0) {
+      scroller.scrollTo({ left: 0, top: 0, behavior: "instant" });
+    }
+  }
+  window.scrollTo({ left: 0, top: 0, behavior: "instant" });
   if (devtoolsToggle)
     devtoolsToggle.style.pointerEvents = previousPointerEvents;
 

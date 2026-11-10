@@ -16,7 +16,7 @@ References: [`context/spec/021-migrate-to-tanstack-start/technical-consideration
 Consequences:
 
 - **No data migration to undo.** There is no per-app data copy, no dual-write, no backfill. Reverting app code leaves every row exactly where it was.
-- **Sessions survive the rollback.** Both apps use the same `BETTER_AUTH_SECRET`, the same Better Auth default cookie name, the same `/api/auth` base path, and the same domain. A user signed in on the current app stays signed in after a rollback — no forced re-login. A reverted `savepoint-app/` would therefore still authenticate existing users against the live session table.
+- ~~**Sessions survive the rollback.** Both apps use the same `BETTER_AUTH_SECRET`, the same Better Auth default cookie name, the same `/api/auth` base path, and the same domain. A user signed in on the current app stays signed in after a rollback — no forced re-login. A reverted `savepoint-app/` would therefore still authenticate existing users against the live session table.~~ — corrected 2026-11-06 (spec 027): sessions are per host. They survive a code rollback only while the app is served from the same address. After the spec 027 phase 2 address change, users sign in once on the new address (cookies do not move between hosts), and rolling the address back costs one more re-sign-in on the old host (see [Spec 027 phase 2 — address change](#spec-027-phase-2--address-change)). The shared `BETTER_AUTH_SECRET`, cookie name and `/api/auth` base path are unchanged.
 - **Schema migrations are owned by `savepoint-tanstack/`.** Migrations applied to the shared DB are forward-compatible; the auth model and shared domain tables are stable. A migration on the shared DB does **not** need to be reverted to roll back app code. If you must fall all the way back to the deleted Next.js app, note its `schema.prisma` is byte-identical for the auth model and shared domain tables, so it reads the same DB without a schema change.
 
 ## Rolling back a recent change (normal case)
@@ -129,6 +129,60 @@ The migration soft-deletes duplicate live `ImportedGame` rows (keeping the most 
 
 4. **Deploy**, then keep the branch for a few days.
 5. **Rollback.** Revert the Vercel deployment. Rows the migration soft-deleted can be restored from the branch (`UPDATE "ImportedGame" SET "deletedAt" = NULL WHERE id IN (...)` using ids that are live on the branch but deleted in production), but only after dropping the unique index.
+
+## Spec 027 phase 2 — address change
+
+Phase 2 renames the product to "Continue?" and moves it from the free Vercel subdomain `savepoint-app.vercel.app` to `continueapp.vercel.app`. Design: [`context/spec/027-design-reset/technical-considerations.md`](../context/spec/027-design-reset/technical-considerations.md) §2.9 and §2.15. The data layer is untouched: same Neon DB, same Better Auth tables, same Cognito user pool and S3 bucket. Only the address, the allowed origins and the hosted redirect change.
+
+### What users and the owner will notice
+
+- **One re-sign-in on the new address.** Better Auth cookies are scoped to the host and do not move. Cognito's own session usually makes it a single tap; the library is unchanged. No session hand-off is built.
+- **The theme starts at System once.** The theme choice lives in `localStorage`, which is per origin, so it resets on the first visit to `continueapp.vercel.app` and persists after a choice is made there.
+- **Old links keep working.** `savepoint-app.vercel.app/...` answers with a permanent 308 redirect to the same path and query on `continueapp.vercel.app`.
+- **Never detach or delete the old domain from the Vercel project.** The redirect depends on it, and old links exist in the wild (shared pages, link previews, installed home-screen icons). Removing it turns every old link into a dead end. Keep the old domain and its redirect for at least a year.
+- **Leftover on purpose:** the Cognito hosted-UI `domain_prefix` is not changed (ForceNew, auth outage), so the hosted sign-in screen still shows the old name.
+
+### Cutover steps
+
+Run in order. Verify each step before starting the next. "Owner" means the repo owner acting in the Vercel dashboard, Terraform or GitHub.
+
+| # | Step | Who | Verify | Rollback |
+|---|---|---|---|---|
+| 0 | **Pre-flight (manual, in the consoles).** Make the three console changes in [Step 0 details](#step-0-details), keeping every existing value. The release PR is green in CI. | Owner | Sign-in and an avatar upload still work on `savepoint-app.vercel.app`. The Cognito client lists both callback URLs. | Remove the two added URLs and the CORS origin. Nothing else depends on them yet. |
+| 1 | **Add the new domain in Vercel.** Project -> Settings -> Domains: add `continueapp.vercel.app` to the same project (on the free tier this is renaming or adding the project's `vercel.app` domain) and keep `savepoint-app.vercel.app` attached. Make the new domain primary only if Vercel asks; do not remove the old one. | Owner | `continueapp.vercel.app` is listed as valid in Domains, with no "Invalid Configuration" warning. | Remove only the new domain from the project. Leave the old domain untouched. |
+| 2 | **Verify TLS on the new host.** | Owner / agent | `curl -sI https://continueapp.vercel.app/` returns an HTTP response over a valid certificate (no certificate error). | Same as step 1. |
+| 3 | **Merge the release PR** (rename code, theme and brand changes, `BETTER_AUTH_EXTRA_ORIGINS` support). The merge triggers the production deploy, which runs `prisma:migrate:deploy`. | Owner | `deploy.yml` is green. `savepoint-app.vercel.app` still serves the app and sign-in works there (`BETTER_AUTH_URL` still points at the old origin). | Revert the PR on `main` (or promote the previous Vercel deployment) per [Rolling back a recent change](#rolling-back-a-recent-change-normal-case). No DB action. |
+| 4 | **Switch the app origin.** In Vercel set `BETTER_AUTH_URL=https://continueapp.vercel.app` and `BETTER_AUTH_EXTRA_ORIGINS=https://savepoint-app.vercel.app` (Production environment), then redeploy. `BETTER_AUTH_URL` drives the Better Auth `baseURL`, the Steam OpenID realm and `return_to`, and the absolute og URLs. The extra origin keeps the old host in `trustedOrigins` while both hosts serve the app. | Owner | On `continueapp.vercel.app`: Google sign-in through Cognito (at most one re-sign-in, library unchanged), Steam connect (an already-linked account keeps working because `steamId64` is stored), an avatar upload (proves S3 CORS), a deep link such as `/games/<slug>?action=add-game`, and sign-out. | Restore `BETTER_AUTH_URL=https://savepoint-app.vercel.app`, keep or clear `BETTER_AUTH_EXTRA_ORIGINS`, redeploy. One more re-sign-in on the old host. |
+| 5 | **Redirect the old domain.** Project -> Settings -> Domains -> `savepoint-app.vercel.app` -> Edit -> Redirect to `continueapp.vercel.app`, permanent (308). Vercel preserves path and query. No code needed; it keeps working even if the app is broken or rolled back. | Owner | `curl -I "https://savepoint-app.vercel.app/games/<slug>?action=add-game"` returns `308` with `Location: https://continueapp.vercel.app/games/<slug>?action=add-game`. Also: a Telegram link preview of a new-host link shows the new name and logo; the first visit to the new host follows the device theme and a choice persists across a reload; Add to Home Screen on a phone shows the new icon and name (owner checks). | In the Domains settings, set the old domain back to serve the project (turn the redirect off). Do this first when rolling back the whole change. |
+
+Release 3 is done after step 5 verifies.
+
+#### Step 0 details
+
+The live Cognito client and S3 CORS were set up by hand, and no Terraform state for them is in the repo. Do **not** run `terraform apply` for this change: with no state the plan would try to create a new user pool and bucket.
+
+1. AWS Console -> Cognito -> user pool -> App clients -> the web client -> Login pages -> Edit: add callback URL `https://continueapp.vercel.app/api/auth/callback/cognito` and sign-out URL `https://continueapp.vercel.app`.
+2. AWS Console -> S3 -> avatar bucket -> Permissions -> CORS: add `https://continueapp.vercel.app` to `AllowedOrigins`.
+3. Google Cloud -> APIs & Services -> Credentials -> the OAuth client: no change. Google redirects to the Cognito domain (`.../oauth2/idpresponse`), which stays the same; only confirm that is the redirect URI listed.
+
+### Rollback of the whole change
+
+Order matters:
+
+1. Turn off the old domain's redirect (step 5 rollback).
+2. Restore `BETTER_AUTH_URL=https://savepoint-app.vercel.app` and redeploy (step 4 rollback). Users sign in once more on the old host.
+3. If the code is also at fault, revert the PR as in the normal case. The DB is shared and untouched.
+4. Leave the new domain, the added Cognito callback and sign-out URLs, and the S3 CORS origin in place. They are harmless and make a retry a no-op.
+
+Never detach the old domain at any point in a rollback.
+
+### Follow-up after 2-4 weeks
+
+A separate small change, once traffic on the new host is steady:
+
+- Remove `https://savepoint-app.vercel.app` from the S3 bucket CORS `AllowedOrigins` (console).
+- Remove `BETTER_AUTH_EXTRA_ORIGINS` from Vercel and redeploy.
+- Keep the 308 redirect, the old domain on the project, and the old Cognito callback URL for at least a year.
 
 ## Decision checklist
 

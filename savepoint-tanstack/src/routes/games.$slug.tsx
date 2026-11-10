@@ -19,6 +19,7 @@ import {
   TimesToBeatSection,
   TimesToBeatSkeleton,
 } from "@/features/game-detail/ui";
+import { socialMeta } from "@/shared/config/site";
 import { AppError, NotFoundError } from "@/shared/lib/errors";
 import { Card } from "@/shared/ui/card";
 import { PageHeader } from "@/shared/ui/page-header";
@@ -39,6 +40,13 @@ export const Route = createFileRoute("/games/$slug")({
     void context.queryClient.prefetchQuery(relatedGamesQueryOptions(igdbId));
     return view;
   },
+  head: ({ match, loaderData }) => ({
+    meta: socialMeta({
+      siteOrigin: match.context.siteOrigin,
+      pathname: match.pathname,
+      title: loaderData?.data.game.title,
+    }),
+  }),
   component: GameDetailRoute,
   errorComponent: GameDetailErrorBoundary,
   notFoundComponent: GameNotFound,

@@ -23,7 +23,7 @@ vi.mock("@/features/command-palette", () => ({
 }));
 
 const elements = {
-  getBrandLink: () => screen.getByRole("link", { name: "SavePoint" }),
+  getBrandLink: () => screen.getByRole("link", { name: "Continue?" }),
   getSearchButton: () => screen.getByRole("button", { name: "Search games" }),
   querySearchLink: () => screen.queryByRole("link", { name: "Search games" }),
   getThemeToggle: () => screen.getByTestId("theme-toggle"),
@@ -47,6 +47,11 @@ describe("AppMobileTopbar", () => {
 
     it("renders a brand link pointing to /", () => {
       expect(elements.getBrandLink()).toHaveAttribute("href", "/");
+    });
+
+    it("shows the product name next to the mark inside the single brand link", () => {
+      expect(elements.getBrandLink()).toHaveTextContent("Continue?");
+      expect(screen.getAllByRole("link")).toHaveLength(1);
     });
 
     it("renders a search button (not a link to /games/search)", () => {

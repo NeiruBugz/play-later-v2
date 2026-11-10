@@ -92,6 +92,13 @@ describe("AddGameAction", () => {
     });
   });
 
+  describe("given a result row renders the icon add", () => {
+    it("is not the screen's primary action", () => {
+      renderAction();
+      expect(elements.getAddIcon()).not.toHaveClass("bg-primary");
+    });
+  });
+
   describe("given the labelled variant", () => {
     it("adds from the Add to library button", async () => {
       renderAction({

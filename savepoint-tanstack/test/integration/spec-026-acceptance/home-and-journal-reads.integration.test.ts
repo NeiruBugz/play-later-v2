@@ -55,7 +55,7 @@ async function seedGame(userId: string, title: string) {
 }
 
 describe("given a library with Playing, queued and Done games (AC 2.17 Home)", () => {
-  it("returns only playing, upNextTop3, upNextTotal and counts", async () => {
+  it("returns only playing, upNextQueue, upNextTotal and counts", async () => {
     const user = await createUser(db.prisma);
     const playing = await seedGame(user.id, "Now");
     await setStatusWorker(user.id, { id: playing.item.id, to: "PLAYING" });
@@ -72,7 +72,7 @@ describe("given a library with Playing, queued and Done games (AC 2.17 Home)", (
     expect(Object.keys(home).sort()).toEqual([
       "counts",
       "playing",
-      "upNextTop3",
+      "upNextQueue",
       "upNextTotal",
     ]);
     expect(home).not.toHaveProperty("recentlyPlayed");
@@ -80,11 +80,12 @@ describe("given a library with Playing, queued and Done games (AC 2.17 Home)", (
     // 2.17: the games being played, each once; one set of status counts
     expect(home.playing.map((item) => item.game.title)).toEqual(["Now"]);
     expect(home.counts).toEqual({ WANT: 4, PLAYING: 1, DONE: 1 });
-    // 2.4: first 3 queued in queue order, with the full size for "See all"
-    expect(home.upNextTop3.map((item) => item.game.title)).toEqual([
+    // 2.4: the whole queue in queue order
+    expect(home.upNextQueue.map((item) => item.game.title)).toEqual([
       "Q1",
       "Q2",
       "Q3",
+      "Q4",
     ]);
     expect(home.upNextTotal).toBe(4);
   });

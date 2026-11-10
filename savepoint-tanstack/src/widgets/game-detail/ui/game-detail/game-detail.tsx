@@ -1,14 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 
-import { CriticScoreRing, GameCover } from "@/entities/game";
+import { CriticScoreRing } from "@/entities/game";
 import { useSetOwnership, useSetStatus } from "@/features/manage-library-entry";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import {
-  buildCoverImageUrl,
-  buildScreenshotUrl,
-} from "@/shared/lib/igdb-image";
+import { buildScreenshotUrl } from "@/shared/lib/igdb-image";
 import { Card } from "@/shared/ui/card";
+import { GameCover } from "@/shared/ui/game-cover";
 import { PageHeader } from "@/shared/ui/page-header";
 
 import { AboutPanel } from "../about-panel";
@@ -48,8 +46,6 @@ export function GameDetail({
   function openLogSession() {
     openGlobalAction(navigate, "log-session", gameSlug);
   }
-
-  const coverUrl = buildCoverImageUrl(game.coverImage, "t_cover_big_2x");
 
   const releaseYear = game.releaseDate
     ? game.releaseDate.getUTCFullYear().toString()
@@ -233,23 +229,10 @@ export function GameDetail({
             }}
           />
         ) : (
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, color-mix(in oklch, var(--primary) 20%, transparent), transparent 60%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-muted to-transparent to-60%" />
         )}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: [
-              "linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--background) 40%, transparent) 55%, var(--background) 88%, var(--background) 100%)",
-              "linear-gradient(90deg, color-mix(in oklch, var(--background) 60%, transparent) 0%, transparent 40%)",
-            ].join(", "),
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 via-55% to-background to-88%" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent to-40%" />
       </div>
 
       <div className="relative px-6 pb-16 md:px-12">
@@ -304,9 +287,12 @@ export function GameDetail({
           id="hero"
           className="grid grid-cols-1 items-end gap-7 pt-36 md:grid-cols-[200px_1fr] md:pt-44"
         >
-          <div className="w-32 md:w-[200px]">
-            <GameCover src={coverUrl} alt={`Cover for ${game.title}`} eager />
-          </div>
+          <GameCover
+            src={game.coverImage}
+            name={game.title}
+            size="lg"
+            priority
+          />
           <div className="min-w-0 pb-1.5">
             <div className="flex items-start justify-between gap-6">
               <div className="min-w-0 flex-1">
@@ -396,6 +382,7 @@ export function GameDetail({
         <GameDetailActionBar
           gameSlug={gameSlug}
           libraryStatus={sharedLibraryStatus}
+          doneOutcome={doneOutcome}
           viewerUserId={viewerUserId}
         />
       ) : null}

@@ -76,8 +76,8 @@ describe("LibraryGrid", () => {
       expect(elements.queryCoverImage("Hades")).toBeNull();
     });
 
-    it("still renders the game title", () => {
-      expect(screen.getByText("Hades")).toBeDefined();
+    it("still renders the game title under the placeholder", () => {
+      expect(screen.getAllByText("Hades")).toHaveLength(2);
     });
   });
 });

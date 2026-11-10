@@ -1275,7 +1275,7 @@ describe("GameDetail", () => {
       // GD-3: cover renders above title in the DOM (stacked hero, no grid collision)
       it("renders the game cover image above the title heading in the DOM", () => {
         const cover = screen.queryByRole("img", {
-          name: "Cover for Hollow Knight",
+          name: "Hollow Knight",
         });
         const title = elements.getTitle();
         expect(cover).not.toBeNull();

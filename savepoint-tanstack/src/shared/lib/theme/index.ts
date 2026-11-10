@@ -3,7 +3,7 @@
  * lower-layer slices (e.g. `features/toggle-theme`) can read the current
  * theme without importing from the `app/` layer.
  *
- * `SavepointThemeProvider` stays in `app/providers/theme-provider/` (the
+ * `ThemeProvider` stays in `app/providers/theme-provider/` (the
  * canonical provider mount-point for TanStack Start) and imports this context
  * object. Consumers outside `app/` import `useTheme` from here.
  *
@@ -40,12 +40,12 @@ export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
  * Read the current theme + setter. Throws if called outside a
- * `<SavepointThemeProvider>` — that's an integration bug, not a UX state.
+ * `<ThemeProvider>` — that's an integration bug, not a UX state.
  */
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (ctx === null) {
-    throw new Error("useTheme() must be used within <SavepointThemeProvider>.");
+    throw new Error("useTheme() must be used within <ThemeProvider>.");
   }
   return ctx;
 }

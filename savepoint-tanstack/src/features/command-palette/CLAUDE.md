@@ -3,7 +3,7 @@
 App-wide ⌘K / Ctrl+K palette. Mounted once at the root (`__root.tsx`
 `RootShell`) when a user is signed in; the sidebar and mobile topbar
 search-trigger buttons fire `openCommandPalette()` which dispatches a
-`savepoint:command-palette:open` event the component listens for.
+`app:command-palette:open` event the component listens for.
 
 ## Structure
 

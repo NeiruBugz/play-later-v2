@@ -30,6 +30,7 @@ FSD nominally forbids sibling-to-sibling imports. The codebase has these intenti
 - `widgets/library-page/` → `widgets/library-item-card/`
 - `widgets/library-item-card/` → `widgets/game-card/` (extends GameCard's shape)
 - ~~`widgets/dashboard-page/` → `widgets/library-item-card/` (dashboard section composes library cards)~~ — retired 2026-11-04: spec 026 deleted the dashboard section; `dashboard-page` no longer imports `library-item-card`.
+- `widgets/dashboard-page/` → `widgets/up-next-shelf/` (home composes the Up Next shelf; spec 027 slice 20)
 - `widgets/journal-timeline-page/` → `widgets/journal-timeline/` (page widget wraps its timeline + owns navigation)
 
 All are justified in [`../../../savepoint-tanstack/DIVERGENCES.md`](../../../savepoint-tanstack/DIVERGENCES.md) (the first two: LibraryItemCard widget move post-Slice 14A; the latter two surfaced + documented in the Slice 23 FSD audit, when the boundaries linter was made `@/`-alias-aware). The boundaries linter does **not** enforce per-carve-out — it allows `widgets→widgets` wholesale; this list is the human/code-review discipline. When introducing a new widget-to-widget import:
