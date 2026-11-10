@@ -9,7 +9,7 @@ import {
 } from "./import-game-to-library.worker";
 
 export const importGameToLibraryFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => IMPORT_GAME_TO_LIBRARY_INPUT.parse(data))
+  .validator((data: unknown) => IMPORT_GAME_TO_LIBRARY_INPUT.parse(data))
   .handler(async ({ data }): Promise<ImportGameToLibraryResult> => {
     const userId = await requireUserId();
     return importGameToLibraryWorker(userId, data);

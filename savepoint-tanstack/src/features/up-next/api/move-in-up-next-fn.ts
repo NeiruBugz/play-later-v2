@@ -9,7 +9,7 @@ import {
 } from "./move-in-up-next-fn.worker";
 
 export const moveInUpNextFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => MOVE_IN_UP_NEXT_INPUT.parse(data))
+  .validator((data: unknown) => MOVE_IN_UP_NEXT_INPUT.parse(data))
   .handler(async ({ data }): Promise<MoveInUpNextResult> => {
     const userId = await requireUserId();
     return moveInUpNextWorker(userId, data);

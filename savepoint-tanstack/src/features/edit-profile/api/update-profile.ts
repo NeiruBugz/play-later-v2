@@ -21,7 +21,7 @@ const CHECK_USERNAME_INPUT = z.object({
 });
 
 export const updateProfileFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => UPDATE_PROFILE_INPUT.parse(data))
+  .validator((data: unknown) => UPDATE_PROFILE_INPUT.parse(data))
   .handler(async ({ data }): Promise<Profile> => {
     const userId = await requireUserId();
     return updateProfileWorker(userId, data);
@@ -31,7 +31,7 @@ export const updateProfileFn = createServerFn({ method: "POST" })
 // the availability check legitimately runs anonymously during sign-up, so we
 // read the optional userId directly via getServerUserId rather than throwing.
 export const checkUsernameFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => CHECK_USERNAME_INPUT.parse(data))
+  .validator((data: unknown) => CHECK_USERNAME_INPUT.parse(data))
   .handler(async ({ data }): Promise<{ available: boolean }> => {
     const parsed = CHECK_USERNAME_INPUT.parse(data);
     const userId = await getServerUserId(getRequest());

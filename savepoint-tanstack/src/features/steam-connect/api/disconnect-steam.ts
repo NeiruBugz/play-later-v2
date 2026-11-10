@@ -20,7 +20,7 @@ const DISCONNECT_STEAM_INPUT = z.object({}).passthrough();
  * NO `.server.ts` suffix per foot-gun #1.
  */
 export const disconnectSteamFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => DISCONNECT_STEAM_INPUT.parse(data))
+  .validator((data: unknown) => DISCONNECT_STEAM_INPUT.parse(data))
   .handler(async (): Promise<void> => {
     const userId = await requireUserId();
     await disconnectSteamWorker(userId);

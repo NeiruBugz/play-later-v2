@@ -27,9 +27,9 @@ export const SEARCH_GAMES_INPUT = z.object({
 });
 
 export const searchGamesFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SEARCH_GAMES_INPUT.parse(data))
+  .validator((data: unknown) => SEARCH_GAMES_INPUT.parse(data))
   .handler(async ({ data }): Promise<SearchGamesResult> => {
-    // Re-parse server-side: inputValidator runs only on cross-network calls;
+    // Re-parse server-side: validator runs only on cross-network calls;
     // programmatic callers (other server fns, tests) bypass it.
     const parsed = SEARCH_GAMES_INPUT.parse(data);
     // Entities cannot import the session entity, so this fn is keyed by client

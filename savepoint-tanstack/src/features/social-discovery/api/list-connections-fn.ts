@@ -10,7 +10,7 @@ import {
 } from "./list-connections.worker";
 
 export const listConnectionsFn = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => LIST_CONNECTIONS_INPUT.parse(data))
+  .validator((data: unknown) => LIST_CONNECTIONS_INPUT.parse(data))
   .handler(async ({ data }): Promise<ListConnectionsResult> => {
     const viewerId = await getServerUserId(getRequest());
     return listConnectionsWorker(viewerId, data);

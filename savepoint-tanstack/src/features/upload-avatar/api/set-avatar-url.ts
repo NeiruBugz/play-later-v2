@@ -14,7 +14,7 @@ import {
  * client-supplied URL is ever stored.
  */
 export const setAvatarUrlFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => SET_AVATAR_URL_INPUT.parse(data))
+  .validator((data: unknown) => SET_AVATAR_URL_INPUT.parse(data))
   .handler(async ({ data }): Promise<{ ok: true }> => {
     const userId = await requireUserId();
     return setAvatarUrlWorker(userId, data);

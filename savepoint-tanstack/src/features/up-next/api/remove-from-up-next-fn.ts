@@ -9,7 +9,7 @@ import {
 } from "./remove-from-up-next-fn.worker";
 
 export const removeFromUpNextFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => REMOVE_FROM_UP_NEXT_INPUT.parse(data))
+  .validator((data: unknown) => REMOVE_FROM_UP_NEXT_INPUT.parse(data))
   .handler(async ({ data }): Promise<RemoveFromUpNextResult> => {
     const userId = await requireUserId();
     return removeFromUpNextWorker(userId, data);

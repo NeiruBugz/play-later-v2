@@ -17,7 +17,7 @@ import {
  * NO `.server.ts` suffix per foot-gun #1.
  */
 export const fetchSteamGamesFn = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => FETCH_STEAM_GAMES_INPUT.parse(data))
+  .validator((data: unknown) => FETCH_STEAM_GAMES_INPUT.parse(data))
   .handler(async ({ data }): Promise<PaginatedImportedGames> => {
     const parsed = FETCH_STEAM_GAMES_INPUT.parse(data);
     const userId = await requireUserId();

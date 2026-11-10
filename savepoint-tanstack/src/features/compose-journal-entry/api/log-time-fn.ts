@@ -9,7 +9,7 @@ import {
 } from "./log-time-fn.worker";
 
 export const logTimeFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => LOG_TIME_INPUT.parse(data))
+  .validator((data: unknown) => LOG_TIME_INPUT.parse(data))
   .handler(async ({ data }): Promise<LogTimeResult> => {
     const userId = await requireUserId();
     return logTimeWorker(userId, data);

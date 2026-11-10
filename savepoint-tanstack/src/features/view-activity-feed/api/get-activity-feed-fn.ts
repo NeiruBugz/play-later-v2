@@ -14,7 +14,7 @@ import {
  * Auth-gated: anonymous viewers receive `UnauthorizedError`.
  */
 export const getActivityFeedFn = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => GET_ACTIVITY_FEED_INPUT.parse(data))
+  .validator((data: unknown) => GET_ACTIVITY_FEED_INPUT.parse(data))
   .handler(async ({ data }): Promise<ActivityFeedResult> => {
     const userId = await requireUserId();
     return getActivityFeedWorker(userId, data);
