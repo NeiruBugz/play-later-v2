@@ -7,7 +7,6 @@ import {
   GenericErrorBanner,
   SteamApiUnavailableErrorCard,
   SteamPrivacyErrorCard,
-  SteamProfileNotFoundErrorCard,
   SteamRateLimitErrorCard,
 } from "@/features/steam-import/ui/error-cards";
 import { getErrorMessage } from "@/shared/lib/errors";
@@ -166,8 +165,6 @@ function SteamGamesError({ error }: { error: unknown }) {
         <SteamPrivacyErrorCard message={message} />
       ) : errName === "SteamApiUnavailableError" ? (
         <SteamApiUnavailableErrorCard message={message} />
-      ) : errName === "SteamProfileNotFoundError" ? (
-        <SteamProfileNotFoundErrorCard message={message} />
       ) : errName === "SteamRateLimitError" ? (
         <SteamRateLimitErrorCard message={message} />
       ) : (

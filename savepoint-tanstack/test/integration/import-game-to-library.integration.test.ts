@@ -42,6 +42,38 @@ vi.mock("@/shared/api/igdb", async () => {
   };
 });
 
+const statusFailure = vi.hoisted(() => ({ failNext: false }));
+
+vi.mock(
+  "@/entities/library-item/api/set-library-item-status.server",
+  async () => {
+    const actual = await vi.importActual<
+      typeof import("@/entities/library-item/api/set-library-item-status.server")
+    >("@/entities/library-item/api/set-library-item-status.server");
+    const failOnce = () => {
+      if (statusFailure.failNext) {
+        statusFailure.failNext = false;
+        throw new Error("simulated mid-import failure");
+      }
+    };
+    return {
+      ...actual,
+      setLibraryItemStatus: (
+        ...args: Parameters<typeof actual.setLibraryItemStatus>
+      ) => {
+        failOnce();
+        return actual.setLibraryItemStatus(...args);
+      },
+      setLibraryItemStatusInTx: (
+        ...args: Parameters<typeof actual.setLibraryItemStatusInTx>
+      ) => {
+        failOnce();
+        return actual.setLibraryItemStatusInTx(...args);
+      },
+    };
+  }
+);
+
 const getGameByIgdbIdMock = getGameByIgdbId as ReturnType<typeof vi.fn>;
 const matchSteamGameMock = matchSteamGameByAppId as ReturnType<typeof vi.fn>;
 
@@ -87,6 +119,7 @@ beforeEach(async () => {
 
   getGameByIgdbIdMock.mockReset();
   matchSteamGameMock.mockReset();
+  statusFailure.failNext = false;
 });
 
 async function createImported(
@@ -357,6 +390,61 @@ describe("importGameToLibraryWorker", () => {
       } catch {
         // expected ConflictError
       }
+      const row = await db.prisma.importedGame.findUnique({
+        where: { id: importedId },
+      });
+      expect(row?.igdbMatchStatus).toBe("MATCHED");
+    });
+  });
+
+  describe("given the status change fails mid-import and the user retries", () => {
+    let importedId: string;
+    beforeEach(async () => {
+      const row = await createImported(ALICE_ID);
+      importedId = row.id;
+      await db.prisma.game.create({
+        data: { igdbId: 808, title: "Retry Me", slug: "retry-me" },
+      });
+      statusFailure.failNext = true;
+    });
+
+    it("leaves no half-imported library item behind after the failure", async () => {
+      await expect(
+        importGameToLibraryWorker(ALICE_ID, {
+          importedGameId: importedId,
+          status: "PLAYING",
+          manualIgdbId: 808,
+        })
+      ).rejects.toThrow("simulated mid-import failure");
+
+      expect(await db.prisma.libraryItem.count()).toBe(0);
+      const row = await db.prisma.importedGame.findUnique({
+        where: { id: importedId },
+      });
+      expect(row?.igdbMatchStatus).toBe("PENDING");
+    });
+
+    it("converges to the requested status and MATCHED on retry", async () => {
+      await importGameToLibraryWorker(ALICE_ID, {
+        importedGameId: importedId,
+        status: "PLAYING",
+        manualIgdbId: 808,
+      }).catch(() => undefined);
+
+      const result = await importGameToLibraryWorker(ALICE_ID, {
+        importedGameId: importedId,
+        status: "PLAYING",
+        manualIgdbId: 808,
+      });
+
+      const item = await db.prisma.libraryItem.findUniqueOrThrow({
+        where: { id: result.libraryItemId },
+      });
+      expect(item.status).toBe("PLAYING");
+      const openPlays = await db.prisma.playthrough.count({
+        where: { libraryItemId: item.id, finishedAt: null },
+      });
+      expect(openPlays).toBe(1);
       const row = await db.prisma.importedGame.findUnique({
         where: { id: importedId },
       });

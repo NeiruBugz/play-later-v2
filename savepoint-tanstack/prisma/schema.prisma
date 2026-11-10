@@ -104,8 +104,6 @@ model Game {
   franchiseId   Int?
   genres        GameGenre[]
   platforms     GamePlatform[]
-
-  @@index([slug])
 }
 
 model LibraryItem {
@@ -119,7 +117,7 @@ model LibraryItem {
   acquisitionType         AcquisitionType   @default(DIGITAL)
   gameId                  String
   game                    Game              @relation("GameLibraryItems", fields: [gameId], references: [id], onDelete: Cascade)
-  User                    user              @relation(fields: [userId], references: [id])
+  User                    user              @relation(fields: [userId], references: [id], onDelete: Cascade)
   startedAt               DateTime?
   completedAt             DateTime?
   hasBeenPlayed           Boolean           @default(false)
@@ -208,14 +206,13 @@ model Playthrough {
   updatedAt       DateTime          @updatedAt
 
   @@unique([libraryItemId, ordinal])
-  @@index([libraryItemId])
 }
 
 model IgnoredImportedGames {
   id     String @id @default(cuid())
   name   String
   userId String
-  User   user   @relation(fields: [userId], references: [id])
+  User   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ImportedGame {
@@ -235,7 +232,7 @@ model ImportedGame {
   updatedAt        DateTime        @updatedAt
   deletedAt        DateTime?
   userId           String
-  User             user            @relation(fields: [userId], references: [id])
+  User             user            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
@@ -318,9 +315,6 @@ model Genre {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   games     GameGenre[]
-
-  @@index([slug])
-  @@index([name])
 }
 
 model Platform {
@@ -337,9 +331,6 @@ model Platform {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   games           GamePlatform[]
-
-  @@index([slug])
-  @@index([name])
 }
 
 model GameGenre {
@@ -349,7 +340,6 @@ model GameGenre {
   genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
 
   @@id([gameId, genreId])
-  @@index([gameId])
   @@index([genreId])
 }
 
@@ -360,7 +350,6 @@ model GamePlatform {
   platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
 
   @@id([gameId, platformId])
-  @@index([gameId])
   @@index([platformId])
 }
 
@@ -374,6 +363,5 @@ model Follow {
   following user @relation("UserIsFollowed", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
-  @@index([followerId])
   @@index([followingId])
 }

@@ -9,7 +9,6 @@ export {
   IgdbManualSearch,
   SteamPrivacyErrorCard,
   SteamApiUnavailableErrorCard,
-  SteamProfileNotFoundErrorCard,
   SteamRateLimitErrorCard,
   GenericErrorBanner,
   showSyncStartedToast,

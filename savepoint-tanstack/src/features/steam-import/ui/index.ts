@@ -5,7 +5,6 @@ export type { IgdbManualSearchProps } from "./igdb-manual-search";
 export {
   SteamPrivacyErrorCard,
   SteamApiUnavailableErrorCard,
-  SteamProfileNotFoundErrorCard,
   SteamRateLimitErrorCard,
   GenericErrorBanner,
   showSyncStartedToast,

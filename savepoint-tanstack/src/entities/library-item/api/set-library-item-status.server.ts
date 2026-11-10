@@ -5,6 +5,7 @@ import type {
   DoneOutcome,
   LibraryItem,
   LibraryItemStatus,
+  Prisma,
 } from "../../../../shared/lib/prisma/client.ts";
 import { compactQueueAfter, lockUserQueue } from "./up-next-queue.server";
 
@@ -31,88 +32,101 @@ export async function setLibraryItemStatus(
   id: number,
   to: LibraryItemStatus
 ): Promise<SetLibraryItemStatusResult> {
-  return prisma.$transaction(async (tx) => {
-    await lockUserQueue(tx, userId);
+  return prisma.$transaction((tx) =>
+    setLibraryItemStatusInTx(tx, userId, id, to)
+  );
+}
 
-    const owned = await tx.libraryItem.findFirst({
-      where: { id, userId },
+/**
+ * Same as {@link setLibraryItemStatus} but joins the caller's transaction, so a
+ * larger unit of work (e.g. import-to-library) commits or rolls back as one.
+ */
+export async function setLibraryItemStatusInTx(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  id: number,
+  to: LibraryItemStatus
+): Promise<SetLibraryItemStatusResult> {
+  await lockUserQueue(tx, userId);
+
+  const owned = await tx.libraryItem.findFirst({
+    where: { id, userId },
+    select: { id: true },
+  });
+  if (!owned) {
+    throw new NotFoundError("Library item not found", { itemId: id });
+  }
+
+  await tx.$executeRaw`SELECT 1 FROM "LibraryItem" WHERE id = ${id} FOR UPDATE`;
+
+  const current = await tx.libraryItem.findUniqueOrThrow({ where: { id } });
+  const snapshot: LibraryItemStatusSnapshot = {
+    status: current.status,
+    upNextPosition: current.upNextPosition,
+    statusChangedAt: current.statusChangedAt,
+    doneOutcome: current.doneOutcome,
+  };
+  const noChange: SetLibraryItemStatusUndo = {
+    snapshot,
+    createdPlayId: null,
+    closedPlayId: null,
+  };
+
+  if (current.status === to) {
+    return { item: current, undo: noChange };
+  }
+
+  const now = new Date();
+  let createdPlayId: string | null = null;
+  let closedPlayId: string | null = null;
+
+  if (current.status === "PLAYING") {
+    const openPlay = await tx.playthrough.findFirst({
+      where: { libraryItemId: id, finishedAt: null },
+      orderBy: { ordinal: "desc" },
       select: { id: true },
     });
-    if (!owned) {
-      throw new NotFoundError("Library item not found", { itemId: id });
-    }
-
-    await tx.$executeRaw`SELECT 1 FROM "LibraryItem" WHERE id = ${id} FOR UPDATE`;
-
-    const current = await tx.libraryItem.findUniqueOrThrow({ where: { id } });
-    const snapshot: LibraryItemStatusSnapshot = {
-      status: current.status,
-      upNextPosition: current.upNextPosition,
-      statusChangedAt: current.statusChangedAt,
-      doneOutcome: current.doneOutcome,
-    };
-    const noChange: SetLibraryItemStatusUndo = {
-      snapshot,
-      createdPlayId: null,
-      closedPlayId: null,
-    };
-
-    if (current.status === to) {
-      return { item: current, undo: noChange };
-    }
-
-    const now = new Date();
-    let createdPlayId: string | null = null;
-    let closedPlayId: string | null = null;
-
-    if (current.status === "PLAYING") {
-      const openPlay = await tx.playthrough.findFirst({
-        where: { libraryItemId: id, finishedAt: null },
-        orderBy: { ordinal: "desc" },
-        select: { id: true },
+    if (openPlay) {
+      await tx.playthrough.update({
+        where: { id: openPlay.id },
+        data: { finishedAt: now },
       });
-      if (openPlay) {
-        await tx.playthrough.update({
-          where: { id: openPlay.id },
-          data: { finishedAt: now },
-        });
-        closedPlayId = openPlay.id;
-      }
+      closedPlayId = openPlay.id;
     }
+  }
 
-    const leavesQueue = to === "PLAYING" && current.upNextPosition !== null;
-    if (leavesQueue) {
-      await tx.libraryItem.update({
-        where: { id },
-        data: { upNextPosition: null },
-      });
-      await compactQueueAfter(tx, userId, current.upNextPosition as number);
-    }
-
-    if (to === "PLAYING") {
-      const { _max } = await tx.playthrough.aggregate({
-        where: { libraryItemId: id },
-        _max: { ordinal: true },
-      });
-      const ordinal = (_max.ordinal ?? 0) + 1;
-      const play = await tx.playthrough.create({
-        data: {
-          libraryItemId: id,
-          ordinal,
-          kind: ordinal === 1 ? "FIRST" : "REPLAY",
-          status: "PLAYING",
-          startedAt: now,
-        },
-        select: { id: true },
-      });
-      createdPlayId = play.id;
-    }
-
-    const item = await tx.libraryItem.update({
+  const leavesQueue = to === "PLAYING" && current.upNextPosition !== null;
+  if (leavesQueue) {
+    await tx.libraryItem.update({
       where: { id },
-      data: { status: to, statusChangedAt: now },
+      data: { upNextPosition: null },
     });
+    await compactQueueAfter(tx, userId, current.upNextPosition as number);
+  }
 
-    return { item, undo: { snapshot, createdPlayId, closedPlayId } };
+  if (to === "PLAYING") {
+    const { _max } = await tx.playthrough.aggregate({
+      where: { libraryItemId: id },
+      _max: { ordinal: true },
+    });
+    const ordinal = (_max.ordinal ?? 0) + 1;
+    const play = await tx.playthrough.create({
+      data: {
+        libraryItemId: id,
+        ordinal,
+        kind: ordinal === 1 ? "FIRST" : "REPLAY",
+        status: "PLAYING",
+        startedAt: now,
+      },
+      select: { id: true },
+    });
+    createdPlayId = play.id;
+  }
+
+  const item = await tx.libraryItem.update({
+    where: { id },
+    data: { status: to, statusChangedAt: now },
   });
+
+  return { item, undo: { snapshot, createdPlayId, closedPlayId } };
 }

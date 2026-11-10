@@ -51,7 +51,7 @@ export async function importSteamLibraryWorker(
   }
 
   // Re-throws typed Steam errors (SteamProfilePrivateError,
-  // SteamApiUnavailableError, SteamRateLimitError, SteamProfileNotFoundError)
+  // SteamApiUnavailableError, SteamRateLimitError)
   // — caller decides UX.
   const ownedGames = await fetchOwnedGames(user.steamId64);
 
