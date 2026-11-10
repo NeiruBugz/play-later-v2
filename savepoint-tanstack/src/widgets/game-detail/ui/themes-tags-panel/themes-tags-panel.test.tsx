@@ -4,9 +4,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ThemesTagsPanel } from "./themes-tags-panel";
 
 const elements = {
-  queryThemesLabel: () => screen.queryByText("// THEMES"),
-  queryGenresLabel: () => screen.queryByText("// GENRES"),
-  queryPlatformsLabel: () => screen.queryByText("// PLATFORMS"),
+  queryThemesLabel: () => screen.queryByRole("heading", { name: "Themes" }),
+  queryGenresLabel: () => screen.queryByRole("heading", { name: "Genres" }),
+  queryPlatformsLabel: () =>
+    screen.queryByRole("heading", { name: "Platforms" }),
   queryThemesList: () => screen.queryByLabelText("Themes"),
   queryGenresList: () => screen.queryByLabelText("Genres"),
   queryPlatformsList: () => screen.queryByLabelText("Platforms"),

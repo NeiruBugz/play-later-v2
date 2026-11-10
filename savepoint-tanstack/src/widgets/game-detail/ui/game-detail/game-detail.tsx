@@ -9,6 +9,7 @@ import {
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
 import { Card } from "@/shared/ui/card";
+import { PageHeader } from "@/shared/ui/page-header";
 
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
@@ -135,7 +136,7 @@ export function GameDetail({
         <Card
           id="screenshots"
           variant="flat"
-          className="gap-md p-xl mt-8 flex flex-col"
+          className="mt-8 flex flex-col gap-2 p-4"
         >
           <ScreenshotsPanel
             screenshots={igdbDetails.screenshots}
@@ -146,14 +147,10 @@ export function GameDetail({
 
       <div
         data-testid="game-detail-bento-grid"
-        className="gap-lg mt-8 grid grid-cols-1 md:grid-cols-[1.35fr_1fr] md:items-start"
+        className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-[1.35fr_1fr] md:items-start"
       >
         {showPersonalPanels && libraryEntry ? (
-          <Card
-            id="rating"
-            variant="flat"
-            className="gap-md p-xl flex flex-col"
-          >
+          <Card id="rating" variant="flat" className="flex flex-col gap-2 p-4">
             <GameRating
               libraryItemId={libraryEntry.id}
               rating={libraryEntry.rating}
@@ -179,7 +176,7 @@ export function GameDetail({
             id="about"
             variant="flat"
             data-testid="game-detail-about-card"
-            className="gap-lg p-xl flex flex-col"
+            className="flex flex-col gap-3 p-4"
           >
             <AboutPanel
               summary={summary}
@@ -195,7 +192,7 @@ export function GameDetail({
             id="themes"
             variant="flat"
             data-testid="game-detail-themes-tags-card"
-            className="gap-lg p-xl flex flex-col"
+            className="flex flex-col gap-3 p-4"
           >
             <ThemesTagsPanel
               themes={themes}
@@ -206,11 +203,7 @@ export function GameDetail({
         ) : null}
 
         {showJournalPanel ? (
-          <Card
-            id="journal"
-            variant="flat"
-            className="gap-md p-xl flex flex-col"
-          >
+          <Card id="journal" variant="flat" className="flex flex-col gap-2 p-4">
             <GameNotesList notes={notes} onNewNote={openLogSession} />
           </Card>
         ) : null}
@@ -265,14 +258,14 @@ export function GameDetail({
           <Link
             to="/library"
             aria-label="Back"
-            className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-muted-foreground"
           >
             <ArrowLeft size={20} aria-hidden="true" />
           </Link>
           <button
             type="button"
             aria-label="More"
-            className="text-foreground hover:text-muted-foreground flex h-11 w-11 items-center justify-center rounded-full transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-muted-foreground"
           >
             <MoreHorizontal size={20} aria-hidden="true" />
           </button>
@@ -281,23 +274,27 @@ export function GameDetail({
         {/* Desktop breadcrumb — visible at md and above */}
         <nav
           aria-label="Breadcrumb"
-          className="text-caption text-muted-foreground relative z-10 hidden items-center gap-1.5 pt-3.5 md:flex"
+          className="relative z-10 hidden items-center gap-1.5 pt-3.5 text-xs font-medium text-muted-foreground md:flex"
         >
           <Link
             to="/library"
-            className="hover:text-foreground transition-colors"
+            className="transition-colors hover:text-foreground"
           >
             Library
           </Link>
-          <span className="opacity-50">/</span>
+          <span aria-hidden="true" className="opacity-50">
+            /
+          </span>
           <Link
             to="/library"
-            className="hover:text-foreground transition-colors"
+            className="transition-colors hover:text-foreground"
           >
             Games
           </Link>
-          <span className="opacity-50">/</span>
-          <span className="text-foreground max-w-[280px] truncate font-medium">
+          <span aria-hidden="true" className="opacity-50">
+            /
+          </span>
+          <span className="max-w-[280px] truncate font-medium text-foreground">
             {game.title}
           </span>
         </nav>
@@ -316,14 +313,14 @@ export function GameDetail({
                 {eyebrowParts.length > 0 ? (
                   <p
                     aria-label="Release metadata"
-                    className="text-caption text-muted-foreground mb-2.5 flex flex-wrap items-center gap-2 tracking-widest uppercase"
+                    className="mb-2.5 flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground uppercase"
                   >
                     {eyebrowParts.map((part, i) => (
                       <span key={i} className="flex items-center gap-2">
                         {i > 0 ? (
                           <span
                             aria-hidden="true"
-                            className="bg-muted-foreground inline-block h-[3px] w-[3px] rounded-full"
+                            className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground"
                           />
                         ) : null}
                         {part}
@@ -332,9 +329,7 @@ export function GameDetail({
                   </p>
                 ) : null}
 
-                <h1 className="text-h1 mb-4 tracking-tight break-words">
-                  {game.title}
-                </h1>
+                <PageHeader title={game.title} className="mb-4" />
               </div>
 
               {/* Critic ring shown in hero on mobile; on desktop it lives in the rail */}

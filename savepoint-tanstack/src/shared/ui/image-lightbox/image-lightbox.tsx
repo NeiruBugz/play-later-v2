@@ -42,8 +42,8 @@ export function ImageLightbox({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogPrimitive.Backdrop className="data-[open]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:fade-in-0 fixed inset-0 z-50 bg-black/85 backdrop-blur-sm" />
-        <DialogPrimitive.Popup className="gap-lg p-2xl fixed inset-0 z-50 flex flex-col items-center justify-center focus:outline-none">
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-scrim/85 backdrop-blur-sm data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:animate-in data-[open]:fade-in-0" />
+        <DialogPrimitive.Popup className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 p-6 focus:outline-none">
           <DialogPrimitive.Title className="sr-only">
             {current.alt}
           </DialogPrimitive.Title>
@@ -53,7 +53,7 @@ export function ImageLightbox({
 
           <DialogPrimitive.Close
             aria-label="Close"
-            className="bg-foreground/15 text-background hover:bg-foreground/25 absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 flex size-11 items-center justify-center rounded-full bg-foreground/15 text-background transition-colors hover:bg-foreground/25 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
           >
             <X className="h-5 w-5" />
           </DialogPrimitive.Close>
@@ -68,7 +68,7 @@ export function ImageLightbox({
             <NavArrow side="right" onClick={goNext} />
           </div>
 
-          <div className="flex max-w-full gap-2 overflow-x-auto">
+          <div className="flex max-w-full gap-2 overflow-x-auto pb-safe">
             {images.map((image, i) => (
               <button
                 key={image.src}
@@ -112,7 +112,7 @@ function NavArrow({
       aria-label={side === "left" ? "Previous screenshot" : "Next screenshot"}
       onClick={onClick}
       className={cn(
-        "bg-foreground/40 text-background hover:bg-foreground/60 absolute top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none",
+        "absolute top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-foreground/40 text-background transition-colors hover:bg-foreground/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none",
         side === "left" ? "left-3" : "right-3"
       )}
     >

@@ -10,12 +10,12 @@ export function ProfileVisibilityToggle({
   disabled = false,
 }: ProfileVisibilityToggleProps) {
   return (
-    <div className="gap-lg p-lg flex items-center justify-between rounded-lg border">
-      <div className="space-y-xs">
-        <Label htmlFor={id} className="body-sm font-medium">
+    <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+      <div className="space-y-1">
+        <Label htmlFor={id} className="text-sm">
           Public profile
         </Label>
-        <p className="body-sm text-muted-foreground">
+        <p className="text-base text-muted-foreground md:text-sm">
           Allow other users to see your profile and gaming activity
         </p>
       </div>

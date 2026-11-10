@@ -45,11 +45,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
   };
 
   return (
-    <div
-      role="radiogroup"
-      aria-label={PICKER_LABEL}
-      className="gap-2xs flex flex-col"
-    >
+    <div role="radiogroup" aria-label={PICKER_LABEL} className="flex flex-col">
       {STATUS_ENTRIES.map((entry, index) => {
         const Icon = entry.icon;
         const checked = entry.value === value;
@@ -66,7 +62,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
             onClick={() => onSelect(entry.value)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
-              "gap-sm px-sm py-xs flex w-full items-center rounded-md text-left text-sm transition-colors",
+              "flex min-h-11 w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm transition-colors md:min-h-0",
               "hover:bg-muted focus-visible:bg-muted focus-visible:outline-none",
               checked && "font-semibold"
             )}
@@ -85,7 +81,7 @@ function StatusRadioList({ value, onSelect }: RadioListProps) {
             </span>
             <span className="flex-1">{entry.label}</span>
             {checked ? (
-              <Check className="text-primary h-4 w-4" aria-hidden="true" />
+              <Check className="h-4 w-4 text-primary" aria-hidden="true" />
             ) : null}
           </button>
         );
@@ -118,7 +114,7 @@ export function StatusPicker({
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger render={trigger} />
-        <PopoverContent align="start" className="p-xs w-56">
+        <PopoverContent align="start" className="w-56 p-1">
           <StatusRadioList value={value} onSelect={handleSelect} />
         </PopoverContent>
       </Popover>
@@ -128,12 +124,10 @@ export function StatusPicker({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger render={trigger} />
-      <SheetContent
-        side="bottom"
-        aria-describedby={undefined}
-        className="p-md pb-xl"
-      >
-        <SheetTitle className="mb-sm text-base">{PICKER_LABEL}</SheetTitle>
+      <SheetContent side="bottom" aria-describedby={undefined} className="py-4">
+        <SheetTitle className="mb-1.5 pr-11 text-base">
+          {PICKER_LABEL}
+        </SheetTitle>
         <StatusRadioList value={value} onSelect={handleSelect} />
       </SheetContent>
     </Sheet>

@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { buildCoverImageProps } from "@/shared/lib/igdb-image";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
 
@@ -31,20 +32,20 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
             alt={alt}
             loading="lazy"
             decoding="async"
-            className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
+            className="aspect-[3/4] w-full rounded-lg object-cover shadow-md"
           />
         ) : (
           <div
             role="img"
             aria-label={alt}
-            className="bg-muted shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)]"
+            className="aspect-[3/4] w-full rounded-lg bg-muted shadow-md"
           />
         )}
         <div className="absolute top-1.5 left-1.5">
           <LibraryStatusBadge status={item.status} />
         </div>
       </div>
-      <p className="mt-2 truncate text-sm leading-tight font-medium group-hover:underline">
+      <p className="mt-2 truncate text-base leading-tight font-medium group-hover:underline md:text-sm">
         {item.game.title}
       </p>
       <QueueMarker
@@ -53,9 +54,9 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
         className="mt-1"
       />
       {item.platform ? (
-        <p className="text-muted-foreground mt-0.5 truncate text-xs">
+        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
           {item.platform}
-        </p>
+        </span>
       ) : null}
     </Link>
   );
@@ -82,14 +83,12 @@ export function DashboardGameRail({
   return (
     <section aria-labelledby="home-up-next-heading">
       <header className="mb-2 flex items-baseline justify-between">
-        <h2 id="home-up-next-heading" className="heading-xs">
-          {title}
-        </h2>
+        <SectionLabel id="home-up-next-heading">{title}</SectionLabel>
         {showViewAll ? (
           <Link
             to="/library"
             search={viewAll}
-            className="text-muted-foreground hover:text-foreground group inline-flex items-center text-xs font-medium"
+            className="group -my-3 inline-flex min-h-11 items-center text-xs font-medium text-muted-foreground hover:text-foreground md:my-0 md:min-h-0"
           >
             {viewAllLabel}
             <ChevronRight
@@ -117,7 +116,9 @@ export function DashboardGameRail({
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground text-sm">{emptyMessage}</p>
+        <p className="text-base text-muted-foreground md:text-sm">
+          {emptyMessage}
+        </p>
       )}
     </section>
   );

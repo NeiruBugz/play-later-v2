@@ -12,13 +12,10 @@ import { formatAbsoluteDate, formatHours } from "@/shared/lib/date";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+  ModalBody,
+  ModalFooter,
+  ResponsiveModal,
+} from "@/shared/ui/responsive-modal";
 import {
   Select,
   SelectContent,
@@ -106,20 +103,17 @@ export function ImportGameModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[480px]">
-        <DialogHeader>
-          <DialogTitle>
-            {showSearch ? "Select correct game" : "Add game"}
-          </DialogTitle>
-          <DialogDescription className="truncate">
-            {game.name}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+      title={showSearch ? "Select correct game" : "Add game"}
+      description={game.name}
+      contentClassName="sm:max-w-[480px]"
+    >
+      <ModalBody>
         {showSearch ? (
           <div className="space-y-4 overflow-hidden py-2">
-            <div className="bg-muted/50 rounded-lg p-3 text-sm">
+            <div className="rounded-lg bg-muted/50 p-3 text-sm">
               <p className="text-muted-foreground">
                 We couldn&apos;t auto-match this Steam game. Search and pick the
                 correct entry.
@@ -169,39 +163,35 @@ export function ImportGameModal({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 Smart default: {getStatusLabel(smartStatus)}
               </p>
             </div>
           </div>
         )}
+      </ModalBody>
 
-        <DialogFooter>
-          {showSearch ? (
-            <Button
-              variant="secondary"
-              onClick={() => setShowSearch(false)}
-              disabled={isPending}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden />
-              Back
+      <ModalFooter>
+        {showSearch ? (
+          <Button
+            variant="secondary"
+            onClick={() => setShowSearch(false)}
+            disabled={isPending}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden />
+            Back
+          </Button>
+        ) : (
+          <>
+            <Button variant="secondary" onClick={onClose} disabled={isPending}>
+              Cancel
             </Button>
-          ) : (
-            <>
-              <Button
-                variant="secondary"
-                onClick={onClose}
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-              <Button onClick={() => void runImport()} disabled={isPending}>
-                {isPending ? "Importing…" : "Import"}
-              </Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <Button onClick={() => void runImport()} disabled={isPending}>
+              {isPending ? "Importing…" : "Import"}
+            </Button>
+          </>
+        )}
+      </ModalFooter>
+    </ResponsiveModal>
   );
 }

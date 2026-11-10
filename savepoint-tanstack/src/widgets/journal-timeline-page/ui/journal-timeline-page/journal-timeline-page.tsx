@@ -43,7 +43,6 @@ export function JournalTimelinePage({
     <div className="md:grid md:grid-cols-[1fr_280px] md:items-start md:gap-8">
       <div>
         <PageHeader
-          eyebrow="// JOURNAL"
           title="Journal"
           sub={subtitle}
           actions={
@@ -53,7 +52,7 @@ export function JournalTimelinePage({
           }
         />
 
-        <div className="mb-lg">
+        <div className="mb-3">
           <JournalGameFilter
             options={gameOptions}
             value={selectedGame}

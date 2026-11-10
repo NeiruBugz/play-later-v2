@@ -9,12 +9,16 @@ Infrastructure primitives shared across all layers. No domain logic lives here.
 
 ## Subdirectories
 
-| Dir       | Contents                                                                   |
-| --------- | -------------------------------------------------------------------------- |
-| `lib/`    | Prisma singleton (`db`), logger (pino), `AppError` taxonomy, auth instance |
-| `ui/`     | shadcn/ui primitives, design tokens, base components                       |
-| `config/` | Zod-validated env (`env` from `@env`)                                      |
-| `api/`    | Low-level external clients: S3, IGDB — no business logic                   |
+| Dir       | Contents                                                                     |
+| --------- | ---------------------------------------------------------------------------- |
+| `lib/`    | Prisma singleton (`db`), logger (pino), `AppError` taxonomy, auth instance   |
+| `ui/`     | Stock shadcn `base-maia` primitives (Base UI) and repo-owned base components |
+| `config/` | Site constants (`THEME_COLORS`); env lives in `env.ts` (`@env`)              |
+| `api/`    | Low-level external clients: S3, IGDB — no business logic                     |
+
+## Styling
+
+Design tokens (color, radius, fonts) live in `src/styles.css`; there is no custom spacing, type or shadow layer. Primitives in `ui/` are the stock `shadcn view` output (style `base-maia`, pulled in a scratch directory, never `shadcn init` or `apply` in the repo). Deliberate deviations are listed in [`ui/README.md`](./ui/README.md). Lint (`eslint-plugin-better-tailwindcss`) rejects unknown, conflicting and retired classes.
 
 ## Key rule
 

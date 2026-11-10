@@ -5,6 +5,7 @@ import { formatHours } from "@/shared/lib/date";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 
 import { calculateSmartStatus } from "../../lib/calculate-smart-status";
 import type { ImportedGameCardProps } from "./imported-game-card.type";
@@ -47,21 +48,21 @@ export function ImportedGameCard({
 
   return (
     <Card>
-      <CardContent className="flex items-center gap-3 p-3">
+      <CardContent className="flex items-center gap-3">
         {steamIconUrl ? (
           <img
             src={steamIconUrl}
             alt={`Cover for ${game.name}`}
-            className="h-10 w-10 shrink-0 rounded object-cover"
+            className="h-10 w-10 shrink-0 rounded-sm object-cover"
             width={40}
             height={40}
           />
         ) : (
           <div
-            className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-muted"
             aria-hidden="true"
           >
-            <span className="text-muted-foreground text-xs font-medium">
+            <span className="text-xs font-medium text-muted-foreground">
               {game.name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -77,7 +78,7 @@ export function ImportedGameCard({
               {getStatusLabel(smartStatus)}
             </Badge>
           </div>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
             <span>
               {game.playtime ? formatHours(game.playtime) : "Never played"}
             </span>
@@ -92,17 +93,23 @@ export function ImportedGameCard({
 
         <div className="flex shrink-0 gap-2">
           {!isIgnored && onAddToLibrary ? (
-            <Button
-              type="button"
-              variant="default"
-              size="icon"
-              onClick={onAddToLibrary}
-              disabled={isPending}
-              aria-label={`Add ${game.name}`}
-              title="Add"
-            >
-              <Plus />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="icon"
+                    onClick={onAddToLibrary}
+                    disabled={isPending}
+                    aria-label={`Add ${game.name}`}
+                  />
+                }
+              >
+                <Plus />
+              </TooltipTrigger>
+              <TooltipContent>Add to library</TooltipContent>
+            </Tooltip>
           ) : null}
 
           {isIgnored && onAddToLibrary ? (
@@ -119,17 +126,23 @@ export function ImportedGameCard({
           ) : null}
 
           {!isIgnored && onDismiss ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onDismiss}
-              disabled={isPending}
-              aria-label={`Remove ${game.name}`}
-              title="Remove game"
-            >
-              <X />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={onDismiss}
+                    disabled={isPending}
+                    aria-label={`Remove ${game.name}`}
+                  />
+                }
+              >
+                <X />
+              </TooltipTrigger>
+              <TooltipContent>Remove game</TooltipContent>
+            </Tooltip>
           ) : null}
         </div>
       </CardContent>

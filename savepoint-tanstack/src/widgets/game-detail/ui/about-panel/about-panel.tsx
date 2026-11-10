@@ -1,3 +1,5 @@
+import { SectionLabel } from "@/shared/ui/section-label";
+
 import type { AboutPanelProps } from "./about-panel.type";
 
 type Fact = { term: string; value: string };
@@ -23,19 +25,19 @@ export function AboutPanel({
       {summary ? (
         <p
           aria-label="Game summary"
-          className="text-body text-foreground/85 max-w-[720px] leading-relaxed"
+          className="max-w-[720px] text-base text-foreground/85"
         >
           {summary}
         </p>
       ) : null}
 
       {facts.length > 0 ? (
-        <div className="gap-lg grid grid-cols-1 md:grid-cols-[max-content_1fr] md:items-baseline">
-          <span className="terminal-label">// ABOUT</span>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[max-content_1fr] md:items-baseline">
+          <SectionLabel>About</SectionLabel>
           <dl className="text-sm">
             {facts.map((fact) => (
               <div key={fact.term} className="flex gap-2">
-                <dt className="text-muted-foreground w-24">{fact.term}</dt>
+                <dt className="w-24 text-muted-foreground">{fact.term}</dt>
                 <dd className="text-foreground">{fact.value}</dd>
               </div>
             ))}

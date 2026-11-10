@@ -83,6 +83,7 @@ function collectPhoneFailures(): Failure[] {
     '[role="option"]',
     '[data-slot="badge"]',
     '[data-slot="label"]',
+    '[data-slot="section-label"]',
   ].join(",");
 
   const failures: Failure[] = [];

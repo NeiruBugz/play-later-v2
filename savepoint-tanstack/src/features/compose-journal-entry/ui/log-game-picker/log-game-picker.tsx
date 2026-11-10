@@ -14,7 +14,7 @@ export function LogGamePicker({ games, onSelect }: LogGamePickerProps) {
     : games;
 
   return (
-    <div className="gap-xs flex flex-col">
+    <div className="flex flex-col gap-1">
       <Input
         type="search"
         aria-label="Search your library"
@@ -34,10 +34,10 @@ export function LogGamePicker({ games, onSelect }: LogGamePickerProps) {
             <li key={game.gameId}>
               <button
                 type="button"
-                className="hover:bg-muted flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left text-sm transition-colors"
+                className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted"
                 onClick={() => onSelect(game)}
               >
-                <span className="bg-muted size-8 shrink-0 overflow-hidden rounded-[4px]">
+                <span className="size-8 shrink-0 overflow-hidden rounded-sm bg-muted">
                   {coverUrl ? (
                     <img
                       src={coverUrl}
@@ -47,7 +47,7 @@ export function LogGamePicker({ games, onSelect }: LogGamePickerProps) {
                   ) : null}
                 </span>
                 <span className="min-w-0 flex-1 truncate">{game.title}</span>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                   {getStatusLabel(game.status)}
                 </span>
               </button>
@@ -55,7 +55,7 @@ export function LogGamePicker({ games, onSelect }: LogGamePickerProps) {
           );
         })}
         {visibleGames.length === 0 ? (
-          <li className="text-muted-foreground px-2 py-3 text-sm">
+          <li className="px-2 py-3 text-sm text-muted-foreground">
             No games match.
           </li>
         ) : null}

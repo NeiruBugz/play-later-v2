@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getProfileSettingsFn } from "@/features/edit-profile/api/get-profile-settings";
 import { ProfileSettingsForm } from "@/features/edit-profile/ui/profile-settings-form";
 import { AvatarUpload } from "@/features/upload-avatar";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 export const Route = createFileRoute("/_authed/settings/profile")({
   loader: () => getProfileSettingsFn(),
@@ -17,9 +18,9 @@ function SettingsProfilePage() {
   return (
     <div>
       <section className="mb-8" aria-labelledby="profile-picture-heading">
-        <h2 id="profile-picture-heading" className="mb-3 text-base font-medium">
+        <SectionLabel id="profile-picture-heading" className="mb-3">
           Profile picture
-        </h2>
+        </SectionLabel>
         <AvatarUpload />
       </section>
 

@@ -6,6 +6,7 @@ import { updateJournalEntryFn } from "@/features/edit-journal-entry/api/update-j
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { StickyFooter } from "@/shared/ui/sticky-footer";
 import { Textarea } from "@/shared/ui/textarea";
 
 import type { EditJournalEntryFormProps } from "./edit-journal-entry-form.type";
@@ -62,8 +63,8 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="gap-md flex flex-col">
-      <label className="gap-xs flex flex-col text-sm">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2">
+      <label className="flex flex-col gap-1 text-sm">
         <span className="sr-only">Content</span>
         <Textarea
           aria-label="Content"
@@ -74,7 +75,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
       </label>
 
       {entry.gameId !== null ? (
-        <label className="gap-xs flex flex-col text-sm">
+        <label className="flex flex-col gap-1 text-sm">
           <span>Time played (hours)</span>
           <Input
             type="number"
@@ -89,12 +90,12 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
       ) : null}
 
       {error !== null ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       ) : null}
 
-      <div className="gap-sm flex justify-end">
+      <StickyFooter aboveBottomNav className="flex justify-end gap-1.5">
         <Button
           type="button"
           variant="outline"
@@ -106,7 +107,7 @@ export function EditJournalEntryForm({ entry }: EditJournalEntryFormProps) {
         <Button type="submit" disabled={isSubmitting || isEmpty}>
           Save
         </Button>
-      </div>
+      </StickyFooter>
     </form>
   );
 }

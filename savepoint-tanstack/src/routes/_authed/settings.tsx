@@ -31,7 +31,7 @@ function SettingsLayout() {
   const backLink = (
     <Link
       to="/profile"
-      className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm"
+      className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground hover:text-foreground md:mb-6 md:min-h-0"
     >
       <ArrowLeft className="h-4 w-4" aria-hidden="true" />
       Back to profile
@@ -42,7 +42,7 @@ function SettingsLayout() {
     return (
       <div className="container mx-auto px-4 py-6">
         {backLink}
-        <PageHeader eyebrow="// SETTINGS" title="Settings" />
+        <PageHeader title="Settings" />
         {activeSegment === undefined ? <SettingsList /> : <Outlet />}
       </div>
     );
@@ -51,7 +51,7 @@ function SettingsLayout() {
   return (
     <div className="container mx-auto px-4 py-6">
       {backLink}
-      <PageHeader eyebrow="// SETTINGS" title="Settings" />
+      <PageHeader title="Settings" />
       <div className="grid gap-6 md:grid-cols-[200px_1fr]">
         <aside>
           <SettingsRail activeSegment={activeSegment} />

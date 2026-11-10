@@ -1,6 +1,7 @@
 /** @type {import('prettier').Config} */
 export default {
   endOfLine: "lf",
+  tailwindStylesheet: "./src/styles.css",
   semi: true,
   singleQuote: false,
   tabWidth: 2,

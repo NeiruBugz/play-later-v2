@@ -5,6 +5,7 @@ import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { openGlobalAction } from "@/shared/lib/global-action";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { DashboardPlayingSectionProps } from "./dashboard-playing-section.type";
 
@@ -15,34 +16,34 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
   const alt = `Cover for ${game.title}`;
 
   return (
-    <li className="bg-card shadow-paper-md flex items-center gap-3 rounded-xl border p-3">
+    <li className="flex items-center gap-3 rounded-xl border bg-card p-3 shadow-md">
       {coverUrl ? (
         <img
           src={coverUrl}
           alt={alt}
           width={48}
           height={64}
-          className="aspect-[3/4] w-12 shrink-0 rounded-[var(--radius-cover)] object-cover"
+          className="aspect-[3/4] w-12 shrink-0 rounded-lg object-cover"
         />
       ) : (
         <div
           role="img"
           aria-label={alt}
-          className="bg-muted aspect-[3/4] w-12 shrink-0 rounded-[var(--radius-cover)]"
+          className="aspect-[3/4] w-12 shrink-0 rounded-lg bg-muted"
         />
       )}
       <div className="min-w-0 flex-1">
         <Link
           to="/games/$slug"
           params={{ slug: game.slug }}
-          className="line-clamp-2 text-sm leading-tight font-medium hover:underline"
+          className="-my-3.5 line-clamp-2 py-3.5 text-sm leading-tight font-medium hover:underline md:my-0 md:py-0"
         >
           {game.title}
         </Link>
         {item.platform ? (
-          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
             {item.platform}
-          </p>
+          </span>
         ) : null}
       </div>
       <Button
@@ -62,9 +63,9 @@ export function DashboardPlayingSection({
 }: DashboardPlayingSectionProps) {
   return (
     <section aria-labelledby="home-playing-heading">
-      <h2 id="home-playing-heading" className="heading-xs mb-2">
+      <SectionLabel id="home-playing-heading" className="mb-2">
         Playing
-      </h2>
+      </SectionLabel>
       <ul className="flex flex-col gap-2 md:grid md:grid-cols-2 md:gap-3">
         {items.map((item) => (
           <PlayingRow key={item.id} item={item} />

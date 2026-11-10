@@ -214,7 +214,7 @@ export function ImportedGamesPage({
           className="flex items-center justify-between pt-2"
           aria-label="Steam games pagination"
         >
-          <span className="text-muted-foreground text-sm">
+          <span className="text-sm text-muted-foreground">
             Page {pagination.page} of {pagination.totalPages} ·{" "}
             {pagination.total} total
           </span>

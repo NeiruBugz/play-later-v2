@@ -54,4 +54,46 @@ describe("Separator", () => {
       );
     });
   });
+
+  // jsdom computes no layout, so the sizing classes are asserted against the
+  // orientation attribute Base UI emits; real layout is verified in the browser.
+  describe("given orientation='horizontal'", () => {
+    beforeEach(() => {
+      render(<Separator orientation="horizontal" decorative={false} />);
+    });
+
+    it("emits data-orientation=horizontal", () => {
+      expect(elements.querySeparator()).toHaveAttribute(
+        "data-orientation",
+        "horizontal"
+      );
+    });
+
+    it("draws a full-width hairline via the emitted attribute", () => {
+      expect(elements.querySeparator()).toHaveClass(
+        "data-[orientation=horizontal]:h-px",
+        "data-[orientation=horizontal]:w-full"
+      );
+    });
+  });
+
+  describe("given orientation='vertical'", () => {
+    beforeEach(() => {
+      render(<Separator orientation="vertical" decorative={false} />);
+    });
+
+    it("emits data-orientation=vertical", () => {
+      expect(elements.querySeparator()).toHaveAttribute(
+        "data-orientation",
+        "vertical"
+      );
+    });
+
+    it("draws a stretched vertical hairline via the emitted attribute", () => {
+      expect(elements.querySeparator()).toHaveClass(
+        "data-[orientation=vertical]:w-px",
+        "data-[orientation=vertical]:self-stretch"
+      );
+    });
+  });
 });

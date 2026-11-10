@@ -37,12 +37,12 @@ export function UndoToastBody({
       role="status"
       aria-live="polite"
       className={cn(
-        "bg-background text-foreground border-border",
-        "rounded-md border shadow-lg",
-        "gap-md p-md flex w-full items-center"
+        "bg-popover text-popover-foreground",
+        "rounded-lg border shadow-md",
+        "flex w-full items-center gap-2 p-2"
       )}
     >
-      <span className="body-sm flex-1">{message}</span>
+      <span className="flex-1 text-sm">{message}</span>
       <Button
         type="button"
         variant="ghost"

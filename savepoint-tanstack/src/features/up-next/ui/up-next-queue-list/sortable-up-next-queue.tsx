@@ -54,7 +54,7 @@ function SortableRow({
         transition,
       }}
       className={cn(
-        "bg-background flex items-center gap-3",
+        "flex items-center gap-3 bg-background",
         isDragging && "relative z-10 shadow-lg"
       )}
     >
@@ -73,7 +73,7 @@ function SortableRow({
             {...attributes}
             {...listeners}
             aria-label={`Drag ${row.title}`}
-            className="text-muted-foreground hover:text-foreground shrink-0 cursor-grab touch-none p-1"
+            className="shrink-0 cursor-grab touch-none p-1 text-muted-foreground hover:text-foreground"
           >
             <GripVertical className="h-4 w-4" aria-hidden="true" />
           </button>

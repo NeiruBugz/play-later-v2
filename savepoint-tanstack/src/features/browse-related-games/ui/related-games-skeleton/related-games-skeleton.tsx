@@ -1,3 +1,6 @@
+import { SectionLabel } from "@/shared/ui/section-label";
+import { Skeleton } from "@/shared/ui/skeleton";
+
 /**
  * Suspense fallback for `RelatedGamesTabs`. Mimics the grid shape
  * (5-up at lg) with shimmer placeholders. Pure CSS — no props, no logic.
@@ -9,16 +12,16 @@ export function RelatedGamesSkeleton() {
     <section
       aria-labelledby="related-games-heading-skeleton"
       aria-busy="true"
-      className="gap-md flex flex-col"
+      className="flex flex-col gap-2"
     >
-      <h2 id="related-games-heading-skeleton" className="text-h3">
+      <SectionLabel id="related-games-heading-skeleton">
         Related games
-      </h2>
+      </SectionLabel>
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {Array.from({ length: PLACEHOLDER_COUNT }).map((_, index) => (
           <li key={index} className="flex flex-col gap-2">
-            <div className="bg-muted aspect-[3/4] w-full animate-pulse rounded" />
-            <div className="bg-muted h-4 w-3/4 animate-pulse rounded" />
+            <Skeleton className="aspect-[3/4] w-full rounded-md" />
+            <Skeleton className="h-4 w-3/4 rounded-md" />
           </li>
         ))}
       </ul>

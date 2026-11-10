@@ -6,15 +6,12 @@ import { toast } from "sonner";
 import type { LibraryItemWithGame } from "@/entities/library-item/api";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
 import { RatingInput } from "@/shared/ui/rating-input";
+import {
+  ModalBody,
+  ModalFooter,
+  ResponsiveModal,
+} from "@/shared/ui/responsive-modal";
 
 import { deleteLibraryItemFn } from "../../api/delete-library-item-fn";
 import { getPlatformOptionsFn } from "../../api/get-platform-options";
@@ -72,15 +69,18 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
   } = useLibraryModalForm({ entry, onClose });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{entry.game.title}</DialogTitle>
-          <DialogDescription>Update rating and platform.</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="gap-md flex flex-col">
-          <div className="gap-xs flex flex-col text-sm">
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={entry.game.title}
+      description="Update rating and platform."
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="flex min-h-0 flex-1 flex-col gap-2"
+      >
+        <ModalBody className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1 text-sm">
             <span id="library-modal-platform-label">Platform</span>
             <PlatformCombobox
               value={platform}
@@ -90,7 +90,7 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
             />
           </div>
 
-          <div className="gap-xs flex flex-col text-sm">
+          <div className="flex flex-col gap-1 text-sm">
             <span id="library-modal-rating-label">Rating</span>
             <RatingInput
               aria-label="Rating"
@@ -101,35 +101,35 @@ export function LibraryModal({ entry, open, onOpenChange }: LibraryModalProps) {
           </div>
 
           {error !== null ? (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {error}
             </p>
           ) : null}
+        </ModalBody>
 
-          <DialogFooter className="sm:justify-between">
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-destructive hover:text-destructive"
-              onClick={() => setConfirmingRemove(true)}
-            >
-              <Trash2 aria-hidden="true" />
-              Remove from library
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              Save changes
-            </Button>
-          </DialogFooter>
-        </form>
-        <RemoveFromLibraryDialog
-          open={confirmingRemove}
-          onOpenChange={setConfirmingRemove}
-          gameTitle={entry.game.title}
-          onConfirm={() => {
-            void handleRemove();
-          }}
-        />
-      </DialogContent>
-    </Dialog>
+        <ModalFooter className="justify-between">
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-destructive hover:text-destructive"
+            onClick={() => setConfirmingRemove(true)}
+          >
+            <Trash2 aria-hidden="true" />
+            Remove from library
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            Save changes
+          </Button>
+        </ModalFooter>
+      </form>
+      <RemoveFromLibraryDialog
+        open={confirmingRemove}
+        onOpenChange={setConfirmingRemove}
+        gameTitle={entry.game.title}
+        onConfirm={() => {
+          void handleRemove();
+        }}
+      />
+    </ResponsiveModal>
   );
 }

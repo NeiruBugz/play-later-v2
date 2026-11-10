@@ -31,13 +31,13 @@ export function CriticScoreRing({ value }: CriticScoreRingProps) {
           background: `conic-gradient(var(--foreground) ${degrees}deg, color-mix(in oklch, var(--muted-foreground) 20%, transparent) ${degrees}deg)`,
         }}
       >
-        <div className="bg-card absolute inset-[7px] flex flex-col items-center justify-center rounded-full">
-          <span className="text-foreground text-xl leading-none font-bold tabular-nums">
+        <div className="absolute inset-[7px] flex flex-col items-center justify-center rounded-full bg-card">
+          <span className="text-xl leading-none font-bold text-foreground tabular-nums">
             {clamped}
           </span>
         </div>
       </div>
-      <span className="text-caption text-muted-foreground tracking-wider uppercase">
+      <span className="text-xs font-medium text-muted-foreground uppercase">
         Critic score
       </span>
     </div>

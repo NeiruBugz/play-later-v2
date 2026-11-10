@@ -6,7 +6,7 @@
 
 Conventions for every slice:
 - Paths are relative to `savepoint-tanstack/` unless they say otherwise.
-- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && test:integration && build`. Every slice ends with it green.
+- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && build`, plus `test:integration` only when the diff touches server/DB paths (`git diff --name-only | rg '/api/|\.server\.|\.worker\.|prisma/|test/integration/|test/setup/|env\.ts|shared/lib/(db|auth|logger|errors|prisma)'` prints something). Integration also runs once before each release PR; CI runs it on every PR. Every slice ends with it green. (Owner, 2026-11-06: the integration suite only imports server layers, and Release 2 touches none of them.)
 - **Starting the app for a Verify task:**
   - `docker compose up -d`, then `pnpm --filter savepoint-tanstack dev` (port 6060) in the background.
   - Record the dev-server PID when starting it, and stop the server with `kill <PID>` at the end. Never pipe a daemon's stop command into another command.
@@ -104,31 +104,38 @@ Conventions for every slice:
     - Stop the server by PID and delete the temporary files.
     - Release 1 can ship after this. **[Agent: testing]**
 
-- [ ] **Slice 7: Titles use the title font, `/about` shows "not found", and the token layer is cleaned up**
-  - [ ] In `src/styles.css`:
+- [x] **Slice 7: Titles use the title font, `/about` shows "not found", and the token layer is cleaned up**
+  - [x] In `src/styles.css`:
     - add `--font-sans`, `--font-mono` and `--font-display` to `@theme`, so `font-display` produces CSS;
     - move the still-used custom utilities from `@layer utilities` to `@utility`, so their variants start working (hover shadows, `sm:` gaps);
     - delete the dead parts: about 114 spacing classes, 13 typography classes, unused keyframes, the duplicate reduced-motion block, the v3-shaped `--container-*`, the self-referencing `@theme` bindings, and the unused `chart-*` and `sidebar-*` tokens.
 
     Diff the compiled CSS to confirm no live class disappeared. **[Agent: react-frontend]**
-  - [ ] Delete `src/routes/about.tsx` and regenerate `routeTree.gen.ts`. Add an assertion to `src/routes/-route-tree.test.tsx` that `/about` is absent. **[Agent: tanstack-fullstack]**
-  - [ ] Verify:
+  - [x] Delete `src/routes/about.tsx` and regenerate `routeTree.gen.ts`. Add an assertion to `src/routes/-route-tree.test.tsx` that `/about` is absent. **[Agent: tanstack-fullstack]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Open `/about` and see the standard not-found screen. Confirm in the Playwright MCP, via computed `font-family`, that the four former no-op places use Space Grotesk: log-session title, journal stats rail, journal entry card. Confirm that hovering a button at desktop changes its shadow.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 8: Every primitive has the stock Maia look in today's palette**
-  - [ ] Change `components.json` to `style: "base-maia"` and `baseColor: "neutral"`.
+    Accepted deviation (owner, 2026-11-05): moving the spacing utilities to `@utility` sorts them alphabetically, so where one element carries two custom spacing classes (a `Card` variant `p-2xl` plus a call-site `p-lg`; `tailwind-merge` keeps both) the other one now wins. Journal cards and the settings/account cards render tighter than Release 1. Left until Slice 9.
+
+- [x] **Slice 8: Every primitive has the stock Maia look in today's palette**
+  - [x] Change `components.json` to `style: "base-maia"` and `baseColor: "neutral"`.
     - Map today's spec-022 oklch values onto the stock shadcn variable names in `:root` and `.dark`. `--primary` is today's teal, and `--accent` is the stock hover surface.
     - Keep `--success/warning/info`, `--status-want/playing/done` and the bottom-nav variables, each declared raw and as `--color-*` in `@theme inline`. Use one stock `--radius`. Delete the other non-stock tokens.
     - Add a note to `.claude/rules/tanstack/shared.md`: never run `shadcn init` or `apply` against the repo. **[Agent: react-frontend]**
-  - [ ] Re-pull each primitive with `npx shadcn@latest view <name>`, style `base-maia`, in a scratch copy, never in the repo. Diff it and replace the repo file.
+  - [x] Re-pull each primitive with `npx shadcn@latest view <name>`, style `base-maia`, in a scratch copy, never in the repo. Diff it and replace the repo file.
     - Apply the deviation table from tech spec §2.4: button sizes `h-11 md:h-9` / `h-10 md:h-8` / icon `size-11 md:size-9`; inputs, textarea, command input and select trigger at `text-base md:text-sm`; a solid focus ring at ≥3:1; `Toaster` taking `theme` from the theme provider.
     - Record the table in a new `src/shared/ui/README.md` section.
     - Restyle the non-shadcn primitives to stock tokens: empty-state, page-header, rating-input, segmented-control, responsive-modal, undo-toast, image-lightbox.
     - Add a stock `Skeleton` and replace the 11 ad hoc `animate-pulse` uses. **[Agent: react-frontend]**
-  - [ ] Rewrite the class-asserting tests as behaviour tests: `badge`, `alert`, `library-item-card:221,255`, `platform-badges:63`, `library-status-badge:61-69`, `game-card:98-106`. Drop the retired theme names from `theme-provider.test.tsx`. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Rewrite the class-asserting tests as behaviour tests: `badge`, `alert`, `library-item-card:221,255`, `platform-badges:63`, `library-status-badge:61-69`, `game-card:98-106`. Drop the retired theme names from `theme-provider.test.tsx`. **[Agent: testing]**
+  - [x] Fix what the first Slice 8 verify found:
+    - Tabs: stock `tabs.tsx` (and `separator.tsx`) key their layout off `data-horizontal`/`data-vertical`, but Base UI emits `data-orientation`, so the related-games tablist renders as a tall column. Make the orientation styles match what Base UI emits.
+    - Sheets: stock `SheetContent` has no body padding, so the Add game and Log time sheets are edge to edge on phone. Restore the side inset.
+    - 44px on phone (owner, 2026-11-05: everything at 44px, per §2.6): `Input` `h-11 md:h-9`, Button `sm` `h-11 md:h-8`, and drop the `h-8 w-8` override on the game page "More library actions" icon button. Update the deviation table in `src/shared/ui/README.md` and tech spec §2.4.
+    Cover the tabs and sheet fixes with behaviour tests. **[Agent: react-frontend]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). At desktop width, confirm all of the following:
       - primary buttons on every screen share height and corner radius;
@@ -139,14 +146,20 @@ Conventions for every slice:
       - switching Light and Dark changes only colors.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 9: Every screen is on stock spacing and type, with plain section labels**
-  - [ ] Write the dev-only codemod `scripts/codemods/tailwind-semantic.ts` (ts-morph).
+- [x] **Slice 9: Every screen is on stock spacing and type, with plain section labels**
+  - [x] Write the dev-only codemod `scripts/codemods/tailwind-semantic.ts` (ts-morph).
     - It reads the current values from `styles.css` and maps semantic spacing to numeric Tailwind steps, the type classes to stock sizes, and `shadow-paper-*` to `shadow-xs/sm/md`.
     - It touches only string literals in `className`, `cn()` and `cva()`.
+    - Where one element ends up with two conflicting spacing classes (a `Card` variant plus a call-site override; see the Slice 7 accepted deviation), keep one stock value on purpose. Release 1 showed the variant's value (e.g. `p-2xl`, 24px), not the call site's.
     - Run it on `src/shared` and `src/entities`, then run the gate. **[Agent: react-frontend]**
-  - [ ] Run the codemod on `src/features`, then on `src/widgets` and `src/routes`, running the gate after each layer. Grep for retired names left in template literals and fix them by hand. Fix bare `rounded` and arbitrary radius values per file. **[Agent: react-frontend]**
-  - [ ] Add `SectionLabel` (body font, sentence case) to `shared/ui`. Replace `terminal-label`, the local `TerminalLabel` clone and every `// LABEL` string with it. Make `PageHeader` the only page-title style, on every screen in §2.0. Remove `font-serif` from the profile name. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Run the codemod on `src/features`, then on `src/widgets` and `src/routes`, running the gate after each layer. Grep for retired names left in template literals and fix them by hand. Fix bare `rounded` and arbitrary radius values per file. **[Agent: react-frontend]**
+  - [x] Add `SectionLabel` (body font, sentence case) to `shared/ui`. Replace `terminal-label`, the local `TerminalLabel` clone and every `// LABEL` string with it. Make `PageHeader` the only page-title style, on every screen in §2.0. Remove `font-serif` from the profile name. Replace the last `text-foreground-body` (`journal-stats-rail.tsx`) with a stock color and delete `--foreground-body` (task 8.1 kept it because that file still reads it). **[Agent: react-frontend]**
+  - [x] Finish what the first Slice 9 verify found:
+    - Section headings still in the title style become `SectionLabel`: game page "Times to beat" (incl. its skeleton) and "Related games" (`routes/games.$slug.tsx`), `journal-entry-page.tsx`, `add-to-track-invite.tsx`, `empty-library-hero.tsx`, and the `/settings/account` "Account" `h2`; `rg 'font-display' src` should then only hit `PageHeader` (and the landing hero, Slice 13).
+    - Unknown URLs (`defaultNotFoundComponent`) render the not-found state with `PageHeader`, like the per-route not-found states.
+    - Sign-in: its visible title uses the `PageHeader` style.
+    - The review script's body-text rule treats `[data-slot=section-label]` as a label. **[Agent: react-frontend]**
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP, assert on every screen that:
       - no text starts with `//`;
@@ -156,33 +169,34 @@ Conventions for every slice:
       - page titles, including the profile name, use the title font.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 10: The custom styling layer cannot come back**
-  - [ ] Delete the remaining semantic spacing, typography and shadow utilities from `styles.css`. Confirm `styles.css` is about 300 lines and `rg` finds none of the retired names in `src/`. **[Agent: react-frontend]**
-  - [ ] Add `eslint-plugin-better-tailwindcss` (exact pin) to `eslint.config.mjs`. Rules:
+- [x] **Slice 10: The custom styling layer cannot come back**
+  - [x] Delete the remaining semantic spacing, typography and shadow utilities from `styles.css`. Confirm `styles.css` is about 300 lines and `rg` finds none of the retired names in `src/`. **[Agent: react-frontend]**
+  - [x] Add `eslint-plugin-better-tailwindcss` (exact pin) to `eslint.config.mjs`. Rules:
     - `no-unknown-classes` against `src/styles.css`;
     - `no-conflicting-classes`;
     - `no-restricted-classes` banning `text-[Npx]`, hex and arbitrary colors, raw palette colors outside an allow-list, `font-serif`, `terminal-label` and the retired semantic names;
     - `no-restricted-syntax` for inline color styles.
 
     Add rule tests in `test/eslint/`. **[Agent: react-frontend]**
-  - [ ] Tooling and docs:
+  - [x] Tooling and docs:
     - bump `prettier-plugin-tailwindcss` to the v4-aware line with `tailwindStylesheet: "./src/styles.css"`;
     - upgrade `tailwind-merge` to the v3 line, with exact pins;
     - update `.claude/rules/tanstack/shared.md` and `widgets.md`, `src/shared/README.md`, `DIVERGENCES.md` and the spec-022 design README to the new rule: tokens in `styles.css`, stock `shadcn view` output as the source of truth, deviations listed in `shared/ui/README.md`. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Add a throwaway file using `px-xl`, `text-[11px]` and `bg-[#2f8a82]`, and confirm lint fails on each. Delete the file.
     - Confirm `cn("text-xs","text-muted-foreground")` keeps both classes, using a small node check that is then deleted. **[Agent: testing]**
 
 - [ ] **Slice 11: Phone screens respect the notch, the home indicator and the keyboard**
-  - [ ] Change the viewport meta in `routes/__root.tsx` `head()` to `width=device-width, initial-scale=1, viewport-fit=cover`. No `maximum-scale` or `user-scalable`. Add a unit test for the `head()` viewport string. **[Agent: tanstack-fullstack]**
-  - [ ] Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` using `env(safe-area-inset-*)`. Apply them to the mobile top bar, the game-detail action bar, the navigation progress bar and the sheet.
+  - [x] Change the viewport meta in `routes/__root.tsx` `head()` to `width=device-width, initial-scale=1, viewport-fit=cover`. No `maximum-scale` or `user-scalable`. Add a unit test for the `head()` viewport string. **[Agent: tanstack-fullstack]**
+  - [x] Add `@utility pt-safe/pb-safe/pl-safe/pr-safe` using `env(safe-area-inset-*)`. Apply them to the mobile top bar, the game-detail action bar, the navigation progress bar and the sheet.
     - `SheetContent`: switch to `max-h-[90dvh]`; the scroll area becomes `flex-1 overflow-y-auto`; add a sticky `SheetFooter` with `pb-safe`.
     - Phone `Toaster`: `mobileOffset` above `--bottom-nav-height`. **[Agent: react-frontend]**
-  - [ ] Add a `StickyFooter` primitive: pinned at the bottom with `pb-safe` on phone, inline from `md` up.
+  - [x] Add a `StickyFooter` primitive: pinned at the bottom with `pb-safe` on phone, inline from `md` up.
     - Use it for the primary button of the sign-in, profile setup, log, journal edit and profile settings forms.
     - Move the bottom-sheet primary buttons into `SheetFooter`: Add game, Log session, filters.
     - Add a `visualViewport` adjustment only if the device check shows a field hidden behind the iOS keyboard. **[Agent: react-frontend]**
+  - [x] Fix what the first Slice 11 verify found: `StickyFooter` is `position: sticky`, so on short forms (profile setup, settings profile, journal edit) the primary button sits under the last field instead of in the bottom third, and on profile setup it never pins (its sticky container is the card). On phone the primary button must always sit in the bottom third and stay there while scrolling, without covering content (reserve its height at the end of the scroll area) and above the bottom nav where there is one. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - Start the app (record the PID). In the Playwright MCP at 390×844, confirm:
@@ -192,26 +206,36 @@ Conventions for every slice:
     - Stop the server by PID and delete the screenshots.
     - Then ask the owner to do the real-device check on an iPhone and an Android phone: notch and home indicator, the keyboard over text fields, no zoom on focus. Record the result in the slice notes. **[Agent: testing]**
 
-- [ ] **Slice 12: Phone screens use bottom sheets, readable text and thumb-sized targets**
-  - [ ] Route Remove from library, `library-modal`, whats-new, the Steam import modal and Steam connect through `ResponsiveModal`, so they open as bottom sheets on phone with a visible close button. **[Agent: react-frontend]**
-  - [ ] Replace every `text-[10px]` and `text-[11px]`: bottom-nav labels, landing, library card, platform and status badges, profile. The floor is `text-xs`; body text is `text-base md:text-sm`. **[Agent: react-frontend]**
-  - [ ] Bring every tappable element to at least 44×44 at phone width. Migrate the remaining native `<button>` elements to `Button`, or give them `min-h-11 min-w-11 md:min-h-0 md:min-w-0`. Extend the hit area of small icon controls. **[Agent: react-frontend]**
-  - [ ] Make hover-only information reachable by tap. Platform badges open a `Popover` on tap; the Steam imported-card icon buttons replace `title=` with `aria-label` plus a tooltip or popover. **[Agent: react-frontend]**
-  - [ ] Write behaviour tests:
+    Slice notes (2026-11-06): the gate and the Playwright part pass (second run, after the `StickyFooter` fix): primary buttons at 724–788 px of 844 on every form and sheet at any scroll, last field never covered, toasts above the bottom nav, `.pt-safe`/`.pb-safe` reference `env(safe-area-inset-*)`, desktop unchanged. The owner's real-device check is deferred to the Release 2 Vercel preview, together with Slice 12. Check on iPhone (Safari and home screen) and Android Chrome:
+    - top bar and navigation progress bar clear the notch; bottom nav, sheet footers and the lightbox strip clear the home indicator; game-page action bar insets in landscape;
+    - sign-in, profile setup, settings profile and journal edit: the primary button sits at the bottom and is not under the bottom nav;
+    - the keyboard over text fields (sign-in, profile setup, Log time note, journal edit, settings name and username): the focused field stays visible; does the pinned button ride above the iOS keyboard or get covered (decides whether a `visualViewport` adjustment is needed); on Android, does the bottom nav jump above the keyboard;
+    - no zoom on focus on any input or the search field;
+    - a status-change toast sits above the bottom nav.
+
+- [x] **Slice 12: Phone screens use bottom sheets, readable text and thumb-sized targets**
+  - [x] Route Remove from library, `library-modal`, whats-new, the Steam import modal and Steam connect through `ResponsiveModal`, so they open as bottom sheets on phone with a visible close button. The sheet close button must not overlap the header text (Slice 8 verify: on the Log time sheet it covers the end of the description). **[Agent: react-frontend]**
+  - [x] Replace every `text-[10px]` and `text-[11px]`: bottom-nav labels, landing, library card, platform and status badges, profile. The floor is `text-xs`; body text is `text-base md:text-sm`. **[Agent: react-frontend]**
+  - [x] Bring every tappable element to at least 44×44 at phone width. Migrate the remaining native `<button>` elements to `Button`, or give them `min-h-11 min-w-11 md:min-h-0 md:min-w-0`. Extend the hit area of small icon controls. Known from the Slice 8 verify: the toast "Undo" action is sonner's own action button (24px; style it through the `Toaster`'s `toastOptions.classNames.actionButton`, the `Button` inside `UndoToastBody` is not on that path), the Grid/List view toggles are 42 px wide, the game page tabs are 32 px, the status chip and status-picker rows are under 44. **[Agent: react-frontend]**
+  - [x] Make hover-only information reachable by tap. Platform badges open a `Popover` on tap; the Steam imported-card icon buttons replace `title=` with `aria-label` plus a tooltip or popover. **[Agent: react-frontend]**
+  - [x] Write behaviour tests:
     - Remove from library opens as a sheet when `useIsDesktop` is false and as a dialog when it is true;
     - tapping a platform badge shows the platform name. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Run the review script's phone checks at 360, 390 and 430. `report.json` must show no overflow, no target under 44×44, no text under 12px and no body text under 15px on any §2.0 screen.
     - In the Playwright MCP, open each of the five dialogs at 390 and confirm they open as bottom sheets.
     - Stop the server by PID and delete the temporary report and screenshots. **[Agent: testing]**
 
-- [ ] **Slice 13: The landing page follows the theme and only today's palette is used**
-  - [ ] Remove the forced `class="dark"` and the decorative blobs and gradients from `routes/index.tsx` and the landing widgets, and move them onto shared components and tokens.
+- [x] **Slice 13: The landing page follows the theme and only today's palette is used**
+  - [x] Remove the forced `class="dark"` and the decorative blobs and gradients from `routes/index.tsx` and the landing widgets, and move them onto shared components and tokens.
     - Add `THEME_COLORS` to `shared/config/site.ts` (today's `--background` for each mode). Use it for the `theme-color` meta and the manifest colors, replacing the retired `#f6f1e7` / `#120f0c`.
     - Unit-test `THEME_INIT_SCRIPT` in jsdom with a stubbed `matchMedia`, for a stored choice, no choice and an invalid value. **[Agent: tanstack-fullstack]**
-  - [ ] Make the platform badges neutral: one palette color, the platform name as text. Delete the 20 hexes and the platform tokens. Replace the remaining raw palette colors: `rating-input` amber, `bg-black/55` overlays, landing emerald and fuchsia. Replace the runtime oklch in `derive-banner-gradient.ts` with tokens. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Make the platform badges neutral: one palette color, the platform name as text. Delete the 20 hexes and the platform tokens. Replace the remaining raw palette colors: `rating-input` amber, `bg-black/55` overlays, landing emerald and fuchsia. Replace the runtime oklch in `derive-banner-gradient.ts` with tokens. **[Agent: react-frontend]**
+  - [x] Fix what the first Slice 13 verify found: only the dark `theme-color` meta reaches the HTML; the light one declared in `__root.tsx` `head()` is dropped (likely de-duplicated by `name`). Both per-scheme metas must render. Cover it with a test of the rendered head.
+
+    Accepted (owner rule via tech spec §2.5): stock `shadow-xs/sm/md` cast black-alpha shadows; they are part of the stock look and count as palette for the color scan.
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). Signed out, in the Playwright MCP:
       - `emulateMedia({ colorScheme: "light" })` shows Light;
@@ -220,17 +244,26 @@ Conventions for every slice:
     - Scan the computed colors of every element on the §2.0 screens and confirm each is a palette token, excluding covers, screenshots and avatars. `rg` for hex and raw palette classes must be clean.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 14: Readability and focus meet the baseline in both modes**
-  - [ ] Check contrast in Light and Dark for body, label, button, placeholder, muted, toast and over-cover text, and for the focus ring. Adjust token values until text reaches 4.5:1 (3:1 for large text) and the focus ring reaches 3:1, without changing hues. Write the measured ratios into `src/shared/ui/README.md`. **[Agent: react-frontend]**
-  - [ ] Verify:
+- [x] **Slice 14: Readability and focus meet the baseline in both modes**
+  - [x] Check contrast in Light and Dark for body, label, button, placeholder, muted, toast and over-cover text, and for the focus ring. Adjust token values until text reaches 4.5:1 (3:1 for large text) and the focus ring reaches 3:1, without changing hues. Write the measured ratios into `src/shared/ui/README.md`. Known from 13.2: check `text-scrim-foreground` over bright covers, `fill-warning` rating stars in Light, and the `game-card` accent-cover title (light text on a gradient ending in the cream `--background`) in Light. **[Agent: react-frontend]**
+  - [x] Fix what the first Slice 14 verify found:
+    - Focus: 670 of 1308 focus stops show only the browser default outline recoloured by `* { outline-ring/50 }` (`styles.css:177`), 2.1–2.8:1. Give every focusable element a visible ≥2px indicator at ≥3:1 (a base `:focus-visible` rule on `--ring` without the `/50`). The library card menu trigger ring over cover art (`ring-scrim-foreground/70`) falls to 1.2:1 on some covers, and the game-page tab panel has `outline-none` with no replacement.
+    - Text below 4.5:1: `QueueMarker` (`bg-primary/10 text-primary`, Light 4.46), the active status-lens chip count (`opacity-80`, Light 4.17), journal entry card hours (`text-primary/70`, Light 3.15, Dark 4.28). The breadcrumb separator (`opacity-50`, 2.1–2.4) is fine only if it is decorative and hidden from assistive tech.
+    - Extend `contrast.test.ts` to cover tinted and alpha text pairs like these. **[Agent: react-frontend]**
+  - [x] Verify:
     - Start the app (record the PID).
     - In the Playwright MCP, compute contrast ratios for the listed text types on home, library, game page, journal and settings in both modes. Tab through each screen and confirm the focused element has a visible outline at ≥3:1.
     - Stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 15: Owner approves phase 1 phone first, then desktop (Release 2)**
-  - [ ] Capture `review/phase1/after/phone` in Light and Dark with the review script. Assemble the before/after pairs with `report.json`, and list any content or control present before but missing after, other than the items removed in §2.3–2.4. Present the phone pairs to the owner. **[Agent: testing]**
-  - [ ] After the owner approves every phone pair, capture `review/phase1/after/desktop` and present the desktop pairs. Rework any rejected pair in a follow-up task and show it again. **[Agent: testing]**
-  - [ ] Verify:
+- [x] **Slice 15: Owner approves phase 1 phone first, then desktop (Release 2)**
+  - [x] Capture `review/phase1/after/phone` in Light and Dark with the review script. Assemble the before/after pairs with `report.json`, and list any content or control present before but missing after, other than the items removed in §2.3–2.4. Present the phone pairs to the owner. **[Agent: testing]**
+
+    Owner approved all 46 phone pairs on 2026-11-06 (`review/phase1/compare-phone.html`; phone checks 1395 → 2, both the Up Next shelf). The landing's uppercase marketing labels stay as they are.
+  - [x] After the owner approves every phone pair, capture `review/phase1/after/desktop` and present the desktop pairs. Rework any rejected pair in a follow-up task and show it again. **[Agent: testing]**
+
+    Owner approved all 44 desktop pairs and the 12 reworked phone pairs on 2026-11-06 (`review/phase1/compare-desktop.html`, `compare-phone.html`; after 5f011058).
+  - [x] Rework what the desktop compare found before showing it to the owner: profile counts read "1Followers · 1Following" (missing space, own and public profile, both modes and likely phone too); spacing below the page sub-text is tighter than before on search results and journal compose, below the "Note" title on journal entry, and between the sign-in fields. Restore the before spacing with stock steps and re-capture the affected phone and desktop pairs. **[Agent: react-frontend]**
+  - [x] Verify:
     - Confirm the owner approved every phone pair and every desktop pair. Run the gate one last time.
     - Copy `review/phase1/after` to `review/phase2/before`, since the phase 2 "before" is the shipped phase 1.
     - Release 2 can ship after this. **[Agent: testing]**
@@ -272,7 +305,7 @@ Conventions for every slice:
 - [ ] **Slice 19: One status chip everywhere, including "Let go"**
   - [ ] Add `shared/ui/status-chip.tsx` with `status: "want" | "playing" | "done" | "let-go"`. It is built on the Maia `Badge`, uses the `--status-*` colors, and has one casing; `let-go` uses the Done color.
     - Map the domain status and outcome to it at the entity layer.
-    - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar and status-switcher color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
+    - Replace the Badge status variants, `LibraryStatusBadge`, `RunStatusBadge` inline styles, the action-bar, status-switcher and journal stats rail (`journal-stats-rail.tsx`) color-mix styles, and the cover-gradient accents on library cards, the game page, home, search results and the profile library. **[Agent: react-frontend]**
   - [ ] Write behaviour tests: each status renders its label; "Let go" shares the Done variant attribute; contrast tokens are applied in both modes, asserted via the variant attribute and not via classes. **[Agent: testing]**
   - [ ] Verify:
     - Run the gate.

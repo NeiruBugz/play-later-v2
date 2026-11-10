@@ -6,6 +6,7 @@ import {
   getSteamConnectionFn,
   SteamConnectCard,
 } from "@/features/steam-connect";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 export const Route = createFileRoute("/_authed/settings/account")({
   loader: () => getSteamConnectionFn(),
@@ -19,7 +20,7 @@ function SettingsAccountPage() {
   // `_authed/settings.tsx` layout route. Child renders content only.
   return (
     <div>
-      <h2 className="text-h2 mb-6">Account</h2>
+      <SectionLabel className="mb-6">Account</SectionLabel>
 
       <div className="space-y-6">
         <SteamConnectCard steamId={steamId} connectUrl={connectUrl} />

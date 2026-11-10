@@ -5,6 +5,7 @@ import {
   buildScreenshotUrl,
 } from "@/shared/lib/igdb-image";
 import { ImageLightbox } from "@/shared/ui/image-lightbox";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { ScreenshotsPanelProps } from "./screenshots-panel.type";
 
@@ -34,21 +35,18 @@ export function ScreenshotsPanel({
       aria-labelledby="screenshots-heading"
       aria-label={`Screenshots of ${gameTitle}`}
     >
-      <h2
-        id="screenshots-heading"
-        className="text-muted-foreground mb-md font-mono text-xs tracking-wider uppercase"
-      >
+      <SectionLabel id="screenshots-heading" className="mb-2">
         Screenshots
-      </h2>
+      </SectionLabel>
 
-      <div className="gap-sm flex overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible">
+      <div className="flex gap-1.5 overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible">
         {images.map((image, i) => (
           <button
             key={image.full}
             type="button"
             aria-label={`Open screenshot ${i + 1}`}
             onClick={() => setActiveIndex(i)}
-            className="ring-offset-background focus-visible:ring-ring w-48 shrink-0 overflow-hidden rounded-md leading-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:w-auto"
+            className="w-48 shrink-0 overflow-hidden rounded-md leading-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:w-auto"
           >
             <img
               src={image.thumb}

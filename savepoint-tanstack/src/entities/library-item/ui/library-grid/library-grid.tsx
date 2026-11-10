@@ -26,12 +26,12 @@ export function LibraryGrid({ games }: LibraryGridProps) {
               />
             ) : (
               <div
-                className="bg-muted aspect-[3/4] w-full"
+                className="aspect-[3/4] w-full bg-muted"
                 aria-hidden="true"
               />
             )}
           </div>
-          <p className="body-sm mt-2 line-clamp-2 font-medium">{game.title}</p>
+          <p className="mt-2 line-clamp-2 text-sm">{game.title}</p>
         </div>
       ))}
     </div>

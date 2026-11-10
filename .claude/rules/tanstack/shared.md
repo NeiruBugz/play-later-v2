@@ -7,7 +7,7 @@ paths:
 
 The BOTTOM of the FSD graph. `shared/` imports from nothing in the app
 graph; everything imports it. Holds DB / logger / errors / auth-client /
-IGDB / S3 / shadcn primitives.
+IGDB / S3 / shadcn primitives. Design tokens live in `src/styles.css`.
 
 ## Rules
 
@@ -23,10 +23,15 @@ IGDB / S3 / shadcn primitives.
 
 ### `shared/ui/`
 
-- **Rule:** `shared/ui/` is primitives only — shadcn-derived components with minimal styling. **Why:** layer responsibility; custom domain components belong in entities or features.
+- ~~**Rule:** `shared/ui/` is primitives only — shadcn-derived components with minimal styling. **Why:** layer responsibility; custom domain components belong in entities or features.~~ — superseded 2026-11-05 (spec 027 design reset):
+- **Rule:** `shared/ui/` is primitives only — stock shadcn `base-maia` output (Base UI under the hood). Deliberate deviations are listed in [`shared/ui/README.md`](../../../savepoint-tanstack/src/shared/ui/README.md); anything not listed there must match `shadcn view`. **Why:** layer responsibility; stock output is the source of truth, so re-pulls stay a diff, not a rewrite. Custom domain components belong in entities or features.
 - **Rule:** `shared/ui/index.ts` is the public barrel — re-exports every primitive. **Why:** single import path (`import { Button } from "@/shared/ui"`).
-- **Rule:** UI primitives import only from `@/shared/lib/utils` + radix-ui + react. No imports from other layers. **Why:** primitives must stay platform-neutral.
-- **Rule:** styling via `cn()` + Tailwind only. No inline `style={...}` (except for dynamic CSS variables), no CSS-in-JS. **Why:** one styling pipeline.
+- ~~**Rule:** UI primitives import only from `@/shared/lib/utils` + radix-ui + react. No imports from other layers. **Why:** primitives must stay platform-neutral.~~ — superseded 2026-11-05 (spec 027 design reset):
+- **Rule:** UI primitives import only from `@/shared/lib/utils` + `@base-ui/react` + react (+ `lucide-react` icons). No imports from other layers. **Why:** primitives must stay platform-neutral.
+- ~~**Rule:** styling via `cn()` + Tailwind only. No inline `style={...}` (except for dynamic CSS variables), no CSS-in-JS. **Why:** one styling pipeline.~~ — superseded 2026-11-05 (spec 027 design reset):
+- **Rule:** styling via `cn()` + stock Tailwind utilities only. Color, radius and font tokens are defined once in `src/styles.css`. There is no custom spacing, type or shadow layer: no semantic utilities, no `text-[Npx]`, no hex or arbitrary colors, no inline color styles. Enforced by `eslint-plugin-better-tailwindcss` and `no-restricted-syntax` in `eslint.config.mjs` (tests in `test/eslint/`). No CSS-in-JS. **Why:** one styling pipeline, one source of truth.
+- ~~**Rule:** never run `shadcn init` or `shadcn apply` against the repo (`apply --only theme` overwrites the palette in `src/styles.css`). Pull stock output with `shadcn view <name>` in a scratch directory outside the repo and diff it. **Why:** `components.json` only seeds `shadcn add`; our tokens are the source of truth.~~ — superseded 2026-11-05 (spec 027 design reset):
+- **Rule:** never run `shadcn init` or `shadcn apply` against the repo (`apply --only theme` overwrites the tokens in `src/styles.css`). Pull stock output (style `base-maia`) with `shadcn view <name>` in a scratch directory outside the repo and diff it. **Why:** `components.json` only seeds `shadcn add`; `src/styles.css` holds our tokens.
 
 ### `shared/api/`
 
@@ -37,7 +42,8 @@ IGDB / S3 / shadcn primitives.
 
 ### `shared/config/`
 
-- **Rule:** `shared/config/` is reserved for per-layer env subsets if needed. Currently unused; either populate or delete. **Why:** nothing rots faster than empty directories.
+- ~~**Rule:** `shared/config/` is reserved for per-layer env subsets if needed. Currently unused; either populate or delete. **Why:** nothing rots faster than empty directories.~~ — superseded 2026-11-06 (spec 027 design reset):
+- **Rule:** `shared/config/` holds static site config and per-layer env subsets if needed. Today: `site.ts` (`THEME_COLORS`, the hex of each mode's `--background`, used by the `theme-color` meta and the manifest). **Why:** one source for values that can't live in CSS.
 
 ## Documented exceptions
 

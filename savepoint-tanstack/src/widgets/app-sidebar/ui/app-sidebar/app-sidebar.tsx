@@ -107,7 +107,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       data-testid="app-sidebar"
       aria-label="Primary navigation"
       data-collapsed={collapsed ? "true" : undefined}
-      className={`bg-background sticky top-0 hidden h-screen shrink-0 flex-col self-start border-r transition-[width] duration-200 md:flex ${collapsed ? "w-16" : "w-64"}`}
+      className={`sticky top-0 hidden h-screen shrink-0 flex-col self-start border-r bg-background transition-[width] duration-200 md:flex ${collapsed ? "w-16" : "w-64"}`}
     >
       <div className={`space-y-3 pt-4 ${collapsed ? "px-2" : "px-4"}`}>
         <div className="flex items-center justify-between">
@@ -122,14 +122,18 @@ export function AppSidebar({ user }: AppSidebarProps) {
               aria-hidden="true"
               className="h-8 w-8 shrink-0"
             />
-            {!collapsed && <span className="text-h3">SavePoint</span>}
+            {!collapsed && (
+              <span className="font-display text-2xl font-semibold tracking-tight">
+                SavePoint
+              </span>
+            )}
           </Link>
 
           <button
             type="button"
             aria-label={collapseLabel}
             onClick={toggleCollapsed}
-            className="text-muted-foreground hover:bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
           >
             <CollapseIcon size={16} aria-hidden="true" />
           </button>
@@ -140,10 +144,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
             type="button"
             aria-label="Open command palette"
             onClick={openCommandPalette}
-            className="border-border text-muted-foreground flex w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm"
+            className="flex w-full items-center justify-between rounded-md border border-border bg-transparent px-3 py-2 text-sm text-muted-foreground"
           >
             <span>Search</span>
-            <kbd className="text-muted-foreground rounded border px-1.5 py-0.5 text-xs font-semibold">
+            <kbd className="rounded-sm border px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">
               ⌘K
             </kbd>
           </button>
@@ -154,7 +158,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
             type="button"
             aria-label="Open command palette"
             onClick={openCommandPalette}
-            className="text-muted-foreground hover:bg-accent flex w-full items-center justify-center rounded-md py-2"
+            className="flex w-full items-center justify-center rounded-md py-2 text-muted-foreground hover:bg-accent"
           >
             <Search size={16} aria-hidden="true" />
           </button>
@@ -164,7 +168,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           type="button"
           aria-label="Log"
           onClick={openLogSession}
-          className={`bg-primary text-primary-foreground flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
+          className={`flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground ${collapsed ? "aspect-square px-0" : ""}`}
         >
           <BookOpen size={16} aria-hidden="true" />
           {!collapsed && "Log"}
@@ -174,7 +178,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           to="."
           search={(prev) => ({ ...prev, action: "add-game" as const })}
           aria-label="Add game"
-          className={`border-border hover:bg-accent flex w-full items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold ${collapsed ? "aspect-square px-0" : ""}`}
+          className={`flex w-full items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-semibold hover:bg-accent ${collapsed ? "aspect-square px-0" : ""}`}
         >
           <PackagePlus size={16} aria-hidden="true" />
           {!collapsed && "Add game"}
@@ -191,7 +195,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               "aria-current": "page" as const,
               className: "bg-muted text-foreground",
             }}
-            className={`hover:bg-accent flex items-center rounded-md py-2 text-sm font-medium ${collapsed ? "justify-center px-2" : "gap-2 px-3"}`}
+            className={`flex items-center rounded-md py-2 text-sm font-medium hover:bg-accent ${collapsed ? "justify-center px-2" : "gap-2 px-3"}`}
           >
             <Icon size={16} aria-hidden={!collapsed} />
             {!collapsed && label}
@@ -208,7 +212,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <DropdownMenuTrigger
             type="button"
             aria-label="Open user menu"
-            className={`hover:bg-accent data-[popup-open]:bg-accent flex w-full items-center rounded-md py-1.5 text-sm ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
+            className={`flex w-full items-center rounded-md py-1.5 text-sm hover:bg-accent data-[popup-open]:bg-accent ${collapsed ? "justify-center px-1" : "gap-2 px-2"}`}
           >
             <Avatar className="h-7 w-7">
               {user.image ? (

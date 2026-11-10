@@ -52,7 +52,7 @@ function RatingStar({
   return (
     <span className={cn("relative inline-block", sizeClass)} aria-hidden="true">
       <Star
-        className={cn("text-muted-foreground/40 absolute inset-0", sizeClass)}
+        className={cn("absolute inset-0 text-muted-foreground/40", sizeClass)}
         strokeWidth={1.5}
       />
       {fill !== "empty" && (
@@ -63,7 +63,7 @@ function RatingStar({
           )}
         >
           <Star
-            className={cn("fill-amber-400 text-amber-400", sizeClass)}
+            className={cn("fill-warning text-warning", sizeClass)}
             strokeWidth={1.5}
           />
         </span>
@@ -204,7 +204,7 @@ export function RatingInput({
         "inline-flex items-center",
         gapClasses[size],
         interactive &&
-          "focus:ring-ring cursor-pointer rounded-sm focus:ring-2 focus:outline-none",
+          "cursor-pointer rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         className
       )}
     >
@@ -220,7 +220,14 @@ export function RatingInput({
             }
           : {};
         return (
-          <span key={starIndex} {...starProps} className="inline-block">
+          <span
+            key={starIndex}
+            {...starProps}
+            className={cn(
+              "inline-flex items-center justify-center",
+              interactive && "min-h-11 min-w-11 md:min-h-0 md:min-w-0"
+            )}
+          >
             <RatingStar
               fill={getStarFill(starIndex, displayValue)}
               sizeClass={sizeClass}

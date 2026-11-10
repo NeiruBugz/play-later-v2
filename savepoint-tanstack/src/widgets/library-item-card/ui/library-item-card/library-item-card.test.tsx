@@ -84,15 +84,6 @@ const statusResult = (
   } as unknown as SetStatusResult["undo"],
 });
 
-// The platform chip renders the abbreviation/icon inside a Badge <div> that
-// carries the variant classes. Walking to the nearest classed ancestor reaches
-// the Badge — mirrors the helper in entities/game/ui/platform-badges.test.tsx.
-const badgeClassNameFor = (text: HTMLElement | null): string => {
-  // eslint-disable-next-line testing-library/no-node-access
-  const badge = text?.closest("[class]");
-  return badge?.className ?? "";
-};
-
 const buildItem = (
   overrides: Partial<LibraryItemWithGame> & {
     gameTitle?: string;
@@ -223,39 +214,12 @@ describe("LibraryItemCard", () => {
         expect(screen.getByText("PS5")).toBeDefined();
       });
 
-      it("colors the platform badge with the playstation family variant", () => {
-        // The platform chip delegates to the shared PlatformBadgeItem, which
-        // abbreviates the label and tints it via the badge `playstation`
-        // variant (brand color) rather than the neutral `subtle` variant.
-        const className = badgeClassNameFor(screen.getByText("PS5"));
-        expect(className).toContain("text-[#0070d1]");
-        expect(className).not.toContain("text-muted-foreground");
-      });
-
       it("shows no rating text since this item has no rating", () => {
         expect(elements.queryUnrated()).toBeNull();
       });
 
       it('renders the "Mark done" next-step CTA for status PLAYING', () => {
         expect(screen.getByRole("button", { name: "Mark done" })).toBeDefined();
-      });
-    });
-
-    describe("given an item on a neutral platform (Stadia)", () => {
-      beforeEach(() => {
-        render(
-          <LibraryItemCard
-            item={buildItem({ status: "PLAYING", platform: "Stadia" })}
-          />
-        );
-      });
-
-      it("renders the platform badge with the subtle (neutral) variant", () => {
-        // Stadia has no family mapping, so it keeps its full label and falls
-        // back to the neutral `subtle` badge variant (muted foreground).
-        const className = badgeClassNameFor(screen.getByText("Stadia"));
-        expect(className).toContain("text-muted-foreground");
-        expect(className).not.toContain("text-[#0070d1]");
       });
     });
 

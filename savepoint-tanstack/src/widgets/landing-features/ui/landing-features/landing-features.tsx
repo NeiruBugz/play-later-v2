@@ -1,5 +1,9 @@
 import { Star } from "lucide-react";
 
+import { Badge } from "@/shared/ui/badge";
+import { Card } from "@/shared/ui/card";
+import { SectionLabel } from "@/shared/ui/section-label";
+
 /**
  * Mini-features strip (left column). Renders three labeled blocks under the
  * hero: Library / Journal / Timeline. Stacks vertically on mobile.
@@ -12,14 +16,16 @@ export function LandingFeaturesStrip() {
   ];
 
   return (
-    <div className="border-border/30 border-t pt-6">
+    <div className="border-t pt-6">
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {items.map((item) => (
           <li key={item.title} className="space-y-1">
-            <p className="text-foreground text-sm font-semibold">
+            <p className="text-base font-semibold text-foreground md:text-sm">
               {item.title}
             </p>
-            <p className="text-muted-foreground text-xs">{item.body}</p>
+            <p className="text-base text-muted-foreground md:text-sm">
+              {item.body}
+            </p>
           </li>
         ))}
       </ul>
@@ -35,30 +41,35 @@ export function LandingFeaturesStrip() {
 export function LandingPreviewCard() {
   return (
     <div className="relative">
-      <div className="border-border/40 bg-card/40 relative overflow-hidden rounded-3xl border p-5 shadow-2xl backdrop-blur-sm">
-        <div className="from-primary relative h-56 overflow-hidden rounded-2xl bg-gradient-to-br via-fuchsia-500 to-rose-500">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_60%)]" />
-          <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/20 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.16em] text-white/90 uppercase backdrop-blur-sm">
+      <Card className="gap-4 p-5">
+        <div className="relative h-56 overflow-hidden rounded-2xl bg-primary text-primary-foreground">
+          <Badge
+            variant="secondary"
+            className="absolute top-4 left-4 h-auto gap-2 px-2.5 py-0.5 tracking-[0.12em] uppercase"
+          >
             <span
               aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full bg-white"
+              className="h-1.5 w-1.5 rounded-full bg-primary"
             />
             CURRENTLY EXPLORING
-          </span>
+          </Badge>
           <div className="absolute right-4 bottom-4 left-4">
-            <p className="text-2xl font-semibold tracking-tight text-white">
+            <p className="text-2xl font-semibold tracking-tight">
               Hollow Knight
             </p>
-            <p className="mt-1 text-[11px] tracking-[0.18em] text-white/70 uppercase">
+            <span className="mt-1 block text-xs tracking-[0.14em] uppercase">
               TEAM CHERRY · 2017
-            </p>
+            </span>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
+        <div className="flex items-center justify-between">
+          <SectionLabel
+            as="span"
+            className="text-xs tracking-[0.12em] uppercase"
+          >
             SESSION 12 · 47H TOTAL
-          </p>
+          </SectionLabel>
           <div
             className="flex items-center gap-0.5"
             aria-label="4 out of 5 stars"
@@ -67,42 +78,53 @@ export function LandingPreviewCard() {
               <Star
                 key={i}
                 aria-hidden="true"
-                className="fill-primary text-primary h-3.5 w-3.5"
+                className="h-3.5 w-3.5 fill-primary text-primary"
               />
             ))}
             <Star
               aria-hidden="true"
-              className="text-muted-foreground/40 h-3.5 w-3.5"
+              className="h-3.5 w-3.5 text-muted-foreground/40"
             />
           </div>
         </div>
 
-        <div className="border-border/40 bg-background/40 mt-4 rounded-xl border p-4">
-          <p className="text-muted-foreground text-[10px] font-medium tracking-[0.18em] uppercase">
-            APR 22 · NOTE
-          </p>
-          <p className="text-foreground/90 mt-2 text-sm leading-relaxed italic">
-            &ldquo;Took five tries on Hornet — finally read the dash pattern.
-            The arena lighting in this fight is unreal.&rdquo;
-          </p>
-        </div>
+        <Card variant="flat" size="sm" className="bg-muted">
+          <div className="px-(--card-spacing)">
+            <SectionLabel
+              as="span"
+              className="block text-xs tracking-[0.14em] uppercase"
+            >
+              APR 22 · NOTE
+            </SectionLabel>
+            <p className="mt-2 text-base leading-relaxed text-foreground italic md:text-sm">
+              &ldquo;Took five tries on Hornet — finally read the dash pattern.
+              The arena lighting in this fight is unreal.&rdquo;
+            </p>
+          </div>
+        </Card>
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-muted-foreground text-[11px] font-medium tracking-[0.18em] uppercase">
+        <div className="flex items-center justify-between">
+          <SectionLabel
+            as="span"
+            className="text-xs tracking-[0.14em] uppercase"
+          >
             UP NEXT
-          </p>
+          </SectionLabel>
           <div className="flex items-center gap-2" aria-hidden="true">
-            <span className="h-6 w-6 rounded-md bg-gradient-to-br from-rose-500 to-orange-500" />
-            <span className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600" />
-            <span className="h-6 w-6 rounded-md bg-gradient-to-br from-violet-400 to-indigo-400" />
+            <span className="h-6 w-6 rounded-md bg-muted" />
+            <span className="h-6 w-6 rounded-md bg-muted" />
+            <span className="h-6 w-6 rounded-md bg-muted" />
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="border-border/40 bg-background/80 text-muted-foreground absolute right-4 -bottom-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] backdrop-blur-sm">
+      <Badge
+        variant="outline"
+        className="absolute right-4 -bottom-3 h-auto gap-1.5 bg-background px-3 py-1 font-normal"
+      >
         <span aria-hidden="true">↳</span>
         <span>218 in your library</span>
-      </div>
+      </Badge>
     </div>
   );
 }

@@ -28,8 +28,8 @@ export function LibraryStatusBadge({
       aria-label={`Status: ${label}`}
       data-status={status}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] leading-none font-medium whitespace-nowrap text-white",
-        "bg-black/55 ring-1 ring-white/10 backdrop-blur-sm",
+        "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs leading-none font-medium whitespace-nowrap text-scrim-foreground",
+        "bg-scrim/60 ring-1 ring-scrim-foreground/10 backdrop-blur-sm",
         className
       )}
     >

@@ -3,6 +3,7 @@ import { ChevronRight, Settings, UserCircle2 } from "lucide-react";
 
 import { ThemeToggle } from "@/features/toggle-theme";
 import { cn } from "@/shared/lib/utils";
+import { SectionLabel } from "@/shared/ui/section-label";
 
 import type { SettingsListProps } from "./settings-list.type";
 
@@ -18,14 +19,11 @@ function SettingsGroup({ header, children }: SettingsGroupProps) {
   return (
     <div className="mb-6">
       {header && (
-        <div
-          data-testid={headerId}
-          className="text-muted-foreground mb-2 px-1 text-xs font-medium tracking-widest uppercase"
-        >
+        <SectionLabel data-testid={headerId} className="mb-2 px-1">
           {header}
-        </div>
+        </SectionLabel>
       )}
-      <div className="border-border/55 bg-card overflow-hidden rounded-xl border shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border/55 bg-card shadow-sm">
         {children}
       </div>
     </div>
@@ -58,11 +56,11 @@ function SettingsRowLink({
         // Full-height tappable row (min 52 px matches design reference)
         "flex min-h-[52px] items-center gap-3 px-4 py-3 transition-colors",
         "hover:bg-muted/40 active:bg-muted/60",
-        !isLast && "border-border/45 border-b"
+        !isLast && "border-b border-border/45"
       )}
     >
       <span
-        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-white"
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-background"
         style={{ background: iconBg }}
         aria-hidden="true"
       >
@@ -77,7 +75,7 @@ function SettingsRowLink({
         {label}
       </span>
       <ChevronRight
-        className="text-muted-foreground/60 h-4 w-4"
+        className="h-4 w-4 text-muted-foreground/60"
         aria-hidden="true"
       />
     </Link>
@@ -118,7 +116,7 @@ export function SettingsList({ activeSegment }: SettingsListProps) {
         />
       </SettingsGroup>
 
-      <footer className="text-muted-foreground mt-8 text-center text-xs">
+      <footer className="mt-8 text-center text-xs text-muted-foreground">
         SavePoint · for patient gamers
       </footer>
     </nav>

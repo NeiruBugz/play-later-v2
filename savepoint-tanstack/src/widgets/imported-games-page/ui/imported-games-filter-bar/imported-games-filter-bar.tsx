@@ -243,7 +243,7 @@ export function ImportedGamesFilterBar({
   return (
     <div className="space-y-4" data-testid="imported-games-filter-bar">
       <div className="relative">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
           placeholder="Search games..."
@@ -256,7 +256,7 @@ export function ImportedGamesFilterBar({
               commitSearch();
             }
           }}
-          className="pr-9 pl-9"
+          className="px-8"
           aria-label="Search Steam games"
         />
         {searchValue ? (
@@ -276,7 +276,7 @@ export function ImportedGamesFilterBar({
       <div className="space-y-1">
         <Label
           htmlFor="sort-selector"
-          className="text-muted-foreground text-xs"
+          className="text-xs text-muted-foreground"
         >
           Sort by
         </Label>
@@ -315,7 +315,7 @@ export function ImportedGamesFilterBar({
         />
         <Label
           htmlFor="show-dismissed"
-          className="text-muted-foreground cursor-pointer text-sm font-normal"
+          className="cursor-pointer text-sm font-normal text-muted-foreground"
         >
           Show removed games
         </Label>
@@ -326,7 +326,7 @@ export function ImportedGamesFilterBar({
           <div key={field.paramKey} className="space-y-1">
             <Label
               htmlFor={field.triggerId}
-              className="text-muted-foreground text-xs"
+              className="text-xs text-muted-foreground"
             >
               {field.fieldLabel}
             </Label>
@@ -364,7 +364,7 @@ export function ImportedGamesFilterBar({
               type="button"
               onClick={chip.onRemove}
               aria-label={`Remove ${chip.label} filter`}
-              className="border-input bg-muted hover:bg-muted/80 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs"
+              className="inline-flex items-center gap-1 rounded-full border border-input bg-muted px-2.5 py-1 text-xs hover:bg-muted/80"
             >
               <span>{chip.label}</span>
               <X className="h-3 w-3" />

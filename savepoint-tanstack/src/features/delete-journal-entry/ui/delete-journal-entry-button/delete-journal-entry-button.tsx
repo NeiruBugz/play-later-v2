@@ -35,7 +35,7 @@ export function DeleteJournalEntryButton({
 
   if (confirming) {
     return (
-      <div className="gap-sm flex items-center">
+      <div className="flex items-center gap-1.5">
         <Button
           type="button"
           variant="outline"

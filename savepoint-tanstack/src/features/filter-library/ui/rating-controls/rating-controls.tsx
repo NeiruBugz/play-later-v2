@@ -7,6 +7,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import { RatingInput } from "@/shared/ui/rating-input";
+import { SectionLabel } from "@/shared/ui/section-label";
 import { Switch } from "@/shared/ui/switch";
 
 import type { RatingControlsProps } from "./rating-controls.type";
@@ -21,11 +22,9 @@ export function RatingControls({
 }: RatingControlsProps) {
   const unratedSwitchId = `${idPrefix}-unrated-only`;
   return (
-    <section className="space-y-sm">
-      <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-        Rating
-      </p>
-      <div className="gap-sm flex items-center">
+    <section className="space-y-1.5">
+      <SectionLabel as="p">Rating</SectionLabel>
+      <div className="flex items-center gap-1.5">
         <Label className="text-sm font-medium">Minimum rating</Label>
         {/* `minRating` is in stars (the URL/user unit); RatingInput speaks the
             1–10 storage int internally, so convert across this boundary. */}
@@ -53,7 +52,7 @@ export function RatingControls({
           </Button>
         ) : null}
       </div>
-      <div className="gap-sm flex items-center">
+      <div className="flex items-center gap-1.5">
         <Switch
           id={unratedSwitchId}
           checked={unratedOnly === true}
