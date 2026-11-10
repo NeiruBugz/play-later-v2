@@ -308,7 +308,7 @@ export function GameDetail({
           className="grid grid-cols-1 items-end gap-7 pt-36 md:grid-cols-[200px_1fr] md:pt-44"
         >
           <div className="w-32 md:w-[200px]">
-            <GameCover src={coverUrl} alt={`Cover for ${game.title}`} />
+            <GameCover src={coverUrl} alt={`Cover for ${game.title}`} eager />
           </div>
           <div className="min-w-0 pb-1.5">
             <div className="flex items-start justify-between gap-6">

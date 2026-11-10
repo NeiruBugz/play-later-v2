@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { LibraryStatusBadge, QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { buildCoverImageProps } from "@/shared/lib/igdb-image";
 
 import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
 
@@ -14,7 +14,7 @@ import type { DashboardGameRailProps } from "./dashboard-game-rail.type";
  * forced into a narrow rail slot).
  */
 function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
-  const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_720p");
+  const cover = buildCoverImageProps(item.game.coverImage);
   const alt = `Cover for ${item.game.title}`;
 
   return (
@@ -24,11 +24,13 @@ function RailCoverTile({ item }: { item: LibraryItemWithGame }) {
       className="group w-32 shrink-0 snap-start md:w-auto"
     >
       <div className="relative">
-        {coverUrl ? (
+        {cover ? (
           <img
-            src={coverUrl}
+            src={cover.src}
+            srcSet={cover.srcSet}
             alt={alt}
             loading="lazy"
+            decoding="async"
             className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
           />
         ) : (

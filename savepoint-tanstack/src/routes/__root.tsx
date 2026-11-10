@@ -26,6 +26,7 @@ import { AppShell } from "@/widgets/app-shell";
 import { AppSidebar } from "@/widgets/app-sidebar";
 import { DoneFlowProvider } from "@/widgets/done-flow";
 import { GlobalActionHost } from "@/widgets/global-action-host";
+import { NavigationProgress } from "@/widgets/navigation-progress";
 
 import appCss from "../styles.css?url";
 
@@ -136,6 +137,7 @@ export function RootShell() {
 
   return (
     <SavepointThemeProvider defaultTheme="system">
+      <NavigationProgress />
       <AddFlowProvider>
         <DoneFlowProvider>
           <AppShell

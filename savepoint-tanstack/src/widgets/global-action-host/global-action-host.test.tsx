@@ -54,7 +54,7 @@ vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
   undoStatusFn: vi.fn(),
 }));
 
-vi.mock("@/features/add-game", () => ({
+vi.mock("@/features/add-game/ui/add-game-content", () => ({
   AddGameContent: () => (
     <div data-testid="add-game-content">add-game-content</div>
   ),
@@ -66,9 +66,9 @@ vi.mock("@/features/add-game", () => ({
 
 const elements = {
   queryLogForm: () => screen.queryByTestId("log-form"),
-  getLogForm: () => screen.getByTestId("log-form"),
+  findLogForm: () => screen.findByTestId("log-form"),
   queryAddGameContent: () => screen.queryByTestId("add-game-content"),
-  getAddGameContent: () => screen.getByTestId("add-game-content"),
+  findAddGameContent: () => screen.findByTestId("add-game-content"),
   // Dialog shell: Radix Dialog.Content sets role="dialog"
   queryDialog: () => screen.queryByRole("dialog"),
   getDialog: () => screen.getByRole("dialog"),
@@ -105,8 +105,8 @@ describe("GlobalActionHost", () => {
       render(<GlobalActionHost />);
     });
 
-    it("renders the Log form with no game chosen", () => {
-      expect(elements.getLogForm().textContent).toContain("game=none");
+    it("renders the Log form with no game chosen", async () => {
+      expect((await elements.findLogForm()).textContent).toContain("game=none");
     });
 
     it("titles the dialog Log time", () => {
@@ -122,8 +122,10 @@ describe("GlobalActionHost", () => {
       render(<GlobalActionHost />);
     });
 
-    it("renders the same Log form with the game chosen", () => {
-      expect(elements.getLogForm().textContent).toContain("game=hollow-knight");
+    it("renders the same Log form with the game chosen", async () => {
+      expect((await elements.findLogForm()).textContent).toContain(
+        "game=hollow-knight"
+      );
     });
   });
 
@@ -135,11 +137,12 @@ describe("GlobalActionHost", () => {
       render(<GlobalActionHost />);
     });
 
-    it("renders the Add Game content", () => {
-      expect(elements.getAddGameContent()).toBeDefined();
+    it("renders the Add Game content", async () => {
+      expect(await elements.findAddGameContent()).toBeDefined();
     });
 
-    it("does not render the Log form", () => {
+    it("does not render the Log form", async () => {
+      await elements.findAddGameContent();
       expect(elements.queryLogForm()).toBeNull();
     });
   });
@@ -169,6 +172,7 @@ describe("GlobalActionHost", () => {
       mockSearch = { action: "log-session", game: "some-slug" };
       mockNavigate.mockReset();
       render(<GlobalActionHost />);
+      await elements.findLogForm();
       await actions.clickClose();
     });
 

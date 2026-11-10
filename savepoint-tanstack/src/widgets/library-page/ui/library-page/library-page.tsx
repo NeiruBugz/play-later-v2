@@ -6,7 +6,14 @@ import {
   PackagePlus,
   SearchX,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   LibraryStatusBadge,
@@ -35,7 +42,7 @@ import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
+import { buildCoverImageProps } from "@/shared/lib/igdb-image";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
@@ -50,14 +57,14 @@ import type { LibraryPageProps } from "./library-page.type";
  * one-line title, platform, rating, then the status control and next-step
  * button. The rich `LibraryItemCard` row is reserved for the list view.
  */
-function LibraryGridTile({
+const LibraryGridTile = memo(function LibraryGridTile({
   item,
   onEdit,
 }: {
   item: LibraryItemWithGame;
-  onEdit: () => void;
+  onEdit: (item: LibraryItemWithGame) => void;
 }) {
-  const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_720p");
+  const cover = buildCoverImageProps(item.game.coverImage);
   const alt = `Cover for ${item.game.title}`;
   const { status, setStatus, isPending } = useSetStatus({
     id: item.id,
@@ -86,11 +93,13 @@ function LibraryGridTile({
         className="group block"
       >
         <div className="relative">
-          {coverUrl ? (
+          {cover ? (
             <img
-              src={coverUrl}
+              src={cover.src}
+              srcSet={cover.srcSet}
               alt={alt}
               loading="lazy"
+              decoding="async"
               className="shadow-paper-md aspect-[3/4] w-full rounded-[var(--radius-cover)] object-cover"
             />
           ) : (
@@ -145,7 +154,7 @@ function LibraryGridTile({
       <div className="absolute top-2 right-2 z-10">
         <LibraryCardMenu
           item={item}
-          onEdit={onEdit}
+          onEdit={() => onEdit(item)}
           ownership={ownership}
           extraItems={
             <UpNextMenuActions status={status} membership={membership} />
@@ -154,7 +163,30 @@ function LibraryGridTile({
       </div>
     </div>
   );
-}
+});
+
+const LibraryListRow = memo(function LibraryListRow({
+  item,
+  onEdit,
+}: {
+  item: LibraryItemWithGame;
+  onEdit: (item: LibraryItemWithGame) => void;
+}) {
+  return (
+    <LibraryItemCard
+      item={item}
+      layout="row"
+      menu={(upNext, ownership) => (
+        <LibraryCardMenu
+          item={item}
+          onEdit={() => onEdit(item)}
+          ownership={ownership}
+          extraItems={upNext}
+        />
+      )}
+    />
+  );
+});
 
 /**
  * Fallback per-status counts derived from the loaded items. Used ONLY when the
@@ -239,11 +271,12 @@ export function LibraryPage(props: LibraryPageProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const deferredTitleQuery = useDeferredValue(titleQuery);
   const filteredItems = useMemo(() => {
-    const q = titleQuery.trim().toLowerCase();
+    const q = deferredTitleQuery.trim().toLowerCase();
     if (q.length === 0) return items;
     return items.filter((item) => item.game.title.toLowerCase().includes(q));
-  }, [items, titleQuery]);
+  }, [items, deferredTitleQuery]);
 
   // Loader counts cover the full library; the derived fallback only sees the
   // (filtered) page, so it is used only when the prop is absent.
@@ -433,23 +466,9 @@ export function LibraryPage(props: LibraryPageProps) {
               {filteredItems.map((item) => (
                 <li key={item.id}>
                   {viewMode === "grid" ? (
-                    <LibraryGridTile
-                      item={item}
-                      onEdit={() => setSelectedEntry(item)}
-                    />
+                    <LibraryGridTile item={item} onEdit={setSelectedEntry} />
                   ) : (
-                    <LibraryItemCard
-                      item={item}
-                      layout="row"
-                      menu={(upNext, ownership) => (
-                        <LibraryCardMenu
-                          item={item}
-                          onEdit={() => setSelectedEntry(item)}
-                          ownership={ownership}
-                          extraItems={upNext}
-                        />
-                      )}
-                    />
+                    <LibraryListRow item={item} onEdit={setSelectedEntry} />
                   )}
                 </li>
               ))}

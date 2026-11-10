@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { STATUS_ENTRIES } from "@/entities/library-item/model";
@@ -367,6 +369,47 @@ describe("AppSidebar", () => {
       expect(
         screen.getByRole("button", { name: "Expand sidebar" })
       ).toBeDefined();
+    });
+  });
+
+  describe("given a collapsed preference is stored and the server rendered the default", () => {
+    const recoverableErrors: unknown[] = [];
+    let container: HTMLDivElement;
+
+    beforeEach(async () => {
+      recoverableErrors.length = 0;
+      currentPath = "/dashboard";
+      const serverHtml = renderToString(<AppSidebar user={stubUser} />);
+      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      container = document.createElement("div");
+      container.innerHTML = serverHtml;
+      document.body.appendChild(container);
+      await act(async () => {
+        hydrateRoot(container, <AppSidebar user={stubUser} />, {
+          onRecoverableError: (error) => recoverableErrors.push(error),
+        });
+      });
+    });
+
+    afterEach(() => {
+      document.body.replaceChildren();
+    });
+
+    it("hydrates without discarding the server HTML", () => {
+      expect(recoverableErrors).toEqual([]);
+    });
+
+    it("settles into the stored collapsed state", () => {
+      expect(elements.getSidebar().className).toMatch(/w-16/);
+    });
+  });
+
+  describe("given the stored preference is expanded and the user collapses then reloads", () => {
+    it("keeps the stored preference untouched by merely mounting", () => {
+      window.localStorage.setItem("sp:sidebar-collapsed", "true");
+      currentPath = "/dashboard";
+      render(<AppSidebar user={stubUser} />);
+      expect(window.localStorage.getItem("sp:sidebar-collapsed")).toBe("true");
     });
   });
 });

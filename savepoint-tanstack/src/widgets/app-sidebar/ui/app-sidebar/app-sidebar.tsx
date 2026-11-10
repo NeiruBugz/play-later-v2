@@ -49,20 +49,35 @@ const NAV_ITEMS = [
 ] as const;
 
 function readCollapsedFromStorage(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+  try {
+    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeCollapsedToStorage(collapsed: boolean) {
+  try {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  } catch {
+    // Storage unavailable (private mode / blocked); the preference stays in-memory.
+  }
 }
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const router = useRouter();
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(readCollapsedFromStorage);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
-  }, [collapsed]);
+    setCollapsed(readCollapsedFromStorage());
+  }, []);
 
-  const toggleCollapsed = () => setCollapsed((prev) => !prev);
+  const toggleCollapsed = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    writeCollapsedToStorage(next);
+  };
 
   const openLogSession = () => {
     void navigate({
