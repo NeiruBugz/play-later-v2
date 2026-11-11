@@ -306,7 +306,7 @@ Conventions for every slice:
 
 - [ ] **Slice 10: The unused HLTB-era game columns are dropped**
   - [x] Precondition: the owner has run `SELECT count(*) FROM "Game" WHERE "mainStory" IS NOT NULL OR "mainExtra" IS NOT NULL OR "completionist" IS NOT NULL OR "hltbId" IS NOT NULL` on Neon, and it returned 0. Do not start this slice without that result.
-  - [ ] RED test: an integration test reading `information_schema.columns` asserts that `Game` has no `mainStory`, `mainExtra`, `completionist` or `hltbId` column. **[Agent: testing]**
+  - [x] RED test: an integration test reading `information_schema.columns` asserts that `Game` has no `mainStory`, `mainExtra`, `completionist` or `hltbId` column. **[Agent: testing]**
   - [ ] Migration 2 `drop_unused_hltb_game_columns`: drop the four columns and `Game_hltbId_key`, and remove them from `schema.prisma`, the factories and any type that still names them. The PR description states that the CI destructive-operation warning is intentional. **[Agent: prisma-database]**
   - [ ] Verify:
     - Run the gate, including integration.
