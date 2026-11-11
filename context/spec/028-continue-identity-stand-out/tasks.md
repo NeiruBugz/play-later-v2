@@ -1,0 +1,317 @@
+<!-- not-user-reviewed -->
+# Tasks: Continue? identity round 2 (spec 028)
+
+- **Functional spec:** [functional-spec.md](./functional-spec.md)
+- **Technical spec:** [technical-considerations.md](./technical-considerations.md)
+
+Conventions for every slice:
+- Paths are relative to `savepoint-tanstack/` unless they start with `context/` or `.github/`.
+- **TDD (binding, `savepoint-tanstack/CLAUDE.md`):** inside each slice, the test task comes before the implementation tasks. Tests are written failing first (RED). During a RED task, `typecheck` and the test runs are expected to fail.
+- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && build`.
+  - Add `test:integration` when `git diff --name-only | rg '/api/|\.server\.|\.worker\.|prisma/|test/integration/|test/factories/|scripts/backfill'` prints anything.
+  - Every slice ends with the gate green.
+- **Starting the app for a Verify task:**
+  - `docker compose up -d`, then start `pnpm --filter savepoint-tanstack dev` (port 6060) in the background and record its PID.
+  - Stop it with `kill <PID>` at the end of the task. Never pipe a daemon's stop command into another command.
+  - Sign in through the credentials provider (`AUTH_ENABLE_CREDENTIALS=true`) as `audit_full` on the seeded local DB.
+  - Browser checks use the Playwright MCP or the `verify-ui` skill scripts.
+- **Review images** live under `context/spec/028-continue-identity-stand-out/review/`, which is gitignored. They are kept on purpose for the owner's review. Everything else a Verify task produces (extra screenshots, traces, temporary scripts) is deleted at the end of that task.
+- **Comparison captures** run with `--reseed`, followed by the local backfill (Slice 1), so fixture covers have their stored tint and length.
+- **Release steps on Neon** (owner-run, outside any agent task):
+  - after Slice 3 deploys: run the backfill for times;
+  - after Slice 5 deploys: run it again for covers;
+  - before Slice 10: run the zero-count pre-check.
+
+---
+
+- [ ] **Slice 1: The review script captures the spec 028 "before" set, including the cover fixtures**
+  - [ ] Point `scripts/design-review` at spec 028:
+    - `--spec` flag, default `028-continue-identity-stand-out`; the output root becomes `context/spec/<spec>/review/<phase>/<set>`. Keep `--out` working.
+    - Add `context/spec/028-continue-identity-stand-out/review/` to the repo `.gitignore`.
+    - Update `scripts/design-review/README.md`. **[Agent: testing]**
+  - [ ] Add the game-page states the spec covers to `screens.ts`: `game-playing`, `game-want`, `game-done` (with a Let go reason), `game-not-in-library` (existing) and `game-signed-out`. Also add `settings-play`, marked `skip` until Slice 3.
+    - Add a committed fixture SQL `context/spec/028-continue-identity-stand-out/review-fixtures.sql` (next to `tasks.md`, outside the gitignored `review/`). `--reseed` applies it after the 026 seed.
+    - It gives `audit_full` four Playing or Up Next games with known IGDB covers: one mostly red, one mostly green, one black-and-white, and one with no cover art.
+    - It gives one Playing game at least three dated sessions, and Playing games whose last sessions were 3 days, 2 weeks and 40 days ago. **[Agent: testing]**
+  - [ ] Capture the "before" set: phone at 390×844 plus desktop at 1440×900, Light and Dark, with the phone checks' `report.json`. **[Agent: testing]**
+  - [ ] Verify:
+    - Start the app (record the PID) and run `design-review --phase round2 --set before --desktop --reseed`.
+    - Confirm a PNG exists for every non-skipped screen in both modes, and that `report.json` exists.
+    - Confirm `git status` shows nothing under `review/`.
+    - Stop the server by PID and delete any extra files created outside `review/round2/before/`. **[Agent: testing]**
+
+- [ ] **Slice 2: The game page shows typical play time from stored columns, with "Main story" meaning time to credits**
+  - [ ] RED tests:
+    - Integration `ensure-game-enrichment` (times part, IGDB mocked at `src/shared/api/igdb/fetch.ts`): it writes `timeToCreditsSeconds` / `timeToCompleteSeconds` from `hastily` / `completely`; it sets `timesToBeatFetchedAt` when IGDB has no data; it leaves `timesToBeatFetchedAt` null when IGDB fails; it refetches after 30 days and not before; the batched variant sends 10 ids per request.
+    - Rewrite `get-times-to-beat.integration` for the `hastily,completely` fields.
+    - Integration `get-game-details`: returns both times for a signed-out viewer; a slow IGDB response (over 1.5 s) still returns the page without times.
+    - Integration `add-game` and `steam-import` workers: enrichment runs, and an IGDB failure doesn't fail the add or import.
+    - Rewrite `routes/-games.$slug.test` and `-social-meta.test` so they no longer mock the live times-to-beat query. **[Agent: testing]**
+  - [ ] Migration 1 `add_game_enrichment_and_evening_length`, exactly as tech spec §2.2:
+    - the six `Game` columns, with CHECK `coverHue` 0–359 and `coverChroma` ≥ 0;
+    - `user.eveningMinutes Int NOT NULL DEFAULT 105` with CHECK BETWEEN 30 AND 360.
+    - Extend `test/factories` (`buildGame`, `createGame`, `buildLibraryItemWithGame`) with the new columns. **[Agent: prisma-database]**
+  - [ ] Enrichment, times only:
+    - Change `getTimesToBeat` and `TIMES_TO_BEAT_FIELDS` (`src/shared/api/igdb/queries.ts:4`) to `hastily,completely`, returning `{ timeToCreditsSeconds, timeToCompleteSeconds }`.
+    - Create `src/entities/game/api/ensure-game-enrichment.server.ts` with `ensureGameEnrichment` / `ensureGamesEnrichment`. It refreshes after 30 days, soft-fails, and writes with one update per game. Leave room for the hue step added in Slice 5.
+    - Call it from `getGameDetails` (awaited, capped at 1.5 s), the add-game worker and the steam-import worker (batched).
+    - `GameDetails` gains `timeToCreditsSeconds` and `timeToCompleteSeconds`. **[Agent: tanstack-fullstack]**
+  - [ ] Remove the live path: `get-times-to-beat-for-game.ts`, `timesToBeatQueryOptions`, its integration test, and the route prefetch and Suspense slot (`src/routes/games.$slug.tsx:31-42,114-119`).
+    - `times-to-beat-section` reads the two times from loader data, labelled "Main story" and "100%" in hours. It is deleted in Slice 7. **[Agent: tanstack-fullstack]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Start the app (record the PID). Open a game page whose row has never been enriched.
+    - Confirm the page renders, and that the network panel shows no separate times-to-beat server call.
+    - Read the row's `timeToCreditsSeconds` with `docker exec savepoint-postgres psql -U postgres -d savepoint-db` (local DB only) and confirm the "Main story" hours on the page equal it.
+    - Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 3: Library cards show length in evenings, with no badge on the cover**
+  - [ ] RED tests:
+    - Unit `src/shared/lib/evenings.test.ts`: 14.5 h → "About 8 evenings", 1.5 h → "One evening", 51 h → "About 29 evenings", 4.375 h → "About 3 evenings", null → null; at 180 min, 14.5 h → "About 5 evenings" and 2 h → "One evening".
+    - Integration: `get-library` returns `timeToCreditsSeconds`, `coverHue` and `coverChroma` on `game`; `getCurrentUserFn` returns `eveningMinutes` (105 for a new user and for a signed-out visitor).
+    - Integration for the backfill's core function: it fills un-enriched games, is idempotent on rerun, and reports coverage.
+    - Rewrite `library-item-card.test` and `game-card.test`: no Want/Playing/Done badge on the cover; 8.5 h reads "About 5 evenings" under the title; a game with no time still renders the length line, empty; the status shows once, in the status control. **[Agent: testing]**
+  - [ ] Data for the card:
+    - Extend the `getLibrary` select and `LibraryItemWithGame.game` (`src/entities/library-item/model/types.ts:24-33`) with `timeToCreditsSeconds`, `coverHue` and `coverChroma`.
+    - `getCurrentUserFn` selects and returns `eveningMinutes`, with 105 when signed out.
+    - Add `useEveningMinutes()` in `src/entities/session/model/`. **[Agent: tanstack-fullstack]**
+  - [ ] Add the backfill script `scripts/backfill-game-enrichment.ts` (times only for now; covers are added in Slice 5):
+    - 10 ids per request, 300 ms between requests, idempotent.
+    - Prints how many games have a credits time.
+    - Runs with Node's built-in TypeScript like `scripts/design-review`, and reads `@env`.
+    - Add a `backfill:enrichment` package script and a short README note. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - Add `src/shared/lib/evenings.ts` (`EVENING_MINUTES_CHOICES`, `DEFAULT_EVENING_MINUTES`, `formatEvenings` with integer rounding).
+    - `game-card` gains `lengthLabel?: string | null` and always renders a fixed-height line after the title.
+    - `library-item-card` stops passing the StatusChip through `badges` (`:71-82`) and passes `formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)`. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Run the backfill against the local DB and confirm its coverage line.
+    - Start the app (record the PID). On `/library` at 1440×900, Light and Dark:
+      - no cover shows a status badge;
+      - cards with a credits time read "About N evenings";
+      - neighbouring cards with and without a length have their platform lines at the same height (measure with `verify-ui` alignment);
+      - no card is tinted.
+    - At 360, 390 and 430 wide, confirm there is no sideways page scroll.
+    - Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 4: A person sets how long an evening is in Settings, and library lengths follow**
+  - [ ] RED tests:
+    - Integration `set-evening-length`: it saves each of the six values; it rejects 100 and a string; it requires sign-in; `getCurrentUserFn` then returns the new value.
+    - Unit `radio-group` primitive: arrow keys move the selection; each option is a radio with its label.
+    - Component test for the Play settings page:
+      - a new user sees 1.75 h selected;
+      - the example line reads "A 14.5-hour game is about 8 evenings.";
+      - choosing 3 h saves the value and updates the example line. **[Agent: testing]**
+  - [ ] Feature `src/features/set-evening-length/`: `api/set-evening-length.ts` (`createServerFn`) plus `.worker.ts`.
+    - Validate twice with a `z.union` of the six literals, and use `requireUserId()`.
+    - The entity is `updateProfile` (`src/entities/profile/api/update-profile.server.ts:22-61`) with an optional `eveningMinutes`. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - Add `src/shared/ui/radio-group.tsx` on Base UI Radio (base-maia style): six pill radios in a 3-column grid, each at least 44 px tall.
+    - Add the route `src/routes/_authed/settings/play.tsx` titled "How long is an evening for you?", with the example line built from `formatEvenings`.
+    - Add a "Play" item to `settings-rail.tsx:14-21` and `settings-list.tsx:104-114`, and extend `activeSegment` in `src/routes/_authed/settings.tsx:23-29`.
+    - After saving, call `invalidateCurrentUser(queryClient)`.
+    - Un-skip `settings-play` in `screens.ts`. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Start the app (record the PID). Open Settings → Play: 1.75 h is selected.
+    - Choose 3 h. A library card for a 14.5 h game now reads "About 5 evenings", and one for a 2 h game reads "One evening".
+    - Open a second browser context signed in as the same user: it shows 3 h.
+    - Reset the setting to 1.75 h.
+    - Check tap sizes on the Play page at 390 wide.
+    - Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 5: The game page opens with a cover-tinted header showing identity and key facts**
+  - [ ] RED tests:
+    - Unit `src/shared/lib/cover-tint.test.ts` with pixel fixtures: mostly red gives a red hue; greyscale gives null; white with a small colored logo gives null; a red split across 355° and 5° gives a hue near 0, not 180.
+    - Extend `src/shared/ui/contrast.test.ts` with the hue 0–359 sweep at the chroma cap, in Light and Dark. Foreground, ink and the primary button must be at least 4.5:1 against the wash, and title contrast must differ by at most 0.5 between any two hues.
+    - Integration `ensure-game-enrichment` hue part: it writes `coverHue`/`coverChroma`/`coverTintComputedAt`; a black-and-white cover sets `coverTintComputedAt` with a null hue; a failed image fetch leaves `coverTintComputedAt` null. `get-game-details` returns `coverTint` signed out.
+    - Component `game-header`:
+      - facts "Length / Critics / On" read "About 8 evenings", "87", "PS5 · PC · XSX";
+      - five platforms show "+2";
+      - with no critic score there is no Critics fact;
+      - the identity line reads "2025 · Shooter" when the developer is unknown;
+      - Back is a link to `/library` on first render.
+    - Unit `formatPlatformFact`. **[Agent: testing]**
+  - [ ] Hue enrichment:
+    - Add `jpeg-js` at exact `0.4.4`, imported only from the `.server.ts` entity file.
+    - Add the pure `extractCoverTint(rgba)` in `src/shared/lib/cover-tint.ts`, using the recipe in tech spec §2.3.
+    - Fetch `t_thumb` `.jpg` inside `ensureGameEnrichment`. `GameDetails` gains `coverTint`.
+    - Extend the backfill with covers (concurrency 4) and add the tinted-games count to its coverage output. **[Agent: tanstack-fullstack]**
+  - [ ] Tint rendering:
+    - Add `src/shared/ui/cover-tint/` (`tint`, `variant: "panel" | "header"`). It sets only `--tint-h`, `--tint-c` and `data-tint`.
+    - Add the `cover-tint` utility in `styles.css`: fixed per-mode L (Light 0.915 / 0.87 / 0.44, Dark 0.255 / 0.31 / 0.80), a chroma cap tuned until the sweep passes, `data-tint="off"` falling back to `--card`, and the header fade over the bottom third. **[Agent: react-frontend]**
+  - [ ] Header:
+    - Add `src/widgets/game-detail/ui/game-header/`, wrapped in `CoverTint variant="header"`.
+    - Top row: Back (`useCanGoBack()` → `router.history.back()`, else `/library`).
+    - Identity: `GameCover size="lg"`, then `[year, developer, genres[0]]` with the developer taken from involved companies, then the title in `font-display`.
+    - `game-key-facts` with `formatPlatformFact` (export `abbreviatePlatformName` from the `entities/game` public API). Values use `--tint-ink`.
+    - Desktop: `md:grid-cols-[200px_1fr] items-end`, with no backdrop room (`pt-36 md:pt-44`) and no blurred screenshot. The existing actions stay below the header until Slice 6. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration. Run the backfill locally and confirm the tinted count.
+    - Start the app (record the PID) and open the red, green, black-and-white and no-cover fixture games, in Light and Dark:
+      - the red and green headers are tinted in their hue, pale in Light and deep in Dark;
+      - the black-and-white and no-cover headers use the neutral card color.
+    - Signed out: the facts are present.
+    - Open a game from Home, tap Back, and confirm you return to Home. Open a game page in a fresh tab, tap Back, and confirm you land on the Library.
+    - At desktop width, confirm the title, facts and the header's bottom edge line up with the cover's bottom.
+    - Check the client bundle doesn't contain `jpeg-js` (`rg -l jpeg-js .output/public` is empty).
+    - Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 6: The header holds the right actions for each visitor, with "Done with it?" and the "⋯" menu**
+  - [ ] RED tests:
+    - Integration `set-status-fn` with `doneOutcome`: it writes status and reason in one transaction; it is rejected unless `to` is DONE; undo restores the previous reason.
+    - Component `game-header-actions`, one `describe` per state:
+      - Playing: status control, "Log time", "Done with it?";
+      - Want: "Start playing";
+      - Done · Let go: the control reads "Done · Let go", the button reads "Play again", and the `DoneOutcomeLabel` dropdown is present;
+      - not in library: exactly one "Add to library";
+      - signed out: the "Sign in to add this game" link only.
+    - Component `done-with-it`:
+      - "Done with it?" shows Finished / Let it go / the explanation line / Not yet;
+      - "Not yet" restores it and changes nothing;
+      - "Let it go" sets Done and opens the Done dialog with "Let go" selected;
+      - after "Finished", closing the dialog leaves "Done · Finished".
+    - Component `game-more-menu`: Edit details…, the ownership choice, the Up Next actions and Remove from library; hidden when the game is not in the library.
+    - Rewrite `game-library-controls.test` for what remains. **[Agent: testing]**
+  - [ ] Status plumbing:
+    - `setStatusFn` and its worker accept an optional `doneOutcome`, allowed only with `to: "DONE"`.
+    - `setLibraryItemStatusInTx` writes it in the same transaction.
+    - `changeStatusWithUndo` and `useSetStatus` pass it through. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - Add `game-header-actions`, `done-with-it` and `game-more-menu` (extracted from `game-library-controls:103-134`), and put them in `game-header`.
+    - `DoneRequest` gains `initialOutcome`, and `DoneFollowUp` seeds its state from it.
+    - Remove `game-detail-action-bar` and `add-to-track-invite`, with their tests. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Start the app (record the PID), using the fixture games:
+      - On a Playing game, tap "Done with it?" → "Let it go". The dialog opens with "Let go" selected. Close it, and the control reads "Done · Let go".
+      - Put it back to Playing with the status control.
+      - Open "⋯" in phone and desktop layouts.
+      - As a user without the game, the page has exactly one "Add to library". Signed out, it has only the sign-in link.
+    - Measure the "Done with it?", "Finished", "Let it go" and "Not yet" tap areas at 390 wide (at least 44×44).
+    - Reseed afterwards. Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 7: Below the header, the game page shows Your play, About, and sideways screenshot and related rows**
+  - [ ] RED tests:
+    - Component `your-play-card`:
+      - "3 sessions · 4.5 h", and "No sessions yet" with no "0 h" anywhere;
+      - with 5 notes, the two newest show with dates, and "All notes (5)" expands to all five, newest first;
+      - "New note" opens the Log sheet for this game;
+      - Want shows "Why this one?", Playing shows no question;
+      - History is hidden when there are no ended plays;
+      - played time stays "4.5 h" whatever the evening setting.
+    - Rewrite `about-panel.test`:
+      - the 4-line clamp with "More";
+      - Developer / Released / Main story / 100% in hours, with unknown rows left out;
+      - one group of theme and genre tags.
+    - Component tests for the screenshots strip (single row, opens the lightbox, hidden when empty) and the related strip ("More in Metal Gear", same-size covers, "All 35", hidden when empty, no-cover placeholder).
+    - Rewrite `game-detail.test`: the order header → Your play → About → screenshots → related; no tabs, ring, "Time played" card or right column; About spans full width without Your play.
+    - Delete the tests of the components removed below. **[Agent: testing]**
+  - [ ] UI:
+    - `game-detail.tsx` renders `grid md:grid-cols-2` (Your play | About, `h-full`; About `md:col-span-2` alone), then the strips.
+    - Add `your-play-card/`, which moves `GamePrompts` out of `game-library-controls`, caps `game-notes-list` at 2, and includes `game-rating` and `play-history`.
+    - Rework `about-panel`.
+    - `screenshots-panel` becomes an `overflow-x-auto snap-x gap-3` row, with `min-w-0` on the column.
+    - The related strip uses `collections[0]` in `features/browse-related-games`.
+    - Delete `game-detail-jump-spine`, `game-detail-detail-rail`, `themes-tags-panel`, `related-panel`, `critic-score-ring`, `times-to-beat-section`, `times-to-beat-skeleton`, `related-games-tabs`, and the bento and `[1fr_320px]` grids. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate.
+    - Start the app (record the PID). At 1440×900, confirm Your play and About are equal width with level bottom edges (measure with `verify-ui`). For a game not in the library, About spans the full width.
+    - At 360, 390 and 430, confirm there is no sideways page scroll while scrolling each strip, and that neighbouring screenshots and covers have a visible gap.
+    - Open a screenshot in the lightbox.
+    - Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 8: Home opens with the "Continue …?" question**
+  - [ ] RED tests:
+    - Unit `formatTimeAgo` in `src/shared/lib/date.test.ts`: every row of spec §2.3's table, including the 13/14 and 29/30/59/60/364/365-day edges.
+    - Unit `orderContinueGames`: by latest session; falls back to the date it became Playing; ties go to becoming Playing more recently, then title.
+    - Integration `get-dashboard-page-data`:
+      - `playing` comes in question order from journal entries keyed by `gameId`, including an entry with null `libraryItemId`;
+      - entries without time don't count as sessions;
+      - `lastSessionAt` and `becamePlayingAt` are present.
+    - Component `use-continue-question` + `continue-panel` (fake timers for "now"):
+      - "Continue {3-days game}?" with "Last session 3 days ago" and the platform;
+      - Not tonight ×2 steps through "2 weeks ago" and "a month ago", then "Start {Up Next #1}?" with "First in Up Next" and the length, then the rest state with no tint;
+      - "Ask me again" goes back to the first game;
+      - "Log time" opens the Log sheet for that game, and after a data reload the same game reads "Last session today";
+      - "Start playing" leads to "Continue {game}?" with "Started playing today", and Undo brings back "Start {game}?";
+      - a Done first-in-queue reads "Play {game} again?" with "Play again";
+      - without a platform there is no stray separator;
+      - with no Playing games and an empty Up Next there is no panel. **[Agent: testing]**
+  - [ ] Server:
+    - Add `getLatestSessionDates(userId, gameIds)` in `src/entities/journal-entry/api/` (`groupBy gameId`, `_max.createdAt`, `playedMinutes > 0`).
+    - Add `orderContinueGames` in `src/features/dashboard/model/`.
+    - The dashboard worker returns the `DashboardPageData` contract from tech spec §2.5. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - Add `formatTimeAgo` in `src/shared/lib/date.ts`.
+    - Add `src/widgets/dashboard-page/model/use-continue-question.ts` (`skippedIds`, `focusId`; local state only).
+    - Add `ui/continue-panel/` with the continue/start/replay/rest variants, in `CoverTint variant="panel"` (rest uses `tint="off"`). It is keyed by item id with a CSS fade, and the time phrase renders after hydration.
+    - "Continue" / "Start" / "Play" use `--tint-ink`; the primary button stays plum.
+    - Place the panel at the top of `dashboard-page.tsx`. The rest of Home is unchanged until Slice 9. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Start the app (record the PID) on the reseeded fixtures:
+      - Step through Not tonight to the rest state and back with Ask me again.
+      - Go to the Library and back, and the first question returns.
+      - Log 1.5 h from the panel, and it reads "Last session today".
+      - Start the Up Next game, and Undo puts it back in its queue position.
+    - With reduce motion emulated, confirm the change is immediate.
+    - At 360 wide, ask about the fixture with the longest title: it wraps with both buttons inside the panel.
+    - Confirm the Light and Dark tints follow the red and green fixtures.
+    - Reseed afterwards. Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 9: Below the question, Home shows the Up Next shelf, Also playing and the counts line**
+  - [ ] RED tests:
+    - Rewrite `up-next-shelf.test`:
+      - no status chips;
+      - the first cover is larger and captioned "About 18 evenings" for 31 h, or with its title when the length is unknown;
+      - "Replay" in any position, including first;
+      - no "Play next";
+      - "See all" goes to the Library's Up Next filter.
+    - Component `also-playing`: lists Playing games except the first in question order; stays the same through Not tonight; is absent with one Playing game; "Log" opens the Log sheet for that game.
+    - Component `dashboard-counts-line`:
+      - "28 games · 18 want · 3 playing · 7 done";
+      - each status part links to the filtered Library;
+      - zero parts are left out;
+      - one game reads "1 game";
+      - an empty library has no line.
+    - Rewrite `dashboard-page.test`:
+      - phone has no "Home" title and no Add game;
+      - desktop has the "Home" title with an outline "Add game";
+      - the order is panel → shelf → Also playing → counts;
+      - the empty state is "Nothing playing right now";
+      - after "Start playing" on the panel, the earlier Playing game appears under Also playing. **[Agent: testing]**
+  - [ ] UI:
+    - Update `up-next-shelf.tsx`: remove the StatusChip overlay (`:47-51`) and "Play next" (`:53-61`), and add the new captions.
+    - Add `ui/also-playing/` to replace `dashboard-playing-section`, and `ui/dashboard-counts-line/` to replace `dashboard-status-strip`.
+    - `dashboard-page.tsx`: the `PageHeader` shows on desktop only, with an outline Add game. Set the section order and the empty-state condition. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate.
+    - Start the app (record the PID). At 390×844 with one Playing game, the first Up Next cover is fully visible without scrolling, and the bottom-bar Log is in the bottom third.
+    - With 5 queued games, scrolling the shelf sideways doesn't scroll the page, at 360, 390 and 430.
+    - Tap "3 playing", and the Library opens filtered to Playing.
+    - Stop the server by PID and delete any screenshots. **[Agent: testing]**
+
+- [ ] **Slice 10: The unused HLTB-era game columns are dropped**
+  - [ ] Precondition: the owner has run `SELECT count(*) FROM "Game" WHERE "mainStory" IS NOT NULL OR "mainExtra" IS NOT NULL OR "completionist" IS NOT NULL OR "hltbId" IS NOT NULL` on Neon, and it returned 0. Do not start this slice without that result.
+  - [ ] RED test: an integration test reading `information_schema.columns` asserts that `Game` has no `mainStory`, `mainExtra`, `completionist` or `hltbId` column. **[Agent: testing]**
+  - [ ] Migration 2 `drop_unused_hltb_game_columns`: drop the four columns and `Game_hltbId_key`, and remove them from `schema.prisma`, the factories and any type that still names them. The PR description states that the CI destructive-operation warning is intentional. **[Agent: prisma-database]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Run `prisma migrate status` locally, and confirm `rg -n 'mainStory|mainExtra|completionist|hltbId' src prisma/schema.prisma test` prints nothing.
+    - Start the app (record the PID), open a game page and the Library, then stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 11: Owner review of the "after" set, phone first**
+  - [ ] Capture the "after" set with `design-review --phase round2 --set after --desktop --reseed`, after running the local backfill:
+    - phone at 390×844 (checks at 360, 390 and 430), then desktop at 1440×900, in Light and Dark;
+    - Home, the five game-page states, the Library and Settings → Play.
+    - Compare `report.json` with the "before" one. List every remaining failure from the phone checks: sideways scroll, tap size, font size. **[Agent: testing]**
+  - [ ] Build a side-by-side before/after review page of the captures for the owner (phone first), and fix any check failures in the slice that introduced them before handing over. **[Agent: react-frontend]**
+  - [ ] Verify: the owner has reviewed the page and either approved it or listed changes. Changes get their own follow-up tasks here. Delete the temporary review build files, but keep `review/round2/`. **[Agent: testing]**
+
+- [ ] **Slice 12: Feature Testing & Regression**
+
+  > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
+  - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 028-continue-identity-stand-out` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
