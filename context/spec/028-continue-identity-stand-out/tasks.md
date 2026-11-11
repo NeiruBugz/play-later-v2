@@ -24,7 +24,7 @@ Conventions for every slice:
 ---
 
 - [ ] **Slice 1: The review script captures the spec 028 "before" set, including the cover fixtures**
-  - [ ] Point `scripts/design-review` at spec 028:
+  - [x] Point `scripts/design-review` at spec 028:
     - `--spec` flag, default `028-continue-identity-stand-out`; the output root becomes `context/spec/<spec>/review/<phase>/<set>`. Keep `--out` working.
     - Add `context/spec/028-continue-identity-stand-out/review/` to the repo `.gitignore`.
     - Update `scripts/design-review/README.md`. **[Agent: testing]**

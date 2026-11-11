@@ -47,6 +47,8 @@ const SETTLE_PAUSE_MS = 150;
 const THEME_STORAGE_KEY = "theme";
 const WHATS_NEW_STORAGE_KEY = "whatsNewLastSeenVersion";
 
+const DEFAULT_SPEC = "028-continue-identity-stand-out";
+
 const { values: args } = parseArgs({
   options: {
     phase: { type: "string" },
@@ -55,6 +57,7 @@ const { values: args } = parseArgs({
     checks: { type: "boolean", default: false },
     reseed: { type: "boolean", default: false },
     out: { type: "string" },
+    spec: { type: "string", default: DEFAULT_SPEC },
     query: { type: "string" },
     screens: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
@@ -75,7 +78,14 @@ const password = process.env.REVIEW_PASSWORD;
 const baseURL = args["base-url"] as string;
 const outDir = resolve(
   args.out ??
-    join(repoRoot, "context/spec/027-design-reset/review", args.phase, args.set)
+    join(
+      repoRoot,
+      "context/spec",
+      args.spec as string,
+      "review",
+      args.phase,
+      args.set
+    )
 );
 
 const checksEnabled =
