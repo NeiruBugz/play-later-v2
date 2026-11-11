@@ -304,11 +304,11 @@ Conventions for every slice:
     - Tap "3 playing", and the Library opens filtered to Playing.
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 10: The unused HLTB-era game columns are dropped**
+- [x] **Slice 10: The unused HLTB-era game columns are dropped**
   - [x] Precondition: the owner has run `SELECT count(*) FROM "Game" WHERE "mainStory" IS NOT NULL OR "mainExtra" IS NOT NULL OR "completionist" IS NOT NULL OR "hltbId" IS NOT NULL` on Neon, and it returned 0. Do not start this slice without that result.
   - [x] RED test: an integration test reading `information_schema.columns` asserts that `Game` has no `mainStory`, `mainExtra`, `completionist` or `hltbId` column. **[Agent: testing]**
-  - [ ] Migration 2 `drop_unused_hltb_game_columns`: drop the four columns and `Game_hltbId_key`, and remove them from `schema.prisma`, the factories and any type that still names them. The PR description states that the CI destructive-operation warning is intentional. **[Agent: prisma-database]**
-  - [ ] Verify:
+  - [x] Migration 2 `drop_unused_hltb_game_columns`: drop the four columns and `Game_hltbId_key`, and remove them from `schema.prisma`, the factories and any type that still names them. The PR description states that the CI destructive-operation warning is intentional. **[Agent: prisma-database]**
+  - [x] Verify:
     - Run the gate, including integration.
     - Run `prisma migrate status` locally, and confirm `rg -n 'mainStory|mainExtra|completionist|hltbId' src prisma/schema.prisma test` prints nothing.
     - Start the app (record the PID), open a game page and the Library, then stop the server by PID. **[Agent: testing]**
