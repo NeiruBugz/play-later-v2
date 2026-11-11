@@ -169,7 +169,7 @@ Conventions for every slice:
     - Check the client bundle doesn't contain `jpeg-js` (`rg -l jpeg-js .output/public` is empty).
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 6: The header holds the right actions for each visitor, with "Done with it?" and the "⋯" menu**
+- [x] **Slice 6: The header holds the right actions for each visitor, with "Done with it?" and the "⋯" menu**
   - [x] RED tests:
     - Integration `set-status-fn` with `doneOutcome`: it writes status and reason in one transaction; it is rejected unless `to` is DONE; undo restores the previous reason.
     - Component `game-header-actions`, one `describe` per state:
@@ -193,7 +193,7 @@ Conventions for every slice:
     - Add `game-header-actions`, `done-with-it` and `game-more-menu` (extracted from `game-library-controls:103-134`), and put them in `game-header`.
     - `DoneRequest` gains `initialOutcome`, and `DoneFollowUp` seeds its state from it.
     - Remove `game-detail-action-bar` and `add-to-track-invite`, with their tests. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Start the app (record the PID), using the fixture games:
       - On a Playing game, tap "Done with it?" → "Let it go". The dialog opens with "Let go" selected. Close it, and the control reads "Done · Let go".
