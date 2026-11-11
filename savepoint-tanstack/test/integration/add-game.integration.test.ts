@@ -1,4 +1,12 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
 import { addToUpNext } from "@/entities/library-item/api/add-to-up-next.server";
@@ -8,6 +16,7 @@ import { addGameWorker } from "@/features/add-game/api/add-game.worker";
 import { undoAddGameWorker } from "@/features/add-game/api/undo-add-game.worker";
 import { logTimeWorker } from "@/features/compose-journal-entry/api/log-time-fn.worker";
 import { answerPromptWorker } from "@/features/library-prompts/api/answer-prompt-fn.worker";
+import { igdbFetch } from "@/shared/api/igdb/fetch";
 import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
 import {
@@ -21,6 +30,10 @@ import {
   type IsolatedDatabase,
 } from "../setup/isolated-db.ts";
 
+vi.mock("@/shared/api/igdb/fetch", () => ({ igdbFetch: vi.fn() }));
+
+const igdbFetchMock = vi.mocked(igdbFetch);
+
 let db: IsolatedDatabase;
 
 beforeAll(async () => {
@@ -32,6 +45,8 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
+  igdbFetchMock.mockReset();
+  igdbFetchMock.mockResolvedValue([]);
   await db.prisma.playthrough.deleteMany();
   await db.prisma.journalEntry.deleteMany();
   await db.prisma.libraryItem.deleteMany();
@@ -94,6 +109,44 @@ describe(addGameWorker, () => {
 
     await expect(addGameWorker(user.id, { igdbId: -1 })).rejects.toThrow();
     expect(await db.prisma.libraryItem.count()).toBe(0);
+  });
+});
+
+describe("addGameWorker enrichment", () => {
+  describe("given IGDB has times for a game that was never enriched", () => {
+    it("stores the times on the game while adding it", async () => {
+      const user = await createUser(db.prisma);
+      const game = await createGame(db.prisma);
+      igdbFetchMock.mockResolvedValue([
+        { id: 1, game_id: game.igdbId, hastily: 36_000, completely: 90_000 },
+      ]);
+
+      await addGameWorker(user.id, { igdbId: game.igdbId });
+
+      expect(
+        await db.prisma.game.findUniqueOrThrow({ where: { id: game.id } })
+      ).toMatchObject({
+        timeToCreditsSeconds: 36_000,
+        timeToCompleteSeconds: 90_000,
+      });
+    });
+  });
+
+  describe("given IGDB fails while enriching", () => {
+    it("still adds the game to the library and leaves it unfetched for a retry", async () => {
+      const user = await createUser(db.prisma);
+      const game = await createGame(db.prisma);
+      igdbFetchMock.mockRejectedValue(new Error("IGDB 500"));
+
+      const result = await addGameWorker(user.id, { igdbId: game.igdbId });
+
+      expect(result).toMatchObject({ created: true, status: "WANT" });
+      expect(await itemExists(result.libraryItemId)).toBe(true);
+      expect(
+        (await db.prisma.game.findUniqueOrThrow({ where: { id: game.id } }))
+          .timesToBeatFetchedAt
+      ).toBeNull();
+    });
   });
 });
 

@@ -1,8 +1,9 @@
 /**
- * Integration test for `getTimesToBeat` (Slice 14 phase-2 rework).
+ * Integration test for `getTimesToBeat`.
  *
  * IGDB transport mocked via vi.stubGlobal("fetch", ...). No DB writes —
- * read-through IGDB query against `/game_time_to_beats`.
+ * read-through IGDB query against `/game_time_to_beats`. `hastily` is the time
+ * to credits, `completely` the time to 100%; `normally` is not read.
  */
 import {
   afterAll,
@@ -86,12 +87,39 @@ describe("getTimesToBeat", () => {
     vi.stubGlobal(
       "fetch",
       makeFetchMock({
-        igdbBody: [{ id: 1, normally: 36000, completely: 90000 }],
+        igdbBody: [{ id: 1, hastily: 36000, completely: 90000 }],
       })
     );
 
     const result = await getTimesToBeat({ igdbId: IGDB_ID });
-    expect(result).toEqual({ mainStory: 36000, completionist: 90000 });
+    expect(result).toEqual({
+      timeToCreditsSeconds: 36000,
+      timeToCompleteSeconds: 90000,
+    });
+  });
+
+  it("asks IGDB for hastily and completely", async () => {
+    const fetchMock = makeFetchMock({ igdbBody: [] });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getTimesToBeat({ igdbId: IGDB_ID });
+
+    const igdbCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes("api.igdb.com")
+    );
+    expect(String(igdbCall?.[1]?.body)).toContain(
+      "fields hastily, completely;"
+    );
+  });
+
+  it("ignores `normally` — it is not the time to credits", async () => {
+    vi.stubGlobal(
+      "fetch",
+      makeFetchMock({ igdbBody: [{ id: 1, normally: 50000 }] })
+    );
+
+    const result = await getTimesToBeat({ igdbId: IGDB_ID });
+    expect(result).toBeNull();
   });
 
   it("returns null when IGDB returns no items for the game", async () => {
@@ -101,21 +129,24 @@ describe("getTimesToBeat", () => {
     expect(result).toBeNull();
   });
 
-  it("returns null when both `normally` and `completely` are missing", async () => {
+  it("returns null when both `hastily` and `completely` are missing", async () => {
     vi.stubGlobal("fetch", makeFetchMock({ igdbBody: [{ id: 1 }] }));
 
     const result = await getTimesToBeat({ igdbId: IGDB_ID });
     expect(result).toBeNull();
   });
 
-  it("returns mainStory only when `completely` is missing", async () => {
+  it("returns the time to credits only when `completely` is missing", async () => {
     vi.stubGlobal(
       "fetch",
-      makeFetchMock({ igdbBody: [{ id: 1, normally: 18000 }] })
+      makeFetchMock({ igdbBody: [{ id: 1, hastily: 18000 }] })
     );
 
     const result = await getTimesToBeat({ igdbId: IGDB_ID });
-    expect(result).toEqual({ mainStory: 18000, completionist: null });
+    expect(result).toEqual({
+      timeToCreditsSeconds: 18000,
+      timeToCompleteSeconds: null,
+    });
   });
 
   it("throws UpstreamError on transport / non-2xx", async () => {
@@ -136,7 +167,7 @@ describe("getTimesToBeat", () => {
   it("throws UpstreamError on malformed response", async () => {
     vi.stubGlobal(
       "fetch",
-      makeFetchMock({ igdbBody: [{ normally: "not-a-number" }] })
+      makeFetchMock({ igdbBody: [{ hastily: "not-a-number" }] })
     );
 
     await expect(getTimesToBeat({ igdbId: IGDB_ID })).rejects.toThrow(
@@ -147,7 +178,7 @@ describe("getTimesToBeat", () => {
   it("does not write to the Game table", async () => {
     vi.stubGlobal(
       "fetch",
-      makeFetchMock({ igdbBody: [{ id: 1, normally: 36000 }] })
+      makeFetchMock({ igdbBody: [{ id: 1, hastily: 36000 }] })
     );
 
     const before = await db.prisma.game.count();

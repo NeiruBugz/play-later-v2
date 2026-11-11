@@ -28,7 +28,7 @@ Conventions for every slice:
     - `--spec` flag, default `028-continue-identity-stand-out`; the output root becomes `context/spec/<spec>/review/<phase>/<set>`. Keep `--out` working.
     - Add `context/spec/028-continue-identity-stand-out/review/` to the repo `.gitignore`.
     - Update `scripts/design-review/README.md`. **[Agent: testing]**
-  - [ ] Add the game-page states the spec covers to `screens.ts`: `game-playing`, `game-want`, `game-done` (with a Let go reason), `game-not-in-library` (existing) and `game-signed-out`. Also add `settings-play`, marked `skip` until Slice 3.
+  - [x] Add the game-page states the spec covers to `screens.ts`: `game-playing`, `game-want`, `game-done` (with a Let go reason), `game-not-in-library` (existing) and `game-signed-out`. Also add `settings-play`, marked `skip` until Slice 3.
     - Add a committed fixture SQL `context/spec/028-continue-identity-stand-out/review-fixtures.sql` (next to `tasks.md`, outside the gitignored `review/`). `--reseed` applies it after the 026 seed.
     - It gives `audit_full` four Playing or Up Next games with known IGDB covers: one mostly red, one mostly green, one black-and-white, and one with no cover art.
     - It gives one Playing game at least three dated sessions, and Playing games whose last sessions were 3 days, 2 weeks and 40 days ago. **[Agent: testing]**
@@ -40,7 +40,7 @@ Conventions for every slice:
     - Stop the server by PID and delete any extra files created outside `review/round2/before/`. **[Agent: testing]**
 
 - [ ] **Slice 2: The game page shows typical play time from stored columns, with "Main story" meaning time to credits**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Integration `ensure-game-enrichment` (times part, IGDB mocked at `src/shared/api/igdb/fetch.ts`): it writes `timeToCreditsSeconds` / `timeToCompleteSeconds` from `hastily` / `completely`; it sets `timesToBeatFetchedAt` when IGDB has no data; it leaves `timesToBeatFetchedAt` null when IGDB fails; it refetches after 30 days and not before; the batched variant sends 10 ids per request.
     - Rewrite `get-times-to-beat.integration` for the `hastily,completely` fields.
     - Integration `get-game-details`: returns both times for a signed-out viewer; a slow IGDB response (over 1.5 s) still returns the page without times.
