@@ -32,6 +32,8 @@ export type GameDetailData = {
   playtimeSessionCount: number;
   /** Ended plays of the viewer's library entry; owner only, empty when none. */
   history?: Play[];
+  timeToCreditsSeconds: number | null;
+  timeToCompleteSeconds: number | null;
 };
 
 export type GameDetailProps = {

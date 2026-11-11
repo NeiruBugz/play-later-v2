@@ -126,6 +126,12 @@ const buildGame = (overrides: Partial<Game> = {}): Game => ({
   steamAppId: null,
   slug: "hollow-knight",
   franchiseId: null,
+  timeToCreditsSeconds: null,
+  timeToCompleteSeconds: null,
+  timesToBeatFetchedAt: null,
+  coverHue: null,
+  coverChroma: null,
+  coverTintComputedAt: null,
   ...overrides,
 });
 
@@ -153,6 +159,8 @@ const buildData = (
   notes: [],
   playtimeTotalMinutes: 0,
   playtimeSessionCount: 0,
+  timeToCreditsSeconds: null,
+  timeToCompleteSeconds: null,
 });
 
 const elements = {

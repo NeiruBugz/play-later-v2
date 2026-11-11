@@ -173,6 +173,9 @@ export function GameLibraryControls({
               slug: "",
               coverImage: null,
               releaseDate: null,
+              timeToCreditsSeconds: null,
+              coverHue: null,
+              coverChroma: null,
             },
           }}
         />

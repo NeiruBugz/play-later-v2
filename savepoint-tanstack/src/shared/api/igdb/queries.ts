@@ -1,13 +1,21 @@
 import { ALLOWED_GAME_CATEGORIES, SEARCH_RESULTS_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 
-export const TIMES_TO_BEAT_FIELDS = ["normally", "completely"] as const;
+export const TIMES_TO_BEAT_FIELDS = ["hastily", "completely"] as const;
 
 export function buildTimesToBeatQuery(igdbId: number): string {
   return new QueryBuilder()
     .fields([...TIMES_TO_BEAT_FIELDS])
     .where(`game_id = ${igdbId}`)
     .limit(1)
+    .build();
+}
+
+export function buildTimesToBeatBatchQuery(igdbIds: number[]): string {
+  return new QueryBuilder()
+    .fields(["game_id", ...TIMES_TO_BEAT_FIELDS])
+    .where(`game_id = (${igdbIds.join(",")})`)
+    .limit(igdbIds.length)
     .build();
 }
 

@@ -50,7 +50,7 @@ Conventions for every slice:
     - the six `Game` columns, with CHECK `coverHue` 0–359 and `coverChroma` ≥ 0;
     - `user.eveningMinutes Int NOT NULL DEFAULT 105` with CHECK BETWEEN 30 AND 360.
     - Extend `test/factories` (`buildGame`, `createGame`, `buildLibraryItemWithGame`) with the new columns. **[Agent: prisma-database]**
-  - [ ] Enrichment, times only:
+  - [x] Enrichment, times only:
     - Change `getTimesToBeat` and `TIMES_TO_BEAT_FIELDS` (`src/shared/api/igdb/queries.ts:4`) to `hastily,completely`, returning `{ timeToCreditsSeconds, timeToCompleteSeconds }`.
     - Create `src/entities/game/api/ensure-game-enrichment.server.ts` with `ensureGameEnrichment` / `ensureGamesEnrichment`. It refreshes after 30 days, soft-fails, and writes with one update per game. Leave room for the hue step added in Slice 5.
     - Call it from `getGameDetails` (awaited, capped at 1.5 s), the add-game worker and the steam-import worker (batched).
@@ -70,7 +70,7 @@ Conventions for every slice:
     - Integration: `get-library` returns `timeToCreditsSeconds`, `coverHue` and `coverChroma` on `game`; `getCurrentUserFn` returns `eveningMinutes` (105 for a new user and for a signed-out visitor).
     - Integration for the backfill's core function: it fills un-enriched games, is idempotent on rerun, and reports coverage.
     - Rewrite `library-item-card.test` and `game-card.test`: no Want/Playing/Done badge on the cover; 8.5 h reads "About 5 evenings" under the title; a game with no time still renders the length line, empty; the status shows once, in the status control. **[Agent: testing]**
-  - [ ] Data for the card:
+  - [x] Data for the card:
     - Extend the `getLibrary` select and `LibraryItemWithGame.game` (`src/entities/library-item/model/types.ts:24-33`) with `timeToCreditsSeconds`, `coverHue` and `coverChroma`.
     - `getCurrentUserFn` selects and returns `eveningMinutes`, with 105 when signed out.
     - Add `useEveningMinutes()` in `src/entities/session/model/`. **[Agent: tanstack-fullstack]**
@@ -102,7 +102,7 @@ Conventions for every slice:
       - a new user sees 1.75 h selected;
       - the example line reads "A 14.5-hour game is about 8 evenings.";
       - choosing 3 h saves the value and updates the example line. **[Agent: testing]**
-  - [ ] Feature `src/features/set-evening-length/`: `api/set-evening-length.ts` (`createServerFn`) plus `.worker.ts`.
+  - [x] Feature `src/features/set-evening-length/`: `api/set-evening-length.ts` (`createServerFn`) plus `.worker.ts`.
     - Validate twice with a `z.union` of the six literals, and use `requireUserId()`.
     - The entity is `updateProfile` (`src/entities/profile/api/update-profile.server.ts:22-61`) with an optional `eveningMinutes`. **[Agent: tanstack-fullstack]**
   - [ ] UI:

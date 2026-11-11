@@ -29,6 +29,9 @@ export type LibraryItemWithGame = LibraryItem & {
     slug: string;
     coverImage: string | null;
     releaseDate: Date | null;
+    timeToCreditsSeconds: number | null;
+    coverHue: number | null;
+    coverChroma: number | null;
   };
 };
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { ensureGamesEnrichment } from "@/entities/game/api/ensure-game-enrichment.server";
 import {
   upsertGameFromIgdb,
   upsertGameFromIgdbPayload,
@@ -109,6 +110,7 @@ export async function importGameToLibraryWorker(
   const game = matchedRemote
     ? await upsertGameFromIgdbPayload(matchedRemote)
     : await upsertGameFromIgdb(igdbId);
+  await ensureGamesEnrichment([game]);
 
   // One transaction: library item, status change and MATCHED flip commit or
   // roll back together, so a retry after a failure starts from a clean slate.
