@@ -65,7 +65,7 @@ Conventions for every slice:
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 3: Library cards show length in evenings, with no badge on the cover**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Unit `src/shared/lib/evenings.test.ts`: 14.5 h → "About 8 evenings", 1.5 h → "One evening", 51 h → "About 29 evenings", 4.375 h → "About 3 evenings", null → null; at 180 min, 14.5 h → "About 5 evenings" and 2 h → "One evening".
     - Integration: `get-library` returns `timeToCreditsSeconds`, `coverHue` and `coverChroma` on `game`; `getCurrentUserFn` returns `eveningMinutes` (105 for a new user and for a signed-out visitor).
     - Integration for the backfill's core function: it fills un-enriched games, is idempotent on rerun, and reports coverage.
@@ -95,7 +95,7 @@ Conventions for every slice:
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 4: A person sets how long an evening is in Settings, and library lengths follow**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Integration `set-evening-length`: it saves each of the six values; it rejects 100 and a string; it requires sign-in; `getCurrentUserFn` then returns the new value.
     - Unit `radio-group` primitive: arrow keys move the selection; each option is a radio with its label.
     - Component test for the Play settings page:
