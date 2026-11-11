@@ -11,18 +11,21 @@
  * rides inside `return_to` (which Steam signs) and is checked on callback.
  *
  * `realm` MUST be the bare origin (no path). `returnTo` MUST be on the same
- * origin/realm.
+ * origin/realm. Both are derived through `URL` so a `siteUrl` with a trailing
+ * slash (e.g. `BETTER_AUTH_URL=https://app.example.com/`) cannot produce a
+ * `//steam/callback` return-to that the callback verifier rejects.
  */
 export function buildSteamOpenIdLoginUrl(
-  returnToOrigin: string,
+  siteUrl: string,
   state: string
 ): string {
-  const realm = returnToOrigin;
-  const returnTo = `${returnToOrigin}/steam/callback?state=${encodeURIComponent(state)}`;
+  const realm = new URL(siteUrl).origin;
+  const returnTo = new URL("/steam/callback", realm);
+  returnTo.searchParams.set("state", state);
   const params = new URLSearchParams({
     "openid.ns": "http://specs.openid.net/auth/2.0",
     "openid.mode": "checkid_setup",
-    "openid.return_to": returnTo,
+    "openid.return_to": returnTo.toString(),
     "openid.realm": realm,
     "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
     "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
