@@ -203,7 +203,7 @@ Conventions for every slice:
     - Measure the "Done with it?", "Finished", "Let it go" and "Not yet" tap areas at 390 wide (at least 44×44).
     - Reseed afterwards. Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 7: Below the header, the game page shows Your play, About, and sideways screenshot and related rows**
+- [x] **Slice 7: Below the header, the game page shows Your play, About, and sideways screenshot and related rows**
   - [x] RED tests:
     - Component `your-play-card`:
       - "3 sessions · 4.5 h", and "No sessions yet" with no "0 h" anywhere;
@@ -226,7 +226,7 @@ Conventions for every slice:
     - `screenshots-panel` becomes an `overflow-x-auto snap-x gap-3` row, with `min-w-0` on the column.
     - The related strip uses `collections[0]` in `features/browse-related-games`.
     - Delete `game-detail-jump-spine`, `game-detail-detail-rail`, `themes-tags-panel`, `related-panel`, `critic-score-ring`, `times-to-beat-section`, `times-to-beat-skeleton`, `related-games-tabs`, and the bento and `[1fr_320px]` grids. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). At 1440×900, confirm Your play and About are equal width with level bottom edges (measure with `verify-ui`). For a game not in the library, About spans the full width.
     - At 360, 390 and 430, confirm there is no sideways page scroll while scrolling each strip, and that neighbouring screenshots and covers have a visible gap.
