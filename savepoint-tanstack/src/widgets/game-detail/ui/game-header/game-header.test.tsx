@@ -17,8 +17,8 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-const EIGHT_AND_A_HALF_HOURS_IN_SECONDS = 8.5 * 3600;
-const EVENING_MINUTES = 60;
+const FOURTEEN_AND_A_HALF_HOURS_IN_SECONDS = 14.5 * 3600;
+const EVENING_MINUTES = 105;
 const SIX_PLATFORMS = [
   "PlayStation 5",
   "PC (Microsoft Windows)",
@@ -74,7 +74,7 @@ const buildData = (
   notes: [],
   playtimeTotalMinutes: 0,
   playtimeSessionCount: 0,
-  timeToCreditsSeconds: EIGHT_AND_A_HALF_HOURS_IN_SECONDS,
+  timeToCreditsSeconds: FOURTEEN_AND_A_HALF_HOURS_IN_SECONDS,
   timeToCompleteSeconds: null,
   coverTint: null,
   ...dataOverrides,

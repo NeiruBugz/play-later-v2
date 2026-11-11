@@ -144,7 +144,7 @@ Conventions for every slice:
   - [x] Tint rendering:
     - Add `src/shared/ui/cover-tint/` (`tint`, `variant: "panel" | "header"`). It sets only `--tint-h`, `--tint-c` and `data-tint`.
     - Add the `cover-tint` utility in `styles.css`: fixed per-mode L (Light 0.915 / 0.87 / 0.44, Dark 0.255 / 0.31 / 0.80), a chroma cap tuned until the sweep passes, `data-tint="off"` falling back to `--card`, and the header fade over the bottom third. **[Agent: react-frontend]**
-  - [ ] Header:
+  - [x] Header:
     - Add `src/widgets/game-detail/ui/game-header/`, wrapped in `CoverTint variant="header"`.
     - Top row: Back (`useCanGoBack()` → `router.history.back()`, else `/library`).
     - Identity: `GameCover size="lg"`, then `[year, developer, genres[0]]` with the developer taken from involved companies, then the title in `font-display`.
@@ -177,7 +177,7 @@ Conventions for every slice:
       - after "Finished", closing the dialog leaves "Done · Finished".
     - Component `game-more-menu`: Edit details…, the ownership choice, the Up Next actions and Remove from library; hidden when the game is not in the library.
     - Rewrite `game-library-controls.test` for what remains. **[Agent: testing]**
-  - [ ] Status plumbing:
+  - [x] Status plumbing:
     - `setStatusFn` and its worker accept an optional `doneOutcome`, allowed only with `to: "DONE"`.
     - `setLibraryItemStatusInTx` writes it in the same transaction.
     - `changeStatusWithUndo` and `useSetStatus` pass it through. **[Agent: tanstack-fullstack]**

@@ -30,10 +30,11 @@ export type SetLibraryItemStatusResult = {
 export async function setLibraryItemStatus(
   userId: string,
   id: number,
-  to: LibraryItemStatus
+  to: LibraryItemStatus,
+  doneOutcome?: DoneOutcome
 ): Promise<SetLibraryItemStatusResult> {
   return prisma.$transaction((tx) =>
-    setLibraryItemStatusInTx(tx, userId, id, to)
+    setLibraryItemStatusInTx(tx, userId, id, to, doneOutcome)
   );
 }
 
@@ -45,7 +46,8 @@ export async function setLibraryItemStatusInTx(
   tx: Prisma.TransactionClient,
   userId: string,
   id: number,
-  to: LibraryItemStatus
+  to: LibraryItemStatus,
+  doneOutcome?: DoneOutcome
 ): Promise<SetLibraryItemStatusResult> {
   await lockUserQueue(tx, userId);
 
@@ -125,7 +127,11 @@ export async function setLibraryItemStatusInTx(
 
   const item = await tx.libraryItem.update({
     where: { id },
-    data: { status: to, statusChangedAt: now },
+    data: {
+      status: to,
+      statusChangedAt: now,
+      ...(doneOutcome !== undefined ? { doneOutcome } : {}),
+    },
   });
 
   return { item, undo: { snapshot, createdPlayId, closedPlayId } };

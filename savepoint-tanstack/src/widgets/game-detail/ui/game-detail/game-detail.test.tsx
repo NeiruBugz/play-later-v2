@@ -32,7 +32,8 @@ vi.mock("@/features/library-prompts/api/dismiss-prompt-fn", () => ({
   dismissPromptFn: vi.fn(),
 }));
 vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ invalidate: vi.fn() }),
+  useRouter: () => ({ invalidate: vi.fn(), history: { back: vi.fn() } }),
+  useCanGoBack: () => false,
   useNavigate: (options?: unknown) => {
     mockUseNavigate(options);
     return mockNavigate;
@@ -106,6 +107,9 @@ vi.mock("@/features/up-next/api/remove-from-up-next-fn", () => ({
   removeFromUpNextFn: vi.fn(),
 }));
 
+vi.mock("@/entities/session/model", () => ({
+  useEveningMinutes: () => 105,
+}));
 vi.mock("sonner", () => ({
   toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn() }),
 }));
@@ -161,6 +165,7 @@ const buildData = (
   playtimeSessionCount: 0,
   timeToCreditsSeconds: null,
   timeToCompleteSeconds: null,
+  coverTint: null,
 });
 
 const elements = {

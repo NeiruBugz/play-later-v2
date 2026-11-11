@@ -87,7 +87,7 @@ export interface GameDetails {
   history: EndedPlay[];
   timeToCreditsSeconds: Game["timeToCreditsSeconds"];
   timeToCompleteSeconds: Game["timeToCompleteSeconds"];
-  coverTint?: CoverTint | null;
+  coverTint: CoverTint | null;
 }
 
 export async function getGameDetails(params: {

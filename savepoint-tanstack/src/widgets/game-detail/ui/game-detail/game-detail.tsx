@@ -1,19 +1,16 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 
-import { CriticScoreRing } from "@/entities/game";
+import { useEveningMinutes } from "@/entities/session/model";
 import { useSetOwnership, useSetStatus } from "@/features/manage-library-entry";
 import { openGlobalAction } from "@/shared/lib/global-action";
-import { buildScreenshotUrl } from "@/shared/lib/igdb-image";
 import { Card } from "@/shared/ui/card";
-import { GameCover } from "@/shared/ui/game-cover";
-import { PageHeader } from "@/shared/ui/page-header";
 
 import { AboutPanel } from "../about-panel";
 import { AddToTrackInvite } from "../add-to-track-invite";
 import { GameDetailActionBar } from "../game-detail-action-bar";
 import { GameDetailDetailRail } from "../game-detail-detail-rail";
 import { GameDetailJumpSpine } from "../game-detail-jump-spine";
+import { GameHeader } from "../game-header";
 import { GameLibraryControls } from "../game-library-controls";
 import { GameNotesList } from "../game-notes-list";
 import { GameRating } from "../game-rating";
@@ -42,6 +39,7 @@ export function GameDetail({
     playtimeSessionCount,
   } = data;
   const navigate = useNavigate();
+  const eveningMinutes = useEveningMinutes();
 
   function openLogSession() {
     openGlobalAction(navigate, "log-session", gameSlug);
@@ -61,15 +59,8 @@ export function GameDetail({
   const publisher =
     igdbDetails.involved_companies?.find((c) => c.publisher)?.company.name ??
     null;
-  const screenshotBgUrl = buildScreenshotUrl(
-    igdbDetails.screenshots?.[0]?.image_id
-  );
 
   const criticScore = igdbDetails.aggregated_rating ?? null;
-
-  const eyebrowParts: string[] = [releaseYear, publisher, genres[0] ?? null]
-    .filter((p): p is string => Boolean(p))
-    .map((p) => p.toUpperCase());
 
   const hasAboutData = Boolean(
     summary || releaseYear || developer || publisher
@@ -215,127 +206,14 @@ export function GameDetail({
 
   return (
     <div className="relative flex flex-col">
-      <div
-        aria-hidden="true"
-        data-testid="game-detail-hero-backdrop"
-        className="pointer-events-none absolute inset-x-0 top-0 h-56 overflow-hidden md:h-72"
-      >
-        {screenshotBgUrl ? (
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url(${screenshotBgUrl})`,
-              filter: "saturate(0.85)",
-            }}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-muted to-transparent to-60%" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 via-55% to-background to-88%" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent to-40%" />
-      </div>
+      <GameHeader data={data} eveningMinutes={eveningMinutes} />
 
       <div className="relative px-6 pb-16 md:px-12">
-        {/* Mobile top bar: Back + More — visible below md breakpoint */}
-        <div className="relative z-10 flex items-center justify-between pt-3.5 md:hidden">
-          <Link
-            to="/library"
-            aria-label="Back"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-muted-foreground"
-          >
-            <ArrowLeft size={20} aria-hidden="true" />
-          </Link>
-          <button
-            type="button"
-            aria-label="More"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-muted-foreground"
-          >
-            <MoreHorizontal size={20} aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* Desktop breadcrumb — visible at md and above */}
-        <nav
-          aria-label="Breadcrumb"
-          className="relative z-10 hidden items-center gap-1.5 pt-3.5 text-xs font-medium text-muted-foreground md:flex"
-        >
-          <Link
-            to="/library"
-            className="transition-colors hover:text-foreground"
-          >
-            Library
-          </Link>
-          <span aria-hidden="true" className="opacity-50">
-            /
-          </span>
-          <Link
-            to="/library"
-            className="transition-colors hover:text-foreground"
-          >
-            Games
-          </Link>
-          <span aria-hidden="true" className="opacity-50">
-            /
-          </span>
-          <span className="max-w-[280px] truncate font-medium text-foreground">
-            {game.title}
-          </span>
-        </nav>
-
-        {/* Stacked hero: cover first (mobile) / side-by-side (desktop) */}
-        <section
-          id="hero"
-          className="grid grid-cols-1 items-end gap-7 pt-36 md:grid-cols-[200px_1fr] md:pt-44"
-        >
-          <GameCover
-            src={game.coverImage}
-            name={game.title}
-            size="lg"
-            priority
-          />
-          <div className="min-w-0 pb-1.5">
-            <div className="flex items-start justify-between gap-6">
-              <div className="min-w-0 flex-1">
-                {eyebrowParts.length > 0 ? (
-                  <p
-                    aria-label="Release metadata"
-                    className="mb-2.5 flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground uppercase"
-                  >
-                    {eyebrowParts.map((part, i) => (
-                      <span key={i} className="flex items-center gap-2">
-                        {i > 0 ? (
-                          <span
-                            aria-hidden="true"
-                            className="inline-block h-[3px] w-[3px] rounded-full bg-muted-foreground"
-                          />
-                        ) : null}
-                        {part}
-                      </span>
-                    ))}
-                  </p>
-                ) : null}
-
-                <PageHeader title={game.title} className="mb-4" />
-              </div>
-
-              {/* Critic ring shown in hero on mobile; on desktop it lives in the rail */}
-              {criticScore !== null ? (
-                <div className="md:hidden">
-                  <CriticScoreRing value={criticScore} />
-                </div>
-              ) : null}
-            </div>
-
-            {libraryControlsProps !== null ? (
-              <div className="md:hidden">
-                <GameLibraryControls
-                  key={game.igdbId}
-                  {...libraryControlsProps}
-                />
-              </div>
-            ) : null}
+        {libraryControlsProps !== null ? (
+          <div className="mt-4 md:hidden">
+            <GameLibraryControls key={game.igdbId} {...libraryControlsProps} />
           </div>
-        </section>
+        ) : null}
 
         {/* Jump spine: mobile — visible below md; desktop version is inside the content column */}
         {jumpSections.length > 0 ? (

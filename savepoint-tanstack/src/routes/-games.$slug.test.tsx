@@ -103,6 +103,7 @@ const buildView = (
     history: [],
     timeToCreditsSeconds: 36_000,
     timeToCompleteSeconds: 90_000,
+    coverTint: null,
   },
   viewerUserId: null,
   ...overrides,
