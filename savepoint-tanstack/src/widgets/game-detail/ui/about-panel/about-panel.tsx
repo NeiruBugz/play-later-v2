@@ -86,11 +86,11 @@ export function AboutPanel({
       ) : null}
 
       {tags.length > 0 ? (
-        <ul aria-label="Themes and genres" className="flex flex-wrap gap-1.5">
+        <ul aria-label="Themes and genres" className="flex flex-wrap gap-2">
           {tags.map((tag) => (
             <li
               key={tag}
-              className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
+              className="rounded-full bg-muted px-2.5 py-0.5 text-base text-muted-foreground md:px-2 md:text-xs"
             >
               {tag}
             </li>
