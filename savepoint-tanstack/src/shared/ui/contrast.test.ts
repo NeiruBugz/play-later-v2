@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { COVER_TINT_CHROMA_CAP } from "../lib/cover-tint";
 import { STATUS_VARIANTS_WITH_CONTRAST_CHECK } from "./contrast-status-variants";
 
 type Rgb = [number, number, number];
@@ -226,4 +227,52 @@ describe.each(modes)("contrast in %s", (mode) => {
       expect(contrast(at("ring"), at(surface))).toBeGreaterThanOrEqual(GRAPHIC);
     }
   );
+});
+
+const TINT_LIGHTNESS = {
+  light: { wash: 0.915, ink: 0.44 },
+  dark: { wash: 0.255, ink: 0.8 },
+} as const;
+const TITLE_CONTRAST_MAX_SPREAD = 0.5;
+const HUES = Array.from({ length: 360 }, (_, hue) => hue);
+
+describe.each(modes)("cover tint contrast in %s", (mode) => {
+  const lightness = TINT_LIGHTNESS[mode];
+  const atCap = (level: number, hue: number) =>
+    oklchToLinearRgb(`oklch(${level} ${COVER_TINT_CHROMA_CAP} ${hue})`);
+  const worstAcrossHues = (measure: (hue: number) => number) =>
+    Math.min(...HUES.map(measure));
+
+  it("body text holds 4.5:1 on the wash at every hue", () => {
+    expect(
+      worstAcrossHues((hue) =>
+        contrast(token(mode, "foreground"), atCap(lightness.wash, hue))
+      )
+    ).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it("tint ink holds 4.5:1 on the wash at every hue", () => {
+    expect(
+      worstAcrossHues((hue) =>
+        contrast(atCap(lightness.ink, hue), atCap(lightness.wash, hue))
+      )
+    ).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it("the primary button holds 4.5:1 against the wash at every hue", () => {
+    expect(
+      worstAcrossHues((hue) =>
+        contrast(token(mode, "primary"), atCap(lightness.wash, hue))
+      )
+    ).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it("title contrast differs by at most 0.5 between any two hues", () => {
+    const titleContrasts = HUES.map((hue) =>
+      contrast(token(mode, "foreground"), atCap(lightness.wash, hue))
+    );
+    expect(
+      Math.max(...titleContrasts) - Math.min(...titleContrasts)
+    ).toBeLessThanOrEqual(TITLE_CONTRAST_MAX_SPREAD);
+  });
 });

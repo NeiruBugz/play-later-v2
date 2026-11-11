@@ -121,7 +121,7 @@ Conventions for every slice:
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 5: The game page opens with a cover-tinted header showing identity and key facts**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Unit `src/shared/lib/cover-tint.test.ts` with pixel fixtures: mostly red gives a red hue; greyscale gives null; white with a small colored logo gives null; a red split across 355° and 5° gives a hue near 0, not 180.
     - Extend `src/shared/ui/contrast.test.ts` with the hue 0–359 sweep at the chroma cap, in Light and Dark. Foreground, ink and the primary button must be at least 4.5:1 against the wash, and title contrast must differ by at most 0.5 between any two hues.
     - Integration `ensure-game-enrichment` hue part: it writes `coverHue`/`coverChroma`/`coverTintComputedAt`; a black-and-white cover sets `coverTintComputedAt` with a null hue; a failed image fetch leaves `coverTintComputedAt` null. `get-game-details` returns `coverTint` signed out.
@@ -158,7 +158,7 @@ Conventions for every slice:
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 6: The header holds the right actions for each visitor, with "Done with it?" and the "⋯" menu**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Integration `set-status-fn` with `doneOutcome`: it writes status and reason in one transaction; it is rejected unless `to` is DONE; undo restores the previous reason.
     - Component `game-header-actions`, one `describe` per state:
       - Playing: status control, "Log time", "Done with it?";
