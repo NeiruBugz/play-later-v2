@@ -5,7 +5,7 @@
 -- Cover ids were checked by downloading t_thumb and averaging a 16x16 resample:
 --   co2y6s  Final Fantasy II  mean RGB 227,23,35   (mostly red)
 --   co20n4  Black Mesa        mean RGB 132,144,67  (green: 24% of pixels clearly green; the greenest cover available locally)
---   co9vgt  Garagem SA        mean RGB 154,150,151 (black-and-white, luminance sd 82)
+--   coctc7  Greyscale Cover   Metal Gear: Ghost Babel cover; 99.7% of pixels achromatic (OKLCH chroma < 0.04 or max channel gap <= 12), luminance sd 97
 --   none    Review Fixture: No Cover
 
 DO $$
@@ -19,19 +19,26 @@ BEGIN
 
   DELETE FROM "JournalEntry" WHERE "userId" = full_id AND tags @> ARRAY['review-fixture'];
 
+  -- Retired fixture (Garagem SA, igdbId 345628): remove it and its rows so it does not linger
+  DELETE FROM "JournalEntry" WHERE "gameId" IN (SELECT id FROM "Game" WHERE "igdbId" = 345628);
+  DELETE FROM "Playthrough" WHERE "libraryItemId" IN (
+    SELECT li.id FROM "LibraryItem" li JOIN "Game" g ON g.id = li."gameId" WHERE g."igdbId" = 345628);
+  DELETE FROM "LibraryItem" WHERE "gameId" IN (SELECT id FROM "Game" WHERE "igdbId" = 345628);
+  DELETE FROM "Game" WHERE "igdbId" = 345628;
+
   INSERT INTO "Game" (id, "igdbId", title, slug, "coverImage", "updatedAt")
   VALUES
     ('review-fixture-red',      387,       'Final Fantasy II',        'final-fantasy-ii',        'https://images.igdb.com/igdb/image/upload/t_cover_big/co2y6s.jpg', now()),
     ('review-fixture-green',    6739,      'Black Mesa',              'black-mesa',              'https://images.igdb.com/igdb/image/upload/t_cover_big/co20n4.jpg', now()),
-    ('review-fixture-bw',       345628,    'Garagem SA',              'garagem-sa',              'https://images.igdb.com/igdb/image/upload/t_cover_big/co9vgt.jpg', now()),
+    ('review-fixture-bw',       900000002, 'Review Fixture: Greyscale Cover', 'review-fixture-greyscale-cover', 'https://images.igdb.com/igdb/image/upload/t_cover_big/coctc7.jpg', now()),
     ('review-fixture-no-cover', 900000001, 'Review Fixture: No Cover', 'review-fixture-no-cover', NULL, now())
-  ON CONFLICT ("igdbId") DO UPDATE SET "coverImage" = EXCLUDED."coverImage", "updatedAt" = now();
+  ON CONFLICT ("igdbId") DO UPDATE SET title = EXCLUDED.title, slug = EXCLUDED.slug, "coverImage" = EXCLUDED."coverImage", "updatedAt" = now();
 
   -- Playing library items for the four fixture games
   FOR row IN SELECT * FROM (VALUES
     (387::int,       30),
     (6739::int,      45),
-    (345628::int,    90),
+    (900000002::int, 90),
     (900000001::int, 10)
   ) AS t(igdb, started_days_ago)
   LOOP
@@ -50,20 +57,20 @@ BEGIN
   -- One open play per fixture game (replaces any earlier fixture play)
   DELETE FROM "Playthrough" WHERE "libraryItemId" IN (
     SELECT li.id FROM "LibraryItem" li JOIN "Game" g ON g.id = li."gameId"
-    WHERE li."userId" = full_id AND g."igdbId" IN (387, 6739, 345628, 900000001));
+    WHERE li."userId" = full_id AND g."igdbId" IN (387, 6739, 900000002, 900000001));
   INSERT INTO "Playthrough" (id, "libraryItemId", ordinal, kind, status, platform, "startedAt", "playtimeMinutes", "updatedAt")
   SELECT gen_random_uuid()::text, li.id, 1, 'FIRST', 'PLAYING', li.platform, li."startedAt", 0, now()
   FROM "LibraryItem" li JOIN "Game" g ON g.id = li."gameId"
-  WHERE li."userId" = full_id AND g."igdbId" IN (387, 6739, 345628, 900000001);
+  WHERE li."userId" = full_id AND g."igdbId" IN (387, 6739, 900000002, 900000001);
 
-  -- Dated sessions: Final Fantasy II has three (last 3 days ago), Black Mesa last 14 days ago, Garagem SA last 40 days ago
+  -- Dated sessions: Final Fantasy II has three (last 3 days ago), Black Mesa last 14 days ago, the greyscale fixture last 40 days ago
   FOR row IN SELECT * FROM (VALUES
     (387::int,    3,  90,  'Reached the Mysidia chapter.'),
     (387::int,    6,  120, 'Leveled spells until they stopped failing.'),
     (387::int,    10, 75,  'Fixed the party after the Fynn siege.'),
     (6739::int,   14, 60,  'Surface Tension, slowly.'),
     (6739::int,   20, 45,  'Back to the lambda core.'),
-    (345628::int, 40, 30,  'One lap of the first track.')
+    (900000002::int, 40, 30,  'One lap of the first track.')
   ) AS t(igdb, days_ago, minutes, content)
   LOOP
     INSERT INTO "JournalEntry" (id, kind, content, "playedMinutes", tags, "userId", "gameId", "libraryItemId", "playthroughId",
