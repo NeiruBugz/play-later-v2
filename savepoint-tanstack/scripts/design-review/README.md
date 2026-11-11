@@ -30,7 +30,7 @@ Runs on Node's built-in TypeScript support (Node >= 22.18). First time only: `pn
 
 ## Reseeding
 
-Verification flows mutate `audit_full` (status changes reorder "Recently Updated"), so captures drift from the before set. Run every comparison capture with `--reseed`: the before set was captured on the seeded state. `--reseed` pipes `context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql` into `docker exec -i savepoint-postgres psql -U postgres -d savepoint-db` and fails clearly if docker or the container is unavailable (override the container with `REVIEW_DB_CONTAINER`; check `docker compose ps`). The reseed resets the status-model notice; capture dismisses it again with "Got it".
+Verification flows mutate `audit_full` (status changes reorder "Recently Updated"), so captures drift from the before set. Run every comparison capture with `--reseed`: the before set was captured on the seeded state. `--reseed` pipes `context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql`, then the committed `context/spec/028-continue-identity-stand-out/review-fixtures.sql` (four Playing games with red / green / black-and-white / no cover art, dated sessions 3 days, 14 days and 40 days back, a Let go reason on Crisis Core), into `docker exec -i savepoint-postgres psql -U postgres -d savepoint-db` and fails clearly if docker or the container is unavailable (override the container with `REVIEW_DB_CONTAINER`; check `docker compose ps`). The reseed resets the status-model notice; capture dismisses it again with "Got it".
 
 Before every screenshot (and before the phone checks) capture waits up to 5s each for running animations to finish and for in-viewport images to load, then pauses 150ms. A timeout is logged, not fatal.
 

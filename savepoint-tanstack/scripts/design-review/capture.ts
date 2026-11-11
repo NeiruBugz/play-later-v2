@@ -40,6 +40,10 @@ const SEED_SQL_PATH = join(
   repoRoot,
   "context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql"
 );
+const FIXTURES_SQL_PATH = join(
+  repoRoot,
+  "context/spec/028-continue-identity-stand-out/review-fixtures.sql"
+);
 const DB_CONTAINER = process.env.REVIEW_DB_CONTAINER ?? "savepoint-postgres";
 const ANIMATION_WAIT_MS = 5_000;
 const SETTLE_PAUSE_MS = 150;
@@ -127,9 +131,8 @@ async function newContext(
   return context;
 }
 
-function reseedAuditAccounts(): void {
-  if (!existsSync(SEED_SQL_PATH))
-    fail(`--reseed: seed file not found at ${SEED_SQL_PATH}`);
+function applySqlFile(sqlPath: string): void {
+  if (!existsSync(sqlPath)) fail(`--reseed: SQL file not found at ${sqlPath}`);
   const result = spawnSync(
     "docker",
     [
@@ -144,7 +147,7 @@ function reseedAuditAccounts(): void {
       "-d",
       "savepoint-db",
     ],
-    { input: readFileSync(SEED_SQL_PATH), encoding: "utf8" }
+    { input: readFileSync(sqlPath), encoding: "utf8" }
   );
   if (result.error) {
     fail(
@@ -153,10 +156,17 @@ function reseedAuditAccounts(): void {
   }
   if (result.status !== 0) {
     fail(
-      `--reseed: psql in container "${DB_CONTAINER}" exited ${result.status}. Check \`docker compose ps\` (override with REVIEW_DB_CONTAINER).\n${result.stderr}`
+      `--reseed: psql in container "${DB_CONTAINER}" exited ${result.status} for ${sqlPath}. Check \`docker compose ps\` (override with REVIEW_DB_CONTAINER).\n${result.stderr}`
     );
   }
-  console.log(`reseeded audit accounts via ${DB_CONTAINER}`);
+}
+
+function reseedAuditAccounts(): void {
+  applySqlFile(SEED_SQL_PATH);
+  applySqlFile(FIXTURES_SQL_PATH);
+  console.log(
+    `reseeded audit accounts and spec 028 fixtures via ${DB_CONTAINER}`
+  );
 }
 
 // --query rides on every page.goto, so a query-driven state survives each full

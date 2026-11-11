@@ -65,6 +65,12 @@ const gotoGameLinkedFrom = async (
   await page.goto(`/games/${slug}`);
 };
 
+const FIXTURE_GAME_SLUGS = {
+  playing: "final-fantasy-ii",
+  want: "resident-evil-2",
+  doneLetGo: "crisis-core-final-fantasy-vii",
+} as const;
+
 export const SCREENS: Screen[] = [
   { id: "landing", auth: false, path: "/" },
   { id: "sign-in", auth: false, path: "/login" },
@@ -113,6 +119,22 @@ export const SCREENS: Screen[] = [
     auth: true,
     open: (page, ctx) =>
       gotoGameLinkedFrom(page, "/library", () => ctx.librarySlugs[0]),
+  },
+  {
+    id: "game-playing",
+    auth: true,
+    path: `/games/${FIXTURE_GAME_SLUGS.playing}`,
+  },
+  { id: "game-want", auth: true, path: `/games/${FIXTURE_GAME_SLUGS.want}` },
+  {
+    id: "game-done",
+    auth: true,
+    path: `/games/${FIXTURE_GAME_SLUGS.doneLetGo}`,
+  },
+  {
+    id: "game-signed-out",
+    auth: false,
+    path: `/games/${FIXTURE_GAME_SLUGS.playing}`,
   },
   {
     id: "game-not-in-library",
@@ -170,6 +192,11 @@ export const SCREENS: Screen[] = [
   },
   { id: "settings-profile", auth: true, path: "/settings/profile" },
   { id: "settings-account", auth: true, path: "/settings/account" },
+  {
+    id: "settings-play",
+    auth: true,
+    skip: "Settings -> Play does not exist until spec 028 Slice 4.",
+  },
   { id: "search-results", auth: true, path: "/games/search?q=zelda" },
   {
     id: "quick-search",
