@@ -59,6 +59,7 @@ function makeLibraryItem(
   opts: {
     status?: "WANT" | "PLAYING" | "DONE";
     upNextPosition?: number | null;
+    statusChangedAt?: Date | null;
     createdAt?: Date;
     updatedAt?: Date;
   } = {}
@@ -69,6 +70,7 @@ function makeLibraryItem(
     gameId,
     status: opts.status ?? ("WANT" as const),
     upNextPosition: opts.upNextPosition ?? null,
+    statusChangedAt: opts.statusChangedAt ?? null,
     acquisitionType: "DIGITAL" as const,
     createdAt: ts,
     updatedAt: opts.updatedAt ?? ts,
@@ -182,6 +184,126 @@ describe("getDashboardPageDataWorker", () => {
       expect(data).not.toHaveProperty("recentlyAdded");
       expect(data).not.toHaveProperty("showStats");
       expect(data).not.toHaveProperty("quickLogGames");
+    });
+  });
+  describe("given Playing games with and without logged sessions", () => {
+    const at = (iso: string) => new Date(`${iso}T12:00:00.000Z`);
+    let pLogged: string;
+    let pUnkeyed: string;
+    let pBare: string;
+    let pNotesOnly: string;
+
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("order") });
+      const names = ["logged", "unkeyed", "bare", "notes"];
+      await db.prisma.game.createMany({
+        data: names.map((x) => makeGame(`ord-${x}`)),
+      });
+      [pLogged, pUnkeyed, pBare, pNotesOnly] = names.map(
+        (x) => `ddpd-game-ord-${x}`
+      );
+
+      const loggedItem = await db.prisma.libraryItem.create({
+        data: makeLibraryItem("ddpd-user-order", pLogged, {
+          status: "PLAYING",
+          statusChangedAt: at("2026-01-01"),
+          updatedAt: at("2026-06-01"),
+        }),
+      });
+      await db.prisma.libraryItem.createMany({
+        data: [
+          makeLibraryItem("ddpd-user-order", pUnkeyed, {
+            status: "PLAYING",
+            statusChangedAt: at("2026-02-01"),
+            updatedAt: at("2026-05-01"),
+          }),
+          makeLibraryItem("ddpd-user-order", pBare, {
+            status: "PLAYING",
+            statusChangedAt: at("2026-03-05"),
+            updatedAt: at("2026-04-01"),
+          }),
+          makeLibraryItem("ddpd-user-order", pNotesOnly, {
+            status: "PLAYING",
+            statusChangedAt: at("2026-02-20"),
+            updatedAt: at("2026-03-01"),
+          }),
+        ],
+      });
+
+      const entry = (
+        gameId: string,
+        createdAt: Date,
+        playedMinutes: number | null,
+        libraryItemId: number | null = null
+      ) => ({
+        userId: "ddpd-user-order",
+        gameId,
+        libraryItemId,
+        content: "entry",
+        playedMinutes,
+        createdAt,
+      });
+      await db.prisma.journalEntry.createMany({
+        data: [
+          entry(pLogged, at("2026-02-15"), 45, loggedItem.id),
+          entry(pLogged, at("2026-03-01"), 60, loggedItem.id),
+          entry(pLogged, at("2026-04-01"), null, loggedItem.id),
+          entry(pUnkeyed, at("2026-03-10"), 30, null),
+          entry(pBare, at("2026-05-01"), 0),
+          entry(pNotesOnly, at("2026-05-02"), null),
+        ],
+      });
+    });
+
+    it("lists them most recently played first, falling back to when they became Playing", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-order");
+
+      expect(data.playing.map((i) => i.game.id)).toEqual([
+        pUnkeyed,
+        pBare,
+        pLogged,
+        pNotesOnly,
+      ]);
+    });
+
+    it("counts a session logged without a library item link", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-order");
+
+      expect(
+        data.playing.find((i) => i.game.id === pUnkeyed)?.lastSessionAt
+      ).toEqual(at("2026-03-10"));
+    });
+
+    it("dates the last session by the latest entry that has time", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-order");
+
+      expect(
+        data.playing.find((i) => i.game.id === pLogged)?.lastSessionAt
+      ).toEqual(at("2026-03-01"));
+    });
+
+    it("does not count notes without time or with zero minutes as sessions", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-order");
+
+      const bare = data.playing.find((i) => i.game.id === pBare);
+      const notesOnly = data.playing.find((i) => i.game.id === pNotesOnly);
+      expect(bare?.lastSessionAt).toBeNull();
+      expect(notesOnly?.lastSessionAt).toBeNull();
+    });
+
+    it("tells when each game became Playing", async () => {
+      const data = await getDashboardPageDataWorker("ddpd-user-order");
+
+      expect(
+        Object.fromEntries(
+          data.playing.map((i) => [i.game.id, i.becamePlayingAt])
+        )
+      ).toEqual({
+        [pLogged]: at("2026-01-01"),
+        [pUnkeyed]: at("2026-02-01"),
+        [pBare]: at("2026-03-05"),
+        [pNotesOnly]: at("2026-02-20"),
+      });
     });
   });
 });

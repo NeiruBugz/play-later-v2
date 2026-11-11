@@ -226,7 +226,7 @@ Conventions for every slice:
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 8: Home opens with the "Continue …?" question**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Unit `formatTimeAgo` in `src/shared/lib/date.test.ts`: every row of spec §2.3's table, including the 13/14 and 29/30/59/60/364/365-day edges.
     - Unit `orderContinueGames`: by latest session; falls back to the date it became Playing; ties go to becoming Playing more recently, then title.
     - Integration `get-dashboard-page-data`:
