@@ -34,6 +34,7 @@ export type GameDetailData = {
   history?: Play[];
   timeToCreditsSeconds: number | null;
   timeToCompleteSeconds: number | null;
+  coverTint?: { hue: number; chroma: number } | null;
 };
 
 export type GameDetailProps = {

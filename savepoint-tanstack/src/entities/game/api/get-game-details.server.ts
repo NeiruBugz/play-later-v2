@@ -2,6 +2,7 @@ import {
   getGameDetailsFromIgdb,
   type GameDetailsResponseItem,
 } from "@/shared/api/igdb";
+import type { CoverTint } from "@/shared/lib/cover-tint";
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -86,6 +87,7 @@ export interface GameDetails {
   history: EndedPlay[];
   timeToCreditsSeconds: Game["timeToCreditsSeconds"];
   timeToCompleteSeconds: Game["timeToCompleteSeconds"];
+  coverTint?: CoverTint | null;
 }
 
 export async function getGameDetails(params: {
@@ -152,5 +154,9 @@ export async function getGameDetails(params: {
     history,
     timeToCreditsSeconds: enrichment.timeToCreditsSeconds,
     timeToCompleteSeconds: enrichment.timeToCompleteSeconds,
+    coverTint:
+      enrichment.coverHue !== null && enrichment.coverChroma !== null
+        ? { hue: enrichment.coverHue, chroma: enrichment.coverChroma }
+        : null,
   };
 }

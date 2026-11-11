@@ -23,6 +23,7 @@ import {
   toStatusChipStatus,
 } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import { useEveningMinutes } from "@/entities/session/model";
 import {
   LibraryFilters,
   MobileFilterBar,
@@ -41,6 +42,7 @@ import { EmptyLibraryHero } from "@/features/onboarding-first-time";
 import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
+import { formatEvenings } from "@/shared/lib/evenings";
 import { openGlobalAction } from "@/shared/lib/global-action";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -65,6 +67,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
   item: LibraryItemWithGame;
   onEdit: (item: LibraryItemWithGame) => void;
 }) {
+  const eveningMinutes = useEveningMinutes();
   const { status, setStatus, isPending } = useSetStatus({
     id: item.id,
     gameTitle: item.game.title,
@@ -99,6 +102,12 @@ const LibraryGridTile = memo(function LibraryGridTile({
         <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
           {item.game.title}
         </h3>
+        <p
+          data-testid="game-card-length"
+          className="h-4 text-xs leading-4 text-muted-foreground"
+        >
+          {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
+        </p>
         <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
           <QueueMarker
             status={status}

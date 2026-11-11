@@ -83,11 +83,15 @@ Conventions for every slice:
     - Add `src/shared/lib/evenings.ts` (`EVENING_MINUTES_CHOICES`, `DEFAULT_EVENING_MINUTES`, `formatEvenings` with integer rounding).
     - `game-card` gains `lengthLabel?: string | null` and always renders a fixed-height line after the title.
     - `library-item-card` stops passing the StatusChip through `badges` (`:71-82`) and passes `formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)`. **[Agent: react-frontend]**
+  - [x] Grid tile (owner decision 2026-11-11, found during Verify: the default Grid view uses `LibraryGridTile` in `library-page.tsx`, which the spec did not name):
+    - Test first, in `library-page.test.tsx`: a tile with a credits time reads "About N evenings" under the title; a tile with none keeps a blank line of the same height.
+    - Add the fixed-height length line to the tile, using `useEveningMinutes`.
+    - The tile keeps its cover status chip, because it has no status control. The "no cover badge" rule applies to the list card. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate, including integration.
     - Run the backfill against the local DB and confirm its coverage line.
-    - Start the app (record the PID). On `/library` at 1440×900, Light and Dark:
-      - no cover shows a status badge;
+    - Start the app (record the PID). On `/library` at 1440×900, Light and Dark, in List view and in Grid view:
+      - no list card shows a cover status badge (Grid tiles keep theirs);
       - cards with a credits time read "About N evenings";
       - neighbouring cards with and without a length have their platform lines at the same height (measure with `verify-ui` alignment);
       - no card is tinted.
@@ -132,12 +136,12 @@ Conventions for every slice:
       - the identity line reads "2025 · Shooter" when the developer is unknown;
       - Back is a link to `/library` on first render.
     - Unit `formatPlatformFact`. **[Agent: testing]**
-  - [ ] Hue enrichment:
+  - [x] Hue enrichment:
     - Add `jpeg-js` at exact `0.4.4`, imported only from the `.server.ts` entity file.
     - Add the pure `extractCoverTint(rgba)` in `src/shared/lib/cover-tint.ts`, using the recipe in tech spec §2.3.
     - Fetch `t_thumb` `.jpg` inside `ensureGameEnrichment`. `GameDetails` gains `coverTint`.
     - Extend the backfill with covers (concurrency 4) and add the tinted-games count to its coverage output. **[Agent: tanstack-fullstack]**
-  - [ ] Tint rendering:
+  - [x] Tint rendering:
     - Add `src/shared/ui/cover-tint/` (`tint`, `variant: "panel" | "header"`). It sets only `--tint-h`, `--tint-c` and `data-tint`.
     - Add the `cover-tint` utility in `styles.css`: fixed per-mode L (Light 0.915 / 0.87 / 0.44, Dark 0.255 / 0.31 / 0.80), a chroma cap tuned until the sweep passes, `data-tint="off"` falling back to `--card`, and the header fade over the bottom third. **[Agent: react-frontend]**
   - [ ] Header:

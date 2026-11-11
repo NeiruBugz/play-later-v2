@@ -24,17 +24,27 @@ async function countCoverage(): Promise<EnrichmentCoverage> {
   return { totalGames, gamesWithCreditsTime };
 }
 
+export function countGamesWithCoverTint(): Promise<number> {
+  return prisma.game.count({ where: { coverHue: { not: null } } });
+}
+
 export async function backfillGameEnrichment({
   delayBetweenRequestsMs = DEFAULT_DELAY_BETWEEN_REQUESTS_MS,
 }: BackfillOptions = {}): Promise<EnrichmentCoverage> {
   const unenrichedGames = await prisma.game.findMany({
-    where: { timesToBeatFetchedAt: null },
+    where: {
+      OR: [{ timesToBeatFetchedAt: null }, { coverTintComputedAt: null }],
+    },
     select: {
       id: true,
       igdbId: true,
       timeToCreditsSeconds: true,
       timeToCompleteSeconds: true,
       timesToBeatFetchedAt: true,
+      coverImage: true,
+      coverHue: true,
+      coverChroma: true,
+      coverTintComputedAt: true,
     },
     orderBy: { id: "asc" },
   });

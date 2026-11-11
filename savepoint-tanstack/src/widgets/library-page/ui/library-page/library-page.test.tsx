@@ -840,4 +840,65 @@ describe("LibraryPage", () => {
       });
     }
   );
+
+  describe("given grid tiles where one game has a time to credits and one has none", () => {
+    const eightAndAHalfHoursInSeconds = 8.5 * 3600;
+
+    const buildTile = (
+      id: number,
+      title: string,
+      timeToCreditsSeconds: number | null
+    ) => {
+      const item = buildLibraryItemWithGame(
+        { id, status: "PLAYING", platform: "PC" },
+        { id: `g-${id}`, title, slug: title.toLowerCase() }
+      );
+      return {
+        ...item,
+        game: { ...item.game, timeToCreditsSeconds },
+      } as LibraryItemWithGame;
+    };
+
+    const getTile = (title: string) =>
+      screen
+        .getAllByTestId("library-grid-tile")
+        .find(
+          (tile) =>
+            within(tile).queryByRole("link", { name: `View ${title}` }) !== null
+        )!;
+
+    beforeEach(() => {
+      render(
+        <LibraryPage
+          items={[
+            buildTile(41, "Longplay", eightAndAHalfHoursInSeconds),
+            buildTile(42, "Unmeasured", null),
+          ]}
+          total={2}
+          {...defaultViewProps}
+        />
+      );
+    });
+
+    it("reads the length in evenings under the title of the timed game", () => {
+      expect(
+        within(getTile("Longplay")).getByTestId("game-card-length")
+      ).toHaveTextContent("About 5 evenings");
+    });
+
+    it("keeps a blank fixed-height length line on the untimed game", () => {
+      const lengthLine = within(getTile("Unmeasured")).getByTestId(
+        "game-card-length"
+      );
+
+      expect(lengthLine).toBeEmptyDOMElement();
+      expect(lengthLine).toHaveClass("h-4");
+    });
+
+    it("keeps the status chip on the tile", () => {
+      expect(
+        within(elements.getCardLink("Longplay")).getByText("Playing")
+      ).toBeInTheDocument();
+    });
+  });
 });
