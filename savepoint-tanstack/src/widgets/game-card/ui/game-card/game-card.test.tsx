@@ -48,6 +48,7 @@ const elements = {
   queryLink: () => screen.queryByRole("link", { name: /View Hollow Knight/ }),
   getBadge: () => screen.getByText("NEW"),
   getFooter: () => screen.getByText("Footer slot"),
+  getLengthLine: () => screen.getByTestId("game-card-length"),
 };
 
 describe("GameCard", () => {
@@ -163,6 +164,42 @@ describe("GameCard", () => {
       // Family color + variant coverage lives in PlatformBadges' own test;
       // here we only prove GameCard routes platforms through that component.
       expect(screen.queryByText("PlayStation 5")).toBeNull();
+    });
+  });
+
+  describe("given a length label", () => {
+    beforeEach(() => {
+      render(
+        <GameCard
+          game={baseGame}
+          asLink={false}
+          lengthLabel="About 5 evenings"
+        />
+      );
+    });
+
+    it("reads the label right after the title", () => {
+      const title = elements.getTitle();
+      const length = elements.getLengthLine();
+      expect(length).toHaveTextContent("About 5 evenings");
+      expect(
+        title.compareDocumentPosition(length) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
+
+  describe.each([
+    ["null", null],
+    ["omitted", undefined],
+  ])("given a length label that is %s", (_name, lengthLabel) => {
+    beforeEach(() => {
+      render(
+        <GameCard game={baseGame} asLink={false} lengthLabel={lengthLabel} />
+      );
+    });
+
+    it("still renders the length line, empty, to hold its height", () => {
+      expect(elements.getLengthLine()).toBeEmptyDOMElement();
     });
   });
 

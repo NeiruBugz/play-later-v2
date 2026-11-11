@@ -32,6 +32,9 @@ export type GameDetailData = {
   playtimeSessionCount: number;
   /** Ended plays of the viewer's library entry; owner only, empty when none. */
   history?: Play[];
+  timeToCreditsSeconds: number | null;
+  timeToCompleteSeconds: number | null;
+  coverTint: { hue: number; chroma: number } | null;
 };
 
 export type GameDetailProps = {
@@ -49,9 +52,4 @@ export type GameDetailProps = {
    * plumbing; the widget stays prop-driven and unit-testable.
    */
   relatedGamesSlot?: ReactNode;
-  /**
-   * Optional Suspense-wrapped times-to-beat slot. Rendered after the
-   * library-status strip column when present.
-   */
-  timesToBeatSlot?: ReactNode;
 };

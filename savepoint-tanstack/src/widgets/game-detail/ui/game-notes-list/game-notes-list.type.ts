@@ -11,4 +11,5 @@ export type GameNote = {
 export type GameNotesListProps = {
   notes: GameNote[];
   onNewNote: () => void;
+  previewSize?: number;
 };

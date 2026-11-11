@@ -23,6 +23,7 @@ import {
   toStatusChipStatus,
 } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import { useEveningMinutes } from "@/entities/session/model";
 import {
   LibraryFilters,
   MobileFilterBar,
@@ -41,6 +42,7 @@ import { EmptyLibraryHero } from "@/features/onboarding-first-time";
 import { UpNextQueueList } from "@/features/up-next";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
+import { formatEvenings } from "@/shared/lib/evenings";
 import { openGlobalAction } from "@/shared/lib/global-action";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -65,6 +67,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
   item: LibraryItemWithGame;
   onEdit: (item: LibraryItemWithGame) => void;
 }) {
+  const eveningMinutes = useEveningMinutes();
   const { status, setStatus, isPending } = useSetStatus({
     id: item.id,
     gameTitle: item.game.title,
@@ -84,43 +87,56 @@ const LibraryGridTile = memo(function LibraryGridTile({
   });
 
   return (
-    <div className="relative" data-testid="library-grid-tile">
-      <Link
-        to="/games/$slug"
-        params={{ slug: item.game.slug }}
-        aria-label={`View ${item.game.title}`}
-        className="group block"
-      >
-        <GameCover src={item.game.coverImage} name={item.game.title}>
-          <div className="absolute top-2 left-2">
-            <StatusChip status={toStatusChipStatus(status, item.doneOutcome)} />
+    <div
+      className="relative flex h-full flex-col"
+      data-testid="library-grid-tile"
+    >
+      <div className="flex-1">
+        <Link
+          to="/games/$slug"
+          params={{ slug: item.game.slug }}
+          aria-label={`View ${item.game.title}`}
+          className="group block"
+        >
+          <GameCover src={item.game.coverImage} name={item.game.title}>
+            <div className="absolute top-2 left-2">
+              <StatusChip
+                status={toStatusChipStatus(status, item.doneOutcome)}
+              />
+            </div>
+          </GameCover>
+          <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
+            {item.game.title}
+          </h3>
+          <p
+            data-testid="game-card-length"
+            className="h-6 text-base leading-6 text-muted-foreground md:h-4 md:text-xs md:leading-4"
+          >
+            {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
+          </p>
+          {item.platform ? (
+            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+              {item.platform}
+            </span>
+          ) : null}
+          <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
+            <QueueMarker
+              status={status}
+              upNextPosition={membership.upNextPosition}
+            />
+            <NotOwnedTag status={status} isOwned={ownership.isOwned} />
           </div>
-        </GameCover>
-        <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
-          {item.game.title}
-        </h3>
-        <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
-          <QueueMarker
-            status={status}
-            upNextPosition={membership.upNextPosition}
-          />
-          <NotOwnedTag status={status} isOwned={ownership.isOwned} />
-        </div>
-        {item.platform ? (
-          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-            {item.platform}
-          </span>
-        ) : null}
-      </Link>
-      <div
-        className="mt-1 flex h-4 items-center"
-        onClickCapture={(event) => event.stopPropagation()}
-      >
+        </Link>
         {item.rating === null ? null : (
-          <RatingInput value={item.rating} size="sm" readOnly />
+          <div
+            className="mt-1 flex h-4 items-center"
+            onClickCapture={(event) => event.stopPropagation()}
+          >
+            <RatingInput value={item.rating} size="sm" readOnly />
+          </div>
         )}
       </div>
-      <div className="mt-2 flex flex-col items-start gap-2">
+      <div className="mt-auto flex flex-col items-start gap-2 pt-2">
         <StatusControl
           status={status}
           outcome={item.doneOutcome}
@@ -450,11 +466,11 @@ export function LibraryPage(props: LibraryPageProps) {
               className={
                 viewMode === "grid"
                   ? "grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5"
-                  : "flex flex-col gap-2"
+                  : "grid grid-cols-1 gap-x-6 gap-y-4 xl:grid-cols-2"
               }
             >
               {filteredItems.map((item) => (
-                <li key={item.id}>
+                <li key={item.id} className="min-w-0">
                   {viewMode === "grid" ? (
                     <LibraryGridTile item={item} onEdit={setSelectedEntry} />
                   ) : (

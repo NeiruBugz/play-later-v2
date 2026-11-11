@@ -16,6 +16,29 @@ const elements = {
 };
 
 describe("StatusControl", () => {
+  describe("given a Done item with an outcome and showDoneOutcome", () => {
+    it("reads the outcome in the chip text", () => {
+      render(
+        <StatusControl
+          status="DONE"
+          outcome="LET_GO"
+          showDoneOutcome
+          onChange={onChange}
+        />
+      );
+      expect(elements.getPill("Done")).toHaveTextContent("Done · Let go");
+    });
+  });
+
+  describe("given a Done item with an outcome and no showDoneOutcome", () => {
+    it("keeps the plain Let go chip", () => {
+      render(
+        <StatusControl status="DONE" outcome="LET_GO" onChange={onChange} />
+      );
+      expect(elements.getPill("Done")).toHaveTextContent(/^Let go$/);
+    });
+  });
+
   beforeEach(() => {
     onChange.mockClear();
   });

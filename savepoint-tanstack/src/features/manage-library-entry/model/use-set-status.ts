@@ -1,7 +1,10 @@
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
+import type {
+  DoneOutcome,
+  LibraryItemStatus,
+} from "../../../../shared/lib/prisma/client.ts";
 import {
   changeStatusWithUndo,
   type DisplayedStatus,
@@ -20,7 +23,10 @@ export type UseSetStatusArgs = {
 export type UseSetStatusResult = {
   status: LibraryItemStatus;
   upNextPosition: number | null;
-  setStatus: (to: LibraryItemStatus) => Promise<void>;
+  setStatus: (
+    to: LibraryItemStatus,
+    options?: { doneOutcome?: DoneOutcome }
+  ) => Promise<void>;
   isPending: boolean;
 };
 
@@ -61,13 +67,17 @@ export function useSetStatus({
     if (serverChanged) await router.invalidate();
   };
 
-  const setStatus = (to: LibraryItemStatus) =>
+  const setStatus = (
+    to: LibraryItemStatus,
+    options?: { doneOutcome?: DoneOutcome }
+  ) =>
     runSerialized(async () => {
       if (to === displayed.status) return false;
       return changeStatusWithUndo({
         id,
         gameTitle,
         to,
+        doneOutcome: options?.doneOutcome,
         previous: displayed,
         onPending: setOverride,
         onDisplay: setOverride,

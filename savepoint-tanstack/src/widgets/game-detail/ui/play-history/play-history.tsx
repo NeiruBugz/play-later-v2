@@ -42,7 +42,10 @@ export function PlayHistory({ plays }: PlayHistoryProps) {
         </button>
       </SectionLabel>
       {open ? (
-        <ul id="play-history-list" className="flex flex-col gap-1 text-sm">
+        <ul
+          id="play-history-list"
+          className="flex flex-col gap-1 text-base md:text-sm"
+        >
           {newestFirst.map((play) => (
             <li key={play.id} className="tabular-nums">
               {formatRange(play)}

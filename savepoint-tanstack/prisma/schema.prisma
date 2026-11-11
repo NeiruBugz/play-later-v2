@@ -71,6 +71,7 @@ model user {
   steamAvatar              String?
   steamConnectedAt         DateTime?
   statusModelNoticePending Boolean                @default(false)
+  eveningMinutes           Int                    @default(105)
   account                  account[]
   session                  session[]
   LibraryItem              LibraryItem[]
@@ -84,26 +85,29 @@ model user {
 
 // ----- Application Models ------//
 model Game {
-  id            String         @id @default(cuid())
-  igdbId        Int            @unique
-  hltbId        String?        @unique
-  title         String
-  description   String?
-  coverImage    String?
-  releaseDate   DateTime?
-  mainStory     Int?
-  mainExtra     Int?
-  completionist Int?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  libraryItems  LibraryItem[]  @relation("GameLibraryItems")
-  Review        Review[]
-  JournalEntry  JournalEntry[]
-  steamAppId    Int?
-  slug          String         @unique
-  franchiseId   Int?
-  genres        GameGenre[]
-  platforms     GamePlatform[]
+  id           String         @id @default(cuid())
+  igdbId       Int            @unique
+  title        String
+  description  String?
+  coverImage   String?
+  releaseDate  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  libraryItems LibraryItem[]  @relation("GameLibraryItems")
+  Review       Review[]
+  JournalEntry JournalEntry[]
+  steamAppId   Int?
+  slug         String         @unique
+  franchiseId  Int?
+  genres       GameGenre[]
+  platforms    GamePlatform[]
+
+  timeToCreditsSeconds  Int?
+  timeToCompleteSeconds Int?
+  timesToBeatFetchedAt  DateTime?
+  coverHue              Int?
+  coverChroma           Float?
+  coverTintComputedAt   DateTime?
 }
 
 model LibraryItem {

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { PROMPT_QUESTION } from "@/entities/journal-entry";
 import { formatHours, formatJournalDate } from "@/shared/lib/date";
@@ -19,10 +20,18 @@ function noteText(note: GameNote): string {
  * the time beside its date; a time-only note reads "{time} played". Every note
  * opens its note view.
  */
-export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
+export function GameNotesList({
+  notes,
+  onNewNote,
+  previewSize = Infinity,
+}: GameNotesListProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const newestFirst = [...notes].sort(
     (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
   );
+  const canExpand = newestFirst.length > previewSize;
+  const visibleNotes =
+    isExpanded || !canExpand ? newestFirst : newestFirst.slice(0, previewSize);
 
   return (
     <>
@@ -40,7 +49,7 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
           className="flex flex-col gap-2"
           aria-labelledby="game-notes-heading"
         >
-          {newestFirst.map((note) => (
+          {visibleNotes.map((note) => (
             <li key={note.id}>
               <Link
                 to="/journal/$id"
@@ -56,11 +65,11 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
                   ) : null}
                 </span>
                 {note.prompt ? (
-                  <span className="text-sm font-medium">
+                  <span className="text-base font-medium md:text-sm">
                     {PROMPT_QUESTION[note.prompt]}
                   </span>
                 ) : null}
-                <span className="line-clamp-2 text-sm leading-snug">
+                <span className="line-clamp-2 text-base leading-snug md:text-sm">
                   {noteText(note)}
                 </span>
               </Link>
@@ -68,6 +77,18 @@ export function GameNotesList({ notes, onNewNote }: GameNotesListProps) {
           ))}
         </ul>
       )}
+
+      {canExpand && !isExpanded ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="self-start"
+          onClick={() => setIsExpanded(true)}
+        >
+          {`All notes (${newestFirst.length})`}
+        </Button>
+      ) : null}
     </>
   );
 }

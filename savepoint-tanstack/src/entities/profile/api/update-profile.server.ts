@@ -9,6 +9,7 @@ export interface UpdateProfileInput {
   name?: string;
   username?: string;
   isPublicProfile?: boolean;
+  eveningMinutes?: number;
 }
 
 const PROFILE_SELECT = {
@@ -35,6 +36,9 @@ export async function updateProfile(
   }
   if (input.isPublicProfile !== undefined) {
     data.isPublicProfile = input.isPublicProfile;
+  }
+  if (input.eveningMinutes !== undefined) {
+    data.eveningMinutes = input.eveningMinutes;
   }
 
   try {

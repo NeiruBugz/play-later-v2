@@ -240,12 +240,20 @@ function PrimaryActionContent({
   }
   if (isOwnProfile) {
     return (
-      <Link
-        to="/settings/profile"
-        className={cn(buttonVariants({ variant: "outline" }), className)}
-      >
-        Edit Profile
-      </Link>
+      <div className={cn("flex gap-2", className)}>
+        <Link
+          to="/settings/profile"
+          className={cn(buttonVariants({ variant: "outline" }), "flex-1")}
+        >
+          Edit Profile
+        </Link>
+        <Link
+          to="/settings"
+          className={cn(buttonVariants({ variant: "outline" }), "flex-1")}
+        >
+          Settings
+        </Link>
+      </div>
     );
   }
   return null;

@@ -2,6 +2,7 @@ import {
   getGameDetailsFromIgdb,
   type GameDetailsResponseItem,
 } from "@/shared/api/igdb";
+import type { CoverTint } from "@/shared/lib/cover-tint";
 import { prisma } from "@/shared/lib/db.server";
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -10,6 +11,7 @@ import type {
   JournalEntry,
   LibraryItem,
 } from "../../../../shared/lib/prisma/client.ts";
+import { ensureGameEnrichment } from "./ensure-game-enrichment.server";
 import { getEndedPlays, type EndedPlay } from "./get-ended-plays.server";
 import { upsertThinGameFromIgdbDetailsPayload } from "./upsert-game.server";
 
@@ -19,6 +21,20 @@ export type GameDetailsNote = Pick<
 >;
 
 export type GameDetailsPrompts = { why: boolean; stayed: boolean };
+
+const ENRICHMENT_CAP_MS = 1_500;
+
+async function enrichWithinCap(game: Game) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const capReached = new Promise<typeof game>((resolve) => {
+    timer = setTimeout(() => resolve(game), ENRICHMENT_CAP_MS);
+  });
+  try {
+    return await Promise.race([ensureGameEnrichment(game), capReached]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const NO_PROMPTS: GameDetailsPrompts = { why: false, stayed: false };
 
@@ -69,6 +85,9 @@ export interface GameDetails {
   playtimeSessionCount: number;
   /** Ended plays, newest first; the owner's own game only, empty otherwise. */
   history: EndedPlay[];
+  timeToCreditsSeconds: Game["timeToCreditsSeconds"];
+  timeToCompleteSeconds: Game["timeToCompleteSeconds"];
+  coverTint: CoverTint | null;
 }
 
 export async function getGameDetails(params: {
@@ -83,6 +102,7 @@ export async function getGameDetails(params: {
   }
 
   const game = await upsertThinGameFromIgdbDetailsPayload(igdbDetails);
+  const enrichment = await enrichWithinCap(game);
 
   let libraryEntry: LibraryItem | null = null;
   let notes: GameDetailsNote[] = [];
@@ -132,5 +152,11 @@ export async function getGameDetails(params: {
     playtimeTotalMinutes,
     playtimeSessionCount,
     history,
+    timeToCreditsSeconds: enrichment.timeToCreditsSeconds,
+    timeToCompleteSeconds: enrichment.timeToCompleteSeconds,
+    coverTint:
+      enrichment.coverHue !== null && enrichment.coverChroma !== null
+        ? { hue: enrichment.coverHue, chroma: enrichment.coverChroma }
+        : null,
   };
 }

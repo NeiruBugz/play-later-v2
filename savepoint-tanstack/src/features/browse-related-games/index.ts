@@ -4,8 +4,7 @@ export { relatedGamesQueryOptions } from "./model";
 export {
   RelatedGamesList,
   RelatedGamesSkeleton,
-  RelatedGamesTabs,
+  RelatedGamesStrip,
   type RelatedGamesListProps,
-  type RelatedGamesTabsProps,
-  type RelatedGamesTabsSection,
+  type RelatedGamesStripProps,
 } from "./ui";

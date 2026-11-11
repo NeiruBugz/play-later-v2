@@ -20,11 +20,14 @@ export function DoneFollowUp({
   itemId,
   gameTitle,
   currentRating,
+  initialOutcome,
   onClose,
   onUndo,
   onSaved,
 }: DoneFollowUpProps) {
-  const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [outcome, setOutcome] = useState<Outcome | null>(
+    initialOutcome ?? null
+  );
   const [rating, setRating] = useState<number | null>(currentRating);
   const [stayed, setStayed] = useState("");
   const [busy, setBusy] = useState(false);

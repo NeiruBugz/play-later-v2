@@ -1,131 +1,98 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildLibraryItem } from "../../../../../test/factories/builders.ts";
 import { GameLibraryControls } from "./game-library-controls";
 
-const { deleteMock, invalidateMock, setOwnedMock } = vi.hoisted(() => ({
-  deleteMock: vi.fn(),
-  invalidateMock: vi.fn(),
-  setOwnedMock: vi.fn(),
-}));
-
 vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ invalidate: invalidateMock }),
-}));
-vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
-  deleteLibraryItemFn: deleteMock,
-}));
-vi.mock("@/shared/lib/use-media-query", () => ({
-  useIsDesktop: () => true,
-}));
-vi.mock("@/features/add-game", () => ({ AddGameAction: () => null }));
-vi.mock("@/features/library-prompts/ui/game-prompts", () => ({
-  GamePrompts: () => null,
+  useRouter: () => ({ invalidate: vi.fn() }),
 }));
 vi.mock("@/entities/session/api/get-session.server", () => ({
   getServerUserId: vi.fn(),
 }));
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-function Harness({ isOwned = true }: { isOwned?: boolean }) {
-  return (
+type StripOptions = {
+  status?: "WANT" | "PLAYING" | "DONE";
+  upNextPosition?: number | null;
+  isOwned?: boolean;
+  inLibrary?: boolean;
+};
+
+function renderStrip({
+  status = "WANT",
+  upNextPosition = null,
+  isOwned = true,
+  inLibrary = true,
+}: StripOptions = {}) {
+  render(
     <GameLibraryControls
       igdbId={1}
       gameTitle="Hades"
-      entry={buildLibraryItem({ id: 7, status: "PLAYING" })}
-      libraryStatus={{
-        status: "PLAYING",
-        setStatus: vi.fn(),
-        isPending: false,
-      }}
-      libraryOwnership={{
-        isOwned,
-        setOwned: setOwnedMock,
-        isPending: false,
-      }}
+      entry={
+        inLibrary ? buildLibraryItem({ id: 7, status, upNextPosition }) : null
+      }
+      libraryStatus={
+        inLibrary ? { status, setStatus: vi.fn(), isPending: false } : null
+      }
+      libraryOwnership={
+        inLibrary ? { isOwned, setOwned: vi.fn(), isPending: false } : null
+      }
     />
   );
 }
 
 const elements = {
-  getTrigger: () =>
-    screen.getByRole("button", { name: "More library actions" }),
-  getItem: (name: string) => screen.getByRole("menuitem", { name }),
-  queryItem: (name: string) => screen.queryByRole("menuitem", { name }),
-  queryRemoveDialog: () =>
-    screen.queryByText("Remove Hades from your library?"),
-  getConfirmRemove: () => screen.getByRole("button", { name: "Remove" }),
+  queryQueueMarker: (text: string) => screen.queryByText(text),
+  queryNotOwned: () => screen.queryByText("Not owned"),
+  queryStatusControl: () =>
+    screen.queryByRole("button", { name: /^Status: .*\. Change$/ }),
+  queryMoreMenu: () =>
+    screen.queryByRole("button", { name: "More library actions" }),
+  queryNextStep: () =>
+    screen.queryByRole("button", {
+      name: /^(Start playing|Mark done|Play again)$/,
+    }),
+  queryAddButton: () =>
+    screen.queryByRole("button", { name: "Add to library" }),
 };
 
-const actions = {
-  openMenu: () => userEvent.click(elements.getTrigger()),
-  chooseItem: (name: string) => userEvent.click(elements.getItem(name)),
-};
-
-describe("GameLibraryControls actions menu", () => {
-  beforeEach(() => {
-    deleteMock.mockReset();
-    deleteMock.mockResolvedValue(undefined);
-    invalidateMock.mockReset();
-    invalidateMock.mockResolvedValue(undefined);
-    setOwnedMock.mockReset();
-  });
-
-  describe("given the menu is closed", () => {
+describe("GameLibraryControls", () => {
+  describe("given a queued Want game the user does not own", () => {
     beforeEach(() => {
-      render(<Harness />);
+      renderStrip({ status: "WANT", upNextPosition: 2, isOwned: false });
     });
 
-    it("shows no actions", () => {
-      expect(elements.queryItem("Remove from library")).toBeNull();
-    });
-  });
-
-  describe("given an owned game and the user chooses the ownership action", () => {
-    beforeEach(async () => {
-      render(<Harness isOwned />);
-      await actions.openMenu();
-      await actions.chooseItem("I don't own it yet");
+    it("shows the Up Next position and the Not owned tag", () => {
+      expect(elements.queryQueueMarker("Up Next #2")).toBeInTheDocument();
+      expect(elements.queryNotOwned()).toBeInTheDocument();
     });
 
-    it("marks the game as not owned and closes the menu", () => {
-      expect(setOwnedMock).toHaveBeenCalledExactlyOnceWith(false);
-      expect(elements.queryItem("Remove from library")).toBeNull();
+    it("leaves the actions to the header", () => {
+      expect(elements.queryStatusControl()).toBeNull();
+      expect(elements.queryNextStep()).toBeNull();
+      expect(elements.queryMoreMenu()).toBeNull();
     });
   });
 
-  describe("given the user chooses Remove from library with the pointer", () => {
-    beforeEach(async () => {
-      render(<Harness />);
-      await actions.openMenu();
-      await actions.chooseItem("Remove from library");
+  describe("given an owned Want game that is not queued", () => {
+    beforeEach(() => {
+      renderStrip({ status: "WANT", upNextPosition: null, isOwned: true });
     });
 
-    it("asks for confirmation before deleting", () => {
-      expect(elements.queryRemoveDialog()).toBeInTheDocument();
-      expect(deleteMock).not.toHaveBeenCalled();
-    });
-
-    it("deletes the entry once the user confirms", async () => {
-      await userEvent.click(elements.getConfirmRemove());
-      expect(deleteMock).toHaveBeenCalledExactlyOnceWith({
-        data: { itemId: 7 },
-      });
+    it("shows neither a queue marker nor the Not owned tag", () => {
+      expect(elements.queryQueueMarker("Up Next #2")).toBeNull();
+      expect(elements.queryNotOwned()).toBeNull();
     });
   });
 
-  describe("given the user reaches Remove from library with the keyboard", () => {
-    beforeEach(async () => {
-      render(<Harness />);
-      elements.getTrigger().focus();
-      await userEvent.keyboard("{ArrowDown}");
-      await userEvent.keyboard("{ArrowDown}{ArrowDown}{Enter}");
+  describe("given the game is not in the library", () => {
+    beforeEach(() => {
+      renderStrip({ inLibrary: false });
     });
 
-    it("opens the remove confirmation", () => {
-      expect(elements.queryRemoveDialog()).toBeInTheDocument();
+    it("renders no add action, because the header owns it", () => {
+      expect(elements.queryAddButton()).toBeNull();
+      expect(elements.queryStatusControl()).toBeNull();
     });
   });
 });

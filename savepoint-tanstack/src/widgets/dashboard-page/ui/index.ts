@@ -1,8 +1,11 @@
 export { DashboardPage } from "./dashboard-page";
 export type { DashboardPageProps } from "./dashboard-page";
 
-export { DashboardPlayingSection } from "./dashboard-playing-section";
-export type { DashboardPlayingSectionProps } from "./dashboard-playing-section";
+export { AlsoPlaying } from "./also-playing";
+export type { AlsoPlayingProps } from "./also-playing";
 
-export { DashboardStatusStrip } from "./dashboard-status-strip";
-export type { DashboardStatusStripProps } from "./dashboard-status-strip";
+export { DashboardCountsLine } from "./dashboard-counts-line";
+export type { DashboardCountsLineProps } from "./dashboard-counts-line";
+
+export { ContinuePanel } from "./continue-panel";
+export type { ContinuePanelProps } from "./continue-panel";

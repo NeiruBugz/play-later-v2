@@ -118,6 +118,30 @@ describe("ProfileOverview", () => {
     });
   });
 
+  describe("given the owner's own profile", () => {
+    it("links to the Settings list so a phone user can reach it", () => {
+      render(
+        <ProfileOverview profile={stubProfile} stats={stubStats} isOwnProfile />
+      );
+      const links = screen.getAllByRole("link", { name: "Settings" });
+      expect(links.length).toBeGreaterThan(0);
+      for (const link of links) {
+        expect(link).toHaveAttribute("href", "/settings");
+      }
+    });
+
+    it("hides the Settings link from other viewers", () => {
+      render(
+        <ProfileOverview
+          profile={stubProfile}
+          stats={stubStats}
+          isOwnProfile={false}
+        />
+      );
+      expect(screen.queryByRole("link", { name: "Settings" })).toBeNull();
+    });
+  });
+
   describe("given recently played games", () => {
     it("titles the section Playing, matching its content", () => {
       render(

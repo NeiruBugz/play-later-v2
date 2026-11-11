@@ -5,7 +5,6 @@ import { Route as LandingRoute } from "./index";
 
 vi.mock("@/features/game-detail/api", () => ({
   getGameDetailPageDataFn: vi.fn(),
-  getTimesToBeatForGameFn: vi.fn(),
 }));
 
 vi.mock("@/features/browse-related-games/api", () => ({
@@ -20,11 +19,7 @@ vi.mock("@/widgets/landing-features", () => ({
 }));
 vi.mock("@/features/browse-related-games", () => ({
   RelatedGamesSkeleton: () => null,
-  RelatedGamesTabs: () => null,
-}));
-vi.mock("@/features/game-detail/ui", () => ({
-  TimesToBeatSection: () => null,
-  TimesToBeatSkeleton: () => null,
+  RelatedGamesStrip: () => null,
 }));
 
 const siteOrigin = "https://example.test";

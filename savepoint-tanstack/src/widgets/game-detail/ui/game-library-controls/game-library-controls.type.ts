@@ -3,10 +3,7 @@ import type {
   UseSetStatusResult,
 } from "@/features/manage-library-entry";
 
-import type {
-  DoneOutcome,
-  LibraryItem,
-} from "../../../../../shared/lib/prisma/client.ts";
+import type { LibraryItem } from "../../../../../shared/lib/prisma/client.ts";
 
 export type LibraryStatusState = Pick<
   UseSetStatusResult,
@@ -26,8 +23,4 @@ export type GameLibraryControlsProps = {
   libraryStatus: LibraryStatusState | null;
   /** Shared ownership state of the game page; null while the game is not in the library. */
   libraryOwnership: LibraryOwnershipState | null;
-  /** How a Done game ended; owner-only, null otherwise. */
-  doneOutcome?: DoneOutcome | null;
-  /** Which optional prompts to offer (owner-only flags). */
-  prompts?: { why: boolean; stayed: boolean };
 };

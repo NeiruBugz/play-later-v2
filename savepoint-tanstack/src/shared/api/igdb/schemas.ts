@@ -36,7 +36,8 @@ const GameTypeSchema = z.object({
 
 export const TimesToBeatItemSchema = z.object({
   id: z.number().optional(),
-  normally: z.number().optional(),
+  game_id: z.number().optional(),
+  hastily: z.number().optional(),
   completely: z.number().optional(),
 });
 

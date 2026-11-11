@@ -94,6 +94,10 @@ vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
 }));
 
+vi.mock("@/entities/session/model", () => ({
+  useEveningMinutes: () => 105,
+}));
+
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;
@@ -498,7 +502,7 @@ describe("LibraryPage", () => {
       // LIB-5: switching to list view changes the presentation
       it("switches to list view — the grid list no longer has grid-cols-2 (LIB-5)", () => {
         const list = elements.getLibraryList();
-        expect(list.className).not.toMatch(/grid-cols-2/);
+        expect(list.className).not.toMatch(/(^|\s)grid-cols-2/);
       });
     });
 
@@ -836,4 +840,77 @@ describe("LibraryPage", () => {
       });
     }
   );
+
+  describe("given grid tiles where one game has a time to credits and one has none", () => {
+    const eightAndAHalfHoursInSeconds = 8.5 * 3600;
+
+    const buildTile = (
+      id: number,
+      title: string,
+      timeToCreditsSeconds: number | null
+    ) => {
+      const item = buildLibraryItemWithGame(
+        { id, status: "PLAYING", platform: "PC" },
+        { id: `g-${id}`, title, slug: title.toLowerCase() }
+      );
+      return {
+        ...item,
+        game: { ...item.game, timeToCreditsSeconds },
+      } as LibraryItemWithGame;
+    };
+
+    const getTile = (title: string) =>
+      screen
+        .getAllByTestId("library-grid-tile")
+        .find(
+          (tile) =>
+            within(tile).queryByRole("link", { name: `View ${title}` }) !== null
+        )!;
+
+    beforeEach(() => {
+      render(
+        <LibraryPage
+          items={[
+            buildTile(41, "Longplay", eightAndAHalfHoursInSeconds),
+            buildTile(42, "Unmeasured", null),
+          ]}
+          total={2}
+          {...defaultViewProps}
+        />
+      );
+    });
+
+    it("reads the length in evenings under the title of the timed game", () => {
+      expect(
+        within(getTile("Longplay")).getByTestId("game-card-length")
+      ).toHaveTextContent("About 5 evenings");
+    });
+
+    it("keeps a blank fixed-height length line on the untimed game", () => {
+      const lengthLine = within(getTile("Unmeasured")).getByTestId(
+        "game-card-length"
+      );
+
+      expect(lengthLine).toBeEmptyDOMElement();
+      expect(lengthLine).toHaveClass("h-6");
+    });
+
+    it("renders the primary action after the game link in the tile", () => {
+      const tile = getTile("Longplay");
+      const orderedControls = within(tile)
+        .getAllByRole("link")
+        .concat(within(tile).getAllByRole("button"));
+
+      expect(orderedControls[0]).toHaveAccessibleName("View Longplay");
+      expect(
+        within(tile).getByRole("button", { name: /mark done/i })
+      ).toBeInTheDocument();
+    });
+
+    it("keeps the status chip on the tile", () => {
+      expect(
+        within(elements.getCardLink("Longplay")).getByText("Playing")
+      ).toBeInTheDocument();
+    });
+  });
 });

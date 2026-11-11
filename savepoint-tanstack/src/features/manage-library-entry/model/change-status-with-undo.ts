@@ -4,7 +4,10 @@ import { getStatusLabel } from "@/entities/library-item/model";
 import { getUserFacingErrorMessage } from "@/shared/lib/user-facing-error";
 import { showUndoToast } from "@/shared/ui/undo-toast";
 
-import type { LibraryItemStatus } from "../../../../shared/lib/prisma/client.ts";
+import type {
+  DoneOutcome,
+  LibraryItemStatus,
+} from "../../../../shared/lib/prisma/client.ts";
 import { setStatusFn } from "../api/set-status-fn";
 import type { SetStatusResult } from "../api/set-status-fn.worker";
 import { undoStatusFn } from "../api/undo-status-fn";
@@ -19,6 +22,7 @@ export type ChangeStatusWithUndoArgs = {
   id: number;
   gameTitle: string;
   to: LibraryItemStatus;
+  doneOutcome?: DoneOutcome;
   previous: DisplayedStatus;
   onDisplay: (displayed: DisplayedStatus) => void;
   onPending?: (displayed: DisplayedStatus) => void;
@@ -38,6 +42,7 @@ export async function changeStatusWithUndo({
   id,
   gameTitle,
   to,
+  doneOutcome,
   previous,
   onDisplay,
   onPending,
@@ -74,7 +79,9 @@ export async function changeStatusWithUndo({
 
   onPending?.({ status: to, upNextPosition: previous.upNextPosition });
   try {
-    const result = await setStatusFn({ data: { id, to } });
+    const result = await setStatusFn({
+      data: doneOutcome === undefined ? { id, to } : { id, to, doneOutcome },
+    });
     const current = {
       status: result.status,
       upNextPosition: result.upNextPosition,
@@ -85,6 +92,7 @@ export async function changeStatusWithUndo({
         id,
         gameTitle,
         rating,
+        initialOutcome: doneOutcome,
         undo: () => undo(current, result.undo),
       });
       return true;

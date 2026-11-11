@@ -86,6 +86,44 @@ export function formatRelativeTime(date: Date, now: Date = new Date()): string {
   return RELATIVE_TIME_FORMATTER.format(-diffDays, "day");
 }
 
+const DAYS_PER_WEEK = 7;
+const DAYS_PER_MONTH = 30;
+const DAYS_PER_YEAR = 365;
+const WEEKS_FROM_DAYS = 14;
+const MONTH_FROM_DAYS = 30;
+const MONTHS_FROM_DAYS = 60;
+
+function startOfLocalDayUtc(date: Date): number {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+/**
+ * Plain-language age of a past date by calendar days in local time:
+ * `today`, `yesterday`, `3 days ago`, `2 weeks ago`, `a month ago`,
+ * `4 months ago`, `over a year ago`.
+ */
+export function formatTimeAgo(date: Date, now: Date = new Date()): string {
+  const days = Math.max(
+    0,
+    Math.round(
+      (startOfLocalDayUtc(now) - startOfLocalDayUtc(date)) /
+        MILLISECONDS_PER_DAY
+    )
+  );
+
+  if (days === 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < WEEKS_FROM_DAYS) return `${days} days ago`;
+  if (days < MONTH_FROM_DAYS) {
+    return `${Math.floor(days / DAYS_PER_WEEK)} weeks ago`;
+  }
+  if (days < MONTHS_FROM_DAYS) return "a month ago";
+  if (days < DAYS_PER_YEAR) {
+    return `${Math.floor(days / DAYS_PER_MONTH)} months ago`;
+  }
+  return "over a year ago";
+}
+
 /**
  * Hours with at most one decimal and no trailing ".0": `1.5 h`, `12 h`, `0.5 h`.
  * The single hour formatter for time played; minutes are rounded to 0.1 h.

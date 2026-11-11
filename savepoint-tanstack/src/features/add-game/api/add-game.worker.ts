@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { ensureGameEnrichment } from "@/entities/game/api/ensure-game-enrichment.server";
 import { upsertGameFromIgdb } from "@/entities/game/api/upsert-game.server";
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
 import type { LibraryItemStatus } from "@/entities/library-item/model";
@@ -21,6 +22,7 @@ export async function addGameWorker(
 ): Promise<AddGameResult> {
   const { igdbId } = ADD_GAME_INPUT.parse(data);
   const game = await upsertGameFromIgdb(igdbId);
+  await ensureGameEnrichment(game);
   const { item, created } = await addGameToLibrary(userId, game.id);
   return {
     libraryItemId: item.id,

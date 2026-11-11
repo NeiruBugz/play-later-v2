@@ -1,9 +1,12 @@
 import { createContext, useContext } from "react";
 
+import type { DoneOutcome } from "../../../../shared/lib/prisma/client.ts";
+
 export type DoneRequest = {
   id: number;
   gameTitle: string;
   rating: number | null;
+  initialOutcome?: DoneOutcome;
   undo: () => Promise<void>;
 };
 

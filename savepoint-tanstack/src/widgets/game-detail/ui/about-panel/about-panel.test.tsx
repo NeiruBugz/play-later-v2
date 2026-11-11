@@ -1,153 +1,154 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { AboutPanel } from "./about-panel";
+import type { AboutPanelProps } from "./about-panel.type";
+
+const LONG_SUMMARY = "A challenging metroidvania. ".repeat(40).trim();
+
+const fullProps: AboutPanelProps = {
+  summary: LONG_SUMMARY,
+  developer: "Team Cherry",
+  releaseDate: new Date("2017-02-24T00:00:00Z"),
+  timeToCreditsSeconds: 14.5 * 3600,
+  timeToCompleteSeconds: 19 * 3600,
+  themes: ["Fantasy", "Action"],
+  genres: ["Adventure", "Platform"],
+};
+
+const emptyProps: AboutPanelProps = {
+  summary: null,
+  developer: null,
+  releaseDate: null,
+  timeToCreditsSeconds: null,
+  timeToCompleteSeconds: null,
+  themes: [],
+  genres: [],
+};
 
 const elements = {
-  querySummary: () => screen.queryByLabelText("Game summary"),
+  getTitle: () => screen.getByRole("heading", { name: "About" }),
   getSummary: () => screen.getByLabelText("Game summary"),
-  queryFactsLabel: () => screen.queryByRole("heading", { name: "About" }),
-  queryReleaseYearTerm: () => screen.queryByText("Release year"),
-  queryReleaseYearValue: () => screen.queryByText("2017"),
-  queryDeveloperTerm: () => screen.queryByText("Developer"),
-  queryDeveloperValue: () => screen.queryByText("Team Cherry"),
-  queryPublisherTerm: () => screen.queryByText("Publisher"),
-  queryPublisherValue: () => screen.queryByText("Skybound Games"),
+  querySummary: () => screen.queryByLabelText("Game summary"),
+  getMore: () => screen.getByRole("button", { name: "More" }),
+  queryMore: () => screen.queryByRole("button", { name: "More" }),
+  getLess: () => screen.getByRole("button", { name: "Less" }),
+  getTags: () => screen.getByRole("list", { name: "Themes and genres" }),
+  queryTags: () => screen.queryByRole("list", { name: "Themes and genres" }),
+  queryTerm: (term: string) => screen.queryByText(term),
+  getValueFor: (term: string) =>
+    // eslint-disable-next-line testing-library/no-node-access
+    screen.getByText(term).nextElementSibling,
 };
 
 describe("AboutPanel", () => {
-  describe("given all facts are present", () => {
+  describe("given a long description", () => {
     beforeEach(() => {
-      render(
-        <AboutPanel
-          summary="A challenging metroidvania."
-          releaseYear="2017"
-          developer="Team Cherry"
-          publisher="Skybound Games"
-        />
-      );
+      render(<AboutPanel {...fullProps} />);
     });
 
-    it("renders the summary text", () => {
-      expect(elements.getSummary().textContent).toBe(
-        "A challenging metroidvania."
-      );
+    it("shows the About title", () => {
+      expect(elements.getTitle()).toBeInTheDocument();
     });
 
-    it("renders the About facts label", () => {
-      expect(elements.queryFactsLabel()).not.toBeNull();
+    it("cuts the description to four lines", () => {
+      expect(elements.getSummary()).toHaveClass("line-clamp-4");
     });
 
-    it("renders the release year", () => {
-      expect(elements.queryReleaseYearTerm()).not.toBeNull();
-      expect(elements.queryReleaseYearValue()).not.toBeNull();
+    it("offers More", () => {
+      expect(elements.getMore()).toHaveAttribute("aria-expanded", "false");
     });
 
-    it("renders the developer", () => {
-      expect(elements.queryDeveloperTerm()).not.toBeNull();
-      expect(elements.queryDeveloperValue()).not.toBeNull();
-    });
+    describe("when the user taps More", () => {
+      beforeEach(async () => {
+        await userEvent.click(elements.getMore());
+      });
 
-    it("renders the publisher", () => {
-      expect(elements.queryPublisherTerm()).not.toBeNull();
-      expect(elements.queryPublisherValue()).not.toBeNull();
+      it("shows the full description", () => {
+        expect(elements.getSummary()).not.toHaveClass("line-clamp-4");
+        expect(elements.getSummary()).toHaveTextContent(LONG_SUMMARY);
+      });
+
+      it("offers Less to cut it back", async () => {
+        await userEvent.click(elements.getLess());
+        expect(elements.getSummary()).toHaveClass("line-clamp-4");
+      });
     });
   });
 
-  describe("given no summary", () => {
+  describe("given every fact is known", () => {
     beforeEach(() => {
-      render(
-        <AboutPanel
-          summary={null}
-          releaseYear="2017"
-          developer="Team Cherry"
-          publisher="Skybound Games"
-        />
+      render(<AboutPanel {...fullProps} />);
+    });
+
+    it("lists the developer", () => {
+      expect(elements.getValueFor("Developer")).toHaveTextContent(
+        "Team Cherry"
       );
     });
 
-    it("does not render the summary paragraph", () => {
+    it("lists the full release date", () => {
+      expect(elements.getValueFor("Released")).toHaveTextContent(
+        "Feb 24, 2017"
+      );
+    });
+
+    it("lists the typical times in hours", () => {
+      expect(elements.getValueFor("Main story")).toHaveTextContent("14.5 h");
+      expect(elements.getValueFor("100%")).toHaveTextContent("19 h");
+    });
+  });
+
+  describe("given only a description", () => {
+    beforeEach(() => {
+      render(<AboutPanel {...emptyProps} summary="A short one." />);
+    });
+
+    it("leaves out every row with an unknown value", () => {
+      expect(elements.queryTerm("Developer")).toBeNull();
+      expect(elements.queryTerm("Released")).toBeNull();
+      expect(elements.queryTerm("Main story")).toBeNull();
+      expect(elements.queryTerm("100%")).toBeNull();
+    });
+
+    it("shows no tag group", () => {
+      expect(elements.queryTags()).toBeNull();
+    });
+  });
+
+  describe("given only the main story time is known", () => {
+    beforeEach(() => {
+      render(<AboutPanel {...emptyProps} timeToCreditsSeconds={14.5 * 3600} />);
+    });
+
+    it("lists Main story and leaves out 100%", () => {
+      expect(elements.getValueFor("Main story")).toHaveTextContent("14.5 h");
+      expect(elements.queryTerm("100%")).toBeNull();
+    });
+
+    it("shows no description or More", () => {
       expect(elements.querySummary()).toBeNull();
+      expect(elements.queryMore()).toBeNull();
     });
   });
 
-  describe("given developer is absent", () => {
+  describe("given themes and genres", () => {
     beforeEach(() => {
-      render(
-        <AboutPanel
-          summary="Some copy."
-          releaseYear="2017"
-          developer={null}
-          publisher="Skybound Games"
-        />
-      );
+      render(<AboutPanel {...fullProps} />);
     });
 
-    it("omits the developer row", () => {
-      expect(elements.queryDeveloperTerm()).toBeNull();
+    it("shows them together as one group of tags", () => {
+      expect(
+        within(elements.getTags())
+          .getAllByRole("listitem")
+          .map((tag) => tag.textContent)
+      ).toEqual(["Fantasy", "Action", "Adventure", "Platform"]);
     });
 
-    it("still renders the publisher row", () => {
-      expect(elements.queryPublisherTerm()).not.toBeNull();
-    });
-  });
-
-  describe("given publisher is absent", () => {
-    beforeEach(() => {
-      render(
-        <AboutPanel
-          summary="Some copy."
-          releaseYear="2017"
-          developer="Team Cherry"
-          publisher={null}
-        />
-      );
-    });
-
-    it("omits the publisher row", () => {
-      expect(elements.queryPublisherTerm()).toBeNull();
-    });
-  });
-
-  describe("given release year is absent", () => {
-    beforeEach(() => {
-      render(
-        <AboutPanel
-          summary="Some copy."
-          releaseYear={null}
-          developer="Team Cherry"
-          publisher="Skybound Games"
-        />
-      );
-    });
-
-    it("omits the release year row", () => {
-      expect(elements.queryReleaseYearTerm()).toBeNull();
-    });
-  });
-
-  describe("given every field is absent (title-only catalog)", () => {
-    beforeEach(() => {
-      render(
-        <div data-testid="about-host">
-          <AboutPanel
-            summary={null}
-            releaseYear={null}
-            developer={null}
-            publisher={null}
-          />
-        </div>
-      );
-    });
-
-    it("renders nothing at all (no summary, no facts label, no placeholder)", () => {
-      expect(elements.querySummary()).toBeNull();
-      expect(elements.queryFactsLabel()).toBeNull();
-      expect(screen.getByTestId("about-host").textContent).toBe("");
-    });
-
-    it("does not emit an em-dash placeholder", () => {
-      expect(screen.queryByText("—")).toBeNull();
+    it("has no separate Themes or Platforms heading", () => {
+      expect(screen.queryByRole("heading", { name: "Themes" })).toBeNull();
+      expect(screen.queryByRole("heading", { name: "Platforms" })).toBeNull();
     });
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -70,6 +70,10 @@ vi.mock("@/features/up-next/api/remove-from-up-next-fn", () => ({
   removeFromUpNextFn: vi.fn(),
 }));
 
+vi.mock("@/entities/session/model", () => ({
+  useEveningMinutes: () => 105,
+}));
+
 vi.mock("@/shared/lib/use-media-query", () => ({ useIsDesktop: () => true }));
 
 const statusResult = (
@@ -103,6 +107,19 @@ const buildItem = (
   );
 };
 
+const withTimeToCredits = (
+  item: LibraryItemWithGame,
+  timeToCreditsSeconds: number | null
+): LibraryItemWithGame => ({
+  ...item,
+  game: {
+    ...item.game,
+    timeToCreditsSeconds,
+    coverHue: null,
+    coverChroma: null,
+  },
+});
+
 const elements = {
   getCardLink: (title: string) =>
     screen.getByRole("link", { name: `View ${title}` }),
@@ -111,13 +128,20 @@ const elements = {
   queryCoverImage: (title: string) => screen.queryByAltText(title),
   queryCoverPlaceholder: (title: string) =>
     screen.queryByRole("img", { name: title }),
-  getStatusBadge: (label: string) => {
-    const [coverChip] = screen
-      .getAllByText(label)
-      .filter((node) => node.getAttribute("data-slot") === "badge");
-    if (!coverChip) throw new Error(`No status chip reads ${label}`);
-    return coverChip;
+  queryStatusMentionsOutsideControl: (controlStatus: string) => {
+    const insideControl = within(
+      screen.getByRole("button", { name: `Status: ${controlStatus}. Change` })
+    );
+    return ["Want", "Playing", "Done", "Let go"].flatMap((label) =>
+      screen
+        .queryAllByText(label)
+        .filter((node) => !insideControl.queryAllByText(label).includes(node))
+    );
   },
+  getStatusLabelMentions: (label: string) => screen.getAllByText(label),
+  getTitle: (title: string) =>
+    screen.getByRole("heading", { level: 3, name: title }),
+  getLengthLine: () => screen.getByTestId("game-card-length"),
   getStatusControl: (label: string) =>
     screen.getByRole("button", { name: `Status: ${label}. Change` }),
   getNextStep: (name: string) => screen.getByRole("button", { name }),
@@ -193,12 +217,47 @@ describe("LibraryItemCard", () => {
       ["PLAYING", "Playing"],
       ["DONE", "Done"],
     ] as const)(
-      "renders %s as the human label %s (overlaid on the cover)",
+      "shows %s once, in the status control, with no badge on the cover",
       (status, label) => {
         render(<LibraryItemCard item={buildItem({ status })} />);
-        expect(elements.getStatusBadge(label)).toBeDefined();
+        expect(elements.queryStatusMentionsOutsideControl(label)).toEqual([]);
+        expect(elements.getStatusLabelMentions(label)).toHaveLength(1);
+        expect(elements.getStatusControl(label)).toBeDefined();
       }
     );
+  });
+
+  describe("given a game with 8.5 hours to its credits", () => {
+    beforeEach(() => {
+      render(
+        <LibraryItemCard
+          item={withTimeToCredits(buildItem({ status: "PLAYING" }), 30_600)}
+        />
+      );
+    });
+
+    it("reads About 5 evenings under the title", () => {
+      const length = elements.getLengthLine();
+      expect(length).toHaveTextContent("About 5 evenings");
+      expect(
+        elements.getTitle("Hollow Knight").compareDocumentPosition(length) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
+
+  describe("given a game with no known length", () => {
+    beforeEach(() => {
+      render(
+        <LibraryItemCard
+          item={withTimeToCredits(buildItem({ status: "PLAYING" }), null)}
+        />
+      );
+    });
+
+    it("still renders the length line, empty, so cards stay aligned", () => {
+      expect(elements.getLengthLine()).toBeEmptyDOMElement();
+    });
   });
 
   describe("meta footer + CTA (Phase 3 visual-parity push)", () => {
@@ -275,7 +334,9 @@ describe("LibraryItemCard", () => {
         expect(
           await screen.findByText("Hollow Knight is now Playing")
         ).toBeDefined();
-        expect(elements.getStatusBadge("Playing")).toBeDefined();
+        expect(elements.queryStatusMentionsOutsideControl("Playing")).toEqual(
+          []
+        );
         expect(elements.getStatusControl("Playing")).toBeDefined();
         expect(elements.getNextStep("Mark done")).toBeDefined();
       });
@@ -301,8 +362,9 @@ describe("LibraryItemCard", () => {
           data: { id: 4, to: "DONE" },
         });
         await waitFor(() =>
-          expect(elements.getStatusBadge("Done")).toBeDefined()
+          expect(elements.getStatusControl("Done")).toBeDefined()
         );
+        expect(elements.queryStatusMentionsOutsideControl("Done")).toEqual([]);
         expect(elements.getNextStep("Play again")).toBeDefined();
       });
     });
@@ -328,7 +390,8 @@ describe("LibraryItemCard", () => {
 
       it("reverts the card to Want", async () => {
         await screen.findByText("Couldn't save. Try again.");
-        expect(elements.getStatusBadge("Want")).toBeDefined();
+        expect(elements.getStatusControl("Want")).toBeDefined();
+        expect(elements.queryStatusMentionsOutsideControl("Want")).toEqual([]);
         expect(elements.getNextStep("Start playing")).toBeDefined();
       });
     });
@@ -389,23 +452,19 @@ describe("LibraryItemCard", () => {
       });
     });
 
-    describe("status chip", () => {
-      it("marks the Playing chip with its status and variant", () => {
-        render(<LibraryItemCard item={buildItem({ status: "PLAYING" })} />);
-        const chip = elements.getStatusBadge("Playing");
-        expect(chip).toHaveAttribute("data-status", "playing");
-        expect(chip).toHaveAttribute("data-variant", "playing");
-      });
-
-      it("reads Let go in the Done variant for a Done game that was let go", () => {
+    describe("given a Done game that was let go", () => {
+      beforeEach(() => {
         render(
           <LibraryItemCard
             item={buildItem({ status: "DONE", doneOutcome: "LET_GO" })}
           />
         );
-        const chip = elements.getStatusBadge("Let go");
-        expect(chip).toHaveAttribute("data-status", "let-go");
-        expect(chip).toHaveAttribute("data-variant", "done");
+      });
+
+      it("shows Let go once, in the status control, with no cover badge", () => {
+        expect(elements.getStatusControl("Done")).toBeDefined();
+        expect(elements.getStatusLabelMentions("Let go")).toHaveLength(1);
+        expect(elements.queryStatusMentionsOutsideControl("Done")).toEqual([]);
       });
     });
   });

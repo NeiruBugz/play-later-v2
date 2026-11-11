@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Continue? identity round 2 — stand-out Home, game page and library</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  @media (prefers-color-scheme: dark) {
+    :root {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  }
+  :root[data-theme='dark'] {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  :root[data-theme='light'] {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 36px 28px 80px; }
+  @media (max-width: 700px) { main { padding: 20px 16px 60px; } }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 42px 0 12px; }
+  h4 { margin: 14px 0 6px; font-size: 14px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 4px; }
+  .statusbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
+  .status-chip { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--warn); color: var(--chip-ink); }
+  .progress { font-size: 13px; color: var(--muted); }
+  .bar { display: inline-block; width: 140px; height: 7px; border-radius: 4px; background: var(--line); vertical-align: middle; margin: 0 6px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--ok); }
+  .src { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; color: var(--chip-ink); white-space: nowrap; }
+  .src.interview { background: var(--src-interview); }
+  .src.code { background: var(--src-code); }
+  .src.web { background: var(--src-web); }
+  .src.kb { background: var(--src-kb); }
+  .glance { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin-top: 14px; }
+  .glance ul { margin: 8px 0 0; padding-left: 20px; }
+  .glance li { margin: 6px 0; }
+  table.decisions { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  table.decisions th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line); }
+  table.decisions td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.decisions td:first-child { font-weight: 600; width: 26%; }
+  .why { color: var(--muted); font-size: 13px; display: block; margin-top: 2px; }
+  .diagram-wrap { overflow-x: auto; margin-top: 12px; }
+  .diagram-note { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .diagram-wrap svg { max-width: 100%; height: auto; display: block; }
+  .d-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .d-label { fill: var(--ink); font-size: 13px; font-weight: 600; }
+  .d-sublabel { fill: var(--muted); font-size: 11.5px; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .d-arrow.dashed { stroke-dasharray: 5 4; }
+  .d-head { fill: var(--muted); }
+  .tabs { margin-top: 12px; }
+  .tabbar { display: flex; gap: 4px; border-bottom: 2px solid var(--line); }
+  .tabbar button { appearance: none; border: none; background: none; color: var(--muted); font: 600 14px/1.4 inherit; padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tabbar button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tabbar button .count { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+  .tabpanel { display: none; padding: 6px 2px 0; }
+  .tabpanel.active { display: block; }
+  ul.findings { list-style: none; margin: 10px 0 0; padding: 0; }
+  ul.findings li { margin: 0; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  ul.findings li:last-child { border-bottom: none; }
+  .impact { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .impact a { color: var(--accent); text-decoration: none; }
+  .impact a:hover { text-decoration: underline; }
+  .empty { color: var(--muted); font-size: 14px; padding: 16px 4px; }
+  .req { border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .req h3 { margin: 0 0 4px; font-size: 16.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+  .req h3 .provrow { display: flex; gap: 5px; }
+  .req .oneliner { margin: 2px 0 6px; }
+  .req .prose { color: var(--muted); font-size: 14px; margin: 0 0 4px; }
+  details.ac { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.ac summary { cursor: pointer; font-size: 13.5px; color: var(--accent); font-weight: 600; }
+  details.ac ul { list-style: none; padding-left: 4px; margin: 10px 0 2px; }
+  details.ac li { margin: 10px 0; padding-left: 26px; position: relative; font-size: 14.5px; }
+  details.ac li::before { content: "☐"; position: absolute; left: 2px; top: 0; color: var(--pending); font-size: 15px; }
+  details.ac li.done::before { content: "☑"; color: var(--ok); }
+  details.ac li b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  .cols h4 { margin: 0 0 6px; }
+  .cols ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .cols li { margin: 5px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  code { background: var(--panel); border-radius: 4px; padding: 1px 5px; font-size: .92em; }
+  .tablewrap { overflow-x: auto; margin: 12px 0; }
+  table.md { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+  table.md th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  table.md td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.md tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<main>
+<h1>Continue? identity round 2 — stand-out Home, game page and library</h1>
+<div class="meta">Topic: Make the app recognizably its own on the three screens where a person decides what to play. Home opens with one question, &quot;Continue …?&quot;. A game's cover tints its main surface. Game length reads as evenings. The game page and library cards are regrouped so they feel calmer. &nbsp;·&nbsp; Author: Nail Badiullin</div>
+<div class="statusbar">
+  <span class="status-chip">Draft</span>
+  <span class="progress">Verification: <span class="bar"><i style="width:0%"></i></span> 0 of 100 criteria verified</span>
+</div>
+<h2 id="glance">At a glance</h2>
+<div class="glance"><ul><li>Home opens with one question about tonight: &quot;Continue {game}?&quot; with Log time and Not tonight. It steps through your Playing games, then the first Up Next game, then accepts a night off.</li>
+<li>The Home question panel and the game page header take a soft tint from the game's cover. No other surface is tinted.</li>
+<li>Game length reads in words as &quot;About N evenings&quot;. An evening is 1.75 h unless you change it in Settings. Time already played stays in hours.</li>
+<li>The game page is regrouped: one header with the title, three key facts and the actions, then &quot;Your play&quot;, About, and sideways rows for screenshots and related games.</li>
+<li>Library cards lose the status badge on the cover and gain a length line.</li></ul></div>
+<h2 id="decisions">Decisions to approve</h2>
+<p class="meta">These are the judgment calls in this spec — the things a reviewer might want to challenge. Everything else follows from them.</p>
+<table class="decisions">
+  <tr><th>Decision</th><th>Choice</th><th>Source</th></tr>
+<tr>
+    <td>Home's first element</td>
+    <td>A &quot;Continue …?&quot; question panel replaces the Up Next shelf as the first thing on Home<span class="why">The nightly decision becomes a single yes or no. The full lists stay one scroll away.</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Not tonight</td>
+    <td>Moves to the next game and remembers nothing<span class="why">Owner's choice. There is no skip history and no shelving nudge.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Primary button label</td>
+    <td>&quot;Log time&quot;, not &quot;Log a session&quot;<span class="why">Keeps spec 026's word list: one action, one label.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Length unit</td>
+    <td>Words only, &quot;About N evenings&quot;, rounded with halves up, never drawn as dots or bars<span class="why">Long games would need too many marks. Length never fills up as you play, so it can't become a progress bar.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Evening length</td>
+    <td>A Settings choice from 1 h to 3 h, default 1.75 h, saved with the account<span class="why">The owner rejected a fixed length. Research shows people want their own estimate.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Which play time drives evenings</td>
+    <td>Today's &quot;Main story&quot; figure. If it turns out to include extras, switch to the credits-only figure and fix the labels.<span class="why">The catalog's meaning could not be confirmed. It is checked during the technical spec.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Cover tint</td>
+    <td>Only the Home question panel and the game page header. Fixed lightness per mode, neutral when the cover has no clear color.<span class="why">One bold surface per screen. Text stays readable whatever the cover. This is an exception to spec 027's palette rule.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Done with it?</td>
+    <td>Finished or Let it go in place, then the Done dialog opens with the reason already set<span class="why">Keeps the rating and reflection one step away.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Critic score</td>
+    <td>Kept as a small &quot;Critics 87&quot; fact; the ring is removed<span class="why">It's useful to know but shouldn't compete for attention.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>Length for non-owners</td>
+    <td>Shown to every visitor in the header<span class="why">Length matters most before you add a game. Today it's hidden from non-owners.</span></td>
+    <td><span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Thumb zone on Home</td>
+    <td>Accepted exception: the question sits near the top, and the bottom bar's Log stays within thumb reach<span class="why">Approved in the design review.</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Back on the game page</td>
+    <td>Returns to the previous screen, or to the Library<span class="why">Today it always goes to the Library.</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Related games</td>
+    <td>One &quot;More in {series}&quot; row for the first series<span class="why">Simpler than one tab per series.</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Add game on phone Home</td>
+    <td>Removed; adding happens through search<span class="why">Matches the approved design.</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+</table>
+
+<h2 id="findings">Findings that shaped this spec</h2>
+<p class="meta">What the research phase discovered and where it landed. The technical detail behind each finding lives in <code>research-notes.md</code>.</p>
+<div class="tabs">
+  <div class="tabbar" role="tablist">
+<button class="active" role="tab" onclick="tab(0, this)">Codebase exploration <span class="count">· 5</span></button>
+<button class="" role="tab" onclick="tab(1, this)">Web research <span class="count">· 4</span></button>
+<button class="" role="tab" onclick="tab(2, this)">Knowledge base <span class="count">· 0</span></button>
+  </div>
+<div class="tabpanel active"><ul class="findings"><li>Playing games on Home are ordered by the last edit to the library entry. Logging a session doesn't move a game up.<span class="impact">→ The question orders games by the latest logged session instead.</span></li>
+<li>Typical play time is shown only to visitors who have the game, in hours, in a monospaced font.<span class="impact">→ Length becomes a header fact shown to everyone, in evenings.</span></li>
+<li>The &quot;Time played 0 h&quot; card appears for any signed-in visitor, and the phone &quot;⋯&quot; button does nothing.<span class="impact">→ The card is removed, and &quot;⋯&quot; becomes a working menu.</span></li>
+<li>Spec 026 bans &quot;Log a session&quot;. Spec 027 requires that Up Next comes first, that colors come only from the palette, and that covers carry status badges.<span class="impact">→ These are listed as explicit replacements or exceptions in the scope.</span></li>
+<li>Each library card shows its status twice.<span class="impact">→ The cover badge goes, and the status control remains.</span></li></ul></div>
+<div class="tabpanel "><ul class="findings"><li>Continue rows (Xbox, Steam, Netflix) are ordered by recency. Netflix's &quot;remove from row&quot; only hides the title.<span class="impact">→ Recency order, and Not tonight changes nothing.</span></li>
+<li>Artwork-derived colors often fail contrast (Spotify, Symfonium). The usual fix is a fixed-lightness variant per mode, plus a neutral fallback.<span class="impact">→ Tint with fixed lightness, and no tint for colorless covers.</span></li>
+<li>No product found expresses length in evenings. Round figures avoid false precision, and StoryGraph users ask to set their own estimates.<span class="impact">→ Words only, whole numbers, and a Settings choice.</span></li>
+<li>The evidence for choice overload is weak (Scheibehenne 2010 meta-analysis).<span class="impact">→ The one-question Home is justified by calm, and the full lists stay one scroll away.</span></li></ul></div>
+<div class="tabpanel "><div class="empty">Not consulted: no knowledge sources are recorded for this project (the owner declined discovery).</div></div>
+</div>
+<h2>Requirements</h2>
+<section class="req" id="r20">
+  <h3><span>2.0 Definitions used in this specification</span><span class="provrow"></span></h3>
+  
+  <p class="prose"><strong>Statuses:</strong> a game in the library is <strong>Want</strong> (not started), <strong>Playing</strong> or <strong>Done</strong>. A Done game can carry a private reason, <strong>Finished</strong> or <strong>Let go</strong>, that only its owner sees.</p>
+<p class="prose"><strong>Play:</strong> one stretch of playing a game. A play starts when the game becomes Playing and ends when it leaves Playing. A game played twice has two plays.</p>
+<p class="prose"><strong>Up Next:</strong> an ordered queue of up to 5 games the person plans to play next. It may hold Want games, and Done games meant for a replay (shown as &quot;Replay&quot;).</p>
+<p class="prose"><strong>Session:</strong> time the person logs for a game with the Log sheet, in hours. <strong>Time played</strong> is the sum of a game's session lengths. It is shown as it is everywhere in the app: hours with at most one decimal, for example &quot;6 h&quot; or &quot;4.5 h&quot;.</p>
+<p class="prose"><strong>Note:</strong> a free-text entry the person writes about a game in the Log sheet. A note may be saved with or without time. Only entries with time count as sessions.</p>
+<p class="prose"><strong>Log sheet:</strong> the existing sheet titled &quot;Log time&quot; that records time and a note for a game. On a phone it opens as a panel that slides up from the bottom.</p>
+<p class="prose"><strong>Status control:</strong> the existing status badge with a small down arrow. Tapping it opens a list of Want, Playing and Done, and choosing one changes the game's status.</p>
+<p class="prose"><strong>Next-step button:</strong> the existing one-tap button on a library card. It reads &quot;Start playing&quot; for Want, &quot;Mark done&quot; for Playing and &quot;Play again&quot; for Done.</p>
+<p class="prose"><strong>Up Next actions:</strong> the existing menu items &quot;Put in Up Next&quot; and &quot;Remove from Up Next&quot;.</p>
+<p class="prose"><strong>Typical play time:</strong> how long a game usually takes, from the public game catalog. The catalog gives up to two figures, which the app labels &quot;Main story&quot; and &quot;100%&quot;. Many games have neither.</p>
+<p class="prose"><strong>Evening:</strong> a person's usual evening of play. It is 1.75 hours unless the person chooses another length in Settings (2.12). Visitors who are signed out always get 1.75 hours.</p>
+<p class="prose"><strong>Cover tint:</strong> a soft background color in the main hue of a game's cover art.</p>
+<p class="prose"><strong>Accent:</strong> the brand color, plum, used for the primary button, the selected item, the Playing status, focus outlines and links.</p>
+<p class="prose"><strong>Primary button:</strong> the filled plum button for a screen's or panel's main action.</p>
+<p class="prose"><strong>Readable:</strong> text meets the standard accessibility contrast level, WCAG AA. That is a contrast ratio of at least 4.5:1, or 3:1 for large text, against its background. This is the level spec 027 already requires.</p>
+<p class="prose"><strong>Widths:</strong></p>
+<p class="prose"><strong>Screens covered:</strong> Home, the game page and the Library page, in both layouts, in Light and Dark, plus one new item in Settings (2.12).</p>
+<p class="prose"><strong>Default evening in examples:</strong> every example and acceptance criterion in 2.1–2.11 assumes the default 1.75-hour evening.</p>
+<p class="prose"><strong>Reference design:</strong> the owner-approved review page &quot;Continue? identity round 2&quot; (2026-11-10) shows the intended look. Where it and this text differ, this text wins.</p>
+<p class="prose">#### 2.1 Game length in evenings</p>
+<p class="prose">Wherever the app shows how long a game takes, it shows it in evenings, in words. Time a person has already played stays in hours.</p>
+<p class="prose">The number of evenings is the game's &quot;Main story&quot; figure divided by the length of an evening (2.0; 1.75 hours unless changed in Settings). It is rounded to the nearest whole number, with halves rounding up, and is never less than one. The catalog's own meaning of this figure may be &quot;main story plus some extras&quot;. If that is confirmed, evenings are based on the catalog's time-to-credits figure instead, and the About list's labels (2.7) are corrected to say what each figure measures.</p>
+<p class="prose">It reads &quot;One evening&quot; for one, and &quot;About N evenings&quot; otherwise.</p>
+<p class="prose">There are no dots, bars or other drawn marks for length.</p>
+<p class="prose">The length never changes because of time played. It is not a progress measure.</p>
+<p class="prose">When a game has no &quot;Main story&quot; figure, no length is shown, even if a &quot;100%&quot; figure exists.</p>
+<p class="prose">Length appears in exactly these places:</p>
+<p class="prose">Today it appears only on the game page.</p>
+<p class="prose">#### 2.2 Cover tint</p>
+<p class="prose">Two surfaces are tinted with a soft color taken from the cover of the game they are about: the Home question panel (2.3) and the game page header (2.6). No other surface is tinted, so a screen has at most one tinted surface.</p>
+<p class="prose"><strong>The tint keeps the cover's main hue.</strong></p>
+<p class="prose"><strong>Colors on the tinted surface:</strong></p>
+<p class="prose"><strong>A cover with no clear color gives no tint.</strong> This means a cover with almost no colorful areas, for example black-and-white art, or a white cover with only a small colored logo. A game without cover art behaves the same way. The surface then uses the normal neutral card color.</p>
+<p class="prose"><strong>Exception to spec 027.</strong> The tint is a deliberate exception to spec 027's rule that every interface color comes from the fixed palette (027 §2.4), and to its list of accent uses (027 §2.9). Neither rule otherwise changes.</p>
+<p class="prose">#### 2.3 Home: the &quot;Continue …?&quot; question</p>
+<p class="prose">Home opens with a single question about what to play tonight, in a tinted panel (2.2). In the phone layout this panel takes the place of the page title &quot;Home&quot;. In the desktop layout the page title &quot;Home&quot; stays above it.</p>
+<p class="prose">The panel goes through up to three steps, in order, skipping any step that has no game:</p>
+<p class="prose">1. <strong>Each Playing game, most recently played first.</strong></p>
+<p class="prose">2. <strong>The first Up Next game.</strong> Only the first game in the queue is asked about.</p>
+<p class="prose">3. <strong>A rest state.</strong></p>
+<p class="prose">Wording for &quot;how long ago&quot;:</p>
+<div class="tablewrap"><table class="md"><thead><tr><th>Time since</th><th>Wording</th></tr></thead><tbody>
+<tr><td>same day</td><td>&quot;today&quot;</td></tr>
+<tr><td>1 day</td><td>&quot;yesterday&quot;</td></tr>
+<tr><td>2–13 days</td><td>&quot;N days ago&quot;</td></tr>
+<tr><td>14–29 days</td><td>&quot;N weeks ago&quot; (2–4, rounded down)</td></tr>
+<tr><td>30–59 days</td><td>&quot;a month ago&quot;</td></tr>
+<tr><td>60–364 days</td><td>&quot;N months ago&quot; (rounded down)</td></tr>
+<tr><td>365 days or more</td><td>&quot;over a year ago&quot;</td></tr>
+</tbody></table></div>
+<p class="prose">Behavior:</p>
+<p class="prose"><strong>Not tonight</strong> moves to the next game or step without changing anything about the game. On the Up Next question, it moves to the rest state. Nothing is remembered: leaving Home and coming back starts again at the first step that has a game.</p>
+<p class="prose"><strong>Log time</strong> opens the Log sheet with that game already chosen.</p>
+<p class="prose"><strong>Start playing</strong> and <strong>Play again</strong> change the game's status to Playing, exactly as the same buttons do elsewhere: the game leaves Up Next and an Undo option appears.</p>
+<p class="prose"><strong>Changing questions:</strong> the old question fades out, the new one fades in, and the tint changes to the new game's cover. With the device's &quot;reduce motion&quot; setting on, the change is immediate.</p>
+<p class="prose"><strong>Nothing to ask:</strong> with no Playing games and an empty Up Next, there is no question panel. Home shows the existing empty state &quot;Nothing playing right now&quot;, with &quot;Pick from Up Next&quot; and &quot;Add a game&quot;.</p>
+<p class="prose">#### 2.4 Home: below the question</p>
+<p class="prose">Below the question panel, Home shows, in this order:</p>
+<p class="prose">1. <strong>Up Next shelf:</strong> the queued games' covers in queue order, in a row that scrolls sideways.</p>
+<p class="prose">2. <strong>Also playing:</strong> every Playing game except the one first in the question order (2.3), in question order.</p>
+<p class="prose">3. <strong>Counts:</strong> one quiet line, for example &quot;28 games · 18 want · 3 playing · 7 done&quot;.</p>
+<p class="prose">This replaces two earlier rules:</p>
+<p class="prose">spec 027 §2.12: the Up Next card is the first and largest element on Home;</p>
+<p class="prose">the spec 026 criterion that, with one Playing game, Up Next is visible without scrolling at 390 × 844.</p>
+<p class="prose">The new rule: at 390 × 844, the first Up Next cover is fully visible without scrolling.</p>
+<p class="prose">In the phone layout, Home has no &quot;Add game&quot; button; adding a game stays available from search in the top bar. In the desktop layout, &quot;Add game&quot; stays as an outline button next to the page title.</p>
+<p class="prose">#### 2.5 Game page: overall order</p>
+<p class="prose">The game page is regrouped into, top to bottom: 1. the header (2.6); 2. the &quot;Your play&quot; card (2.7), only for a signed-in visitor who has the game in their library; 3. the About card (2.7); 4. the screenshots row (2.8); 5. the related-games row (2.8).</p>
+<p class="prose">Removed from the game page:</p>
+<p class="prose">the row of jump tabs;</p>
+<p class="prose">the side column in the desktop layout;</p>
+<p class="prose">the large critic-score ring and its &quot;Critic consensus&quot; card;</p>
+<p class="prose">the &quot;Time played / Sessions&quot; card;</p>
+<p class="prose">the separate &quot;Times to beat&quot; and &quot;Themes / Genres / Platforms&quot; cards;</p>
+<p class="prose">the blurred screenshot behind the header.</p>
+<p class="prose">In the desktop layout, &quot;Your play&quot; and About sit side by side in two columns of equal width, both as tall as the taller of the two. Without a &quot;Your play&quot; card, About spans the full width.</p>
+<p class="prose">#### 2.6 Game page: the header</p>
+<p class="prose">The header is tinted (2.2). The tint starts at the top of the page and fades into the page background over the bottom third of the header, below the actions. A header with no tint fades from the neutral card color in the same way. The header holds, in reading order:</p>
+<p class="prose"><strong>Top row:</strong> Back, and a &quot;⋯&quot; menu button in both layouts.</p>
+<p class="prose"><strong>Identity:</strong></p>
+<p class="prose"><strong>Key facts:</strong> a row of up to three facts, each a small label over a value. A fact whose value is unknown is left out and the others close up.</p>
+<p class="prose"><strong>Actions,</strong> depending on the visitor:</p>
+<p class="prose">The key facts show to every visitor, signed in or not. Today, typical play time shows only to visitors who have the game.</p>
+<p class="prose"><strong>Layout:</strong></p>
+<p class="prose">In the desktop layout, the cover is on the left. The identity, key facts and actions are on the right, bottom-aligned with the cover, so there is no empty area beside the title.</p>
+<p class="prose">In the phone layout, the cover and identity share a row, with the key facts and actions below at full width.</p>
+<p class="prose">#### 2.7 Game page: &quot;Your play&quot; and About</p>
+<p class="prose"><strong>&quot;Your play&quot;</strong> shows only to a signed-in visitor who has the game in the library. It holds the person's own record for the game:</p>
+<p class="prose">The title &quot;Your play&quot; and a <strong>New note</strong> button, which opens the Log sheet with this game chosen.</p>
+<p class="prose">One line with the session count and time played (&quot;3 sessions · 4.5 h&quot;, &quot;1 session · 2 h&quot;), or &quot;No sessions yet&quot;. Next to it are the rating stars, which can be set or changed here.</p>
+<p class="prose">The game-page question from spec 026: &quot;Why this one?&quot; for a Want game, &quot;What stayed with you?&quot; for a Done game, and none for a Playing game. As today, the question has a text field, and the answer is saved as a note.</p>
+<p class="prose">The two most recent notes, with or without time, each with its date in the body font. When there are more than two, &quot;All notes ({n})&quot; shows the rest in the same card.</p>
+<p class="prose">The History of earlier plays, collapsed and read-only, as today. It is hidden when the game has no ended plays.</p>
+<p class="prose"><strong>About</strong> shows to every visitor:</p>
+<p class="prose">The title &quot;About&quot;.</p>
+<p class="prose">The game's description, cut to four lines, with a &quot;More&quot; link that shows the rest.</p>
+<p class="prose">A short list: Developer, Released (full date), and the two typical play times in hours as supporting detail. The labels are the ones settled in 2.1, today &quot;Main story&quot; and &quot;100%&quot;. Rows with unknown values are left out.</p>
+<p class="prose">The game's themes and genres as small tags, in one group.</p>
+<p class="prose">#### 2.8 Game page: screenshots and related games</p>
+<p class="prose"><strong>Screenshots</strong> become one row that scrolls sideways, in both layouts. Tapping a screenshot opens it large, as today. When the game has no screenshots, the row and its label are hidden.</p>
+<p class="prose"><strong>Related games</strong> become one row that scrolls sideways.</p>
+<p class="prose">Neither row makes the page scroll sideways, and covers and screenshots keep a visible gap between them.</p>
+<p class="prose">#### 2.9 Game page: &quot;Done with it?&quot;</p>
+<p class="prose">For a Playing game, <strong>Done with it?</strong> offers the two Done reasons in place, without a menu.</p>
+<p class="prose">Tapping it replaces the text button with two buttons, <strong>Finished</strong> and <strong>Let it go</strong>, side by side. Below them is the line &quot;Both move it to Done. Only you see which one.&quot; and a <strong>Not yet</strong> text button, which puts back &quot;Done with it?&quot; and changes nothing.</p>
+<p class="prose"><strong>Choosing a reason</strong> marks the game Done with that reason. The existing Done dialog then opens as today (rating, &quot;What stayed with you?&quot;, Skip and Save), with the chosen reason already selected. Closing the dialog any way leaves the game Done with the chosen reason, as Skip does.</p>
+<p class="prose"><strong>No Undo message.</strong> As for any change to Done, the Done dialog takes the place of the Undo message. The status control still changes the status back.</p>
+<p class="prose"><strong>Wording:</strong> the button reads &quot;Let it go&quot;. The reason it sets is called &quot;Let go&quot; everywhere else.</p>
+<p class="prose">#### 2.10 Library cards</p>
+<p class="prose">Library cards get the same cover treatment as Home, and show the game's length.</p>
+<p class="prose"><strong>No badge on the cover.</strong> The status appears once, in the status control below the title. This replaces the &quot;library card&quot; part of 027 §2.13 for the cover only; the status control keeps the 027 chip.</p>
+<p class="prose"><strong>Length.</strong> Each card shows &quot;About N evenings&quot; (2.1) under the title, for Want, Playing and Done games alike. A game with no length leaves that line blank, so cards side by side in the desktop grid stay aligned.</p>
+<p class="prose"><strong>No tint.</strong> Cards are not tinted (2.2).</p>
+<p class="prose"><strong>Unchanged:</strong> the title, &quot;Up Next #n&quot; or &quot;Not owned&quot; when they apply, the platform, the rating, the status control, the next-step button and the &quot;⋯&quot; menu.</p>
+<p class="prose">#### 2.11 Phone, themes and motion</p>
+<p class="prose">Everything in this spec meets the phone baseline of spec 027 §2.6 and the readability level (2.0), at every phone width and in Light and Dark:</p>
+<p class="prose">no sideways page scrolling;</p>
+<p class="prose">tap targets at least 44 × 44 points;</p>
+<p class="prose">body text at least 15 points;</p>
+<p class="prose">nothing that works only on hover.</p>
+<p class="prose">Thumb reach on Home: the question panel sits near the top of the screen, so its buttons are not in the bottom third that spec 027 §2.6 calls the thumb zone. The bottom bar's &quot;Log&quot; button stays in that zone and does the same job. This is an accepted exception to 027 §2.6's rule that a screen's primary button sits in the thumb zone.</p>
+<p class="prose">#### 2.12 Setting: how long is an evening</p>
+<p class="prose">A person can choose how long an evening of play is for them. Every length in evenings follows that choice.</p>
+<p class="prose"><strong>Where:</strong> Settings has the item &quot;How long is an evening for you?&quot;.</p>
+<p class="prose"><strong>Choices:</strong> 1 h, 1.5 h, 1.75 h, 2 h, 2.5 h and 3 h. It starts at 1.75 h.</p>
+<p class="prose"><strong>What it changes:</strong></p>
+<p class="prose"><strong>Example line:</strong> under the choices, a line shows what the current choice means, for example &quot;A 14.5-hour game is about 8 evenings.&quot;</p>
+  <details class="ac"><summary>Acceptance criteria — 100 (0 verified)</summary><ul>
+<li class="">Given a game whose &quot;Main story&quot; time is 14.5 hours, when the user views its game page, then its length reads &quot;About 8 evenings&quot;.</li>
+<li class="">Given a game whose &quot;Main story&quot; time is 1.5 hours, when the user views its game page, then its length reads &quot;One evening&quot;.</li>
+<li class="">Given a game whose &quot;Main story&quot; time is 51 hours, when the user views its game page, then its length reads &quot;About 29 evenings&quot;, with no dots, bars or other marks.</li>
+<li class="">Given a game whose &quot;Main story&quot; time is 4.375 hours (exactly 2.5 evenings), when the user views its game page, then its length reads &quot;About 3 evenings&quot;.</li>
+<li class="">Given a game with a &quot;100%&quot; time but no &quot;Main story&quot; time, when the user views its game page, then no length is shown and no placeholder text such as &quot;Unknown&quot; appears.</li>
+<li class="">Given a Playing game with 6 hours of time played and a length of &quot;About 8 evenings&quot;, when the user views its game page, then the length still reads &quot;About 8 evenings&quot; and time played reads &quot;6 h&quot;.</li>
+<li class="">When the user views the game page, then the header's Length fact is in evenings, and hours for typical play time appear only in the About card's list (2.7).</li>
+<li class="">Given the Home question is about a game with a mostly red cover, when the user views Home in Light, then the question panel has a pale red-tinted background, and in Dark it has a deep red-tinted background.</li>
+<li class="">Given a game with a mostly green cover, when the user opens its game page, then the header background is green-tinted.</li>
+<li class="">When the user compares the game pages of two games with differently colored covers, then their header backgrounds differ in hue, and the game title has the same contrast ratio against both headers to within 0.5.</li>
+<li class="">Given a game whose cover is black and white, when the user opens its game page, then the header uses the plain neutral card color with no tint.</li>
+<li class="">When the user checks every text on a tinted surface in Light and in Dark, then each one is readable (at least 4.5:1, or 3:1 for large text).</li>
+<li class="">When the user views the Library page, then no card and no part of the page is tinted.</li>
+<li class="">When the user views a tinted surface that has a primary button, then the button is plum, not the tint color.</li>
+<li class="">Given three Playing games whose latest sessions were 3 days, 2 weeks and 40 days ago, when the user opens Home, then the panel asks &quot;Continue {the 3-days game}?&quot;, with &quot;Last session 3 days ago&quot; and its recorded platform above the question.</li>
+<li class="">Given the same three games, when the user taps &quot;Not tonight&quot; twice, then the panel asks about the 2-weeks game (&quot;Last session 2 weeks ago&quot;) and then the 40-days game (&quot;Last session a month ago&quot;), in that order.</li>
+<li class="">Given the panel is asking about the last Playing game and Up Next holds a Want game, when the user taps &quot;Not tonight&quot;, then the panel asks &quot;Start {first Up Next game}?&quot;, with &quot;First in Up Next&quot; and the game's length.</li>
+<li class="">Given the panel asks &quot;Start {first Up Next game}?&quot;, when the user taps &quot;Not tonight&quot;, then the panel reads &quot;Nothing tonight is fine too.&quot; with an &quot;Ask me again&quot; button and no tint.</li>
+<li class="">Given the rest state, when the user taps &quot;Ask me again&quot;, then the panel asks about the most recently played Playing game again.</li>
+<li class="">Given the user tapped &quot;Not tonight&quot; on a game, when the user goes to the Library and back to Home, then the panel asks about the most recently played Playing game again, and that game's status and queue position are unchanged.</li>
+<li class="">Given the panel asks &quot;Continue {game}?&quot;, when the user taps &quot;Log time&quot;, then the Log sheet opens with that game already chosen.</li>
+<li class="">Given the panel asks &quot;Continue {the 2-weeks game}?&quot;, when the user saves 1.5 hours in the Log sheet, then the panel still asks about that game and reads &quot;Last session today&quot;.</li>
+<li class="">Given the panel asks &quot;Start {game}?&quot;, when the user taps &quot;Start playing&quot;, then the game becomes Playing, leaves Up Next, an Undo option appears, and the panel asks &quot;Continue {game}?&quot; with &quot;Started playing today&quot;.</li>
+<li class="">Given the user just tapped &quot;Start playing&quot; on the panel, when they tap Undo, then the game is back in Up Next in its old position and the panel asks &quot;Start {game}?&quot; again.</li>
+<li class="">Given a Playing game with no sessions that became Playing 15 days ago and no other Playing game, when the user opens Home, then the line above the question reads &quot;Started playing 2 weeks ago&quot;.</li>
+<li class="">Given two Playing games whose latest sessions were both yesterday, when the user opens Home, then the panel first asks about the one that became Playing more recently.</li>
+<li class="">Given no Playing games and at least one Up Next game, when the user opens Home, then the first question is &quot;Start {first Up Next game}?&quot;.</li>
+<li class="">Given no Playing games and an empty Up Next, when the user opens Home, then there is no question panel and the empty state &quot;Nothing playing right now&quot; is shown.</li>
+<li class="">Given the first Up Next game is a Done game queued for a replay and there are no Playing games, when the user opens Home, then the panel asks &quot;Play {game} again?&quot; with a &quot;Play again&quot; button.</li>
+<li class="">Given a Playing game with no recorded platform, when the panel asks about it, then the line above the question shows the last-session wording with no platform and no stray separator.</li>
+<li class="">When the user views Home in the phone layout, then there is no &quot;Home&quot; page title, and the question panel is the first thing below the top bar.</li>
+<li class="">When the user views Home in the desktop layout, then the page title &quot;Home&quot; appears above the question panel.</li>
+<li class="">Given &quot;reduce motion&quot; is turned on in the device settings, when the user taps &quot;Not tonight&quot;, then the next question appears immediately without a fade.</li>
+<li class="">Given 4 games in Up Next, the first with a &quot;Main story&quot; time of 31 hours, when the user views Home, then the first cover is larger than the others and captioned &quot;About 18 evenings&quot;.</li>
+<li class="">When the user views the Up Next shelf, then no cover shows a &quot;Want&quot;, &quot;Playing&quot; or &quot;Done&quot; badge.</li>
+<li class="">Given a Done game queued for a replay in first position, when the user views the shelf, then the first, larger cover is captioned &quot;Replay&quot;.</li>
+<li class="">Given one Playing game and at least one Up Next game, when the user opens Home at 390 × 844, then the first Up Next cover is fully visible without scrolling.</li>
+<li class="">Given three Playing games, when the user views Home, then &quot;Also playing&quot; lists the two games not asked about first, in question order, and the list does not change when the user taps &quot;Not tonight&quot;.</li>
+<li class="">Given one Playing game, when the user views Home, then there is no &quot;Also playing&quot; section.</li>
+<li class="">Given one Playing game and one Up Next game, when the user taps &quot;Start playing&quot; on the panel, then the earlier Playing game appears under &quot;Also playing&quot;.</li>
+<li class="">When the user taps &quot;Log&quot; on an &quot;Also playing&quot; row, then the Log sheet opens with that game already chosen.</li>
+<li class="">Given 28 games (18 Want, 3 Playing, 7 Done), when the user views Home, then the counts line reads &quot;28 games · 18 want · 3 playing · 7 done&quot;.</li>
+<li class="">When the user taps &quot;3 playing&quot; in the counts line, then the Library opens filtered to Playing.</li>
+<li class="">Given no Done games, when the user views the counts line, then it has no &quot;done&quot; part.</li>
+<li class="">Given exactly one game in the library, when the user views Home, then the counts line begins &quot;1 game&quot;.</li>
+<li class="">Given 5 games in Up Next, when the user scrolls the shelf sideways in the phone layout, then the page itself does not scroll sideways.</li>
+<li class="">When a signed-in user opens the game page of a game in their library, then the page shows, in order, the header, &quot;Your play&quot;, About, the screenshots row and the related-games row.</li>
+<li class="">When any visitor opens any game page, then there is no row of section tabs, no critic-score ring and no &quot;Time played&quot; card.</li>
+<li class="">Given a signed-in user with the game in their library, when they view the game page in the desktop layout, then &quot;Your play&quot; and About are side by side with equal widths, and their bottom edges line up.</li>
+<li class="">Given a visitor who does not have the game in their library, when they view the game page in the desktop layout, then About spans the full content width and there is no &quot;Your play&quot; card.</li>
+<li class="">When the user views the game page in the desktop layout, then there is no column to the right of the main content.</li>
+<li class="">Given a game with length, critic score and platforms known, when any visitor opens its game page, then the header shows three facts labelled &quot;Length&quot;, &quot;Critics&quot; and &quot;On&quot;, for example &quot;About 8 evenings&quot;, &quot;87&quot; and &quot;PS5 · PC · XSX&quot;.</li>
+<li class="">Given a game on five platforms, when the user views its header, then &quot;On&quot; shows three short names followed by &quot;+2&quot;.</li>
+<li class="">Given a game with no critic score, when any visitor opens its game page, then the facts row shows only &quot;Length&quot; and &quot;On&quot;, with no gap where &quot;Critics&quot; would be.</li>
+<li class="">Given a signed-out visitor, when they open a game page, then the header shows the key facts and a &quot;Sign in to add this game&quot; link, and no status control or &quot;Log time&quot;.</li>
+<li class="">Given a signed-in user without the game, when they open its game page, then the page has exactly one &quot;Add to library&quot; button, in the header.</li>
+<li class="">Given a Playing game in the user's library, when they open its game page, then the header shows the status control, a plum &quot;Log time&quot; button and a &quot;Done with it?&quot; text button.</li>
+<li class="">Given a Want game in the user's library, when they open its game page, then the header's primary button is &quot;Start playing&quot;.</li>
+<li class="">Given a Done game with the reason Let go, when the user opens its game page, then the status control reads &quot;Done · Let go&quot; and the primary button is &quot;Play again&quot;.</li>
+<li class="">When the user taps &quot;⋯&quot; on the game page of a game in their library, in either layout, then a menu opens with &quot;Edit details…&quot;, the ownership choice, the Up Next actions and &quot;Remove from library&quot;.</li>
+<li class="">When the user views the header in the desktop layout, then the title, facts and actions sit to the right of the cover and end level with the cover's bottom edge.</li>
+<li class="">Given the user opened a game page from Home, when they tap Back, then they return to Home.</li>
+<li class="">Given a game with no known developer, when the user reads the line above the title, then it reads &quot;{year} · {first genre}&quot; in normal capitalization, for example &quot;2025 · Shooter&quot;.</li>
+<li class="">Given a game in the user's library with 3 sessions totalling 4.5 hours, when they view the game page, then &quot;Your play&quot; reads &quot;3 sessions · 4.5 h&quot;.</li>
+<li class="">Given a game in the user's library with no sessions, when they view the game page, then &quot;Your play&quot; reads &quot;No sessions yet&quot;, and no &quot;0 h&quot; appears anywhere on the page.</li>
+<li class="">Given 5 notes on the game, when the user views &quot;Your play&quot;, then the two newest notes appear with their dates, together with an &quot;All notes (5)&quot; link.</li>
+<li class="">Given 5 notes on the game, when the user taps &quot;All notes (5)&quot;, then all five notes appear in the card, newest first.</li>
+<li class="">When the user taps &quot;New note&quot; in &quot;Your play&quot;, then the Log sheet opens with this game already chosen.</li>
+<li class="">Given a Want game in the library, when the user views &quot;Your play&quot;, then it shows the &quot;Why this one?&quot; question with a text field.</li>
+<li class="">Given a Playing game in the library, when the user views &quot;Your play&quot;, then it shows no question.</li>
+<li class="">Given a game that has never left Playing, when the user views &quot;Your play&quot;, then no History section appears.</li>
+<li class="">Given a description longer than four lines, when the user taps &quot;More&quot; in About, then the full description appears.</li>
+<li class="">When the user views About for a game with typical play times of 14.5 and 19 hours, then the list shows both times in hours, and the header's Length fact reads &quot;About 8 evenings&quot;.</li>
+<li class="">When the user views About, then themes and genres appear together as one group of tags, and there is no separate Themes or Platforms card.</li>
+<li class="">Given a game with 8 screenshots, when the user views the game page in the desktop layout, then the screenshots appear in a single row that scrolls sideways, not in a grid.</li>
+<li class="">When the user taps a screenshot, then it opens large over the page.</li>
+<li class="">Given a game with no screenshots, when the user views the game page, then there is no Screenshots label and no row.</li>
+<li class="">Given a game in the Metal Gear series with 35 related games, when the user views the game page, then a row titled &quot;More in Metal Gear&quot; shows same-size covers with titles that scroll sideways, and an &quot;All 35&quot; link.</li>
+<li class="">When the user scrolls either row sideways in the phone layout, then the page itself does not scroll sideways, and neighbouring covers or screenshots never touch.</li>
+<li class="">Given a Playing game, when the user taps &quot;Done with it?&quot;, then the buttons &quot;Finished&quot; and &quot;Let it go&quot; appear in its place, with the line &quot;Both move it to Done. Only you see which one.&quot; and a &quot;Not yet&quot; button.</li>
+<li class="">Given the two reasons are showing, when the user taps &quot;Not yet&quot;, then &quot;Done with it?&quot; returns and the game is still Playing.</li>
+<li class="">When the user taps &quot;Let it go&quot;, then the game becomes Done and the Done dialog opens with &quot;Let go&quot; already selected.</li>
+<li class="">Given the user chose &quot;Finished&quot; and then closed the Done dialog without saving, when they view the game page, then the status control reads &quot;Done · Finished&quot;.</li>
+<li class="">When the user views the game page of a Want or Done game, then there is no &quot;Done with it?&quot; button.</li>
+<li class="">When the user views the Library page, then no cover shows a status badge, and each card shows its status once, in the status control.</li>
+<li class="">Given a library game with a &quot;Main story&quot; time of 8.5 hours, when the user views its card, then it reads &quot;About 5 evenings&quot; under the title.</li>
+<li class="">Given a Done game with a &quot;Main story&quot; time of 34 hours, when the user views its card, then it reads &quot;About 19 evenings&quot;.</li>
+<li class="">Given two neighbouring cards in the desktop grid, one with a length and one without, when the user views them, then their platform lines start at the same height.</li>
+<li class="">When the user views the Library page in Light and in Dark, then no card has a tinted background.</li>
+<li class="">Given each phone width (360, 390 and 430 points), when the user views Home, the game page and the Library, then the page never scrolls sideways, and no text, button or cover is cut off, apart from long names that end with &quot;…&quot; by design.</li>
+<li class="">When the user measures the &quot;Log time&quot;, &quot;Not tonight&quot;, &quot;Done with it?&quot;, &quot;Finished&quot;, &quot;Let it go&quot; and &quot;Not yet&quot; buttons in the phone layout, then each tap area is at least 44 × 44 points.</li>
+<li class="">Given the longest game name in the user's library, when the Home question asks about that game at 360 points wide, then the whole question wraps onto several lines without being cut off, and both buttons stay visible inside the panel.</li>
+<li class="">When the user views Home in the phone layout, then the bottom bar's &quot;Log&quot; button is in the bottom third of the screen.</li>
+<li class="">Given a user who has never changed the setting, when they open Settings, then &quot;How long is an evening for you?&quot; shows 1.75 h selected.</li>
+<li class="">Given the setting is 1.75 h, when the user views the example line, then it reads &quot;A 14.5-hour game is about 8 evenings.&quot;</li>
+<li class="">Given a game whose &quot;Main story&quot; time is 14.5 hours, when the user changes the setting to 3 h and opens that game's page, then its length reads &quot;About 5 evenings&quot;.</li>
+<li class="">Given the setting is 3 h, when the user views a library card for a game whose &quot;Main story&quot; time is 2 hours, then it reads &quot;One evening&quot;.</li>
+<li class="">Given the user changed the setting to 2 h on one device, when they sign in on another device, then the setting shows 2 h there too.</li>
+<li class="">Given the user changed the setting, when a signed-out visitor opens the same game page, then the visitor sees the length based on 1.75 h.</li>
+<li class="">Given the user changed the setting to 3 h, when they view &quot;Your play&quot; for a game with 4.5 hours played, then it still reads &quot;4.5 h&quot;.</li>
+</ul></details>
+</section>
+<h2 id="scope">3. Scope and Boundaries</h2>
+<div class="cols"><div><h4>In-Scope</h4><ul><li>Home in both layouts: the question panel, the simplified Up Next shelf, &quot;Also playing&quot; and the counts line.</li>
+<li>Cover tint on the Home question panel and the game page header.</li>
+<li>Game length in evenings on the game page header, in the Home question and shelf, and on library cards.</li>
+<li>The regrouped game page in both layouts, including &quot;Done with it?&quot; and a working &quot;⋯&quot; menu.</li>
+<li>Library cards: no cover badge, and a length line.</li>
+<li>A Settings choice for the length of an evening (2.12).</li>
+<li>Changes to earlier specs that this requires:</li></ul></div>
+<div><h4>Out-of-Scope</h4><ul><li>Learning the evening length automatically from the person's own sessions. The length is set by the person in Settings (2.12).</li>
+<li>Remembering &quot;Not tonight&quot;, or suggesting to shelve a game that is skipped often.</li>
+<li>Suggestions of what to play next by mood, length or ownership. The question uses only the Playing order and the Up Next queue.</li>
+<li>Tinting any surface other than the Home question panel and the game page header, including the shelf, library cards, the journal and profile.</li>
+<li>Showing game length anywhere not listed in 2.1, including the journal, profile, search and the landing page.</li>
+<li>Changes to the desktop sidebar. Its &quot;Log&quot; button stays filled plum.</li>
+<li>A soft limit on the number of Playing games.</li>
+<li>New platform or store imports.</li></ul></div></div>
+<h2>Change Log</h2>
+<p><em>Dated amendments made after the spec was first written — typically by <code>/awos:spec</code> in Update Mode when a bug fix changed documented behavior. Each entry records the date, the source reference (bug id or fix description), and what behavior changed and why. Leave empty until the first amendment.</em></p>
+<footer>
+  This page is a <strong>review lens</strong> — the canonical, normative contract is <code>functional-spec.md</code> in this directory; approvals bind to it, and the technical detail behind the findings lives in <code>research-notes.md</code>.<br>
+  Generated 2026-11-11 from functional-spec.md (51e1bea14f93), status <em>Draft</em> — 100 criteria, 0 verified. Rendered by AWOS (/awos:spec).
+</footer>
+</main>
+<script>
+  function tab(i, el) {
+    document.querySelectorAll('.tabbar button').forEach(function (b, j) { b.classList.toggle('active', j === i); });
+    document.querySelectorAll('.tabpanel').forEach(function (p, j) { p.classList.toggle('active', j === i); });
+  }
+</script>
+</body>
+</html>

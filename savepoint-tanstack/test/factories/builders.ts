@@ -11,7 +11,15 @@ const FIXED_DATE = new Date("2025-01-01T00:00:00.000Z");
 export type LibraryItemWithGame = LibraryItem & {
   game: Pick<
     Game,
-    "id" | "igdbId" | "title" | "slug" | "coverImage" | "releaseDate"
+    | "id"
+    | "igdbId"
+    | "title"
+    | "slug"
+    | "coverImage"
+    | "releaseDate"
+    | "timeToCreditsSeconds"
+    | "coverHue"
+    | "coverChroma"
   >;
 };
 
@@ -20,19 +28,21 @@ export function buildGame(overrides: Partial<Game> = {}): Game {
   return {
     id: `game-${n}`,
     igdbId: 100_000 + n,
-    hltbId: null,
     title: `Test Game ${n}`,
     description: null,
     coverImage: null,
     releaseDate: null,
-    mainStory: null,
-    mainExtra: null,
-    completionist: null,
     createdAt: FIXED_DATE,
     updatedAt: FIXED_DATE,
     steamAppId: null,
     slug: `test-game-${n}`,
     franchiseId: null,
+    timeToCreditsSeconds: null,
+    timeToCompleteSeconds: null,
+    timesToBeatFetchedAt: null,
+    coverHue: null,
+    coverChroma: null,
+    coverTintComputedAt: null,
     ...overrides,
   };
 }
@@ -69,10 +79,30 @@ export function buildLibraryItemWithGame(
   overrides: Partial<LibraryItem> = {},
   game: Partial<Game> = {}
 ): LibraryItemWithGame {
-  const { id, igdbId, title, slug, coverImage, releaseDate } = buildGame(game);
+  const {
+    id,
+    igdbId,
+    title,
+    slug,
+    coverImage,
+    releaseDate,
+    timeToCreditsSeconds,
+    coverHue,
+    coverChroma,
+  } = buildGame(game);
   return {
     ...buildLibraryItem({ gameId: id, ...overrides }),
-    game: { id, igdbId, title, slug, coverImage, releaseDate },
+    game: {
+      id,
+      igdbId,
+      title,
+      slug,
+      coverImage,
+      releaseDate,
+      timeToCreditsSeconds,
+      coverHue,
+      coverChroma,
+    },
   };
 }
 

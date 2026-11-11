@@ -1,3 +1,4 @@
+import { getLatestSessionDates } from "@/entities/journal-entry/api/get-latest-session-dates.server";
 import { getLibraryStatusCounts } from "@/entities/library-item/api/get-library-status-counts.server";
 import {
   getLibrary,
@@ -5,15 +6,21 @@ import {
 } from "@/entities/library-item/api/get-library.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
+import { orderContinueGames } from "../model/order-continue-games";
+
 export type DashboardStatusCounts = {
   WANT: number;
   PLAYING: number;
   DONE: number;
 };
 
+export type ContinueGame = LibraryItemWithGame & {
+  lastSessionAt: Date | null;
+  becamePlayingAt: Date | null;
+};
+
 export type DashboardPageData = {
-  /** Every PLAYING game, most recently updated first. */
-  playing: LibraryItemWithGame[];
+  playing: ContinueGame[];
   /** The whole Up Next queue (Want or Done, at most UP_NEXT_MAX), in queue order. */
   upNextQueue: LibraryItemWithGame[];
   /** Queue size. */
@@ -36,8 +43,18 @@ export async function getDashboardPageDataWorker(
     getLibrary(userId, { upNext: true }),
   ]);
 
+  const lastSessionDates = await getLatestSessionDates(
+    userId,
+    playing.items.map((item) => item.gameId)
+  );
+  const playingWithDates: ContinueGame[] = playing.items.map((item) => ({
+    ...item,
+    lastSessionAt: lastSessionDates.get(item.gameId) ?? null,
+    becamePlayingAt: item.statusChangedAt,
+  }));
+
   return {
-    playing: playing.items,
+    playing: orderContinueGames(playingWithDates),
     upNextQueue: queued.items,
     upNextTotal: queued.total,
     counts: {

@@ -40,12 +40,18 @@ const SEED_SQL_PATH = join(
   repoRoot,
   "context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql"
 );
+const FIXTURES_SQL_PATH = join(
+  repoRoot,
+  "context/spec/028-continue-identity-stand-out/review-fixtures.sql"
+);
 const DB_CONTAINER = process.env.REVIEW_DB_CONTAINER ?? "savepoint-postgres";
 const ANIMATION_WAIT_MS = 5_000;
 const SETTLE_PAUSE_MS = 150;
 
 const THEME_STORAGE_KEY = "theme";
 const WHATS_NEW_STORAGE_KEY = "whatsNewLastSeenVersion";
+
+const DEFAULT_SPEC = "028-continue-identity-stand-out";
 
 const { values: args } = parseArgs({
   options: {
@@ -55,6 +61,7 @@ const { values: args } = parseArgs({
     checks: { type: "boolean", default: false },
     reseed: { type: "boolean", default: false },
     out: { type: "string" },
+    spec: { type: "string", default: DEFAULT_SPEC },
     query: { type: "string" },
     screens: { type: "string" },
     "base-url": { type: "string", default: "http://localhost:6060" },
@@ -75,7 +82,14 @@ const password = process.env.REVIEW_PASSWORD;
 const baseURL = args["base-url"] as string;
 const outDir = resolve(
   args.out ??
-    join(repoRoot, "context/spec/027-design-reset/review", args.phase, args.set)
+    join(
+      repoRoot,
+      "context/spec",
+      args.spec as string,
+      "review",
+      args.phase,
+      args.set
+    )
 );
 
 const checksEnabled =
@@ -117,9 +131,8 @@ async function newContext(
   return context;
 }
 
-function reseedAuditAccounts(): void {
-  if (!existsSync(SEED_SQL_PATH))
-    fail(`--reseed: seed file not found at ${SEED_SQL_PATH}`);
+function applySqlFile(sqlPath: string): void {
+  if (!existsSync(sqlPath)) fail(`--reseed: SQL file not found at ${sqlPath}`);
   const result = spawnSync(
     "docker",
     [
@@ -134,7 +147,7 @@ function reseedAuditAccounts(): void {
       "-d",
       "savepoint-db",
     ],
-    { input: readFileSync(SEED_SQL_PATH), encoding: "utf8" }
+    { input: readFileSync(sqlPath), encoding: "utf8" }
   );
   if (result.error) {
     fail(
@@ -143,10 +156,17 @@ function reseedAuditAccounts(): void {
   }
   if (result.status !== 0) {
     fail(
-      `--reseed: psql in container "${DB_CONTAINER}" exited ${result.status}. Check \`docker compose ps\` (override with REVIEW_DB_CONTAINER).\n${result.stderr}`
+      `--reseed: psql in container "${DB_CONTAINER}" exited ${result.status} for ${sqlPath}. Check \`docker compose ps\` (override with REVIEW_DB_CONTAINER).\n${result.stderr}`
     );
   }
-  console.log(`reseeded audit accounts via ${DB_CONTAINER}`);
+}
+
+function reseedAuditAccounts(): void {
+  applySqlFile(SEED_SQL_PATH);
+  applySqlFile(FIXTURES_SQL_PATH);
+  console.log(
+    `reseeded audit accounts and spec 028 fixtures via ${DB_CONTAINER}`
+  );
 }
 
 // --query rides on every page.goto, so a query-driven state survives each full

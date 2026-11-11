@@ -11,7 +11,6 @@ import { Route } from "./games.$slug";
 
 vi.mock("@/features/game-detail/api", () => ({
   getGameDetailPageDataFn: vi.fn(),
-  getTimesToBeatForGameFn: vi.fn(),
 }));
 
 vi.mock("@/features/browse-related-games/api", () => ({
@@ -24,32 +23,35 @@ vi.mock("@/widgets/game-detail", () => ({
     viewerUserId,
     gameSlug,
     relatedGamesSlot,
-    timesToBeatSlot,
   }: {
     data: GameDetailPageView["data"];
     viewerUserId: string | null;
     gameSlug?: string;
     relatedGamesSlot?: React.ReactNode;
-    timesToBeatSlot?: React.ReactNode;
   }) => (
     <div data-testid="game-detail">
       <h1>{data.game.title}</h1>
       <span data-testid="viewer-user-id">{viewerUserId ?? "anon"}</span>
       <span data-testid="game-slug">{gameSlug ?? "missing"}</span>
       <span data-testid="note-count">{data.notes.length}</span>
+      <span data-testid="time-to-credits">
+        {data.timeToCreditsSeconds ?? "none"}
+      </span>
+      <span data-testid="time-to-complete">
+        {data.timeToCompleteSeconds ?? "none"}
+      </span>
       <div data-testid="related-games-slot">{relatedGamesSlot}</div>
-      <div data-testid="times-to-beat-slot">{timesToBeatSlot}</div>
     </div>
   ),
 }));
 
 vi.mock("@/features/browse-related-games", () => ({
-  RelatedGamesTabs: ({
+  RelatedGamesStrip: ({
     sections,
   }: {
     sections: ReadonlyArray<{ collectionId: number }>;
   }) => (
-    <div data-testid="related-games-tabs">
+    <div data-testid="related-games-strip">
       {sections.map((section) => (
         <div
           key={section.collectionId}
@@ -59,22 +61,6 @@ vi.mock("@/features/browse-related-games", () => ({
     </div>
   ),
   RelatedGamesSkeleton: () => <div data-testid="related-games-skeleton" />,
-}));
-
-vi.mock("@/features/game-detail/ui", () => ({
-  TimesToBeatSection: ({
-    timesToBeat,
-  }: {
-    timesToBeat: {
-      mainStory: number | null;
-      completionist: number | null;
-    } | null;
-  }) => (
-    <div data-testid="times-to-beat-section">
-      ms:{timesToBeat?.mainStory ?? "null"}
-    </div>
-  ),
-  TimesToBeatSkeleton: () => <div data-testid="times-to-beat-skeleton" />,
 }));
 
 vi.mock("@tanstack/react-router", async () => ({
@@ -115,6 +101,9 @@ const buildView = (
     playtimeTotalMinutes: 0,
     playtimeSessionCount: 0,
     history: [],
+    timeToCreditsSeconds: 36_000,
+    timeToCompleteSeconds: 90_000,
+    coverTint: null,
   },
   viewerUserId: null,
   ...overrides,
@@ -134,28 +123,18 @@ const elements = {
     screen.queryByRole("heading", { name: "Game not found" }),
   queryRelatedGamesSkeleton: () =>
     screen.queryByTestId("related-games-skeleton"),
-  queryTimesToBeatSkeleton: () =>
-    screen.queryByTestId("times-to-beat-skeleton"),
-  queryTimesToBeatSection: () => screen.queryByTestId("times-to-beat-section"),
+  getTimeToCredits: () => screen.getByTestId("time-to-credits"),
+  getTimeToComplete: () => screen.getByTestId("time-to-complete"),
   queryRelatedList: (collectionId: number) =>
     screen.queryByTestId(`related-list-${collectionId}`),
   getRelatedGamesAlert: () => screen.getByText("Couldn't load related games"),
-  getTimesToBeatAlert: () => screen.getByText("Couldn't load times to beat"),
 };
 
-async function arrangeSlotFns({
-  relatedGames,
-  timesToBeat,
-}: {
-  relatedGames: Promise<unknown>;
-  timesToBeat: Promise<unknown>;
-}) {
-  const api = await import("@/features/game-detail/api");
+async function arrangeRelatedGames(relatedGames: Promise<unknown>) {
   const relatedApi = await import("@/features/browse-related-games/api");
   vi.mocked(relatedApi.getRelatedCollectionsFn).mockReturnValue(
     relatedGames as any
   );
-  vi.mocked(api.getTimesToBeatForGameFn).mockReturnValue(timesToBeat as any);
 }
 
 function renderRoute(view: GameDetailPageView) {
@@ -175,10 +154,7 @@ function renderRoute(view: GameDetailPageView) {
 describe("/games/$slug route", () => {
   describe("given the loader resolves with signed-in viewer data", () => {
     beforeEach(async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.resolve([]),
-        timesToBeat: Promise.resolve(null),
-      });
+      await arrangeRelatedGames(Promise.resolve([]));
       renderRoute(buildView({ viewerUserId: "user-123" }));
     });
 
@@ -191,6 +167,13 @@ describe("/games/$slug route", () => {
       expect(elements.getViewerId().textContent).toBe("user-123");
     });
 
+    it("forwards the stored time to credits and time to 100% to the widget", () => {
+      expect([
+        elements.getTimeToCredits().textContent,
+        elements.getTimeToComplete().textContent,
+      ]).toEqual(["36000", "90000"]);
+    });
+
     it("forwards the game slug to the widget so the mobile action bar CTA targets the correct game", () => {
       expect(elements.getGameSlug().textContent).toBe("celeste");
     });
@@ -198,10 +181,7 @@ describe("/games/$slug route", () => {
 
   describe("given the loader resolves with anonymous viewer data", () => {
     beforeEach(async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.resolve([]),
-        timesToBeat: Promise.resolve(null),
-      });
+      await arrangeRelatedGames(Promise.resolve([]));
       renderRoute(buildView({ viewerUserId: null }));
     });
 
@@ -212,51 +192,22 @@ describe("/games/$slug route", () => {
 
   describe("slot suspense + error states", () => {
     it("renders the related-games skeleton while the slot fetch is pending", async () => {
-      await arrangeSlotFns({
-        relatedGames: new Promise(() => undefined),
-        timesToBeat: Promise.resolve(null),
-      });
+      await arrangeRelatedGames(new Promise(() => undefined));
       renderRoute(buildView());
 
       expect(elements.queryRelatedGamesSkeleton()).not.toBeNull();
     });
 
-    it("renders the times-to-beat skeleton while the slot fetch is pending", async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.resolve([]),
-        timesToBeat: new Promise(() => undefined),
-      });
-      renderRoute(buildView());
-
-      expect(elements.queryTimesToBeatSkeleton()).not.toBeNull();
-    });
-
-    it("renders the resolved times-to-beat section once the slot fetch settles", async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.resolve([]),
-        timesToBeat: Promise.resolve({
-          mainStory: 36000,
-          completionist: 72000,
-        }),
-      });
-      renderRoute(buildView());
-
-      await waitFor(() => {
-        expect(elements.queryTimesToBeatSection()).not.toBeNull();
-      });
-    });
-
-    it("renders the resolved related-games tabs once the slot fetch settles", async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.resolve([
+    it("renders the resolved related-games strip once the slot fetch settles", async () => {
+      await arrangeRelatedGames(
+        Promise.resolve([
           {
             collectionId: 99,
             collectionName: "Test Collection",
             games: [],
           },
-        ]),
-        timesToBeat: Promise.resolve(null),
-      });
+        ])
+      );
       renderRoute(buildView());
 
       await waitFor(() => {
@@ -265,10 +216,7 @@ describe("/games/$slug route", () => {
     });
 
     it("renders an inline error alert when the related-games slot fetch rejects", async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.reject(new Error("upstream boom")),
-        timesToBeat: Promise.resolve(null),
-      });
+      await arrangeRelatedGames(Promise.reject(new Error("upstream boom")));
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => undefined);
@@ -276,23 +224,6 @@ describe("/games/$slug route", () => {
 
       await waitFor(() => {
         expect(elements.getRelatedGamesAlert()).toBeDefined();
-      });
-
-      consoleErrorSpy.mockRestore();
-    });
-
-    it("renders an inline error alert when the times-to-beat slot fetch rejects", async () => {
-      await arrangeSlotFns({
-        relatedGames: Promise.resolve([]),
-        timesToBeat: Promise.reject(new Error("upstream boom")),
-      });
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => undefined);
-      renderRoute(buildView());
-
-      await waitFor(() => {
-        expect(elements.getTimesToBeatAlert()).toBeDefined();
       });
 
       consoleErrorSpy.mockRestore();
@@ -373,12 +304,8 @@ describe("/games/$slug loader prefetch", () => {
   const runLoader = async (view: GameDetailPageView) => {
     const api = await import("@/features/game-detail/api");
     vi.mocked(api.getGameDetailPageDataFn).mockResolvedValue(view);
-    vi.mocked(api.getTimesToBeatForGameFn).mockResolvedValue({
-      mainStory: 1,
-    } as any);
     const relatedApi = await import("@/features/browse-related-games/api");
     vi.mocked(relatedApi.getRelatedCollectionsFn).mockResolvedValue([]);
-    vi.mocked(api.getTimesToBeatForGameFn).mockClear();
     vi.mocked(relatedApi.getRelatedCollectionsFn).mockClear();
     const queryClient = new QueryClient();
     const loader = Route.options.loader as (args: any) => Promise<unknown>;
@@ -391,9 +318,6 @@ describe("/games/$slug loader prefetch", () => {
 
   it("returns the page data without waiting on the slot queries", async () => {
     const api = await import("@/features/game-detail/api");
-    vi.mocked(api.getTimesToBeatForGameFn).mockReturnValue(
-      new Promise(() => undefined) as any
-    );
     const relatedApi = await import("@/features/browse-related-games/api");
     vi.mocked(relatedApi.getRelatedCollectionsFn).mockReturnValue(
       new Promise(() => undefined) as any
@@ -407,19 +331,6 @@ describe("/games/$slug loader prefetch", () => {
     expect(result).toEqual(buildView());
   });
 
-  it("prefetches times-to-beat into the query client once", async () => {
-    const { api, queryClient } = await runLoader(buildView());
-    await vi.waitFor(() => {
-      expect(queryClient.getQueryData(["times-to-beat", 1234])).toEqual({
-        mainStory: 1,
-      });
-    });
-    expect(api.getTimesToBeatForGameFn).toHaveBeenCalledTimes(1);
-    expect(api.getTimesToBeatForGameFn).toHaveBeenCalledWith({
-      data: { igdbId: 1234 },
-    });
-  });
-
   it("prefetches related-games into the query client once", async () => {
     const { relatedApi, queryClient } = await runLoader(buildView());
     await vi.waitFor(() => {
@@ -428,6 +339,17 @@ describe("/games/$slug loader prefetch", () => {
     expect(relatedApi.getRelatedCollectionsFn).toHaveBeenCalledTimes(1);
     expect(relatedApi.getRelatedCollectionsFn).toHaveBeenCalledWith({
       data: { igdbId: 1234 },
+    });
+  });
+
+  it("does not start a separate times-to-beat query, the times come with the page data", async () => {
+    const { queryClient, result } = await runLoader(buildView());
+
+    expect(
+      queryClient.getQueryCache().findAll({ queryKey: ["times-to-beat"] })
+    ).toHaveLength(0);
+    expect(result).toMatchObject({
+      data: { timeToCreditsSeconds: 36_000, timeToCompleteSeconds: 90_000 },
     });
   });
 });

@@ -214,6 +214,36 @@
   padding-right: max(var(--safe-floor, 0px), env(safe-area-inset-right));
 }
 
+@utility cover-tint {
+  --tint-chroma-cap: 0.04;
+  --tint-chroma: min(var(--tint-c, 0), var(--tint-chroma-cap));
+  --tint-wash: oklch(0.915 var(--tint-chroma) var(--tint-h, 0));
+  --tint-deep: oklch(0.87 var(--tint-chroma) var(--tint-h, 0));
+  --tint-ink: oklch(0.44 var(--tint-chroma) var(--tint-h, 0));
+  background-color: var(--tint-wash);
+  color: var(--foreground);
+
+  &:is(.dark *) {
+    --tint-wash: oklch(0.255 var(--tint-chroma) var(--tint-h, 0));
+    --tint-deep: oklch(0.31 var(--tint-chroma) var(--tint-h, 0));
+    --tint-ink: oklch(0.8 var(--tint-chroma) var(--tint-h, 0));
+  }
+
+  &[data-tint="off"] {
+    --tint-wash: var(--card);
+    --tint-deep: var(--card);
+    --tint-ink: var(--foreground);
+  }
+
+  &[data-variant="header"] {
+    background-image: linear-gradient(
+      to bottom,
+      var(--tint-wash) 66%,
+      var(--background)
+    );
+  }
+}
+
 @utility navigation-progress-bar {
   animation: navigation-progress 1.1s ease-in-out infinite;
 }

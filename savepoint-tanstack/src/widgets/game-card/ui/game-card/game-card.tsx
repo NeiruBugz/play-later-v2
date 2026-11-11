@@ -20,6 +20,7 @@ export function GameCard({
   children,
   badges,
   overlay,
+  lengthLabel,
   titleClassName,
   className,
   ...props
@@ -61,6 +62,13 @@ export function GameCard({
           >
             {title}
           </h3>
+
+          <p
+            data-testid="game-card-length"
+            className="h-6 text-base leading-6 text-muted-foreground md:h-4 md:text-xs md:leading-4"
+          >
+            {lengthLabel}
+          </p>
 
           {showMeta ? (
             <div className="flex flex-col gap-1.5">
