@@ -181,7 +181,7 @@ Conventions for every slice:
     - `setStatusFn` and its worker accept an optional `doneOutcome`, allowed only with `to: "DONE"`.
     - `setLibraryItemStatusInTx` writes it in the same transaction.
     - `changeStatusWithUndo` and `useSetStatus` pass it through. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - Add `game-header-actions`, `done-with-it` and `game-more-menu` (extracted from `game-library-controls:103-134`), and put them in `game-header`.
     - `DoneRequest` gains `initialOutcome`, and `DoneFollowUp` seeds its state from it.
     - Remove `game-detail-action-bar` and `add-to-track-invite`, with their tests. **[Agent: react-frontend]**

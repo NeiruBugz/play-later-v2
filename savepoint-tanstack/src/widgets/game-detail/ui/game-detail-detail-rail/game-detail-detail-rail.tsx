@@ -1,16 +1,11 @@
 import { CriticScoreRing } from "@/entities/game";
 import { formatHours } from "@/shared/lib/date";
-import { Button } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
 
-import { GameLibraryControls } from "../game-library-controls";
 import type { GameDetailDetailRailProps } from "./game-detail-detail-rail.type";
 
 export function GameDetailDetailRail({
-  libraryControlsProps,
-  libraryControlsKey,
-  onLogSession,
-  showLogTime,
+  showPlaytime,
   criticScore,
   playtimeTotalMinutes,
   playtimeSessionCount,
@@ -21,20 +16,6 @@ export function GameDetailDetailRail({
       data-testid="game-detail-detail-rail"
       className="sticky top-6 flex flex-col gap-4"
     >
-      <Card variant="flat" className="flex flex-col gap-4 p-5">
-        {libraryControlsProps !== null ? (
-          <GameLibraryControls
-            key={libraryControlsKey}
-            {...libraryControlsProps}
-          />
-        ) : null}
-        {showLogTime ? (
-          <Button type="button" className="w-full" onClick={onLogSession}>
-            Log time
-          </Button>
-        ) : null}
-      </Card>
-
       {criticScore !== null ? (
         <Card variant="flat" className="flex items-center gap-4 p-5">
           <CriticScoreRing value={criticScore} />
@@ -44,7 +25,7 @@ export function GameDetailDetailRail({
         </Card>
       ) : null}
 
-      {libraryControlsProps !== null ? (
+      {showPlaytime ? (
         <Card variant="flat" className="p-5">
           <dl className="flex flex-col gap-3 text-sm">
             <div className="flex items-center justify-between">

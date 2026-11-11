@@ -895,6 +895,18 @@ describe("LibraryPage", () => {
       expect(lengthLine).toHaveClass("h-4");
     });
 
+    it("renders the primary action after the game link in the tile", () => {
+      const tile = getTile("Longplay");
+      const orderedControls = within(tile)
+        .getAllByRole("link")
+        .concat(within(tile).getAllByRole("button"));
+
+      expect(orderedControls[0]).toHaveAccessibleName("View Longplay");
+      expect(
+        within(tile).getByRole("button", { name: /mark done/i })
+      ).toBeInTheDocument();
+    });
+
     it("keeps the status chip on the tile", () => {
       expect(
         within(elements.getCardLink("Longplay")).getByText("Playing")

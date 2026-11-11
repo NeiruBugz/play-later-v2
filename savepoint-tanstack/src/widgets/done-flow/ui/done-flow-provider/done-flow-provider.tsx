@@ -27,6 +27,7 @@ export function DoneFlowProvider({ children }: DoneFlowProviderProps) {
           itemId={request.id}
           gameTitle={request.gameTitle}
           currentRating={request.rating}
+          initialOutcome={request.initialOutcome}
           onUndo={request.undo}
           onSaved={() => void router.invalidate()}
           onClose={() => setRequest(null)}

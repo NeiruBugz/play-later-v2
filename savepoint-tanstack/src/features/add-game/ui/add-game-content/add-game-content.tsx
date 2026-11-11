@@ -82,7 +82,7 @@ export function AddGameContent({ onSeeAll }: AddGameContentProps) {
 
   return (
     <InlineAddConfirmationHost>
-      <div className="flex flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3">
         <form onSubmit={handleSubmit} className="relative flex items-center">
           <Search
             aria-hidden="true"

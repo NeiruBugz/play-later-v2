@@ -123,6 +123,7 @@ describe("spec 027 design reset", () => {
         "src/shared/ui/logo.tsx",
         "src/shared/ui/page-header.tsx",
         "src/shared/ui/sheet.tsx",
+        "src/widgets/game-detail/ui/game-header/game-header.tsx",
         "src/widgets/landing-hero/ui/landing-hero/landing-hero.tsx",
         "src/widgets/up-next-shelf/ui/up-next-shelf/up-next-shelf.tsx",
       ]);

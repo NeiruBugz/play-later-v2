@@ -6,12 +6,12 @@ import { openGlobalAction } from "@/shared/lib/global-action";
 import { Card } from "@/shared/ui/card";
 
 import { AboutPanel } from "../about-panel";
-import { AddToTrackInvite } from "../add-to-track-invite";
-import { GameDetailActionBar } from "../game-detail-action-bar";
 import { GameDetailDetailRail } from "../game-detail-detail-rail";
 import { GameDetailJumpSpine } from "../game-detail-jump-spine";
 import { GameHeader } from "../game-header";
+import { GameHeaderActions } from "../game-header-actions";
 import { GameLibraryControls } from "../game-library-controls";
+import { GameMoreMenu } from "../game-more-menu";
 import { GameNotesList } from "../game-notes-list";
 import { GameRating } from "../game-rating";
 import { PlayHistory } from "../play-history";
@@ -70,7 +70,6 @@ export function GameDetail({
 
   const isInLibrary = libraryEntry !== null;
   const showPersonalPanels = viewerUserId !== null && isInLibrary;
-  const showTrackInvite = !showPersonalPanels;
 
   const showScreenshotsPanel = (igdbDetails.screenshots?.length ?? 0) > 0;
   const showJournalPanel = showPersonalPanels;
@@ -112,7 +111,6 @@ export function GameDetail({
           entry: libraryEntry,
           libraryStatus: sharedLibraryStatus,
           libraryOwnership: sharedLibraryOwnership,
-          doneOutcome,
           prompts,
         }
       : null;
@@ -143,16 +141,6 @@ export function GameDetail({
               rating={libraryEntry.rating}
             />
             <PlayHistory plays={history} />
-          </Card>
-        ) : null}
-
-        {showTrackInvite ? (
-          <Card variant="flat" className="flex flex-col">
-            <AddToTrackInvite
-              igdbId={game.igdbId}
-              gameTitle={game.title}
-              isSignedIn={viewerUserId !== null}
-            />
           </Card>
         ) : null}
 
@@ -206,11 +194,34 @@ export function GameDetail({
 
   return (
     <div className="relative flex flex-col">
-      <GameHeader data={data} eveningMinutes={eveningMinutes} />
+      <GameHeader
+        data={data}
+        eveningMinutes={eveningMinutes}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <GameHeaderActions
+              igdbId={game.igdbId}
+              gameTitle={game.title}
+              gameSlug={gameSlug ?? game.slug}
+              entry={libraryEntry}
+              libraryStatus={sharedLibraryStatus}
+              doneOutcome={doneOutcome ?? null}
+              viewerUserId={viewerUserId}
+            />
+            <GameMoreMenu
+              igdbId={game.igdbId}
+              gameTitle={game.title}
+              entry={libraryEntry}
+              libraryStatus={sharedLibraryStatus}
+              libraryOwnership={sharedLibraryOwnership}
+            />
+          </div>
+        }
+      />
 
       <div className="relative px-6 pb-16 md:px-12">
         {libraryControlsProps !== null ? (
-          <div className="mt-4 md:hidden">
+          <div className="mt-4">
             <GameLibraryControls key={game.igdbId} {...libraryControlsProps} />
           </div>
         ) : null}
@@ -241,10 +252,7 @@ export function GameDetail({
           {/* Sticky detail rail — desktop only, CSS-hidden on mobile */}
           <div className="hidden md:block">
             <GameDetailDetailRail
-              libraryControlsProps={libraryControlsProps}
-              libraryControlsKey={String(game.igdbId)}
-              onLogSession={openLogSession}
-              showLogTime={showPersonalPanels}
+              showPlaytime={libraryControlsProps !== null}
               criticScore={criticScore}
               playtimeTotalMinutes={playtimeTotalMinutes}
               playtimeSessionCount={playtimeSessionCount}
@@ -253,17 +261,6 @@ export function GameDetail({
           </div>
         </div>
       </div>
-
-      {/* Sticky bottom action bar — present in DOM for SSR; GameDetailActionBar
-          already applies md:hidden on its own root so it disappears on desktop */}
-      {gameSlug ? (
-        <GameDetailActionBar
-          gameSlug={gameSlug}
-          libraryStatus={sharedLibraryStatus}
-          doneOutcome={doneOutcome}
-          viewerUserId={viewerUserId}
-        />
-      ) : null}
     </div>
   );
 }

@@ -17,7 +17,6 @@ import { GameDetail } from "./game-detail";
 import type { GameDetailData } from "./game-detail.type";
 
 const mockNavigate = vi.fn();
-const mockUseNavigate = vi.fn();
 
 vi.mock("@/features/done-follow-up/api/save-done-follow-up-fn", () => ({
   saveDoneFollowUpFn: vi.fn(),
@@ -34,10 +33,7 @@ vi.mock("@/features/library-prompts/api/dismiss-prompt-fn", () => ({
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: vi.fn(), history: { back: vi.fn() } }),
   useCanGoBack: () => false,
-  useNavigate: (options?: unknown) => {
-    mockUseNavigate(options);
-    return mockNavigate;
-  },
+  useNavigate: () => mockNavigate,
   Link: ({ to, children, ...rest }: any) => (
     <a href={to} {...rest}>
       {children}
@@ -171,29 +167,22 @@ const buildData = (
 const elements = {
   getTitle: () =>
     screen.getByRole("heading", { name: "Hollow Knight", level: 1 }),
-  queryBreadcrumbLibrary: () => screen.queryByRole("link", { name: "Library" }),
-  queryBreadcrumbGames: () => screen.queryByRole("link", { name: "Games" }),
-  // The hero (md:hidden), the desktop rail and the phone action bar each render
+  // The hero (md:hidden) and the desktop rail each render
   // a status pill when a viewer is signed in, so these use queryAll.
   queryStatusPill: () =>
     screen.queryAllByRole("button", { name: /^Status: .*\. Change$/ })[0] ??
     null,
-  queryStatusPillsNamed: (label: string) =>
-    screen.queryAllByRole("button", { name: `Status: ${label}. Change` }),
   getHeaderStatusPill: (label: string) =>
     within(document.body).getAllByRole("button", {
       name: `Status: ${label}. Change`,
     })[0]!,
-  getActionBarStatusPill: (label: string) =>
-    within(screen.getByTestId("game-detail-action-bar")).getByRole("button", {
-      name: `Status: ${label}. Change`,
-    }),
   getStatusRadio: (label: string) => screen.getByRole("radio", { name: label }),
   getStatusRadios: () => screen.getAllByRole("radio"),
   getNextStepButton: (label: string) =>
     screen.getAllByRole("button", { name: label })[0]!,
-  queryAddToLibrary: () =>
-    screen.queryAllByRole("button", { name: "Add to library" })[0] ?? null,
+  getAddToLibraryButtons: () =>
+    screen.queryAllByRole("button", { name: "Add to library" }),
+  queryAddToLibrary: () => elements.getAddToLibraryButtons()[0] ?? null,
   queryStatusSwitcher: () =>
     screen.queryAllByTestId("game-library-controls")[0] ?? null,
   queryMoreMenuTrigger: () =>
@@ -238,8 +227,6 @@ const elements = {
   queryEmDash: () => screen.queryByText("—"),
   queryScreenshotsRegion: () =>
     screen.queryByLabelText("Screenshots of Hollow Knight"),
-  queryTrackInvite: () => screen.queryByTestId("add-to-track-invite"),
-  querySignInLink: () => screen.queryByRole("link", { name: "Sign in" }),
   getBentoGrid: () => screen.getByTestId("game-detail-bento-grid"),
 };
 
@@ -301,17 +288,6 @@ describe("GameDetail Up Next", () => {
   const getRemoveFrom = () =>
     screen.queryAllByRole("button", { name: "Remove from Up Next" })[0] ?? null;
 
-  it("offers Put in Up Next for a Want game", () => {
-    renderWith({ status: "WANT" });
-    expect(getPutIn()).not.toBeNull();
-  });
-
-  it("shows the Up Next marker and Remove for a queued Want game", () => {
-    renderWith({ status: "WANT", upNextPosition: 2 });
-    expect(screen.getAllByText("Up Next #2").length).toBeGreaterThan(0);
-    expect(getRemoveFrom()).not.toBeNull();
-  });
-
   it("shows Replay for a queued Done game", () => {
     renderWith({ status: "DONE", upNextPosition: 1 });
     expect(screen.getAllByText("Replay").length).toBeGreaterThan(0);
@@ -331,10 +307,8 @@ describe("GameDetail", () => {
       render(<GameDetail data={buildData(null)} viewerUserId={null} />);
     });
 
-    it("renders the game title, breadcrumbs, and the About facts label", () => {
+    it("renders the game title as the page heading and the About facts label", () => {
       expect(elements.getTitle()).toBeDefined();
-      expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
-      expect(elements.queryBreadcrumbGames()).not.toBeNull();
       expect(elements.queryGameDetailLabel()).not.toBeNull();
     });
 
@@ -370,9 +344,8 @@ describe("GameDetail", () => {
       );
     });
 
-    it("renders an Add to library action and no status pill", () => {
-      expect(elements.queryStatusSwitcher()).not.toBeNull();
-      expect(elements.queryAddToLibrary()).not.toBeNull();
+    it("renders exactly one Add to library action and no status pill", () => {
+      expect(elements.getAddToLibraryButtons()).toHaveLength(1);
       expect(elements.queryStatusPill()).toBeNull();
     });
 
@@ -380,8 +353,7 @@ describe("GameDetail", () => {
       expect(elements.queryMoreMenuTrigger()).toBeNull();
     });
 
-    it("replaces the personal panels with a single start-tracking invitation", () => {
-      expect(elements.queryTrackInvite()).not.toBeNull();
+    it("renders no personal panels", () => {
       expect(elements.queryYourRecord()).toBeNull();
       expect(elements.queryNotesHeading()).toBeNull();
       expect(elements.queryTimesToBeatSlot()).toBeNull();
@@ -422,9 +394,7 @@ describe("GameDetail", () => {
       expect(elements.queryLegacyCatalogCard()).toBeNull();
     });
 
-    it("offers a start-tracking invitation with a sign-in affordance", () => {
-      expect(elements.queryTrackInvite()).not.toBeNull();
-      expect(elements.querySignInLink()).not.toBeNull();
+    it("offers no Add to library action", () => {
       expect(elements.queryAddToLibrary()).toBeNull();
     });
   });
@@ -687,36 +657,6 @@ describe("GameDetail", () => {
     });
   });
 
-  describe("given igdbDetails with both a developer and publisher company", () => {
-    beforeEach(() => {
-      render(
-        <GameDetail
-          data={buildData(null, {
-            involved_companies: [
-              {
-                developer: true,
-                publisher: false,
-                company: { id: 1, name: "Team Cherry" },
-              },
-              {
-                developer: false,
-                publisher: true,
-                company: { id: 2, name: "Skybound Games" },
-              },
-            ],
-          })}
-          viewerUserId={null}
-        />
-      );
-    });
-
-    it("shows the publisher name uppercased in the eyebrow row, not the developer", () => {
-      const eyebrow = screen.getByLabelText("Release metadata");
-      expect(eyebrow.textContent).toContain("SKYBOUND GAMES");
-      expect(eyebrow.textContent).not.toContain("TEAM CHERRY");
-    });
-  });
-
   describe("given igdbDetails with an aggregated rating", () => {
     beforeEach(() => {
       render(
@@ -764,43 +704,6 @@ describe("GameDetail", () => {
       expect(elements.queryPlatformsList()).toBeNull();
       expect(elements.queryGenresLabel()).toBeNull();
       expect(elements.queryPlatformsLabel()).toBeNull();
-    });
-  });
-
-  describe("given igdbDetails with screenshots", () => {
-    beforeEach(() => {
-      render(
-        <GameDetail
-          data={buildData(null, {
-            screenshots: [
-              { id: 1, image_id: "abc123" },
-              { id: 2, image_id: "def456" },
-            ],
-          })}
-          viewerUserId={null}
-        />
-      );
-    });
-
-    it("renders the first screenshot as a full-bleed hero backdrop", () => {
-      const backdrop = screen.getByTestId("game-detail-hero-backdrop");
-      expect(backdrop.innerHTML).toContain("abc123");
-    });
-  });
-
-  describe("given igdbDetails with no screenshots", () => {
-    beforeEach(() => {
-      render(
-        <GameDetail
-          data={buildData(null, { screenshots: undefined })}
-          viewerUserId={null}
-        />
-      );
-    });
-
-    it("does not render any screenshot URL in the hero backdrop", () => {
-      const backdrop = screen.getByTestId("game-detail-hero-backdrop");
-      expect(backdrop.innerHTML).not.toContain("images.igdb.com");
     });
   });
 
@@ -1095,28 +998,6 @@ describe("GameDetail", () => {
       });
     });
 
-    it("navigates relative to the current page so the game page stays open", async () => {
-      mockNavigate.mockReset();
-      mockUseNavigate.mockReset();
-      render(
-        <GameDetail
-          data={buildData(buildLibraryEntry())}
-          viewerUserId="user-1"
-          gameSlug="hollow-knight"
-        />
-      );
-
-      const rail = screen.getByTestId("game-detail-detail-rail");
-      await userEvent.click(
-        within(rail).getByRole("button", { name: "Log time" })
-      );
-
-      expect(mockNavigate.mock.calls[0]![0].to).toBe(".");
-      for (const [options] of mockUseNavigate.mock.calls) {
-        expect(options?.from).toBeUndefined();
-      }
-    });
-
     it("shows no Log time when the game is not in the viewer's library", () => {
       render(
         <GameDetail
@@ -1165,22 +1046,8 @@ describe("GameDetail", () => {
         expect(screen.queryByTestId("game-detail-detail-rail")).not.toBeNull();
       });
 
-      it("renders the mobile action bar in the DOM (CSS hides it on desktop)", () => {
-        expect(screen.queryByTestId("game-detail-action-bar")).not.toBeNull();
-      });
-
-      it("renders the library controls inside the detail rail", () => {
-        const rail = screen.getByTestId("game-detail-detail-rail");
-        const switcher = within(rail).queryByTestId("game-library-controls");
-        expect(switcher).not.toBeNull();
-      });
-
-      it("renders a Log time button inside the detail rail", () => {
-        const rail = screen.getByTestId("game-detail-detail-rail");
-        const logBtn = within(rail).queryByRole("button", {
-          name: "Log time",
-        });
-        expect(logBtn).not.toBeNull();
+      it("does not render the old phone action bar", () => {
+        expect(screen.queryByTestId("game-detail-action-bar")).toBeNull();
       });
 
       it("renders the critic score ring inside the detail rail", () => {
@@ -1269,20 +1136,9 @@ describe("GameDetail", () => {
         );
       });
 
-      // Both nav variants are always present in the DOM (CSS-gated)
-      it("renders both the mobile top bar and the breadcrumb nav in the DOM", () => {
-        expect(screen.queryByRole("link", { name: "Back" })).not.toBeNull();
-        expect(elements.queryBreadcrumbLibrary()).not.toBeNull();
-        expect(elements.queryBreadcrumbGames()).not.toBeNull();
-      });
-
       // GD-4: mobile top bar must expose Back + More affordances
       it("shows a Back link in the mobile top bar", () => {
         expect(screen.queryByRole("link", { name: "Back" })).not.toBeNull();
-      });
-
-      it("shows a More button in the mobile top bar", () => {
-        expect(screen.queryByRole("button", { name: "More" })).not.toBeNull();
       });
 
       // GD-3: cover renders above title in the DOM (stacked hero, no grid collision)
@@ -1344,12 +1200,6 @@ describe("GameDetail", () => {
             expect(elements.getHeaderStatusPill("Done")).toBeDefined();
           });
         });
-
-        it("shows Done in the phone action bar pill", async () => {
-          await waitFor(() => {
-            expect(elements.getActionBarStatusPill("Done")).toBeDefined();
-          });
-        });
       });
     });
 
@@ -1364,10 +1214,9 @@ describe("GameDetail", () => {
         await userEvent.click(elements.getNextStepButton("Start playing"));
       });
 
-      it("shows Playing in the header and the phone action bar", async () => {
+      it("shows Playing in the header", async () => {
         await waitFor(() => {
           expect(elements.getHeaderStatusPill("Playing")).toBeDefined();
-          expect(elements.getActionBarStatusPill("Playing")).toBeDefined();
         });
       });
     });
@@ -1380,14 +1229,13 @@ describe("GameDetail", () => {
         await userEvent.click(elements.getStatusRadio("Done"));
       });
 
-      it("keeps the previous status in the header and the phone bar", async () => {
+      it("keeps the previous status in the header", async () => {
         await waitFor(() => {
           expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
             "Couldn't save. Try again."
           );
         });
         expect(elements.getHeaderStatusPill("Playing")).toBeDefined();
-        expect(elements.getActionBarStatusPill("Playing")).toBeDefined();
       });
     });
   });

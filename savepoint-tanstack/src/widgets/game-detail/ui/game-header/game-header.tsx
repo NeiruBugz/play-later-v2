@@ -55,7 +55,7 @@ function KeyFact({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-export function GameHeader({ data, eveningMinutes }: GameHeaderProps) {
+export function GameHeader({ data, eveningMinutes, actions }: GameHeaderProps) {
   const { game, igdbDetails, timeToCreditsSeconds, coverTint } = data;
 
   const releaseYear = igdbDetails.first_release_date
@@ -109,6 +109,7 @@ export function GameHeader({ data, eveningMinutes }: GameHeaderProps) {
               <KeyFact key={fact.label} {...fact} />
             ))}
           </dl>
+          {actions}
         </div>
       </div>
     </CoverTint>

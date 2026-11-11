@@ -87,49 +87,56 @@ const LibraryGridTile = memo(function LibraryGridTile({
   });
 
   return (
-    <div className="relative" data-testid="library-grid-tile">
-      <Link
-        to="/games/$slug"
-        params={{ slug: item.game.slug }}
-        aria-label={`View ${item.game.title}`}
-        className="group block"
-      >
-        <GameCover src={item.game.coverImage} name={item.game.title}>
-          <div className="absolute top-2 left-2">
-            <StatusChip status={toStatusChipStatus(status, item.doneOutcome)} />
-          </div>
-        </GameCover>
-        <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
-          {item.game.title}
-        </h3>
-        <p
-          data-testid="game-card-length"
-          className="h-4 text-xs leading-4 text-muted-foreground"
+    <div
+      className="relative flex h-full flex-col"
+      data-testid="library-grid-tile"
+    >
+      <div className="flex-1">
+        <Link
+          to="/games/$slug"
+          params={{ slug: item.game.slug }}
+          aria-label={`View ${item.game.title}`}
+          className="group block"
         >
-          {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
-        </p>
-        <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
-          <QueueMarker
-            status={status}
-            upNextPosition={membership.upNextPosition}
-          />
-          <NotOwnedTag status={status} isOwned={ownership.isOwned} />
-        </div>
-        {item.platform ? (
-          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-            {item.platform}
-          </span>
-        ) : null}
-      </Link>
-      <div
-        className="mt-1 flex h-4 items-center"
-        onClickCapture={(event) => event.stopPropagation()}
-      >
+          <GameCover src={item.game.coverImage} name={item.game.title}>
+            <div className="absolute top-2 left-2">
+              <StatusChip
+                status={toStatusChipStatus(status, item.doneOutcome)}
+              />
+            </div>
+          </GameCover>
+          <h3 className="mt-2 line-clamp-2 text-base leading-tight font-medium group-hover:underline md:line-clamp-1 md:text-sm">
+            {item.game.title}
+          </h3>
+          <p
+            data-testid="game-card-length"
+            className="h-4 text-xs leading-4 text-muted-foreground"
+          >
+            {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
+          </p>
+          {item.platform ? (
+            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+              {item.platform}
+            </span>
+          ) : null}
+          <div className="mt-1 flex flex-wrap items-center gap-1 empty:hidden">
+            <QueueMarker
+              status={status}
+              upNextPosition={membership.upNextPosition}
+            />
+            <NotOwnedTag status={status} isOwned={ownership.isOwned} />
+          </div>
+        </Link>
         {item.rating === null ? null : (
-          <RatingInput value={item.rating} size="sm" readOnly />
+          <div
+            className="mt-1 flex h-4 items-center"
+            onClickCapture={(event) => event.stopPropagation()}
+          >
+            <RatingInput value={item.rating} size="sm" readOnly />
+          </div>
         )}
       </div>
-      <div className="mt-2 flex flex-col items-start gap-2">
+      <div className="mt-auto flex flex-col items-start gap-2 pt-2">
         <StatusControl
           status={status}
           outcome={item.doneOutcome}
@@ -463,7 +470,7 @@ export function LibraryPage(props: LibraryPageProps) {
               }
             >
               {filteredItems.map((item) => (
-                <li key={item.id}>
+                <li key={item.id} className="min-w-0">
                   {viewMode === "grid" ? (
                     <LibraryGridTile item={item} onEdit={setSelectedEntry} />
                   ) : (

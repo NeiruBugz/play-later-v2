@@ -54,6 +54,7 @@ function Page() {
       <StatusControl
         status={libraryStatus.status}
         outcome={row.doneOutcome}
+        showDoneOutcome
         onChange={() => {}}
       />
       {libraryStatus.status === "PLAYING" ? (
@@ -150,7 +151,13 @@ describe("DoneWithIt", () => {
 
         expect(elements.getOutcomeRadio("Let go")).toBeChecked();
         expect(elements.getOutcomeRadio("Finished")).not.toBeChecked();
-        expect(elements.getStatusControl()).toHaveTextContent("Done");
+      });
+
+      it("leaves the game Done · Let go once the dialog is skipped", async () => {
+        await elements.getDoneDialog();
+        await userEvent.click(elements.getSkip());
+
+        expect(elements.getStatusControl()).toHaveTextContent("Done · Let go");
       });
     });
 
