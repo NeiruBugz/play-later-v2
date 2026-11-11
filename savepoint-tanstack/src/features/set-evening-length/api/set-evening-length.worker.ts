@@ -2,14 +2,16 @@ import { z } from "zod";
 
 import { updateProfile } from "@/entities/profile/api/update-profile.server";
 import { UnauthorizedError } from "@/shared/lib/errors";
-import { EVENING_MINUTES_CHOICES } from "@/shared/lib/evenings";
 
-const [first, second, ...rest] = EVENING_MINUTES_CHOICES.map((minutes) =>
-  z.literal(minutes)
-);
+export const MIN_EVENING_MINUTES = 30;
+export const MAX_EVENING_MINUTES = 360;
 
 export const SET_EVENING_LENGTH_INPUT = z.object({
-  eveningMinutes: z.union([first, second, ...rest]),
+  eveningMinutes: z
+    .number()
+    .int()
+    .min(MIN_EVENING_MINUTES)
+    .max(MAX_EVENING_MINUTES),
 });
 
 export async function setEveningLengthWorker(

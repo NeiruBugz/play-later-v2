@@ -72,17 +72,30 @@ describe("setEveningLengthWorker", () => {
     }
   );
 
-  describe("given a signed-in user choosing a length outside the six choices", () => {
-    it("rejects 100 minutes and keeps the saved value", async () => {
-      await expect(
-        setEveningLengthWorker(userId, { eveningMinutes: 100 })
-      ).rejects.toThrow();
-      expect(await readEveningMinutes()).toBe(DEFAULT_EVENING_MINUTES);
-    });
+  describe.each([30, 45, 100, 135, 200, 360])(
+    "given a signed-in user typing their own %i-minute evening",
+    (minutes) => {
+      beforeEach(async () => {
+        await setEveningLengthWorker(userId, { eveningMinutes: minutes });
+      });
 
-    it("rejects a string and keeps the saved value", async () => {
+      it("saves that evening length", async () => {
+        expect(await readEveningMinutes()).toBe(minutes);
+      });
+    }
+  );
+
+  describe("given a signed-in user choosing an unusable length", () => {
+    it.each([
+      ["29 minutes", 29],
+      ["361 minutes", 361],
+      ["a fractional 100.5 minutes", 100.5],
+      ["NaN", Number.NaN],
+      ["a string", "180"],
+      ["null", null],
+    ])("rejects %s and keeps the saved value", async (_label, value) => {
       await expect(
-        setEveningLengthWorker(userId, { eveningMinutes: "180" })
+        setEveningLengthWorker(userId, { eveningMinutes: value })
       ).rejects.toThrow();
       expect(await readEveningMinutes()).toBe(DEFAULT_EVENING_MINUTES);
     });

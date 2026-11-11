@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_EVENING_MINUTES,
   EVENING_MINUTES_CHOICES,
+  formatEveningLengthInput,
   formatEvenings,
+  parseEveningLengthInput,
 } from "./evenings";
 
 const hours = (value: number) => value * 3600;
@@ -50,5 +52,43 @@ describe("evening length choices", () => {
 
   it("defaults to 105 minutes", () => {
     expect(DEFAULT_EVENING_MINUTES).toBe(105);
+  });
+});
+
+describe(parseEveningLengthInput, () => {
+  it.each([
+    ["150", "minutes", 150],
+    ["30", "minutes", 30],
+    ["360", "minutes", 360],
+    ["2.25", "hours", 135],
+    ["2.999", "hours", 180],
+    ["0.5", "hours", 30],
+    ["6", "hours", 360],
+  ] as const)("reads %s %s as %i minutes", (value, unit, expected) => {
+    expect(parseEveningLengthInput(value, unit)).toBe(expected);
+  });
+
+  it.each([
+    ["20", "minutes"],
+    ["361", "minutes"],
+    ["7", "hours"],
+    ["0", "minutes"],
+    ["-90", "minutes"],
+    ["", "minutes"],
+    ["abc", "hours"],
+  ] as const)("rejects %j %s", (value, unit) => {
+    expect(parseEveningLengthInput(value, unit)).toBeNull();
+  });
+});
+
+describe(formatEveningLengthInput, () => {
+  it.each([
+    [135, { value: "135", unit: "minutes" }],
+    [120, { value: "2", unit: "hours" }],
+    [240, { value: "4", unit: "hours" }],
+    [270, { value: "270", unit: "minutes" }],
+    [45, { value: "45", unit: "minutes" }],
+  ])("shows %i minutes as %j", (minutes, expected) => {
+    expect(formatEveningLengthInput(minutes)).toEqual(expected);
   });
 });

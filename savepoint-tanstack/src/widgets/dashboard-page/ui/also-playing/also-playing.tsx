@@ -1,15 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Play } from "lucide-react";
 
-import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import type { DashboardPageData } from "@/features/dashboard";
 import { openGlobalAction } from "@/shared/lib/global-action";
 import { Button } from "@/shared/ui/button";
 import { GameCover } from "@/shared/ui/game-cover";
 import { SectionLabel } from "@/shared/ui/section-label";
 
-import type { DashboardPlayingSectionProps } from "./dashboard-playing-section.type";
+import type { AlsoPlayingProps } from "./also-playing.type";
 
-function PlayingRow({ item }: { item: LibraryItemWithGame }) {
+type PlayingItem = DashboardPageData["playing"][number];
+
+function AlsoPlayingRow({ item }: { item: PlayingItem }) {
   const navigate = useNavigate();
   const { game } = item;
 
@@ -43,17 +45,18 @@ function PlayingRow({ item }: { item: LibraryItemWithGame }) {
   );
 }
 
-export function DashboardPlayingSection({
-  items,
-}: DashboardPlayingSectionProps) {
+export function AlsoPlaying({ playing }: AlsoPlayingProps) {
+  const [, ...others] = playing;
+  if (others.length === 0) return null;
+
   return (
-    <section aria-labelledby="home-playing-heading">
-      <SectionLabel id="home-playing-heading" className="mb-2">
-        Playing
+    <section aria-labelledby="home-also-playing-heading" className="mb-4">
+      <SectionLabel id="home-also-playing-heading" className="mb-2">
+        Also playing
       </SectionLabel>
       <ul className="flex flex-col gap-2 md:grid md:grid-cols-2 md:gap-3">
-        {items.map((item) => (
-          <PlayingRow key={item.id} item={item} />
+        {others.map((item) => (
+          <AlsoPlayingRow key={item.id} item={item} />
         ))}
       </ul>
     </section>

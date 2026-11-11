@@ -21,6 +21,14 @@ Conventions for every slice:
   - after Slice 5 deploys: run it again for covers;
   - before Slice 10: run the zero-count pre-check.
 
+**Owner additions during implementation (2026-11-11):**
+- Library Grid tile also shows the length line and keeps its cover status chip (the tile has no status control).
+- Library List view lays out in two columns from 1280 px, with each card's controls pinned to the card bottom; Grid tile controls are pinned the same way.
+- Settings → Play also has a custom length input (minutes or hours, any whole number from 30 to 360 minutes). The six presets stay.
+- A phone user reaches Settings from a "Settings" button on their own profile page.
+- Fixes found by the owner: selected radio pill unreadable in Dark, "Add a game" dialog content wider than its panel.
+- The Want question keeps the existing wording "Why do you want to play this?" (the spec's "Why this one?" misquoted spec 026).
+
 ---
 
 - [x] **Slice 1: The review script captures the spec 028 "before" set, including the cover fixtures**
@@ -285,7 +293,7 @@ Conventions for every slice:
       - the order is panel → shelf → Also playing → counts;
       - the empty state is "Nothing playing right now";
       - after "Start playing" on the panel, the earlier Playing game appears under Also playing. **[Agent: testing]**
-  - [ ] UI:
+  - [x] UI:
     - Update `up-next-shelf.tsx`: remove the StatusChip overlay (`:47-51`) and "Play next" (`:53-61`), and add the new captions.
     - Add `ui/also-playing/` to replace `dashboard-playing-section`, and `ui/dashboard-counts-line/` to replace `dashboard-status-strip`.
     - `dashboard-page.tsx`: the `PageHeader` shows on desktop only, with an outline Add game. Set the section order and the empty-state condition. **[Agent: react-frontend]**

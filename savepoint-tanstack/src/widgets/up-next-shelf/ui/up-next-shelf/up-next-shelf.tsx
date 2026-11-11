@@ -1,22 +1,23 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Search } from "lucide-react";
 
-import { QueueMarker, toStatusChipStatus } from "@/entities/library-item";
+import { QueueMarker } from "@/entities/library-item";
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
+import { useEveningMinutes } from "@/entities/session/model";
 import { openCommandPalette } from "@/features/command-palette";
+import { formatEvenings } from "@/shared/lib/evenings";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { GameCover } from "@/shared/ui/game-cover";
 import { SectionLabel } from "@/shared/ui/section-label";
-import { StatusChip } from "@/shared/ui/status-chip";
 
 import type { UpNextShelfProps } from "./up-next-shelf.type";
 
 const EMPTY_MESSAGE = "Nothing queued yet — put up to 5 games in Up Next.";
 
-const FIRST_ITEM_WIDTH = "w-[min(60vw,15rem)] md:w-64";
+const FIRST_ITEM_WIDTH = "w-[min(68vw,17rem)] md:w-72";
 const REST_ITEM_WIDTH = "w-36 md:w-40";
-const EMPTY_HEIGHT = "h-[calc(min(60vw,15rem)*1.5)] md:h-96";
+const EMPTY_HEIGHT = "h-[calc(min(68vw,17rem)*1.5)] md:h-108";
 
 function ShelfItem({
   item,
@@ -25,6 +26,12 @@ function ShelfItem({
   item: LibraryItemWithGame;
   isNext: boolean;
 }) {
+  const eveningMinutes = useEveningMinutes();
+  const caption =
+    (isNext
+      ? formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)
+      : null) ?? item.game.title;
+
   return (
     <li
       data-next={isNext ? "true" : undefined}
@@ -43,25 +50,14 @@ function ShelfItem({
           src={item.game.coverImage}
           name={item.game.title}
           priority={isNext}
-        >
-          <div className="absolute top-1.5 left-1.5">
-            <StatusChip
-              status={toStatusChipStatus(item.status, item.doneOutcome)}
-            />
-          </div>
-        </GameCover>
-        {isNext ? (
-          <span className="mt-2 block text-sm font-medium text-foreground">
-            Play next
-          </span>
-        ) : null}
+        />
         <p
           className={cn(
             "truncate leading-tight font-medium group-hover:underline",
             isNext ? "mt-1 font-display text-lg" : "mt-2 text-base md:text-sm"
           )}
         >
-          {item.game.title}
+          {caption}
         </p>
         <QueueMarker
           status={item.status}
