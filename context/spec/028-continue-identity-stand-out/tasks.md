@@ -98,7 +98,7 @@ Conventions for every slice:
     - At 360, 390 and 430 wide, confirm there is no sideways page scroll.
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 4: A person sets how long an evening is in Settings, and library lengths follow**
+- [x] **Slice 4: A person sets how long an evening is in Settings, and library lengths follow**
   - [x] RED tests:
     - Integration `set-evening-length`: it saves each of the six values; it rejects 100 and a string; it requires sign-in; `getCurrentUserFn` then returns the new value.
     - Unit `radio-group` primitive: arrow keys move the selection; each option is a radio with its label.
@@ -115,7 +115,7 @@ Conventions for every slice:
     - Add a "Play" item to `settings-rail.tsx:14-21` and `settings-list.tsx:104-114`, and extend `activeSegment` in `src/routes/_authed/settings.tsx:23-29`.
     - After saving, call `invalidateCurrentUser(queryClient)`.
     - Un-skip `settings-play` in `screens.ts`. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Start the app (record the PID). Open Settings → Play: 1.75 h is selected.
     - Choose 3 h. A library card for a 14.5 h game now reads "About 5 evenings", and one for a 2 h game reads "One evening".
