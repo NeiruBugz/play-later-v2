@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author(s):** Nail Badiullin (with Claude; specialist input from prisma-database, tanstack-fullstack, react-frontend)
 
-Paths are relative to `savepoint-tanstack/` unless they start with `context/` or `.github/`. Raw inventory: [research-notes.md](./research-notes.md). Items marked **Assumption** were proposed, not confirmed; challenge them before `/awos:tasks`.
+Paths are relative to `savepoint-tanstack/` unless they start with `context/` or `.github/`. Raw inventory: [research-notes.md](./research-notes.md). Choices marked **Confirmed** were settled with the owner on 2026-11-11.
 
 ---
 
@@ -59,7 +59,7 @@ Slices 1, 2 and 3a can run in parallel once 0a lands. Slice 4 depends on 3a for 
 - Nothing has ever read or written them. They come from the 2024 HLTB-era base migration and have no defined unit.
 - Run `SELECT count(*) FROM "Game" WHERE "mainStory" IS NOT NULL OR "mainExtra" IS NOT NULL OR "completionist" IS NOT NULL OR "hltbId" IS NOT NULL` on Neon first. The migration ships only when it returns 0.
 - The CI destructive-operation step (`.github/workflows/pr-checks-tanstack.yml:197-224`) only warns. Say in the PR that the drop is intentional.
-- **Assumption:** new unit-bearing columns plus the drop, rather than reusing `mainStory`/`completionist`. Their names carry the wrong meaning now that `normally` is known not to be the main story.
+- **Confirmed (owner, 2026-11-11):** new unit-bearing columns plus the drop, rather than reusing `mainStory`/`completionist`. Their names carry the wrong meaning now that `normally` is known not to be the main story.
 
 No index is added. The last-session lookup covers at most ~10 Playing games and uses the existing `JournalEntry` indexes (`prisma/schema.prisma:184-187`).
 
@@ -97,7 +97,7 @@ Entities never import each other. Feature workers call the entity, and `getGameD
 - Covers: fetched with concurrency 4.
 - Idempotent and safe to rerun. It prints coverage: games with a credits time, games with a tint.
 - Run against Neon after slice 0a deploys. It is a release step for slices 2 and 4.
-- **Assumption:** backfill script plus write-through, rather than lazy-only. Lazy-only would leave Home and every library card without length or tint for games the person hasn't opened since release.
+- **Confirmed (owner, 2026-11-11):** backfill script plus write-through, rather than lazy-only. Lazy-only would leave Home and every library card without length or tint for games the person hasn't opened since release.
 
 **Removed with slice 0a:**
 - `src/features/game-detail/api/get-times-to-beat-for-game.ts`;
@@ -124,7 +124,7 @@ Entities never import each other. Feature workers call the entity, and `getGameD
   - New route `src/routes/_authed/settings/play.tsx`, a "Play" item in `src/widgets/settings-rail/ui/settings-rail/settings-rail.tsx:14-21` and `settings-list.tsx:104-114`, and an extended `activeSegment` in `src/routes/_authed/settings.tsx:23-29`.
   - The control is a new `src/shared/ui/radio-group.tsx` (Base UI Radio, pulled from the shadcn base-maia style): six pill radios in a 3-column grid, each at least 44 px tall, plus the example line built with `formatEvenings`.
   - `segment-control` isn't used because it has tab semantics.
-  - **Assumption:** a new "Play" Settings page, rather than a section on Profile.
+  - **Confirmed (owner, 2026-11-11):** a new "Play" Settings page, rather than a section on Profile.
 
 ### 2.5 Home
 
@@ -210,7 +210,7 @@ type DashboardPageData = {
   - On is a new `formatPlatformFact(names, 3)` using `abbreviatePlatformName` (`src/entities/game/ui/platform-badges/platform-badges.utility.ts:89`, now exported from the `entities/game` public API), followed by "+N".
   - A missing fact is not rendered.
 - **`game-header-actions`:** one branch per state in spec 2.6. Not in library means `AddGameAction` only. Signed out means the "Sign in to add this game" link.
-  - **Assumption:** for a Done game, the existing `DoneOutcomeLabel` dropdown (Finished / Let go / Clear) stays next to the status control, so the reason can still be changed. The spec doesn't remove it.
+  - **Confirmed (owner, 2026-11-11):** for a Done game, the existing `DoneOutcomeLabel` dropdown (Finished / Let go / Clear) stays next to the status control, so the reason can still be changed. The spec doesn't remove it.
 - **`done-with-it`:** inline Finished / Let it go / Not yet with local state. Choosing a reason calls the status change with the reason (below), and the Done dialog opens pre-set.
 - **Layout:** reuses the existing `items-end md:grid-cols-[200px_1fr]` hero grid (`game-detail.tsx:288`), so the right column is bottom-aligned with the cover. `pt-36 md:pt-44` (the backdrop room) goes.
 
