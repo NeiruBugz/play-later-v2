@@ -2,7 +2,14 @@ import { execSync } from "node:child_process";
 
 const DOCKER_CONTAINER = "savepoint-postgres";
 const PG_USER = "postgres";
-const TEST_DB_PATTERNS = [/^savepoint_tanstack_test_/, /^test_ts_/, /^test_/, /^test-/, /^savepoint-db-test/, /^test/];
+const TEST_DB_PATTERNS = [
+  /^savepoint_tanstack_test_/,
+  /^test_ts_/,
+  /^test_/,
+  /^test-/,
+  /^savepoint-db-test/,
+  /^test/,
+];
 
 const listOutput = execSync(
   `docker exec ${DOCKER_CONTAINER} psql -U ${PG_USER} -At -c "SELECT datname FROM pg_database WHERE datistemplate = false"`,
@@ -36,7 +43,9 @@ for (const dbName of matches) {
     dropped += 1;
   } catch (err) {
     failed += 1;
-    console.error(`  failed: ${dbName} — ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`);
+    console.error(
+      `  failed: ${dbName} — ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`
+    );
   }
 }
 

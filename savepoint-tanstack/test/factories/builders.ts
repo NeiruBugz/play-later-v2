@@ -33,6 +33,12 @@ export function buildGame(overrides: Partial<Game> = {}): Game {
     steamAppId: null,
     slug: `test-game-${n}`,
     franchiseId: null,
+    timeToCreditsSeconds: null,
+    timeToCompleteSeconds: null,
+    timesToBeatFetchedAt: null,
+    coverHue: null,
+    coverChroma: null,
+    coverTintComputedAt: null,
     ...overrides,
   };
 }

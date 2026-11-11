@@ -46,7 +46,7 @@ Conventions for every slice:
     - Integration `get-game-details`: returns both times for a signed-out viewer; a slow IGDB response (over 1.5 s) still returns the page without times.
     - Integration `add-game` and `steam-import` workers: enrichment runs, and an IGDB failure doesn't fail the add or import.
     - Rewrite `routes/-games.$slug.test` and `-social-meta.test` so they no longer mock the live times-to-beat query. **[Agent: testing]**
-  - [ ] Migration 1 `add_game_enrichment_and_evening_length`, exactly as tech spec §2.2:
+  - [x] Migration 1 `add_game_enrichment_and_evening_length`, exactly as tech spec §2.2:
     - the six `Game` columns, with CHECK `coverHue` 0–359 and `coverChroma` ≥ 0;
     - `user.eveningMinutes Int NOT NULL DEFAULT 105` with CHECK BETWEEN 30 AND 360.
     - Extend `test/factories` (`buildGame`, `createGame`, `buildLibraryItemWithGame`) with the new columns. **[Agent: prisma-database]**

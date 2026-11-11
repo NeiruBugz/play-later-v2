@@ -71,6 +71,7 @@ model user {
   steamAvatar              String?
   steamConnectedAt         DateTime?
   statusModelNoticePending Boolean                @default(false)
+  eveningMinutes           Int                    @default(105)
   account                  account[]
   session                  session[]
   LibraryItem              LibraryItem[]
@@ -104,6 +105,13 @@ model Game {
   franchiseId   Int?
   genres        GameGenre[]
   platforms     GamePlatform[]
+
+  timeToCreditsSeconds  Int?
+  timeToCompleteSeconds Int?
+  timesToBeatFetchedAt  DateTime?
+  coverHue              Int?
+  coverChroma           Float?
+  coverTintComputedAt   DateTime?
 }
 
 model LibraryItem {
