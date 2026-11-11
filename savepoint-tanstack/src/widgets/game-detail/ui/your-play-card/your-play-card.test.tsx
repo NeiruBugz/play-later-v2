@@ -73,7 +73,8 @@ const elements = {
   getAllNotes: (count: number) =>
     screen.getByRole("button", { name: `All notes (${count})` }),
   getNoteLinks: () => screen.queryAllByRole("link"),
-  queryWhyQuestion: () => screen.queryByLabelText("Why this one?"),
+  queryWhyQuestion: () =>
+    screen.queryByLabelText("Why do you want to play this?"),
   queryHistoryToggle: () => screen.queryByRole("button", { name: "History" }),
   queryRatingSlider: (name: string) => screen.queryByRole("slider", { name }),
 };
@@ -219,7 +220,7 @@ describe("YourPlayCard", () => {
       });
     });
 
-    it("asks Why this one? with a text field", () => {
+    it("asks Why do you want to play this? with a text field", () => {
       expect(elements.queryWhyQuestion()).toBeInTheDocument();
     });
   });

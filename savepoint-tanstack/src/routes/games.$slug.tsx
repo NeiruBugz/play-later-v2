@@ -9,18 +9,14 @@ import { Component, Suspense, type ReactNode } from "react";
 
 import {
   RelatedGamesSkeleton,
-  RelatedGamesTabs,
+  RelatedGamesStrip,
 } from "@/features/browse-related-games";
-import type { RelatedCollection } from "@/features/browse-related-games/api";
 import { relatedGamesQueryOptions } from "@/features/browse-related-games/model";
 import { getGameDetailPageDataFn } from "@/features/game-detail/api";
-import { TimesToBeatSection } from "@/features/game-detail/ui";
 import { socialMeta } from "@/shared/config/site";
 import { AppError, NotFoundError } from "@/shared/lib/errors";
-import { Card } from "@/shared/ui/card";
 import { PageHeader } from "@/shared/ui/page-header";
 import { SectionLabel } from "@/shared/ui/section-label";
-import { GameCard } from "@/widgets/game-card";
 import { GameDetail } from "@/widgets/game-detail";
 
 export const Route = createFileRoute("/games/$slug")({
@@ -56,31 +52,17 @@ function GameDetailRoute() {
       data={data}
       viewerUserId={viewerUserId}
       gameSlug={data.game.slug}
-      timesToBeatSlot={
-        <TimesToBeatSection
-          timeToCreditsSeconds={data.timeToCreditsSeconds}
-          timeToCompleteSeconds={data.timeToCompleteSeconds}
-        />
-      }
       relatedGamesSlot={
         <SectionErrorBoundary
           fallback={
-            <Card variant="flat" className="flex flex-col gap-2 p-4">
-              <SectionErrorMessage
-                headingId="related-games-heading"
-                heading="Related games"
-                message="Couldn't load related games"
-              />
-            </Card>
+            <SectionErrorMessage
+              headingId="related-games-heading"
+              heading="Related games"
+              message="Couldn't load related games"
+            />
           }
         >
-          <Suspense
-            fallback={
-              <Card variant="flat" className="flex flex-col gap-2 p-4">
-                <RelatedGamesSkeleton />
-              </Card>
-            }
-          >
+          <Suspense fallback={<RelatedGamesSkeleton />}>
             <RelatedGamesSlot igdbId={igdbId} />
           </Suspense>
         </SectionErrorBoundary>
@@ -91,34 +73,7 @@ function GameDetailRoute() {
 
 function RelatedGamesSlot({ igdbId }: { igdbId: number }) {
   const { data: sections } = useSuspenseQuery(relatedGamesQueryOptions(igdbId));
-  if (sections.length === 0) return null;
-  return <RelatedGamesSections sections={sections} />;
-}
-
-function RelatedGamesSections({ sections }: { sections: RelatedCollection[] }) {
-  return (
-    <Card variant="flat" className="flex flex-col gap-2 p-4">
-      <section
-        aria-labelledby="related-games-heading"
-        className="flex flex-col gap-2"
-      >
-        <SectionLabel id="related-games-heading">Related games</SectionLabel>
-        <RelatedGamesTabs
-          sections={sections}
-          renderGame={(game) => (
-            <GameCard
-              game={{
-                slug: game.slug,
-                title: game.title,
-                coverImageId: game.coverImageId,
-              }}
-              density="minimal"
-            />
-          )}
-        />
-      </section>
-    </Card>
-  );
+  return <RelatedGamesStrip sections={sections} />;
 }
 
 function SectionErrorMessage({

@@ -56,6 +56,7 @@ function playing(
     lastSessionDaysAgo?: number;
     becamePlayingDaysAgo?: number;
     platform?: string | null;
+    coverHue?: number | null;
   } = {}
 ): Playing {
   const { lastSessionDaysAgo, becamePlayingDaysAgo = 100 } = opts;
@@ -66,7 +67,13 @@ function playing(
         status: "PLAYING",
         platform: opts.platform === undefined ? "PC" : opts.platform,
       },
-      { id: `game-${id}`, title, slug: title.toLowerCase() }
+      {
+        id: `game-${id}`,
+        title,
+        slug: title.toLowerCase(),
+        coverHue: opts.coverHue === undefined ? 27 : opts.coverHue,
+        coverChroma: 0.12,
+      }
     ),
     lastSessionAt:
       lastSessionDaysAgo === undefined ? null : daysAgo(lastSessionDaysAgo),
@@ -390,6 +397,21 @@ describe("ContinuePanel", () => {
       expect(elements.getContextLine().textContent?.trim()).toBe(
         "First in Up Next"
       );
+    });
+  });
+
+  describe("given a Playing game without a stored cover tint", () => {
+    beforeEach(() => {
+      renderPanel({
+        playing: [
+          playing(1, "Hades", { lastSessionDaysAgo: 3, coverHue: null }),
+        ],
+        upNextQueue: [],
+      });
+    });
+
+    it("uses the neutral card colour", () => {
+      expect(elements.getTint()).toHaveAttribute("data-tint", "off");
     });
   });
 

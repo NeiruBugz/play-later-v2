@@ -34,19 +34,23 @@ export function ScreenshotsPanel({
     <section
       aria-labelledby="screenshots-heading"
       aria-label={`Screenshots of ${gameTitle}`}
+      className="min-w-0"
     >
       <SectionLabel id="screenshots-heading" className="mb-2">
         Screenshots
       </SectionLabel>
 
-      <div className="flex gap-1.5 overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible">
+      <div
+        data-testid="screenshots-row"
+        className="flex snap-x gap-3 overflow-x-auto pb-2"
+      >
         {images.map((image, i) => (
           <button
             key={image.full}
             type="button"
             aria-label={`Open screenshot ${i + 1}`}
             onClick={() => setActiveIndex(i)}
-            className="w-48 shrink-0 overflow-hidden rounded-md leading-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:w-auto"
+            className="w-60 shrink-0 snap-start overflow-hidden rounded-md leading-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:w-72"
           >
             <img
               src={image.thumb}

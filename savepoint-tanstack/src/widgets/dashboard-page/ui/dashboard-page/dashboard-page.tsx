@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { UpNextShelf } from "@/widgets/up-next-shelf";
 
+import { ContinuePanel } from "../continue-panel";
 import { DashboardPlayingSection } from "../dashboard-playing-section";
 import { DashboardStatusStrip } from "../dashboard-status-strip";
 import type { DashboardPageProps } from "./dashboard-page.type";
@@ -33,6 +34,8 @@ export function DashboardPage({ data }: DashboardPageProps) {
           </Button>
         }
       />
+
+      <ContinuePanel playing={data.playing} upNextQueue={data.upNextQueue} />
 
       <div className="mb-4 min-w-0">
         <UpNextShelf items={data.upNextQueue} />

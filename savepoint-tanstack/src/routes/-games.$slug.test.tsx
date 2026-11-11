@@ -46,12 +46,12 @@ vi.mock("@/widgets/game-detail", () => ({
 }));
 
 vi.mock("@/features/browse-related-games", () => ({
-  RelatedGamesTabs: ({
+  RelatedGamesStrip: ({
     sections,
   }: {
     sections: ReadonlyArray<{ collectionId: number }>;
   }) => (
-    <div data-testid="related-games-tabs">
+    <div data-testid="related-games-strip">
       {sections.map((section) => (
         <div
           key={section.collectionId}
@@ -198,7 +198,7 @@ describe("/games/$slug route", () => {
       expect(elements.queryRelatedGamesSkeleton()).not.toBeNull();
     });
 
-    it("renders the resolved related-games tabs once the slot fetch settles", async () => {
+    it("renders the resolved related-games strip once the slot fetch settles", async () => {
       await arrangeRelatedGames(
         Promise.resolve([
           {

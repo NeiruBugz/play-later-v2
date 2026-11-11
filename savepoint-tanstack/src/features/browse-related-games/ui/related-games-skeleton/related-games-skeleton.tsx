@@ -2,7 +2,7 @@ import { SectionLabel } from "@/shared/ui/section-label";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 /**
- * Suspense fallback for `RelatedGamesTabs`. Mimics the grid shape
+ * Suspense fallback for `RelatedGamesStrip`. Mimics the grid shape
  * (5-up at lg) with shimmer placeholders. Pure CSS — no props, no logic.
  */
 const PLACEHOLDER_COUNT = 10;

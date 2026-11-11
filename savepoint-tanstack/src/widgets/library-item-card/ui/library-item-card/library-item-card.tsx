@@ -57,7 +57,7 @@ export function LibraryItemCard({
     <div
       className={cn(
         "relative flex flex-row gap-3",
-        !isRow && "md:flex-col md:gap-0"
+        isRow ? "h-full" : "md:flex-col md:gap-0"
       )}
       data-testid="library-item-card-root"
     >
@@ -125,7 +125,12 @@ export function LibraryItemCard({
           )}
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div
+          className={cn(
+            "mt-2 flex flex-wrap items-center gap-2",
+            isRow && "mt-auto pt-2"
+          )}
+        >
           <StatusControl
             status={status}
             outcome={item.doneOutcome}

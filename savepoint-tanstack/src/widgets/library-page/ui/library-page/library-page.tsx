@@ -466,7 +466,7 @@ export function LibraryPage(props: LibraryPageProps) {
               className={
                 viewMode === "grid"
                   ? "grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5"
-                  : "flex flex-col gap-2"
+                  : "grid grid-cols-1 gap-x-6 gap-y-4 xl:grid-cols-2"
               }
             >
               {filteredItems.map((item) => (

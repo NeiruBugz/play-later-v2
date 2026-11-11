@@ -502,7 +502,7 @@ describe("LibraryPage", () => {
       // LIB-5: switching to list view changes the presentation
       it("switches to list view — the grid list no longer has grid-cols-2 (LIB-5)", () => {
         const list = elements.getLibraryList();
-        expect(list.className).not.toMatch(/grid-cols-2/);
+        expect(list.className).not.toMatch(/(^|\s)grid-cols-2/);
       });
     });
 

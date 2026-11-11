@@ -21,6 +21,17 @@ vi.mock("@tanstack/react-router", () => ({
     );
   },
   useNavigate: () => mockNavigate,
+  useRouter: () => ({ invalidate: vi.fn() }),
+}));
+
+vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
+  setStatusFn: vi.fn(),
+}));
+vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
+  undoStatusFn: vi.fn(),
+}));
+vi.mock("@/entities/session/model", () => ({
+  useEveningMinutes: () => 105,
 }));
 
 vi.mock("@/features/command-palette", () => ({

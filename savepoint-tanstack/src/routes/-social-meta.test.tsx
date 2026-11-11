@@ -19,7 +19,7 @@ vi.mock("@/widgets/landing-features", () => ({
 }));
 vi.mock("@/features/browse-related-games", () => ({
   RelatedGamesSkeleton: () => null,
-  RelatedGamesTabs: () => null,
+  RelatedGamesStrip: () => null,
 }));
 
 const siteOrigin = "https://example.test";

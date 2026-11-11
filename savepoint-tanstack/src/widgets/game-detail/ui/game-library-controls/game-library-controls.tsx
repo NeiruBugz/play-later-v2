@@ -1,5 +1,4 @@
 import { NotOwnedTag, QueueMarker } from "@/entities/library-item";
-import { GamePrompts } from "@/features/library-prompts/ui/game-prompts";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 
 import type { GameLibraryControlsProps } from "./game-library-controls.type";
@@ -9,7 +8,6 @@ export function GameLibraryControls({
   entry,
   libraryStatus,
   libraryOwnership,
-  prompts,
 }: GameLibraryControlsProps) {
   const membership = useUpNextMembership({
     id: entry?.id ?? 0,
@@ -34,14 +32,6 @@ export function GameLibraryControls({
         status={libraryStatus.status}
         isOwned={libraryOwnership.isOwned}
       />
-      {prompts !== undefined ? (
-        <GamePrompts
-          libraryItemId={entry.id}
-          gameTitle={gameTitle}
-          prompts={prompts}
-          status={libraryStatus.status}
-        />
-      ) : null}
     </div>
   );
 }

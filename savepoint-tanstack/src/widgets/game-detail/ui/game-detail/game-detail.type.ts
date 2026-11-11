@@ -52,9 +52,4 @@ export type GameDetailProps = {
    * plumbing; the widget stays prop-driven and unit-testable.
    */
   relatedGamesSlot?: ReactNode;
-  /**
-   * Optional Suspense-wrapped times-to-beat slot. Rendered after the
-   * library-status strip column when present.
-   */
-  timesToBeatSlot?: ReactNode;
 };

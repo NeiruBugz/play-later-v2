@@ -23,6 +23,4 @@ export type GameLibraryControlsProps = {
   libraryStatus: LibraryStatusState | null;
   /** Shared ownership state of the game page; null while the game is not in the library. */
   libraryOwnership: LibraryOwnershipState | null;
-  /** Which optional prompts to offer (owner-only flags). */
-  prompts?: { why: boolean; stayed: boolean };
 };

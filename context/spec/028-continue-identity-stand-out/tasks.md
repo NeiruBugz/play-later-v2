@@ -211,7 +211,7 @@ Conventions for every slice:
     - Component tests for the screenshots strip (single row, opens the lightbox, hidden when empty) and the related strip ("More in Metal Gear", same-size covers, "All 35", hidden when empty, no-cover placeholder).
     - Rewrite `game-detail.test`: the order header → Your play → About → screenshots → related; no tabs, ring, "Time played" card or right column; About spans full width without Your play.
     - Delete the tests of the components removed below. **[Agent: testing]**
-  - [ ] UI:
+  - [x] UI:
     - `game-detail.tsx` renders `grid md:grid-cols-2` (Your play | About, `h-full`; About `md:col-span-2` alone), then the strips.
     - Add `your-play-card/`, which moves `GamePrompts` out of `game-library-controls`, caps `game-notes-list` at 2, and includes `game-rating` and `play-history`.
     - Rework `about-panel`.
@@ -242,11 +242,11 @@ Conventions for every slice:
       - a Done first-in-queue reads "Play {game} again?" with "Play again";
       - without a platform there is no stray separator;
       - with no Playing games and an empty Up Next there is no panel. **[Agent: testing]**
-  - [ ] Server:
+  - [x] Server:
     - Add `getLatestSessionDates(userId, gameIds)` in `src/entities/journal-entry/api/` (`groupBy gameId`, `_max.createdAt`, `playedMinutes > 0`).
     - Add `orderContinueGames` in `src/features/dashboard/model/`.
     - The dashboard worker returns the `DashboardPageData` contract from tech spec §2.5. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - Add `formatTimeAgo` in `src/shared/lib/date.ts`.
     - Add `src/widgets/dashboard-page/model/use-continue-question.ts` (`skippedIds`, `focusId`; local state only).
     - Add `ui/continue-panel/` with the continue/start/replay/rest variants, in `CoverTint variant="panel"` (rest uses `tint="off"`). It is keyed by item id with a CSS fade, and the time phrase renders after hydration.
