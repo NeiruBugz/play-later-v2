@@ -233,7 +233,7 @@ Conventions for every slice:
     - Open a screenshot in the lightbox.
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 8: Home opens with the "Continue …?" question**
+- [x] **Slice 8: Home opens with the "Continue …?" question**
   - [x] RED tests:
     - Unit `formatTimeAgo` in `src/shared/lib/date.test.ts`: every row of spec §2.3's table, including the 13/14 and 29/30/59/60/364/365-day edges.
     - Unit `orderContinueGames`: by latest session; falls back to the date it became Playing; ties go to becoming Playing more recently, then title.
@@ -260,7 +260,7 @@ Conventions for every slice:
     - Add `ui/continue-panel/` with the continue/start/replay/rest variants, in `CoverTint variant="panel"` (rest uses `tint="off"`). It is keyed by item id with a CSS fade, and the time phrase renders after hydration.
     - "Continue" / "Start" / "Play" use `--tint-ink`; the primary button stays plum.
     - Place the panel at the top of `dashboard-page.tsx`. The rest of Home is unchanged until Slice 9. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Start the app (record the PID) on the reseeded fixtures:
       - Step through Not tonight to the rest state and back with Ask me again.
