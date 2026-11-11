@@ -23,7 +23,7 @@ Conventions for every slice:
 
 ---
 
-- [ ] **Slice 1: The review script captures the spec 028 "before" set, including the cover fixtures**
+- [x] **Slice 1: The review script captures the spec 028 "before" set, including the cover fixtures**
   - [x] Point `scripts/design-review` at spec 028:
     - `--spec` flag, default `028-continue-identity-stand-out`; the output root becomes `context/spec/<spec>/review/<phase>/<set>`. Keep `--out` working.
     - Add `context/spec/028-continue-identity-stand-out/review/` to the repo `.gitignore`.
@@ -32,8 +32,8 @@ Conventions for every slice:
     - Add a committed fixture SQL `context/spec/028-continue-identity-stand-out/review-fixtures.sql` (next to `tasks.md`, outside the gitignored `review/`). `--reseed` applies it after the 026 seed.
     - It gives `audit_full` four Playing or Up Next games with known IGDB covers: one mostly red, one mostly green, one black-and-white, and one with no cover art.
     - It gives one Playing game at least three dated sessions, and Playing games whose last sessions were 3 days, 2 weeks and 40 days ago. **[Agent: testing]**
-  - [ ] Capture the "before" set: phone at 390×844 plus desktop at 1440×900, Light and Dark, with the phone checks' `report.json`. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Capture the "before" set: phone at 390×844 plus desktop at 1440×900, Light and Dark, with the phone checks' `report.json`. **[Agent: testing]**
+  - [x] Verify:
     - Start the app (record the PID) and run `design-review --phase round2 --set before --desktop --reseed`.
     - Confirm a PNG exists for every non-skipped screen in both modes, and that `report.json` exists.
     - Confirm `git status` shows nothing under `review/`.
