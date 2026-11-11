@@ -10,16 +10,12 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/entities/session/api/get-session.server", () => ({
   getServerUserId: vi.fn(),
 }));
-vi.mock("@/features/library-prompts/ui/game-prompts", () => ({
-  GamePrompts: ({ status }: { status: string }) => <p>Prompts for {status}</p>,
-}));
 
 type StripOptions = {
   status?: "WANT" | "PLAYING" | "DONE";
   upNextPosition?: number | null;
   isOwned?: boolean;
   inLibrary?: boolean;
-  prompts?: { why: boolean; stayed: boolean };
 };
 
 function renderStrip({
@@ -27,7 +23,6 @@ function renderStrip({
   upNextPosition = null,
   isOwned = true,
   inLibrary = true,
-  prompts,
 }: StripOptions = {}) {
   render(
     <GameLibraryControls
@@ -42,7 +37,6 @@ function renderStrip({
       libraryOwnership={
         inLibrary ? { isOwned, setOwned: vi.fn(), isPending: false } : null
       }
-      prompts={prompts}
     />
   );
 }
@@ -60,7 +54,6 @@ const elements = {
     }),
   queryAddButton: () =>
     screen.queryByRole("button", { name: "Add to library" }),
-  queryPrompts: (status: string) => screen.queryByText(`Prompts for ${status}`),
 };
 
 describe("GameLibraryControls", () => {
@@ -89,19 +82,6 @@ describe("GameLibraryControls", () => {
     it("shows neither a queue marker nor the Not owned tag", () => {
       expect(elements.queryQueueMarker("Up Next #2")).toBeNull();
       expect(elements.queryNotOwned()).toBeNull();
-    });
-  });
-
-  describe("given prompts are offered for a Done game", () => {
-    beforeEach(() => {
-      renderStrip({
-        status: "DONE",
-        prompts: { why: false, stayed: true },
-      });
-    });
-
-    it("shows the prompts", () => {
-      expect(elements.queryPrompts("DONE")).toBeInTheDocument();
     });
   });
 

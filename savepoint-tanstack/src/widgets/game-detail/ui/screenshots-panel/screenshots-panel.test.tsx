@@ -17,6 +17,8 @@ const elements = {
   getThumbnailImage: (n: number) =>
     // eslint-disable-next-line testing-library/no-node-access
     elements.getThumbnail(n).querySelector("img") as HTMLImageElement,
+  getRow: () => screen.getByTestId("screenshots-row"),
+  queryRegion: () => screen.queryByLabelText("Screenshots of FF7"),
   queryLightboxImage: (n: number) =>
     screen.queryByRole("img", { name: `Screenshot ${n}` }),
 };
@@ -39,6 +41,16 @@ describe("ScreenshotsPanel", () => {
       expect(elements.getThumbnail(1)).not.toBeNull();
       expect(elements.getThumbnail(2)).not.toBeNull();
       expect(elements.getThumbnail(3)).not.toBeNull();
+    });
+
+    it("lays the screenshots out as a single row that scrolls sideways", () => {
+      expect(elements.getRow()).toHaveClass("overflow-x-auto");
+      expect(elements.getRow()).not.toHaveClass("grid");
+      expect(elements.getRow()).not.toHaveClass("md:grid");
+    });
+
+    it("keeps a gap between neighbouring screenshots", () => {
+      expect(elements.getRow()).toHaveClass("gap-3");
     });
 
     it("loads thumbnails at the medium screenshot size", () => {
@@ -67,8 +79,9 @@ describe("ScreenshotsPanel", () => {
       render(<ScreenshotsPanel screenshots={[]} gameTitle="FF7" />);
     });
 
-    it("renders nothing", () => {
+    it("renders no label and no row", () => {
       expect(elements.queryHeading()).toBeNull();
+      expect(elements.queryRegion()).toBeNull();
     });
   });
 
@@ -77,8 +90,9 @@ describe("ScreenshotsPanel", () => {
       render(<ScreenshotsPanel screenshots={undefined} gameTitle="FF7" />);
     });
 
-    it("renders nothing", () => {
+    it("renders no label and no row", () => {
       expect(elements.queryHeading()).toBeNull();
+      expect(elements.queryRegion()).toBeNull();
     });
   });
 });

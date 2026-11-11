@@ -196,12 +196,12 @@ Conventions for every slice:
     - Reseed afterwards. Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 7: Below the header, the game page shows Your play, About, and sideways screenshot and related rows**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Component `your-play-card`:
       - "3 sessions · 4.5 h", and "No sessions yet" with no "0 h" anywhere;
       - with 5 notes, the two newest show with dates, and "All notes (5)" expands to all five, newest first;
       - "New note" opens the Log sheet for this game;
-      - Want shows "Why this one?", Playing shows no question;
+      - Want shows "Why do you want to play this?", Playing shows no question;
       - History is hidden when there are no ended plays;
       - played time stays "4.5 h" whatever the evening setting.
     - Rewrite `about-panel.test`:

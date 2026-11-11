@@ -295,7 +295,7 @@ The key facts show to every visitor, signed in or not. Today, typical play time 
 **"Your play"** shows only to a signed-in visitor who has the game in the library. It holds the person's own record for the game:
 - The title "Your play" and a **New note** button, which opens the Log sheet with this game chosen.
 - One line with the session count and time played ("3 sessions · 4.5 h", "1 session · 2 h"), or "No sessions yet". Next to it are the rating stars, which can be set or changed here.
-- The game-page question from spec 026: "Why this one?" for a Want game, "What stayed with you?" for a Done game, and none for a Playing game. As today, the question has a text field, and the answer is saved as a note.
+- The game-page question from spec 026: "Why do you want to play this?" for a Want game, "What stayed with you?" for a Done game, and none for a Playing game. As today, the question has a text field, and the answer is saved as a note.
 - The two most recent notes, with or without time, each with its date in the body font. When there are more than two, "All notes ({n})" shows the rest in the same card.
 - The History of earlier plays, collapsed and read-only, as today. It is hidden when the game has no ended plays.
 
@@ -311,7 +311,7 @@ The key facts show to every visitor, signed in or not. Today, typical play time 
   - [ ] Given 5 notes on the game, when the user views "Your play", then the two newest notes appear with their dates, together with an "All notes (5)" link.
   - [ ] Given 5 notes on the game, when the user taps "All notes (5)", then all five notes appear in the card, newest first.
   - [ ] When the user taps "New note" in "Your play", then the Log sheet opens with this game already chosen.
-  - [ ] Given a Want game in the library, when the user views "Your play", then it shows the "Why this one?" question with a text field.
+  - [ ] Given a Want game in the library, when the user views "Your play", then it shows the "Why do you want to play this?" question with a text field.
   - [ ] Given a Playing game in the library, when the user views "Your play", then it shows no question.
   - [ ] Given a game that has never left Playing, when the user views "Your play", then no History section appears.
   - [ ] Given a description longer than four lines, when the user taps "More" in About, then the full description appears.
