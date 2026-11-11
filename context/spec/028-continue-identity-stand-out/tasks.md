@@ -321,8 +321,8 @@ Conventions for every slice:
   - [ ] Build a side-by-side before/after review page of the captures for the owner (phone first), and fix any check failures in the slice that introduced them before handing over. **[Agent: react-frontend]**
   - [ ] Verify: the owner has reviewed the page and either approved it or listed changes. Changes get their own follow-up tasks here. Delete the temporary review build files, but keep `review/round2/`. **[Agent: testing]**
 
-- [ ] **Slice 12: Feature Testing & Regression**
+- [x] **Slice 12: Feature Testing & Regression**
 
   > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
-  - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 028-continue-identity-stand-out` and `@regression` if suitable for long-term regression. **[Agent: testing]**
-  - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+  - [x] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 028-continue-identity-stand-out` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [x] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
