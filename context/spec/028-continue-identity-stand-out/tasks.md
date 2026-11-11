@@ -314,11 +314,11 @@ Conventions for every slice:
     - Start the app (record the PID), open a game page and the Library, then stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 11: Owner review of the "after" set, phone first**
-  - [ ] Capture the "after" set with `design-review --phase round2 --set after --desktop --reseed`, after running the local backfill:
+  - [x] Capture the "after" set with `design-review --phase round2 --set after --desktop --reseed`, after running the local backfill:
     - phone at 390×844 (checks at 360, 390 and 430), then desktop at 1440×900, in Light and Dark;
     - Home, the five game-page states, the Library and Settings → Play.
     - Compare `report.json` with the "before" one. List every remaining failure from the phone checks: sideways scroll, tap size, font size. **[Agent: testing]**
-  - [ ] Build a side-by-side before/after review page of the captures for the owner (phone first), and fix any check failures in the slice that introduced them before handing over. **[Agent: react-frontend]**
+  - [x] Build a side-by-side before/after review page of the captures for the owner (phone first), and fix any check failures in the slice that introduced them before handing over. **[Agent: react-frontend]**
   - [ ] Verify: the owner has reviewed the page and either approved it or listed changes. Changes get their own follow-up tasks here. Delete the temporary review build files, but keep `review/round2/`. **[Agent: testing]**
 
 - [x] **Slice 12: Feature Testing & Regression**
