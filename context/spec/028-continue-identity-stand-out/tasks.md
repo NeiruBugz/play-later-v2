@@ -64,7 +64,7 @@ Conventions for every slice:
     - Read the row's `timeToCreditsSeconds` with `docker exec savepoint-postgres psql -U postgres -d savepoint-db` (local DB only) and confirm the "Main story" hours on the page equal it.
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 3: Library cards show length in evenings, with no badge on the cover**
+- [x] **Slice 3: Library cards show length in evenings, with no badge on the cover**
   - [x] RED tests:
     - Unit `src/shared/lib/evenings.test.ts`: 14.5 h → "About 8 evenings", 1.5 h → "One evening", 51 h → "About 29 evenings", 4.375 h → "About 3 evenings", null → null; at 180 min, 14.5 h → "About 5 evenings" and 2 h → "One evening".
     - Integration: `get-library` returns `timeToCreditsSeconds`, `coverHue` and `coverChroma` on `game`; `getCurrentUserFn` returns `eveningMinutes` (105 for a new user and for a signed-out visitor).
@@ -87,7 +87,7 @@ Conventions for every slice:
     - Test first, in `library-page.test.tsx`: a tile with a credits time reads "About N evenings" under the title; a tile with none keeps a blank line of the same height.
     - Add the fixed-height length line to the tile, using `useEveningMinutes`.
     - The tile keeps its cover status chip, because it has no status control. The "no cover badge" rule applies to the list card. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Run the backfill against the local DB and confirm its coverage line.
     - Start the app (record the PID). On `/library` at 1440×900, Light and Dark, in List view and in Grid view:
