@@ -39,7 +39,7 @@ Conventions for every slice:
     - Confirm `git status` shows nothing under `review/`.
     - Stop the server by PID and delete any extra files created outside `review/round2/before/`. **[Agent: testing]**
 
-- [ ] **Slice 2: The game page shows typical play time from stored columns, with "Main story" meaning time to credits**
+- [x] **Slice 2: The game page shows typical play time from stored columns, with "Main story" meaning time to credits**
   - [x] RED tests:
     - Integration `ensure-game-enrichment` (times part, IGDB mocked at `src/shared/api/igdb/fetch.ts`): it writes `timeToCreditsSeconds` / `timeToCompleteSeconds` from `hastily` / `completely`; it sets `timesToBeatFetchedAt` when IGDB has no data; it leaves `timesToBeatFetchedAt` null when IGDB fails; it refetches after 30 days and not before; the batched variant sends 10 ids per request.
     - Rewrite `get-times-to-beat.integration` for the `hastily,completely` fields.
@@ -57,7 +57,7 @@ Conventions for every slice:
     - `GameDetails` gains `timeToCreditsSeconds` and `timeToCompleteSeconds`. **[Agent: tanstack-fullstack]**
   - [x] Remove the live path: `get-times-to-beat-for-game.ts`, `timesToBeatQueryOptions`, its integration test, and the route prefetch and Suspense slot (`src/routes/games.$slug.tsx:31-42,114-119`).
     - `times-to-beat-section` reads the two times from loader data, labelled "Main story" and "100%" in hours. It is deleted in Slice 7. **[Agent: tanstack-fullstack]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Start the app (record the PID). Open a game page whose row has never been enriched.
     - Confirm the page renders, and that the network panel shows no separate times-to-beat server call.
