@@ -20,13 +20,14 @@ export const Route = createFileRoute("/_authed/settings")({
 function SettingsLayout() {
   const isDesktop = useIsDesktop();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const activeSegment: "profile" | "account" | undefined = pathname.endsWith(
-    "/settings/profile"
-  )
-    ? "profile"
-    : pathname.endsWith("/settings/account")
-      ? "account"
-      : undefined;
+  const activeSegment: "profile" | "account" | "play" | undefined =
+    pathname.endsWith("/settings/profile")
+      ? "profile"
+      : pathname.endsWith("/settings/account")
+        ? "account"
+        : pathname.endsWith("/settings/play")
+          ? "play"
+          : undefined;
 
   const backLink = (
     <Link

@@ -178,7 +178,7 @@ describe(ensureGamesEnrichment, () => {
       const sizes = igdbFetchMock.mock.calls.map(
         ([, query]) => idsRequestedIn(query).length
       );
-      expect(sizes.toSorted((a, b) => b - a)).toEqual([
+      expect([...sizes].sort((a, b) => b - a)).toEqual([
         BATCH_SIZE,
         BATCH_SIZE,
         5,

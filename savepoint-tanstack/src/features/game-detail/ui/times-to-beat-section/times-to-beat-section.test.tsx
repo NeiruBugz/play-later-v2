@@ -18,12 +18,12 @@ const elements = {
 };
 
 describe("TimesToBeatSection", () => {
-  describe("given both a main-story and a completionist benchmark", () => {
+  describe("given both a time to credits and a time to complete", () => {
     beforeEach(() => {
-      // mainStory 36000s = 10h, completionist 72000s = 20h
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: 36000, completionist: 72000 }}
+          timeToCreditsSeconds={36000}
+          timeToCompleteSeconds={72000}
         />
       );
     });
@@ -53,7 +53,8 @@ describe("TimesToBeatSection", () => {
     beforeEach(() => {
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: 36000, completionist: null }}
+          timeToCreditsSeconds={36000}
+          timeToCompleteSeconds={null}
         />
       );
     });
@@ -71,7 +72,8 @@ describe("TimesToBeatSection", () => {
     beforeEach(() => {
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: null, completionist: 72000 }}
+          timeToCreditsSeconds={null}
+          timeToCompleteSeconds={72000}
         />
       );
     });
@@ -89,7 +91,8 @@ describe("TimesToBeatSection", () => {
     beforeEach(() => {
       render(
         <TimesToBeatSection
-          timesToBeat={{ mainStory: null, completionist: null }}
+          timeToCreditsSeconds={null}
+          timeToCompleteSeconds={null}
         />
       );
     });
@@ -102,7 +105,12 @@ describe("TimesToBeatSection", () => {
 
   describe("given no benchmark (null)", () => {
     beforeEach(() => {
-      render(<TimesToBeatSection timesToBeat={null} />);
+      render(
+        <TimesToBeatSection
+          timeToCreditsSeconds={null}
+          timeToCompleteSeconds={null}
+        />
+      );
     });
 
     it("renders nothing, not even the heading", () => {

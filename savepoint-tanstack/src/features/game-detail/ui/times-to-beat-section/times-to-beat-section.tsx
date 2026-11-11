@@ -6,10 +6,13 @@ import type { TimesToBeatSectionProps } from "./times-to-beat-section.type";
 
 const SECONDS_PER_MINUTE = 60;
 
-export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
+export function TimesToBeatSection({
+  timeToCreditsSeconds,
+  timeToCompleteSeconds,
+}: TimesToBeatSectionProps) {
   const entries = [
-    { label: "Main story", seconds: timesToBeat?.mainStory ?? null },
-    { label: "100%", seconds: timesToBeat?.completionist ?? null },
+    { label: "Main story", seconds: timeToCreditsSeconds },
+    { label: "100%", seconds: timeToCompleteSeconds },
   ].filter(
     (entry): entry is { label: string; seconds: number } =>
       entry.seconds !== null

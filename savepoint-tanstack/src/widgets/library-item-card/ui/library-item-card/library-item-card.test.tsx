@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -128,10 +128,16 @@ const elements = {
   queryCoverImage: (title: string) => screen.queryByAltText(title),
   queryCoverPlaceholder: (title: string) =>
     screen.queryByRole("img", { name: title }),
-  queryStatusBadges: () =>
-    screen
-      .queryAllByText(/^(Want|Playing|Done|Let go)$/)
-      .filter((node) => node.getAttribute("data-slot") === "badge"),
+  queryStatusMentionsOutsideControl: (controlStatus: string) => {
+    const insideControl = within(
+      screen.getByRole("button", { name: `Status: ${controlStatus}. Change` })
+    );
+    return ["Want", "Playing", "Done", "Let go"].flatMap((label) =>
+      screen
+        .queryAllByText(label)
+        .filter((node) => !insideControl.queryAllByText(label).includes(node))
+    );
+  },
   getStatusLabelMentions: (label: string) => screen.getAllByText(label),
   getTitle: (title: string) =>
     screen.getByRole("heading", { level: 3, name: title }),
@@ -214,7 +220,7 @@ describe("LibraryItemCard", () => {
       "shows %s once, in the status control, with no badge on the cover",
       (status, label) => {
         render(<LibraryItemCard item={buildItem({ status })} />);
-        expect(elements.queryStatusBadges()).toEqual([]);
+        expect(elements.queryStatusMentionsOutsideControl(label)).toEqual([]);
         expect(elements.getStatusLabelMentions(label)).toHaveLength(1);
         expect(elements.getStatusControl(label)).toBeDefined();
       }
@@ -328,7 +334,9 @@ describe("LibraryItemCard", () => {
         expect(
           await screen.findByText("Hollow Knight is now Playing")
         ).toBeDefined();
-        expect(elements.queryStatusBadges()).toEqual([]);
+        expect(elements.queryStatusMentionsOutsideControl("Playing")).toEqual(
+          []
+        );
         expect(elements.getStatusControl("Playing")).toBeDefined();
         expect(elements.getNextStep("Mark done")).toBeDefined();
       });
@@ -356,7 +364,7 @@ describe("LibraryItemCard", () => {
         await waitFor(() =>
           expect(elements.getStatusControl("Done")).toBeDefined()
         );
-        expect(elements.queryStatusBadges()).toEqual([]);
+        expect(elements.queryStatusMentionsOutsideControl("Done")).toEqual([]);
         expect(elements.getNextStep("Play again")).toBeDefined();
       });
     });
@@ -383,7 +391,7 @@ describe("LibraryItemCard", () => {
       it("reverts the card to Want", async () => {
         await screen.findByText("Couldn't save. Try again.");
         expect(elements.getStatusControl("Want")).toBeDefined();
-        expect(elements.queryStatusBadges()).toEqual([]);
+        expect(elements.queryStatusMentionsOutsideControl("Want")).toEqual([]);
         expect(elements.getNextStep("Start playing")).toBeDefined();
       });
     });
@@ -453,10 +461,10 @@ describe("LibraryItemCard", () => {
         );
       });
 
-      it("shows Done once, in the status control, with no cover badge", () => {
+      it("shows Let go once, in the status control, with no cover badge", () => {
         expect(elements.getStatusControl("Done")).toBeDefined();
-        expect(elements.getStatusLabelMentions("Done")).toHaveLength(1);
-        expect(elements.queryStatusBadges()).toEqual([]);
+        expect(elements.getStatusLabelMentions("Let go")).toHaveLength(1);
+        expect(elements.queryStatusMentionsOutsideControl("Done")).toEqual([]);
       });
     });
   });

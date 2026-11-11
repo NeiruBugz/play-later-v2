@@ -1,8 +1,4 @@
-export {
-  getGameDetailPageDataFn,
-  getTimesToBeatForGameFn,
-  type GameDetailPageView,
-} from "./api";
+export { getGameDetailPageDataFn, type GameDetailPageView } from "./api";
 export {
   TimesToBeatSection,
   TimesToBeatSkeleton,

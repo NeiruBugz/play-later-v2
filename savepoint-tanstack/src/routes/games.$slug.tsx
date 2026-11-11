@@ -14,11 +14,7 @@ import {
 import type { RelatedCollection } from "@/features/browse-related-games/api";
 import { relatedGamesQueryOptions } from "@/features/browse-related-games/model";
 import { getGameDetailPageDataFn } from "@/features/game-detail/api";
-import { timesToBeatQueryOptions } from "@/features/game-detail/model";
-import {
-  TimesToBeatSection,
-  TimesToBeatSkeleton,
-} from "@/features/game-detail/ui";
+import { TimesToBeatSection } from "@/features/game-detail/ui";
 import { socialMeta } from "@/shared/config/site";
 import { AppError, NotFoundError } from "@/shared/lib/errors";
 import { Card } from "@/shared/ui/card";
@@ -36,7 +32,6 @@ export const Route = createFileRoute("/games/$slug")({
       throw error;
     });
     const { igdbId } = view.data.game;
-    void context.queryClient.prefetchQuery(timesToBeatQueryOptions(igdbId));
     void context.queryClient.prefetchQuery(relatedGamesQueryOptions(igdbId));
     return view;
   },
@@ -62,27 +57,10 @@ function GameDetailRoute() {
       viewerUserId={viewerUserId}
       gameSlug={data.game.slug}
       timesToBeatSlot={
-        <SectionErrorBoundary
-          fallback={
-            <Card variant="flat" className="flex flex-col gap-2 p-4">
-              <SectionErrorMessage
-                headingId="times-to-beat-heading"
-                heading="Times to beat"
-                message="Couldn't load times to beat"
-              />
-            </Card>
-          }
-        >
-          <Suspense
-            fallback={
-              <Card variant="flat" className="flex flex-col gap-2 p-4">
-                <TimesToBeatSkeleton />
-              </Card>
-            }
-          >
-            <TimesToBeatSlot igdbId={igdbId} />
-          </Suspense>
-        </SectionErrorBoundary>
+        <TimesToBeatSection
+          timeToCreditsSeconds={data.timeToCreditsSeconds}
+          timeToCompleteSeconds={data.timeToCompleteSeconds}
+        />
       }
       relatedGamesSlot={
         <SectionErrorBoundary
@@ -109,13 +87,6 @@ function GameDetailRoute() {
       }
     />
   );
-}
-
-function TimesToBeatSlot({ igdbId }: { igdbId: number }) {
-  const { data: timesToBeat } = useSuspenseQuery(
-    timesToBeatQueryOptions(igdbId)
-  );
-  return <TimesToBeatSection timesToBeat={timesToBeat} />;
 }
 
 function RelatedGamesSlot({ igdbId }: { igdbId: number }) {

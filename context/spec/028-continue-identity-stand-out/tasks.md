@@ -55,7 +55,7 @@ Conventions for every slice:
     - Create `src/entities/game/api/ensure-game-enrichment.server.ts` with `ensureGameEnrichment` / `ensureGamesEnrichment`. It refreshes after 30 days, soft-fails, and writes with one update per game. Leave room for the hue step added in Slice 5.
     - Call it from `getGameDetails` (awaited, capped at 1.5 s), the add-game worker and the steam-import worker (batched).
     - `GameDetails` gains `timeToCreditsSeconds` and `timeToCompleteSeconds`. **[Agent: tanstack-fullstack]**
-  - [ ] Remove the live path: `get-times-to-beat-for-game.ts`, `timesToBeatQueryOptions`, its integration test, and the route prefetch and Suspense slot (`src/routes/games.$slug.tsx:31-42,114-119`).
+  - [x] Remove the live path: `get-times-to-beat-for-game.ts`, `timesToBeatQueryOptions`, its integration test, and the route prefetch and Suspense slot (`src/routes/games.$slug.tsx:31-42,114-119`).
     - `times-to-beat-section` reads the two times from loader data, labelled "Main story" and "100%" in hours. It is deleted in Slice 7. **[Agent: tanstack-fullstack]**
   - [ ] Verify:
     - Run the gate, including integration.
@@ -74,12 +74,12 @@ Conventions for every slice:
     - Extend the `getLibrary` select and `LibraryItemWithGame.game` (`src/entities/library-item/model/types.ts:24-33`) with `timeToCreditsSeconds`, `coverHue` and `coverChroma`.
     - `getCurrentUserFn` selects and returns `eveningMinutes`, with 105 when signed out.
     - Add `useEveningMinutes()` in `src/entities/session/model/`. **[Agent: tanstack-fullstack]**
-  - [ ] Add the backfill script `scripts/backfill-game-enrichment.ts` (times only for now; covers are added in Slice 5):
+  - [x] Add the backfill script `scripts/backfill-game-enrichment.ts` (times only for now; covers are added in Slice 5):
     - 10 ids per request, 300 ms between requests, idempotent.
     - Prints how many games have a credits time.
     - Runs with Node's built-in TypeScript like `scripts/design-review`, and reads `@env`.
     - Add a `backfill:enrichment` package script and a short README note. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - Add `src/shared/lib/evenings.ts` (`EVENING_MINUTES_CHOICES`, `DEFAULT_EVENING_MINUTES`, `formatEvenings` with integer rounding).
     - `game-card` gains `lengthLabel?: string | null` and always renders a fixed-height line after the title.
     - `library-item-card` stops passing the StatusChip through `badges` (`:71-82`) and passes `formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)`. **[Agent: react-frontend]**
@@ -105,7 +105,7 @@ Conventions for every slice:
   - [x] Feature `src/features/set-evening-length/`: `api/set-evening-length.ts` (`createServerFn`) plus `.worker.ts`.
     - Validate twice with a `z.union` of the six literals, and use `requireUserId()`.
     - The entity is `updateProfile` (`src/entities/profile/api/update-profile.server.ts:22-61`) with an optional `eveningMinutes`. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - Add `src/shared/ui/radio-group.tsx` on Base UI Radio (base-maia style): six pill radios in a 3-column grid, each at least 44 px tall.
     - Add the route `src/routes/_authed/settings/play.tsx` titled "How long is an evening for you?", with the example line built from `formatEvenings`.
     - Add a "Play" item to `settings-rail.tsx:14-21` and `settings-list.tsx:104-114`, and extend `activeSegment` in `src/routes/_authed/settings.tsx:23-29`.

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Settings, UserCircle2 } from "lucide-react";
+import { Moon, Settings, UserCircle2 } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -20,6 +20,12 @@ const ITEMS = [
     label: "Account",
     segment: "account",
     icon: Settings,
+  },
+  {
+    to: "/settings/play",
+    label: "Play",
+    segment: "play",
+    icon: Moon,
   },
 ] as const;
 

@@ -192,11 +192,7 @@ export const SCREENS: Screen[] = [
   },
   { id: "settings-profile", auth: true, path: "/settings/profile" },
   { id: "settings-account", auth: true, path: "/settings/account" },
-  {
-    id: "settings-play",
-    auth: true,
-    skip: "Settings -> Play does not exist until spec 028 Slice 4.",
-  },
+  { id: "settings-play", auth: true, path: "/settings/play" },
   { id: "search-results", auth: true, path: "/games/search?q=zelda" },
   {
     id: "quick-search",

@@ -12,6 +12,7 @@ vi.mock("./get-current-user", () => ({
 const signedIn = {
   user: { id: "u1", name: "Ada", username: "ada", image: null },
   statusModelNoticePending: false,
+  eveningMinutes: 120,
 };
 
 describe("currentUserQueryOptions", () => {

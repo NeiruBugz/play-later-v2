@@ -94,6 +94,10 @@ vi.mock("@/features/compose-journal-entry/api/get-loggable-games", () => ({
   getLoggableGamesFn: vi.fn(),
 }));
 
+vi.mock("@/entities/session/model", () => ({
+  useEveningMinutes: () => 105,
+}));
+
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;

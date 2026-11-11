@@ -11,7 +11,15 @@ const FIXED_DATE = new Date("2025-01-01T00:00:00.000Z");
 export type LibraryItemWithGame = LibraryItem & {
   game: Pick<
     Game,
-    "id" | "igdbId" | "title" | "slug" | "coverImage" | "releaseDate"
+    | "id"
+    | "igdbId"
+    | "title"
+    | "slug"
+    | "coverImage"
+    | "releaseDate"
+    | "timeToCreditsSeconds"
+    | "coverHue"
+    | "coverChroma"
   >;
 };
 
@@ -75,10 +83,30 @@ export function buildLibraryItemWithGame(
   overrides: Partial<LibraryItem> = {},
   game: Partial<Game> = {}
 ): LibraryItemWithGame {
-  const { id, igdbId, title, slug, coverImage, releaseDate } = buildGame(game);
+  const {
+    id,
+    igdbId,
+    title,
+    slug,
+    coverImage,
+    releaseDate,
+    timeToCreditsSeconds,
+    coverHue,
+    coverChroma,
+  } = buildGame(game);
   return {
     ...buildLibraryItem({ gameId: id, ...overrides }),
-    game: { id, igdbId, title, slug, coverImage, releaseDate },
+    game: {
+      id,
+      igdbId,
+      title,
+      slug,
+      coverImage,
+      releaseDate,
+      timeToCreditsSeconds,
+      coverHue,
+      coverChroma,
+    },
   };
 }
 

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, Settings, UserCircle2 } from "lucide-react";
+import { ChevronRight, Moon, Settings, UserCircle2 } from "lucide-react";
 
 import { ThemeToggle } from "@/features/toggle-theme";
 import { PRODUCT_NAME } from "@/shared/config/site";
@@ -113,6 +113,13 @@ export function SettingsList({ activeSegment }: SettingsListProps) {
           iconBg="var(--muted-foreground)"
           label="Account"
           isActive={activeSegment === "account"}
+        />
+        <SettingsRowLink
+          to="/settings/play"
+          icon={Moon}
+          iconBg="var(--muted-foreground)"
+          label="Play"
+          isActive={activeSegment === "play"}
           isLast
         />
       </SettingsGroup>

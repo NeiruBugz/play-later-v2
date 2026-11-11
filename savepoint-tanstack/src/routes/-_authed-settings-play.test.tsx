@@ -43,6 +43,8 @@ vi.mock("@/features/set-evening-length/api/set-evening-length", () => ({
   },
 }));
 
+vi.mock("@/shared/lib/auth/auth.server", () => ({ auth: {} }));
+
 vi.mock("@/entities/session", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   useEveningMinutes: () =>

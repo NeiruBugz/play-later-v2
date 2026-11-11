@@ -4,17 +4,17 @@ import {
   NotOwnedTag,
   QueueMarker,
   StatusControl,
-  toStatusChipStatus,
 } from "@/entities/library-item";
+import { useEveningMinutes } from "@/entities/session/model";
 import {
   useSetOwnership,
   useSetStatus,
 } from "@/features/manage-library-entry/model";
 import { useUpNextMembership } from "@/features/up-next/model/use-up-next-membership";
 import { UpNextMenuActions } from "@/features/up-next/ui/up-next-menu-actions";
+import { formatEvenings } from "@/shared/lib/evenings";
 import { cn } from "@/shared/lib/utils";
 import { RatingInput } from "@/shared/ui/rating-input";
-import { StatusChip } from "@/shared/ui/status-chip";
 import { GameCard } from "@/widgets/game-card";
 
 import type { LibraryItemCardProps } from "./library-item-card.type";
@@ -24,6 +24,7 @@ export function LibraryItemCard({
   menu,
   layout = "responsive",
 }: LibraryItemCardProps) {
+  const eveningMinutes = useEveningMinutes();
   const isRow = layout === "row";
   const { status, setStatus, isPending } = useSetStatus({
     id: item.id,
@@ -69,18 +70,6 @@ export function LibraryItemCard({
           }}
           asLink
           density="minimal"
-          badges={
-            <div
-              className={cn(
-                "absolute bottom-2 left-2 flex flex-col items-start gap-1",
-                !isRow && "md:top-2 md:bottom-auto"
-              )}
-            >
-              <StatusChip
-                status={toStatusChipStatus(status, item.doneOutcome)}
-              />
-            </div>
-          }
         />
         {menuNode ? (
           <div className="absolute top-2 right-2 z-10">{menuNode}</div>
@@ -98,6 +87,13 @@ export function LibraryItemCard({
         >
           {item.game.title}
         </h3>
+
+        <p
+          data-testid="game-card-length"
+          className="h-4 text-xs leading-4 text-muted-foreground"
+        >
+          {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
+        </p>
 
         <div className="mt-1 flex flex-wrap items-center gap-1 self-start empty:hidden">
           <QueueMarker

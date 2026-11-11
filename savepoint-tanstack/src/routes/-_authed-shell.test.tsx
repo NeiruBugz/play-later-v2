@@ -149,6 +149,7 @@ describe("__root beforeLoad", () => {
   const signedIn = {
     user: { id: "u1", name: "Ada", username: "ada", image: null },
     statusModelNoticePending: true,
+    eveningMinutes: 120,
   };
 
   const runBeforeLoad = (queryClient: QueryClient) =>
@@ -163,7 +164,8 @@ describe("__root beforeLoad", () => {
 
   it("puts the current user and notice flag into the route context", async () => {
     await expect(runBeforeLoad(new QueryClient())).resolves.toEqual({
-      ...signedIn,
+      user: signedIn.user,
+      statusModelNoticePending: signedIn.statusModelNoticePending,
       siteOrigin: "https://example.test",
     });
   });

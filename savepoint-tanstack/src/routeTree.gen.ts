@@ -25,6 +25,7 @@ import { Route as AuthedJournalNewRouteImport } from './routes/_authed/journal.n
 import { Route as AuthedProfileIndexRouteImport } from './routes/_authed/profile.index'
 import { Route as AuthedProfileSetupRouteImport } from './routes/_authed/profile.setup'
 import { Route as AuthedSettingsAccountRouteImport } from './routes/_authed/settings/account'
+import { Route as AuthedSettingsPlayRouteImport } from './routes/_authed/settings/play'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
 import { Route as AuthedSteamGamesRouteImport } from './routes/_authed/steam/games'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -113,6 +114,11 @@ const AuthedSettingsAccountRoute = AuthedSettingsAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthedSettingsRoute,
 } as any)
+const AuthedSettingsPlayRoute = AuthedSettingsPlayRouteImport.update({
+  id: '/play',
+  path: '/play',
+  getParentRoute: () => AuthedSettingsRoute,
+} as any)
 const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/journal/new': typeof AuthedJournalNewRoute
   '/profile/setup': typeof AuthedProfileSetupRoute
   '/settings/account': typeof AuthedSettingsAccountRoute
+  '/settings/play': typeof AuthedSettingsPlayRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/steam/games': typeof AuthedSteamGamesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/journal/new': typeof AuthedJournalNewRoute
   '/profile/setup': typeof AuthedProfileSetupRoute
   '/settings/account': typeof AuthedSettingsAccountRoute
+  '/settings/play': typeof AuthedSettingsPlayRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/steam/games': typeof AuthedSteamGamesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/_authed/journal/new': typeof AuthedJournalNewRoute
   '/_authed/profile/setup': typeof AuthedProfileSetupRoute
   '/_authed/settings/account': typeof AuthedSettingsAccountRoute
+  '/_authed/settings/play': typeof AuthedSettingsPlayRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
   '/_authed/steam/games': typeof AuthedSteamGamesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/journal/new'
     | '/profile/setup'
     | '/settings/account'
+    | '/settings/play'
     | '/settings/profile'
     | '/steam/games'
     | '/api/auth/$'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/journal/new'
     | '/profile/setup'
     | '/settings/account'
+    | '/settings/play'
     | '/settings/profile'
     | '/steam/games'
     | '/api/auth/$'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/_authed/journal/new'
     | '/_authed/profile/setup'
     | '/_authed/settings/account'
+    | '/_authed/settings/play'
     | '/_authed/settings/profile'
     | '/_authed/steam/games'
     | '/api/auth/$'
@@ -434,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSettingsAccountRouteImport
       parentRoute: typeof AuthedSettingsRoute
     }
+    '/_authed/settings/play': {
+      id: '/_authed/settings/play'
+      path: '/play'
+      fullPath: '/settings/play'
+      preLoaderRoute: typeof AuthedSettingsPlayRouteImport
+      parentRoute: typeof AuthedSettingsRoute
+    }
     '/_authed/settings/profile': {
       id: '/_authed/settings/profile'
       path: '/profile'
@@ -495,11 +514,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthedSettingsRouteChildren {
   AuthedSettingsAccountRoute: typeof AuthedSettingsAccountRoute
+  AuthedSettingsPlayRoute: typeof AuthedSettingsPlayRoute
   AuthedSettingsProfileRoute: typeof AuthedSettingsProfileRoute
 }
 
 const AuthedSettingsRouteChildren: AuthedSettingsRouteChildren = {
   AuthedSettingsAccountRoute: AuthedSettingsAccountRoute,
+  AuthedSettingsPlayRoute: AuthedSettingsPlayRoute,
   AuthedSettingsProfileRoute: AuthedSettingsProfileRoute,
 }
 
