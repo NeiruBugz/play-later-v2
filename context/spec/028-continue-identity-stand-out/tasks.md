@@ -1,4 +1,3 @@
-<!-- not-user-reviewed -->
 # Tasks: Continue? identity round 2 (spec 028)
 
 - **Functional spec:** [functional-spec.md](./functional-spec.md)
