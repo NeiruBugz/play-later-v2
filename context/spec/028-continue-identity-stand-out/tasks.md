@@ -132,7 +132,7 @@ Conventions for every slice:
     - Check tap sizes on the Play page at 390 wide.
     - Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 5: The game page opens with a cover-tinted header showing identity and key facts**
+- [x] **Slice 5: The game page opens with a cover-tinted header showing identity and key facts**
   - [x] RED tests:
     - Unit `src/shared/lib/cover-tint.test.ts` with pixel fixtures: mostly red gives a red hue; greyscale gives null; white with a small colored logo gives null; a red split across 355° and 5° gives a hue near 0, not 180.
     - Extend `src/shared/ui/contrast.test.ts` with the hue 0–359 sweep at the chroma cap, in Light and Dark. Foreground, ink and the primary button must be at least 4.5:1 against the wash, and title contrast must differ by at most 0.5 between any two hues.
@@ -158,7 +158,7 @@ Conventions for every slice:
     - Identity: `GameCover size="lg"`, then `[year, developer, genres[0]]` with the developer taken from involved companies, then the title in `font-display`.
     - `game-key-facts` with `formatPlatformFact` (export `abbreviatePlatformName` from the `entities/game` public API). Values use `--tint-ink`.
     - Desktop: `md:grid-cols-[200px_1fr] items-end`, with no backdrop room (`pt-36 md:pt-44`) and no blurred screenshot. The existing actions stay below the header until Slice 6. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration. Run the backfill locally and confirm the tinted count.
     - Start the app (record the PID) and open the red, green, black-and-white and no-cover fixture games, in Light and Dark:
       - the red and green headers are tinted in their hue, pale in Light and deep in Dark;
