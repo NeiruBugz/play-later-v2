@@ -63,4 +63,19 @@ describe("buildSteamOpenIdLoginUrl", () => {
       expect(params.get("openid.realm")).toBe("https://app.example.com");
     });
   });
+
+  describe("given a site URL with a trailing slash", () => {
+    const url = buildSteamOpenIdLoginUrl("https://app.example.com/", STATE);
+    const params = new URL(url).searchParams;
+
+    it("keeps a single slash before /steam/callback in return_to", () => {
+      expect(params.get("openid.return_to")).toBe(
+        `https://app.example.com/steam/callback?state=${STATE}`
+      );
+    });
+
+    it("uses the bare origin as realm", () => {
+      expect(params.get("openid.realm")).toBe("https://app.example.com");
+    });
+  });
 });
