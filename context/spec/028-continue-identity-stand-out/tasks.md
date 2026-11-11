@@ -272,7 +272,7 @@ Conventions for every slice:
     - Confirm the Light and Dark tints follow the red and green fixtures.
     - Reseed afterwards. Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
-- [ ] **Slice 9: Below the question, Home shows the Up Next shelf, Also playing and the counts line**
+- [x] **Slice 9: Below the question, Home shows the Up Next shelf, Also playing and the counts line**
   - [x] RED tests:
     - Rewrite `up-next-shelf.test`:
       - no status chips;
@@ -297,7 +297,7 @@ Conventions for every slice:
     - Update `up-next-shelf.tsx`: remove the StatusChip overlay (`:47-51`) and "Play next" (`:53-61`), and add the new captions.
     - Add `ui/also-playing/` to replace `dashboard-playing-section`, and `ui/dashboard-counts-line/` to replace `dashboard-status-strip`.
     - `dashboard-page.tsx`: the `PageHeader` shows on desktop only, with an outline Add game. Set the section order and the empty-state condition. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - Start the app (record the PID). At 390×844 with one Playing game, the first Up Next cover is fully visible without scrolling, and the bottom-bar Log is in the bottom third.
     - With 5 queued games, scrolling the shelf sideways doesn't scroll the page, at 360, 390 and 430.
