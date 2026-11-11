@@ -96,7 +96,7 @@ export function GameHeader({ data, eveningMinutes, actions }: GameHeaderProps) {
         <div className="flex min-w-0 flex-col gap-3">
           <div className="min-w-0">
             {identityLine ? (
-              <p className="mb-1.5 text-xs font-medium text-[var(--tint-ink)]">
+              <p className="mb-1.5 text-base font-medium text-[var(--tint-ink)] md:text-xs">
                 {identityLine}
               </p>
             ) : null}

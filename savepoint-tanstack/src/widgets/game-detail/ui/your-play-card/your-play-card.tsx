@@ -39,7 +39,7 @@ export function YourPlayCard({
       className="flex h-full flex-col gap-3 p-4"
     >
       <SectionLabel>Your play</SectionLabel>
-      <p className="text-sm tabular-nums">
+      <p className="text-base tabular-nums md:text-sm">
         {formatSessionsLine(playtimeTotalMinutes, playtimeSessionCount)}
       </p>
       <GameRating libraryItemId={entry.id} rating={entry.rating} />

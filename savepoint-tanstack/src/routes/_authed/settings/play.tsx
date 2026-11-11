@@ -159,7 +159,7 @@ function SettingsPlayPage() {
           </p>
         ) : null}
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground md:text-sm">
         A {EXAMPLE_GAME_HOURS}-hour game is {exampleEvenings}.
       </p>
     </div>

@@ -110,7 +110,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
           </h3>
           <p
             data-testid="game-card-length"
-            className="h-4 text-xs leading-4 text-muted-foreground"
+            className="h-6 text-base leading-6 text-muted-foreground md:h-4 md:text-xs md:leading-4"
           >
             {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
           </p>

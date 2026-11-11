@@ -65,11 +65,11 @@ export function GameNotesList({
                   ) : null}
                 </span>
                 {note.prompt ? (
-                  <span className="text-sm font-medium">
+                  <span className="text-base font-medium md:text-sm">
                     {PROMPT_QUESTION[note.prompt]}
                   </span>
                 ) : null}
-                <span className="line-clamp-2 text-sm leading-snug">
+                <span className="line-clamp-2 text-base leading-snug md:text-sm">
                   {noteText(note)}
                 </span>
               </Link>

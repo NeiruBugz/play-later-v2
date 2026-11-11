@@ -25,7 +25,7 @@ export function DashboardCountsLine({ counts }: DashboardCountsLineProps) {
           <Link
             to="/library"
             search={{ status: entry.value }}
-            className="-my-3 py-3 hover:text-foreground hover:underline md:my-0 md:py-0"
+            className="inline-flex min-h-11 items-center hover:text-foreground hover:underline md:min-h-0"
           >
             {counts[entry.value]} {entry.label.toLowerCase()}
           </Link>

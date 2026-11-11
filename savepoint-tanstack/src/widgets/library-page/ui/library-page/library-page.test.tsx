@@ -892,7 +892,7 @@ describe("LibraryPage", () => {
       );
 
       expect(lengthLine).toBeEmptyDOMElement();
-      expect(lengthLine).toHaveClass("h-4");
+      expect(lengthLine).toHaveClass("h-6");
     });
 
     it("renders the primary action after the game link in the tile", () => {

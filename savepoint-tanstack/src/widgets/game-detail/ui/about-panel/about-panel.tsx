@@ -73,7 +73,7 @@ export function AboutPanel({
       ) : null}
 
       {facts.length > 0 ? (
-        <dl className="flex flex-col gap-1 text-sm">
+        <dl className="flex flex-col gap-1 text-base md:text-sm">
           {facts.map((fact) => (
             <div key={fact.term} className="flex gap-2">
               <dt className="w-24 shrink-0 text-muted-foreground">
