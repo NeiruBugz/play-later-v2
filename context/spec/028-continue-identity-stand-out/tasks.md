@@ -265,7 +265,7 @@ Conventions for every slice:
     - Reseed afterwards. Stop the server by PID and delete any screenshots. **[Agent: testing]**
 
 - [ ] **Slice 9: Below the question, Home shows the Up Next shelf, Also playing and the counts line**
-  - [ ] RED tests:
+  - [x] RED tests:
     - Rewrite `up-next-shelf.test`:
       - no status chips;
       - the first cover is larger and captioned "About 18 evenings" for 31 h, or with its title when the length is unknown;

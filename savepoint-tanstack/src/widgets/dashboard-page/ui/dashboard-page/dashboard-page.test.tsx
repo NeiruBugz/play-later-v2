@@ -1,18 +1,39 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
+import { Toaster } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DashboardPageData } from "@/features/dashboard";
 
+import { buildLibraryItemWithGame } from "../../../../../test/factories/builders.ts";
 import { DashboardPage } from "./dashboard-page";
 
-const mockNavigate = vi.fn();
+type Playing = DashboardPageData["playing"][number];
+type Queued = DashboardPageData["upNextQueue"][number];
+
+const { navigateMock, invalidateMock, setStatusFnMock, isDesktop } = vi.hoisted(
+  () => ({
+    navigateMock: vi.fn(),
+    invalidateMock: vi.fn(),
+    setStatusFnMock: vi.fn(),
+    isDesktop: { current: false },
+  })
+);
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ to, children, ...rest }: any) => {
-    const search = rest.search as Record<string, string> | undefined;
-    delete rest.params;
-    delete rest.search;
+  useNavigate: () => navigateMock,
+  useRouter: () => ({ invalidate: invalidateMock }),
+  Link: ({
+    to,
+    children,
+    search,
+    ...rest
+  }: {
+    to?: string;
+    children: ReactNode;
+    search?: Record<string, string>;
+  }) => {
     const query = search ? `?${new URLSearchParams(search).toString()}` : "";
     return (
       <a href={`${to}${query}`} {...rest}>
@@ -20,12 +41,13 @@ vi.mock("@tanstack/react-router", () => ({
       </a>
     );
   },
-  useNavigate: () => mockNavigate,
-  useRouter: () => ({ invalidate: vi.fn() }),
 }));
-
+vi.mock("@/shared/lib/use-media-query", () => ({
+  useIsDesktop: () => isDesktop.current,
+  useMediaQuery: () => isDesktop.current,
+}));
 vi.mock("@/features/manage-library-entry/api/set-status-fn", () => ({
-  setStatusFn: vi.fn(),
+  setStatusFn: setStatusFnMock,
 }));
 vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
   undoStatusFn: vi.fn(),
@@ -33,11 +55,13 @@ vi.mock("@/features/manage-library-entry/api/undo-status-fn", () => ({
 vi.mock("@/entities/session/model", () => ({
   useEveningMinutes: () => 105,
 }));
-
 vi.mock("@/features/command-palette", () => ({
   openCommandPalette: vi.fn(),
 }));
-
+vi.mock("@/shared/lib/user-facing-error", () => ({
+  SAVE_FAILED_MESSAGE: "Couldn't save. Try again.",
+  getUserFacingErrorMessage: () => "Couldn't save. Try again.",
+}));
 vi.mock("@/shared/lib/igdb-image", () => ({
   buildCoverImageUrl: () => "https://images.igdb.com/cover.jpg",
   buildCoverImageProps: () => ({
@@ -46,28 +70,22 @@ vi.mock("@/shared/lib/igdb-image", () => ({
   }),
 }));
 
-function makeItem(id: string, title: string, overrides: object = {}) {
+function playing(id: number, title: string): Playing {
   return {
-    id,
-    status: "PLAYING",
-    platform: "PC",
-    upNextPosition: null,
-    game: {
-      id: `game-${id}`,
-      igdbId: 1,
-      title,
-      slug: title.toLowerCase().replace(/\s+/g, "-"),
-      coverImage: "abc",
-    },
-    ...overrides,
-  } as unknown as DashboardPageData["playing"][number];
+    ...buildLibraryItemWithGame(
+      { id, status: "PLAYING", platform: "PC" },
+      { id: `game-${id}`, title, slug: title.toLowerCase() }
+    ),
+    lastSessionAt: null,
+    becamePlayingAt: new Date(2026, 5, 1),
+  };
 }
 
-function makeQueued(position: number, title: string) {
-  return makeItem(`q${position}`, title, {
-    status: "WANT",
-    upNextPosition: position,
-  });
+function queued(position: number, title: string): Queued {
+  return buildLibraryItemWithGame(
+    { id: 100 + position, status: "WANT", upNextPosition: position },
+    { id: `game-q${position}`, title, slug: title.toLowerCase() }
+  );
 }
 
 function makeData(
@@ -84,225 +102,234 @@ function makeData(
 
 const QUEUE_EMPTY_COPY = "Nothing queued yet — put up to 5 games in Up Next.";
 
+const threePlayingAndQueue = makeData({
+  playing: [playing(1, "Hades"), playing(2, "Celeste"), playing(3, "Tunic")],
+  upNextQueue: [queued(1, "Disco"), queued(2, "Inside")],
+  upNextTotal: 2,
+  counts: { WANT: 6, PLAYING: 3, DONE: 4 },
+});
+
 const elements = {
-  getHomeHeading: () => screen.getByRole("heading", { level: 1 }),
-  getPlayingSection: () => screen.getByRole("region", { name: "Playing" }),
-  getUpNextSection: () => screen.getByRole("region", { name: "Up Next" }),
-  getCountsStrips: () => screen.queryAllByLabelText("Library status summary"),
-  getAddGameButtons: () =>
-    screen.getAllByRole("button", { name: "Add a game" }),
-  queryPickFromUpNext: () =>
-    screen.queryByRole("link", { name: "Pick from Up Next" }),
+  queryHomeTitle: () => screen.queryByRole("heading", { level: 1 }),
+  getHomeTitle: () => screen.getByRole("heading", { level: 1 }),
+  queryAddGame: () => screen.queryByRole("button", { name: "Add game" }),
+  getAddGame: () => screen.getByRole("button", { name: "Add game" }),
+  getQuestion: (text: string) => screen.getByRole("heading", { name: text }),
+  getUpNext: () => screen.getByRole("region", { name: "Up Next" }),
+  getAlsoPlaying: () => screen.getByRole("region", { name: "Also playing" }),
+  queryAlsoPlaying: () =>
+    screen.queryByRole("region", { name: "Also playing" }),
+  getCounts: () => screen.getByTestId("dashboard-counts-line"),
   getEmptyStates: () => screen.queryAllByRole("status"),
 };
 
+function renderPage(data: DashboardPageData) {
+  const view = render(
+    <>
+      <DashboardPage data={data} />
+      <Toaster />
+    </>
+  );
+  const reload = (next: DashboardPageData) =>
+    view.rerender(
+      <>
+        <DashboardPage data={next} />
+        <Toaster />
+      </>
+    );
+  return { ...view, reload };
+}
+
 describe("DashboardPage", () => {
   beforeEach(() => {
-    mockNavigate.mockReset();
+    navigateMock.mockReset();
+    invalidateMock.mockReset();
+    setStatusFnMock.mockReset();
+    isDesktop.current = false;
   });
 
-  describe("given one Playing game and a full queue", () => {
+  describe("given the phone layout", () => {
     beforeEach(() => {
-      render(
-        <DashboardPage
-          data={makeData({
-            playing: [makeItem("p1", "Elden Ring")],
-            upNextQueue: [
-              makeQueued(1, "Hades"),
-              makeQueued(2, "Celeste"),
-              makeQueued(3, "Hollow Knight"),
-            ],
-            upNextTotal: 5,
-            counts: { WANT: 6, PLAYING: 1, DONE: 4 },
-          })}
-        />
-      );
+      isDesktop.current = false;
+      renderPage(threePlayingAndQueue);
+    });
+
+    it("has no Home title, so the question panel comes first", () => {
+      expect(elements.queryHomeTitle()).toBeNull();
+      expect(elements.getQuestion("Continue Hades?")).toBeVisible();
+    });
+
+    it("has no Add game button", () => {
+      expect(elements.queryAddGame()).toBeNull();
+    });
+  });
+
+  describe("given the desktop layout", () => {
+    beforeEach(() => {
+      isDesktop.current = true;
+      renderPage(threePlayingAndQueue);
     });
 
     it("titles the screen Home", () => {
-      expect(elements.getHomeHeading()).toHaveTextContent("Home");
+      expect(elements.getHomeTitle()).toHaveTextContent("Home");
     });
 
-    it("shows the Playing game exactly once", () => {
-      expect(screen.getAllByText("Elden Ring")).toHaveLength(1);
+    it("offers Add game as an outline button", () => {
+      expect(elements.getAddGame()).toHaveClass("border-border");
+      expect(elements.getAddGame()).not.toHaveClass("bg-primary");
     });
 
-    it("keeps the Playing game inside the Playing section only", () => {
+    it("opens the add search from Add game", async () => {
+      await userEvent.click(elements.getAddGame());
+      const { search } = navigateMock.mock.calls[0][0];
+      expect(search({})).toEqual({ action: "add-game", game: undefined });
+    });
+  });
+
+  describe("given three Playing games and a queue", () => {
+    beforeEach(() => {
+      renderPage(threePlayingAndQueue);
+    });
+
+    it("stacks the question panel, the shelf, Also playing, then the counts", () => {
+      const inPageOrder = [
+        elements.getQuestion("Continue Hades?"),
+        elements.getUpNext(),
+        elements.getAlsoPlaying(),
+        elements.getCounts(),
+      ];
+      const sortedByPosition = [...inPageOrder].sort((a, b) =>
+        a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+      );
+      expect(sortedByPosition).toEqual(inPageOrder);
+    });
+
+    it("lists the Playing games after the first under Also playing", () => {
+      const rows = within(elements.getAlsoPlaying()).getAllByRole("listitem");
       expect(
-        within(elements.getUpNextSection()).queryByText("Elden Ring")
-      ).toBeNull();
+        rows.map((row) => within(row).getByRole("link").textContent)
+      ).toEqual(["Celeste", "Tunic"]);
     });
 
-    it("shows the status counts once", () => {
-      expect(elements.getCountsStrips()).toHaveLength(1);
-      const strip = elements.getCountsStrips()[0];
-      expect(strip).toHaveTextContent("11 games");
-      expect(within(strip).getByRole("link", { name: /Want 6/ })).toBeVisible();
-      expect(within(strip).getByRole("link", { name: /Done 4/ })).toBeVisible();
-    });
-
-    it("lists the queued games in queue order with their markers", () => {
-      const upNext = within(elements.getUpNextSection());
-      const titles = upNext
-        .getAllByRole("link")
-        .map((el) => el.textContent ?? "")
-        .filter((text) => /Hades|Celeste|Hollow Knight/.test(text));
-      expect(
-        titles.map((text) => text.match(/Hades|Celeste|Hollow/)![0])
-      ).toEqual(["Hades", "Celeste", "Hollow"]);
-      expect(upNext.getAllByText(/Up Next #/)).toHaveLength(3);
-    });
-
-    it("links See all to the library's Up Next view", () => {
-      expect(
-        within(elements.getUpNextSection()).getByRole("link", {
-          name: /see all/i,
-        })
-      ).toHaveAttribute("href", "/library?status=UP_NEXT");
+    it("tells the status counts once, in one line", () => {
+      expect(elements.getCounts()).toHaveTextContent(
+        "13 games · 6 want · 3 playing · 4 done"
+      );
     });
 
     it("shows no empty state", () => {
       expect(elements.getEmptyStates()).toHaveLength(0);
     });
 
-    it("lays out Up Next first, then Playing, so Up Next is the first thing on a phone", () => {
-      const sections = screen
-        .getAllByRole("region")
-        .map((el) => el.getAttribute("aria-labelledby"));
-      expect(sections).toEqual([
-        "home-up-next-heading",
-        "home-playing-heading",
-      ]);
-      expect(
-        within(elements.getPlayingSection()).getAllByRole("listitem")
-      ).toHaveLength(1);
-    });
-
-    it("logs time for the Playing game from its Log button", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "Log" }));
-      const { search } = mockNavigate.mock.calls[0][0];
-      expect(search({})).toEqual({ action: "log-session", game: "elden-ring" });
+    it("keeps Also playing the same after Not tonight", async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "Not tonight" })
+      );
+      expect(elements.getQuestion("Continue Celeste?")).toBeVisible();
+      const rows = within(elements.getAlsoPlaying()).getAllByRole("listitem");
+      expect(rows).toHaveLength(2);
+      expect(within(rows[0]).getByRole("link")).toHaveTextContent("Celeste");
     });
   });
 
-  describe("given a stats card, distribution bar or recent history would once have shown", () => {
-    beforeEach(() => {
-      render(
-        <DashboardPage
-          data={makeData({
-            playing: [makeItem("p1", "Elden Ring")],
-            counts: { WANT: 3, PLAYING: 1, DONE: 3 },
-          })}
-        />
+  describe("given one Playing game and a queued game", () => {
+    it("shows no Also playing section", () => {
+      renderPage(
+        makeData({
+          playing: [playing(1, "Hades")],
+          upNextQueue: [queued(1, "Disco")],
+          counts: { WANT: 1, PLAYING: 1, DONE: 0 },
+        })
       );
+      expect(elements.queryAlsoPlaying()).toBeNull();
     });
 
-    it("shows none of them and avoids retired words", () => {
-      const text = document.body.textContent ?? "";
-      expect(text).not.toMatch(/recently played/i);
-      expect(text).not.toMatch(
-        /dashboard|playthrough|backlog|completed|log session/i
-      );
-      expect(screen.queryByRole("progressbar")).toBeNull();
-      expect(
-        screen.queryByRole("img", { name: /distribution|chart/i })
-      ).toBeNull();
+    describe("when the user skips to the queued game and taps Start playing", () => {
+      it("lists the earlier Playing game under Also playing", async () => {
+        const hades = playing(1, "Hades");
+        const disco = playing(2, "Disco");
+        const { reload } = renderPage(
+          makeData({
+            playing: [hades],
+            upNextQueue: [queued(2, "Disco")],
+            counts: { WANT: 1, PLAYING: 1, DONE: 0 },
+          })
+        );
+        setStatusFnMock.mockResolvedValue({
+          status: "PLAYING",
+          upNextPosition: null,
+          undo: { snapshot: {}, createdPlayId: null, closedPlayId: null },
+        });
+        invalidateMock.mockImplementationOnce(async () =>
+          reload(
+            makeData({
+              playing: [disco, hades],
+              counts: { WANT: 0, PLAYING: 2, DONE: 0 },
+            })
+          )
+        );
+
+        await userEvent.click(
+          screen.getByRole("button", { name: "Not tonight" })
+        );
+        await userEvent.click(
+          screen.getByRole("button", { name: "Start playing" })
+        );
+
+        await waitFor(() =>
+          expect(
+            within(elements.getAlsoPlaying()).getByText("Hades")
+          ).toBeVisible()
+        );
+      });
     });
   });
 
   describe("given nothing is Playing and the queue has games", () => {
     beforeEach(() => {
-      render(
-        <DashboardPage
-          data={makeData({
-            upNextQueue: [makeQueued(1, "Hades")],
-            upNextTotal: 1,
-            counts: { WANT: 1, PLAYING: 0, DONE: 0 },
-          })}
-        />
-      );
-    });
-
-    it("shows exactly one empty state", () => {
-      expect(elements.getEmptyStates()).toHaveLength(1);
-    });
-
-    it("offers Pick from Up Next, opening the library's Up Next view", () => {
-      expect(elements.queryPickFromUpNext()).toHaveAttribute(
-        "href",
-        "/library?status=UP_NEXT"
-      );
-    });
-
-    it("does not offer a second Add a game button in the empty state", () => {
-      expect(
-        within(elements.getEmptyStates()[0]).queryByRole("button", {
-          name: "Add a game",
+      renderPage(
+        makeData({
+          upNextQueue: [queued(1, "Disco")],
+          upNextTotal: 1,
+          counts: { WANT: 1, PLAYING: 0, DONE: 0 },
         })
-      ).toBeNull();
+      );
+    });
+
+    it("shows Nothing playing right now with Pick from Up Next", () => {
+      expect(elements.getEmptyStates()).toHaveLength(1);
+      expect(screen.getByText("Nothing playing right now")).toBeVisible();
+      expect(
+        screen.getByRole("link", { name: "Pick from Up Next" })
+      ).toHaveAttribute("href", "/library?status=UP_NEXT");
+    });
+
+    it("shows no Also playing section", () => {
+      expect(elements.queryAlsoPlaying()).toBeNull();
     });
   });
 
-  describe("given nothing is Playing and the queue is empty", () => {
+  describe("given an empty library", () => {
     beforeEach(() => {
-      render(<DashboardPage data={makeData()} />);
+      renderPage(makeData());
     });
 
-    it("shows exactly one empty state with Add a game", () => {
-      expect(elements.getEmptyStates()).toHaveLength(1);
-      expect(elements.getAddGameButtons()).toHaveLength(1);
-      expect(elements.queryPickFromUpNext()).toBeNull();
-    });
-
-    it("opens the add search from Add a game", async () => {
-      await userEvent.click(elements.getAddGameButtons()[0]);
-      const { search } = mockNavigate.mock.calls[0][0];
+    it("shows Nothing playing right now with Add a game", async () => {
+      expect(screen.getByText("Nothing playing right now")).toBeVisible();
+      await userEvent.click(screen.getByRole("button", { name: "Add a game" }));
+      const { search } = navigateMock.mock.calls[0][0];
       expect(search({})).toEqual({ action: "add-game", game: undefined });
     });
 
     it("explains the empty queue once, inside the Up Next section", () => {
       expect(screen.getAllByText(QUEUE_EMPTY_COPY)).toHaveLength(1);
       expect(
-        within(elements.getUpNextSection()).getByText(QUEUE_EMPTY_COPY)
+        within(elements.getUpNext()).getByText(QUEUE_EMPTY_COPY)
       ).toBeVisible();
-      expect(screen.queryByRole("link", { name: /see all/i })).toBeNull();
     });
 
-    it("has a single main landmark region of its own: none, since the app shell owns it", () => {
-      expect(screen.queryByRole("main")).toBeNull();
-    });
-
-    it("shows no counts strip for an empty library", () => {
-      expect(elements.getCountsStrips()).toHaveLength(0);
-    });
-  });
-
-  describe("given a Playing game and an empty queue", () => {
-    beforeEach(() => {
-      render(
-        <DashboardPage
-          data={makeData({
-            playing: [makeItem("p1", "Elden Ring")],
-            counts: { WANT: 0, PLAYING: 1, DONE: 0 },
-          })}
-        />
-      );
-    });
-
-    it("keeps the Up Next empty copy and shows no empty state", () => {
-      expect(
-        within(elements.getUpNextSection()).getByText(QUEUE_EMPTY_COPY)
-      ).toBeVisible();
-      expect(elements.getEmptyStates()).toHaveLength(0);
-    });
-  });
-
-  describe("given the Home header", () => {
-    it("opens the add search from the Add game button", async () => {
-      render(<DashboardPage data={makeData()} />);
-      await userEvent.click(screen.getByRole("button", { name: "Add game" }));
-      const { search } = mockNavigate.mock.calls[0][0];
-      expect(search({})).toEqual({ action: "add-game", game: undefined });
+    it("shows no counts line", () => {
+      expect(screen.queryByTestId("dashboard-counts-line")).toBeNull();
     });
   });
 });
