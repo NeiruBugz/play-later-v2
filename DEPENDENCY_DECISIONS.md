@@ -126,6 +126,18 @@ Each entry records:
   override to cover the modern `yaml` package family. Exact pin.
 - **Added**: pre-2026
 
+### `@tanstack/router-core>seroval-plugins`: `1.7.7`
+
+- **Why**: Scoped pin to keep the `seroval-plugins` that router-core uses
+  compatible with the root `seroval` 1.7.2 pin. A lockfile refresh let it
+  resolve to `seroval-plugins` 1.8.0, which imports `seroval/shared` (a path
+  only seroval ^1.8.0 exports). That broke `vite build` with `"./shared" is
+  not exported ... from package seroval`. Scoped to router-core so other
+  consumers (solid-js → 1.5.6) are untouched.
+- **Added**: 2026-11-12 (PR #390).
+- **Revisit**: lift together with the `seroval` pin once seroval 1.8.x and
+  seroval-plugins 1.8.x are both past the 7-day quarantine.
+
 ## Removed overrides (kept for historical context)
 
 ### `glob`: `^10.5.0` — removed 2026-05-23
