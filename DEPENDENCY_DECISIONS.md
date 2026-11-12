@@ -138,6 +138,28 @@ Each entry records:
 - **Revisit**: lift together with the `seroval` pin once seroval 1.8.x and
   seroval-plugins 1.8.x are both past the 7-day quarantine.
 
+### `eslint-plugin-react-hooks>@babel/core`: `7.29.7`
+
+- **Why**: Dependabot alert #156 (arbitrary file read via `sourceMappingURL`,
+  fixed in 7.29.6). eslint-plugin-react-hooks 6.1.1 resolved `@babel/core`
+  7.28.5; its declared range is `^7.24.4`, so 7.29.7 is in-range. Scoped to
+  this one consumer because an unscoped `@babel/core` refresh previously broke
+  the TanStack Router code-split build (`Export 'SplitNotFoundComponent' is
+  not defined`). Dev-only (lint).
+- **Added**: 2026-11-12.
+- **Revisit**: drop when eslint-plugin-react-hooks is upgraded and resolves a
+  patched `@babel/core` on its own.
+
+### `@tailwindcss/typography>postcss-selector-parser`: `6.1.5`
+
+- **Why**: Dependabot alert #300 (quadratic-complexity selector parsing, fixed
+  in 6.1.5). `@tailwindcss/typography` pins `postcss-selector-parser` to
+  exactly `6.0.10`, even in its latest release (0.5.20), so it can only be
+  forced via override. 6.1.x is semver-compatible with 6.0.x. Build-time only.
+- **Added**: 2026-11-12.
+- **Revisit**: drop when `@tailwindcss/typography` ships with a patched
+  `postcss-selector-parser`.
+
 ## Removed overrides (kept for historical context)
 
 ### `glob`: `^10.5.0` — removed 2026-05-23
