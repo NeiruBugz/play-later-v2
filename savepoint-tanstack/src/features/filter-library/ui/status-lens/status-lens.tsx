@@ -78,7 +78,7 @@ export function StatusLens({
     <div
       role="tablist"
       aria-label="Filter by status"
-      className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="-mx-1 flex [scrollbar-width:none] gap-2 overflow-x-auto px-1 py-1 [&::-webkit-scrollbar]:hidden"
     >
       {chips.map((chip) => {
         const active = currentValue === chip.value;

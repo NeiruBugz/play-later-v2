@@ -100,7 +100,7 @@ export function UpNextShelf({ items }: UpNextShelfProps) {
         <ul
           data-scroller
           aria-label="Up Next, in play order"
-          className="-mx-4 flex min-w-0 snap-x snap-mandatory [scroll-padding-inline:1rem] items-start gap-3 overflow-x-auto overscroll-x-contain scroll-smooth px-4 pb-1 [scrollbar-width:none] md:mx-0 md:[scroll-padding-inline:0] md:px-0 [&::-webkit-scrollbar]:hidden"
+          className="-mx-4 flex min-w-0 snap-x snap-mandatory [scroll-padding-inline:1rem] [scrollbar-width:none] items-start gap-3 overflow-x-auto overscroll-x-contain scroll-smooth px-4 pb-1 md:mx-0 md:[scroll-padding-inline:0] md:px-0 [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => (
             <ShelfItem key={item.id} item={item} isNext={index === 0} />
