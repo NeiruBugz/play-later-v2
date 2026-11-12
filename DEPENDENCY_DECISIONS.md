@@ -29,7 +29,7 @@ Each entry records:
 - **Added**: pre-2026; pinned exact 2026-05-23.
 - **Revisit**: when bumping Better Auth, drop the override and re-test.
 
-### `valibot`: `1.2.0`
+### `valibot`: `1.4.2`
 
 - **Why**: Transitive pin to keep a single major version across the workspace
   (originally added during the spec-021 parallel-app migration to stop the two
@@ -37,7 +37,9 @@ Each entry records:
   `savepoint-app/` is gone; the override is now a defensive single-version pin
   for the remaining transitive consumers. (Was a `^1.2.0` caret; tightened to
   exact 2026-05-23 — the caret already resolved to 1.2.0, so this is a no-tree
-  change that removes future re-resolution drift.)
+  change that removes future re-resolution drift.) Bumped to `1.4.2`
+  2026-11-12 for Dependabot alert #183 (`record()` issue paths break
+  `flatten()`).
 - **Added**: spec 021 era; pinned exact 2026-05-23.
 - **Revisit**: drop if no transitive consumer pulls valibot after a dependency
   sweep.
@@ -51,16 +53,17 @@ Each entry records:
 - **Added**: pre-2026; pinned exact 2026-05-23.
 - **Revisit**: only if upstream consumers move to a hard `^5` pin.
 
-### `fast-xml-parser`: `5.7.3`
+### `fast-xml-parser`: `5.12.0`
 
 - **Why**: Pinned exactly (per project rule `feedback_pin_exact_versions`) to
   the version that the AWS SDK currently resolves. Earlier versions had RCE
   CVEs (CVE-2024-41818). Replacing the previous open-ended `>=5.3.8` so future
   installs cannot drift quietly into a version we haven't reviewed.
 - **Added**: original CVE remediation pre-2026; tightened to `5.4.1` 2026-05-18,
-  bumped to `5.7.3` to track the AWS SDK's resolved version.
+  bumped to `5.7.3` to track the AWS SDK's resolved version, then to `5.12.0`
+  2026-11-12 for Dependabot alert #315 (quadratic CPU on unterminated tags).
 - **Revisit**: when the AWS SDK or other primary consumers declare a tighter
-  range that includes `5.7.3` or later.
+  range that includes `5.12.0` or later.
 
 ### `fast-xml-builder`: `1.2.0`
 
@@ -77,10 +80,11 @@ Each entry records:
 - **Added**: pre-2026.
 - **Revisit**: when all consumers declare a range that includes `3.1.2` or later.
 
-### `handlebars`: `4.7.9`
+### `handlebars`: `4.7.10`
 
 - **Why**: Defensive against older versions with prototype-pollution CVEs
-  (CVE-2019-19919 family). Exact pin.
+  (CVE-2019-19919 family). Exact pin. Bumped from `4.7.9` 2026-11-12: 4.7.9
+  itself is vulnerable to JS injection (Dependabot alerts #239, #240, #242).
 - **Added**: pre-2026
 
 ### `lodash`: `4.18.1`
@@ -104,9 +108,11 @@ Each entry records:
 - **Why**: ReDoS fix (CVE-2024-45296). Exact pin.
 - **Added**: pre-2026
 
-### `brace-expansion`: `2.0.2`
+### `brace-expansion`: `2.1.7`
 
-- **Why**: ReDoS fix in shell-style brace expansion. Exact pin.
+- **Why**: ReDoS fix in shell-style brace expansion. Exact pin. Bumped from
+  `2.0.2` 2026-11-12: the 2.0.x line has six DoS advisories fixed across
+  2.0.3–2.1.7 (Dependabot alerts #74, #185, #197, #199, #268–#270).
 - **Added**: pre-2026
 
 ### `smol-toml`: `1.6.1`

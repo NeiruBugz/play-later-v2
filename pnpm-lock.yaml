@@ -9,17 +9,17 @@ overrides:
   ws: 8.21.0
   undici: 7.30.1
   vite: 8.3.5
-  valibot: 1.2.0
+  valibot: 1.4.2
   js-yaml: 4.3.2
-  fast-xml-parser: 5.7.3
+  fast-xml-parser: 5.12.0
   fast-xml-builder: 1.2.0
   fast-uri: 3.1.9
-  handlebars: 4.7.9
+  handlebars: 4.7.10
   lodash: 4.18.1
   defu: 6.1.6
   picomatch: 4.0.4
   path-to-regexp: 8.4.2
-  brace-expansion: 2.0.2
+  brace-expansion: 2.1.7
   smol-toml: 1.6.1
   yaml: 2.8.3
   esbuild: 0.28.1
@@ -67,7 +67,7 @@ importers:
         version: 7.10.1(prisma@7.10.1(@types/node@22.10.2)(@types/react-dom@19.2.0(@types/react@19.2.0))(@types/react@19.2.0)(magicast@0.5.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@6.0.3))(typescript@6.0.3)
       '@t3-oss/env-core':
         specifier: 0.13.11
-        version: 0.13.11(typescript@6.0.3)(valibot@1.2.0(typescript@6.0.3))(zod@4.6.7)
+        version: 0.13.11(typescript@6.0.3)(valibot@1.4.2(typescript@6.0.3))(zod@4.6.7)
       '@tailwindcss/vite':
         specifier: 4.3.4
         version: 4.3.4(vite@8.3.5(@types/node@22.10.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.3))
@@ -1146,8 +1146,8 @@ packages:
     resolution: {integrity: sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==}
     engines: {node: '>= 20.19.0'}
 
-  '@nodable/entities@2.2.0':
-    resolution: {integrity: sha512-9uGyhaQavEUMC8AIddIjau4NsnsXhou+j5sBAGojCM1oxmQpVKTWR/9JxABD6UAv12vpIms55fPZKFQEhG6uBg==}
+  '@nodable/entities@3.1.0':
+    resolution: {integrity: sha512-LsS/DjHr+uDM647Gru/cA8+J3a3HfhttwCKLyuoyN7yXTFCxKBtSgMQBvrW9yNPa2/zDRUNuGPaH5QUFoa4arQ==}
 
   '@oozcitak/dom@2.0.2':
     resolution: {integrity: sha512-GjpKhkSYC3Mj4+lfwEyI1dqnsKTgwGy48ytZEhm4A/xnH/8z9M3ZVXKr/YGQi3uCLs1AEBS+x5T2JPiueEDW8w==}
@@ -2032,7 +2032,7 @@ packages:
     peerDependencies:
       arktype: ^2.1.0
       typescript: '>=5.0.0'
-      valibot: 1.2.0
+      valibot: 1.4.2
       zod: ^3.24.0 || ^4.0.0
     peerDependenciesMeta:
       arktype:
@@ -2686,7 +2686,7 @@ packages:
   '@valibot/to-json-schema@1.8.0':
     resolution: {integrity: sha512-a0M+uwCuQZEPAo65NYkFSJ14O5c213KoSZmPdoCfuFvUhfULi4T2Z6Tpjv6lTVMW9RoLm74RpRAjNEa43KcN+g==}
     peerDependencies:
-      valibot: 1.2.0
+      valibot: 1.4.2
 
   '@visx/curve@4.0.1-alpha.0':
     resolution: {integrity: sha512-jRu61Uz274pV1zyioXmboyrLutYbnKsgjj4njSGCnhdXj5GkZvZbg+ThDb6oOzoAnJOBRLz4rzPlWvNJOzuVMg==}
@@ -2967,8 +2967,8 @@ packages:
   bowser@2.13.1:
     resolution: {integrity: sha512-OHawaAbjwx6rqICCKgSG0SAnT05bzd7ppyKLVUITZpANBaaMFBAsaNkto3LoQ31tyFP5kNujE8Cdx85G9VzOkw==}
 
-  brace-expansion@2.0.2:
-    resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
+  brace-expansion@2.1.7:
+    resolution: {integrity: sha512-uZbew1NqdmPDTMJ8ah1y+b+9QEJrfkXFk3RcTQw3X0jW/xRUvFKsg1CfQdSYGdTbXZWExtU3J3ccxtnfw1Fi0g==}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -3602,8 +3602,8 @@ packages:
   fast-xml-builder@1.2.0:
     resolution: {integrity: sha512-00aAWieqff+ZJhsXA4g1g7M8k+7AYoMUUHF+/zFb5U6Uv/P0Vl4QZo84/IcufzYalLuEj9928bXN9PbbFzMF0Q==}
 
-  fast-xml-parser@5.7.3:
-    resolution: {integrity: sha512-C0AaNuC+mscy6vrAQKAc/rMq+zAPHodfHGZu4sGVehvAQt/JLG1O5zEcYcXSY5zSqr4YVgxsB+pHXTq0i7eDlg==}
+  fast-xml-parser@5.12.0:
+    resolution: {integrity: sha512-/pXxRBtwxY9w8z7YbgsvIPPcPvFDsTbIkWwTQJhzNJPokj+TbN6ftmcv4j/pEQDvOCNnKGDzuk5Bo2oogIOiFg==}
     hasBin: true
 
   fdir@6.5.0:
@@ -3759,8 +3759,8 @@ packages:
       crossws:
         optional: true
 
-  handlebars@4.7.9:
-    resolution: {integrity: sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==}
+  handlebars@4.7.10:
+    resolution: {integrity: sha512-P5VJMVM7qgBn6vjXMw8WG9uVI+ncf2pi72j4de4yz5ZULLj2RGqLYaKOYGsgyrViQ0tePOVlN1tDCCXXtFqXKg==}
     engines: {node: '>=0.4.7'}
     hasBin: true
 
@@ -3965,6 +3965,9 @@ packages:
   is-typed-array@1.1.15:
     resolution: {integrity: sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==}
     engines: {node: '>= 0.4'}
+
+  is-unsafe@2.0.3:
+    resolution: {integrity: sha512-ZBllczCCO267vgdFb6Tq3pv+LhHaCiGMdr+ZsuL+OopruAg7S+3ZDs1vD0RPC0uSrkjzbraxaGjtX1YBxjPeFQ==}
 
   is-weakmap@2.0.2:
     resolution: {integrity: sha512-K5pXYOm9wqY1RgjpL3YTkF39tni1XajUIkawTLUo9EZEVUFga5gSQJF8nNS7ZwJQ02y+1YCNYcMh+HIf1ZqE+w==}
@@ -5341,8 +5344,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  valibot@1.2.0:
-    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
+  valibot@1.4.2:
+    resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -5522,6 +5525,10 @@ packages:
 
   xml-naming@0.1.0:
     resolution: {integrity: sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw==}
+    engines: {node: '>=16.0.0'}
+
+  xml-naming@0.3.0:
+    resolution: {integrity: sha512-ghig2TBE/H11aOVgmahA3MhimvkBr6JIYknH/Dhdk10nXwdbIqBJsbfMxpvFPG8bAw77gN29aQWvKpmVoPlvPQ==}
     engines: {node: '>=16.0.0'}
 
   xmlbuilder2@4.0.3:
@@ -6063,7 +6070,7 @@ snapshots:
   '@aws-sdk/xml-builder@3.972.17':
     dependencies:
       '@smithy/types': 4.14.0
-      fast-xml-parser: 5.7.3
+      fast-xml-parser: 5.12.0
       tslib: 2.8.1
 
   '@aws/lambda-invoke-store@0.2.2': {}
@@ -6386,7 +6393,7 @@ snapshots:
     dependencies:
       eslint-import-resolver-node: 0.3.9
       eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.58.0(eslint@9.39.1(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.1(jiti@2.7.0))
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       is-core-module: 2.16.1
       micromatch: 4.0.8
     transitivePeerDependencies:
@@ -6746,7 +6753,7 @@ snapshots:
 
   '@noble/hashes@2.2.0': {}
 
-  '@nodable/entities@2.2.0': {}
+  '@nodable/entities@3.1.0': {}
 
   '@oozcitak/dom@2.0.2':
     dependencies:
@@ -6902,7 +6909,7 @@ snapshots:
       proper-lockfile: 4.1.2
       remeda: 2.33.4
       std-env: 3.10.0
-      valibot: 1.2.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
       zeptomatch: 2.1.0
     transitivePeerDependencies:
       - typescript
@@ -7614,10 +7621,10 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@t3-oss/env-core@0.13.11(typescript@6.0.3)(valibot@1.2.0(typescript@6.0.3))(zod@4.6.7)':
+  '@t3-oss/env-core@0.13.11(typescript@6.0.3)(valibot@1.4.2(typescript@6.0.3))(zod@4.6.7)':
     optionalDependencies:
       typescript: 6.0.3
-      valibot: 1.2.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
       zod: 4.6.7
 
   '@tailwindcss/node@4.3.4':
@@ -8362,9 +8369,9 @@ snapshots:
     dependencies:
       uncrypto: 0.1.3
 
-  '@valibot/to-json-schema@1.8.0(valibot@1.2.0(typescript@6.0.3))':
+  '@valibot/to-json-schema@1.8.0(valibot@1.4.2(typescript@6.0.3))':
     dependencies:
-      valibot: 1.2.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
 
   '@visx/curve@4.0.1-alpha.0':
     dependencies:
@@ -8697,7 +8704,7 @@ snapshots:
 
   bowser@2.13.1: {}
 
-  brace-expansion@2.0.2:
+  brace-expansion@2.1.7:
     dependencies:
       balanced-match: 1.0.2
 
@@ -9231,14 +9238,14 @@ snapshots:
   eslint-plugin-better-tailwindcss@4.10.0(eslint@9.39.1(jiti@2.7.0))(tailwindcss@4.3.4)(typescript@6.0.3):
     dependencies:
       '@eslint/css-tree': 4.1.2
-      '@valibot/to-json-schema': 1.8.0(valibot@1.2.0(typescript@6.0.3))
+      '@valibot/to-json-schema': 1.8.0(valibot@1.4.2(typescript@6.0.3))
       enhanced-resolve: 5.26.1
       jiti: 2.7.0
       synckit: 0.12.3
       tailwind-csstree: 0.3.3
       tailwindcss: 4.3.4
       tsconfig-paths-webpack-plugin: 4.2.0
-      valibot: 1.2.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
     optionalDependencies:
       eslint: 9.39.1(jiti@2.7.0)
     transitivePeerDependencies:
@@ -9252,7 +9259,7 @@ snapshots:
       eslint: 9.39.1(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.9
       eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.58.0(eslint@9.39.1(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.1(jiti@2.7.0))
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       micromatch: 4.0.8
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
@@ -9428,12 +9435,14 @@ snapshots:
       path-expression-matcher: 1.6.2
       xml-naming: 0.1.0
 
-  fast-xml-parser@5.7.3:
+  fast-xml-parser@5.12.0:
     dependencies:
-      '@nodable/entities': 2.2.0
+      '@nodable/entities': 3.1.0
       fast-xml-builder: 1.2.0
+      is-unsafe: 2.0.3
       path-expression-matcher: 1.6.2
       strnum: 2.5.1
+      xml-naming: 0.3.0
 
   fdir@6.5.0(picomatch@4.0.4):
     optionalDependencies:
@@ -9586,7 +9595,7 @@ snapshots:
     optionalDependencies:
       crossws: 0.4.5(srvx@0.11.15)
 
-  handlebars@4.7.9:
+  handlebars@4.7.10:
     dependencies:
       minimist: 1.2.8
       neo-async: 2.6.2
@@ -9820,6 +9829,8 @@ snapshots:
       which-typed-array: 1.1.22
     optional: true
 
+  is-unsafe@2.0.3: {}
+
   is-weakmap@2.0.2:
     optional: true
 
@@ -10041,15 +10052,15 @@ snapshots:
 
   minimatch@10.2.5:
     dependencies:
-      brace-expansion: 2.0.2
+      brace-expansion: 2.1.7
 
   minimatch@3.1.2:
     dependencies:
-      brace-expansion: 2.0.2
+      brace-expansion: 2.1.7
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 2.0.2
+      brace-expansion: 2.1.7
     optional: true
 
   minimist@1.2.8: {}
@@ -11169,7 +11180,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  valibot@1.2.0(typescript@6.0.3):
+  valibot@1.4.2(typescript@6.0.3):
     optionalDependencies:
       typescript: 6.0.3
 
@@ -11318,6 +11329,8 @@ snapshots:
   xml-name-validator@5.0.0: {}
 
   xml-naming@0.1.0: {}
+
+  xml-naming@0.3.0: {}
 
   xmlbuilder2@4.0.3:
     dependencies:
