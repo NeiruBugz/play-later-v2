@@ -47,19 +47,20 @@ export async function refreshReleaseDatesWorker(
   );
   if (!releaseInfoByIgdbId) return NOTHING_REFRESHED;
 
-  const writes: ReleaseCheckWrite[] = dueGames.flatMap((game) => {
+  const writes: ReleaseCheckWrite[] = dueGames.map((game) => {
     const releaseInfo = releaseInfoByIgdbId.get(game.igdbId);
-    if (!releaseInfo) return [];
-    return [
-      {
-        gameId: game.id,
-        stored: {
-          releaseDate: game.releaseDate,
-          releaseDatePrecision: game.releaseDatePrecision,
-        },
-        data: applyReleaseCheck(game, mapIgdbReleaseDate(releaseInfo), now),
+    return {
+      gameId: game.id,
+      stored: {
+        releaseDate: game.releaseDate,
+        releaseDatePrecision: game.releaseDatePrecision,
       },
-    ];
+      data: applyReleaseCheck(
+        game,
+        releaseInfo ? mapIgdbReleaseDate(releaseInfo) : "unknown",
+        now
+      ),
+    };
   });
 
   const updated = await applyReleaseChecks(writes);

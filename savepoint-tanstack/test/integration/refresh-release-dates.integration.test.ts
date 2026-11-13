@@ -344,6 +344,134 @@ describe("refreshReleaseDatesWorker", () => {
     });
   });
 
+  describe("given a due game that IGDB no longer returns at all", () => {
+    const vanishedIgdbId = 777_001;
+    let userId: string;
+    let gameId: string;
+    let firstResult: Awaited<ReturnType<typeof refreshReleaseDatesWorker>>;
+
+    beforeEach(async () => {
+      userId = (await createUser(db.prisma)).id;
+      gameId = (
+        await addToLibrary(userId, {
+          igdbId: vanishedIgdbId,
+          ...stateOfStoredDay("2026-11-25", 3),
+        })
+      ).id;
+      igdbAnswers({});
+
+      firstResult = await refreshReleaseDatesWorker(userId);
+    });
+
+    it("stamps the check time and keeps the stored date and precision", async () => {
+      expect(await readGame(gameId)).toMatchObject({
+        releaseDate: utcMidnight("2026-11-25"),
+        releaseDatePrecision: "DAY",
+        releaseDateCheckedAt: NOW,
+        releaseDateMovedFrom: null,
+        releaseDateMovedAt: null,
+      });
+    });
+
+    it("counts it as checked and updated", () => {
+      expect(firstResult).toEqual({ checked: 1, updated: 1 });
+    });
+
+    it("does not ask IGDB about it again on the next visit", async () => {
+      igdbFetchMock.mockClear();
+
+      const secondResult = await refreshReleaseDatesWorker(userId);
+
+      expect(igdbFetchMock).not.toHaveBeenCalled();
+      expect(secondResult).toEqual({ checked: 0, updated: 0 });
+    });
+  });
+
+  describe("given a never-checked game without a date that IGDB no longer returns", () => {
+    let userId: string;
+    let gameId: string;
+
+    beforeEach(async () => {
+      userId = (await createUser(db.prisma)).id;
+      gameId = (
+        await addToLibrary(userId, {
+          igdbId: 777_002,
+          releaseDate: null,
+          releaseDatePrecision: null,
+          releaseDateCheckedAt: null,
+        })
+      ).id;
+      igdbAnswers({});
+
+      await refreshReleaseDatesWorker(userId);
+    });
+
+    it("stamps the check time and leaves the date unknown", async () => {
+      expect(await readGame(gameId)).toMatchObject({
+        releaseDate: null,
+        releaseDatePrecision: null,
+        releaseDateCheckedAt: NOW,
+      });
+    });
+
+    it("does not ask IGDB about it again on the next visit", async () => {
+      igdbFetchMock.mockClear();
+
+      await refreshReleaseDatesWorker(userId);
+
+      expect(igdbFetchMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given one due game that IGDB answers and one that it omits", () => {
+    let answeredGameId: string;
+    let omittedGameId: string;
+    let result: Awaited<ReturnType<typeof refreshReleaseDatesWorker>>;
+
+    beforeEach(async () => {
+      const userId = (await createUser(db.prisma)).id;
+      answeredGameId = (
+        await addToLibrary(userId, {
+          igdbId: liveGames.day.id,
+          ...stateOfStoredDay("2026-11-20", 3),
+        })
+      ).id;
+      omittedGameId = (
+        await addToLibrary(userId, {
+          igdbId: 777_003,
+          ...stateOfStoredDay("2026-11-25", 3),
+        })
+      ).id;
+      igdbAnswers({ [liveGames.day.id]: liveGames.day });
+
+      result = await refreshReleaseDatesWorker(userId);
+    });
+
+    it("writes the corrected date and move marker for the answered game", async () => {
+      expect(await readGame(answeredGameId)).toMatchObject({
+        releaseDate: utcMidnight("2026-11-13"),
+        releaseDatePrecision: "DAY",
+        releaseDateCheckedAt: NOW,
+        releaseDateMovedFrom: utcMidnight("2026-11-20"),
+        releaseDateMovedAt: NOW,
+      });
+    });
+
+    it("only stamps the check time for the omitted game", async () => {
+      expect(await readGame(omittedGameId)).toMatchObject({
+        releaseDate: utcMidnight("2026-11-25"),
+        releaseDatePrecision: "DAY",
+        releaseDateCheckedAt: NOW,
+        releaseDateMovedFrom: null,
+        releaseDateMovedAt: null,
+      });
+    });
+
+    it("counts both games as checked and updated", () => {
+      expect(result).toEqual({ checked: 2, updated: 2 });
+    });
+  });
+
   describe("given a library with due games, fresh games, a released game and someone else's game", () => {
     let result: Awaited<ReturnType<typeof refreshReleaseDatesWorker>>;
     let dueIgdbIds: number[];
