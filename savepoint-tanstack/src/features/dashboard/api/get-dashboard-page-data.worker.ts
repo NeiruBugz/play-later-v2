@@ -1,9 +1,12 @@
+import type { ComingSoonCandidate } from "@/entities/game";
 import { getLatestSessionDates } from "@/entities/journal-entry/api/get-latest-session-dates.server";
+import { getComingSoonCandidates } from "@/entities/library-item/api/get-coming-soon-candidates.server";
 import { getLibraryStatusCounts } from "@/entities/library-item/api/get-library-status-counts.server";
 import {
   getLibrary,
   type LibraryItemWithGame,
 } from "@/entities/library-item/api/get-library.server";
+import { toUtcCalendarDay } from "@/shared/lib/date";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 import { orderContinueGames } from "../model/order-continue-games";
@@ -26,6 +29,7 @@ export type DashboardPageData = {
   /** Queue size. */
   upNextTotal: number;
   counts: DashboardStatusCounts;
+  comingSoonCandidates: ComingSoonCandidate[];
 };
 
 export async function getDashboardPageDataWorker(
@@ -33,15 +37,17 @@ export async function getDashboardPageDataWorker(
 ): Promise<DashboardPageData> {
   if (!userId) throw new UnauthorizedError("Sign in required");
 
-  const [statusCounts, playing, queued] = await Promise.all([
-    getLibraryStatusCounts(userId),
-    getLibrary(userId, {
-      status: "PLAYING",
-      sortBy: "updatedAt",
-      sortOrder: "desc",
-    }),
-    getLibrary(userId, { upNext: true }),
-  ]);
+  const [statusCounts, playing, queued, comingSoonCandidates] =
+    await Promise.all([
+      getLibraryStatusCounts(userId),
+      getLibrary(userId, {
+        status: "PLAYING",
+        sortBy: "updatedAt",
+        sortOrder: "desc",
+      }),
+      getLibrary(userId, { upNext: true }),
+      getComingSoonCandidates(userId, toUtcCalendarDay(new Date())),
+    ]);
 
   const lastSessionDates = await getLatestSessionDates(
     userId,
@@ -62,5 +68,6 @@ export async function getDashboardPageDataWorker(
       PLAYING: statusCounts.PLAYING,
       DONE: statusCounts.DONE,
     },
+    comingSoonCandidates,
   };
 }

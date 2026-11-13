@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DashboardPageData } from "@/features/dashboard";
 
@@ -11,6 +11,7 @@ import { DashboardPage } from "./dashboard-page";
 
 type Playing = DashboardPageData["playing"][number];
 type Queued = DashboardPageData["upNextQueue"][number];
+type ComingSoonCandidate = DashboardPageData["comingSoonCandidates"][number];
 
 const { navigateMock, invalidateMock, setStatusFnMock, isDesktop } = vi.hoisted(
   () => ({
@@ -70,11 +71,15 @@ vi.mock("@/shared/lib/igdb-image", () => ({
   }),
 }));
 
-function playing(id: number, title: string): Playing {
+function playing(
+  id: number,
+  title: string,
+  tint: { coverHue: number; coverChroma: number } | null = null
+): Playing {
   return {
     ...buildLibraryItemWithGame(
       { id, status: "PLAYING", platform: "PC" },
-      { id: `game-${id}`, title, slug: title.toLowerCase() }
+      { id: `game-${id}`, title, slug: title.toLowerCase(), ...tint }
     ),
     lastSessionAt: null,
     becamePlayingAt: new Date(2026, 5, 1),
@@ -88,6 +93,21 @@ function queued(position: number, title: string): Queued {
   );
 }
 
+let nextComingSoonItemId = 1;
+
+function comingSoonGame(title: string, day: string): ComingSoonCandidate {
+  return {
+    id: nextComingSoonItemId++,
+    game: {
+      slug: title.toLowerCase().replaceAll(" ", "-"),
+      title,
+      coverImage: null,
+      releaseDate: new Date(`${day}T00:00:00Z`),
+      releaseDatePrecision: "DAY",
+    },
+  };
+}
+
 function makeData(
   overrides: Partial<DashboardPageData> = {}
 ): DashboardPageData {
@@ -96,6 +116,7 @@ function makeData(
     upNextQueue: [],
     upNextTotal: 0,
     counts: { WANT: 0, PLAYING: 0, DONE: 0 },
+    comingSoonCandidates: [],
     ...overrides,
   } as DashboardPageData;
 }
@@ -109,6 +130,8 @@ const threePlayingAndQueue = makeData({
   counts: { WANT: 6, PLAYING: 3, DONE: 4 },
 });
 
+const TINT_SELECTOR = "[data-tint], [style*='--tint']";
+
 const elements = {
   queryHomeTitle: () => screen.queryByRole("heading", { level: 1 }),
   getHomeTitle: () => screen.getByRole("heading", { level: 1 }),
@@ -119,9 +142,21 @@ const elements = {
   getAlsoPlaying: () => screen.getByRole("region", { name: "Also playing" }),
   queryAlsoPlaying: () =>
     screen.queryByRole("region", { name: "Also playing" }),
+  getComingSoon: () => screen.getByRole("region", { name: "Coming soon" }),
+  queryComingSoon: () => screen.queryByRole("region", { name: "Coming soon" }),
   getCounts: () => screen.getByTestId("dashboard-counts-line"),
+  // eslint-disable-next-line testing-library/no-node-access -- CoverTint exposes only data-tint and the --tint custom properties
+  queryTintIn: (root: HTMLElement) => root.querySelector(TINT_SELECTOR),
+  // eslint-disable-next-line testing-library/no-node-access -- CoverTint exposes only data-tint
+  getTintedSurfaces: () => document.querySelectorAll("[data-tint='on']"),
   getEmptyStates: () => screen.queryAllByRole("status"),
 };
+
+function sortedByPagePosition(nodes: Element[]) {
+  return [...nodes].sort((a, b) =>
+    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+  );
+}
 
 function renderPage(data: DashboardPageData) {
   const view = render(
@@ -330,6 +365,119 @@ describe("DashboardPage", () => {
 
     it("shows no counts line", () => {
       expect(screen.queryByTestId("dashboard-counts-line")).toBeNull();
+    });
+  });
+
+  describe("given games coming soon", () => {
+    const comingSoonGames = [
+      comingSoonGame("Out Today Game", "2026-11-12"),
+      comingSoonGame("Nine Days Out", "2026-11-21"),
+    ];
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 10, 12, 12));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe("and three Playing games with a queue", () => {
+      beforeEach(() => {
+        renderPage({
+          ...threePlayingAndQueue,
+          comingSoonCandidates: comingSoonGames,
+        });
+      });
+
+      it("shows Coming soon after Also playing and before the counts", () => {
+        const inPageOrder = [
+          elements.getUpNext(),
+          elements.getAlsoPlaying(),
+          elements.getComingSoon(),
+          elements.getCounts(),
+        ];
+        expect(sortedByPagePosition(inPageOrder)).toEqual(inPageOrder);
+      });
+
+      it("lists the games coming soon", () => {
+        expect(
+          within(elements.getComingSoon()).getByText("Out today")
+        ).toBeVisible();
+        expect(
+          within(elements.getComingSoon()).getByText("Out Today Game")
+        ).toBeVisible();
+      });
+    });
+
+    describe("and nothing is Playing", () => {
+      beforeEach(() => {
+        renderPage(
+          makeData({
+            upNextQueue: [queued(1, "Disco")],
+            upNextTotal: 1,
+            counts: { WANT: 1, PLAYING: 0, DONE: 0 },
+            comingSoonCandidates: comingSoonGames,
+          })
+        );
+      });
+
+      it("shows Coming soon after Nothing playing right now and before the counts", () => {
+        const inPageOrder = [
+          screen.getByText("Nothing playing right now"),
+          elements.getComingSoon(),
+          elements.getCounts(),
+        ];
+        expect(sortedByPagePosition(inPageOrder)).toEqual(inPageOrder);
+      });
+    });
+
+    describe("and the Continue? panel has a tinted cover", () => {
+      beforeEach(() => {
+        renderPage(
+          makeData({
+            playing: [
+              playing(1, "Hades", { coverHue: 200, coverChroma: 0.04 }),
+              playing(2, "Celeste"),
+            ],
+            upNextQueue: [queued(1, "Disco")],
+            upNextTotal: 1,
+            counts: { WANT: 1, PLAYING: 2, DONE: 0 },
+            comingSoonCandidates: comingSoonGames,
+          })
+        );
+      });
+
+      it("tints only the Continue? panel", () => {
+        const tinted = elements.getTintedSurfaces();
+        expect(tinted).toHaveLength(1);
+        expect(
+          within(tinted[0] as HTMLElement).getByRole("heading", {
+            name: "Continue Hades?",
+          })
+        ).toBeVisible();
+      });
+
+      it("has no tint inside Coming soon", () => {
+        expect(elements.queryTintIn(elements.getComingSoon())).toBeNull();
+      });
+    });
+  });
+
+  describe("given nothing is coming soon", () => {
+    beforeEach(() => {
+      renderPage(threePlayingAndQueue);
+    });
+
+    it("shows no Coming soon section", () => {
+      expect(elements.queryComingSoon()).toBeNull();
+    });
+
+    it("offers no See all upcoming link", () => {
+      expect(
+        screen.queryByRole("link", { name: "See all upcoming" })
+      ).toBeNull();
     });
   });
 });

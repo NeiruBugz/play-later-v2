@@ -1,12 +1,13 @@
 /**
  * Integration tests for getDashboardPageDataWorker.
  *
- * Home payload: { playing, upNextQueue, upNextTotal, counts }.
+ * Home payload: { playing, upNextQueue, upNextTotal, counts, comingSoonCandidates }.
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { getDashboardPageDataWorker } from "@/features/dashboard/api/get-dashboard-page-data.worker";
+import { toUtcCalendarDay } from "@/shared/lib/date";
 import { UnauthorizedError } from "@/shared/lib/errors";
 
 import {
@@ -103,6 +104,7 @@ describe("getDashboardPageDataWorker", () => {
       const data = await getDashboardPageDataWorker("ddpd-user-empty");
 
       expect(Object.keys(data).sort()).toEqual([
+        "comingSoonCandidates",
         "counts",
         "playing",
         "upNextQueue",
@@ -112,6 +114,7 @@ describe("getDashboardPageDataWorker", () => {
       expect(data.playing).toEqual([]);
       expect(data.upNextQueue).toEqual([]);
       expect(data.upNextTotal).toBe(0);
+      expect(data.comingSoonCandidates).toEqual([]);
     });
   });
 
@@ -303,6 +306,94 @@ describe("getDashboardPageDataWorker", () => {
         [pUnkeyed]: at("2026-02-01"),
         [pBare]: at("2026-03-05"),
         [pNotesOnly]: at("2026-02-20"),
+      });
+    });
+  });
+
+  describe("given library games with release dates", () => {
+    const midnightUtcInDays = (days: number) =>
+      new Date(
+        `${toUtcCalendarDay(new Date(Date.now() + days * 86_400_000))}T00:00:00.000Z`
+      );
+
+    async function addGameReleasing(
+      userId: string,
+      suffix: string,
+      release: { inDays: number; precision: "DAY" | "MONTH" }
+    ) {
+      const game = makeGame(suffix);
+      await db.prisma.game.create({
+        data: {
+          ...game,
+          releaseDate: midnightUtcInDays(release.inDays),
+          releaseDatePrecision: release.precision,
+        },
+      });
+      await db.prisma.libraryItem.create({
+        data: makeLibraryItem(userId, game.id),
+      });
+    }
+
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("soon") });
+    });
+
+    describe("when an exact-day game releases nine days from now", () => {
+      beforeEach(async () => {
+        await addGameReleasing("ddpd-user-soon", "nine", {
+          inDays: 9,
+          precision: "DAY",
+        });
+      });
+
+      it("lists it as a Coming soon candidate", async () => {
+        const data = await getDashboardPageDataWorker("ddpd-user-soon");
+
+        expect(
+          data.comingSoonCandidates.map((candidate) => candidate.game)
+        ).toEqual([
+          expect.objectContaining({
+            title: "Dashboard Game nine",
+            slug: "dashboard-game-nine",
+            releaseDate: midnightUtcInDays(9),
+            releaseDatePrecision: "DAY",
+          }),
+        ]);
+      });
+    });
+
+    describe("when the library has no exact-day game in the next month", () => {
+      beforeEach(async () => {
+        await addGameReleasing("ddpd-user-soon", "far", {
+          inDays: 60,
+          precision: "DAY",
+        });
+        await addGameReleasing("ddpd-user-soon", "month", {
+          inDays: 9,
+          precision: "MONTH",
+        });
+      });
+
+      it("has no Coming soon candidates", async () => {
+        const data = await getDashboardPageDataWorker("ddpd-user-soon");
+
+        expect(data.comingSoonCandidates).toEqual([]);
+      });
+    });
+
+    describe("when only another user's library has a game releasing soon", () => {
+      beforeEach(async () => {
+        await db.prisma.user.create({ data: makeUser("neighbour") });
+        await addGameReleasing("ddpd-user-neighbour", "theirs", {
+          inDays: 9,
+          precision: "DAY",
+        });
+      });
+
+      it("has no Coming soon candidates", async () => {
+        const data = await getDashboardPageDataWorker("ddpd-user-soon");
+
+        expect(data.comingSoonCandidates).toEqual([]);
       });
     });
   });

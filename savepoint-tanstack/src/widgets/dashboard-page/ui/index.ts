@@ -9,3 +9,6 @@ export type { DashboardCountsLineProps } from "./dashboard-counts-line";
 
 export { ContinuePanel } from "./continue-panel";
 export type { ContinuePanelProps } from "./continue-panel";
+
+export { ComingSoon } from "./coming-soon";
+export type { ComingSoonProps } from "./coming-soon";
