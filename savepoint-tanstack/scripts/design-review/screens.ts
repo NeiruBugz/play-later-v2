@@ -71,6 +71,11 @@ const FIXTURE_GAME_SLUGS = {
   doneLetGo: "crisis-core-final-fantasy-vii",
 } as const;
 
+const RELEASE_FIXTURE_GAME_SLUGS = {
+  exactUpcoming: "netherwake",
+  tba: "neon-district",
+} as const;
+
 export const SCREENS: Screen[] = [
   { id: "landing", auth: false, path: "/" },
   { id: "sign-in", auth: false, path: "/login" },
@@ -81,6 +86,11 @@ export const SCREENS: Screen[] = [
   },
   { id: "home", auth: true, path: "/dashboard" },
   { id: "library", auth: true, path: "/library" },
+  {
+    id: "upcoming",
+    auth: true,
+    path: "/upcoming",
+  },
   {
     id: "library-empty-filter",
     auth: true,
@@ -130,6 +140,16 @@ export const SCREENS: Screen[] = [
     id: "game-done",
     auth: true,
     path: `/games/${FIXTURE_GAME_SLUGS.doneLetGo}`,
+  },
+  {
+    id: "game-releases",
+    auth: true,
+    path: `/games/${RELEASE_FIXTURE_GAME_SLUGS.exactUpcoming}`,
+  },
+  {
+    id: "game-tba",
+    auth: true,
+    path: `/games/${RELEASE_FIXTURE_GAME_SLUGS.tba}`,
   },
   {
     id: "game-signed-out",

@@ -1,0 +1,230 @@
+# Tasks: Release days (spec 029)
+
+- **Functional spec:** [functional-spec.md](./functional-spec.md)
+- **Technical spec:** [technical-considerations.md](./technical-considerations.md)
+
+Conventions for every slice:
+- Paths are relative to `savepoint-tanstack/` unless they start with `context/` or `.github/`.
+- **TDD (binding, `savepoint-tanstack/CLAUDE.md`):** inside each slice, the test task comes before the implementation tasks. Tests are written failing first (RED). During a RED task, `typecheck` and the test runs are expected to fail.
+- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && build`.
+  - Add `test:integration` when `git diff --name-only | rg '/api/|\.server\.|\.worker\.|prisma/|test/integration/|test/factories/|scripts/'` prints anything.
+  - Every slice ends with the gate green.
+- **Fixed "today" in tests:** every date rule is tested with an injected `today` string or fake timers. No test depends on the real date.
+- **Starting the app for a Verify task:**
+  - `docker compose up -d`, then start `pnpm --filter savepoint-tanstack dev` (port 6060) in the background and record its PID.
+  - Stop it with `kill <PID>` at the end of the task. Never pipe a daemon's stop command into another command.
+  - Sign in through the credentials provider (`AUTH_ENABLE_CREDENTIALS=true`) as `audit_full` on the seeded local DB.
+  - Browser checks use the Playwright MCP or the `verify-ui` skill scripts.
+- **Release fixtures:** `context/spec/029-release-days/review-fixtures.sql` (committed, Slice 2) dates `audit_full`'s games relative to `CURRENT_DATE`. It covers an exact date today, tomorrow, +9, +30 and +31 days, a game on 2 January of next year, a month, a quarter and a year date, TBA, no date, a game released last year, and an exact date moved 3 and 20 days ago. Every fixture row sets `releaseDateCheckedAt = now()`, so a refresh during a Verify task leaves it alone.
+- **IGDB in Verify tasks:** the refresh calls real IGDB with the local `.env` credentials. A slice that needs a deterministic refresh result uses the worker integration tests (IGDB mocked at `src/shared/api/igdb/fetch.ts`) instead of the browser.
+- **Review images** live under `context/spec/029-release-days/review/`, which is gitignored (Slice 2). They are kept on purpose for the owner's review. Everything else a Verify task produces (extra screenshots, traces, temporary scripts) is deleted at the end of that task.
+
+---
+
+- [x] **Slice 1: The IGDB date-format mapping is pinned from live data**
+  - [x] Write `scripts/inspect-igdb-release-dates.ts` (read-only) and add the package script `inspect:igdb-release-dates` (`tsx --env-file-if-exists=.env scripts/inspect-igdb-release-dates.ts`, the same shape as `backfill:enrichment`, `package.json:29`).
+    - It uses the app's IGDB client (`src/shared/api/igdb/fetch.ts`) and runs:
+      - `fields *; limit 50;` against `/date_formats`;
+      - a `/games` query for about six known games: two exact-day upcoming, one month-only, one quarter-only, one year-only and one TBD. It requests `name, first_release_date, release_dates.date, release_dates.date_format, release_dates.y, release_dates.m, release_dates.status`.
+    - It prints JSON only and never prints credentials. **[Agent: tanstack-fullstack]**
+  - [x] Owner step: Nail runs `! pnpm --filter savepoint-tanstack inspect:igdb-release-dates`. The output is pasted into `context/spec/029-release-days/research-notes.md` under "Codebase findings → IGDB date formats (live, <date>)". **[Agent: tanstack-fullstack]**
+  - [x] From the pasted output, write RED unit tests for `src/shared/api/igdb/release-date.ts`:
+    - the id → precision constant matches the live `/date_formats` list;
+    - `mapIgdbReleaseDate` turns each captured game payload into the expected `{releaseDate, precision}`;
+    - vague dates become period-start days (MONTH = `y`/`m`/1, QUARTER = start month from the format id, YEAR = 1 Jan), never the placeholder timestamp;
+    - a game with no `first_release_date` and only TBD entries gives TBA;
+    - a game with no `first_release_date` and a dated Beta entry gives `{null, null}`;
+    - colliding placeholders (a YEAR and a Q4 entry on the same last day) pick the most precise entry;
+    - no entry matching `first_release_date` gives `"unknown"`, and so does an unknown `date_format`;
+    - every returned date is UTC midnight. **[Agent: testing]**
+  - [x] Implement `src/shared/api/igdb/release-date.ts`:
+    - the pinned `DATE_FORMAT_PRECISION` constant, the `IgdbReleasePrecision` string union and `mapIgdbReleaseDate`;
+    - extend `ReleaseDateSchema` (`schemas.ts:26-30`) with `date`, `date_format`, `y`, `m`;
+    - export everything from the igdb barrel. No entity imports. **[Agent: tanstack-fullstack]**
+  - [x] Verify:
+    - Run the gate.
+    - Confirm the unit tests use the captured payloads verbatim, and that the mapping in the research notes matches the constant.
+    - Delete any temporary JSON dumps outside `research-notes.md`. **[Agent: testing]**
+
+- [x] **Slice 2: A newly added game and the game page show honest release dates**
+  - [x] RED tests (part A written first, part B after IGDB's date codes were pinned; the legacy fallback is tested at `getGameDetails` level, so the About panel only receives resolved props):
+    - Unit, `src/entities/game/model/release-date.test.ts`, fixed `today`:
+      - `toStoredDay`, plus `deviceToday` in a New York timezone (`2027-03-14T00:00Z` reads "14 Mar");
+      - `releasePeriodEnd`, and `isUpcomingRelease` at the 31 Mar, 30 Jun and 31 Dec period ends, plus TBA, NULL precision and yesterday;
+      - `formatReleaseLabel` for every §2.1 form, same year and next year, with and without `alwaysYear`;
+      - `describeReleaseFact` for upcoming, TBA, released (exact and year-only) and no date.
+    - Unit, `formatCalendarDay` in `src/shared/lib/date.ts`.
+    - Unit, `useDeviceToday`: server snapshot is the UTC day, client snapshot is the local day, and it updates on `visibilitychange`.
+    - Integration, `upsert-game`:
+      - a payload with `release_dates` stores the date, precision and `releaseDateCheckedAt`;
+      - a payload without it leaves precision and `checkedAt` NULL;
+      - an existing row is returned untouched.
+    - Integration, the migration's CHECKs: they reject a half-set moved pair, a TBA row with a date, and a non-midnight `releaseDate`.
+    - Component, About panel: "Releases 14 Mar 2027", "Releases 2027", "Release date" + "TBA", "Released 2 Jun 2020", "Released 2020", and no fact for no date. Also the legacy NULL-precision fallback to the live details payload.
+    - Component, game header: the year comes from the stored date when a precision is set. **[Agent: testing]**
+  - [x] Migration `YYYYMMDDHHMMSS_add_game_release_precision`, exactly as tech spec §2.2:
+    - enum `ReleaseDatePrecision`;
+    - `releaseDatePrecision`, `releaseDateCheckedAt`, `releaseDateMovedFrom`, `releaseDateMovedAt` on `Game`;
+    - the three raw-SQL CHECKs.
+    - Extend `test/factories` (`buildGame`, `createGame`, `buildLibraryItemWithGame`) with the new columns. **[Agent: prisma-database]**
+  - [x] Creation path and IGDB field lists:
+    - Add `release_dates.{date,date_format,y,m}` to search (`queries.ts:45-46`), get-by-id (`get-game-by-id.ts:28`) and details-by-slug (`get-game-details-by-slug.ts:17`). The Steam match list stays unchanged.
+    - `findOrCreateGame` (`src/entities/game/api/upsert-game.server.ts:18-51`) runs `mapIgdbReleaseDate` when `release_dates` is present (tech spec §2.5).
+    - `getGameDetails` passes the stored precision and the live mapped fallback to the page. **[Agent: tanstack-fullstack]**
+  - [x] Pure model and hook:
+    - `src/entities/game/model/release-date.ts` (new `model/` segment, barrel-exported) with the tech spec §2.3 functions: `toStoredDay`, `deviceToday`, `releasePeriodEnd`, `isUpcomingRelease`, `formatReleaseLabel`, `describeReleaseFact`. The later slices add the rest.
+    - `formatCalendarDay` in `src/shared/lib/date.ts`.
+    - `src/shared/lib/hooks/use-device-today.ts` (tech spec §2.7). **[Agent: react-frontend]**
+  - [x] Game page UI:
+    - The About panel fact (`src/widgets/game-detail/ui/about-panel/about-panel.tsx:27-31`) uses `describeReleaseFact(game, useDeviceToday())`, with the legacy fallback (tech spec §2.9).
+    - The header year (`game-header.tsx:61-65`) reads the stored date when a precision is set. **[Agent: react-frontend]**
+  - [x] Review fixtures and capture setup:
+    - Write `context/spec/029-release-days/review-fixtures.sql` as described in the conventions above.
+    - Make `scripts/design-review --reseed` apply `context/spec/<spec>/review-fixtures.sql` when it exists (keep 028's working). Add `screens.ts` entries `game-releases`, `game-tba`, `library`, `home` and `upcoming`; `upcoming` stays `skip` until Slice 6.
+    - Add `context/spec/029-release-days/review/` to the repo `.gitignore`. **[Agent: testing]**
+  - [x] Fixture game pages need real IGDB slugs (found in Verify: pages of fake-igdbId fixture games show "Game not found", because the game page looks the slug up in IGDB first):
+    - Add two library-less Game rows to `review-fixtures.sql`, idempotent like the others and with `releaseDateCheckedAt = now()`: Netherwake (igdbId 349703, slug `netherwake`, DAY, `CURRENT_DATE + 9`) and Neon District (igdbId 124201, slug `neon-district`, TBA, NULL date). The stored precision wins on the game page, so the fixture date shows while the rest of the page comes from real IGDB.
+    - Point the `game-releases` screen at `/games/netherwake` and `game-tba` at `/games/neon-district` in `screens.ts`. **[Agent: testing]**
+  - [x] Verify:
+    - Run the gate, including integration. Apply the migration locally (`prisma:migrate`) and the fixtures (`--reseed`).
+    - Start the app (record the PID).
+    - Search for and add a game with a known future exact date. Its game page shows "Releases" + the date with its year, never "Released".
+    - Open a year-only fixture game page: it shows "Releases 2027" (the fixture year), not a day.
+    - Open a TBA fixture and a released fixture. Open a game in nobody's library: it still shows its "Released" line through the fallback.
+    - Set the browser timezone to `America/New_York` and recheck an exact date: no off-by-one.
+    - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+- [x] **Slice 3: Library cards show "Out …" for upcoming games, and dates refresh when Home or the library opens**
+  - [x] RED tests:
+    - Unit:
+      - `isDueForCheck`: daily within 14 days, weekly otherwise, released games never, legacy NULL precision with a past date checked once, ±1-day UTC slack;
+      - `applyReleaseCheck` (no marker cases in this slice): a fresh value is written, `"unknown"` and `{null, null}` only stamp `checkedAt`;
+      - `getGamesReleaseInfoByIgdbIds`: chunks of 100, a 300 ms pause, and a 429 fall-through to `UpstreamError`.
+    - Integration:
+      - `get-games-due-release-check`: NULL-checked, stale daily, stale weekly and released cases; the cap of 100; ordered nulls first; only this user's library;
+      - `refresh-release-dates.worker` with IGDB mocked: a correction is written and visible to a second user who has the same game; a failure stamps nothing; returns `{checked, updated}`;
+      - `getLibrary` returns `releaseDatePrecision`, `releaseDateMovedFrom` and `releaseDateMovedAt`.
+    - Component:
+      - `ReleaseLines`: "Out 14 Mar", "Out Q2 2027", "Date TBA", nothing for released or NULL precision;
+      - `LibraryGridTile` and `LibraryItemCard` show the line below the length line in both views;
+      - Home and Library fire `refreshReleaseDatesFn` once on mount and swallow its errors. **[Agent: testing]**
+  - [x] Server side (tech spec §2.4, §2.6):
+    - `getGamesReleaseInfoByIgdbIds` in `src/shared/api/igdb/`;
+    - `src/entities/game/model/release-check.ts` (`isDueForCheck` and `applyReleaseCheck`, kept apart from the UI date helpers in `release-date.ts`);
+    - `src/entities/game/api/get-games-due-release-check.server.ts` and `apply-release-checks.server.ts` (compare-and-set update);
+    - `src/features/release-dates/api/refresh-release-dates.worker.ts` + `refresh-release-dates.ts` (`refreshReleaseDatesFn`, POST, `requireUserId`);
+    - the `getLibrary` select and `LibraryItemWithGame` type (`get-library.server.ts:56`, `entities/library-item/model/types.ts:31`). **[Agent: tanstack-fullstack]**
+  - [x] Client side:
+    - `src/features/release-dates/model/use-refresh-release-dates.ts`, called once from the Home and Library route components. No router invalidation.
+    - `src/entities/game/ui/release-lines/` (release line only in this slice), placed after the length line in `LibraryGridTile` (`library-page.tsx:112-117`) and `LibraryItemCard` (~:92-97).
+    - Delete the unused `GameCard.releaseYear` and its `showMeta` branch (`game-card.tsx:28,75-77`), after confirming `density="detailed"` still has a consumer. **[Agent: react-frontend]**
+  - [x] Verify:
+    - Run the gate, including integration. Reseed, then start the app (record the PID).
+    - Open the library in Grid and List: the fixture cards show "Out" + the right label for exact, month, quarter and year games, "Date TBA" for TBA, and nothing for released and no-date games.
+    - `verify-ui` alignment check on a grid row mixing cards with and without the line.
+    - In the DB, set one legacy-style row (precision NULL, `checkedAt` NULL) on a real upcoming IGDB game and open Home. A POST to the refresh fn shows in the network log, the page doesn't wait for it, and after reopening the library the card shows its date.
+    - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+- [x] **Slice 4: A moved exact date shows a quiet "Moved from …" line on library cards**
+  - [x] RED tests:
+    - Unit, `applyReleaseCheck` marker cases: DAY→DAY sets the marker, DAY→vaguer and DAY→TBA set it, vague→DAY sets none, legacy NULL sets none, a new date in the past sets none, a repeat move overwrites, a stored day already past sets none.
+    - Unit, `shouldShowMovedLine` on day 14 vs day 15, and it is false when nothing moved.
+    - Integration, worker: a compare-and-set race between two visits records one marker.
+    - Component, `ReleaseLines` moved line: "Moved from 14 Mar" (and the year form for another year) within 14 days, absent after; shown under "Out 2027" for exact→vague; absent on Home and the game page. **[Agent: testing]**
+  - [x] Marker write rules in `release-check.ts` and the CAS write, per tech spec §2.6. **[Agent: tanstack-fullstack]**
+  - [x] `shouldShowMovedLine` in `release-date.ts`; the moved line in `ReleaseLines` (muted `text-xs`, no warning colour). **[Agent: react-frontend]**
+  - [x] Verify:
+    - Run the gate, including integration. Reseed, then start the app (record the PID).
+    - The fixture moved 3 days ago shows "Out <new date>" plus "Moved from <old date>"; the one moved 20 days ago shows no moved line.
+    - `verify-ui` alignment on a row containing a card with both lines.
+    - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+- [x] **Slice 5: Home shows "Coming soon" for exact releases in the next 30 days**
+  - [x] RED tests:
+    - Unit:
+      - `formatComingSoonWhen`: today → "Out today", tomorrow → "Tomorrow", +9 → "Fri 14 Mar"-style, 28 Dec → 2 Jan with the year;
+      - `selectComingSoon`: day 30 in, day 31 out, today first, cap 3, same-day title A→Z, non-DAY excluded.
+    - Integration, `getComingSoonCandidates`: DAY only, window `[utcToday−1, utcToday+31]`, date then title, `take` 10, per-user isolation, any status and ownership. The dashboard worker returns them.
+    - Component, `ComingSoon`:
+      - hidden when nothing qualifies;
+      - "Out today" first;
+      - cap of 3;
+      - each entry links to its game;
+      - no "days left" wording;
+      - untinted;
+      - shows "See all upcoming" below the entries whenever the section is shown, linking to `/upcoming`;
+      - placed between Also playing / EmptyState and the counts line. **[Agent: testing]**
+  - [x] `getComingSoonCandidates` in `src/entities/library-item/api/`, added to the `Promise.all` in `get-dashboard-page-data.worker.ts:31-66`, with the `DashboardPageData` type extended. **[Agent: tanstack-fullstack]**
+  - [x] Add `formatComingSoonWhen` and `selectComingSoon` to `release-date.ts`.
+    - Build `src/widgets/dashboard-page/ui/coming-soon/` (component folder convention) and render it in `dashboard-page.tsx:44-66`.
+    - Entries are `Link`s to `/games/$slug`: min-h-11, small cover, truncated title, the "when" text.
+    - Below the entries, the "See all upcoming" link to `/upcoming`. Slice 6's page and route are built BEFORE this UI task (typed links need the route), so the order of execution is 6 before 5's UI. **[Agent: react-frontend]**
+  - [x] Verify:
+    - Run the gate, including integration. Reseed, then start the app (record the PID).
+    - At 390 × 844, Home shows Coming soon below Also playing with "Out today" first and three entries at most. The +31 and month-only fixtures are absent.
+    - `verify-ui`: the first Up Next cover is fully visible without scrolling (one Playing, three Up Next, three Coming soon), and the only tinted surface is the Continue? panel.
+    - Tap an entry: its game page opens.
+    - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+- [x] **Slice 6: The Upcoming releases page, reached from Home and the Library**
+  - [x] RED tests:
+    - Unit, `groupByMonth`.
+    - Integration, `getUpcomingReleases` + `get-upcoming-releases.worker`: DAY only, `≥ utcToday−1`, date then title, per-user isolation, no end limit.
+    - Component, `UpcomingReleasesPage`:
+      - month headings in order;
+      - "Fri 14" vs "Out today";
+      - same-day games in title order;
+      - status chip and Not owned tag;
+      - the moved line;
+      - the exact §2.5 empty copy.
+    - Component, Library header: the "Upcoming releases" link is always shown and points to `/upcoming` (written together with Slice 3's library-page tests, same test file).
+    - Route: signed-out visitors are redirected to sign-in. **[Agent: testing]**
+  - [x] `getUpcomingReleases` in `src/entities/library-item/api/`; `src/features/upcoming-releases/api/get-upcoming-releases.ts` (GET, the loader-safe pattern) + worker; route `src/routes/_authed/upcoming.tsx`. **[Agent: tanstack-fullstack]**
+  - [x] UI:
+    - `src/widgets/upcoming-releases-page/ui/upcoming-releases-page/` (tech spec §2.8): month sections, full-row links (min-h-14), single column `max-w-2xl`, the empty state.
+    - The Library `PageHeader` action link (`library-page.tsx:323-335`), first in the row.
+    - Un-skip the `upcoming` review screen. **[Agent: react-frontend]**
+  - [x] Verify:
+    - Run the gate, including integration. Reseed, then start the app (record the PID).
+    - `/upcoming` lists the fixture games in date order under month headings, today's game reads "Out today", and the vague, TBA and released fixtures are absent.
+    - Reach it from "See all upcoming" on Home and from the Library link.
+    - At 390 × 844, `verify-ui` shows no sideways scroll and tap targets of 44 points or more.
+    - Signed out, `/upcoming` redirects to sign-in.
+    - Remove all of `audit_full`'s exact-dated games in a scratch DB transaction (or use `audit_empty`) and confirm the empty copy.
+    - Stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+- [x] **Slice 7: "Continue?" doesn't offer to start a game that isn't out yet**
+  - [x] RED tests, `useContinueQuestion` / `ContinuePanel` with a fixed `today`:
+    - an upcoming head is skipped and the released second game is offered;
+    - an all-upcoming queue shows "Nothing tonight is fine too." with no start offer;
+    - a TBA head is skipped;
+    - the shelf order is unchanged;
+    - a game released yesterday is offered;
+    - Playing games are untouched. **[Agent: testing]**
+  - [x] `useContinueQuestion` (`src/widgets/dashboard-page/model/use-continue-question.ts:24-69`) takes `today`; `queueHead` becomes the first non-upcoming item. `ContinuePanel` passes `useDeviceToday()`. **[Agent: react-frontend]**
+  - [x] Verify:
+    - Run the gate. Reseed, then start the app (record the PID).
+    - With nothing Playing, put an upcoming fixture first in Up Next and a released game second: Continue? offers the released one, and the shelf still shows the upcoming game first.
+    - Make the whole queue upcoming: the resting message shows.
+    - Restore with `--reseed`, stop the server by PID and delete the screenshots. **[Agent: testing]**
+
+- [ ] **Slice 8: Owner review on phone and desktop**
+  - [x] Capture the "after" set with `design-review --spec 029-release-days --phase round1 --set after --desktop --reseed`: phone 390 × 844 plus desktop 1440 × 900, Light and Dark, for `home`, `library` (Grid and List), `upcoming`, `game-releases` and `game-tba`, with the phone checks' `report.json`. **[Agent: testing]**
+  - [ ] Owner step: Nail reviews the images in `context/spec/029-release-days/review/round1/after/` and lists fixes. Each fix becomes a task under this slice before it is ticked. **[Agent: testing]**
+  - [ ] Verify:
+    - Every listed fix is applied and recaptured.
+    - `git status` shows nothing under `review/`.
+    - Stop the server by PID. **[Agent: testing]**
+
+- [x] **Slice 9: Feature Testing & Regression**
+
+  > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
+  - [x] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 029-release-days` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [x] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
+
+---
+
+**Release steps on Neon** (owner-run, outside any agent task):
+- Before deploying Slice 2: dry-run the migration on a Neon branch (`docs/cutover-rollback.md`). First run `SELECT count(*) FROM "Game" WHERE "releaseDate" IS NOT NULL AND "releaseDate" <> date_trunc('day', "releaseDate");` there: it must return 0, or the calendar-day CHECK fails. Every live IGDB date sampled on 2026-11-12 was UTC midnight.
+- No backfill: legacy rows are repaired when their owner opens Home or the library (tech spec §2.2).
+- After Slice 3 deploys: open Home once and check the Vercel logs for `refresh-release-dates` warnings (an unknown `date_format` or IGDB failures).
