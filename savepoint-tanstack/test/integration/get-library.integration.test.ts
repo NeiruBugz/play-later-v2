@@ -663,4 +663,53 @@ describe("getLibrary", () => {
       expect(result.total).toBe(2);
     });
   });
+
+  describe("given a game whose exact release date moved", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("moved") });
+      await db.prisma.game.create({
+        data: {
+          ...makeGame("moved"),
+          releaseDate: new Date("2027-06-03T00:00:00.000Z"),
+          releaseDatePrecision: "DAY",
+          releaseDateMovedFrom: new Date("2027-03-14T00:00:00.000Z"),
+          releaseDateMovedAt: new Date("2026-11-10T08:15:00.000Z"),
+        },
+      });
+      await db.prisma.libraryItem.create({
+        data: makeLibraryItem("lib-user-moved", "lib-game-moved"),
+      });
+    });
+
+    it("returns the release precision and the moved marker with the game", async () => {
+      const result = await getLibrary("lib-user-moved", {});
+
+      expect(result.items[0]?.game).toMatchObject({
+        releaseDate: new Date("2027-06-03T00:00:00.000Z"),
+        releaseDatePrecision: "DAY",
+        releaseDateMovedFrom: new Date("2027-03-14T00:00:00.000Z"),
+        releaseDateMovedAt: new Date("2026-11-10T08:15:00.000Z"),
+      });
+    });
+  });
+
+  describe("given a game whose release was never checked", () => {
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("unchecked") });
+      await db.prisma.game.create({ data: makeGame("unchecked") });
+      await db.prisma.libraryItem.create({
+        data: makeLibraryItem("lib-user-unchecked", "lib-game-unchecked"),
+      });
+    });
+
+    it("returns empty release precision and an empty moved marker", async () => {
+      const result = await getLibrary("lib-user-unchecked", {});
+
+      expect(result.items[0]?.game).toMatchObject({
+        releaseDatePrecision: null,
+        releaseDateMovedFrom: null,
+        releaseDateMovedAt: null,
+      });
+    });
+  });
 });

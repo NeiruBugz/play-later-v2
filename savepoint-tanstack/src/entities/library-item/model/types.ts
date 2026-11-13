@@ -1,6 +1,7 @@
 import type {
   LibraryItem,
   LibraryItemStatus,
+  ReleaseDatePrecision,
 } from "../../../../shared/lib/prisma/client.ts";
 
 export type GetLibraryFilters = {
@@ -29,6 +30,9 @@ export type LibraryItemWithGame = LibraryItem & {
     slug: string;
     coverImage: string | null;
     releaseDate: Date | null;
+    releaseDatePrecision: ReleaseDatePrecision | null;
+    releaseDateMovedFrom: Date | null;
+    releaseDateMovedAt: Date | null;
     timeToCreditsSeconds: number | null;
     coverHue: number | null;
     coverChroma: number | null;

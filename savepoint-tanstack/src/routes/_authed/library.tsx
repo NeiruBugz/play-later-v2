@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { getLibraryPageDataFn } from "@/features/library-list";
+import { useRefreshReleaseDates } from "@/features/release-dates/model";
 import { LibraryPage } from "@/widgets/library-page";
 
 const searchSchema = z.object({
@@ -48,6 +49,7 @@ function LibraryRoute() {
   const { items, total, platforms, statusCounts, onboarding } =
     Route.useLoaderData();
   const search = Route.useSearch();
+  useRefreshReleaseDates();
 
   return (
     <LibraryPage
