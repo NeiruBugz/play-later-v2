@@ -7,7 +7,6 @@ export interface GameCardData {
   slug: string;
   title: string;
   coverImageId?: string | null;
-  releaseYear?: number | null;
   platforms?: string[];
 }
 

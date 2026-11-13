@@ -37,7 +37,9 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 items-center gap-1.5">{actions}</div>
+        <div className="flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-1">
+          {actions}
+        </div>
       ) : null}
     </header>
   );

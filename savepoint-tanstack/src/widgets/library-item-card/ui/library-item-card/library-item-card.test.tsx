@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { setOwnershipFn } from "@/features/manage-library-entry/api/set-ownership-fn";
@@ -690,6 +690,202 @@ describe("LibraryItemCard", () => {
         <LibraryItemCard item={buildItem({ status: "PLAYING" })} menu={menu} />
       );
       expect(screen.queryByRole("menuitem")).toBeNull();
+    });
+  });
+
+  describe.each([
+    { layout: "responsive" as const },
+    { layout: "row" as const },
+  ])("given release dates on a card in the $layout layout", ({ layout }) => {
+    const buildReleaseItem = (
+      release: Partial<LibraryItemWithGame["game"]>
+    ): LibraryItemWithGame =>
+      buildLibraryItemWithGame(
+        { id: 1, status: "WANT", platform: "PC" },
+        {
+          id: "game-1",
+          title: "Hollow Knight",
+          slug: "hollow-knight",
+          ...release,
+        }
+      );
+
+    const elementsOfRelease = {
+      getReleaseLine: () => screen.getByTestId("game-card-release"),
+      queryReleaseLine: () => screen.queryByTestId("game-card-release"),
+      getMovedLine: () => screen.getByTestId("game-card-moved"),
+      queryMovedLine: () => screen.queryByTestId("game-card-moved"),
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 10, 12, 12));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe("given an upcoming game with an exact date", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: new Date("2027-03-14T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+            })}
+          />
+        );
+      });
+
+      it("reads Out and the date under the title", () => {
+        expect(elementsOfRelease.getReleaseLine()).toHaveTextContent(
+          "Out 14 Mar 2027"
+        );
+      });
+
+      it("places the release line after the length line", () => {
+        expect(
+          elements
+            .getLengthLine()
+            .compareDocumentPosition(elementsOfRelease.getReleaseLine()) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      });
+
+      it("places the release line before the platform information", () => {
+        expect(
+          elementsOfRelease
+            .getReleaseLine()
+            .compareDocumentPosition(
+              screen.getByTestId("library-item-card-metadata")
+            ) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      });
+
+      it("shows no moved line", () => {
+        expect(elementsOfRelease.queryMovedLine()).toBeNull();
+      });
+    });
+
+    describe("given an upcoming game known only as a quarter", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: new Date("2027-04-01T00:00:00Z"),
+              releaseDatePrecision: "QUARTER",
+            })}
+          />
+        );
+      });
+
+      it("reads Out and the quarter", () => {
+        expect(elementsOfRelease.getReleaseLine()).toHaveTextContent(
+          "Out Q2 2027"
+        );
+      });
+    });
+
+    describe("given a game the catalogue marks as TBA", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: null,
+              releaseDatePrecision: "TBA",
+            })}
+          />
+        );
+      });
+
+      it("reads just Date TBA", () => {
+        expect(elementsOfRelease.getReleaseLine().textContent).toBe("Date TBA");
+      });
+    });
+
+    describe("given a game that is already out", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: new Date("2019-05-02T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+            })}
+          />
+        );
+      });
+
+      it("shows no release line", () => {
+        expect(elementsOfRelease.queryReleaseLine()).toBeNull();
+      });
+    });
+
+    describe("given a game with no date", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: null,
+              releaseDatePrecision: null,
+            })}
+          />
+        );
+      });
+
+      it("shows no release line", () => {
+        expect(elementsOfRelease.queryReleaseLine()).toBeNull();
+      });
+    });
+
+    describe("given an exact date that moved 2 days ago", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: new Date("2027-06-03T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+              releaseDateMovedFrom: new Date("2027-03-14T00:00:00Z"),
+              releaseDateMovedAt: new Date("2026-11-10T08:15:00Z"),
+            })}
+          />
+        );
+      });
+
+      it("shows the new date and where it moved from", () => {
+        expect(elementsOfRelease.getReleaseLine()).toHaveTextContent(
+          "Out 3 Jun 2027"
+        );
+        expect(elementsOfRelease.getMovedLine().textContent).toBe(
+          "Moved from 14 Mar 2027"
+        );
+      });
+    });
+
+    describe("given an exact date that moved 15 days ago", () => {
+      beforeEach(() => {
+        render(
+          <LibraryItemCard
+            layout={layout}
+            item={buildReleaseItem({
+              releaseDate: new Date("2027-06-03T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+              releaseDateMovedFrom: new Date("2027-03-14T00:00:00Z"),
+              releaseDateMovedAt: new Date("2026-10-28T08:15:00Z"),
+            })}
+          />
+        );
+      });
+
+      it("shows no moved line", () => {
+        expect(elementsOfRelease.queryMovedLine()).toBeNull();
+      });
     });
   });
 });

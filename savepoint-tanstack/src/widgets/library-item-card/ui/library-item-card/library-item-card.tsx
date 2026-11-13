@@ -1,3 +1,4 @@
+import { ReleaseLines } from "@/entities/game";
 import { PlatformBadgeItem } from "@/entities/game/ui/platform-badges";
 import {
   NextStepButton,
@@ -94,6 +95,8 @@ export function LibraryItemCard({
         >
           {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
         </p>
+
+        <ReleaseLines game={item.game} />
 
         <div className="mt-1 flex flex-wrap items-center gap-1 self-start empty:hidden">
           <QueueMarker

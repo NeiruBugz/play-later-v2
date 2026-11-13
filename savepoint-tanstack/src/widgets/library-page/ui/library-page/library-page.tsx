@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 
+import { ReleaseLines } from "@/entities/game";
 import {
   NextStepButton,
   NotOwnedTag,
@@ -114,6 +115,7 @@ const LibraryGridTile = memo(function LibraryGridTile({
           >
             {formatEvenings(item.game.timeToCreditsSeconds, eveningMinutes)}
           </p>
+          <ReleaseLines game={item.game} />
           {item.platform ? (
             <span className="mt-0.5 block truncate text-xs text-muted-foreground">
               {item.platform}
@@ -324,6 +326,12 @@ export function LibraryPage(props: LibraryPageProps) {
         title="Library"
         actions={
           <>
+            <Link
+              to="/upcoming"
+              className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline md:min-h-0"
+            >
+              Upcoming releases
+            </Link>
             <Link
               to="/steam/games"
               className="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline md:min-h-0"

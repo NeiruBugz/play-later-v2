@@ -913,4 +913,196 @@ describe("LibraryPage", () => {
       ).toBeInTheDocument();
     });
   });
+
+  describe.each([
+    { view: "grid" as const, cardTestId: "library-grid-tile" },
+    { view: "list" as const, cardTestId: "library-item-card-root" },
+  ])("given release dates on the cards in the $view view", (scenario) => {
+    const buildReleaseItem = (
+      id: number,
+      title: string,
+      release: {
+        releaseDate: Date | null;
+        releaseDatePrecision: "DAY" | "QUARTER" | "TBA";
+        releaseDateMovedFrom?: Date;
+        releaseDateMovedAt?: Date;
+      }
+    ) =>
+      buildLibraryItemWithGame(
+        { id, status: "PLAYING", platform: "PC" },
+        {
+          id: `g-${id}`,
+          title,
+          slug: title.toLowerCase().replace(/\s+/g, "-"),
+          ...release,
+        }
+      ) as LibraryItemWithGame;
+
+    const getCard = (title: string) =>
+      screen
+        .getAllByTestId(scenario.cardTestId)
+        .find(
+          (card) =>
+            within(card).queryByRole("link", { name: `View ${title}` }) !== null
+        )!;
+
+    const releaseLineOf = (title: string) =>
+      within(getCard(title)).queryByTestId("game-card-release");
+    const movedLineOf = (title: string) =>
+      within(getCard(title)).queryByTestId("game-card-moved");
+
+    beforeEach(async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 10, 12, 12));
+      render(
+        <LibraryPage
+          items={[
+            buildReleaseItem(61, "Exact Soon", {
+              releaseDate: new Date("2027-03-14T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+            }),
+            buildReleaseItem(62, "Quarter Game", {
+              releaseDate: new Date("2027-04-01T00:00:00Z"),
+              releaseDatePrecision: "QUARTER",
+            }),
+            buildReleaseItem(63, "Unannounced", {
+              releaseDate: null,
+              releaseDatePrecision: "TBA",
+            }),
+            buildReleaseItem(64, "Old Classic", {
+              releaseDate: new Date("2019-05-02T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+            }),
+            buildReleaseItem(65, "Delayed Game", {
+              releaseDate: new Date("2027-06-03T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+              releaseDateMovedFrom: new Date("2027-03-14T00:00:00Z"),
+              releaseDateMovedAt: new Date("2026-11-10T08:15:00Z"),
+            }),
+            buildReleaseItem(66, "Long Ago Delayed", {
+              releaseDate: new Date("2027-06-03T00:00:00Z"),
+              releaseDatePrecision: "DAY",
+              releaseDateMovedFrom: new Date("2027-03-14T00:00:00Z"),
+              releaseDateMovedAt: new Date("2026-10-20T08:15:00Z"),
+            }),
+          ]}
+          total={6}
+          {...defaultViewProps}
+        />
+      );
+      if (scenario.view === "list") {
+        await userEvent.click(
+          screen.getByRole("button", { name: "List view" })
+        );
+      }
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("reads Out and the exact date on a card with an exact date", () => {
+      expect(releaseLineOf("Exact Soon")).toHaveTextContent("Out 14 Mar 2027");
+    });
+
+    it("reads Out and the quarter on a card with a quarter", () => {
+      expect(releaseLineOf("Quarter Game")).toHaveTextContent("Out Q2 2027");
+    });
+
+    it("reads just Date TBA on a TBA card", () => {
+      expect(releaseLineOf("Unannounced")?.textContent).toBe("Date TBA");
+    });
+
+    it("shows no release line on a game that is already out", () => {
+      expect(releaseLineOf("Old Classic")).toBeNull();
+    });
+
+    it("shows where a recently moved date moved from, under the new date", () => {
+      expect(releaseLineOf("Delayed Game")).toHaveTextContent("Out 3 Jun 2027");
+      expect(movedLineOf("Delayed Game")?.textContent).toBe(
+        "Moved from 14 Mar 2027"
+      );
+    });
+
+    it("drops the moved line once the move is more than 14 days old", () => {
+      expect(releaseLineOf("Long Ago Delayed")).toHaveTextContent(
+        "Out 3 Jun 2027"
+      );
+      expect(movedLineOf("Long Ago Delayed")).toBeNull();
+    });
+
+    it("shows no moved line on a card that never moved", () => {
+      expect(movedLineOf("Exact Soon")).toBeNull();
+    });
+
+    it("places the release line right after the length line", () => {
+      const card = getCard("Exact Soon");
+      const lengthLine = within(card).getByTestId("game-card-length");
+
+      expect(
+        lengthLine.compareDocumentPosition(
+          within(card).getByTestId("game-card-release")
+        ) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it("places the release line before the platform information", () => {
+      const card = getCard("Exact Soon");
+      const platformInformation =
+        scenario.view === "grid"
+          ? within(card).getByText("PC")
+          : within(card).getByTestId("library-item-card-metadata");
+
+      expect(
+        within(card)
+          .getByTestId("game-card-release")
+          .compareDocumentPosition(platformInformation) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
+
+  describe.each([
+    { description: "an empty library", items: [] as LibraryItemWithGame[] },
+    {
+      description: "a library with games",
+      items: [buildItem({ id: 1, gameTitle: "Hollow Knight" })],
+    },
+  ])("given $description", ({ items }) => {
+    beforeEach(() => {
+      render(
+        <LibraryPage items={items} total={items.length} {...defaultViewProps} />
+      );
+    });
+
+    it("offers an Upcoming releases text link to /upcoming in the page header", () => {
+      const link = screen.getByRole("link", { name: "Upcoming releases" });
+
+      expect(link).toHaveAttribute("href", "/upcoming");
+      expect(link).toHaveTextContent("Upcoming releases");
+    });
+
+    it("lists the Upcoming releases link before Import from Steam", () => {
+      const upcomingLink = screen.getByRole("link", {
+        name: "Upcoming releases",
+      });
+      const [headerImportLink] = screen.getAllByRole("link", {
+        name: "Import from Steam",
+      });
+
+      expect(
+        upcomingLink.compareDocumentPosition(headerImportLink!) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it("lists the Upcoming releases link before the Add game button", () => {
+      expect(
+        screen
+          .getByRole("link", { name: "Upcoming releases" })
+          .compareDocumentPosition(elements.getAddGameTrigger()) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
 });
