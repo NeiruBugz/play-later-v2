@@ -1,7 +1,7 @@
 # Functional Specification: Release days
 
 - **Topic:** Show when upcoming games in a person's library come out. Library cards and the game page show the release date as precisely as it is actually known. Home gets a quiet "Coming soon" section, and a new "Upcoming releases" page lists every game with an exact date ahead. Dates stay current when a release is announced or moved.
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Nail Badiullin
 
 ---
@@ -69,14 +69,14 @@ Wherever this spec shows a release date, it uses one of these forms:
 A game with no date has no label.
 
 - **Acceptance Criteria:**
-  - [ ] Given an upcoming game whose release is known only as the year 2027, when the person views its library card or game page, then they see "2027" and never a specific day such as "31 Dec 2027".
-  - [ ] Given an upcoming game whose release is known only as the second quarter of 2027, when the person views its library card, then they see "Q2 2027".
-  - [ ] Given an upcoming game whose release is known only as March 2027, when the person views its library card, then they see "Mar 2027".
-  - [ ] Given a game the catalogue marks as TBA, when the person views its library card, then they see "Date TBA".
-  - [ ] Given a game with no date, when the person views its library card, then no release date text appears on it.
-  - [ ] Given today is before 14 March and a game has an exact date on 14 March of the current year, when the person views its library card, then the label reads "14 Mar".
-  - [ ] Given a game with an exact date on 14 March of a later year, when the person views its library card, then the label reads "14 Mar" followed by that year, for example "14 Mar 2027".
-  - [ ] Given a person whose device is set to a timezone west of London, for example New York, and a game with an exact date of 14 March, when they view its library card, then the label reads "14 Mar" and not "13 Mar".
+  - [x] Given an upcoming game whose release is known only as the year 2027, when the person views its library card or game page, then they see "2027" and never a specific day such as "31 Dec 2027". _Verified: card 'Out 2027', game page 'Releases 2027' (docs/screenshots/029-release-days-library-grid-labels-390.png, docs/screenshots/029-release-days-game-releases-year-390.png)._
+  - [x] Given an upcoming game whose release is known only as the second quarter of 2027, when the person views its library card, then they see "Q2 2027". _Verified: card 'Out Q2 2027' (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given an upcoming game whose release is known only as March 2027, when the person views its library card, then they see "Mar 2027". _Verified: card 'Out Jan 2027', same month format with the January fixture (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given a game the catalogue marks as TBA, when the person views its library card, then they see "Date TBA". _Verified: card 'Date TBA' (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given a game with no date, when the person views its library card, then no release date text appears on it. _Verified: no date card has no release line (docs/screenshots/029-release-days-library-grid-labels-390.png, docs/screenshots/029-release-days-library-list-view-390.png)._
+  - [x] Given today is before 14 March and a game has an exact date on 14 March of the current year, when the person views its library card, then the label reads "14 Mar". _Verified: 'Out 22 Nov' and 'Out 14 Dec' without year (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given a game with an exact date on 14 March of a later year, when the person views its library card, then the label reads "14 Mar" followed by that year, for example "14 Mar 2027". _Verified: 'Out 2 Jan 2027' with year (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given a person whose device is set to a timezone west of London, for example New York, and a game with an exact date of 14 March, when they view its library card, then the label reads "14 Mar" and not "13 Mar". _Verified: UTC and America/New_York contexts show the identical card and game page (docs/screenshots/029-release-days-game-exact-new-york-390.png)._
 
 ### 2.2 Library cards show the date for upcoming games
 
@@ -84,11 +84,11 @@ Library cards of upcoming games show a line "Out" followed by the date label, fo
 
 - The release date line, and the "Moved from …" line (2.7), must not break alignment between cards in the same row. In each row, every card's cover, title and length line start at the same height, whether or not the card has these extra lines.
 - **Acceptance Criteria:**
-  - [ ] Given today is before 14 March and a Want game has an exact date of 14 March of the current year, when the person opens the library, then its card shows "Out 14 Mar".
-  - [ ] Given an owned Playing game with a date of the second quarter of next year, when the person opens the library, then its card shows "Out Q2" followed by that year.
-  - [ ] Given a game that came out last year, when the person opens the library, then its card shows no release date line.
-  - [ ] Given a grid row where one tile has a release date line and a "Moved from …" line and its neighbours have neither, when the person views the row, then the covers, titles and length lines of all tiles in that row start at the same heights.
-  - [ ] Given a game with an exact date of yesterday, when the person opens the library today, then its card shows no release date line.
+  - [x] Given today is before 14 March and a Want game has an exact date of 14 March of the current year, when the person opens the library, then its card shows "Out 14 Mar". _Verified: Want card 'Out 22 Nov' (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given an owned Playing game with a date of the second quarter of next year, when the person opens the library, then its card shows "Out Q2" followed by that year. _Verified: Quarter fixture set to Playing reads 'Playing' with 'Out Q2 2027' in the live app._
+  - [x] Given a game that came out last year, when the person opens the library, then its card shows no release date line. _Verified: released-last-year card has no release line (docs/screenshots/029-release-days-library-grid-labels-390.png)._
+  - [x] Given a grid row where one tile has a release date line and a "Moved from …" line and its neighbours have neither, when the person views the row, then the covers, titles and length lines of all tiles in that row start at the same heights. _Verified: live measurement: cover, title and length line tops equal across the row holding the Out + Moved card (docs/screenshots/029-release-days-library-moved-card-390.png)._
+  - [x] Given a game with an exact date of yesterday, when the person opens the library today, then its card shows no release date line. _Verified: fixture set to yesterday shows no line on the card (also with a UTC+14 device)._
 
 ### 2.3 The game page says "Releases" for future dates
 
@@ -101,12 +101,12 @@ The game page shows a release line using the 2.1 labels, but always with the yea
 This applies to signed-in people and signed-out visitors alike.
 
 - **Acceptance Criteria:**
-  - [ ] Given a game with an exact release date in the future, when anyone opens its game page, then they see "Releases" followed by that date with its year, and never "Released".
-  - [ ] Given an upcoming game known only as 2027, when anyone opens its game page, then they see "Releases 2027".
-  - [ ] Given a TBA game, when anyone opens its game page, then they see "Release date TBA".
-  - [ ] Given a game released on 2 June 2020, when anyone opens its game page, then they see "Released 2 Jun 2020".
-  - [ ] Given a game known only as released in 2020, when anyone opens its game page, then they see "Released 2020".
-  - [ ] Given a game with no date, when anyone opens its game page, then no release line appears.
+  - [x] Given a game with an exact release date in the future, when anyone opens its game page, then they see "Releases" followed by that date with its year, and never "Released". _Verified: 'Releases 22 Nov 2026', 'Released' absent, signed in and out (docs/screenshots/029-release-days-game-releases-exact-390.png, docs/screenshots/029-release-days-game-releases-exact-signed-out-390.png)._
+  - [x] Given an upcoming game known only as 2027, when anyone opens its game page, then they see "Releases 2027". _Verified: 'Releases 2027' (docs/screenshots/029-release-days-game-releases-year-390.png)._
+  - [x] Given a TBA game, when anyone opens its game page, then they see "Release date TBA". _Verified: 'Release date TBA' (docs/screenshots/029-release-days-game-release-date-tba-390.png)._
+  - [x] Given a game released on 2 June 2020, when anyone opens its game page, then they see "Released 2 Jun 2020". _Verified: 'Released 2 Jun 2020' (docs/screenshots/029-release-days-game-released-exact-390.png)._
+  - [x] Given a game known only as released in 2020, when anyone opens its game page, then they see "Released 2020". _Verified: 'Released 2020' (docs/screenshots/029-release-days-game-released-year-390.png)._
+  - [x] Given a game with no date, when anyone opens its game page, then no release line appears. _Verified: no release row on a real no-date game (docs/screenshots/029-release-days-game-no-date-390.png)._
 
 ### 2.4 Coming soon on Home
 
@@ -120,20 +120,20 @@ Home gets a new section titled **Coming soon**. It lists the person's upcoming g
 - When no upcoming game has an exact date in the window, the section is not shown, with no empty message.
 - Games whose date is only a month, quarter or year, or TBA, never appear here, and no "Moved from …" line appears here.
 - **Acceptance Criteria:**
-  - [ ] Given a game in the library with an exact release date of today, when the person opens Home, then Coming soon shows it with "Out today", listed first.
-  - [ ] Given a game with an exact release date of tomorrow, when the person opens Home, then Coming soon shows it with "Tomorrow".
-  - [ ] Given a game with an exact release date 9 days from today, when the person opens Home, then Coming soon shows it with its short weekday and date, for example "Fri 14 Mar", and no "days left" wording.
-  - [ ] Given a game with an exact release date exactly 30 days from today, when the person opens Home, then it appears in Coming soon.
-  - [ ] Given a game with an exact release date 31 days from today and nothing nearer, when the person opens Home, then no Coming soon section is shown.
-  - [ ] Given today is 28 December and a game has an exact date of 2 January, when the person opens Home, then its entry shows the weekday, "2 Jan" and the new year.
-  - [ ] Given an upcoming game known only as "Mar 2027", when the person opens Home during March 2027, then it does not appear in Coming soon.
-  - [ ] Given five games with exact dates in the next 30 days, two of them on the same day, when the person opens Home, then Coming soon shows the three nearest, with same-day games in title order, followed by the link "See all upcoming".
-  - [ ] When the person taps "See all upcoming", then the Upcoming releases page opens.
-  - [ ] When the person taps a Coming soon entry, then that game's page opens.
-  - [ ] Given a game with an exact date of yesterday, when the person opens Home today, then it does not appear in Coming soon.
-  - [ ] Given a Done game and a Not owned Want game, both with exact dates in the next 30 days, when the person opens Home, then both appear in Coming soon.
-  - [ ] Given a phone at 390 × 844 with one game Playing, three games in Up Next and three Coming soon entries, when the person opens Home, then the first Up Next cover is fully visible without scrolling, and Coming soon appears below "Also playing".
-  - [ ] Given Home with a Coming soon section, when the person looks at the page, then only the "Continue?" panel has a cover tint.
+  - [x] Given a game in the library with an exact release date of today, when the person opens Home, then Coming soon shows it with "Out today", listed first. _Verified: 'Out today' listed first (docs/screenshots/029-release-days-home-coming-soon-cap-same-day-390.png)._
+  - [x] Given a game with an exact release date of tomorrow, when the person opens Home, then Coming soon shows it with "Tomorrow". _Verified: 'Tomorrow' (docs/screenshots/029-release-days-home-coming-soon-390.png)._
+  - [x] Given a game with an exact release date 9 days from today, when the person opens Home, then Coming soon shows it with its short weekday and date, for example "Fri 14 Mar", and no "days left" wording. _Verified: 'Sun 22 Nov', no countdown wording (docs/screenshots/029-release-days-home-coming-soon-390.png)._
+  - [x] Given a game with an exact release date exactly 30 days from today, when the person opens Home, then it appears in Coming soon. _Verified: +30 day game listed (docs/screenshots/029-release-days-home-coming-soon-done-and-not-owned-390.png)._
+  - [x] Given a game with an exact release date 31 days from today and nothing nearer, when the person opens Home, then no Coming soon section is shown. _Verified: no Coming soon section and no 'See all upcoming' (docs/screenshots/029-release-days-home-no-coming-soon-31-days-390.png)._
+  - [x] Given today is 28 December and a game has an exact date of 2 January, when the person opens Home, then its entry shows the weekday, "2 Jan" and the new year. _Verified: verified by test evidence the user accepted: release-coming-soon.test.ts 'adds the new year to %s' and spec-029-acceptance surfaces-agree '28 December ... 2 January'._
+  - [x] Given an upcoming game known only as "Mar 2027", when the person opens Home during March 2027, then it does not appear in Coming soon. _Verified: month-only fixture never listed._
+  - [x] Given five games with exact dates in the next 30 days, two of them on the same day, when the person opens Home, then Coming soon shows the three nearest, with same-day games in title order, followed by the link "See all upcoming". _Verified: 3 nearest with same-day title order A to Z, then 'See all upcoming' (docs/screenshots/029-release-days-home-coming-soon-cap-same-day-390.png)._
+  - [x] When the person taps "See all upcoming", then the Upcoming releases page opens. _Verified: clicked 'See all upcoming', landed on /upcoming (h1 'Upcoming releases')._
+  - [x] When the person taps a Coming soon entry, then that game's page opens. _Verified: clicked an entry, landed on /games/release-fixture-out-today._
+  - [x] Given a game with an exact date of yesterday, when the person opens Home today, then it does not appear in Coming soon. _Verified: yesterday-dated game absent from Coming soon, Library line and Upcoming._
+  - [x] Given a Done game and a Not owned Want game, both with exact dates in the next 30 days, when the person opens Home, then both appear in Coming soon. _Verified: Done and Not owned games both listed (docs/screenshots/029-release-days-home-coming-soon-done-and-not-owned-390.png)._
+  - [x] Given a phone at 390 × 844 with one game Playing, three games in Up Next and three Coming soon entries, when the person opens Home, then the first Up Next cover is fully visible without scrolling, and Coming soon appears below "Also playing". _Verified: measured at 390x844 with 1 Playing, 3 Up Next, 3 Coming soon: first Up Next cover top 279 / bottom 677, scrollY 0; order with Also playing present: Up Next, Also playing, Coming soon, counts (docs/screenshots/029-release-days-home-first-viewport-390x844.png)._
+  - [x] Given Home with a Coming soon section, when the person looks at the page, then only the "Continue?" panel has a cover tint. _Verified: the only .cover-tint on Home is the Continue? panel; 0 tinted elements in Coming soon._
 
 ### 2.5 Upcoming releases page
 
@@ -147,17 +147,17 @@ A new page titled **Upcoming releases** lists every upcoming game in the person'
 - Only signed-in people can open it, and each person sees only their own library.
 - When nothing qualifies, the page shows: "No upcoming releases with a set date. Games appear here once their release day is announced."
 - **Acceptance Criteria:**
-  - [ ] Given three games with exact dates in March, April and the following January, when the person opens Upcoming releases, then they see the games in date order under the headings for those months.
-  - [ ] Given a game known only as "Q2 2027", when the person opens Upcoming releases, then it is not listed.
-  - [ ] Given a game that was known only as "2027" and whose exact date of 14 March 2027 has been announced in the catalogue for more than a week, when the person opens the library and then Upcoming releases, then it is listed under March 2027.
-  - [ ] Given two games with an exact date of today, when the person opens Upcoming releases, then both are at the top of the list in title order, each reading "Out today" instead of a weekday and day.
-  - [ ] Given a game with an exact date of yesterday, when the person opens Upcoming releases today, then it is not listed.
-  - [ ] Given a person with no upcoming games with an exact date, when they open Upcoming releases, then they see "No upcoming releases with a set date. Games appear here once their release day is announced."
-  - [ ] Given a person with no upcoming games at all, when they open the Library page, then the "Upcoming releases" link is still shown next to the page title.
-  - [ ] When the person taps "Upcoming releases" on the Library page, then the Upcoming releases page opens.
-  - [ ] Given a signed-out visitor, when they try to open Upcoming releases, then they are sent to the sign-in page and see no games.
-  - [ ] When the person taps an entry, then that game's page opens.
-  - [ ] Given a phone at 390 × 844, when the person opens Upcoming releases, then the page does not scroll sideways and every entry can be tapped with a target at least 44 points tall.
+  - [x] Given three games with exact dates in March, April and the following January, when the person opens Upcoming releases, then they see the games in date order under the headings for those months. _Verified: headings November 2026, December 2026, January 2027 in date order (docs/screenshots/029-release-days-upcoming-page-390.png)._
+  - [x] Given a game known only as "Q2 2027", when the person opens Upcoming releases, then it is not listed. _Verified: quarter, month, year, TBA, no date and legacy fixtures absent from the page._
+  - [x] Given a game that was known only as "2027" and whose exact date of 14 March 2027 has been announced in the catalogue for more than a week, when the person opens the library and then Upcoming releases, then it is listed under March 2027. _Verified: year-dated game refreshed to its announced exact date through the real catalogue and listed (docs/screenshots/029-release-days-upcoming-refreshed-moved-390.png)._
+  - [x] Given two games with an exact date of today, when the person opens Upcoming releases, then both are at the top of the list in title order, each reading "Out today" instead of a weekday and day. _Verified: two games on today, title order, each 'Out today' (docs/screenshots/029-release-days-upcoming-refreshed-moved-390.png)._
+  - [x] Given a game with an exact date of yesterday, when the person opens Upcoming releases today, then it is not listed. _Verified: yesterday-dated game not listed._
+  - [x] Given a person with no upcoming games with an exact date, when they open Upcoming releases, then they see "No upcoming releases with a set date. Games appear here once their release day is announced." _Verified: exact empty copy shown to audit_empty (docs/screenshots/029-release-days-upcoming-empty-state-390.png)._
+  - [x] Given a person with no upcoming games at all, when they open the Library page, then the "Upcoming releases" link is still shown next to the page title. _Verified: 'Upcoming releases' link shown with no upcoming games (docs/screenshots/029-release-days-library-empty-header-link-390.png)._
+  - [x] When the person taps "Upcoming releases" on the Library page, then the Upcoming releases page opens. _Verified: link opens /upcoming (docs/screenshots/029-release-days-library-header-link-390.png)._
+  - [x] Given a signed-out visitor, when they try to open Upcoming releases, then they are sent to the sign-in page and see no games. _Verified: signed out sent to /login, no games visible (docs/screenshots/029-release-days-upcoming-signed-out-redirect-390.png)._
+  - [x] When the person taps an entry, then that game's page opens. _Verified: clicked an entry, landed on /games/release-fixture-tomorrow._
+  - [x] Given a phone at 390 × 844, when the person opens Upcoming releases, then the page does not scroll sideways and every entry can be tapped with a target at least 44 points tall. _Verified: measured at 390x844: scrollWidth 390 = clientWidth 390, all 9 entries 343x88, 'See all upcoming' and the Library link 44 tall._
 
 ### 2.6 Dates stay current
 
@@ -169,10 +169,10 @@ When the person opens Home or the Library page, SavePoint checks the game catalo
 - **Speed:** Home and the Library page show their content without waiting for the game catalogue. A correction found during a visit shows the next time the person opens a page that shows the date; the page already open is not updated.
 - **When the catalogue fails:** when the game catalogue is slow or unavailable, pages show the last known dates and no error message. The game is checked again on a later visit.
 - **Acceptance Criteria:**
-  - [ ] Given a game with an exact date within the next 14 days whose date in the catalogue moved more than a day ago, when the person opens the library and then opens it again, then its card, its game page and Upcoming releases show the new date.
-  - [ ] Given a game known only as "2027" whose exact date was announced in the catalogue more than a week ago, when the person opens the library and then opens it again, then its card shows the exact date.
-  - [ ] Given the game catalogue is unavailable, when the person opens Home, then Home shows its content with the last known dates and no error message.
-  - [ ] Given a game released last month whose catalogue date later changes, when the person opens the library, then its card still shows no release date line and its game page still shows its original "Released" date.
+  - [x] Given a game with an exact date within the next 14 days whose date in the catalogue moved more than a day ago, when the person opens the library and then opens it again, then its card, its game page and Upcoming releases show the new date. _Verified: live refresh: library open 1 'Out 22 Nov', open 2 'Out 13 Nov' + 'Moved from 22 Nov'; game page, Upcoming and Home agree (docs/screenshots/029-release-days-library-card-refreshed-moved-390.png, docs/screenshots/029-release-days-game-refreshed-date-390.png)._
+  - [x] Given a game known only as "2027" whose exact date was announced in the catalogue more than a week ago, when the person opens the library and then opens it again, then its card shows the exact date. _Verified: year-dated game showed the announced exact date on the second open (docs/screenshots/029-release-days-library-card-year-to-exact-no-moved-390.png)._
+  - [x] Given the game catalogue is unavailable, when the person opens Home, then Home shows its content with the last known dates and no error message. _Verified: verified by test evidence the user accepted: spec-029-acceptance dates-stay-current 'given the catalogue is unavailable' (shows last known date, no error); 134 acceptance tests pass._
+  - [x] Given a game released last month whose catalogue date later changes, when the person opens the library, then its card still shows no release date line and its game page still shows its original "Released" date. _Verified: released game kept no release line, game page 'Released 2 Jun 2020', DB row and checkedAt unchanged after two library opens and Home._
 
 ### 2.7 A quiet "Moved" line when an exact date changes
 
@@ -184,23 +184,23 @@ When a game's exact release date changes, its library card and its Upcoming rele
 - When the date moves again within the 14 days, the line shows the most recent old date, and the 14 days start again.
 - The line is plain text with no warning color and no "Delayed" badge. It does not appear on Home or on the game page.
 - **Acceptance Criteria:**
-  - [ ] Given a game whose exact date changed from 14 March to 3 June of the current year, when the person opens the library, then its card shows "Out 3 Jun" and the line "Moved from 14 Mar".
-  - [ ] Given a game whose card first showed "Moved from 14 Mar" 15 days ago, when the person opens the library, then the line is gone.
-  - [ ] Given a game whose date changed from "2027" to the exact date 14 March 2027, when the person opens the library, then its card shows "Out 14 Mar 2027" and no "Moved" line.
-  - [ ] Given a game whose exact date changed from 14 March to "2027", when the person opens the library, then its card shows "Out 2027" and "Moved from 14 Mar", and the game is not in Upcoming releases.
-  - [ ] Given a game whose exact date changed from 14 March to 3 June, when the person opens Upcoming releases, then the entry under June shows "Moved from 14 Mar".
-  - [ ] Given a game whose exact date changed from 14 March to 3 June, when the person opens Home or the game page, then no "Moved" line appears there.
+  - [x] Given a game whose exact date changed from 14 March to 3 June of the current year, when the person opens the library, then its card shows "Out 3 Jun" and the line "Moved from 14 Mar". _Verified: live refresh 'Out 13 Nov' + 'Moved from 22 Nov'; fixture 'Out 28 Dec' + 'Moved from 3 Dec'._
+  - [x] Given a game whose card first showed "Moved from 14 Mar" 15 days ago, when the person opens the library, then the line is gone. _Verified: marker 15 and 20 days old shows no line._
+  - [x] Given a game whose date changed from "2027" to the exact date 14 March 2027, when the person opens the library, then its card shows "Out 14 Mar 2027" and no "Moved" line. _Verified: year-to-exact after refresh: 'Out 13 Nov', no Moved line._
+  - [x] Given a game whose exact date changed from 14 March to "2027", when the person opens the library, then its card shows "Out 2027" and "Moved from 14 Mar", and the game is not in Upcoming releases. _Verified: exact-to-year state shows 'Out 2027' + 'Moved from 3 Dec', not in Upcoming (docs/screenshots/029-release-days-library-moved-15-days-and-vaguer-390.png); refresh-driven exact-to-vaguer also covered by the spec-029 acceptance tests._
+  - [x] Given a game whose exact date changed from 14 March to 3 June, when the person opens Upcoming releases, then the entry under June shows "Moved from 14 Mar". _Verified: Upcoming entry under December shows 'Moved from 3 Dec' (docs/screenshots/029-release-days-upcoming-page-390.png)._
+  - [x] Given a game whose exact date changed from 14 March to 3 June, when the person opens Home or the game page, then no "Moved" line appears there. _Verified: 'Moved' text absent from Home and the game page while the library card has it._
 
 ### 2.8 "Continue?" doesn't offer to start a game that isn't out yet
 
 When Home's "Continue?" panel would offer to start the first game in the person's Up Next queue, it skips upcoming games and offers the first game in the queue that is released or has no date. When every game in the queue is upcoming, the panel goes straight to its existing resting message ("Nothing tonight is fine too."), as it does after the person has said "Not tonight" to everything. The Up Next queue itself and its order do not change; upcoming games stay on the shelf.
 
 - **Acceptance Criteria:**
-  - [ ] Given nothing is Playing and Up Next holds an upcoming game first and a released game second, when the person opens Home, then the "Continue?" panel offers to start the released game.
-  - [ ] Given nothing is Playing and every game in Up Next is upcoming, when the person opens Home, then the "Continue?" panel shows "Nothing tonight is fine too." and no offer to start a game.
-  - [ ] Given nothing is Playing and Up Next holds a TBA game first, when the person opens Home, then the "Continue?" panel does not offer to start that game.
-  - [ ] Given Up Next holds an upcoming game first, when the person opens Home, then the Up Next shelf still shows that game first.
-  - [ ] Given the first game in Up Next had an exact date of yesterday, when the person opens Home today, then the "Continue?" panel can offer to start it.
+  - [x] Given nothing is Playing and Up Next holds an upcoming game first and a released game second, when the person opens Home, then the "Continue?" panel offers to start the released game. _Verified: Up Next [upcoming, released]: panel offers the released game (docs/screenshots/029-release-days-continue-offers-released-390.png)._
+  - [x] Given nothing is Playing and every game in Up Next is upcoming, when the person opens Home, then the "Continue?" panel shows "Nothing tonight is fine too." and no offer to start a game. _Verified: all upcoming: 'Nothing tonight is fine too.', no Start playing button (docs/screenshots/029-release-days-continue-resting-all-upcoming-390.png)._
+  - [x] Given nothing is Playing and Up Next holds a TBA game first, when the person opens Home, then the "Continue?" panel does not offer to start that game. _Verified: TBA first: offers the next released game (docs/screenshots/029-release-days-continue-skips-tba-390.png)._
+  - [x] Given Up Next holds an upcoming game first, when the person opens Home, then the Up Next shelf still shows that game first. _Verified: shelf still lists the upcoming game as #1._
+  - [x] Given the first game in Up Next had an exact date of yesterday, when the person opens Home today, then the "Continue?" panel can offer to start it. _Verified: game dated yesterday is offered (docs/screenshots/029-release-days-continue-offers-yesterday-release-390.png)._
 
 ---
 

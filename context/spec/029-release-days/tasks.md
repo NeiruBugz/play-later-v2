@@ -208,10 +208,10 @@ Conventions for every slice:
     - Make the whole queue upcoming: the resting message shows.
     - Restore with `--reseed`, stop the server by PID and delete the screenshots. **[Agent: testing]**
 
-- [ ] **Slice 8: Owner review on phone and desktop**
+- [x] **Slice 8: Owner review on phone and desktop**
   - [x] Capture the "after" set with `design-review --spec 029-release-days --phase round1 --set after --desktop --reseed`: phone 390 × 844 plus desktop 1440 × 900, Light and Dark, for `home`, `library` (Grid and List), `upcoming`, `game-releases` and `game-tba`, with the phone checks' `report.json`. **[Agent: testing]**
-  - [ ] Owner step: Nail reviews the images in `context/spec/029-release-days/review/round1/after/` and lists fixes. Each fix becomes a task under this slice before it is ticked. **[Agent: testing]**
-  - [ ] Verify:
+  - [x] Owner step: Nail reviews the images in `context/spec/029-release-days/review/round1/after/` and lists fixes. Each fix becomes a task under this slice before it is ticked. **[Agent: testing]**
+  - [x] Verify:
     - Every listed fix is applied and recaptured.
     - `git status` shows nothing under `review/`.
     - Stop the server by PID. **[Agent: testing]**

@@ -1,7 +1,7 @@
 # Technical Specification: Release days
 
 - **Functional Specification:** [functional-spec.md](./functional-spec.md)
-- **Status:** Draft
+- **Status:** Completed
 - **Author(s):** Nail Badiullin (with Claude; specialist input from prisma-database, tanstack-fullstack, react-frontend)
 
 Paths are relative to `savepoint-tanstack/` unless they start with `context/` or `.github/`. Raw inventory with file:line citations: [research-notes.md](./research-notes.md). Choices marked **Confirmed** were settled with the owner on 2026-11-12.

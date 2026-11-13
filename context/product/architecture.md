@@ -17,7 +17,7 @@
 
 - **UI Framework:** React 19 with TypeScript
 - **Styling:** Tailwind CSS v4 (`@tailwindcss/vite`)
-- **Component Library:** shadcn/ui primitives, ported into `src/shared/ui/`
+- **Component Library:** shadcn/ui primitives (style `base-maia`) on Base UI (`@base-ui/react`), ported into `src/shared/ui/`
 - **Server state:** TanStack Query (`@tanstack/react-query` + `react-router-ssr-query`) for streamed/client-refetchable surfaces (e.g. game-detail related games via `useSuspenseQuery`); most reads are loader-driven
 - **Form Handling:** React Hook Form with Zod validation
 
@@ -35,7 +35,7 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
                           ↓
 ┌───────────────────────────────────────────────────────────┐
 │ features/<intent>/api/  — createServerFn wrappers          │
-│ - .inputValidator(Zod) + re-parse in handler (validate-2x) │
+│ - .validator(Zod) + re-parse in handler (validate-2x)      │
 │ - resolve userId via requireUserId() (throws)              │
 │ - delegate to entity queries / a worker (foot-gun #8 split)│
 └───────────────────────────────────────────────────────────┘
@@ -71,7 +71,7 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 
 - DB sessions in the PostgreSQL `session` table (not JWT) via `prismaAdapter`
 - Server-side lookup: `getServerUserId(request)` reads the request `Headers` and calls `auth.api.getSession({ headers })` → `string | undefined`
-- Auth gates: **`requireUserId()`** in handlers (throws `UnauthorizedError`); **`requireUserIdOrRedirectFn`** in route `beforeLoad` (redirects to `/login`); raw `getServerUserId` only for anonymous-allowed reads
+- Auth gates: **`requireUserId()`** in handlers (throws `UnauthorizedError`); route `beforeLoad` guards read `context.user` (resolved once by the root `beforeLoad`, 5-minute `fetchQuery`) and `throw redirect({ to: "/login" })`; raw `getServerUserId` only for anonymous-allowed reads
 - Client sign-out: `authClient.signOut()` + `router.invalidate()`
 
 **Cross-app session continuity (cutover):** the migration shares the same `BETTER_AUTH_SECRET`, cookie name/domain, and `session` table as the legacy app, so sessions interoperate and survive cutover with no re-login (verified by the Slice 23 cross-app session audit).
@@ -90,17 +90,19 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 - **Production:** Neon (serverless Postgres, pooled + non-pooling URLs)
 - **Local:** Docker Compose on `localhost:6432`
 - Relational model: users, games (IGDB metadata cache), library items, journal entries, collections, follows, imported (Steam) games
+- **Release dates (spec 029):** `Game.releaseDate` (`timestamp(3)`, always UTC midnight) is paired with `releaseDatePrecision` (`ReleaseDatePrecision` enum: `DAY | MONTH | QUARTER | YEAR | TBA`; legacy rows are `NULL` = unknown). Vague dates are stored as the **period start** (e.g. Q2 2027 → 1 Apr 2027) and rendered by precision, so the UI never shows more precision than the catalogue knows; TBA stores a `NULL` date. `releaseDateCheckedAt` stamps the last successful catalogue check, and `releaseDateMovedFrom` / `releaseDateMovedAt` hold the previous exact date and when it moved (used for the 14-day "Moved from …" line). Three raw-SQL `CHECK` constraints in the migration guard the invariants: the moved pair is both-or-neither, `TBA` ⇒ `NULL` date, and dates are UTC midnight. Calendar days are compared as `YYYY-MM-DD` strings (the device's local day on the client, the UTC day on the server) — never through local-time getters.
 
 **ORM Layer:** Prisma
 
 - Generated client outputs into the **source tree** at `savepoint-tanstack/src/shared/lib/prisma/` (gitignored), so `build` runs `prisma generate && vite build` to produce it on a fresh checkout (e.g. Vercel)
 - `prisma.config.ts` loads the DB URL from `process.env` (and `.env` locally) — required at config-load even for generate
-- **Migration ownership:** during the parallel-run the schema was mirrored from `savepoint-app/` (canonical) and CI diff-checked; as `savepoint-app/` is retired, migration ownership moves to `savepoint-tanstack/`
+- **Migration ownership:** `savepoint-tanstack/prisma/migrations/` is the single source of schema changes (the legacy `savepoint-app/` is gone). Migrations are authored with `prisma:migrate` in dev and applied to production by `deploy.yml` (`prisma migrate deploy`) on push to `main`.
 
 **Caching Strategy:**
 
 - **Read-path caching:** TanStack Router loader `staleTime`/`gcTime` (replaces the former Next.js `"use cache"` model) — revisited routes serve cached loader data without a server round-trip
 - **IGDB response caching:** game metadata persisted in the PostgreSQL `Game` table acts as a durable cache
+- **Release-date refresh — lazy, on open, no cron (spec 029):** opening Home or the Library fires a client-side POST (`refreshReleaseDatesFn`, worker-split) *after* mount, so pages never wait for IGDB. Each visit checks at most 100 of the person's library games that are due (daily within 14 days of an exact date, weekly otherwise, released games never; a legacy no-precision row once), batch-fetches them from IGDB (chunks of 100, 300 ms pause), and writes with a **compare-and-set** update keyed on the stored `releaseDate` + `releaseDatePrecision` so two overlapping visits record a move once. The result is not pushed into the open page: corrections show on the next open. Failures stamp nothing, so the game is retried on the next visit. The shared `Game` row is corrected for every user who has the game. There is no scheduler; a cron would only be justified for notifications sent while the app is closed.
 - **Distributed cache (optional):** Upstash Redis (`UPSTASH_REDIS_REST_*`) for hot-path read-through / rate-limit primitives
 
 ---
@@ -112,6 +114,7 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 - Token cache + REST client in `src/shared/api/igdb/`; OAuth token refreshed lazily with a 60s safety margin
 - Search/detail exposed as entity queries (`entities/game/api/*.server.ts`, e.g. `searchGames`, `getGameDetails`, `getRelatedGames`, `getTimesToBeat`) wrapped by feature `createServerFn`s
 - First-lookup games are upserted into the local `Game` table (durable cache)
+- **Release-date mapping (spec 029):** `mapIgdbReleaseDate` in `src/shared/api/igdb/release-date.ts` turns IGDB's `first_release_date` plus its dated `release_dates` entries (`date_format`: 0 day, 1 month, 2 year, 3–6 quarters Q1–Q4, 7 TBD) into `{ releaseDate, precision }`. It picks the most precise entry that carries the first-release timestamp, rebuilds the period start from `y`/`m` (IGDB's placeholder `date` differs by format), and treats "no first release date and every entry TBD/undated" as TBA. Unknown formats return `"unknown"` and only stamp the check. The batch refresh lives in `getGamesReleaseInfoByIgdbIds` (any transport failure → `UpstreamError`). Formats were pinned from live responses (`src/shared/api/igdb/__fixtures__/`, owner-run `inspect:igdb-release-dates`).
 
 **Steam:** account connect/disconnect + profile read are active (OpenID assertion verified against Steam before trust). Library import / sync surfaces exist but the AWS Lambda enrichment pipeline that powered deep sync was retired (spec 015); PSN/Xbox remain paused on the same dependency.
 
@@ -144,8 +147,10 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 
 - Format check, ESLint (incl. **alias-aware** `eslint-plugin-boundaries` FSD enforcement), TypeScript typecheck
 - **Production build** (`prisma generate && vite build`) — catches client/server bundler-graph breaks the type/lint/test steps miss
-- **Merged unit + integration coverage** gate (v8): statements ≥ 85% on `src/{entities,features}` is the cutover gate; branches/lines/functions are regression floors
-- Prisma schema drift check (parity between the two apps during the retirement window)
+- **Merged unit + integration coverage** gate (v8) on `src/{entities,features}`: statements ≥ 85, branches ≥ 86, lines ≥ 83, functions ≥ 79
+- **Migration validation:** `prisma validate`, a schema-drift check, and a warning on destructive migrations (`DROP` / `ALTER COLUMN TYPE`)
+- **Supply chain:** `pnpm audit --prod --audit-level=high` and a 7-day dependency-freshness quarantine (`scripts/check-package-freshness.mjs`)
+- **Deploy (`deploy.yml`, push to `main`):** applies Prisma migrations to production (GitHub environment `production`); the application deploy itself is Vercel's Git integration
 
 ---
 
@@ -167,11 +172,11 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 - **`unit`** (`*.unit.test.ts`, `*.test.tsx`): jsdom for components, node for logic; Prisma mocked. Fast.
 - **`integration`** (`*.integration.test.ts`): node + real PostgreSQL (per-test isolated DB), run sequentially. Worker-split features import the **worker**, not the `createServerFn` wrapper (foot-gun #8).
 
-**Coverage:** merged unit+integration v8 report over `src/{entities,features}` (barrels/types excluded). Enforced thresholds: **statements 85** (the cutover gate), with branches/lines/functions as regression floors. `pnpm --filter savepoint-tanstack test:coverage` runs both projects + enforces. Current suite: ~1615 tests across unit + integration.
+**Coverage:** merged unit+integration v8 report over `src/{entities,features}` (barrels/types excluded). Enforced thresholds (`vitest.config.ts`): statements 85 (the original cutover gate), branches 86, lines 83, functions 79. `pnpm --filter savepoint-tanstack test:coverage` runs both projects + enforces. Current suite: ~2740 unit + ~1010 integration tests.
 
 **Conventions:** element/action vocabulary maps, given/when/then `describe` nesting, arrange-in-`beforeEach`, strings-over-regex queries; tests verify user-observable behavior, not call-envelope shape. Regression guards live in `test/eslint/` (FSD boundary + alias resolution) and `test/canary/` (harness wiring) — do not delete.
 
-**E2E:** deferred (added after cutover stabilizes).
+**E2E:** deferred (added after cutover stabilizes). Playwright is a devDependency used only by `scripts/design-review/` to capture phone/desktop screenshots and run layout checks (not an e2e suite).
 
 ---
 
@@ -179,10 +184,10 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 
 - **Auth:** Better Auth session tokens in httpOnly cookies; CSRF handling built in; Cognito OAuth upstream; credentials provider gated to non-prod.
 - **Authorization:** every mutation requires a validated session; `userId` resolved server-side via `requireUserId()` (never from client input); **privacy invariants enforced at the entity layer** (throw `NotFoundError` for missing-or-denied) so RPC calls can't bypass route gates.
-- **Input validation:** Zod **validate-twice** (`inputValidator` + handler re-parse, since programmatic callers bypass the network validator); Prisma parameterized queries; ID inputs use `z.string().min(1)` (Better Auth emits 32-char nanoids, never `.cuid()`).
+- **Input validation:** Zod **validate-twice** (`validator` + handler re-parse, since programmatic callers bypass the network validator); Prisma parameterized queries; ID inputs use `z.string().min(1)` (Better Auth emits 32-char nanoids, never `.cuid()`).
 - **Bundler boundary:** `import-protection` keeps `.server.*` modules (db, auth, secrets, entity queries) out of the client bundle; public barrels expose only client-safe surface.
 - **Secrets:** all via `env.ts`-validated env vars; `.env` never committed; S3 presign enforces MIME + size; Steam OpenID assertion verified before trust.
-- **Dependencies:** exact-pinned versions; lockfile committed; Dependabot.
+- **Dependencies:** exact-pinned versions; lockfile committed; Dependabot; CI runs `pnpm audit --prod` and a 7-day publish-age quarantine on new versions.
 
 ---
 
@@ -237,15 +242,23 @@ Canonical FSD layers with per-slice capture-group rules in `eslint-plugin-bounda
 **ADR-007: Why `.server.ts` as a bundler boundary?**
 TanStack Start's `import-protection` forbids `*.server.*` in the client bundle. This enforces server-only code (db, auth, entity queries) staying server-side by construction; `createServerFn` files are intentionally *not* `.server.ts` (they are the client-callable RPC bridge). Public barrels must expose only client-safe surface — re-exporting a server-only value into a client-reachable barrel breaks the production build (a class of failure the CI build gate now catches).
 
+**ADR-008: Why refresh release dates on open instead of a cron job?** (spec 029)
+Release dates move, and the app only ever shows them to someone who has opened it, so correcting a game's date when its owner opens Home or the Library gives the same visible freshness as a scheduler with no extra infrastructure (no Vercel cron, no queue, no secrets, no cold-start budget). Work is bounded (≤100 games per visit, throttled by `releaseDateCheckedAt`), never blocks rendering, and a compare-and-set write keeps concurrent visits from double-recording a move. The trade-off is that a change shows on the *next* open and that an unopened account is not refreshed — acceptable because there are no alerts outside the app. Revisit only if notifications while the app is closed are ever added.
+
 ---
 
 **Document Metadata:**
 
-- **Version:** 3.0
-- **Last Updated:** 2026-05-23 (TanStack Start migration — spec 021 cutover)
+- **Version:** 3.1
+- **Last Updated:** 2026-11-13 (release dates — spec 029)
 - **Status:** Active
 - **Maintained By:** Solo developer with AI assistance
 - **Review Cadence:** After each major phase completion
+- **Changes in v3.1:**
+  - §3: `Game` release precision (`ReleaseDatePrecision`), `releaseDateCheckedAt`, moved-from marker and its three `CHECK` constraints; lazy refresh-on-open (client-fired POST, compare-and-set, no cron) under caching.
+  - §4: IGDB release-date mapping and the batch release-info fetch.
+  - ADR-008: refresh on open instead of a cron job.
+  - Drift adopted from the code at the same time: migrations owned by `savepoint-tanstack/` and applied by `deploy.yml`, CI migration validation + supply-chain jobs, `.validator` and `context.user` guards, current test size and the four coverage thresholds, Base UI / `base-maia`, and Playwright used only for design-review screenshots.
 - **Changes in v3.0:**
   - Rewrote the document to describe the deployed **TanStack Start** (`savepoint-tanstack/`) architecture; removed the Next.js/`savepoint-app/` four-layer DAL, `createServerAction`, `Result`-type, and RSC detail (legacy app retained briefly as rollback insurance, then deleted).
   - §1: TanStack Start v1 + Vite/Nitro + the C2 two-layer DAL (throw `AppError`); `.server.ts` bundler boundary.
