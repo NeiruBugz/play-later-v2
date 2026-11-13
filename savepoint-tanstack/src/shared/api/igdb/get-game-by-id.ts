@@ -26,6 +26,10 @@ const GAME_FIELDS = [
   "name",
   "slug",
   "first_release_date",
+  "release_dates.date",
+  "release_dates.date_format",
+  "release_dates.y",
+  "release_dates.m",
   "cover.image_id",
   "platforms.name",
 ] as const;

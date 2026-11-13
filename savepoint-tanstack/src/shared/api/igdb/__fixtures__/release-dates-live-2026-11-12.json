@@ -1,0 +1,329 @@
+{
+  "dateFormats": [
+    {
+      "id": 0,
+      "format": "YYYYMMDD",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "id": 1,
+      "format": "YYYYMM",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440001"
+    },
+    {
+      "id": 2,
+      "format": "YYYY",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440002"
+    },
+    {
+      "id": 3,
+      "format": "YYYYQ1",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440003"
+    },
+    {
+      "id": 4,
+      "format": "YYYYQ2",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440004"
+    },
+    {
+      "id": 5,
+      "format": "YYYYQ3",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440005"
+    },
+    {
+      "id": 6,
+      "format": "YYYYQ4",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440006"
+    },
+    {
+      "id": 7,
+      "format": "TBD",
+      "created_at": 1738022400,
+      "updated_at": 1738022400,
+      "checksum": "550e8400-e29b-41d4-a716-446655440007"
+    }
+  ],
+  "games": {
+    "day": {
+      "id": 349703,
+      "first_release_date": 1794528000,
+      "name": "Netherwake",
+      "release_dates": [
+        {
+          "id": 958885,
+          "date": 1794528000,
+          "human": "Nov 13, 2026",
+          "m": 11,
+          "y": 2026,
+          "status": 6,
+          "date_format": 0
+        }
+      ]
+    },
+    "month": {
+      "id": 322514,
+      "first_release_date": 1796083200,
+      "name": "Former Dawn",
+      "release_dates": [
+        {
+          "id": 667751,
+          "date": 1796083200,
+          "human": "Dec 2026",
+          "m": 12,
+          "y": 2026,
+          "status": 6,
+          "date_format": 1
+        },
+        {
+          "id": 667752,
+          "date": 1796083200,
+          "human": "Dec 2026",
+          "m": 12,
+          "y": 2026,
+          "status": 6,
+          "date_format": 1
+        }
+      ]
+    },
+    "year": {
+      "id": 245937,
+      "first_release_date": 1798675200,
+      "name": "5 Star Fishy",
+      "release_dates": [
+        {
+          "id": 486664,
+          "date": 1798675200,
+          "human": "2026",
+          "m": 12,
+          "y": 2026,
+          "status": 6,
+          "date_format": 2
+        }
+      ]
+    },
+    "q1": {
+      "id": 369379,
+      "first_release_date": 1806451200,
+      "name": "Phase Nexus",
+      "release_dates": [
+        {
+          "id": 808536,
+          "date": 1806451200,
+          "human": "Q1 2027",
+          "m": 3,
+          "y": 2027,
+          "status": 6,
+          "date_format": 3
+        }
+      ]
+    },
+    "q2": {
+      "id": 303002,
+      "first_release_date": 1814313600,
+      "name": "Piggy One Super Spark",
+      "release_dates": [
+        {
+          "id": 845591,
+          "date": 1814313600,
+          "human": "Q2 2027",
+          "m": 6,
+          "y": 2027,
+          "date_format": 4
+        }
+      ]
+    },
+    "q3": {
+      "id": 396020,
+      "first_release_date": 1822262400,
+      "name": "Hunter: The Reckoning - Deathwish",
+      "release_dates": [
+        {
+          "id": 893570,
+          "date": 1822262400,
+          "human": "Q3 2027",
+          "m": 9,
+          "y": 2027,
+          "status": 6,
+          "date_format": 5
+        },
+        {
+          "id": 893568,
+          "date": 1822262400,
+          "human": "Q3 2027",
+          "m": 9,
+          "y": 2027,
+          "status": 6,
+          "date_format": 5
+        },
+        {
+          "id": 893569,
+          "date": 1822262400,
+          "human": "Q3 2027",
+          "m": 9,
+          "y": 2027,
+          "status": 6,
+          "date_format": 5
+        }
+      ]
+    },
+    "q4": {
+      "id": 291104,
+      "first_release_date": 1798675200,
+      "name": "Polda 8",
+      "release_dates": [
+        {
+          "id": 572823,
+          "date": 1798675200,
+          "human": "Q4 2026",
+          "m": 12,
+          "y": 2026,
+          "status": 6,
+          "date_format": 6
+        },
+        {
+          "id": 572824,
+          "date": 1830211200,
+          "human": "Q4 2027",
+          "m": 12,
+          "y": 2027,
+          "status": 6,
+          "date_format": 6
+        },
+        {
+          "id": 572825,
+          "date": 1830211200,
+          "human": "Q4 2027",
+          "m": 12,
+          "y": 2027,
+          "status": 6,
+          "date_format": 6
+        },
+        {
+          "id": 572822,
+          "date": 1798675200,
+          "human": "Q4 2026",
+          "m": 12,
+          "y": 2026,
+          "status": 6,
+          "date_format": 6
+        }
+      ]
+    },
+    "tbd": {
+      "id": 124201,
+      "name": "Neon District",
+      "release_dates": [
+        {
+          "id": 791096,
+          "human": "TBD",
+          "date_format": 7
+        },
+        {
+          "id": 791097,
+          "human": "TBD",
+          "date_format": 7
+        },
+        {
+          "id": 791098,
+          "human": "TBD",
+          "date_format": 7
+        }
+      ]
+    },
+    "mixedStatuses": {
+      "id": 387953,
+      "first_release_date": 1822262400,
+      "name": "Azur",
+      "release_dates": [
+        {
+          "id": 866479,
+          "date": 1822262400,
+          "human": "Q3 2027",
+          "m": 9,
+          "y": 2027,
+          "status": 6,
+          "date_format": 5
+        },
+        {
+          "id": 866660,
+          "date": 1814313600,
+          "human": "Q2 2027",
+          "m": 6,
+          "y": 2027,
+          "status": 2,
+          "date_format": 4
+        },
+        {
+          "id": 866661,
+          "date": 1806451200,
+          "human": "Q1 2027",
+          "m": 3,
+          "y": 2027,
+          "status": 1,
+          "date_format": 3
+        }
+      ]
+    },
+    "exactEarlyVagueLater": {
+      "id": 318175,
+      "first_release_date": 1772496000,
+      "name": "The Legend of Khiimori",
+      "release_dates": [
+        {
+          "id": 823372,
+          "date": 1772496000,
+          "human": "Mar 03, 2026",
+          "m": 3,
+          "y": 2026,
+          "status": 3,
+          "date_format": 0
+        },
+        {
+          "id": 823373,
+          "date": 1806451200,
+          "human": "Q1 2027",
+          "m": 3,
+          "y": 2027,
+          "date_format": 3
+        },
+        {
+          "id": 885968,
+          "date": 1830211200,
+          "human": "2027",
+          "m": 12,
+          "y": 2027,
+          "date_format": 2
+        }
+      ]
+    },
+    "noFirstReleaseDate": {
+      "id": 395123,
+      "name": "DDD: Dice, Dungeons, and Drakes",
+      "release_dates": [
+        {
+          "id": 890267,
+          "date": 1822262400,
+          "human": "Q3 2027",
+          "m": 9,
+          "y": 2027,
+          "status": 2,
+          "date_format": 5
+        }
+      ]
+    }
+  }
+}

@@ -26,7 +26,8 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "test:db:clean": "node ./test/setup/clean-test-dbs.mjs",
     "design-review": "node scripts/design-review/capture.ts",
-    "backfill:enrichment": "tsx --env-file-if-exists=.env scripts/backfill-game-enrichment.ts"
+    "backfill:enrichment": "tsx --env-file-if-exists=.env scripts/backfill-game-enrichment.ts",
+    "inspect:igdb-release-dates": "tsx --env-file-if-exists=.env scripts/inspect-igdb-release-dates.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1024.0",

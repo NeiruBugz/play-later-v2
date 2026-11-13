@@ -6,6 +6,7 @@ import { UpstreamError } from "@/shared/lib/errors";
 import { igdbContextFromThrown } from "./errors";
 import { igdbFetch } from "./fetch";
 import { escapeIgdbString } from "./query-builder";
+import { ReleaseDateSchema } from "./schemas";
 
 const logger = createLogger({ service: "igdb-get-game-details-by-slug" });
 
@@ -15,6 +16,10 @@ const DETAILS_FIELDS = [
   "summary",
   "aggregated_rating",
   "first_release_date",
+  "release_dates.date",
+  "release_dates.date_format",
+  "release_dates.y",
+  "release_dates.m",
   "cover.image_id",
   "genres.id",
   "genres.name",
@@ -55,6 +60,7 @@ export const GameDetailsResponseItemSchema = z.object({
   summary: z.string().optional(),
   aggregated_rating: z.number().optional(),
   first_release_date: z.number().optional(),
+  release_dates: z.array(ReleaseDateSchema).optional(),
   cover: z.object({ image_id: z.string() }).optional(),
   genres: z.array(GenreSchema).optional(),
   platforms: z.array(PlatformSchema).optional(),
