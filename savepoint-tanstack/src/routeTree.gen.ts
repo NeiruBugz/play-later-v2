@@ -16,6 +16,7 @@ import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
+import { Route as AuthedUpcomingRouteImport } from './routes/_authed/upcoming'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as GamesSearchRouteImport } from './routes/games.search'
 import { Route as SteamCallbackRouteImport } from './routes/steam.callback'
@@ -67,6 +68,11 @@ const AuthedLibraryRoute = AuthedLibraryRouteImport.update({
 const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedUpcomingRoute = AuthedUpcomingRouteImport.update({
+  id: '/upcoming',
+  path: '/upcoming',
   getParentRoute: () => AuthedRoute,
 } as any)
 const GamesSlugRoute = GamesSlugRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthedDashboardRoute
   '/library': typeof AuthedLibraryRoute
   '/settings': typeof AuthedSettingsRouteWithChildren
+  '/upcoming': typeof AuthedUpcomingRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthedDashboardRoute
   '/library': typeof AuthedLibraryRoute
   '/settings': typeof AuthedSettingsRouteWithChildren
+  '/upcoming': typeof AuthedUpcomingRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/settings': typeof AuthedSettingsRouteWithChildren
+  '/_authed/upcoming': typeof AuthedUpcomingRoute
   '/games/$slug': typeof GamesSlugRoute
   '/games/search': typeof GamesSearchRoute
   '/steam/callback': typeof SteamCallbackRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/library'
     | '/settings'
+    | '/upcoming'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/library'
     | '/settings'
+    | '/upcoming'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/_authed/dashboard'
     | '/_authed/library'
     | '/_authed/settings'
+    | '/_authed/upcoming'
     | '/games/$slug'
     | '/games/search'
     | '/steam/callback'
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthedSettingsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/upcoming': {
+      id: '/_authed/upcoming'
+      path: '/upcoming'
+      fullPath: '/upcoming'
+      preLoaderRoute: typeof AuthedUpcomingRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/games/$slug': {
@@ -532,6 +551,7 @@ interface AuthedRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedLibraryRoute: typeof AuthedLibraryRoute
   AuthedSettingsRoute: typeof AuthedSettingsRouteWithChildren
+  AuthedUpcomingRoute: typeof AuthedUpcomingRoute
   AuthedJournalNewRoute: typeof AuthedJournalNewRoute
   AuthedProfileSetupRoute: typeof AuthedProfileSetupRoute
   AuthedSteamGamesRoute: typeof AuthedSteamGamesRoute
@@ -545,6 +565,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedLibraryRoute: AuthedLibraryRoute,
   AuthedSettingsRoute: AuthedSettingsRouteWithChildren,
+  AuthedUpcomingRoute: AuthedUpcomingRoute,
   AuthedJournalNewRoute: AuthedJournalNewRoute,
   AuthedProfileSetupRoute: AuthedProfileSetupRoute,
   AuthedSteamGamesRoute: AuthedSteamGamesRoute,
