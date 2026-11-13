@@ -55,9 +55,11 @@ import {
 // RED import — this module does not exist until the GREEN step (task 3).
 import { getGameDetails } from "@/entities/game/api/get-game-details.server";
 import { setLibraryItemStatus } from "@/entities/library-item/api/set-library-item-status.server";
+import releaseDatesFixture from "@/shared/api/igdb/__fixtures__/release-dates-live-2026-11-12.json";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 import { NotFoundError } from "@/shared/lib/errors";
 
+import { createGame } from "../factories/index.ts";
 import {
   setupIsolatedDatabase,
   type IsolatedDatabase,
@@ -912,6 +914,255 @@ describe("getGameDetails", () => {
         expect(result.libraryEntry?.rating).toBe(7);
         expect(JSON.stringify(result.history)).not.toContain("rating");
         expect(JSON.stringify(result.history)).not.toContain("journalEntries");
+      });
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Spec 029: the release date the game page shows
+// ---------------------------------------------------------------------------
+
+type LiveReleaseGame = {
+  id: number;
+  name: string;
+  first_release_date?: number;
+  release_dates: unknown[];
+};
+
+const utcMidnight = (isoDay: string) => new Date(`${isoDay}T00:00:00.000Z`);
+
+const liveGames = releaseDatesFixture.games;
+
+let releaseScenarioCount = 0;
+
+async function openGamePage(params: {
+  live: LiveReleaseGame;
+  stored?: { releaseDate: Date | null } & Partial<{
+    releaseDatePrecision: "DAY" | "MONTH" | "QUARTER" | "YEAR" | "TBA";
+    releaseDateCheckedAt: Date;
+  }>;
+  userId?: string;
+}) {
+  releaseScenarioCount += 1;
+  const slug = `release-scenario-${releaseScenarioCount}`;
+  if (params.stored) {
+    await createGame(db.prisma, {
+      igdbId: params.live.id,
+      slug,
+      ...params.stored,
+    });
+  }
+  vi.stubGlobal(
+    "fetch",
+    makeFetchMock({
+      igdbBody: [
+        {
+          id: params.live.id,
+          name: params.live.name,
+          slug,
+          first_release_date: params.live.first_release_date,
+          release_dates: params.live.release_dates,
+        },
+      ],
+    })
+  );
+  const details = await getGameDetails({ slug, userId: params.userId });
+  return { details, slug };
+}
+
+function legacyRowFor(live: LiveReleaseGame) {
+  return {
+    releaseDate:
+      live.first_release_date === undefined
+        ? null
+        : new Date(live.first_release_date * 1000),
+  };
+}
+
+describe("getGameDetails release date", () => {
+  describe("given the stored game knows how precisely its date is known", () => {
+    it("shows the stored date even when IGDB now reports a different one", async () => {
+      const { details } = await openGamePage({
+        live: liveGames.year,
+        stored: {
+          releaseDate: utcMidnight("2027-03-14"),
+          releaseDatePrecision: "DAY",
+          releaseDateCheckedAt: new Date("2026-11-01T08:00:00.000Z"),
+        },
+      });
+
+      expect(details.game).toMatchObject({
+        releaseDate: utcMidnight("2027-03-14"),
+        releaseDatePrecision: "DAY",
+      });
+    });
+
+    it("shows a stored to-be-announced game as to be announced", async () => {
+      const { details } = await openGamePage({
+        live: liveGames.day,
+        stored: {
+          releaseDate: null,
+          releaseDatePrecision: "TBA",
+          releaseDateCheckedAt: new Date("2026-11-01T08:00:00.000Z"),
+        },
+      });
+
+      expect(details.game).toMatchObject({
+        releaseDate: null,
+        releaseDatePrecision: "TBA",
+      });
+    });
+  });
+
+  describe.each([
+    {
+      case: "a year",
+      live: liveGames.year,
+      releaseDate: utcMidnight("2026-01-01"),
+      precision: "YEAR",
+    },
+    {
+      case: "a quarter",
+      live: liveGames.q1,
+      releaseDate: utcMidnight("2027-01-01"),
+      precision: "QUARTER",
+    },
+    {
+      case: "a month",
+      live: liveGames.month,
+      releaseDate: utcMidnight("2026-12-01"),
+      precision: "MONTH",
+    },
+    {
+      case: "an exact day",
+      live: liveGames.day,
+      releaseDate: utcMidnight("2026-11-13"),
+      precision: "DAY",
+    },
+    {
+      case: "to be announced",
+      live: liveGames.tbd,
+      releaseDate: null,
+      precision: "TBA",
+    },
+  ])(
+    "given a stored game never checked for its release date and IGDB knows it as $case",
+    (scenario) => {
+      let details: Awaited<ReturnType<typeof getGameDetails>>;
+
+      beforeEach(async () => {
+        ({ details } = await openGamePage({
+          live: scenario.live,
+          stored: legacyRowFor(scenario.live),
+        }));
+      });
+
+      it("shows the date IGDB reports, at the precision IGDB reports", () => {
+        expect(details.game).toMatchObject({
+          releaseDate: scenario.releaseDate,
+          releaseDatePrecision: scenario.precision,
+        });
+      });
+    }
+  );
+
+  describe("given a stored game never checked for its release date", () => {
+    const legacyReleaseDate = utcMidnight("2026-12-31");
+    let slug: string;
+
+    beforeEach(async () => {
+      ({ slug } = await openGamePage({
+        live: liveGames.year,
+        stored: { releaseDate: legacyReleaseDate },
+      }));
+    });
+
+    it("leaves the stored row unchecked for the next viewer", async () => {
+      const row = await db.prisma.game.findUniqueOrThrow({ where: { slug } });
+
+      expect(row).toMatchObject({
+        releaseDate: legacyReleaseDate,
+        releaseDatePrecision: null,
+        releaseDateCheckedAt: null,
+      });
+    });
+  });
+
+  describe("given a stored game never checked and IGDB reports a release date in a format it has not documented", () => {
+    const legacyReleaseDate = utcMidnight("2026-11-13");
+    let details: Awaited<ReturnType<typeof getGameDetails>>;
+
+    beforeEach(async () => {
+      ({ details } = await openGamePage({
+        live: {
+          ...liveGames.day,
+          release_dates: [
+            { ...liveGames.day.release_dates[0], date_format: 99 },
+          ],
+        },
+        stored: { releaseDate: legacyReleaseDate },
+      }));
+    });
+
+    it("keeps showing the stored date with no precision", () => {
+      expect(details.game).toMatchObject({
+        releaseDate: legacyReleaseDate,
+        releaseDatePrecision: null,
+      });
+    });
+  });
+
+  describe("given a stored game never checked and IGDB has dated entries but no first release date", () => {
+    const legacyReleaseDate = utcMidnight("2027-09-30");
+    let details: Awaited<ReturnType<typeof getGameDetails>>;
+
+    beforeEach(async () => {
+      ({ details } = await openGamePage({
+        live: liveGames.noFirstReleaseDate,
+        stored: { releaseDate: legacyReleaseDate },
+      }));
+    });
+
+    it("keeps showing the stored date with no precision", () => {
+      expect(details.game).toMatchObject({
+        releaseDate: legacyReleaseDate,
+        releaseDatePrecision: null,
+      });
+    });
+  });
+
+  describe("given a signed-in viewer opens a stored game never checked", () => {
+    let details: Awaited<ReturnType<typeof getGameDetails>>;
+
+    beforeEach(async () => {
+      await db.prisma.user.create({ data: makeUser("release-viewer") });
+      ({ details } = await openGamePage({
+        live: liveGames.year,
+        stored: legacyRowFor(liveGames.year),
+        userId: "ggd-user-release-viewer",
+      }));
+    });
+
+    it("shows the same date and precision a signed-out viewer sees", () => {
+      expect(details.game).toMatchObject({
+        releaseDate: utcMidnight("2026-01-01"),
+        releaseDatePrecision: "YEAR",
+      });
+    });
+  });
+
+  describe("given a game that is not stored yet", () => {
+    let details: Awaited<ReturnType<typeof getGameDetails>>;
+
+    beforeEach(async () => {
+      ({ details } = await openGamePage({ live: liveGames.day }));
+    });
+
+    it("adds it with the exact day and its precision", () => {
+      expect(details.game).toMatchObject({
+        releaseDate: utcMidnight("2026-11-13"),
+        releaseDatePrecision: "DAY",
       });
     });
   });

@@ -139,17 +139,12 @@ describe("GameCard", () => {
         <GameCard
           game={{
             ...baseGame,
-            releaseYear: 2017,
             platforms: ["PlayStation 5", "Nintendo Switch"],
           }}
           density="detailed"
           asLink={false}
         />
       );
-    });
-
-    it("renders the release year", () => {
-      expect(screen.getByText("2017")).toBeDefined();
     });
 
     it("renders platforms through PlatformBadges with abbreviated labels", () => {

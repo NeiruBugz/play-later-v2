@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { isUpcomingRelease, type CalendarDay } from "@/entities/game";
 import type { DashboardPageData } from "@/features/dashboard";
 
 type PlayingGame = DashboardPageData["playing"][number];
@@ -11,6 +12,7 @@ export type ContinueQuestionKind = "continue" | "start" | "replay" | "rest";
 export type UseContinueQuestionArgs = {
   playing: PlayingGame[];
   upNextQueue: QueuedGame[];
+  today: CalendarDay;
 };
 
 export type ContinueQuestion = {
@@ -24,11 +26,14 @@ export type ContinueQuestion = {
 export function useContinueQuestion({
   playing,
   upNextQueue,
+  today,
 }: UseContinueQuestionArgs): ContinueQuestion {
   const [skippedIds, setSkippedIds] = useState<number[]>([]);
   const [focusId, setFocusId] = useState<number | null>(null);
 
-  const queueHead = upNextQueue[0] ?? null;
+  const queueHead =
+    upNextQueue.find((queued) => !isUpcomingRelease(queued.game, today)) ??
+    null;
   const candidates: ContinueQuestionItem[] = queueHead
     ? [...playing, queueHead]
     : playing;

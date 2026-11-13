@@ -15,22 +15,22 @@ Runs on Node's built-in TypeScript support (Node >= 22.18). First time only: `pn
 
 ## Options
 
-| Flag         | Meaning                                                                                   |
-| ------------ | ----------------------------------------------------------------------------------------- |
-| `--phase`    | `phase1` or `phase2` (required)                                                           |
-| `--set`      | `before` or `after` (required)                                                            |
-| `--checks`   | Run the automated phone checks. On by default when `--set` is `before` or `after`.        |
-| `--reseed`   | Re-run the audit seed SQL against the local docker Postgres before capturing (see below). |
-| `--desktop`  | Also capture 1440x900. Phone (390x844) is always captured.                                |
-| `--spec`     | Spec folder name under `context/spec/`. Default `028-continue-identity-stand-out`.        |
-| `--out`      | Output directory. Default `context/spec/<spec>/review/<phase>/<set>/` (repo root)         |
-| `--base-url` | Default `http://localhost:6060`                                                           |
-| `--screens`  | Comma-separated screen ids to capture, e.g. `home,library,game-in-library`. Default: all. |
-| `--query`    | Query string appended to every page URL, e.g. `--query "theme=x"`.                        |
+| Flag         | Meaning                                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `--phase`    | `phase1` or `phase2` (required)                                                                                            |
+| `--set`      | `before` or `after` (required)                                                                                             |
+| `--checks`   | Run the automated phone checks. On by default when `--set` is `before` or `after`.                                         |
+| `--reseed`   | Re-run the audit seed SQL and the selected spec's fixtures against the local docker Postgres before capturing (see below). |
+| `--desktop`  | Also capture 1440x900. Phone (390x844) is always captured.                                                                 |
+| `--spec`     | Spec folder name under `context/spec/`. Default `028-continue-identity-stand-out`.                                         |
+| `--out`      | Output directory. Default `context/spec/<spec>/review/<phase>/<set>/` (repo root)                                          |
+| `--base-url` | Default `http://localhost:6060`                                                                                            |
+| `--screens`  | Comma-separated screen ids to capture, e.g. `home,library,game-in-library`. Default: all.                                  |
+| `--query`    | Query string appended to every page URL, e.g. `--query "theme=x"`.                                                         |
 
 ## Reseeding
 
-Verification flows mutate `audit_full` (status changes reorder "Recently Updated"), so captures drift from the before set. Run every comparison capture with `--reseed`: the before set was captured on the seeded state. `--reseed` pipes `context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql`, then the committed `context/spec/028-continue-identity-stand-out/review-fixtures.sql` (four Playing games with red / green / black-and-white / no cover art, dated sessions 3 days, 14 days and 40 days back, a Let go reason on Crisis Core), into `docker exec -i savepoint-postgres psql -U postgres -d savepoint-db` and fails clearly if docker or the container is unavailable (override the container with `REVIEW_DB_CONTAINER`; check `docker compose ps`). The reseed resets the status-model notice; capture dismisses it again with "Got it".
+Verification flows mutate `audit_full` (status changes reorder "Recently Updated"), so captures drift from the before set. Run every comparison capture with `--reseed`: the before set was captured on the seeded state. `--reseed` pipes `context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql`, then `context/spec/<spec>/review-fixtures.sql` for the selected `--spec` when that file exists, into `docker exec -i savepoint-postgres psql -U postgres -d savepoint-db` and fails clearly if docker or the container is unavailable (override the container with `REVIEW_DB_CONTAINER`; check `docker compose ps`). The reseed resets the status-model notice; capture dismisses it again with "Got it". A spec without a `review-fixtures.sql` gets the audit seed only. Fixture files are idempotent and committed next to the spec: 028's (four Playing games with red / green / black-and-white / no cover art, dated sessions 3 days, 14 days and 40 days back, a Let go reason on Crisis Core) and 029's (sixteen `Release Fixture:` games dated relative to `CURRENT_DATE`: exact days from today to 31 days ahead, 2 January of next year, month / quarter / year / TBA / no date, released last year, two moved dates and a legacy unchecked row, plus two library-less games with real IGDB ids and slugs, `netherwake` (exact day, 9 days ahead) and `neon-district` (TBA), because the game page looks a slug up in IGDB first and the fake-id fixtures render "Game not found"; the stored date and precision win on the page, and a re-run overwrites only their release fields when a real "add game" already created them).
 
 Before every screenshot (and before the phone checks) capture waits up to 5s each for running animations to finish and for in-viewport images to load, then pauses 150ms. A timeout is logged, not fatal.
 

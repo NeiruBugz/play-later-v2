@@ -6,6 +6,7 @@ import { useSetStatus } from "@/features/manage-library-entry/model/use-set-stat
 import { formatTimeAgo } from "@/shared/lib/date";
 import { formatEvenings } from "@/shared/lib/evenings";
 import { openGlobalAction } from "@/shared/lib/global-action";
+import { useDeviceToday } from "@/shared/lib/hooks/use-device-today";
 import { Button } from "@/shared/ui/button";
 import { CoverTint } from "@/shared/ui/cover-tint";
 import { GameCover } from "@/shared/ui/game-cover";
@@ -147,9 +148,11 @@ function Question({ kind, item, onNotTonight, onFocus }: QuestionProps) {
 }
 
 export function ContinuePanel({ playing, upNextQueue }: ContinuePanelProps) {
+  const today = useDeviceToday();
   const { kind, item, notTonight, askAgain, focus } = useContinueQuestion({
     playing,
     upNextQueue,
+    today,
   });
 
   if (kind === "rest") {

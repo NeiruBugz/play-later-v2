@@ -108,6 +108,19 @@ model Game {
   coverHue              Int?
   coverChroma           Float?
   coverTintComputedAt   DateTime?
+
+  releaseDatePrecision ReleaseDatePrecision?
+  releaseDateCheckedAt DateTime?
+  releaseDateMovedFrom DateTime?
+  releaseDateMovedAt   DateTime?
+}
+
+enum ReleaseDatePrecision {
+  DAY
+  MONTH
+  QUARTER
+  YEAR
+  TBA
 }
 
 model LibraryItem {

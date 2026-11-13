@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatHours, formatTimeAgo } from "./date";
+import { formatCalendarDay, formatHours, formatTimeAgo } from "./date";
 
 describe("formatHours", () => {
   it.each([
@@ -60,6 +60,57 @@ describe("formatTimeAgo", () => {
       const earlyMorning = new Date(2026, 5, 15, 0, 1, 0);
 
       expect(formatTimeAgo(earlyMorning, lateTonight)).toBe("today");
+    });
+  });
+});
+
+describe("formatCalendarDay", () => {
+  describe("given a calendar day alone", () => {
+    it.each([
+      ["2027-03-14", "14 Mar"],
+      ["2027-01-02", "2 Jan"],
+      ["2026-12-31", "31 Dec"],
+      ["2027-01-01", "1 Jan"],
+    ])("writes %s as day then month: %s", (day, expected) => {
+      expect(formatCalendarDay(day)).toBe(expected);
+    });
+  });
+
+  describe("given the weekday is asked for", () => {
+    it.each([
+      ["2027-03-14", "Sun 14 Mar"],
+      ["2027-01-02", "Sat 2 Jan"],
+      ["2026-12-28", "Mon 28 Dec"],
+    ])("writes %s with its weekday: %s", (day, expected) => {
+      expect(formatCalendarDay(day, { weekday: true })).toBe(expected);
+    });
+  });
+
+  describe("given the year is asked for", () => {
+    it.each([
+      ["2027-03-14", "14 Mar 2027"],
+      ["2020-06-02", "2 Jun 2020"],
+    ])("writes %s with its year: %s", (day, expected) => {
+      expect(formatCalendarDay(day, { year: true })).toBe(expected);
+    });
+  });
+
+  describe("given both the weekday and the year are asked for", () => {
+    it.each([
+      ["2027-03-14", "Sun 14 Mar 2027"],
+      ["2027-01-02", "Sat 2 Jan 2027"],
+    ])("writes %s in full: %s", (day, expected) => {
+      expect(formatCalendarDay(day, { weekday: true, year: true })).toBe(
+        expected
+      );
+    });
+  });
+
+  describe("given the options are explicitly switched off", () => {
+    it("writes the bare day and month", () => {
+      expect(
+        formatCalendarDay("2027-03-14", { weekday: false, year: false })
+      ).toBe("14 Mar");
     });
   });
 });

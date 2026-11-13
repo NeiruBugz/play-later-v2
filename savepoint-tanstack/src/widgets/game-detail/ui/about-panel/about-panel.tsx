@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-import { formatAbsoluteDate, formatHours } from "@/shared/lib/date";
+import { describeReleaseFact } from "@/entities/game";
+import { formatHours } from "@/shared/lib/date";
+import { useDeviceToday } from "@/shared/lib/hooks/use-device-today";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { SectionLabel } from "@/shared/ui/section-label";
@@ -15,21 +17,21 @@ export function AboutPanel({
   summary,
   developer,
   releaseDate,
+  releaseDatePrecision,
   timeToCreditsSeconds,
   timeToCompleteSeconds,
   themes,
   genres,
 }: AboutPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const releaseFact = describeReleaseFact(
+    { releaseDate, releaseDatePrecision },
+    useDeviceToday()
+  );
 
   const facts: Fact[] = [
     developer ? { term: "Developer", value: developer } : null,
-    releaseDate
-      ? {
-          term: "Released",
-          value: formatAbsoluteDate(releaseDate, { utc: true }),
-        }
-      : null,
+    releaseFact,
     timeToCreditsSeconds !== null
       ? {
           term: "Main story",

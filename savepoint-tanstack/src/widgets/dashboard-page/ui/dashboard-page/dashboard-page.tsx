@@ -9,6 +9,7 @@ import { EmptyState } from "@/shared/ui/empty-state";
 import { UpNextShelf } from "@/widgets/up-next-shelf";
 
 import { AlsoPlaying } from "../also-playing";
+import { ComingSoon } from "../coming-soon";
 import { ContinuePanel } from "../continue-panel";
 import { DashboardCountsLine } from "../dashboard-counts-line";
 import type { DashboardPageProps } from "./dashboard-page.type";
@@ -62,6 +63,8 @@ export function DashboardPage({ data }: DashboardPageProps) {
           }
         />
       )}
+
+      <ComingSoon candidates={data.comingSoonCandidates} />
 
       <DashboardCountsLine counts={data.counts} />
     </div>

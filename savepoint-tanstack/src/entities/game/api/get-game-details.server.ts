@@ -1,5 +1,6 @@
 import {
   getGameDetailsFromIgdb,
+  mapIgdbReleaseDate,
   type GameDetailsResponseItem,
 } from "@/shared/api/igdb";
 import type { CoverTint } from "@/shared/lib/cover-tint";
@@ -34,6 +35,28 @@ async function enrichWithinCap(game: Game) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+type ResolvedReleaseDate = Pick<Game, "releaseDate" | "releaseDatePrecision">;
+
+function resolveReleaseDate(
+  game: Game,
+  igdbDetails: GameDetailsResponseItem
+): ResolvedReleaseDate {
+  if (game.releaseDatePrecision !== null) {
+    return {
+      releaseDate: game.releaseDate,
+      releaseDatePrecision: game.releaseDatePrecision,
+    };
+  }
+  const live = mapIgdbReleaseDate(igdbDetails);
+  if (live !== "unknown" && live.precision !== null) {
+    return {
+      releaseDate: live.releaseDate,
+      releaseDatePrecision: live.precision,
+    };
+  }
+  return { releaseDate: game.releaseDate, releaseDatePrecision: null };
 }
 
 const NO_PROMPTS: GameDetailsPrompts = { why: false, stayed: false };
@@ -143,7 +166,7 @@ export async function getGameDetails(params: {
   }
 
   return {
-    game,
+    game: { ...game, ...resolveReleaseDate(game, igdbDetails) },
     igdbDetails,
     libraryEntry,
     doneOutcome: libraryEntry?.doneOutcome ?? null,

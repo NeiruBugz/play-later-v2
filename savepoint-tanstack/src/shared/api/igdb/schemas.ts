@@ -23,9 +23,13 @@ const PlatformWithReleaseDateSchema = z.object({
   human: z.string().optional(),
 });
 
-const ReleaseDateSchema = z.object({
+export const ReleaseDateSchema = z.object({
   id: z.number(),
   human: z.string().optional(),
+  date: z.number().optional(),
+  date_format: z.number().optional(),
+  y: z.number().optional(),
+  m: z.number().optional(),
   platform: PlatformWithReleaseDateSchema.optional(),
 });
 

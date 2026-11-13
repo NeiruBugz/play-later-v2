@@ -40,10 +40,8 @@ const SEED_SQL_PATH = join(
   repoRoot,
   "context/spec/026-mindful-core-simplification/ui-audit/seed-audit-users.sql"
 );
-const FIXTURES_SQL_PATH = join(
-  repoRoot,
-  "context/spec/028-continue-identity-stand-out/review-fixtures.sql"
-);
+const specFixturesSqlPath = (spec: string): string =>
+  join(repoRoot, "context/spec", spec, "review-fixtures.sql");
 const DB_CONTAINER = process.env.REVIEW_DB_CONTAINER ?? "savepoint-postgres";
 const ANIMATION_WAIT_MS = 5_000;
 const SETTLE_PAUSE_MS = 150;
@@ -161,11 +159,15 @@ function applySqlFile(sqlPath: string): void {
   }
 }
 
-function reseedAuditAccounts(): void {
+function reseedAuditAccounts(spec: string): void {
   applySqlFile(SEED_SQL_PATH);
-  applySqlFile(FIXTURES_SQL_PATH);
+  const fixturesPath = specFixturesSqlPath(spec);
+  const hasSpecFixtures = existsSync(fixturesPath);
+  if (hasSpecFixtures) applySqlFile(fixturesPath);
   console.log(
-    `reseeded audit accounts and spec 028 fixtures via ${DB_CONTAINER}`
+    hasSpecFixtures
+      ? `reseeded audit accounts and spec ${spec} fixtures via ${DB_CONTAINER}`
+      : `reseeded audit accounts via ${DB_CONTAINER} (no review-fixtures.sql for spec ${spec})`
   );
 }
 
@@ -397,7 +399,7 @@ async function main(): Promise<void> {
     );
   }
 
-  if (args.reseed) reseedAuditAccounts();
+  if (args.reseed) reseedAuditAccounts(args.spec as string);
 
   const viewports = args.desktop ? [PHONE, DESKTOP] : [PHONE];
   const screenIds = args.screens?.split(",");

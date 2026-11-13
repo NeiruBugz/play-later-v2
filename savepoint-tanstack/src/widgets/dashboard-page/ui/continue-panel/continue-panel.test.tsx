@@ -45,9 +45,67 @@ vi.mock("@/shared/lib/user-facing-error", () => ({
 }));
 
 const NOW = new Date(2026, 5, 15, 12, 0, 0);
+const NOVEMBER_12_2026_NOON = new Date(2026, 10, 12, 12);
 const daysAgo = (days: number) => new Date(2026, 5, 15 - days, 9, 0, 0);
 const EIGHTEEN_EVENINGS_SECONDS = 18 * 105 * 60;
 const UNDO_PAYLOAD = { snapshot: {}, createdPlayId: null, closedPlayId: null };
+
+type Release = Pick<Queued["game"], "releaseDate" | "releaseDatePrecision">;
+
+const utcDay = (isoDay: string) => new Date(`${isoDay}T00:00:00.000Z`);
+
+const exactDay = (isoDay: string): Release => ({
+  releaseDate: utcDay(isoDay),
+  releaseDatePrecision: "DAY",
+});
+
+const release = {
+  exactDateAhead: exactDay("2026-12-01"),
+  exactDateToday: exactDay("2026-11-12"),
+  exactDateYesterday: exactDay("2026-11-11"),
+  exactDateLongAgo: exactDay("2025-06-02"),
+  tba: { releaseDate: null, releaseDatePrecision: "TBA" } as Release,
+  legacyDateWithoutPrecision: {
+    releaseDate: utcDay("2027-12-31"),
+    releaseDatePrecision: null,
+  } as Release,
+};
+
+const periodReleases = [
+  {
+    precision: "month",
+    notOverYet: {
+      releaseDate: utcDay("2026-11-01"),
+      releaseDatePrecision: "MONTH",
+    } as Release,
+    over: {
+      releaseDate: utcDay("2026-10-01"),
+      releaseDatePrecision: "MONTH",
+    } as Release,
+  },
+  {
+    precision: "quarter",
+    notOverYet: {
+      releaseDate: utcDay("2026-10-01"),
+      releaseDatePrecision: "QUARTER",
+    } as Release,
+    over: {
+      releaseDate: utcDay("2026-07-01"),
+      releaseDatePrecision: "QUARTER",
+    } as Release,
+  },
+  {
+    precision: "year",
+    notOverYet: {
+      releaseDate: utcDay("2026-01-01"),
+      releaseDatePrecision: "YEAR",
+    } as Release,
+    over: {
+      releaseDate: utcDay("2025-01-01"),
+      releaseDatePrecision: "YEAR",
+    } as Release,
+  },
+];
 
 function playing(
   id: number,
@@ -57,6 +115,7 @@ function playing(
     becamePlayingDaysAgo?: number;
     platform?: string | null;
     coverHue?: number | null;
+    release?: Release;
   } = {}
 ): Playing {
   const { lastSessionDaysAgo, becamePlayingDaysAgo = 100 } = opts;
@@ -73,6 +132,7 @@ function playing(
         slug: title.toLowerCase(),
         coverHue: opts.coverHue === undefined ? 27 : opts.coverHue,
         coverChroma: 0.12,
+        ...opts.release,
       }
     ),
     lastSessionAt:
@@ -88,6 +148,7 @@ function queued(
     status?: "WANT" | "DONE";
     platform?: string | null;
     withLength?: boolean;
+    release?: Release;
   } = {}
 ): Queued {
   const item = buildLibraryItemWithGame(
@@ -97,7 +158,12 @@ function queued(
       upNextPosition: id,
       platform: opts.platform === undefined ? "PS5" : opts.platform,
     },
-    { id: `game-${id}`, title, slug: title.toLowerCase() }
+    {
+      id: `game-${id}`,
+      title,
+      slug: title.toLowerCase(),
+      ...opts.release,
+    }
   );
   return {
     ...item,
@@ -422,6 +488,219 @@ describe("ContinuePanel", () => {
       expect(within(container).queryByRole("heading")).toBeNull();
       expect(elements.queryButton("Not tonight")).toBeNull();
       expect(elements.queryButton("Ask me again")).toBeNull();
+    });
+  });
+
+  describe("given games that are not out yet in Up Next", () => {
+    beforeEach(() => {
+      vi.setSystemTime(NOVEMBER_12_2026_NOON);
+    });
+
+    describe("given nothing is Playing, an upcoming game first and a released game second", () => {
+      beforeEach(() => {
+        renderPanel({
+          playing: [],
+          upNextQueue: [
+            queued(10, "Not Out Yet", { release: release.exactDateAhead }),
+            queued(11, "Already Out", { release: release.exactDateLongAgo }),
+          ],
+        });
+      });
+
+      it("asks to start the released game", () => {
+        expect(elements.getQuestion("Start Already Out?")).toBeVisible();
+        expect(elements.getButton("Start playing")).toBeVisible();
+      });
+
+      it("does not ask about the upcoming game", () => {
+        expect(elements.queryQuestion("Start Not Out Yet?")).toBeNull();
+      });
+
+      describe("when the user taps Not tonight", () => {
+        beforeEach(async () => {
+          await actions.notTonight();
+        });
+
+        it("rests without going back to the upcoming game", () => {
+          expect(
+            elements.getText("Nothing tonight is fine too.")
+          ).toBeVisible();
+          expect(elements.queryQuestion("Start Not Out Yet?")).toBeNull();
+          expect(elements.queryButton("Start playing")).toBeNull();
+        });
+      });
+    });
+
+    describe("given nothing is Playing and every Up Next game is upcoming", () => {
+      beforeEach(() => {
+        renderPanel({
+          playing: [],
+          upNextQueue: [
+            queued(10, "Dated Ahead", { release: release.exactDateAhead }),
+            queued(11, "To Be Announced", { release: release.tba }),
+            queued(12, "Due Today", { release: release.exactDateToday }),
+          ],
+        });
+      });
+
+      it("rests with the quiet message", () => {
+        expect(elements.getText("Nothing tonight is fine too.")).toBeVisible();
+        expect(
+          elements.getText("Your games will be here when you come back.")
+        ).toBeVisible();
+      });
+
+      it("offers no game to start", () => {
+        expect(elements.queryButton("Start playing")).toBeNull();
+        expect(elements.queryButton("Play again")).toBeNull();
+        expect(elements.queryButton("Not tonight")).toBeNull();
+        expect(elements.queryQuestion("Start Dated Ahead?")).toBeNull();
+        expect(elements.queryQuestion("Start To Be Announced?")).toBeNull();
+        expect(elements.queryQuestion("Start Due Today?")).toBeNull();
+      });
+    });
+
+    describe("given nothing is Playing and a TBA game is first in Up Next", () => {
+      beforeEach(() => {
+        renderPanel({
+          playing: [],
+          upNextQueue: [
+            queued(10, "To Be Announced", { release: release.tba }),
+            queued(11, "Already Out", { release: release.exactDateLongAgo }),
+          ],
+        });
+      });
+
+      it("asks about the released game instead", () => {
+        expect(elements.getQuestion("Start Already Out?")).toBeVisible();
+        expect(elements.queryQuestion("Start To Be Announced?")).toBeNull();
+      });
+    });
+
+    describe.each(periodReleases)(
+      "given a $precision-dated game first in Up Next and a released game second",
+      ({ notOverYet, over }) => {
+        it("skips the first game while its period is not over", () => {
+          renderPanel({
+            playing: [],
+            upNextQueue: [
+              queued(10, "Period Running", { release: notOverYet }),
+              queued(11, "Already Out", { release: release.exactDateLongAgo }),
+            ],
+          });
+
+          expect(elements.getQuestion("Start Already Out?")).toBeVisible();
+          expect(elements.queryQuestion("Start Period Running?")).toBeNull();
+        });
+
+        it("asks about the first game once its period is over", () => {
+          renderPanel({
+            playing: [],
+            upNextQueue: [
+              queued(10, "Period Over", { release: over }),
+              queued(11, "Already Out", { release: release.exactDateLongAgo }),
+            ],
+          });
+
+          expect(elements.getQuestion("Start Period Over?")).toBeVisible();
+        });
+      }
+    );
+
+    describe("given the first Up Next game came out yesterday", () => {
+      beforeEach(() => {
+        renderPanel({
+          playing: [],
+          upNextQueue: [
+            queued(10, "Out Yesterday", {
+              release: release.exactDateYesterday,
+            }),
+          ],
+        });
+      });
+
+      it("asks to start it", () => {
+        expect(elements.getQuestion("Start Out Yesterday?")).toBeVisible();
+      });
+    });
+
+    describe("given the first Up Next game has a date but no precision", () => {
+      beforeEach(() => {
+        renderPanel({
+          playing: [],
+          upNextQueue: [
+            queued(10, "Legacy Date", {
+              release: release.legacyDateWithoutPrecision,
+            }),
+          ],
+        });
+      });
+
+      it("asks to start it", () => {
+        expect(elements.getQuestion("Start Legacy Date?")).toBeVisible();
+      });
+    });
+
+    describe("given a Playing game that is not out yet and an upcoming Up Next game", () => {
+      beforeEach(() => {
+        renderPanel({
+          playing: [
+            playing(1, "Early Access", {
+              lastSessionDaysAgo: 3,
+              release: release.exactDateAhead,
+            }),
+          ],
+          upNextQueue: [
+            queued(10, "Not Out Yet", { release: release.exactDateAhead }),
+          ],
+        });
+      });
+
+      it("still asks to continue the Playing game", () => {
+        expect(elements.getQuestion("Continue Early Access?")).toBeVisible();
+      });
+
+      describe("when the user taps Not tonight", () => {
+        beforeEach(async () => {
+          await actions.notTonight();
+        });
+
+        it("rests because the only Up Next game is not out yet", () => {
+          expect(
+            elements.getText("Nothing tonight is fine too.")
+          ).toBeVisible();
+          expect(elements.queryButton("Start playing")).toBeNull();
+        });
+      });
+    });
+
+    describe("given a Playing game and Up Next holding an upcoming game, then a released one", () => {
+      beforeEach(async () => {
+        renderPanel({
+          playing: [playing(1, "Hades", { lastSessionDaysAgo: 3 })],
+          upNextQueue: [
+            queued(10, "Not Out Yet", { release: release.exactDateAhead }),
+            queued(11, "Already Out", { release: release.exactDateLongAgo }),
+          ],
+        });
+        await actions.notTonight();
+      });
+
+      it("moves on from the Playing game to the released Up Next game", () => {
+        expect(elements.getQuestion("Start Already Out?")).toBeVisible();
+      });
+
+      describe("and the user taps Not tonight again", () => {
+        beforeEach(async () => {
+          await actions.notTonight();
+        });
+
+        it("rests", () => {
+          expect(
+            elements.getText("Nothing tonight is fine too.")
+          ).toBeVisible();
+        });
+      });
     });
   });
 });

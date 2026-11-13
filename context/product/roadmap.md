@@ -63,7 +63,7 @@ _Everything we could ship on our own data + IGDB. The shipped list stands; the r
 
 6. [x] **Bento Dashboard Reflow** — _Superseded 2026-10-29 by Mindful Core #4 ("What's Next" Home)._
 
-7. [ ] **Upcoming Releases Widget** — countdowns for unreleased wishlisted games using IGDB release dates. _Parked (vision v3): countdowns risk working against "pause before buying"; revisit only as information inside the wishlist._
+7. [x] **Upcoming Releases Widget** — countdowns for unreleased wishlisted games using IGDB release dates. _Delivered 2026-11-13 as Spec 029 (Release Days) in the form vision v3 allowed: plain release-date information only, no countdowns. Honest-precision date labels on cards and the game page, a Home "Coming soon" section (next 30 days), an Upcoming releases page, refresh-on-open, a quiet "Moved from …" line, and Continue? skipping games that aren't out yet._
 
 8. [x] **YTD Stats Card** — _Superseded 2026-10-29 (vision v3 anti-metric: no yearly counters of games finished or hours logged)._
 

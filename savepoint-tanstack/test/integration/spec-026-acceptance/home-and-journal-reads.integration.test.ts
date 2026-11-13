@@ -70,6 +70,7 @@ describe("given a library with Playing, queued and Done games (AC 2.17 Home)", (
 
     // 2.17: no "Recently played" section, no second stats card or distribution bar
     expect(Object.keys(home).sort()).toEqual([
+      "comingSoonCandidates",
       "counts",
       "playing",
       "upNextQueue",

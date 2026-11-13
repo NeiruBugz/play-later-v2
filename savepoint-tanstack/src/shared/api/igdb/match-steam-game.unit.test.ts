@@ -57,6 +57,16 @@ describe(matchSteamGameByAppId, () => {
         'where external_games.url = "https://store.steampowered.com/app/220"'
       );
     });
+
+    it("does not ask IGDB for how precisely release dates are known", async () => {
+      await matchSteamGameByAppId("220");
+      const [, body] = igdbFetchMock.mock.calls[0] ?? [];
+      const requestedFields = /fields([^;]+);/
+        .exec(body)?.[1]
+        .split(",")
+        .map((field) => field.trim());
+      expect(requestedFields).not.toContain("release_dates.date_format");
+    });
   });
 
   describe("given IGDB returns an empty array", () => {

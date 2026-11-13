@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Release days</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  @media (prefers-color-scheme: dark) {
+    :root {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  }
+  :root[data-theme='dark'] {
+    --bg: #10151c; --panel: #171e27; --ink: #e8edf3; --muted: #9aa7b5;
+    --line: #26303c; --accent: #60a5fa;
+    --src-interview: #60a5fa; --src-code: #bda6f5; --src-web: #4fd1c0; --src-kb: #f0b26b;
+    --ok: #4ade80; --pending: #64748b; --warn: #f0b26b; --chip-ink: #10151c;
+}
+  :root[data-theme='light'] {
+    --bg: #ffffff; --panel: #f6f7f9; --ink: #1c2430; --muted: #5b6572;
+    --line: #e3e7ec; --accent: #2563eb;
+    --src-interview: #2563eb; --src-code: #7c3aed; --src-web: #0f766e; --src-kb: #b45309;
+    --ok: #15803d; --pending: #9aa3ad; --warn: #b45309; --chip-ink: #ffffff;
+}
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 36px 28px 80px; }
+  @media (max-width: 700px) { main { padding: 20px 16px 60px; } }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 42px 0 12px; }
+  h4 { margin: 14px 0 6px; font-size: 14px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 4px; }
+  .statusbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
+  .status-chip { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--warn); color: var(--chip-ink); }
+  .progress { font-size: 13px; color: var(--muted); }
+  .bar { display: inline-block; width: 140px; height: 7px; border-radius: 4px; background: var(--line); vertical-align: middle; margin: 0 6px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--ok); }
+  .src { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; color: var(--chip-ink); white-space: nowrap; }
+  .src.interview { background: var(--src-interview); }
+  .src.code { background: var(--src-code); }
+  .src.web { background: var(--src-web); }
+  .src.kb { background: var(--src-kb); }
+  .glance { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin-top: 14px; }
+  .glance ul { margin: 8px 0 0; padding-left: 20px; }
+  .glance li { margin: 6px 0; }
+  table.decisions { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  table.decisions th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line); }
+  table.decisions td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.decisions td:first-child { font-weight: 600; width: 26%; }
+  .why { color: var(--muted); font-size: 13px; display: block; margin-top: 2px; }
+  .diagram-wrap { overflow-x: auto; margin-top: 12px; }
+  .diagram-note { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .diagram-wrap svg { max-width: 100%; height: auto; display: block; }
+  .d-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .d-label { fill: var(--ink); font-size: 13px; font-weight: 600; }
+  .d-sublabel { fill: var(--muted); font-size: 11.5px; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .d-arrow.dashed { stroke-dasharray: 5 4; }
+  .d-head { fill: var(--muted); }
+  .tabs { margin-top: 12px; }
+  .tabbar { display: flex; gap: 4px; border-bottom: 2px solid var(--line); }
+  .tabbar button { appearance: none; border: none; background: none; color: var(--muted); font: 600 14px/1.4 inherit; padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tabbar button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tabbar button .count { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+  .tabpanel { display: none; padding: 6px 2px 0; }
+  .tabpanel.active { display: block; }
+  ul.findings { list-style: none; margin: 10px 0 0; padding: 0; }
+  ul.findings li { margin: 0; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  ul.findings li:last-child { border-bottom: none; }
+  .impact { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .impact a { color: var(--accent); text-decoration: none; }
+  .impact a:hover { text-decoration: underline; }
+  .empty { color: var(--muted); font-size: 14px; padding: 16px 4px; }
+  .req { border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .req h3 { margin: 0 0 4px; font-size: 16.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+  .req h3 .provrow { display: flex; gap: 5px; }
+  .req .oneliner { margin: 2px 0 6px; }
+  .req .prose { color: var(--muted); font-size: 14px; margin: 0 0 4px; }
+  details.ac { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.ac summary { cursor: pointer; font-size: 13.5px; color: var(--accent); font-weight: 600; }
+  details.ac ul { list-style: none; padding-left: 4px; margin: 10px 0 2px; }
+  details.ac li { margin: 10px 0; padding-left: 26px; position: relative; font-size: 14.5px; }
+  details.ac li::before { content: "☐"; position: absolute; left: 2px; top: 0; color: var(--pending); font-size: 15px; }
+  details.ac li.done::before { content: "☑"; color: var(--ok); }
+  details.ac li b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+  .cols h4 { margin: 0 0 6px; }
+  .cols ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .cols li { margin: 5px 0; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  code { background: var(--panel); border-radius: 4px; padding: 1px 5px; font-size: .92em; }
+  .tablewrap { overflow-x: auto; margin: 12px 0; }
+  table.md { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+  table.md th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  table.md td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.md tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<main>
+<h1>Release days</h1>
+<div class="meta">Topic: Show when upcoming games in a person's library come out. Library cards and the game page show the release date as precisely as it is actually known. Home gets a quiet &quot;Coming soon&quot; section, and a new &quot;Upcoming releases&quot; page lists every game with an exact date ahead. Dates stay current when a release is announced or moved. &nbsp;·&nbsp; Author: Nail Badiullin</div>
+<div class="statusbar">
+  <span class="status-chip">Draft</span>
+  <span class="progress">Verification: <span class="bar"><i style="width:0%"></i></span> 0 of 59 criteria verified</span>
+</div>
+<h2 id="glance">At a glance</h2>
+<div class="glance"><ul><li>Games in your library that aren't out yet show their release date, but only as precisely as it's known: 14 Mar, Mar 2027, Q2 2027, 2027 or Date TBA.</li>
+<li>Home gets a quiet Coming soon section below Also playing: up to three games out today or in the next 30 days, with a link to see all.</li>
+<li>A new Upcoming releases page lists every game in your library with an exact release day ahead, grouped by month.</li>
+<li>Release dates stay current: opening Home or the library checks for announced or moved dates, and a moved date shows a quiet 'Moved from …' line for 14 days.</li>
+<li>No countdowns, no store links, no alerts outside the app; and 'Continue?' stops offering to start games that aren't out yet.</li></ul></div>
+<h2 id="decisions">Decisions to approve</h2>
+<p class="meta">These are the judgment calls in this spec — the things a reviewer might want to challenge. Everything else follows from them.</p>
+<table class="decisions">
+  <tr><th>Decision</th><th>Choice</th><th>Source</th></tr>
+<tr>
+    <td>Which games count</td>
+    <td>Any library game not out yet, whatever its status or ownership<span class="why">Every added game counts as owned by default, so 'wishlisted only' would cover almost nothing</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>What appears on Home and in the calendar</td>
+    <td>Only games with an exact release day<span class="why">Vague dates are stored as placeholder days and can't be trusted as days; comparable calendars do the same</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>How dates stay current</td>
+    <td>Checked when you open Home or the library, daily for games due within 14 days, weekly otherwise; no background job<span class="why">Nobody sees the dates without opening the app</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Coming soon window and size</td>
+    <td>Today through the next 30 days, at most 3 entries<span class="why">Owner chose 30 days; 3 keeps the section short</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Calendar shape</td>
+    <td>Date-ordered list under month headings<span class="why">Steam and Backloggd use lists, not month grids</span></td>
+    <td><span class="src interview">Interview</span> <span class="src web">Web</span></td>
+  </tr>
+<tr>
+    <td>When a date moves</td>
+    <td>Plain 'Moved from 14 Mar' line for 14 days, also when an exact date turns vague or TBA<span class="why">Calm, noticeable on a weekly visit, no warning badge</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>Vague dates and 'released'</td>
+    <td>A month, quarter or year date counts as upcoming until that period has ended<span class="why">Avoids calling a 'Mar 2027' game released on 1 March</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+<tr>
+    <td>'Continue?' and unreleased games</td>
+    <td>Skip games that aren't out yet when offering to start one<span class="why">Owner pulled it into scope; you can't start a game that isn't out</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>Second way into the calendar</td>
+    <td>A text link next to the Library page title<span class="why">The phone bottom bar has no free slot and Coming soon is hidden when nothing is due</span></td>
+    <td><span class="src interview">Interview</span> <span class="src code">Codebase</span></td>
+  </tr>
+<tr>
+    <td>No 'already waiting' line</td>
+    <td>Left out<span class="why">Owner found it too pushy</span></td>
+    <td><span class="src interview">Interview</span></td>
+  </tr>
+</table>
+
+<h2 id="findings">Findings that shaped this spec</h2>
+<p class="meta">What the research phase discovered and where it landed. The technical detail behind each finding lives in <code>research-notes.md</code>.</p>
+<div class="tabs">
+  <div class="tabbar" role="tablist">
+<button class="active" role="tab" onclick="tab(0, this)">Codebase exploration <span class="count">· 7</span></button>
+<button class="" role="tab" onclick="tab(1, this)">Web research <span class="count">· 4</span></button>
+<button class="" role="tab" onclick="tab(2, this)">Knowledge base <span class="count">· 0</span></button>
+  </div>
+<div class="tabpanel active"><ul class="findings"><li>A game's release date is copied once when it first enters SavePoint and never updated.<span class="impact">→ <a href="#r26">Dates must be refreshed so delays show up</a></span></li>
+<li>Only one exact-looking date is stored; how precise it is gets lost.<span class="impact">→ <a href="#r21">Labels must follow the real precision</a></span></li>
+<li>The game page labels future dates 'Released'.<span class="impact">→ <a href="#r23">Future dates now read 'Releases'</a></span></li>
+<li>Every added game counts as owned by default.<span class="impact">→ <a href="#r22">All unreleased library games count, not only 'Not owned' ones</a></span></li>
+<li>Home's order is fixed and the first Up Next cover must stay visible on a phone.<span class="impact">→ <a href="#r24">Coming soon sits below Also playing</a></span></li>
+<li>The phone bottom bar is full.<span class="impact">→ <a href="#r25">The calendar is reached from Home and the Library page</a></span></li>
+<li>Home may offer to start a game that isn't out yet.<span class="impact">→ <a href="#r28">'Continue?' now skips unreleased games</a></span></li></ul></div>
+<div class="tabpanel "><ul class="findings"><li>The game catalogue records each date's precision separately and fills vague dates with placeholder days.<span class="impact">→ <a href="#r21">Never show a vague date as a day</a></span></li>
+<li>Steam and Backloggd list upcoming releases in date order and keep vague dates out of the calendar.<span class="impact">→ <a href="#r25">List layout, exact dates only</a></span></li>
+<li>Release dates have no time of day.<span class="impact">→ <a href="#r21">'Today' is the date on your device; no timezone shift</a></span></li>
+<li>Countdown timers are a known urgency pattern.<span class="impact">→ <a href="#r24">No 'N days left' wording anywhere</a></span></li></ul></div>
+<div class="tabpanel "><div class="empty">No internal knowledge sources are configured for this project (declined 2026-11-10).</div></div>
+</div>
+<h2>Requirements</h2>
+<section class="req" id="r20">
+  <h3><span>2.0 Definitions used in this specification</span><span class="provrow"></span></h3>
+  
+  <p class="prose"><strong>Games and dates</strong></p>
+<p class="prose"><strong>Library:</strong> the games a person has added to SavePoint. Each has a status, <strong>Want</strong> (not started), <strong>Playing</strong> or <strong>Done</strong>, and may carry a <strong>&quot;Not owned&quot;</strong> tag, which the person sets for games they don't own yet.</p>
+<p class="prose"><strong>Game catalogue:</strong> the public game database SavePoint takes game details from, including release dates.</p>
+<p class="prose"><strong>Release date:</strong> the date the game catalogue gives as the game's first release, on any platform and in any region, together with how precisely the catalogue knows it. A release date is a calendar day with no time of day: &quot;14 March&quot; means 14 March wherever the person is.</p>
+<p class="prose"><strong>Precision:</strong> how exactly a release date is known: <strong>exact day</strong>, <strong>month</strong>, <strong>quarter</strong>, <strong>year</strong>, or <strong>TBA</strong> (the catalogue says the date is to be announced). A game can also have <strong>no date</strong> at all, with no TBA mark.</p>
+<p class="prose"><strong>Exact date:</strong> a release date with exact-day precision.</p>
+<p class="prose"><strong>Today:</strong> the current calendar date on the person's own device, in their own timezone.</p>
+<p class="prose"><strong>Upcoming game:</strong> a game in the person's library that is not out yet, whatever its status and whether or not it is owned. A game with an exact date is upcoming when that date is today or later. A game with a month, quarter or year date is upcoming until that whole period has ended: &quot;Mar 2027&quot; until the end of 31 March 2027, &quot;Q2 2027&quot; until the end of 30 June 2027, &quot;2027&quot; until the end of 31 December 2027. A TBA game is always upcoming.</p>
+<p class="prose"><strong>Released game:</strong> a game with a date that is not upcoming by the rule above.</p>
+<p class="prose"><strong>Date label:</strong> the short text that shows a release date at its precision (2.1).</p>
+<p class="prose"><strong>Screens</strong></p>
+<p class="prose"><strong>Library views:</strong> the Library page shows games either as a <strong>grid</strong> of cover tiles or as a <strong>list</strong> of cards. In this spec, &quot;library card&quot; means either form, and every criterion about library cards applies to both views.</p>
+<p class="prose"><strong>Length line:</strong> the line on a library card that tells how long a game is, for example &quot;About 8 evenings&quot;.</p>
+<p class="prose"><strong>Home:</strong> the first screen after sign-in. From top to bottom it shows the <strong>&quot;Continue?&quot; panel</strong>, which asks whether to continue or start a game; the <strong>Up Next shelf</strong>, the covers of the person's queue of up to 5 games to play next; <strong>&quot;Also playing&quot;</strong>, the other games in progress, or the message &quot;Nothing playing right now&quot; when none are; and the <strong>counts line</strong>, a short line counting the person's games by status.</p>
+<p class="prose"><strong>Cover tint:</strong> a soft background color taken from a game's cover art. On Home only the &quot;Continue?&quot; panel has one.</p>
+<p class="prose"><strong>Phone layout:</strong> any window narrower than 768 points, designed at 390 × 844 points. <strong>Desktop layout:</strong> 768 points and wider.</p>
+  
+</section>
+<section class="req" id="r21">
+  <h3><span>2.1 Date labels show a date only as precisely as it is known</span><span class="provrow"><span class="src interview">Interview</span> <span class="src web">Web</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Dates show only as precisely as they're known.</p>
+  <p class="prose">Wherever this spec shows a release date, it uses one of these forms:</p>
+<div class="tablewrap"><table class="md"><thead><tr><th>Precision</th><th>Label</th><th>Example</th></tr></thead><tbody>
+<tr><td>Exact day, this year</td><td>day and short month</td><td>14 Mar</td></tr>
+<tr><td>Exact day, another year</td><td>day, short month, year</td><td>14 Mar 2027</td></tr>
+<tr><td>Month</td><td>short month and year</td><td>Mar 2027</td></tr>
+<tr><td>Quarter</td><td>quarter and year</td><td>Q2 2027</td></tr>
+<tr><td>Year</td><td>year</td><td>2027</td></tr>
+<tr><td>TBA</td><td>the words &quot;Date TBA&quot;</td><td>Date TBA</td></tr>
+</tbody></table></div>
+<p class="prose">A game with no date has no label.</p>
+  <details class="ac"><summary>Acceptance criteria — 8 (0 verified)</summary><ul>
+<li class=""><b>Year-only never shows a day</b>Given an upcoming game whose release is known only as the year 2027, when the person views its library card or game page, then they see &quot;2027&quot; and never a specific day such as &quot;31 Dec 2027&quot;.</li>
+<li class=""><b>Quarter label</b>Given an upcoming game whose release is known only as the second quarter of 2027, when the person views its library card, then they see &quot;Q2 2027&quot;.</li>
+<li class=""><b>Month label</b>Given an upcoming game whose release is known only as March 2027, when the person views its library card, then they see &quot;Mar 2027&quot;.</li>
+<li class=""><b>TBA label</b>Given a game the catalogue marks as TBA, when the person views its library card, then they see &quot;Date TBA&quot;.</li>
+<li class=""><b>No date, no label</b>Given a game with no date, when the person views its library card, then no release date text appears on it.</li>
+<li class=""><b>Exact day this year</b>Given today is before 14 March and a game has an exact date on 14 March of the current year, when the person views its library card, then the label reads &quot;14 Mar&quot;.</li>
+<li class=""><b>Exact day another year</b>Given a game with an exact date on 14 March of a later year, when the person views its library card, then the label reads &quot;14 Mar&quot; followed by that year, for example &quot;14 Mar 2027&quot;.</li>
+<li class=""><b>No timezone shift</b>Given a person whose device is set to a timezone west of London, for example New York, and a game with an exact date of 14 March, when they view its library card, then the label reads &quot;14 Mar&quot; and not &quot;13 Mar&quot;.</li>
+</ul></details>
+</section>
+<section class="req" id="r22">
+  <h3><span>2.2 Library cards show the date for upcoming games</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Library cards of upcoming games show 'Out …'.</p>
+  <p class="prose">Library cards of upcoming games show a line &quot;Out&quot; followed by the date label, for example &quot;Out 14 Mar&quot;, &quot;Out Q2 2027&quot;, or just &quot;Date TBA&quot; for a TBA game. This applies to every upcoming game, whatever its status and ownership. Released games and games with no date show no release date line.</p>
+<p class="prose">The release date line, and the &quot;Moved from …&quot; line (2.7), must not break alignment between cards in the same row. In each row, every card's cover, title and length line start at the same height, whether or not the card has these extra lines.</p>
+  <details class="ac"><summary>Acceptance criteria — 5 (0 verified)</summary><ul>
+<li class=""><b>Exact date on a Want card</b>Given today is before 14 March and a Want game has an exact date of 14 March of the current year, when the person opens the library, then its card shows &quot;Out 14 Mar&quot;.</li>
+<li class=""><b>Quarter on an owned Playing card</b>Given an owned Playing game with a date of the second quarter of next year, when the person opens the library, then its card shows &quot;Out Q2&quot; followed by that year.</li>
+<li class=""><b>Released game shows nothing</b>Given a game that came out last year, when the person opens the library, then its card shows no release date line.</li>
+<li class=""><b>Rows stay aligned</b>Given a grid row where one tile has a release date line and a &quot;Moved from …&quot; line and its neighbours have neither, when the person views the row, then the covers, titles and length lines of all tiles in that row start at the same heights.</li>
+<li class=""><b>Line gone after release</b>Given a game with an exact date of yesterday, when the person opens the library today, then its card shows no release date line.</li>
+</ul></details>
+</section>
+<section class="req" id="r23">
+  <h3><span>2.3 The game page says &quot;Releases&quot; for future dates</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">The game page says 'Releases' for future dates.</p>
+  <p class="prose">The game page shows a release line using the 2.1 labels, but always with the year:</p>
+<p class="prose">for an upcoming game, &quot;Releases&quot; followed by the label: &quot;Releases 14 Mar 2027&quot;, &quot;Releases Mar 2027&quot;, &quot;Releases Q2 2027&quot;, &quot;Releases 2027&quot;;</p>
+<p class="prose">for a TBA game, &quot;Release date TBA&quot;;</p>
+<p class="prose">for a released game, &quot;Released&quot; followed by the label: &quot;Released 2 Jun 2020&quot;, or &quot;Released 2020&quot; for a game known only by year;</p>
+<p class="prose">for a game with no date, no release line.</p>
+<p class="prose">This applies to signed-in people and signed-out visitors alike.</p>
+  <details class="ac"><summary>Acceptance criteria — 6 (0 verified)</summary><ul>
+<li class=""><b>Future exact date</b>Given a game with an exact release date in the future, when anyone opens its game page, then they see &quot;Releases&quot; followed by that date with its year, and never &quot;Released&quot;.</li>
+<li class=""><b>Future year-only</b>Given an upcoming game known only as 2027, when anyone opens its game page, then they see &quot;Releases 2027&quot;.</li>
+<li class=""><b>TBA</b>Given a TBA game, when anyone opens its game page, then they see &quot;Release date TBA&quot;.</li>
+<li class=""><b>Released exact date</b>Given a game released on 2 June 2020, when anyone opens its game page, then they see &quot;Released 2 Jun 2020&quot;.</li>
+<li class=""><b>Released year-only</b>Given a game known only as released in 2020, when anyone opens its game page, then they see &quot;Released 2020&quot;.</li>
+<li class=""><b>No date, no line</b>Given a game with no date, when anyone opens its game page, then no release line appears.</li>
+</ul></details>
+</section>
+<section class="req" id="r24">
+  <h3><span>2.4 Coming soon on Home</span><span class="provrow"><span class="src interview">Interview</span> <span class="src web">Web</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Coming soon on Home: up to 3 games due in the next 30 days.</p>
+  <p class="prose">Home gets a new section titled <strong>Coming soon</strong>. It lists the person's upcoming games with an exact date from today through 30 days after today, both days included.</p>
+<p class="prose"><strong>Place:</strong> below &quot;Also playing&quot; (or below &quot;Nothing playing right now&quot;) and above the counts line. It has no cover tint.</p>
+<p class="prose"><strong>Order:</strong> nearest date first. Games on the same date are ordered by title, A to Z.</p>
+<p class="prose"><strong>Each entry</strong> shows the game's cover, its title and when it comes out: <strong>&quot;Out today&quot;</strong> for today, <strong>&quot;Tomorrow&quot;</strong> for tomorrow, and otherwise the short weekday and the date, &quot;Fri 14 Mar&quot;, with the year added when the date falls in the next calendar year (&quot;Fri 2 Jan 2027&quot;). There are no countdowns such as &quot;in 3 days&quot;.</p>
+<p class="prose"><strong>Size:</strong> at most 3 entries. Below them, a link <strong>&quot;See all upcoming&quot;</strong> opens Upcoming releases (2.5). The link is shown whenever the section is shown. Games out today count toward the 3.</p>
+<p class="prose">Tapping an entry opens that game's page.</p>
+<p class="prose">When no upcoming game has an exact date in the window, the section is not shown, with no empty message.</p>
+<p class="prose">Games whose date is only a month, quarter or year, or TBA, never appear here, and no &quot;Moved from …&quot; line appears here.</p>
+  <details class="ac"><summary>Acceptance criteria — 14 (0 verified)</summary><ul>
+<li class=""><b>Out today first</b>Given a game in the library with an exact release date of today, when the person opens Home, then Coming soon shows it with &quot;Out today&quot;, listed first.</li>
+<li class=""><b>Tomorrow</b>Given a game with an exact release date of tomorrow, when the person opens Home, then Coming soon shows it with &quot;Tomorrow&quot;.</li>
+<li class=""><b>Weekday and date, no countdown</b>Given a game with an exact release date 9 days from today, when the person opens Home, then Coming soon shows it with its short weekday and date, for example &quot;Fri 14 Mar&quot;, and no &quot;days left&quot; wording.</li>
+<li class=""><b>Day 30 included</b>Given a game with an exact release date exactly 30 days from today, when the person opens Home, then it appears in Coming soon.</li>
+<li class=""><b>Day 31 hides the section</b>Given a game with an exact release date 31 days from today and nothing nearer, when the person opens Home, then no Coming soon section is shown.</li>
+<li class=""><b>Year across New Year</b>Given today is 28 December and a game has an exact date of 2 January, when the person opens Home, then its entry shows the weekday, &quot;2 Jan&quot; and the new year.</li>
+<li class=""><b>Vague dates excluded</b>Given an upcoming game known only as &quot;Mar 2027&quot;, when the person opens Home during March 2027, then it does not appear in Coming soon.</li>
+<li class=""><b>Three nearest, title order</b>Given five games with exact dates in the next 30 days, two of them on the same day, when the person opens Home, then Coming soon shows the three nearest, with same-day games in title order, followed by the link &quot;See all upcoming&quot;.</li>
+<li class=""><b>See all opens the calendar</b>When the person taps &quot;See all upcoming&quot;, then the Upcoming releases page opens.</li>
+<li class=""><b>Entry opens the game</b>When the person taps a Coming soon entry, then that game's page opens.</li>
+<li class=""><b>Gone after release day</b>Given a game with an exact date of yesterday, when the person opens Home today, then it does not appear in Coming soon.</li>
+<li class=""><b>Any status or ownership</b>Given a Done game and a Not owned Want game, both with exact dates in the next 30 days, when the person opens Home, then both appear in Coming soon.</li>
+<li class=""><b>Up Next cover stays visible</b>Given a phone at 390 × 844 with one game Playing, three games in Up Next and three Coming soon entries, when the person opens Home, then the first Up Next cover is fully visible without scrolling, and Coming soon appears below &quot;Also playing&quot;.</li>
+<li class=""><b>Only one tinted surface</b>Given Home with a Coming soon section, when the person looks at the page, then only the &quot;Continue?&quot; panel has a cover tint.</li>
+</ul></details>
+</section>
+<section class="req" id="r25">
+  <h3><span>2.5 Upcoming releases page</span><span class="provrow"><span class="src interview">Interview</span> <span class="src web">Web</span></span></h3>
+  <p class="oneliner">Upcoming releases lists every exactly dated game ahead, by month.</p>
+  <p class="prose">A new page titled <strong>Upcoming releases</strong> lists every upcoming game in the person's library that has an exact date, from today onward, in date order. Games on the same date are ordered by title, A to Z.</p>
+<p class="prose"><strong>Layout:</strong> entries are grouped under month headings (&quot;March 2027&quot;). Each entry shows the short weekday and day (&quot;Fri 14&quot;), or <strong>&quot;Out today&quot;</strong> in its place for today. It also shows the game's cover and title, its status (Want, Playing or Done), and the &quot;Not owned&quot; tag when it applies.</p>
+<p class="prose">The list ends with the last game that has an exact date. There is no fixed time limit.</p>
+<p class="prose">Games whose date is only a month, quarter or year, or TBA, are not listed. Once the game catalogue announces an exact date for such a game, it appears in the list.</p>
+<p class="prose">Tapping an entry opens that game's page.</p>
+<p class="prose"><strong>Ways in:</strong> &quot;See all upcoming&quot; on Home, and a text link &quot;Upcoming releases&quot; at the top of the Library page, next to the page title. The Library link is always shown, so the page can be reached even when Coming soon is hidden.</p>
+<p class="prose">Only signed-in people can open it, and each person sees only their own library.</p>
+<p class="prose">When nothing qualifies, the page shows: &quot;No upcoming releases with a set date. Games appear here once their release day is announced.&quot;</p>
+  <details class="ac"><summary>Acceptance criteria — 11 (0 verified)</summary><ul>
+<li class=""><b>Month groups in date order</b>Given three games with exact dates in March, April and the following January, when the person opens Upcoming releases, then they see the games in date order under the headings for those months.</li>
+<li class=""><b>Vague dates excluded</b>Given a game known only as &quot;Q2 2027&quot;, when the person opens Upcoming releases, then it is not listed.</li>
+<li class=""><b>Joins once exact date announced</b>Given a game that was known only as &quot;2027&quot; and whose exact date of 14 March 2027 has been announced in the catalogue for more than a week, when the person opens the library and then Upcoming releases, then it is listed under March 2027.</li>
+<li class=""><b>Today's games first</b>Given two games with an exact date of today, when the person opens Upcoming releases, then both are at the top of the list in title order, each reading &quot;Out today&quot; instead of a weekday and day.</li>
+<li class=""><b>Gone after release day</b>Given a game with an exact date of yesterday, when the person opens Upcoming releases today, then it is not listed.</li>
+<li class=""><b>Empty message</b>Given a person with no upcoming games with an exact date, when they open Upcoming releases, then they see &quot;No upcoming releases with a set date. Games appear here once their release day is announced.&quot;</li>
+<li class=""><b>Library link always shown</b>Given a person with no upcoming games at all, when they open the Library page, then the &quot;Upcoming releases&quot; link is still shown next to the page title.</li>
+<li class=""><b>Library link opens the page</b>When the person taps &quot;Upcoming releases&quot; on the Library page, then the Upcoming releases page opens.</li>
+<li class=""><b>Signed-out goes to sign-in</b>Given a signed-out visitor, when they try to open Upcoming releases, then they are sent to the sign-in page and see no games.</li>
+<li class=""><b>Entry opens the game</b>When the person taps an entry, then that game's page opens.</li>
+<li class=""><b>Phone fit and tap size</b>Given a phone at 390 × 844, when the person opens Upcoming releases, then the page does not scroll sideways and every entry can be tapped with a target at least 44 points tall.</li>
+</ul></details>
+</section>
+<section class="req" id="r26">
+  <h3><span>2.6 Dates stay current</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">Dates are checked when you open Home or the library.</p>
+  <p class="prose">When the person opens Home or the Library page, SavePoint checks the game catalogue for newer release dates for the upcoming games and games with no date in their library.</p>
+<p class="prose"><strong>How often:</strong> a game is checked when one of these pages opens and its last check, by anyone, is older than one day for a game with an exact date within 14 days after today, or older than one week for any other game being checked. So, as long as the person opens Home or the library, a change in the catalogue shows up within about a day for games coming out soon and within about a week otherwise. Checks are shared: when one person's visit updates a game, everyone who has that game sees the new date.</p>
+<p class="prose"><strong>Released games</strong> are not checked again; their date stays as it was when they came out.</p>
+<p class="prose"><strong>Where corrections show:</strong> a corrected date shows everywhere the date appears: library cards, the game page, Coming soon and Upcoming releases. The game page itself does not start a check.</p>
+<p class="prose"><strong>Speed:</strong> Home and the Library page show their content without waiting for the game catalogue. A correction found during a visit shows the next time the person opens a page that shows the date; the page already open is not updated.</p>
+<p class="prose"><strong>When the catalogue fails:</strong> when the game catalogue is slow or unavailable, pages show the last known dates and no error message. The game is checked again on a later visit.</p>
+  <details class="ac"><summary>Acceptance criteria — 4 (0 verified)</summary><ul>
+<li class=""><b>Moved date shows on next opening</b>Given a game with an exact date within the next 14 days whose date in the catalogue moved more than a day ago, when the person opens the library and then opens it again, then its card, its game page and Upcoming releases show the new date.</li>
+<li class=""><b>Announced date shows on next opening</b>Given a game known only as &quot;2027&quot; whose exact date was announced in the catalogue more than a week ago, when the person opens the library and then opens it again, then its card shows the exact date.</li>
+<li class=""><b>Catalogue down, no error</b>Given the game catalogue is unavailable, when the person opens Home, then Home shows its content with the last known dates and no error message.</li>
+<li class=""><b>Released games stay frozen</b>Given a game released last month whose catalogue date later changes, when the person opens the library, then its card still shows no release date line and its game page still shows its original &quot;Released&quot; date.</li>
+</ul></details>
+</section>
+<section class="req" id="r27">
+  <h3><span>2.7 A quiet &quot;Moved&quot; line when an exact date changes</span><span class="provrow"><span class="src interview">Interview</span></span></h3>
+  <p class="oneliner">A quiet 'Moved from …' line for 14 days.</p>
+  <p class="prose">When a game's exact release date changes, its library card and its Upcoming releases entry show a small line <strong>&quot;Moved from&quot;</strong> followed by the old date as a 2.1 label (&quot;Moved from 14 Mar&quot;, or &quot;Moved from 14 Mar 2027&quot; when the old date was in another year). The line shows for 14 days after the change first appears in SavePoint, then disappears.</p>
+<p class="prose">The line appears only when the old date was exact. A month, quarter or year date that becomes exact is an announcement, not a move, so it shows no line.</p>
+<p class="prose">When an exact date changes to a vaguer one or to TBA (for example from &quot;14 Mar&quot; to &quot;2027&quot;), the library card shows &quot;Moved from 14 Mar&quot; under &quot;Out 2027&quot; or &quot;Date TBA&quot;, and the game leaves Upcoming releases.</p>
+<p class="prose">When the new date is already in the past (the game came out early), the game counts as released and no line is shown.</p>
+<p class="prose">When the date moves again within the 14 days, the line shows the most recent old date, and the 14 days start again.</p>
+<p class="prose">The line is plain text with no warning color and no &quot;Delayed&quot; badge. It does not appear on Home or on the game page.</p>
+  <details class="ac"><summary>Acceptance criteria — 6 (0 verified)</summary><ul>
+<li class=""><b>Exact to exact move</b>Given a game whose exact date changed from 14 March to 3 June of the current year, when the person opens the library, then its card shows &quot;Out 3 Jun&quot; and the line &quot;Moved from 14 Mar&quot;.</li>
+<li class=""><b>Gone after 14 days</b>Given a game whose card first showed &quot;Moved from 14 Mar&quot; 15 days ago, when the person opens the library, then the line is gone.</li>
+<li class=""><b>Announcement shows no line</b>Given a game whose date changed from &quot;2027&quot; to the exact date 14 March 2027, when the person opens the library, then its card shows &quot;Out 14 Mar 2027&quot; and no &quot;Moved&quot; line.</li>
+<li class=""><b>Exact to vague move</b>Given a game whose exact date changed from 14 March to &quot;2027&quot;, when the person opens the library, then its card shows &quot;Out 2027&quot; and &quot;Moved from 14 Mar&quot;, and the game is not in Upcoming releases.</li>
+<li class=""><b>Shown in the calendar</b>Given a game whose exact date changed from 14 March to 3 June, when the person opens Upcoming releases, then the entry under June shows &quot;Moved from 14 Mar&quot;.</li>
+<li class=""><b>Not on Home or game page</b>Given a game whose exact date changed from 14 March to 3 June, when the person opens Home or the game page, then no &quot;Moved&quot; line appears there.</li>
+</ul></details>
+</section>
+<section class="req" id="r28">
+  <h3><span>2.8 &quot;Continue?&quot; doesn't offer to start a game that isn't out yet</span><span class="provrow"><span class="src interview">Interview</span> <span class="src code">Codebase</span></span></h3>
+  <p class="oneliner">'Continue?' doesn't offer to start a game that isn't out yet.</p>
+  <p class="prose">When Home's &quot;Continue?&quot; panel would offer to start the first game in the person's Up Next queue, it skips upcoming games and offers the first game in the queue that is released or has no date. When every game in the queue is upcoming, the panel goes straight to its existing resting message (&quot;Nothing tonight is fine too.&quot;), as it does after the person has said &quot;Not tonight&quot; to everything. The Up Next queue itself and its order do not change; upcoming games stay on the shelf.</p>
+  <details class="ac"><summary>Acceptance criteria — 5 (0 verified)</summary><ul>
+<li class=""><b>Skips to the released game</b>Given nothing is Playing and Up Next holds an upcoming game first and a released game second, when the person opens Home, then the &quot;Continue?&quot; panel offers to start the released game.</li>
+<li class=""><b>All upcoming, resting message</b>Given nothing is Playing and every game in Up Next is upcoming, when the person opens Home, then the &quot;Continue?&quot; panel shows &quot;Nothing tonight is fine too.&quot; and no offer to start a game.</li>
+<li class=""><b>TBA skipped</b>Given nothing is Playing and Up Next holds a TBA game first, when the person opens Home, then the &quot;Continue?&quot; panel does not offer to start that game.</li>
+<li class=""><b>Shelf unchanged</b>Given Up Next holds an upcoming game first, when the person opens Home, then the Up Next shelf still shows that game first.</li>
+<li class=""><b>Offered once released</b>Given the first game in Up Next had an exact date of yesterday, when the person opens Home today, then the &quot;Continue?&quot; panel can offer to start it.</li>
+</ul></details>
+</section>
+<h2 id="scope">3. Scope and Boundaries</h2>
+<div class="cols"><div><h4>In-Scope</h4><ul><li>Date labels at their real precision on library cards (grid and list) and the game page.</li>
+<li>The game page's &quot;Releases&quot; wording for future dates.</li>
+<li>Coming soon on Home.</li>
+<li>The Upcoming releases page and its two ways in.</li>
+<li>Keeping release dates current when the person opens Home or the library.</li>
+<li>The &quot;Moved from …&quot; line.</li>
+<li>&quot;Continue?&quot; skipping games that aren't out yet (2.8).</li></ul></div>
+<div><h4>Out-of-Scope</h4><ul><li>Notifications outside the app: email, push or any other alert. The person sees release information only when they open SavePoint.</li>
+<li>Separate release dates per platform or region. The catalogue's first release anywhere is used.</li>
+<li>Discovering upcoming games that aren't in the person's library.</li>
+<li>Store links, prices or any other buying prompt.</li>
+<li>Countdowns or &quot;N days left&quot; wording anywhere.</li>
+<li>A line on Coming soon counting how many owned games are already waiting to be played. The owner rejected it as too pushy.</li>
+<li>Release dates in search results, the add-game dialog and quick search. They keep showing the year only.</li>
+<li>Stopping a person from marking a game that isn't out yet as Playing or Done. Only the &quot;Continue?&quot; offer changes (2.8).</li>
+<li>Industry events such as showcases and conferences.</li></ul></div></div>
+<h2>Change Log</h2>
+<p>[YYYY-MM-DD] — [source reference] — [what behavior changed and why]</p>
+<footer>
+  This page is a <strong>review lens</strong> — the canonical, normative contract is <code>functional-spec.md</code> in this directory; approvals bind to it, and the technical detail behind the findings lives in <code>research-notes.md</code>.<br>
+  Generated 2026-11-12 from functional-spec.md (9064e54e900b), status <em>Draft</em> — 59 criteria, 0 verified. Rendered by AWOS (/awos:spec).
+</footer>
+</main>
+<script>
+  function tab(i, el) {
+    document.querySelectorAll('.tabbar button').forEach(function (b, j) { b.classList.toggle('active', j === i); });
+    document.querySelectorAll('.tabpanel').forEach(function (p, j) { p.classList.toggle('active', j === i); });
+  }
+</script>
+</body>
+</html>

@@ -6,23 +6,26 @@ import {
 } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { routeTree } from "../routeTree.gen";
 
-const { counts, resolves, signedInUser } = vi.hoisted(() => ({
-  counts: { currentUser: 0, connections: 0, profilePage: 0 },
-  resolves:
-    <T,>(value: T) =>
-    async () =>
-      value,
-  signedInUser: {
-    id: "user-1",
-    name: "Test User",
-    username: null,
-    image: null,
-  },
-}));
+const { counts, resolves, session, signedInUser, getUpcomingReleasesFnMock } =
+  vi.hoisted(() => ({
+    counts: { currentUser: 0, connections: 0, profilePage: 0 },
+    resolves:
+      <T,>(value: T) =>
+      async () =>
+        value,
+    session: { signedIn: true },
+    signedInUser: {
+      id: "user-1",
+      name: "Test User",
+      username: null,
+      image: null,
+    },
+    getUpcomingReleasesFnMock: vi.fn(),
+  }));
 
 vi.mock("@env", () => ({
   env: new Proxy(
@@ -45,7 +48,10 @@ vi.mock("@/shared/api/get-site-origin", () => ({
 vi.mock("@/entities/session/api/get-current-user", () => ({
   getCurrentUserFn: async () => {
     counts.currentUser += 1;
-    return { user: signedInUser, statusModelNoticePending: false };
+    return {
+      user: session.signedIn ? signedInUser : null,
+      statusModelNoticePending: false,
+    };
   },
 }));
 
@@ -86,6 +92,18 @@ vi.mock("@/features/social-discovery/api", () => ({
       total: 0,
     };
   },
+}));
+
+vi.mock("@/features/upcoming-releases/api/get-upcoming-releases", () => ({
+  getUpcomingReleasesFn: getUpcomingReleasesFnMock,
+}));
+
+vi.mock("#/features/auth-email-sign-in/api/get-email-sign-in-enabled", () => ({
+  getEmailSignInEnabledFn: resolves({ credentialsEnabled: false }),
+}));
+
+vi.mock("@/widgets/auth-page", () => ({
+  AuthPageView: () => <div data-testid="sign-in-page" />,
 }));
 
 vi.mock("@/features/journal-timeline", () => ({
@@ -245,5 +263,85 @@ describe("real route tree", () => {
 
     expect(router.state.location.pathname).toBe("/journal/new");
     expect(counts.currentUser).toBe(1);
+  });
+});
+
+describe("real route tree: /upcoming", () => {
+  const exactDated = (title: string, day: string) => ({
+    id: 41,
+    status: "WANT",
+    isOwned: true,
+    game: {
+      slug: title.toLowerCase().replaceAll(" ", "-"),
+      title,
+      coverImage: null,
+      releaseDate: new Date(`${day}T00:00:00.000Z`),
+      releaseDatePrecision: "DAY",
+      releaseDateMovedFrom: null,
+      releaseDateMovedAt: null,
+    },
+  });
+
+  beforeEach(() => {
+    getUpcomingReleasesFnMock.mockReset();
+    getUpcomingReleasesFnMock.mockResolvedValue({
+      entries: [exactDated("Signalis 2", "2027-03-12")],
+    });
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 10, 12, 12));
+  });
+
+  afterEach(() => {
+    session.signedIn = true;
+    vi.useRealTimers();
+  });
+
+  describe("given a signed-out visitor", () => {
+    let router: Awaited<ReturnType<typeof renderAt>>;
+
+    beforeEach(async () => {
+      session.signedIn = false;
+      router = await renderAt("/upcoming");
+      await waitFor(() =>
+        expect(screen.getByTestId("sign-in-page")).toBeInTheDocument()
+      );
+    });
+
+    it("sends them to the sign-in page", () => {
+      expect(router.state.location.pathname).toBe("/login");
+    });
+
+    it("shows no games", () => {
+      expect(screen.queryByText("Signalis 2")).not.toBeInTheDocument();
+    });
+
+    it("never asks for anyone's upcoming releases", () => {
+      expect(getUpcomingReleasesFnMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given a signed-in visitor", () => {
+    beforeEach(async () => {
+      await renderAt("/upcoming");
+    });
+
+    it("shows the Upcoming releases page", async () => {
+      expect(
+        await screen.findByRole("heading", {
+          level: 1,
+          name: "Upcoming releases",
+        })
+      ).toBeInTheDocument();
+    });
+
+    it("lists the games the loader returned", async () => {
+      expect(await screen.findByText("Signalis 2")).toBeInTheDocument();
+    });
+
+    it("heads the game's month", async () => {
+      expect(
+        await screen.findByRole("heading", { level: 2, name: "March 2027" })
+      ).toBeInTheDocument();
+    });
   });
 });

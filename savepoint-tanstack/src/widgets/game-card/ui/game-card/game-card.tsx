@@ -25,10 +25,8 @@ export function GameCard({
   className,
   ...props
 }: GameCardProps) {
-  const { slug, title, coverImageId, releaseYear, platforms = [] } = game;
-  const showMeta =
-    density === "detailed" &&
-    ((releaseYear ?? null) !== null || platforms.length > 0);
+  const { slug, title, coverImageId, platforms = [] } = game;
+  const showMeta = density === "detailed" && platforms.length > 0;
 
   const card = (
     <div
@@ -72,14 +70,7 @@ export function GameCard({
 
           {showMeta ? (
             <div className="flex flex-col gap-1.5">
-              {(releaseYear ?? null) !== null ? (
-                <span className="text-sm text-muted-foreground">
-                  {releaseYear}
-                </span>
-              ) : null}
-              {platforms.length > 0 ? (
-                <PlatformBadges platforms={platforms} />
-              ) : null}
+              <PlatformBadges platforms={platforms} />
             </div>
           ) : null}
 

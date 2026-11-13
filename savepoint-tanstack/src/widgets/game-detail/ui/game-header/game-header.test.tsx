@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GameDetailsResponseItem } from "@/shared/api/igdb";
 
@@ -27,13 +27,17 @@ const SIX_PLATFORMS = [
   "PlayStation 4",
 ];
 
-const buildGame = (): Game => ({
+const buildGame = (overrides: Partial<Game> = {}): Game => ({
   id: "game-1",
   igdbId: 1234,
   title: "Skyline Run",
   description: null,
   coverImage: null,
   releaseDate: new Date("2025-03-10T00:00:00Z"),
+  releaseDatePrecision: null,
+  releaseDateCheckedAt: null,
+  releaseDateMovedFrom: null,
+  releaseDateMovedAt: null,
   createdAt: new Date("2025-01-01T00:00:00Z"),
   updatedAt: new Date("2025-01-02T00:00:00Z"),
   steamAppId: null,
@@ -45,7 +49,12 @@ const buildGame = (): Game => ({
   coverHue: null,
   coverChroma: null,
   coverTintComputedAt: null,
+  ...overrides,
 });
+
+const utcMidnight = (day: string) => new Date(`${day}T00:00:00Z`);
+
+const FIRST_OF_JANUARY_2024_IN_SECONDS = 1704067200;
 
 const buildData = (
   igdbOverrides: Partial<GameDetailsResponseItem> = {},
@@ -205,6 +214,106 @@ describe(GameHeader, () => {
       renderHeader(buildData());
 
       expect(elements.getBack()).toHaveAttribute("href", "/library");
+    });
+  });
+
+  describe("given a stored exact release day that differs from the live catalogue date", () => {
+    beforeEach(() => {
+      renderHeader(
+        buildData(
+          {},
+          {
+            game: buildGame({
+              releaseDate: utcMidnight("2027-03-14"),
+              releaseDatePrecision: "DAY",
+            }),
+          }
+        )
+      );
+    });
+
+    it("reads the year from the stored date", () => {
+      expect(screen.getByText("2027 · Shooter")).toBeInTheDocument();
+    });
+  });
+
+  describe("given a stored release known only as a year", () => {
+    beforeEach(() => {
+      renderHeader(
+        buildData(
+          {},
+          {
+            game: buildGame({
+              releaseDate: utcMidnight("2027-01-01"),
+              releaseDatePrecision: "YEAR",
+            }),
+          }
+        )
+      );
+    });
+
+    it("reads that year, not the live catalogue year", () => {
+      expect(screen.getByText("2027 · Shooter")).toBeInTheDocument();
+    });
+  });
+
+  describe("given a stored release known only as a quarter", () => {
+    beforeEach(() => {
+      renderHeader(
+        buildData(
+          {},
+          {
+            game: buildGame({
+              releaseDate: utcMidnight("2027-10-01"),
+              releaseDatePrecision: "QUARTER",
+            }),
+          }
+        )
+      );
+    });
+
+    it("reads the year of that quarter", () => {
+      expect(screen.getByText("2027 · Shooter")).toBeInTheDocument();
+    });
+  });
+
+  describe("given a game with a date on record but no known precision", () => {
+    beforeEach(() => {
+      renderHeader(
+        buildData(
+          { first_release_date: FIRST_OF_JANUARY_2024_IN_SECONDS },
+          {
+            game: buildGame({
+              releaseDate: utcMidnight("2027-03-14"),
+              releaseDatePrecision: null,
+            }),
+          }
+        )
+      );
+    });
+
+    it("reads the year from the live catalogue date", () => {
+      expect(screen.getByText("2024 · Shooter")).toBeInTheDocument();
+    });
+  });
+
+  describe("given a release date still to be announced", () => {
+    beforeEach(() => {
+      renderHeader(
+        buildData(
+          { first_release_date: undefined },
+          {
+            game: buildGame({
+              releaseDate: null,
+              releaseDatePrecision: "TBA",
+            }),
+          }
+        )
+      );
+    });
+
+    it("shows no year in the identity line", () => {
+      expect(screen.getByText("Shooter")).toBeInTheDocument();
     });
   });
 });
