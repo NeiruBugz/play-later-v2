@@ -1,5 +1,6 @@
 import {
   getGameByIgdbId,
+  mapIgdbReleaseDate,
   type GameDetailsResponseItem,
   type SearchResponseItem,
 } from "@/shared/api/igdb";
@@ -12,8 +13,39 @@ import type { Game } from "../../../../shared/lib/prisma/client.ts";
 
 type GamePayload = Pick<
   SearchResponseItem,
-  "id" | "name" | "slug" | "first_release_date" | "cover"
+  "id" | "name" | "slug" | "first_release_date" | "release_dates" | "cover"
 >;
+
+const MILLISECONDS_PER_DAY = 86_400_000;
+
+function floorToUtcMidnight(unixSeconds: number): Date {
+  const milliseconds = unixSeconds * 1000;
+  return new Date(
+    Math.floor(milliseconds / MILLISECONDS_PER_DAY) * MILLISECONDS_PER_DAY
+  );
+}
+
+function buildReleaseColumns(payload: GamePayload) {
+  const mapped =
+    payload.release_dates === undefined
+      ? "unknown"
+      : mapIgdbReleaseDate(payload);
+  if (mapped !== "unknown") {
+    return {
+      releaseDate: mapped.releaseDate,
+      releaseDatePrecision: mapped.precision,
+      releaseDateCheckedAt: new Date(),
+    };
+  }
+  return {
+    releaseDate:
+      typeof payload.first_release_date === "number"
+        ? floorToUtcMidnight(payload.first_release_date)
+        : null,
+    releaseDatePrecision: null,
+    releaseDateCheckedAt: null,
+  };
+}
 
 async function findOrCreateGame(payload: GamePayload): Promise<Game> {
   const existing = await prisma.game.findUnique({
@@ -23,11 +55,6 @@ async function findOrCreateGame(payload: GamePayload): Promise<Game> {
     return existing;
   }
 
-  const releaseDate =
-    typeof payload.first_release_date === "number"
-      ? new Date(payload.first_release_date * 1000)
-      : null;
-
   const coverImage = buildCoverImageUrl(payload.cover?.image_id, "t_cover_big");
 
   try {
@@ -36,7 +63,7 @@ async function findOrCreateGame(payload: GamePayload): Promise<Game> {
         igdbId: payload.id,
         title: payload.name,
         slug: payload.slug,
-        releaseDate,
+        ...buildReleaseColumns(payload),
         coverImage,
       },
     });

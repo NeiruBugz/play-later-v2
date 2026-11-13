@@ -147,3 +147,56 @@ export function formatDayMonth(
     ? base
     : `${base} ${value.getFullYear()}`;
 }
+
+const CALENDAR_DAY_PARTS_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+function padTwoDigits(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+/**
+ * Calendar day (`2027-03-14`) of an instant as read on the UTC clock.
+ * For dates stored as UTC midnight.
+ */
+export function toUtcCalendarDay(date: Date): string {
+  return `${date.getUTCFullYear()}-${padTwoDigits(date.getUTCMonth() + 1)}-${padTwoDigits(date.getUTCDate())}`;
+}
+
+/**
+ * Calendar day (`2027-03-14`) of an instant as read on the device clock.
+ */
+export function toLocalCalendarDay(date: Date): string {
+  return `${date.getFullYear()}-${padTwoDigits(date.getMonth() + 1)}-${padTwoDigits(date.getDate())}`;
+}
+
+/**
+ * Display of a `YYYY-MM-DD` calendar day in a fixed day-month order
+ * (`14 Mar`, `Sun 14 Mar`, `14 Mar 2027`, `Sun 14 Mar 2027`).
+ * Built from `Intl` parts at `timeZone: "UTC"`, so the machine time zone and
+ * locale never change the result.
+ */
+export function formatCalendarDay(
+  day: string,
+  options: { weekday?: boolean; year?: boolean } = {}
+): string {
+  const [year, month, dayOfMonth] = day.split("-").map(Number);
+  const partValueByType = new Map(
+    CALENDAR_DAY_PARTS_FORMATTER.formatToParts(
+      new Date(Date.UTC(year, month - 1, dayOfMonth))
+    ).map(({ type, value }) => [type, value])
+  );
+  return [
+    options.weekday ? partValueByType.get("weekday") : undefined,
+    partValueByType.get("day"),
+    partValueByType.get("month"),
+    options.year ? partValueByType.get("year") : undefined,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}

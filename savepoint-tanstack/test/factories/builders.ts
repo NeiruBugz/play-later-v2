@@ -20,6 +20,9 @@ export type LibraryItemWithGame = LibraryItem & {
     | "timeToCreditsSeconds"
     | "coverHue"
     | "coverChroma"
+    | "releaseDatePrecision"
+    | "releaseDateMovedFrom"
+    | "releaseDateMovedAt"
   >;
 };
 
@@ -43,6 +46,10 @@ export function buildGame(overrides: Partial<Game> = {}): Game {
     coverHue: null,
     coverChroma: null,
     coverTintComputedAt: null,
+    releaseDatePrecision: null,
+    releaseDateCheckedAt: null,
+    releaseDateMovedFrom: null,
+    releaseDateMovedAt: null,
     ...overrides,
   };
 }
@@ -89,6 +96,9 @@ export function buildLibraryItemWithGame(
     timeToCreditsSeconds,
     coverHue,
     coverChroma,
+    releaseDatePrecision,
+    releaseDateMovedFrom,
+    releaseDateMovedAt,
   } = buildGame(game);
   return {
     ...buildLibraryItem({ gameId: id, ...overrides }),
@@ -102,6 +112,9 @@ export function buildLibraryItemWithGame(
       timeToCreditsSeconds,
       coverHue,
       coverChroma,
+      releaseDatePrecision,
+      releaseDateMovedFrom,
+      releaseDateMovedAt,
     },
   };
 }

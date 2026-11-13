@@ -26,8 +26,10 @@ import {
   upsertGameFromIgdbPayload,
   upsertThinGameFromIgdbDetailsPayload,
 } from "@/entities/game/api/upsert-game.server";
+import releaseDatesFixture from "@/shared/api/igdb/__fixtures__/release-dates-live-2026-11-12.json";
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 
+import { createGame } from "../factories/index.ts";
 import {
   setupIsolatedDatabase,
   type IsolatedDatabase,
@@ -308,6 +310,308 @@ describe("upsertGameFromIgdb", () => {
       );
 
       await expect(upsertGameFromIgdb(MOCK_IGDB_GAME.id)).rejects.toThrow();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Spec 029: release date and precision stored when a game is first added
+// ---------------------------------------------------------------------------
+
+type LiveReleaseGame =
+  (typeof releaseDatesFixture.games)[keyof typeof releaseDatesFixture.games];
+
+const utcMidnight = (isoDay: string) => new Date(`${isoDay}T00:00:00.000Z`);
+
+function igdbPayloadFrom(liveGame: LiveReleaseGame) {
+  return { ...liveGame, slug: `live-${liveGame.id}` };
+}
+
+function legacyDayPayload() {
+  const { id, name, first_release_date } = releaseDatesFixture.games.day;
+  return { id, name, slug: `live-${id}`, first_release_date };
+}
+
+type StoredGame = Awaited<ReturnType<typeof upsertGameFromIgdbPayload>>;
+
+const SECONDS_IN_AN_HOUR = 3600;
+const SECONDS_IN_A_DAY = 86_400;
+
+describe("upsertGameFromIgdbPayload release date", () => {
+  const { games } = releaseDatesFixture;
+
+  describe.each([
+    {
+      case: "an exact day",
+      liveGame: games.day,
+      releaseDate: "2026-11-13",
+      precision: "DAY",
+    },
+    {
+      case: "a month",
+      liveGame: games.month,
+      releaseDate: "2026-12-01",
+      precision: "MONTH",
+    },
+    {
+      case: "a year",
+      liveGame: games.year,
+      releaseDate: "2026-01-01",
+      precision: "YEAR",
+    },
+    {
+      case: "the first quarter",
+      liveGame: games.q1,
+      releaseDate: "2027-01-01",
+      precision: "QUARTER",
+    },
+    {
+      case: "the fourth quarter",
+      liveGame: games.q4,
+      releaseDate: "2026-10-01",
+      precision: "QUARTER",
+    },
+    {
+      case: "a full release after earlier alpha and beta entries",
+      liveGame: games.mixedStatuses,
+      releaseDate: "2027-07-01",
+      precision: "QUARTER",
+    },
+    {
+      case: "an exact early date followed by vaguer later entries",
+      liveGame: games.exactEarlyVagueLater,
+      releaseDate: "2026-03-03",
+      precision: "DAY",
+    },
+  ])("given IGDB knows the release as $case", (scenario) => {
+    let before: Date;
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      before = new Date();
+      game = await upsertGameFromIgdbPayload(
+        igdbPayloadFrom(scenario.liveGame)
+      );
+    });
+
+    it("stores the first day of the period at UTC midnight", () => {
+      expect(game.releaseDate).toEqual(utcMidnight(scenario.releaseDate));
+    });
+
+    it("stores how precisely the date is known", () => {
+      expect(game.releaseDatePrecision).toBe(scenario.precision);
+    });
+
+    it("stamps the moment the date was checked", () => {
+      const checkedAt = game.releaseDateCheckedAt;
+      expect(checkedAt?.getTime()).toBeGreaterThanOrEqual(before.getTime());
+      expect(checkedAt?.getTime()).toBeLessThanOrEqual(Date.now());
+    });
+  });
+
+  describe("given IGDB lists the release as to be announced", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload(igdbPayloadFrom(games.tbd));
+    });
+
+    it("stores no date", () => {
+      expect(game.releaseDate).toBeNull();
+    });
+
+    it("stores the to-be-announced precision", () => {
+      expect(game.releaseDatePrecision).toBe("TBA");
+    });
+
+    it("stamps the moment the date was checked", () => {
+      expect(game.releaseDateCheckedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe("given IGDB has dated entries but no first release date", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload(
+        igdbPayloadFrom(games.noFirstReleaseDate)
+      );
+    });
+
+    it("stores no date and no precision", () => {
+      expect(game.releaseDate).toBeNull();
+      expect(game.releaseDatePrecision).toBeNull();
+    });
+
+    it("still records that the catalogue was checked", () => {
+      expect(game.releaseDateCheckedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe("given a payload without release dates", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload(legacyDayPayload());
+    });
+
+    it("keeps the first release date", () => {
+      expect(game.releaseDate).toEqual(utcMidnight("2026-11-13"));
+    });
+
+    it("leaves the precision unknown", () => {
+      expect(game.releaseDatePrecision).toBeNull();
+    });
+
+    it("leaves the game unchecked", () => {
+      expect(game.releaseDateCheckedAt).toBeNull();
+    });
+  });
+
+  describe("given a payload without release dates whose first release date has a time of day", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload({
+        ...legacyDayPayload(),
+        first_release_date: games.day.first_release_date + SECONDS_IN_AN_HOUR,
+      });
+    });
+
+    it("adds the game with the same UTC day at midnight", () => {
+      expect(game.releaseDate).toEqual(utcMidnight("2026-11-13"));
+    });
+
+    it("leaves the game unchecked", () => {
+      expect(game.releaseDateCheckedAt).toBeNull();
+    });
+  });
+
+  describe("given release dates that cannot explain the first release date", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload({
+        ...igdbPayloadFrom(games.day),
+        first_release_date: games.day.first_release_date + SECONDS_IN_A_DAY,
+      });
+    });
+
+    it("keeps the first release date", () => {
+      expect(game.releaseDate).toEqual(utcMidnight("2026-11-14"));
+    });
+
+    it("leaves the precision unknown and the game unchecked", () => {
+      expect(game.releaseDatePrecision).toBeNull();
+      expect(game.releaseDateCheckedAt).toBeNull();
+    });
+  });
+
+  describe("given release dates that cannot explain a first release date with a time of day", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload({
+        ...igdbPayloadFrom(games.day),
+        first_release_date: games.day.first_release_date + SECONDS_IN_AN_HOUR,
+      });
+    });
+
+    it("adds the game with the same UTC day at midnight", () => {
+      expect(game.releaseDate).toEqual(utcMidnight("2026-11-13"));
+    });
+
+    it("leaves the precision unknown and the game unchecked", () => {
+      expect(game.releaseDatePrecision).toBeNull();
+      expect(game.releaseDateCheckedAt).toBeNull();
+    });
+  });
+
+  describe("given a release date in a format IGDB has not documented", () => {
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      game = await upsertGameFromIgdbPayload({
+        ...igdbPayloadFrom(games.day),
+        release_dates: [{ ...games.day.release_dates[0], date_format: 99 }],
+      });
+    });
+
+    it("keeps the first release date", () => {
+      expect(game.releaseDate).toEqual(utcMidnight("2026-11-13"));
+    });
+
+    it("leaves the precision unknown and the game unchecked", () => {
+      expect(game.releaseDatePrecision).toBeNull();
+      expect(game.releaseDateCheckedAt).toBeNull();
+    });
+  });
+
+  describe("given the game is already stored with a checked date", () => {
+    const storedReleaseDate = utcMidnight("2027-03-14");
+    const storedCheckedAt = new Date("2026-11-01T08:00:00.000Z");
+    let game: StoredGame;
+
+    beforeEach(async () => {
+      await createGame(db.prisma, {
+        igdbId: games.year.id,
+        slug: "already-stored",
+        releaseDate: storedReleaseDate,
+        releaseDatePrecision: "DAY",
+        releaseDateCheckedAt: storedCheckedAt,
+      });
+
+      game = await upsertGameFromIgdbPayload(igdbPayloadFrom(games.year));
+    });
+
+    it("returns the stored release fields untouched", () => {
+      expect(game).toMatchObject({
+        releaseDate: storedReleaseDate,
+        releaseDatePrecision: "DAY",
+        releaseDateCheckedAt: storedCheckedAt,
+      });
+    });
+
+    it("leaves the stored row as it was", async () => {
+      const row = await db.prisma.game.findUniqueOrThrow({
+        where: { igdbId: games.year.id },
+      });
+
+      expect(row).toMatchObject({
+        releaseDate: storedReleaseDate,
+        releaseDatePrecision: "DAY",
+        releaseDateCheckedAt: storedCheckedAt,
+      });
+    });
+  });
+});
+
+describe("upsertGameFromIgdb release date", () => {
+  describe("given IGDB answers the lookup with an exact upcoming day", () => {
+    let game: Awaited<ReturnType<typeof upsertGameFromIgdb>>;
+
+    beforeEach(async () => {
+      vi.stubGlobal(
+        "fetch",
+        makeFetchMock({
+          igdbResponse: {
+            body: [igdbPayloadFrom(releaseDatesFixture.games.day)],
+          },
+        })
+      );
+
+      game = await upsertGameFromIgdb(releaseDatesFixture.games.day.id);
+    });
+
+    it("stores the day and its precision", () => {
+      expect(game).toMatchObject({
+        releaseDate: utcMidnight("2026-11-13"),
+        releaseDatePrecision: "DAY",
+      });
+    });
+
+    it("stamps the moment the date was checked", () => {
+      expect(game.releaseDateCheckedAt).toBeInstanceOf(Date);
     });
   });
 });

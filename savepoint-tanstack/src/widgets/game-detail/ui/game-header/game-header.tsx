@@ -55,14 +55,26 @@ function KeyFact({ label, value }: { label: string; value: string | null }) {
   );
 }
 
+function utcYearOf(date: Date): string {
+  return date.getUTCFullYear().toString();
+}
+
+function readReleaseYear(
+  { releaseDate, releaseDatePrecision }: GameHeaderProps["data"]["game"],
+  liveReleaseSeconds: number | undefined
+): string | null {
+  if (releaseDatePrecision === "TBA") return null;
+  if (releaseDatePrecision !== null && releaseDate) {
+    return utcYearOf(releaseDate);
+  }
+  if (liveReleaseSeconds) return utcYearOf(new Date(liveReleaseSeconds * 1000));
+  return releaseDate ? utcYearOf(releaseDate) : null;
+}
+
 export function GameHeader({ data, eveningMinutes, actions }: GameHeaderProps) {
   const { game, igdbDetails, timeToCreditsSeconds, coverTint } = data;
 
-  const releaseYear = igdbDetails.first_release_date
-    ? new Date(igdbDetails.first_release_date * 1000)
-        .getUTCFullYear()
-        .toString()
-    : (game.releaseDate?.getUTCFullYear().toString() ?? null);
+  const releaseYear = readReleaseYear(game, igdbDetails.first_release_date);
   const developer =
     igdbDetails.involved_companies?.find((c) => c.developer)?.company.name ??
     null;

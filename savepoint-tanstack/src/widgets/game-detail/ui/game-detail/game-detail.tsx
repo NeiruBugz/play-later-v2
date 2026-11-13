@@ -43,6 +43,7 @@ export function GameDetail({
   const hasAboutData = Boolean(
     summary ||
     game.releaseDate ||
+    game.releaseDatePrecision === "TBA" ||
     developer ||
     timeToCreditsSeconds !== null ||
     timeToCompleteSeconds !== null ||
@@ -152,6 +153,7 @@ export function GameDetail({
                   summary={summary}
                   developer={developer}
                   releaseDate={game.releaseDate}
+                  releaseDatePrecision={game.releaseDatePrecision}
                   timeToCreditsSeconds={timeToCreditsSeconds}
                   timeToCompleteSeconds={timeToCompleteSeconds}
                   themes={themes}
