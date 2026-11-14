@@ -65,7 +65,7 @@ Conventions for every slice:
     - Confirm "We'll notify you when it's complete" never appears.
     - Stop the server by PID and delete artifacts. **[Agent: testing]**
 
-- [ ] **Slice 2: Every game is looked up in the catalogue — found games show cover and year, the rest say "Needs a match"**
+- [x] **Slice 2: Every game is looked up in the catalogue — found games show cover and year, the rest say "Needs a match"**
   - [x] RED tests:
     - **Unit** `shared/api/igdb/match-steam-games.unit.test.ts`:
       - query shape: `external_game_source = 1`, quoted uids, `limit 500`, `release_dates` fields;
@@ -107,7 +107,7 @@ Conventions for every slice:
     - `SyncProgress` "Looking up" stage with `toLocaleString("en-US")` and an `aria-hidden` count;
     - the widget calls `router.invalidate()` when `lookedUp` changes and clamps the page number in the loader. **[Agent: react-frontend]**
   - [x] One-off live check: add a read-only `scripts/inspect-igdb-external-game-sources.ts` (`tsx`, same shape as `inspect:igdb-release-dates`). It confirms that Steam's `external_game_source` id is 1. Record the result in `research-notes.md`. **[Agent: tanstack-fullstack]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Sync in the running app: the count rises, found games show covers and years, unfound games show "Needs a match", and the warning appears only when some do.
     - Pressing + on a found game opens the status choice straight away.
@@ -124,20 +124,20 @@ Conventions for every slice:
       - games added before a failure stay in the library;
       - an unticked sync adds nothing.
     - **Unit:** `calculateSmartStatus` at its new location. **[Agent: testing]**
-  - [ ] Move `calculateSmartStatus` to `entities/imported-game/lib/` and update the `steam-import` imports. **[Agent: tanstack-fullstack]**
-  - [ ] Add-all in the enrich worker:
+  - [x] Move `calculateSmartStatus` to `entities/imported-game/lib/` and update the `steam-import` imports. **[Agent: tanstack-fullstack]**
+  - [x] Add-all in the enrich worker:
     - one short transaction per game using only `tx`;
     - skip if the item exists, then `createWantLibraryItem`, then `setLibraryItemStatusInTx` when PLAYING, then mark MATCHED;
     - gather includes already-resolved rows in the chunks when add-all is on;
     - the job stores `addAllToLibrary` from `startSteamSyncFn`. **[Agent: tanstack-fullstack]**
-  - [ ] UI: the checkbox value now matters; no other UI change. Confirm the confirm dialog sends it, and that games added mid-sync drop off the import page on the next refresh. **[Agent: react-frontend]**
+  - [x] UI: the checkbox value now matters; no other UI change. Confirm the confirm dialog sends it, and that games added mid-sync drop off the import page on the next refresh. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate, including integration.
     - In the app, sync with the box ticked: the library gains the found games with the expected statuses, and needs-a-match games stay on the import page.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 4: When a sync ends, SavePoint says so — live or on the next visit**
-  - [ ] RED tests:
+  - [x] RED tests:
     - **Integration:**
       - finalize computes `newGames` (excluding games in the library before the job), `refreshedGames` (at gather), `needsMatch` and `addedToLibrary` per tech §2.6;
       - `markSyncNoticeSeenWorker` marks the job and older unseen jobs, and throws NotFound for another user's job.
@@ -149,7 +149,7 @@ Conventions for every slice:
       - a pending notice on mount fires once;
       - the toast is dismissed when `noticeSeen` becomes true;
       - there is no polling when idle and nothing is unseen. **[Agent: testing]**
-  - [ ] Entity queries: `markSyncNoticeSeen`, plus summary-count SQL in `finalizeImportJobIfComplete`. **[Agent: prisma-database]**
+  - [x] Entity queries: `markSyncNoticeSeen`, plus summary-count SQL in `finalizeImportJobIfComplete`. **[Agent: prisma-database]**
   - [ ] Server side: the `mark-sync-notice-seen` worker and server fn, and add `noticeSeen` to the status payload. **[Agent: tanstack-fullstack]**
   - [ ] UI:
     - `features/storefront-sync/ui/sync-notice-host/` mounted in `RootShell` (`routes/__root.tsx`) beside `GlobalActionHost`, for authed users only;
