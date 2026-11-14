@@ -1,5 +1,4 @@
 import { SQSClient } from "@aws-sdk/client-sqs";
-
 import { env } from "@env";
 
 import { createSqsSyncQueue } from "@/shared/api/queue/sqs";

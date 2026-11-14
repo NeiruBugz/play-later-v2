@@ -3,7 +3,9 @@ import type { ZodType } from "zod";
 
 import { createLogger } from "@/shared/lib";
 
-export async function processSqsBatch<TMessage extends { jobId: string }>(args: {
+export async function processSqsBatch<
+  TMessage extends { jobId: string },
+>(args: {
   event: SQSEvent;
   service: string;
   schema: ZodType<TMessage>;
