@@ -95,12 +95,12 @@ Conventions for every slice:
     - `upsertGamesFromIgdbBatch`;
     - `setGameSteamAppIds`;
     - `findImportedGamesForUser`: Game join, plus a library-exclusion filter that is safe for null `gameId`. **[Agent: prisma-database]**
-  - [ ] Server side:
+  - [x] Server side:
     - `shared/api/igdb/match-steam-games.ts` and `pacer.ts` (`IGDB_MIN_INTERVAL_MS`, optional);
     - gather does local resolution, then writes the candidate chunks (≤200, `lookupCount`) and the plan before sending;
     - `enrich.worker.ts` takes `runEnrichMessage({message, receiveCount})` and handles final-attempt degradation;
     - add `SYNC_MAX_RECEIVE_COUNT` to the env (default 3). **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - card states and the `matchState` utility in `features/steam-import/ui/imported-game-card/`;
     - `ImportGameModal` gets `startOnSearch` and skips the match step for found games;
     - the warning alert copy and its rule;
@@ -114,7 +114,7 @@ Conventions for every slice:
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 3: "Also add all games to my library" puts every found game into the library**
-  - [ ] RED tests:
+  - [x] RED tests:
     - **Integration:**
       - with the box ticked, found games are added: PLAYING if played in the last 7 days (a play is opened), WANT otherwise;
       - existing library items are unchanged (a Done game stays Done);

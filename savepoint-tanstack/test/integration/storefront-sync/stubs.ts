@@ -103,3 +103,10 @@ export function requestedSteamAppIds(query: string): string[] {
   const uidList = /uid = \(([^)]*)\)/.exec(query)?.[1] ?? "";
   return [...uidList.matchAll(/"([^"]*)"/g)].map((match) => match[1] ?? "");
 }
+
+const SECONDS_PER_DAY = 24 * 60 * 60;
+
+/** Steam's `rtime_last_played` (unix seconds) for a game last played `days` ago. */
+export function steamLastPlayedDaysAgo(days: number): number {
+  return Math.floor(Date.now() / 1000) - days * SECONDS_PER_DAY;
+}
