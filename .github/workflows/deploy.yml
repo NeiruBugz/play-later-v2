@@ -3,10 +3,12 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   migrate:
     name: Run Database Migrations
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
 
@@ -38,3 +40,71 @@ jobs:
       - name: Run database migrations
         working-directory: savepoint-tanstack
         run: pnpm prisma migrate deploy
+
+  deploy-lambdas:
+    name: Deploy Storefront Sync Lambdas
+    needs: migrate
+    if: github.ref == 'refs/heads/main' && vars.AWS_LAMBDA_DEPLOY_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      GATHER_FUNCTION: ${{ vars.STEAM_SYNC_GATHER_FUNCTION }}
+      ENRICH_FUNCTION: ${{ vars.STEAM_SYNC_ENRICH_FUNCTION }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        working-directory: savepoint-tanstack
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Lambda bundles
+        working-directory: savepoint-tanstack
+        env:
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
+        run: pnpm build:lambdas
+
+      - name: Smoke-check Lambda bundles
+        working-directory: savepoint-tanstack
+        run: pnpm smoke:lambdas
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_LAMBDA_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Update Lambda function code
+        working-directory: savepoint-tanstack
+        run: |
+          aws lambda update-function-code \
+            --function-name "$GATHER_FUNCTION" \
+            --zip-file fileb://dist-lambdas/steam-sync-gather.zip \
+            --architectures arm64 \
+            --query LastUpdateStatus --output text
+          aws lambda update-function-code \
+            --function-name "$ENRICH_FUNCTION" \
+            --zip-file fileb://dist-lambdas/steam-sync-enrich.zip \
+            --architectures arm64 \
+            --query LastUpdateStatus --output text
+
+      - name: Wait for updates to finish
+        run: |
+          aws lambda wait function-updated --function-name "$GATHER_FUNCTION"
+          aws lambda wait function-updated --function-name "$ENRICH_FUNCTION"

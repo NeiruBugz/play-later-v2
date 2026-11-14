@@ -79,6 +79,22 @@ jobs:
           POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
         run: pnpm --filter savepoint-tanstack build
 
+      # Bundles the two storefront-sync Lambdas (esbuild → dist-lambdas/*.zip,
+      # via the `zip` CLI preinstalled on ubuntu runners). `typecheck:lambdas`
+      # already ran inside the Typecheck step above (`typecheck` chains it).
+      - name: Build Lambda bundles
+        env:
+          # build:lambdas runs `prisma generate` first, which needs a DB URL at
+          # config-load time even though it never connects.
+          POSTGRES_PRISMA_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+          POSTGRES_URL_NON_POOLING: postgresql://placeholder:placeholder@localhost:5432/placeholder
+        run: pnpm --filter savepoint-tanstack build:lambdas
+
+      # Asserts the zips contain what the Lambda runtime needs and that both
+      # handlers import with only the core env set.
+      - name: Smoke-check Lambda bundles
+        run: pnpm --filter savepoint-tanstack smoke:lambdas
+
       # Runs the merged unit + integration projects under v8 coverage and
       # enforces the Slice 23 thresholds from vitest.config.ts (statements ≥85
       # is the cutover gate; branches/lines/functions are regression floors).

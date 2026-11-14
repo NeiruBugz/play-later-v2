@@ -375,7 +375,7 @@ gh variable list --repo "$GH_REPO"
 
 Expect the four names with the values from the table. No AWS secret (`AWS_ACCESS_KEY_ID` and the like) is needed or should be added: the role is assumed through OIDC.
 
-How the workflow uses it (for reference, written in Slice 9): the job declares `environment: production` and `permissions: { id-token: write, contents: read }`, then `aws-actions/configure-aws-credentials` with `role-to-assume: ${{ vars.AWS_LAMBDA_DEPLOY_ROLE_ARN }}` and `aws-region: ${{ vars.AWS_REGION }}`, then `aws lambda update-function-code` on `vars.STEAM_SYNC_GATHER_FUNCTION` and `vars.STEAM_SYNC_ENRICH_FUNCTION`. If you only set the variables as environment-scoped (`--env production`), the steps still work but the job-level skip condition does not.
+How the workflow uses it (for reference): the `deploy-lambdas` job (runs on `main` only, after `migrate`) declares `environment: production` and `permissions: { id-token: write, contents: read }`, then `aws-actions/configure-aws-credentials` with `role-to-assume: ${{ vars.AWS_LAMBDA_DEPLOY_ROLE_ARN }}` and `aws-region: ${{ vars.AWS_REGION }}`, then `aws lambda update-function-code` on `vars.STEAM_SYNC_GATHER_FUNCTION` and `vars.STEAM_SYNC_ENRICH_FUNCTION`. If you only set the variables as environment-scoped (`--env production`), the steps still work but the job-level skip condition does not.
 
 ## Step 8: smoke-test OIDC
 
@@ -530,7 +530,7 @@ The state bucket is versioned; deleting it requires removing all object versions
 
 Nothing in this stack stores a long-lived AWS key: GitHub and Vercel reach AWS through OIDC, so there is no AWS credential to rotate. What rotates is the four Lambda secrets and the database password, and each lives in more than one place.
 
-Lambdas may keep a warm environment for a while after SSM changes. After any SSM rotation, force new execution environments by re-running the latest "Deploy to Production" workflow run (`gh run rerun <run-id>`; the `deploy-lambdas` job calls `update-function-code`, which recycles the Lambda environments), then run one sync.
+Lambdas may keep a warm environment for a while after SSM changes. After any SSM rotation, force new execution environments by running the "Deploy to Production" workflow manually on `main` (`gh workflow run deploy.yml --repo "$GH_REPO" --ref main`, or Actions, Deploy to Production, Run workflow). The `deploy-lambdas` job calls `update-function-code`, which recycles the Lambda environments; the `migrate` job in the same run is a no-op when no migration is pending. Then run one sync. The workflow only runs on `main`; a dispatch from another branch skips both jobs.
 
 | Secret | Update in (all of them) | Then |
 |---|---|---|
