@@ -1,6 +1,6 @@
 # SavePoint Infrastructure
 
-Terraform IaC for SavePoint (AWS). Manages auth (Cognito) and storage (S3). No remote backend configured — state is local per env.
+Terraform IaC for SavePoint (AWS). `envs/` manages auth (Cognito) and storage (S3); no remote backend there, state is local per env. `stacks/storefront-sync/` is a separate, isolated stack (background Steam sync) with an S3 backend. Owner runbook for that stack: [`docs/storefront-sync-runbook.md`](./docs/storefront-sync-runbook.md).
 
 ## Versions
 - Terraform: `>= 1.5.0`
@@ -34,8 +34,30 @@ Both envs use identical module composition. Differences are only in variable val
 | `cognito` | User Pool, App Client, Hosted UI domain, optional Google IdP federation |
 | `s3` | App-assets bucket (versioned, public-access-blocked, CORS, IAM RW policy) |
 
+## Storefront-sync stack (spec 030)
+`stacks/storefront-sync/` is independent of `envs/*` and never reads or touches them.
+
+| Root | Manages |
+|---|---|
+| `shared/` | Account-wide IAM OIDC providers: Vercel (`https://oidc.vercel.com/<team-slug>`, Team issuer mode) and GitHub Actions. Import an existing GitHub provider instead of recreating it |
+| `prod/` | Gather and enrich SQS queues plus DLQs, two Lambdas (stub code, real code shipped by `deploy-lambdas` in `deploy.yml`), event source mappings, 4 SSM SecureString secrets under `/savepoint/prod/storefront-sync/`, roles `savepoint-prod-vercel-sqs-send` and `savepoint-prod-github-lambda-deploy` |
+| `modules/pipeline/` | The queues, Lambdas, IAM and SSM shared by `prod/` |
+
+- Pins are exact: Terraform `= 1.14.6`, AWS provider `= 6.73.0`, archive `= 2.8.1`.
+- Commands run from `stacks/storefront-sync/shared/` then `prod/`: `terraform init -backend-config=backend.hcl`, `terraform plan -out=plan.tfplan`, apply the saved plan. `backend.hcl` and `terraform.tfvars` are gitignored; copy from the `.example` files.
+- Agents never run `terraform apply`, `aws ssm put-parameter` or any AWS mutation here; validate with `terraform fmt -check -recursive`, `terraform init -backend=false` and `terraform validate`. Apply, SSM values, Vercel and GitHub settings are owner steps in the runbook.
+- GitHub variable contract for `deploy.yml`: `AWS_LAMBDA_DEPLOY_ROLE_ARN`, `AWS_REGION`, `STEAM_SYNC_GATHER_FUNCTION`, `STEAM_SYNC_ENRICH_FUNCTION` (repo variables; the deploy job uses `environment: production`).
+
+**State bootstrap.** The S3 state bucket (versioned, encrypted, private, TLS-only; suggested name `savepoint-tfstate-<account-id>`) is created once by hand with the AWS CLI, because Terraform cannot create the bucket that holds its own state. Locking uses `use_lockfile = true` (a `.tflock` object), no DynamoDB table. Commands and checks: runbook, step 1. Never delete the bucket while the stack exists.
+
+**Secret rotation checklist** (full table in the runbook):
+- No long-lived AWS keys exist; GitHub and Vercel use OIDC. Only the 4 Lambda secrets and the database password rotate.
+- `STEAM_API_KEY`, `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET`: SSM (`put-parameter --overwrite`), Vercel env, local `.env`.
+- Neon password: Neon console, then SSM `POSTGRES_PRISMA_URL`, Vercel `POSTGRES_PRISMA_URL`/`POSTGRES_URL_NON_POOLING`, GitHub `production` secrets of the same names, local `.env`.
+- After any SSM change, recycle the Lambdas (rerun the Deploy workflow), run one sync, check both DLQs are empty.
+
 ## State Backend
-No remote backend. State files are local (`.terraform/` + `terraform.tfstate`) inside each env directory. Do not run `terraform apply` from two machines simultaneously.
+`envs/*`: no remote backend. State files are local (`.terraform/` + `terraform.tfstate`) inside each env directory. Do not run `terraform apply` from two machines simultaneously.
 
 **No state in this checkout (found 2026-11-06).** Neither `envs/dev` nor `envs/prod` has a `terraform.tfstate`, and the owner changes the live Cognito client URLs, S3 CORS and Google OAuth client by hand in the consoles. A `plan` here would propose creating a new pool and bucket. Do not `plan`/`apply` against the live account until the state is found or the resources are imported (`terraform import`); make address/origin changes in the consoles (see `docs/cutover-rollback.md` § Spec 027 phase 2).
 
