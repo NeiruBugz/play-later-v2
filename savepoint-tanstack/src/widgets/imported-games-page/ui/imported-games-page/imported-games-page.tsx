@@ -1,6 +1,6 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import type { ImportedGame } from "@/entities/imported-game/model/types";
@@ -8,14 +8,13 @@ import type { ImportedGame } from "@/entities/imported-game/model/types";
 // so component tests can mock each module without dragging the rest of the
 // feature's server chain into the jsdom env.
 import { dismissImportedGameFn } from "@/features/steam-import/api/dismiss-imported-game";
-import { importSteamLibraryFn } from "@/features/steam-import/api/import-steam-library";
-import {
-  showSyncCompletedToast,
-  showSyncFailedToast,
-  showSyncStartedToast,
-} from "@/features/steam-import/ui/error-cards/import-status-feedback";
 import { ImportGameModal } from "@/features/steam-import/ui/import-game-modal";
 import { ImportedGameCard } from "@/features/steam-import/ui/imported-game-card";
+import {
+  SyncProgress,
+  SyncStartButton,
+  useSteamSyncStatus,
+} from "@/features/storefront-sync";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
@@ -67,6 +66,24 @@ export function ImportedGamesPage({
     startOnSearch: boolean;
   } | null>(null);
 
+  const { data: syncStatus } = useSteamSyncStatus();
+  const syncStageKey =
+    syncStatus === undefined
+      ? undefined
+      : syncStatus === null
+        ? "no-sync"
+        : `${syncStatus.jobId}:${syncStatus.status}`;
+  const previousSyncStageKey = useRef(syncStageKey);
+  useEffect(() => {
+    if (
+      previousSyncStageKey.current !== undefined &&
+      previousSyncStageKey.current !== syncStageKey
+    ) {
+      router.invalidate();
+    }
+    previousSyncStageKey.current = syncStageKey;
+  }, [syncStageKey, router]);
+
   const sortedGames = useMemo(() => {
     const matchStatusOrder = (g: ImportedGame) => {
       if (g.igdbMatchStatus === "MATCHED") return 0;
@@ -88,20 +105,6 @@ export function ImportedGamesPage({
       router.invalidate();
     } catch (err) {
       toast.error(getErrorMessage(err, "Could not remove game"));
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const handleSync = async () => {
-    setPending(true);
-    showSyncStartedToast();
-    try {
-      const { imported } = await importSteamLibraryFn();
-      showSyncCompletedToast(imported);
-      router.invalidate();
-    } catch (err) {
-      showSyncFailedToast(getErrorMessage(err, "Import from Steam failed"));
     } finally {
       setPending(false);
     }
@@ -145,17 +148,16 @@ export function ImportedGamesPage({
       );
     }
     return (
-      <EmptyState
-        icon={Gamepad2}
-        title="No games imported yet"
-        description="Import from Steam to see your games here."
-        action={{
-          label: pending ? "Importing…" : "Import from Steam",
-          onClick: handleSync,
-          disabled: pending,
-          variant: "default",
-        }}
-      />
+      <div className="flex flex-col items-center gap-6">
+        <EmptyState
+          icon={Gamepad2}
+          title="No games imported yet"
+          description="Sync your Steam library to see your games here."
+          spacing="comfortable"
+        />
+        <SyncProgress variant="page" />
+        <SyncStartButton connected />
+      </div>
     );
   }
 
@@ -174,15 +176,10 @@ export function ImportedGamesPage({
         </Alert>
       ) : null}
 
+      <SyncProgress variant="page" />
+
       <div className="flex items-center justify-end">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleSync}
-          disabled={pending}
-        >
-          {pending ? "Importing…" : "Import from Steam"}
-        </Button>
+        <SyncStartButton connected={steamId !== null} />
       </div>
 
       <ul

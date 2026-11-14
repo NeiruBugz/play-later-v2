@@ -14,7 +14,7 @@ export type ImportedGamesPageProps = {
   games: ReadonlyArray<ImportedGame>;
   /**
    * Steam connection state. When `null`, the empty-state CTA links to
-   * `/settings/account`; when set, it offers a "Sync from Steam" button.
+   * `/settings/account`; when set, it offers the Sync button.
    */
   steamId: string | null;
   /** Server-side pagination metadata. Drives the Prev/Next controls. */

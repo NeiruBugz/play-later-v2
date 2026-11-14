@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
@@ -5,6 +6,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ImportedGame } from "@/entities/imported-game/model/types";
 import { dismissImportedGameFn } from "@/features/steam-import";
+import { getSteamSyncStatusFn } from "@/features/storefront-sync/api/get-steam-sync-status";
+import type { SteamSyncStatus } from "@/features/storefront-sync/model/types";
 
 import { ImportedGamesPage } from "./imported-games-page";
 
@@ -22,6 +25,12 @@ vi.mock("@/features/steam-import/api/fetch-steam-games", () => ({
 }));
 vi.mock("@/features/steam-import/api/import-game-to-library", () => ({
   importGameToLibraryFn: vi.fn(),
+}));
+vi.mock("@/features/storefront-sync/api/start-steam-sync", () => ({
+  startSteamSyncFn: vi.fn(),
+}));
+vi.mock("@/features/storefront-sync/api/get-steam-sync-status", () => ({
+  getSteamSyncStatusFn: vi.fn(),
 }));
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
@@ -48,6 +57,33 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
 }));
+
+function renderPage(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+}
+
+function makeSyncStatus(overrides: Partial<SteamSyncStatus>): SteamSyncStatus {
+  return {
+    jobId: "job-1",
+    status: "GATHERING",
+    totalToLookUp: 0,
+    lookedUp: 0,
+    newGames: 0,
+    refreshedGames: 0,
+    addedToLibrary: 0,
+    needsMatch: 0,
+    addAllToLibrary: false,
+    failureCode: null,
+    finishedAt: null,
+    noticeSeen: false,
+    ...overrides,
+  };
+}
 
 function makeGame(
   overrides: Partial<ImportedGame> & Pick<ImportedGame, "id" | "name">
@@ -87,8 +123,14 @@ const elements = {
   queryEmptyConnect: () =>
     screen.queryByText("Connect Steam to see your games"),
   queryEmptyNoGames: () => screen.queryByText("No games imported yet"),
-  querySyncButton: () =>
+  querySyncButton: () => screen.queryByRole("button", { name: "Sync" }),
+  queryLegacyImportButton: () =>
     screen.queryByRole("button", { name: /Import from Steam/ }),
+  findSyncingButton: () => screen.findByRole("button", { name: "Syncing…" }),
+  queryConnectSyncLink: () =>
+    screen.queryByRole("link", { name: "Connect Steam to sync" }),
+  findFetchingStatus: () =>
+    screen.findByRole("status", { name: "Fetching your Steam library…" }),
   queryConnectAction: () =>
     screen.queryByRole("link", { name: "Connect Steam" }) ??
     screen.queryByRole("button", { name: "Connect Steam" }),
@@ -141,11 +183,13 @@ describe("ImportedGamesPage", () => {
     vi.mocked(toast.error).mockReset();
     invalidateMock.mockReset();
     navigateMock.mockReset();
+    vi.mocked(getSteamSyncStatusFn).mockReset();
+    vi.mocked(getSteamSyncStatusFn).mockResolvedValue(null);
   });
 
   describe("given zero games and no Steam connection", () => {
     beforeEach(() => {
-      render(<ImportedGamesPage games={[]} steamId={null} />);
+      renderPage(<ImportedGamesPage games={[]} steamId={null} />);
     });
 
     it("renders the Connect-Steam empty state", () => {
@@ -161,23 +205,89 @@ describe("ImportedGamesPage", () => {
 
   describe("given zero games but Steam is connected", () => {
     beforeEach(() => {
-      render(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
+      renderPage(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
     });
 
     it("renders the No-games-yet empty state", () => {
       expect(elements.queryEmptyNoGames()).not.toBeNull();
     });
 
-    it("renders a Import-from-Steam CTA", () => {
-      expect(
-        screen.queryByRole("button", { name: "Import from Steam" })
-      ).not.toBeNull();
+    it("offers the Sync button in place of the legacy Import-from-Steam button", () => {
+      expect(elements.querySyncButton()).not.toBeNull();
+      expect(elements.queryLegacyImportButton()).toBeNull();
     });
+  });
+
+  describe("given zero games, Steam connected, and a sync running", () => {
+    beforeEach(() => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "GATHERING" })
+      );
+      renderPage(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
+    });
+
+    it("tells the user the Steam library is being fetched", async () => {
+      expect(await elements.findFetchingStatus()).toBeInTheDocument();
+    });
+
+    it("shows a disabled 'Syncing…' button", async () => {
+      expect(await elements.findSyncingButton()).toBeDisabled();
+    });
+  });
+
+  describe("given a populated list and Steam connected", () => {
+    beforeEach(() => {
+      renderPage(
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
+      );
+    });
+
+    it("offers the Sync button above the list", () => {
+      expect(elements.querySyncButton()).not.toBeNull();
+      expect(elements.queryLegacyImportButton()).toBeNull();
+    });
+  });
+
+  describe("given a populated list and no Steam connection", () => {
+    beforeEach(() => {
+      renderPage(<ImportedGamesPage games={[pending]} steamId={null} />);
+    });
+
+    it("links to account settings instead of offering Sync", () => {
+      expect(elements.queryConnectSyncLink()).toHaveAttribute(
+        "href",
+        "/settings/account"
+      );
+      expect(elements.querySyncButton()).toBeNull();
+    });
+  });
+
+  describe("given the sync moves from gathering to finished while the page is open", () => {
+    beforeEach(async () => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "GATHERING" })
+      );
+      renderPage(
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
+      );
+      await elements.findSyncingButton();
+      invalidateMock.mockClear();
+    });
+
+    it("refreshes the loader data once the stage changes", async () => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "FINISHED", finishedAt: new Date() })
+      );
+
+      await waitFor(() => expect(invalidateMock).toHaveBeenCalledOnce(), {
+        timeout: 5000,
+      });
+    }, 8000);
   });
 
   describe("given a mix of UNMATCHED + PENDING games (MATCHED rows excluded by the entity query)", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage
           games={[unmatched, pending]}
           steamId="76561198012345678"
@@ -202,7 +312,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the user clicks the per-row Add button on a PENDING row", () => {
     beforeEach(async () => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.queryAddButton("Pending Game")!);
@@ -216,7 +326,7 @@ describe("ImportedGamesPage", () => {
   describe("given the user clicks dismiss on a PENDING row", () => {
     beforeEach(async () => {
       vi.mocked(dismissImportedGameFn).mockResolvedValue(undefined as never);
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.queryDismissButton("Pending Game")!);
@@ -240,7 +350,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the filter bar is rendered with populated games", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
     });
@@ -260,7 +370,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the user types a search query and presses Enter", () => {
     beforeEach(async () => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.type(elements.getSearchInput(), "halo{Enter}");
@@ -274,7 +384,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the user toggles 'Show dismissed games'", () => {
     beforeEach(async () => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.getShowDismissedCheckbox());
@@ -288,7 +398,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given a search filter is active in the URL", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage
           games={[pending]}
           steamId="76561198012345678"
@@ -312,7 +422,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given filters are active but the server returned zero rows", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage
           games={[]}
           steamId="76561198012345678"
