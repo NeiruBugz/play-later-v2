@@ -213,12 +213,12 @@ Conventions for every slice:
     - `tsconfig.lambdas.json` mapping `@env` → `env.lambda.ts`;
     - script `typecheck:lambdas`, added to `typecheck`;
     - workers import leaf modules, not barrels (`shared/api/steam/steam-fetch`). **[Agent: aws-lambda-backend]**
-  - [ ] `db.server.ts`: `DB_POOL_MAX`, `connectionTimeoutMillis` ≥ 10 s, an idle timeout and a `pool.on("error")` handler. **[Agent: aws-lambda-backend]**
-  - [ ] Lambda handlers in `src/lambdas/steam-sync-gather/handler.ts` and `src/lambdas/steam-sync-enrich/handler.ts`:
+  - [x] `db.server.ts`: `DB_POOL_MAX`, `connectionTimeoutMillis` ≥ 10 s, an idle timeout and a `pool.on("error")` handler. **[Agent: aws-lambda-backend]**
+  - [x] Lambda handlers in `src/lambdas/steam-sync-gather/handler.ts` and `src/lambdas/steam-sync-enrich/handler.ts`:
     - thin adapters, about 20 lines each;
     - the entry fetches the SSM params (`SSM_PARAM_PREFIX`) once per cold start, then dynamically imports the worker graph;
     - pino child bindings `{jobId, userId, messageId, receiveCount}`; never log `steamId64`. **[Agent: aws-lambda-backend]**
-  - [ ] SQS adapter `shared/api/queue/sqs.ts`:
+  - [x] SQS adapter `shared/api/queue/sqs.ts`:
     - `@aws-sdk/client-sqs` pinned exactly at `3.1024.0`, and `@vercel/oidc-aws-credentials-provider` pinned exactly;
     - credentials are created per request inside the server fn;
     - web env vars `STEAM_SYNC_GATHER_QUEUE_URL` and `AWS_SYNC_ROLE_ARN`;
@@ -229,7 +229,7 @@ Conventions for every slice:
     - deterministic zips in `dist-lambdas/` (gitignored);
     - `scripts/smoke-lambda-bundle.mjs`: the metafile has no `@tanstack`, `better-auth`, `react` or S3 modules, and each handler imports with only the core env and acks a malformed record;
     - package scripts `build:lambdas` (runs prisma generate first) and `smoke:lambdas`. **[Agent: aws-lambda-backend]**
-  - [ ] ESLint: add a `lambdas` boundaries element and a `no-restricted-imports` block for `src/lambdas/**` (tech §2.9). **[Agent: tanstack-fullstack]**
+  - [x] ESLint: add a `lambdas` boundaries element and a `no-restricted-imports` block for `src/lambdas/**` (tech §2.9). **[Agent: tanstack-fullstack]**
   - [ ] Verify:
     - Run the gate plus `typecheck:lambdas`, `build:lambdas` and `smoke:lambdas`.
     - Confirm both zips hold only `index.mjs` and `.map`, and report their sizes.
