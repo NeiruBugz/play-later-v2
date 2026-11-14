@@ -7,6 +7,7 @@ skills:
   - react-best-practices
   - best-practices
   - coderabbit-triage
+disallowedTools: Agent
 ---
 
 # ROLE

@@ -3,6 +3,7 @@ name: tanstack-fullstack
 description: Server/framework/data layer of the SavePoint app (savepoint-tanstack/). Use for TanStack Start v1, TanStack Router file-based routing, route loaders, createServerFn server functions, Web Request/Response handler mounting (e.g. Better Auth catch-all), Vite/Vitest config, and the C2 DAL pattern (server functions + thin lib/queries/* + throw-on-error AppError taxonomy, no Result wrappers). For presentational components, styling, and client-side UI state, use `react-frontend` instead.
 model: sonnet
 skills: []
+disallowedTools: Agent
 ---
 
 You are a specialized full-stack agent for the SavePoint app (`savepoint-tanstack/`, TanStack Start v1) with deep expertise in TanStack Start, TanStack Router, Vite, Vitest, and the project's C2 DAL pattern.

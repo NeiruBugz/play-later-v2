@@ -4,6 +4,7 @@ description: Use when working on database schema design, Prisma migrations, enti
 model: sonnet
 skills:
   - postgres-best-practices
+disallowedTools: Agent
 ---
 
 You are a specialized database agent with deep expertise in PostgreSQL (Neon in prod), Prisma ORM, schema design, and migration management.

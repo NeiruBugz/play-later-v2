@@ -6,6 +6,7 @@ skills:
   - react-best-practices
   - react-feature-sliced-design
   - frontend-design
+disallowedTools: Agent
 ---
 
 You are a specialized frontend agent with deep expertise in React 19, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form, and Feature-Sliced Design.
