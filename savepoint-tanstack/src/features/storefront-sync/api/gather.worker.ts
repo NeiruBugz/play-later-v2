@@ -40,18 +40,19 @@ export async function runGatherMessage(args: {
     job.storefront
   );
 
-  const resolvedCount = await resolveImportedGamesFromCatalogue(
-    job.userId,
-    job.storefront
-  );
+  await resolveImportedGamesFromCatalogue(job.userId, job.storefront);
   const candidates = await findLookupCandidates(job.userId, job.storefront, {
-    includeResolved: false,
+    includeResolved: true,
   });
-  const chunks = chunkRowIds(candidates.map((candidate) => candidate.id));
+  const needsLookup = candidates.filter(
+    (candidate) => candidate.gameId === null
+  );
+  const chunkedRows = job.addAllToLibrary ? candidates : needsLookup;
+  const chunks = chunkRows(chunkedRows);
 
   const plan = await recordGatherPlan(job.id, {
-    totalToLookUp: resolvedCount + candidates.length,
-    lookedUp: resolvedCount,
+    totalToLookUp: candidates.length,
+    lookedUp: candidates.length - needsLookup.length,
     refreshedGames: 0,
     totalChunks: chunks.length,
   });
@@ -64,25 +65,25 @@ export async function runGatherMessage(args: {
   }
 
   const queue = getSyncQueue();
-  for (const [chunkIndex, importedGameIds] of chunks.entries()) {
+  for (const [chunkIndex, rows] of chunks.entries()) {
     await queue.send("enrich", {
       v: 1,
       jobId: job.id,
       chunkIndex,
-      importedGameIds,
-      lookupCount: importedGameIds.length,
+      importedGameIds: rows.map((row) => row.id),
+      lookupCount: rows.filter((row) => row.gameId === null).length,
     } satisfies EnrichMessage);
   }
 }
 
-function chunkRowIds(ids: string[]): string[][] {
-  const chunks: string[][] = [];
+function chunkRows<Row>(rows: Row[]): Row[][] {
+  const chunks: Row[][] = [];
   for (
     let start = 0;
-    start < ids.length;
+    start < rows.length;
     start += MAX_IMPORTED_GAME_IDS_PER_CHUNK
   ) {
-    chunks.push(ids.slice(start, start + MAX_IMPORTED_GAME_IDS_PER_CHUNK));
+    chunks.push(rows.slice(start, start + MAX_IMPORTED_GAME_IDS_PER_CHUNK));
   }
   return chunks;
 }
