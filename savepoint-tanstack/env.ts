@@ -74,6 +74,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     VERCEL: z.string().optional(),
     STOREFRONT_SYNC_QUEUE: z.enum(["inline", "sqs"]).optional(),
+    STEAM_SYNC_GATHER_QUEUE_URL: z.string().min(1).optional(),
+    AWS_SYNC_ROLE_ARN: z.string().min(1).optional(),
   },
   client: {},
   runtimeEnv: {
@@ -106,6 +108,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     VERCEL: process.env.VERCEL,
     STOREFRONT_SYNC_QUEUE: process.env.STOREFRONT_SYNC_QUEUE,
+    STEAM_SYNC_GATHER_QUEUE_URL: process.env.STEAM_SYNC_GATHER_QUEUE_URL,
+    AWS_SYNC_ROLE_ARN: process.env.AWS_SYNC_ROLE_ARN,
   },
   createFinalSchema: (shape, isServer) =>
     z

@@ -38,6 +38,11 @@ async function deliver(queue: SyncQueueName, body: unknown): Promise<void> {
 }
 
 export const inlineSyncQueue: SyncQueue = {
+  async sendBatch(queue, bodies) {
+    for (const body of bodies) {
+      await inlineSyncQueue.send(queue, body);
+    }
+  },
   async send(queue, body) {
     const delivery = new Promise<void>((resolve) => {
       setImmediate(() => {

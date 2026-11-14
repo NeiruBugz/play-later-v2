@@ -83,15 +83,17 @@ export async function runGatherMessage(args: {
     return;
   }
 
-  for (const [chunkIndex, rows] of chunks.entries()) {
-    await queue.send("enrich", {
-      v: 1,
-      jobId: job.id,
-      chunkIndex,
-      importedGameIds: rows.map((row) => row.id),
-      lookupCount: rows.filter((row) => row.gameId === null).length,
-    } satisfies EnrichMessage);
-  }
+  const messages = chunks.map(
+    (rows, chunkIndex) =>
+      ({
+        v: 1,
+        jobId: job.id,
+        chunkIndex,
+        importedGameIds: rows.map((row) => row.id),
+        lookupCount: rows.filter((row) => row.gameId === null).length,
+      }) satisfies EnrichMessage
+  );
+  await queue.sendBatch("enrich", messages);
 }
 
 async function fetchOwnedGamesOrFailJob(job: {
