@@ -6,6 +6,7 @@ import {
   getSteamConnectionFn,
   SteamConnectCard,
 } from "@/features/steam-connect";
+import { SyncProgress } from "@/features/storefront-sync";
 import { SectionLabel } from "@/shared/ui/section-label";
 
 export const Route = createFileRoute("/_authed/settings/account")({
@@ -23,7 +24,11 @@ function SettingsAccountPage() {
       <SectionLabel className="mb-6">Account</SectionLabel>
 
       <div className="space-y-6">
-        <SteamConnectCard steamId={steamId} connectUrl={connectUrl} />
+        <SteamConnectCard
+          steamId={steamId}
+          connectUrl={connectUrl}
+          syncSlot={<SyncProgress variant="card" />}
+        />
         <SignOutCard action={<LogoutButton />} />
       </div>
     </div>

@@ -14,6 +14,7 @@ import {
   matchState,
 } from "@/features/steam-import/ui/imported-game-card";
 import {
+  SyncFailureAlert,
   SyncProgress,
   SyncStartButton,
   useSteamSyncStatus,
@@ -158,6 +159,7 @@ export function ImportedGamesPage({
           description="Sync your Steam library to see your games here."
           spacing="comfortable"
         />
+        <SyncFailureAlert />
         <SyncProgress variant="page" />
         <SyncStartButton connected />
       </div>
@@ -180,6 +182,7 @@ export function ImportedGamesPage({
         </Alert>
       ) : null}
 
+      <SyncFailureAlert />
       <SyncProgress variant="page" />
 
       <div className="flex items-center justify-end">

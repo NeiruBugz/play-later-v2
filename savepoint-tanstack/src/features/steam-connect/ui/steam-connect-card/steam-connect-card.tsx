@@ -50,6 +50,7 @@ function SteamIcon({ className }: { className?: string }) {
 export function SteamConnectCard({
   steamId,
   connectUrl,
+  syncSlot,
 }: SteamConnectCardProps) {
   const { pending, run } = useMutationAction();
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
@@ -101,6 +102,7 @@ export function SteamConnectCard({
               privacy settings.
             </AlertDescription>
           </Alert>
+          {syncSlot}
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"

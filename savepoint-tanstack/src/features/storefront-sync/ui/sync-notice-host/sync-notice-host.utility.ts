@@ -6,9 +6,14 @@ export const NOTICE_STALE_TIME_MS = 60_000;
 
 export const noticeToastId = (jobId: string) => `steam-sync-notice-${jobId}`;
 
-export const hasUnseenFinishedNotice = (
+export const isNoticeStatus = (
   status: SteamSyncStatus | null | undefined
-) => status != null && status.status === "FINISHED" && !status.noticeSeen;
+): status is SteamSyncStatus =>
+  status != null &&
+  (status.status === "FINISHED" || status.status === "FAILED");
+
+export const hasUnseenNotice = (status: SteamSyncStatus | null | undefined) =>
+  isNoticeStatus(status) && !status.noticeSeen;
 
 export const shouldPollNotice = (status: SteamSyncStatus | null | undefined) =>
-  isSyncActive(status) || hasUnseenFinishedNotice(status);
+  isSyncActive(status) || hasUnseenNotice(status);

@@ -4,13 +4,14 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { markSyncNoticeSeenFn } from "../../api/mark-sync-notice-seen";
-import { formatSyncSummary } from "../../lib";
+import { formatSyncSummary, syncFailureMessage } from "../../lib";
 import type { SteamSyncStatus } from "../../model/types";
 import {
   STEAM_SYNC_STATUS_QUERY_KEY,
   steamSyncStatusQueryOptions,
 } from "../steam-sync-status";
 import {
+  isNoticeStatus,
   NOTICE_POLL_INTERVAL_MS,
   NOTICE_STALE_TIME_MS,
   noticeToastId,
@@ -30,7 +31,7 @@ export function SyncNoticeHost() {
   const markedSeenJobIds = useRef(new Set<string>());
 
   useEffect(() => {
-    if (status?.status !== "FINISHED") return;
+    if (!isNoticeStatus(status)) return;
     const { jobId } = status;
 
     if (status.noticeSeen) {
@@ -56,9 +57,25 @@ export function SyncNoticeHost() {
       }
     };
 
+    const onDismiss = () => {
+      void markSeen();
+    };
+
+    if (status.status === "FAILED") {
+      toast.error("Steam sync failed", {
+        description: syncFailureMessage(status.failureCode),
+        duration: Infinity,
+        closeButton: true,
+        id: noticeToastId(jobId),
+        onDismiss,
+      });
+      return;
+    }
+
     toast.success("Steam sync finished", {
       description: formatSyncSummary(status),
       duration: Infinity,
+      closeButton: true,
       id: noticeToastId(jobId),
       action: {
         label: "Review games",
@@ -67,9 +84,7 @@ export function SyncNoticeHost() {
           await navigate({ to: "/steam/games" });
         },
       },
-      onDismiss: () => {
-        void markSeen();
-      },
+      onDismiss,
     });
   }, [status, queryClient, navigate]);
 

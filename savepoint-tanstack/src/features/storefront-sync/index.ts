@@ -1,4 +1,5 @@
 export {
+  SyncFailureAlert,
   SyncNoticeHost,
   SyncProgress,
   SyncStartButton,
