@@ -17,6 +17,7 @@ import { ThemeProvider } from "@/app/providers/theme-provider";
 import { currentUserQueryOptions } from "@/entities/session/api/current-user-query";
 import { AddGameAction, InlineAddConfirmationHost } from "@/features/add-game";
 import { CommandPalette } from "@/features/command-palette";
+import { SyncNoticeHost } from "@/features/storefront-sync";
 import { StatusModelNotice, WhatsNewModal } from "@/features/whats-new";
 import { getSiteOriginFn } from "@/shared/api/get-site-origin";
 import { MANIFEST_PATH, socialMeta, THEME_COLORS } from "@/shared/config/site";
@@ -153,6 +154,7 @@ export function RootShell() {
             />
           ) : null}
           {user ? <GlobalActionHost /> : null}
+          {user ? <SyncNoticeHost /> : null}
         </DoneFlowProvider>
       </AddFlowProvider>
       {user && statusModelNoticePending ? <StatusModelNotice /> : null}

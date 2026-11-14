@@ -32,6 +32,9 @@ vi.mock("@/features/storefront-sync/api/start-steam-sync", () => ({
 vi.mock("@/features/storefront-sync/api/get-steam-sync-status", () => ({
   getSteamSyncStatusFn: vi.fn(),
 }));
+vi.mock("@/features/storefront-sync/api/mark-sync-notice-seen", () => ({
+  markSyncNoticeSeenFn: vi.fn(),
+}));
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
 }));

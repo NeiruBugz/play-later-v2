@@ -155,6 +155,7 @@ vi.mock("@/features/command-palette", () => ({
   openCommandPalette: vi.fn(),
 }));
 vi.mock("@/features/whats-new", () => ({ WhatsNewModal: () => null }));
+vi.mock("@/features/storefront-sync", () => ({ SyncNoticeHost: () => null }));
 vi.mock("@tanstack/react-devtools", () => ({ TanStackDevtools: () => null }));
 vi.mock("@tanstack/react-router-devtools", () => ({
   TanStackRouterDevtoolsPanel: () => null,
