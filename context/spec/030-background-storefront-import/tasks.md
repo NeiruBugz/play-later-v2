@@ -150,8 +150,8 @@ Conventions for every slice:
       - the toast is dismissed when `noticeSeen` becomes true;
       - there is no polling when idle and nothing is unseen. **[Agent: testing]**
   - [x] Entity queries: `markSyncNoticeSeen`, plus summary-count SQL in `finalizeImportJobIfComplete`. **[Agent: prisma-database]**
-  - [ ] Server side: the `mark-sync-notice-seen` worker and server fn, and add `noticeSeen` to the status payload. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] Server side: the `mark-sync-notice-seen` worker and server fn, and add `noticeSeen` to the status payload. **[Agent: tanstack-fullstack]**
+  - [x] UI:
     - `features/storefront-sync/ui/sync-notice-host/` mounted in `RootShell` (`routes/__root.tsx`) beside `GlobalActionHost`, for authed users only;
     - toasts fire from an effect with `duration: Infinity`, one id per job;
     - fetch once per app load (staleTime 60 s), then poll every 20 s only while active or unseen;
