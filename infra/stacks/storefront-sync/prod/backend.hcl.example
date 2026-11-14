@@ -1,0 +1,3 @@
+# terraform init -backend-config=backend.hcl
+bucket = "your-state-bucket-name"
+region = "your-aws-region"

@@ -1,0 +1,2 @@
+aws_region       = "your-aws-region"
+vercel_team_slug = "your-vercel-team-slug"
