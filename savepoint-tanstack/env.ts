@@ -75,6 +75,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     VERCEL: z.string().optional(),
+    STOREFRONT_SYNC_QUEUE: z.enum(["inline", "sqs"]).optional(),
   },
   client: {},
   shared: {
@@ -118,7 +119,23 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     VERCEL: process.env.VERCEL,
+    STOREFRONT_SYNC_QUEUE: process.env.STOREFRONT_SYNC_QUEUE,
   },
+  createFinalSchema: (shape, isServer) =>
+    z
+      .object(shape)
+      .refine(
+        (values) =>
+          !isServer ||
+          !(
+            values.NODE_ENV === "production" &&
+            values.STOREFRONT_SYNC_QUEUE === "inline"
+          ),
+        {
+          message: "STOREFRONT_SYNC_QUEUE must not be inline in production",
+          path: ["STOREFRONT_SYNC_QUEUE"],
+        }
+      ),
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
 });
