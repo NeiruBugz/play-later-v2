@@ -175,9 +175,9 @@ Conventions for every slice:
       - the "Steam sync failed" toast;
       - the Steam card renders `syncSlot`;
       - the import page for a disconnected user with games shows the list and "Connect Steam to sync". **[Agent: testing]**
-  - [ ] Entity query `expireStaleImportJob`, called from `getLatestImportJob` and `createImportJob`. **[Agent: prisma-database]**
-  - [ ] Server side: map typed Steam errors and empty results to failure codes in gather; handle a start send failure; snapshot `storefrontAccountId`. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] Entity query `expireStaleImportJob`, called from `getLatestImportJob` and `createImportJob`. **[Agent: prisma-database]**
+  - [x] Server side: map typed Steam errors and empty results to failure codes in gather; handle a start send failure; snapshot `storefrontAccountId`. **[Agent: tanstack-fullstack]**
+  - [x] UI:
     - `features/storefront-sync/ui/sync-failure-alert/` (code → copy, spec 2.6);
     - a failed variant in `SyncNoticeHost`;
     - a `syncSlot` prop on `SteamConnectCard`;
