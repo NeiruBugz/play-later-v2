@@ -190,7 +190,7 @@ Conventions for every slice:
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 6: Honest wording in "What's new"**
-  - [ ] RED: update the `whats-new` test to expect the new Steam entry text and the bumped `CURRENT_VERSION`. **[Agent: testing]**
+  - [x] RED: update the `whats-new` test to expect the new Steam entry text and the bumped `CURRENT_VERSION`. **[Agent: testing]**
   - [ ] Replace the Steam entry description in `features/whats-new/config.ts` with the spec 2.7.1 text and bump `CURRENT_VERSION`. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
@@ -198,7 +198,7 @@ Conventions for every slice:
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 7: The pipeline runs as Lambda bundles (built and smoke-tested locally; the app still runs inline)**
-  - [ ] RED tests:
+  - [x] RED tests:
     - **Unit** `src/lambdas/steam-sync-{gather,enrich}/handler.test.ts`:
       - SQS event parsing;
       - `batchItemFailures` for retryable errors;
