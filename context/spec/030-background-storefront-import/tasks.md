@@ -1,0 +1,292 @@
+<!-- not-user-reviewed -->
+# Tasks: Background Steam sync (spec 030)
+
+- **Functional spec:** [functional-spec.md](./functional-spec.md)
+- **Technical spec:** [technical-considerations.md](./technical-considerations.md)
+
+## Open Questions
+
+- **Lambda runtime and esbuild bundling** (Slice 7) are assigned to `tanstack-fullstack`, the closest server/TypeScript specialist. No installed agent specialises in AWS Lambda handlers or esbuild. Run `/awos:hire cover 030-background-storefront-import: need AWS Lambda + SQS Node handlers, esbuild Lambda bundling` if you want a dedicated agent, then re-run `/awos:tasks`.
+- **Owner-only steps:** nobody but the owner can run these. Agents write the runbook (Slice 8) and the owner runs it:
+  - `terraform apply` against real AWS;
+  - creating the S3 state bucket;
+  - putting SSM secret values;
+  - setting Vercel and GitHub variables;
+  - switching Vercel's OIDC issuer to Team mode;
+  - the first real production sync.
+
+Conventions for every slice:
+- Paths are relative to `savepoint-tanstack/` unless they start with `context/`, `infra/` or `.github/`.
+- **TDD (binding, `savepoint-tanstack/CLAUDE.md`):** in each slice the test task comes before the implementation tasks. Tests are written failing first (RED). During a RED task, `typecheck` and the test runs are expected to fail.
+- **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && build`.
+  - Add `test:integration` when the diff touches `/api/`, `.server.`, `.worker.`, `prisma/`, `test/integration/` or `scripts/`.
+  - From Slice 7 on, add `typecheck:lambdas && build:lambdas && smoke:lambdas`.
+  - Every slice ends with the gate green.
+- **Transport in Slices 1–6** is `STOREFRONT_SYNC_QUEUE=inline`: the whole pipeline runs inside the dev server and the integration tests. No AWS is needed until Slice 8.
+- **External APIs in tests:** integration tests stub Steam at `src/shared/api/steam/steam-fetch.ts` and IGDB at `src/shared/api/igdb/fetch.ts`. Verify tasks may use the real APIs with the local `.env` keys (`STEAM_API_KEY`, `IGDB_*`) and a public test Steam account. If the keys are missing, the Verify task uses the stubbed integration path and says so.
+- **Starting the app for a Verify task:**
+  - Run `docker compose up -d`, then start `pnpm --filter savepoint-tanstack dev` (port 6060) in the background and record its PID.
+  - Stop it with `kill <PID>` at the end of the task. Never pipe a daemon's stop command into another command.
+  - Sign in with the credentials provider (`AUTH_ENABLE_CREDENTIALS=true`) as a seeded local user with `steamId64` set.
+  - Browser checks use the Playwright MCP or the `verify-ui` skill scripts.
+  - Each Verify task deletes its screenshots, traces and temporary scripts before it finishes.
+
+---
+
+- [ ] **Slice 1: Pressing Sync starts a background sync that brings in the Steam library and shows "Fetching your Steam library…"**
+  - [ ] RED tests:
+    - **Integration** (`test/integration/storefront-sync/start-and-gather.integration.test.ts`):
+      - `startSteamSyncWorker` creates a QUEUED job;
+      - a second start while one is active returns the same job with `alreadyRunning: true`;
+      - a user with no `steamId64` gets a `ValidationError`;
+      - the inline queue runs gather, which upserts `ImportedGame` rows (`storefront` param) and finishes the job;
+      - a gather redelivery after the job is finished is dropped;
+      - `getSteamSyncStatusWorker` returns the latest job.
+    - **Unit:**
+      - message zod schemas (`v:1`, unknown fields tolerated, poison message rejected);
+      - `SyncStartButton`: Sync opens "Sync your Steam library" with the box unticked; Cancel starts nothing; "Start sync" closes the dialog; an active job shows a disabled "Syncing…"; `alreadyRunning` shows "A sync is already running"; not connected shows a "Connect Steam to sync" link;
+      - `SyncProgress` shows "Fetching your Steam library…" while GATHERING and nothing when idle. **[Agent: testing]**
+  - [ ] Prisma:
+    - `ImportJob` model plus the `ImportJobStatus` and `ImportFailureCode` enums, per tech §2.2 (with `doneChunkIndexes`, `storefrontAccountId` and the counters);
+    - migration via `--create-only`, with raw SQL appended by hand: the partial unique active index and the CHECK constraints;
+    - document the unmanaged index in `FOOT-GUNS.md` (next to #11). **[Agent: prisma-database]**
+  - [ ] Entity queries in `entities/import-job/api/`: `createImportJob` (`INSERT … ON CONFLICT DO NOTHING RETURNING`), `getLatestImportJob`, `claimGather`, `recordGatherPlan`, `failImportJob`, `finalizeImportJobIfComplete`. Every raw UPDATE sets `"updatedAt" = now()`. Also add the `storefront` parameter to `upsertImportedGamesBatch` and update its callers. **[Agent: prisma-database]**
+  - [ ] Server side:
+    - `shared/api/queue/types.ts` (the `SyncQueue` port);
+    - `features/storefront-sync/model/messages.ts`;
+    - `features/storefront-sync/api/inline-queue.ts` (`setImmediate` + `drain()`);
+    - workers `start-sync.worker.ts`, `gather.worker.ts` (no lookup yet: gather finalizes directly) and `get-sync-status.worker.ts`;
+    - server fns `start-steam-sync.ts` and `get-steam-sync-status.ts`;
+    - an env var `STOREFRONT_SYNC_QUEUE` (`inline | sqs`, defaulting to inline in dev) in `env.ts`, with a refine that rejects `inline` in production. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - `features/storefront-sync/ui/sync-start-button/` (dialog + checkbox; for now the checkbox value is sent but ignored);
+    - `ui/sync-progress/` (stage text, `role="status"`, polls `["storefront-sync","status","STEAM"]` every 3 s while active);
+    - in `widgets/imported-games-page`, replace the "Import from Steam" button and empty-state action with the Sync button, and call `router.invalidate()` when the status changes;
+    - delete the `import-status-feedback` toasts and their exports and tests (spec 2.7.2). **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Start the app and open `/steam/games`. Press Sync, then Start sync: "Fetching your Steam library…" appears, the button reads "Syncing…", and games appear when the sync finishes.
+    - In a second tab, Sync is disabled while the first sync is running.
+    - Confirm "We'll notify you when it's complete" never appears.
+    - Stop the server by PID and delete artifacts. **[Agent: testing]**
+
+- [ ] **Slice 2: Every game is looked up in the catalogue — found games show cover and year, the rest say "Needs a match"**
+  - [ ] RED tests:
+    - **Unit** `shared/api/igdb/match-steam-games.unit.test.ts`:
+      - query shape: `external_game_source = 1`, quoted uids, `limit 500`, `release_dates` fields;
+      - dedupe per uid (main game, then lowest id);
+      - a row without `game` is unfound.
+    - **Unit** pacer.
+    - **Unit** card `matchState` helper.
+    - **Integration:**
+      - local resolution from `Game.steamAppId` counts immediately;
+      - enrich links `gameId`/`lookedUpAt` and sets `Game.steamAppId` only where it is null;
+      - a duplicate chunk delivery doesn't double-count `lookedUp`;
+      - the final attempt (`receiveCount ≥ max`) marks rows as needs-a-match and the job still finishes;
+      - a needs-a-match game is looked up again on the next sync and becomes found;
+      - a stale chunk for a FAILED job is dropped;
+      - imported-games reads exclude rows whose game is already in the library.
+    - **Component:**
+      - the card shows found (catalogue cover, title, year; Steam icon when there's no cover; no year when there's no date), needs-a-match and not-yet states;
+      - the warning appears only for needs-a-match rows, with the new copy;
+      - pressing + on a found game skips "Select correct game";
+      - "Looking up your games — X of Y" updates without a reload. **[Agent: testing]**
+  - [ ] Prisma: `ImportedGame.gameId` (FK SetNull, indexed) and `lookedUpAt`, plus `@@index([steamAppId])` on `Game`, in one additive migration. **[Agent: prisma-database]**
+  - [ ] Entity queries:
+    - `resolveImportedGamesFromCatalogue` (`DISTINCT ON`, int-array binding);
+    - `findLookupCandidates`;
+    - `applyLookupResults`;
+    - `recordChunkDone` (chunk-index marker);
+    - `upsertGamesFromIgdbBatch`;
+    - `setGameSteamAppIds`;
+    - `findImportedGamesForUser`: Game join, plus a library-exclusion filter that is safe for null `gameId`. **[Agent: prisma-database]**
+  - [ ] Server side:
+    - `shared/api/igdb/match-steam-games.ts` and `pacer.ts` (`IGDB_MIN_INTERVAL_MS`, optional);
+    - gather does local resolution, then writes the candidate chunks (≤200, `lookupCount`) and the plan before sending;
+    - `enrich.worker.ts` takes `runEnrichMessage({message, receiveCount})` and handles final-attempt degradation;
+    - add `SYNC_MAX_RECEIVE_COUNT` to the env (default 3). **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - card states and the `matchState` utility in `features/steam-import/ui/imported-game-card/`;
+    - `ImportGameModal` gets `startOnSearch` and skips the match step for found games;
+    - the warning alert copy and its rule;
+    - `SyncProgress` "Looking up" stage with `toLocaleString("en-US")` and an `aria-hidden` count;
+    - the widget calls `router.invalidate()` when `lookedUp` changes and clamps the page number in the loader. **[Agent: react-frontend]**
+  - [ ] One-off live check: add a read-only `scripts/inspect-igdb-external-game-sources.ts` (`tsx`, same shape as `inspect:igdb-release-dates`). It confirms that Steam's `external_game_source` id is 1. Record the result in `research-notes.md`. **[Agent: tanstack-fullstack]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - Sync in the running app: the count rises, found games show covers and years, unfound games show "Needs a match", and the warning appears only when some do.
+    - Pressing + on a found game opens the status choice straight away.
+    - Delete artifacts and stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 3: "Also add all games to my library" puts every found game into the library**
+  - [ ] RED tests:
+    - **Integration:**
+      - with the box ticked, found games are added: PLAYING if played in the last 7 days (a play is opened), WANT otherwise;
+      - existing library items are unchanged (a Done game stays Done);
+      - IGNORED and needs-a-match rows are not added;
+      - a P2002 race counts as skipped;
+      - `addedToLibrary` is correct after a crash and rerun of one chunk;
+      - games added before a failure stay in the library;
+      - an unticked sync adds nothing.
+    - **Unit:** `calculateSmartStatus` at its new location. **[Agent: testing]**
+  - [ ] Move `calculateSmartStatus` to `entities/imported-game/lib/` and update the `steam-import` imports. **[Agent: tanstack-fullstack]**
+  - [ ] Add-all in the enrich worker:
+    - one short transaction per game using only `tx`;
+    - skip if the item exists, then `createWantLibraryItem`, then `setLibraryItemStatusInTx` when PLAYING, then mark MATCHED;
+    - gather includes already-resolved rows in the chunks when add-all is on;
+    - the job stores `addAllToLibrary` from `startSteamSyncFn`. **[Agent: tanstack-fullstack]**
+  - [ ] UI: the checkbox value now matters; no other UI change. Confirm the confirm dialog sends it, and that games added mid-sync drop off the import page on the next refresh. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - In the app, sync with the box ticked: the library gains the found games with the expected statuses, and needs-a-match games stay on the import page.
+    - Delete artifacts and stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 4: When a sync ends, SavePoint says so — live or on the next visit**
+  - [ ] RED tests:
+    - **Integration:**
+      - finalize computes `newGames` (excluding games in the library before the job), `refreshedGames` (at gather), `needsMatch` and `addedToLibrary` per tech §2.6;
+      - `markSyncNoticeSeenWorker` marks the job and older unseen jobs, and throws NotFound for another user's job.
+    - **Unit:** `formatSyncSummary`, table-driven: zero parts dropped, singular for 1, " · " join, "added" only with add-all.
+    - **Component** `SyncNoticeHost`:
+      - fires one "Steam sync finished" toast per job with the summary and "Review games";
+      - "Review games" marks the notice seen and navigates to `/steam/games`;
+      - closing the toast marks it seen;
+      - a pending notice on mount fires once;
+      - the toast is dismissed when `noticeSeen` becomes true;
+      - there is no polling when idle and nothing is unseen. **[Agent: testing]**
+  - [ ] Entity queries: `markSyncNoticeSeen`, plus summary-count SQL in `finalizeImportJobIfComplete`. **[Agent: prisma-database]**
+  - [ ] Server side: the `mark-sync-notice-seen` worker and server fn, and add `noticeSeen` to the status payload. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - `features/storefront-sync/ui/sync-notice-host/` mounted in `RootShell` (`routes/__root.tsx`) beside `GlobalActionHost`, for authed users only;
+    - toasts fire from an effect with `duration: Infinity`, one id per job;
+    - fetch once per app load (staleTime 60 s), then poll every 20 s only while active or unseen;
+    - `formatSyncSummary` in `features/storefront-sync/lib/`. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - In the app, start a sync, move to `/library`: "Steam sync finished" appears with a summary within 1 minute, and "Review games" opens the import page.
+    - Start a sync, close the tab before it ends, open the app again: the message shows once, and a reload doesn't show it again.
+    - Delete artifacts and stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 5: Failures are explained, stuck syncs recover, and the Steam card shows progress**
+  - [ ] RED tests:
+    - **Integration:**
+      - an empty Steam library becomes `FAILED(PROFILE_PRIVATE)` and the import page is unchanged;
+      - Steam 5xx becomes `STEAM_UNAVAILABLE`, and 429 becomes `RATE_LIMITED`;
+      - a queue send failure becomes `START_FAILED` plus an `UpstreamError`;
+      - a job with no change for 30 minutes is expired to `STALLED` on read and before a new start, and Sync works again;
+      - a disconnect mid-sync still finishes, using the snapshot `storefrontAccountId`.
+    - **Component:**
+      - `SyncFailureAlert` shows the exact spec copy for each code and disappears when a new sync starts;
+      - the "Steam sync failed" toast;
+      - the Steam card renders `syncSlot`;
+      - the import page for a disconnected user with games shows the list and "Connect Steam to sync". **[Agent: testing]**
+  - [ ] Entity query `expireStaleImportJob`, called from `getLatestImportJob` and `createImportJob`. **[Agent: prisma-database]**
+  - [ ] Server side: map typed Steam errors and empty results to failure codes in gather; handle a start send failure; snapshot `storefrontAccountId`. **[Agent: tanstack-fullstack]**
+  - [ ] UI:
+    - `features/storefront-sync/ui/sync-failure-alert/` (code → copy, spec 2.6);
+    - a failed variant in `SyncNoticeHost`;
+    - a `syncSlot` prop on `SteamConnectCard`;
+    - `routes/_authed/settings/account.tsx` passes `<SyncProgress variant="card"/>`;
+    - the disconnected-with-games branch in the import widget. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate, including integration.
+    - In the app, with Steam stubbed as private (or a private test account): the privacy message is shown above the list and as a toast.
+    - Account settings shows live progress during a sync.
+    - Delete artifacts and stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 6: Honest wording in "What's new"**
+  - [ ] RED: update the `whats-new` test to expect the new Steam entry text and the bumped `CURRENT_VERSION`. **[Agent: testing]**
+  - [ ] Replace the Steam entry description in `features/whats-new/config.ts` with the spec 2.7.1 text and bump `CURRENT_VERSION`. **[Agent: react-frontend]**
+  - [ ] Verify:
+    - Run the gate.
+    - In the app, the "What's new" modal shows the new Steam text exactly once.
+    - Delete artifacts and stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 7: The pipeline runs as Lambda bundles (built and smoke-tested locally; the app still runs inline)**
+  - [ ] RED tests:
+    - **Unit** `src/lambdas/steam-sync-{gather,enrich}/handler.test.ts`:
+      - SQS event parsing;
+      - `batchItemFailures` for retryable errors;
+      - a poison message is acked;
+      - `ApproximateReceiveCount` is passed to the worker.
+    - **Unit** `shared/api/queue/sqs.ts`: `SendMessageBatch` in groups of 10 with retry of `Failed[]`.
+    - **ESLint regression** in `test/eslint/`: `src/lambdas` may import `features/*/api/*.worker`, entities and shared; it may not import routes, widgets, react, `@tanstack/*` or better-auth. **[Agent: testing]**
+  - [ ] Env split:
+    - `env.core.ts` (`coreEnv`: Postgres pooled URL, `IGDB_*`, `STEAM_API_KEY`, `NODE_ENV`, `LOG_LEVEL`, plus the optional `STEAM_SYNC_ENRICH_QUEUE_URL`, `DB_POOL_MAX`, `IGDB_MIN_INTERVAL_MS`, `SYNC_MAX_RECEIVE_COUNT`);
+    - `env.ts` extends it, with web behaviour unchanged;
+    - `env.lambda.ts`;
+    - `tsconfig.lambdas.json` mapping `@env` → `env.lambda.ts`;
+    - script `typecheck:lambdas`, added to `typecheck`;
+    - workers import leaf modules, not barrels (`shared/api/steam/steam-fetch`). **[Agent: tanstack-fullstack]**
+  - [ ] `db.server.ts`: `DB_POOL_MAX`, `connectionTimeoutMillis` ≥ 10 s, an idle timeout and a `pool.on("error")` handler. **[Agent: tanstack-fullstack]**
+  - [ ] Lambda handlers in `src/lambdas/steam-sync-gather/handler.ts` and `src/lambdas/steam-sync-enrich/handler.ts`:
+    - thin adapters, about 20 lines each;
+    - the entry fetches the SSM params (`SSM_PARAM_PREFIX`) once per cold start, then dynamically imports the worker graph;
+    - pino child bindings `{jobId, userId, messageId, receiveCount}`; never log `steamId64`. **[Agent: tanstack-fullstack]**
+  - [ ] SQS adapter `shared/api/queue/sqs.ts`:
+    - `@aws-sdk/client-sqs` pinned exactly at `3.1024.0`, and `@vercel/oidc-aws-credentials-provider` pinned exactly;
+    - credentials are created per request inside the server fn;
+    - web env vars `STEAM_SYNC_GATHER_QUEUE_URL` and `AWS_SYNC_ROLE_ARN`;
+    - the queue factory picks `sqs` or `inline`;
+    - Preview deployments with no queue URL show sync as unavailable. **[Agent: tanstack-fullstack]**
+  - [ ] Bundling:
+    - `scripts/build-lambdas.mjs` (esbuild, exact-pinned devDependency): ESM `.mjs`, `node22`, `createRequire` banner, `tsconfig.lambdas.json`, `define NODE_ENV=production`, `external pg-native`, sourcemap, metafile;
+    - deterministic zips in `dist-lambdas/` (gitignored);
+    - `scripts/smoke-lambda-bundle.mjs`: the metafile has no `@tanstack`, `better-auth`, `react` or S3 modules, and each handler imports with only the core env and acks a malformed record;
+    - package scripts `build:lambdas` (runs prisma generate first) and `smoke:lambdas`. **[Agent: tanstack-fullstack]**
+  - [ ] ESLint: add a `lambdas` boundaries element and a `no-restricted-imports` block for `src/lambdas/**` (tech §2.9). **[Agent: tanstack-fullstack]**
+  - [ ] Verify:
+    - Run the gate plus `typecheck:lambdas`, `build:lambdas` and `smoke:lambdas`.
+    - Confirm both zips hold only `index.mjs` and `.map`, and report their sizes.
+    - Run the app with `inline` and do one sync, to show the web path is unchanged.
+    - Delete `dist-lambdas/` and artifacts, and stop the server by PID. **[Agent: testing]**
+
+- [ ] **Slice 8: AWS stack and the owner runbook (GitHub ↔ AWS, Vercel ↔ AWS)**
+  - [ ] Terraform `infra/stacks/storefront-sync/` (tech §2.10):
+    - `modules/pipeline/`: 2 queues + DLQs, 2 Lambdas from a committed stub with `ignore_source_code_hash`, event source mappings (`ReportBatchItemFailures`, max concurrency gather 5 / enrich 2), 7-day log groups, 4 SSM SecureString params with `ignore_changes`, least-privilege roles, required tags;
+    - `shared/`: the Vercel and GitHub OIDC providers;
+    - `prod/`: S3 backend with `use_lockfile`, exact pins (Terraform `1.14.6`, AWS `6.73.0`, registry modules), the `vercel-sqs-send` and `github-lambda-deploy` roles, and the outputs;
+    - never touch `infra/envs/*`. **[Agent: aws-infra]**
+  - [ ] Owner runbook `infra/docs/storefront-sync-runbook.md`, with copy-paste commands and a check after each step:
+    1. bootstrap the S3 state bucket;
+    2. check for or import an existing GitHub OIDC provider;
+    3. apply `shared/`, then `prod/`;
+    4. put the SSM values;
+    5. switch Vercel's OIDC issuer to Team mode;
+    6. set the Vercel env vars (`STOREFRONT_SYNC_QUEUE=sqs`, `STEAM_SYNC_GATHER_QUEUE_URL`, `AWS_SYNC_ROLE_ARN`, `AWS_REGION`);
+    7. set the GitHub `production` environment and repo variables (deploy role ARN, function names, region);
+    8. smoke-test OIDC from a Preview deployment and from GitHub (`aws sts get-caller-identity`);
+    9. roll back.
+    - Link the runbook from `infra/CLAUDE.md`, and add the stack, the state-bootstrap note and a secret rotation checklist. **[Agent: aws-infra]**
+  - [ ] Update `context/product/architecture.md`:
+    - §4 Steam: replace the stale "paused on dependency" line;
+    - §5 infra and §6 observability: CloudWatch logs for the Lambdas;
+    - add an ADR for SQS + Lambda over Vercel Queues;
+    - bump the doc version.
+    - Note in spec 003 that background matching supersedes on-demand matching. **[Agent: aws-infra]**
+  - [ ] Verify:
+    - Run `terraform fmt -check -recursive` and `terraform init -backend=false && terraform validate` in each stack root.
+    - Check that the stack has no references to `infra/envs/*`.
+    - Have `checkov` or `trivy config` scan the stack if available; otherwise, say it was skipped.
+    - Read the runbook start to finish and confirm every variable it names exists in `env.ts`/`env.core.ts` and in the Terraform outputs.
+    - Delete any `.terraform/` dirs created during validation. **[Agent: aws-infra]**
+
+- [ ] **Slice 9: CI builds, checks and ships the Lambdas**
+  - [ ] `.github/workflows/pr-checks-tanstack.yml`: add `typecheck:lambdas`, `build:lambdas` (dummy DB URL for prisma generate) and `smoke:lambdas` to the quality job. **[Agent: aws-infra]**
+  - [ ] `.github/workflows/deploy.yml`: new `deploy-lambdas` job.
+    - It has `needs: migrate`, `environment: production` and `permissions: {id-token: write, contents: read}`.
+    - Steps: install, prisma generate, `build:lambdas`, `smoke:lambdas`, `aws-actions/configure-aws-credentials` (pinned, `role-to-assume: vars.AWS_LAMBDA_DEPLOY_ROLE_ARN`), `aws lambda update-function-code --architectures arm64` for both functions, then `aws lambda wait function-updated`.
+    - The job skips cleanly when the vars aren't set yet. **[Agent: aws-infra]**
+  - [ ] Verify:
+    - Run `actionlint` on both workflows; if it isn't installed, run it through `npx` or docker, or report it as skipped.
+    - Run the gate locally, including the lambda scripts.
+    - Confirm the deploy job's skip condition with the variables unset.
+    - Delete artifacts. **[Agent: aws-infra]**
+
+> **Owner rollout** (after Slice 9, following the runbook): apply the stack, set the variables, merge to `main`, then do one real sync with a test Steam account of about 1,000 games. It should finish within 5 minutes (spec 2.2.3), and the CloudWatch logs and DLQs should be checked empty.
+
+- [ ] **Slice 10: Feature Testing & Regression**
+
+  > Verifies the whole feature end-to-end against functional-spec.md, run after all implementation slices are complete.
+  - [ ] Read functional-spec.md acceptance criteria in full. Generate acceptance-level tests that verify the entire feature as a whole — not individual slices. Cover applicable layers (unit for pure logic, integration for service interactions, e2e for user flows) based on the project's testing stack. Write tests with RED validation (must fail before implementation is confirmed done). Annotate each test with `@spec: 030-background-storefront-import` and `@regression` if suitable for long-term regression. **[Agent: testing]**
+  - [ ] Run all generated tests. All must pass. Fix any failures before proceeding. **[Agent: testing]**
