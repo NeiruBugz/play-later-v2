@@ -1,5 +1,6 @@
 import { claimGather } from "@/entities/import-job/api/claim-gather.server";
 import { recordGatherPlan } from "@/entities/import-job/api/record-gather-plan.server";
+import { countRefreshedImportedGames } from "@/entities/imported-game/api/count-refreshed-imported-games.server";
 import { findLookupCandidates } from "@/entities/imported-game/api/find-lookup-candidates.server";
 import { resolveImportedGamesFromCatalogue } from "@/entities/imported-game/api/resolve-imported-games-from-catalogue.server";
 import { upsertImportedGamesBatch } from "@/entities/imported-game/api/upsert-imported-games-batch.server";
@@ -33,6 +34,12 @@ export async function runGatherMessage(args: {
     return;
   }
 
+  const refreshedGames = await countRefreshedImportedGames(
+    job.userId,
+    job.storefront,
+    job.createdAt
+  );
+
   const ownedGames = await fetchOwnedGames(job.storefrontAccountId);
   await upsertImportedGamesBatch(
     job.userId,
@@ -53,7 +60,7 @@ export async function runGatherMessage(args: {
   const plan = await recordGatherPlan(job.id, {
     totalToLookUp: candidates.length,
     lookedUp: candidates.length - needsLookup.length,
-    refreshedGames: 0,
+    refreshedGames,
     totalChunks: chunks.length,
   });
   if (!plan) {
