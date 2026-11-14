@@ -114,6 +114,10 @@ model Game {
   releaseDateCheckedAt DateTime?
   releaseDateMovedFrom DateTime?
   releaseDateMovedAt   DateTime?
+
+  importedGames ImportedGame[]
+
+  @@index([steamAppId])
 }
 
 enum ReleaseDatePrecision {
@@ -251,7 +255,11 @@ model ImportedGame {
   deletedAt        DateTime?
   userId           String
   User             user            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId           String?
+  game             Game?           @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  lookedUpAt       DateTime?
 
+  @@index([gameId])
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
   @@index([userId, playtime])
