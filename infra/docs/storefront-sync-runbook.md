@@ -375,7 +375,7 @@ gh variable list --repo "$GH_REPO"
 
 Expect the four names with the values from the table. No AWS secret (`AWS_ACCESS_KEY_ID` and the like) is needed or should be added: the role is assumed through OIDC.
 
-How the workflow uses it (for reference): the `deploy-lambdas` job (runs on `main` only, after `migrate`) declares `environment: production` and `permissions: { id-token: write, contents: read }`, then `aws-actions/configure-aws-credentials` with `role-to-assume: ${{ vars.AWS_LAMBDA_DEPLOY_ROLE_ARN }}` and `aws-region: ${{ vars.AWS_REGION }}`, then `aws lambda update-function-code` on `vars.STEAM_SYNC_GATHER_FUNCTION` and `vars.STEAM_SYNC_ENRICH_FUNCTION`. If you only set the variables as environment-scoped (`--env production`), the steps still work but the job-level skip condition does not.
+How the workflow uses it (for reference): the `deploy-lambdas` job (runs on `main` only, after `migrate`) declares `environment: production` and `permissions: { id-token: write, contents: read }`, then builds and smoke-checks the two Lambda bundles (`pnpm build:lambdas`, `pnpm smoke:lambdas`), then `aws-actions/configure-aws-credentials` with `role-to-assume: ${{ vars.AWS_LAMBDA_DEPLOY_ROLE_ARN }}` and `aws-region: ${{ vars.AWS_REGION }}`, then `aws lambda update-function-code` on `vars.STEAM_SYNC_GATHER_FUNCTION` and `vars.STEAM_SYNC_ENRICH_FUNCTION`. If you only set the variables as environment-scoped (`--env production`), the steps still work but the job-level skip condition does not.
 
 ## Step 8: smoke-test OIDC
 

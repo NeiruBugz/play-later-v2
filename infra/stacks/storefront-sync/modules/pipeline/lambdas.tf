@@ -33,6 +33,7 @@ resource "aws_lambda_function" "function" {
     variables = merge(
       {
         NODE_ENV               = "production"
+        NODE_OPTIONS           = "--enable-source-maps"
         LOG_LEVEL              = "info"
         SSM_PARAM_PREFIX       = local.ssm_parameter_prefix
         DB_POOL_MAX            = "2"
