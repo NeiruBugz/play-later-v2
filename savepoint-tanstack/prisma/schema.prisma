@@ -79,6 +79,7 @@ model user {
   JournalEntry             JournalEntry[]
   IgnoredImportedGames     IgnoredImportedGames[]
   ImportedGame             ImportedGame[]
+  ImportJob                ImportJob[]
   followers                Follow[]               @relation("UserIsFollowed")
   following                Follow[]               @relation("UserFollows")
 }
@@ -254,6 +255,48 @@ model ImportedGame {
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
   @@index([userId, playtime])
+}
+
+model ImportJob {
+  id                  String             @id @default(cuid())
+  userId              String
+  User                user               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storefront          Storefront
+  status              ImportJobStatus    @default(QUEUED)
+  addAllToLibrary     Boolean            @default(false)
+  storefrontAccountId String
+  totalToLookUp       Int                @default(0)
+  lookedUp            Int                @default(0)
+  totalChunks         Int                @default(0)
+  doneChunkIndexes    Int[]              @default([])
+  newGames            Int                @default(0)
+  refreshedGames      Int                @default(0)
+  addedToLibrary      Int                @default(0)
+  needsMatch          Int                @default(0)
+  failureCode         ImportFailureCode?
+  noticeSeenAt        DateTime?
+  finishedAt          DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([userId, storefront, createdAt(sort: Desc)])
+}
+
+enum ImportJobStatus {
+  QUEUED
+  GATHERING
+  LOOKING_UP
+  FINISHED
+  FAILED
+}
+
+enum ImportFailureCode {
+  PROFILE_PRIVATE
+  STEAM_UNAVAILABLE
+  RATE_LIMITED
+  STALLED
+  START_FAILED
+  UNKNOWN
 }
 
 enum Storefront {
