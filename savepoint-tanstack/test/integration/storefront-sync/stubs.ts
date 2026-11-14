@@ -65,6 +65,46 @@ export function stubSteam(
   return { release, fetchMock };
 }
 
+/**
+ * Stubs Steam GetOwnedGames with a raw JSON body, for the shapes `stubSteam`
+ * cannot produce: a private profile (`{ response: {} }`, or `game_count > 0`
+ * with no `games` array).
+ */
+export function stubSteamBody(body: unknown) {
+  const fetchMock = vi.fn(async (url: string) => {
+    if (!url.includes("GetOwnedGames")) {
+      throw new Error(`Unexpected Steam endpoint: ${url}`);
+    }
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  return { fetchMock };
+}
+
+/** Stubs Steam GetOwnedGames answering with a non-2xx HTTP status (429, 503, ...). */
+export function stubSteamHttpStatus(status: number) {
+  const fetchMock = vi.fn(async (url: string) => {
+    if (!url.includes("GetOwnedGames")) {
+      throw new Error(`Unexpected Steam endpoint: ${url}`);
+    }
+    return new Response("", { status });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  return { fetchMock };
+}
+
+/** Stubs Steam GetOwnedGames failing at the network level (no response at all). */
+export function stubSteamNetworkFailure() {
+  const fetchMock = vi.fn(async () => {
+    throw new TypeError("fetch failed");
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  return { fetchMock };
+}
+
 /** An IGDB `game` object as returned inside an `/external_games` row. */
 export interface IgdbCatalogueGame {
   id: number;

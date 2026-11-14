@@ -114,6 +114,9 @@ function makeGame(
   };
 }
 
+const STEAM_UNAVAILABLE_REASON =
+  "Steam is temporarily unavailable. Please try again later.";
+
 const LOOKED_UP_AT = new Date("2026-11-14T10:00:00.000Z");
 
 const unmatched = makeGame({
@@ -157,6 +160,10 @@ const elements = {
   queryLegacyImportButton: () =>
     screen.queryByRole("button", { name: /Import from Steam/ }),
   findSyncingButton: () => screen.findByRole("button", { name: "Syncing…" }),
+  queryGamesList: () => screen.queryByRole("list", { name: "Steam games" }),
+  queryGameTitle: (title: string) => screen.queryByText(title),
+  findFailureReason: (reason: string) => screen.findByText(reason),
+  queryFailureReason: (reason: string) => screen.queryByText(reason),
   queryConnectSyncLink: () =>
     screen.queryByRole("link", { name: "Connect Steam to sync" }),
   findFetchingStatus: () =>
@@ -297,6 +304,91 @@ describe("ImportedGamesPage", () => {
         "/settings/account"
       );
       expect(elements.querySyncButton()).toBeNull();
+    });
+  });
+
+  describe("given the person disconnected Steam after an earlier sync and still has games", () => {
+    beforeEach(() => {
+      renderPage(<ImportedGamesPage games={[found, pending]} steamId={null} />);
+    });
+
+    it("keeps listing their imported games", () => {
+      expect(elements.queryGamesList()).toBeInTheDocument();
+      expect(elements.queryGameTitle("Half-Life 2")).toBeInTheDocument();
+      expect(elements.queryEmptyConnect()).toBeNull();
+    });
+
+    it("shows 'Connect Steam to sync' to account settings in place of the Sync button", () => {
+      expect(elements.queryConnectSyncLink()).toHaveAttribute(
+        "href",
+        "/settings/account"
+      );
+      expect(elements.querySyncButton()).toBeNull();
+    });
+  });
+
+  describe("given the last sync failed and the list has games", () => {
+    beforeEach(() => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({
+          status: "FAILED",
+          failureCode: "STEAM_UNAVAILABLE",
+          finishedAt: new Date(),
+        })
+      );
+      renderPage(
+        <ImportedGamesPage games={[found]} steamId="76561198012345678" />
+      );
+    });
+
+    it("shows the failure reason above the list", async () => {
+      expect(
+        await elements.findFailureReason(STEAM_UNAVAILABLE_REASON)
+      ).toBeInTheDocument();
+    });
+
+    it("keeps the games and offers Sync again", () => {
+      expect(elements.queryGameTitle("Half-Life 2")).toBeInTheDocument();
+      expect(elements.querySyncButton()).not.toBeNull();
+    });
+  });
+
+  describe("given the last sync failed and the person has no games", () => {
+    beforeEach(() => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({
+          status: "FAILED",
+          failureCode: "STEAM_UNAVAILABLE",
+          finishedAt: new Date(),
+        })
+      );
+      renderPage(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
+    });
+
+    it("shows the failure reason instead of leaving the page silent", async () => {
+      expect(
+        await elements.findFailureReason(STEAM_UNAVAILABLE_REASON)
+      ).toBeInTheDocument();
+    });
+
+    it("offers Sync again", () => {
+      expect(elements.querySyncButton()).not.toBeNull();
+    });
+  });
+
+  describe("given the last sync finished", () => {
+    beforeEach(async () => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "FINISHED", finishedAt: new Date() })
+      );
+      renderPage(
+        <ImportedGamesPage games={[found]} steamId="76561198012345678" />
+      );
+      await vi.waitFor(() => expect(getSteamSyncStatusFn).toHaveBeenCalled());
+    });
+
+    it("shows no failure reason", () => {
+      expect(elements.queryFailureReason(STEAM_UNAVAILABLE_REASON)).toBeNull();
     });
   });
 

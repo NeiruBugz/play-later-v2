@@ -18,6 +18,10 @@
  *         disconnectSteamFn({ data: {} }) and on success fires
  *         toast.success("Steam disconnected") + router.invalidate.
  *       - On rejection fires toast.error(err.message) and does NOT invalidate.
+ *   - Optional `syncSlot?: ReactNode` (spec 030): rendered inside the card when
+ *     connected (the account route passes <SyncProgress variant="card"/>, so
+ *     steam-connect never imports storefront-sync); not rendered when the
+ *     account is not connected; the card is unchanged when it is omitted.
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -77,6 +81,7 @@ const elements = {
   queryDialog: () => screen.queryByRole("dialog"),
   querySteamIdText: (steamId: string) =>
     screen.queryByText(steamId, { exact: false }),
+  querySyncSlot: () => screen.queryByText("Sync slot content"),
   queryPrivacyHint: () =>
     screen.queryByText("check your Steam profile privacy settings", {
       exact: false,
@@ -160,6 +165,43 @@ describe("SteamConnectCard", () => {
 
     it("does not render the connect link in the connected state", () => {
       expect(elements.queryConnectLink()).toBeNull();
+    });
+  });
+
+  describe("given steamId is set and a syncSlot is passed", () => {
+    beforeEach(() => {
+      render(
+        <SteamConnectCard
+          steamId={STEAM_ID_64}
+          connectUrl={CONNECT_URL}
+          syncSlot={<p>Sync slot content</p>}
+        />
+      );
+    });
+
+    it("renders the slot content in the card", () => {
+      expect(elements.querySyncSlot()).toBeInTheDocument();
+    });
+
+    it("keeps the card's own controls", () => {
+      expect(elements.queryDisconnectButton()).not.toBeNull();
+      expect(elements.queryManageLink()).not.toBeNull();
+    });
+  });
+
+  describe("given steamId is null and a syncSlot is passed", () => {
+    beforeEach(() => {
+      render(
+        <SteamConnectCard
+          steamId={null}
+          connectUrl={CONNECT_URL}
+          syncSlot={<p>Sync slot content</p>}
+        />
+      );
+    });
+
+    it("does not render the slot", () => {
+      expect(elements.querySyncSlot()).toBeNull();
     });
   });
 

@@ -163,7 +163,7 @@ Conventions for every slice:
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 5: Failures are explained, stuck syncs recover, and the Steam card shows progress**
-  - [ ] RED tests:
+  - [x] RED tests:
     - **Integration:**
       - an empty Steam library becomes `FAILED(PROFILE_PRIVATE)` and the import page is unchanged;
       - Steam 5xx becomes `STEAM_UNAVAILABLE`, and 429 becomes `RATE_LIMITED`;
