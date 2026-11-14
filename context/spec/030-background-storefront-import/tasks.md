@@ -189,10 +189,10 @@ Conventions for every slice:
     - Account settings shows live progress during a sync.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
-- [ ] **Slice 6: Honest wording in "What's new"**
+- [x] **Slice 6: Honest wording in "What's new"**
   - [x] RED: update the `whats-new` test to expect the new Steam entry text and the bumped `CURRENT_VERSION`. **[Agent: testing]**
   - [x] Replace the Steam entry description in `features/whats-new/config.ts` with the spec 2.7.1 text and bump `CURRENT_VERSION`. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate.
     - In the app, the "What's new" modal shows the new Steam text exactly once.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
@@ -224,7 +224,7 @@ Conventions for every slice:
     - web env vars `STEAM_SYNC_GATHER_QUEUE_URL` and `AWS_SYNC_ROLE_ARN`;
     - the queue factory picks `sqs` or `inline`;
     - Preview deployments with no queue URL show sync as unavailable. **[Agent: aws-lambda-backend]**
-  - [ ] Bundling:
+  - [x] Bundling:
     - `scripts/build-lambdas.mjs` (esbuild, exact-pinned devDependency): ESM `.mjs`, `node22`, `createRequire` banner, `tsconfig.lambdas.json`, `define NODE_ENV=production`, `external pg-native`, sourcemap, metafile;
     - deterministic zips in `dist-lambdas/` (gitignored);
     - `scripts/smoke-lambda-bundle.mjs`: the metafile has no `@tanstack`, `better-auth`, `react` or S3 modules, and each handler imports with only the core env and acks a malformed record;
@@ -267,8 +267,8 @@ Conventions for every slice:
     - Delete any `.terraform/` dirs created during validation. **[Agent: aws-infra]**
 
 - [ ] **Slice 9: CI builds, checks and ships the Lambdas**
-  - [ ] `.github/workflows/pr-checks-tanstack.yml`: add `typecheck:lambdas`, `build:lambdas` (dummy DB URL for prisma generate) and `smoke:lambdas` to the quality job. **[Agent: aws-infra]**
-  - [ ] `.github/workflows/deploy.yml`: new `deploy-lambdas` job.
+  - [x] `.github/workflows/pr-checks-tanstack.yml`: add `typecheck:lambdas`, `build:lambdas` (dummy DB URL for prisma generate) and `smoke:lambdas` to the quality job. **[Agent: aws-infra]**
+  - [x] `.github/workflows/deploy.yml`: new `deploy-lambdas` job.
     - It has `needs: migrate`, `environment: production` and `permissions: {id-token: write, contents: read}`.
     - Steps: install, prisma generate, `build:lambdas`, `smoke:lambdas`, `aws-actions/configure-aws-credentials` (pinned, `role-to-assume: vars.AWS_LAMBDA_DEPLOY_ROLE_ARN`), `aws lambda update-function-code --architectures arm64` for both functions, then `aws lambda wait function-updated`.
     - The job skips cleanly when the vars aren't set yet. **[Agent: aws-infra]**
