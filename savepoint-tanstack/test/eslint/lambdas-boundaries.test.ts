@@ -2,10 +2,11 @@
  * RED regression guard for the `lambdas` layer rules (spec 030 tech 2.9).
  *
  * Contract (eslint.config.mjs, config loaded verbatim):
- *   `src/lambdas/**` may import `@/features/<slice>/api/*.worker`, `@/entities/*`
- *   and `@/shared/*`. It may NOT import `@/routes`, `@/widgets`, `@/app`,
+ *   `src/lambdas/**` may import `@/features/<slice>/api/*.worker`,
+ *   `@/features/<slice>/model/*`, `@/entities/*`, `@/shared/*` and other
+ *   `src/lambdas/**` files. It may NOT import `@/routes`, `@/widgets`, `@/app`,
  *   `react*`, `@tanstack/*`, `better-auth*`, or any feature file that is not an
- *   `api/*.worker`. Nothing outside `src/lambdas` may import it.
+ *   `api/*.worker` or `model/*`. Nothing outside `src/lambdas` may import it.
  * A violation is reported by `boundaries/dependencies` or `no-restricted-imports`.
  */
 import path from "node:path";
@@ -52,6 +53,14 @@ describe("lambdas layer — allowed imports", () => {
     ],
     ["shared code", `import { createLogger } from "@/shared/lib";`],
     ["a node built-in", `import { readFile } from "node:fs/promises";`],
+    [
+      "a sibling lambdas helper",
+      `import { processSqsBatch } from "../shared/sqs-batch";`,
+    ],
+    [
+      "a feature model file",
+      `import { gatherMessageSchema } from "@/features/storefront-sync/model/messages";`,
+    ],
   ])("accepts %s", async (_label, code) => {
     expect(await layerViolations(code)).toHaveLength(0);
   });
@@ -87,6 +96,10 @@ describe("lambdas layer — forbidden imports", () => {
     [
       "a feature barrel",
       `import { SyncStartButton } from "@/features/storefront-sync";`,
+    ],
+    [
+      "a feature ui file",
+      `import { SyncStartButton } from "@/features/storefront-sync/ui/sync-start-button";`,
     ],
   ])("reports %s", async (_label, code) => {
     expect((await layerViolations(code)).length).toBeGreaterThan(0);

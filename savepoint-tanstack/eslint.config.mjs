@@ -430,12 +430,12 @@ export default tseslint.config(
             },
             // ── lambdas ────────────────────────────────────────────────────
             // Handlers compose feature workers, entity queries and shared
-            // code. Nothing allows `lambdas` as a target, so no other layer
-            // may import a handler. Which feature files are reachable is
+            // code, and import sibling lambdas helpers. No other layer allows
+            // `lambdas` as a target, so none may import a handler. Which feature files are reachable is
             // narrowed by the no-restricted-imports block below.
             {
               from: "lambdas",
-              allow: ["feature", "entity", "shared"],
+              allow: ["lambdas", "feature", "entity", "shared"],
             },
             // ── shared ─────────────────────────────────────────────────────
             {
@@ -484,9 +484,10 @@ export default tseslint.config(
             {
               // Regex, not a negated glob: gitignore semantics cannot re-include
               // a file whose parent directory the glob already excluded.
-              regex: "^@/features(?!/[^/]+/api/[^/]+\\.worker$)",
+              regex:
+                "^@/features(?!/[^/]+/(?:api/[^/]+\\.worker|model/[^/]+)$)",
               message:
-                "Lambda handlers may import only `@/features/<slice>/api/*.worker` from features.",
+                "Lambda handlers may import only `@/features/<slice>/api/*.worker` and `@/features/<slice>/model/*` from features.",
             },
           ],
         },
