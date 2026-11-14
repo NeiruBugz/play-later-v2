@@ -1,10 +1,17 @@
 import { claimGather } from "@/entities/import-job/api/claim-gather.server";
+import { failImportJob } from "@/entities/import-job/api/fail-import-job.server";
 import { recordGatherPlan } from "@/entities/import-job/api/record-gather-plan.server";
+import type { ImportFailureCode } from "@/entities/import-job/model";
 import { countRefreshedImportedGames } from "@/entities/imported-game/api/count-refreshed-imported-games.server";
 import { findLookupCandidates } from "@/entities/imported-game/api/find-lookup-candidates.server";
 import { resolveImportedGamesFromCatalogue } from "@/entities/imported-game/api/resolve-imported-games-from-catalogue.server";
 import { upsertImportedGamesBatch } from "@/entities/imported-game/api/upsert-imported-games-batch.server";
 import type { SteamImportedGameInput } from "@/entities/imported-game/model/types";
+import {
+  SteamApiUnavailableError,
+  SteamProfilePrivateError,
+  SteamRateLimitError,
+} from "@/shared/api/steam/errors";
 import {
   fetchOwnedGames,
   type OwnedGame,
@@ -40,7 +47,11 @@ export async function runGatherMessage(args: {
     job.createdAt
   );
 
-  const ownedGames = await fetchOwnedGames(job.storefrontAccountId);
+  const ownedGames = await fetchOwnedGamesOrFailJob(job);
+  if (!ownedGames) {
+    return;
+  }
+
   await upsertImportedGamesBatch(
     job.userId,
     ownedGames.map(adaptOwnedGame),
@@ -81,6 +92,43 @@ export async function runGatherMessage(args: {
       lookupCount: rows.filter((row) => row.gameId === null).length,
     } satisfies EnrichMessage);
   }
+}
+
+async function fetchOwnedGamesOrFailJob(job: {
+  id: string;
+  storefrontAccountId: string;
+}): Promise<OwnedGame[] | null> {
+  try {
+    const ownedGames = await fetchOwnedGames(job.storefrontAccountId);
+    if (ownedGames.length > 0) {
+      return ownedGames;
+    }
+    await failImportJob(job.id, "PROFILE_PRIVATE");
+    return null;
+  } catch (error) {
+    const failureCode = toFailureCode(error);
+    if (failureCode === "UNKNOWN") {
+      logger.error(
+        { jobId: job.id, error },
+        "Unexpected error while fetching owned games"
+      );
+    }
+    await failImportJob(job.id, failureCode);
+    return null;
+  }
+}
+
+function toFailureCode(error: unknown): ImportFailureCode {
+  if (error instanceof SteamProfilePrivateError) {
+    return "PROFILE_PRIVATE";
+  }
+  if (error instanceof SteamApiUnavailableError) {
+    return "STEAM_UNAVAILABLE";
+  }
+  if (error instanceof SteamRateLimitError) {
+    return "RATE_LIMITED";
+  }
+  return "UNKNOWN";
 }
 
 function chunkRows<Row>(rows: Row[]): Row[][] {

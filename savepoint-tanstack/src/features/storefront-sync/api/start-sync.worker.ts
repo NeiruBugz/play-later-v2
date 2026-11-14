@@ -1,12 +1,15 @@
 import { z } from "zod";
 
 import { createImportJob } from "@/entities/import-job/api/create-import-job.server";
+import { failImportJob } from "@/entities/import-job/api/fail-import-job.server";
 import { getActiveImportJob } from "@/entities/import-job/api/get-active-import-job.server";
 import type { ImportJob } from "@/entities/import-job/model";
 import { prisma } from "@/shared/lib/db.server";
 import {
   ConflictError,
+  getErrorMessage,
   UnauthorizedError,
+  UpstreamError,
   ValidationError,
 } from "@/shared/lib/errors";
 
@@ -53,7 +56,15 @@ export async function startSteamSyncWorker(
     return toResult(active, true);
   }
 
-  await getSyncQueue().send("gather", { v: 1, jobId: created.id });
+  try {
+    await getSyncQueue().send("gather", { v: 1, jobId: created.id });
+  } catch (error) {
+    await failImportJob(created.id, "START_FAILED");
+    throw new UpstreamError("Could not start the sync, try again", {
+      jobId: created.id,
+      cause: getErrorMessage(error, "Queue send failed"),
+    });
+  }
   return toResult(created, false);
 }
 
