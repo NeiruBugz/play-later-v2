@@ -113,7 +113,7 @@ Conventions for every slice:
     - Pressing + on a found game opens the status choice straight away.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
-- [ ] **Slice 3: "Also add all games to my library" puts every found game into the library**
+- [x] **Slice 3: "Also add all games to my library" puts every found game into the library**
   - [x] RED tests:
     - **Integration:**
       - with the box ticked, found games are added: PLAYING if played in the last 7 days (a play is opened), WANT otherwise;
@@ -131,12 +131,12 @@ Conventions for every slice:
     - gather includes already-resolved rows in the chunks when add-all is on;
     - the job stores `addAllToLibrary` from `startSteamSyncFn`. **[Agent: tanstack-fullstack]**
   - [x] UI: the checkbox value now matters; no other UI change. Confirm the confirm dialog sends it, and that games added mid-sync drop off the import page on the next refresh. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - In the app, sync with the box ticked: the library gains the found games with the expected statuses, and needs-a-match games stay on the import page.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
-- [ ] **Slice 4: When a sync ends, SavePoint says so — live or on the next visit**
+- [x] **Slice 4: When a sync ends, SavePoint says so — live or on the next visit**
   - [x] RED tests:
     - **Integration:**
       - finalize computes `newGames` (excluding games in the library before the job), `refreshedGames` (at gather), `needsMatch` and `addedToLibrary` per tech §2.6;
@@ -156,7 +156,7 @@ Conventions for every slice:
     - toasts fire from an effect with `duration: Infinity`, one id per job;
     - fetch once per app load (staleTime 60 s), then poll every 20 s only while active or unseen;
     - `formatSyncSummary` in `features/storefront-sync/lib/`. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - In the app, start a sync, move to `/library`: "Steam sync finished" appears with a summary within 1 minute, and "Review games" opens the import page.
     - Start a sync, close the tab before it ends, open the app again: the message shows once, and a reload doesn't show it again.
