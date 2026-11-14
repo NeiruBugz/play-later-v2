@@ -310,7 +310,7 @@ All three server fns resolve the user with `requireUserId()`, validate twice, an
 | Terraform state loss (the existing roots have none) | Separate stack with S3 backend, versioning and a lockfile; existing roots untouched |
 | Secrets in state or the console | SSM SecureString with `ignore_changes`, fetched at cold start |
 | A non-unique `steamAppId` resolves ambiguously | `DISTINCT ON (steamAppId) ORDER BY createdAt`; a second app id for the same game falls back to IGDB |
-| Vercel Preview deployments can't sync | Only prod is wired to SQS; Preview runs without a queue URL and shows sync as unavailable — **Assumption**, see §5 |
+| Vercel Preview deployments can't sync | Only prod is wired to SQS; Preview runs without a queue URL and shows sync as unavailable (owner decision, §5) |
 
 ---
 
@@ -357,11 +357,16 @@ Every slice follows TDD: write the failing test first, then the code (repo metho
 
 ---
 
-## 5. Assumptions to confirm
+## 5. Decisions and remaining assumptions
 
-- **Code deploy.** Lambda code ships from `deploy.yml` via GitHub OIDC, not from local `terraform apply`.
-- **Environments.** Only the prod stack at first. Local dev and integration tests use `inline`. Vercel Preview has no sync. A dev stack plus a Neon branch comes later if needed.
-- **Terraform state.** An S3 backend bucket is bootstrapped once by hand. Terraform `1.14.6` is the pinned CLI version.
-- **Steam id mapping.** `Game.steamAppId` stays single-valued and non-unique; there's no mapping table yet.
-- **`whats-new`.** `CURRENT_VERSION` is bumped, so every user sees the corrected entry again.
-- **Max concurrency.** Gather 5 and enrich 2. Lambda region matches Neon and Vercel (Neon region not verified).
+**Confirmed by owner (2026-11-14):**
+- **Code deploy:** Lambda code ships from `deploy.yml` (`deploy-lambdas`, `needs: migrate`) via GitHub OIDC.
+- **Environments:** prod stack only. Local dev and integration tests use `inline`; Vercel Preview has no sync (no queue URL → sync shown as unavailable).
+- **Terraform state:** S3 backend (versioned, `use_lockfile`), bootstrapped once by hand.
+- **`whats-new`:** bump `CURRENT_VERSION`.
+
+**Assumptions (not yet confirmed):**
+- `Game.steamAppId` stays single-valued and non-unique; no mapping table yet.
+- Terraform CLI pinned at `1.14.6`.
+- Max concurrency: gather 5, enrich 2.
+- The Lambda region matches Neon and Vercel (Neon region not verified).
