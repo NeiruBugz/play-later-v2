@@ -197,7 +197,7 @@ Conventions for every slice:
     - In the app, the "What's new" modal shows the new Steam text exactly once.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
-- [ ] **Slice 7: The pipeline runs as Lambda bundles (built and smoke-tested locally; the app still runs inline)**
+- [x] **Slice 7: The pipeline runs as Lambda bundles (built and smoke-tested locally; the app still runs inline)**
   - [x] RED tests:
     - **Unit** `src/lambdas/steam-sync-{gather,enrich}/handler.test.ts`:
       - SQS event parsing;
@@ -230,13 +230,13 @@ Conventions for every slice:
     - `scripts/smoke-lambda-bundle.mjs`: the metafile has no `@tanstack`, `better-auth`, `react` or S3 modules, and each handler imports with only the core env and acks a malformed record;
     - package scripts `build:lambdas` (runs prisma generate first) and `smoke:lambdas`. **[Agent: aws-lambda-backend]**
   - [x] ESLint: add a `lambdas` boundaries element and a `no-restricted-imports` block for `src/lambdas/**` (tech §2.9). **[Agent: tanstack-fullstack]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate plus `typecheck:lambdas`, `build:lambdas` and `smoke:lambdas`.
     - Confirm both zips hold only `index.mjs` and `.map`, and report their sizes.
     - Run the app with `inline` and do one sync, to show the web path is unchanged.
     - Delete `dist-lambdas/` and artifacts, and stop the server by PID. **[Agent: testing]**
 
-- [ ] **Slice 8: AWS stack and the owner runbook (GitHub ↔ AWS, Vercel ↔ AWS)**
+- [x] **Slice 8: AWS stack and the owner runbook (GitHub ↔ AWS, Vercel ↔ AWS)**
   - [x] Terraform `infra/stacks/storefront-sync/` (tech §2.10):
     - `modules/pipeline/`: 2 queues + DLQs, 2 Lambdas from a committed stub with `ignore_source_code_hash`, event source mappings (`ReportBatchItemFailures`, max concurrency gather 5 / enrich 2), 7-day log groups, 4 SSM SecureString params with `ignore_changes`, least-privilege roles, required tags;
     - `shared/`: the Vercel and GitHub OIDC providers;
@@ -259,20 +259,20 @@ Conventions for every slice:
     - add an ADR for SQS + Lambda over Vercel Queues;
     - bump the doc version.
     - Note in spec 003 that background matching supersedes on-demand matching. **[Agent: aws-infra]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run `terraform fmt -check -recursive` and `terraform init -backend=false && terraform validate` in each stack root.
     - Check that the stack has no references to `infra/envs/*`.
     - Have `checkov` or `trivy config` scan the stack if available; otherwise, say it was skipped.
     - Read the runbook start to finish and confirm every variable it names exists in `env.ts`/`env.core.ts` and in the Terraform outputs.
     - Delete any `.terraform/` dirs created during validation. **[Agent: aws-infra]**
 
-- [ ] **Slice 9: CI builds, checks and ships the Lambdas**
+- [x] **Slice 9: CI builds, checks and ships the Lambdas**
   - [x] `.github/workflows/pr-checks-tanstack.yml`: add `typecheck:lambdas`, `build:lambdas` (dummy DB URL for prisma generate) and `smoke:lambdas` to the quality job. **[Agent: aws-infra]**
   - [x] `.github/workflows/deploy.yml`: new `deploy-lambdas` job.
     - It has `needs: migrate`, `environment: production` and `permissions: {id-token: write, contents: read}`.
     - Steps: install, prisma generate, `build:lambdas`, `smoke:lambdas`, `aws-actions/configure-aws-credentials` (pinned, `role-to-assume: vars.AWS_LAMBDA_DEPLOY_ROLE_ARN`), `aws lambda update-function-code --architectures arm64` for both functions, then `aws lambda wait function-updated`.
     - The job skips cleanly when the vars aren't set yet. **[Agent: aws-infra]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run `actionlint` on both workflows; if it isn't installed, run it through `npx` or docker, or report it as skipped.
     - Run the gate locally, including the lambda scripts.
     - Confirm the deploy job's skip condition with the variables unset.
