@@ -28,7 +28,7 @@ Conventions for every slice:
 
 ---
 
-- [ ] **Slice 1: Pressing Sync starts a background sync that brings in the Steam library and shows "Fetching your Steam library…"**
+- [x] **Slice 1: Pressing Sync starts a background sync that brings in the Steam library and shows "Fetching your Steam library…"**
   - [x] RED tests:
     - **Integration** (`test/integration/storefront-sync/start-and-gather.integration.test.ts`):
       - `startSteamSyncWorker` creates a QUEUED job;
@@ -58,7 +58,7 @@ Conventions for every slice:
     - `ui/sync-progress/` (stage text, `role="status"`, polls `["storefront-sync","status","STEAM"]` every 3 s while active);
     - in `widgets/imported-games-page`, replace the "Import from Steam" button and empty-state action with the Sync button, and call `router.invalidate()` when the status changes;
     - delete the `import-status-feedback` toasts and their exports and tests (spec 2.7.2). **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - Start the app and open `/steam/games`. Press Sync, then Start sync: "Fetching your Steam library…" appears, the button reads "Syncing…", and games appear when the sync finishes.
     - In a second tab, Sync is disabled while the first sync is running.
@@ -66,7 +66,7 @@ Conventions for every slice:
     - Stop the server by PID and delete artifacts. **[Agent: testing]**
 
 - [ ] **Slice 2: Every game is looked up in the catalogue — found games show cover and year, the rest say "Needs a match"**
-  - [ ] RED tests:
+  - [x] RED tests:
     - **Unit** `shared/api/igdb/match-steam-games.unit.test.ts`:
       - query shape: `external_game_source = 1`, quoted uids, `limit 500`, `release_dates` fields;
       - dedupe per uid (main game, then lowest id);

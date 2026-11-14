@@ -2,11 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { ImportedGameWithGame } from "@/entities/imported-game/model/types";
 
 import { ImportedGameCard } from "./imported-game-card";
 
-const baseGame: ImportedGame = {
+const baseGame: ImportedGameWithGame = {
   id: "ig-1",
   name: "Half-Life 2",
   storefront: "STEAM",
@@ -23,6 +23,28 @@ const baseGame: ImportedGame = {
   updatedAt: new Date(),
   deletedAt: null,
   userId: "u-1",
+  gameId: null,
+  lookedUpAt: null,
+  game: null,
+};
+
+const HALF_LIFE_COVER =
+  "https://images.igdb.com/igdb/image/upload/t_cover_big/co1nmw.jpg";
+
+const foundGame: ImportedGameWithGame = {
+  ...baseGame,
+  gameId: "game-1",
+  lookedUpAt: new Date("2026-11-14T10:00:00.000Z"),
+  game: {
+    title: "Half-Life 2",
+    coverImage: HALF_LIFE_COVER,
+    releaseDate: new Date("2004-11-16T00:00:00.000Z"),
+  },
+};
+
+const needsMatchGame: ImportedGameWithGame = {
+  ...baseGame,
+  lookedUpAt: new Date("2026-11-14T10:00:00.000Z"),
 };
 
 const elements = {
@@ -34,6 +56,12 @@ const elements = {
     screen.queryByRole("button", { name: "Restore Half-Life 2" }),
   queryName: () => screen.queryByText("Half-Life 2"),
   queryLastPlayed: () => screen.queryByText(/last played/),
+  queryNeedsMatchBadge: () => screen.queryByText("Needs a match"),
+  queryYear: () => screen.queryByText("2004"),
+  queryCover: () =>
+    screen.queryByRole("img", { name: "Cover for Half-Life 2" }),
+  getImage: () => screen.getByRole("img"),
+  getTitleHeading: (name: string) => screen.getByRole("heading", { name }),
 };
 
 describe("ImportedGameCard", () => {
@@ -183,6 +211,136 @@ describe("ImportedGameCard", () => {
 
     it("does NOT render the dismiss button (already ignored)", () => {
       expect(elements.queryDismissButton()).toBeNull();
+    });
+  });
+  describe("given a game the sync found in the catalogue", () => {
+    beforeEach(() => {
+      render(
+        <ImportedGameCard
+          game={foundGame}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("shows the catalogue cover", () => {
+      expect(elements.queryCover()).toHaveAttribute(
+        "src",
+        expect.stringContaining("images.igdb.com/igdb/image/upload/")
+      );
+      expect(elements.queryCover()).toHaveAttribute(
+        "src",
+        expect.stringContaining("co1nmw.jpg")
+      );
+    });
+
+    it("shows the release year", () => {
+      expect(elements.queryYear()).not.toBeNull();
+    });
+
+    it("does not say the game needs a match", () => {
+      expect(elements.queryNeedsMatchBadge()).toBeNull();
+    });
+
+    it("still offers the Add action", () => {
+      expect(elements.queryAddButton()).not.toBeNull();
+    });
+  });
+
+  describe("given a found game whose catalogue title differs from its Steam name", () => {
+    beforeEach(() => {
+      render(
+        <ImportedGameCard
+          game={{ ...foundGame, name: "HALF-LIFE 2 (Steam edition)" }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("heads the card with the catalogue title", () => {
+      expect(elements.getTitleHeading("Half-Life 2")).toBeInTheDocument();
+    });
+  });
+
+  describe("given a found game with no catalogue cover", () => {
+    beforeEach(() => {
+      render(
+        <ImportedGameCard
+          game={{
+            ...foundGame,
+            img_icon_url: "abc123",
+            game: { ...foundGame.game!, coverImage: null },
+          }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("falls back to the Steam icon", () => {
+      expect(elements.getImage()).toHaveAttribute(
+        "src",
+        "https://media.steampowered.com/steamcommunity/public/images/apps/220/abc123.jpg"
+      );
+    });
+  });
+
+  describe("given a found game with no release date", () => {
+    it("shows no year", () => {
+      const { container } = render(
+        <ImportedGameCard
+          game={{
+            ...foundGame,
+            game: { ...foundGame.game!, releaseDate: null },
+          }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+
+      expect(container).not.toHaveTextContent(/\d{4}/);
+    });
+  });
+
+  describe("given a game that was looked up but not matched", () => {
+    beforeEach(() => {
+      render(
+        <ImportedGameCard
+          game={{ ...needsMatchGame, img_icon_url: "abc123" }}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("says the game needs a match", () => {
+      expect(elements.queryNeedsMatchBadge()).not.toBeNull();
+    });
+
+    it("shows the Steam icon and no year", () => {
+      expect(elements.getImage()).toHaveAttribute(
+        "src",
+        "https://media.steampowered.com/steamcommunity/public/images/apps/220/abc123.jpg"
+      );
+      expect(elements.queryYear()).toBeNull();
+    });
+  });
+
+  describe("given a game that was not looked up yet", () => {
+    beforeEach(() => {
+      render(
+        <ImportedGameCard
+          game={baseGame}
+          onAddToLibrary={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      );
+    });
+
+    it("does not say the game needs a match", () => {
+      expect(elements.queryNeedsMatchBadge()).toBeNull();
     });
   });
 });

@@ -62,6 +62,7 @@ import { runGatherMessage } from "@/features/storefront-sync/api/gather.worker";
 import { getSteamSyncStatusWorker } from "@/features/storefront-sync/api/get-sync-status.worker";
 import { drainInlineSyncQueue } from "@/features/storefront-sync/api/inline-queue";
 import { startSteamSyncWorker } from "@/features/storefront-sync/api/start-sync.worker";
+import { igdbFetch } from "@/shared/api/igdb/fetch";
 import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
 
 import { createUser } from "../../factories/index.ts";
@@ -69,10 +70,18 @@ import {
   setupIsolatedDatabase,
   type IsolatedDatabase,
 } from "../../setup/isolated-db.ts";
+import {
+  externalGamesResponder,
+  STEAM_ID_64,
+  stubSteam,
+  THREE_GAMES,
+} from "./stubs.ts";
 
 vi.hoisted(() => {
   process.env.STOREFRONT_SYNC_QUEUE = "inline";
 });
+
+vi.mock("@/shared/api/igdb/fetch", () => ({ igdbFetch: vi.fn() }));
 
 let db: IsolatedDatabase;
 
@@ -83,49 +92,6 @@ beforeAll(async () => {
 afterAll(async () => {
   await db?.teardown();
 });
-
-const STEAM_ID_64 = "76561198012345678";
-
-interface RawSteamGame {
-  appid: number;
-  name: string;
-  playtime_forever: number;
-  playtime_windows_forever?: number;
-  playtime_mac_forever?: number;
-  playtime_linux_forever?: number;
-  rtime_last_played?: number;
-}
-
-const THREE_GAMES: RawSteamGame[] = [
-  { appid: 730, name: "Counter-Strike 2", playtime_forever: 1200 },
-  { appid: 440, name: "Team Fortress 2", playtime_forever: 0 },
-  { appid: 570, name: "Dota 2", playtime_forever: 600 },
-];
-
-/**
- * Stubs Steam GetOwnedGames. With `hold`, the response waits for `release()`,
- * which keeps the job active (GATHERING) so "second start" is deterministic.
- */
-function stubSteam(games: RawSteamGame[], options: { hold?: boolean } = {}) {
-  let release: () => void = () => {};
-  const gate = options.hold
-    ? new Promise<void>((resolve) => {
-        release = resolve;
-      })
-    : Promise.resolve();
-  const fetchMock = vi.fn(async (url: string) => {
-    if (!url.includes("GetOwnedGames")) {
-      throw new Error(`Unexpected Steam endpoint: ${url}`);
-    }
-    await gate;
-    return new Response(
-      JSON.stringify({ response: { game_count: games.length, games } }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  });
-  vi.stubGlobal("fetch", fetchMock);
-  return { release, fetchMock };
-}
 
 const elements = {
   countImportJobs: (userId: string) =>
@@ -142,6 +108,8 @@ const elements = {
 let aliceId: string;
 
 beforeEach(async () => {
+  vi.mocked(igdbFetch).mockReset();
+  vi.mocked(igdbFetch).mockImplementation(externalGamesResponder({}));
   await db.prisma.importJob.deleteMany();
   await db.prisma.importedGame.deleteMany();
   await db.prisma.user.deleteMany();

@@ -44,6 +44,14 @@ const baseGame: ImportedGame = {
   updatedAt: new Date(),
   deletedAt: null,
   userId: "u-1",
+  gameId: null,
+  lookedUpAt: null,
+};
+
+const foundGame: ImportedGame = {
+  ...baseGame,
+  gameId: "game-1",
+  lookedUpAt: new Date("2026-11-14T10:00:00.000Z"),
 };
 
 const elements = {
@@ -105,6 +113,30 @@ describe(ImportGameModal, () => {
         }),
       });
       const call = vi.mocked(importGameToLibraryFn).mock.calls[0]?.[0];
+      expect(call?.data).not.toHaveProperty("manualIgdbId");
+    });
+  });
+
+  describe("given a game the sync already found in the catalogue", () => {
+    beforeEach(async () => {
+      vi.mocked(importGameToLibraryFn).mockResolvedValue({
+        libraryItemId: 1,
+        gameId: "game-1",
+        gameSlug: "half-life-2",
+      } as never);
+      render(<ImportGameModal isOpen game={foundGame} onClose={vi.fn()} />);
+      await actions.clickImport();
+    });
+
+    it("goes straight to the status choice, never to the manual match", () => {
+      expect(elements.querySearchInput()).toBeNull();
+      expect(elements.queryStatusTrigger()).not.toBeNull();
+    });
+
+    it("adds the game without asking for a manual match", () => {
+      const call = vi.mocked(importGameToLibraryFn).mock.calls[0]?.[0];
+
+      expect(call?.data).toMatchObject({ importedGameId: "ig-1" });
       expect(call?.data).not.toHaveProperty("manualIgdbId");
     });
   });

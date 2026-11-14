@@ -8,6 +8,11 @@
  *     queryFn is `getSteamSyncStatusFn()` from `../../api/get-steam-sync-status`.
  *   - While a job is GATHERING it renders a `role="status"` region reading
  *     "Fetching your Steam library…"; with no active job it renders nothing.
+ *   - While a job is LOOKING_UP (totalToLookUp > 0) the region's accessible
+ *     name is "Looking up your games" (the live region announces the stage
+ *     only) and its visible text is "Looking up your games — {lookedUp} of
+ *     {total}", where the count "{lookedUp} of {total}" sits in its own
+ *     `aria-hidden` span, numbers formatted with toLocaleString("en-US").
  */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
@@ -52,6 +57,11 @@ const elements = {
   findFetchingStatus: () =>
     screen.findByRole("status", { name: "Fetching your Steam library…" }),
   queryStatus: () => screen.queryByRole("status"),
+  findLookingUpStatus: () =>
+    screen.findByRole("status", { name: "Looking up your games" }),
+  findCount: (count: string, timeout = 1000) =>
+    screen.findByText(count, undefined, { timeout }),
+  queryCount: (count: string) => screen.queryByText(count),
 };
 
 describe("SyncProgress", () => {
@@ -99,5 +109,57 @@ describe("SyncProgress", () => {
     it("shows nothing", () => {
       expect(elements.queryStatus()).toBeNull();
     });
+  });
+  describe.each(["page", "card"] as const)(
+    "given the %s variant and a sync that is looking up 340 of 1,200 games",
+    (variant) => {
+      beforeEach(() => {
+        vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+          makeStatus({
+            status: "LOOKING_UP",
+            totalToLookUp: 1200,
+            lookedUp: 340,
+          })
+        );
+        renderProgress(variant);
+      });
+
+      it("announces the stage without the changing numbers", async () => {
+        expect(await elements.findLookingUpStatus()).toBeInTheDocument();
+      });
+
+      it("shows how far the lookup has got, with thousands separated", async () => {
+        expect(await elements.findCount("340 of 1,200")).toBeInTheDocument();
+      });
+    }
+  );
+
+  describe("given the lookup moves on between two polls", () => {
+    beforeEach(async () => {
+      vi.mocked(getSteamSyncStatusFn)
+        .mockResolvedValueOnce(
+          makeStatus({
+            status: "LOOKING_UP",
+            totalToLookUp: 1200,
+            lookedUp: 340,
+          })
+        )
+        .mockResolvedValue(
+          makeStatus({
+            status: "LOOKING_UP",
+            totalToLookUp: 1200,
+            lookedUp: 800,
+          })
+        );
+      renderProgress("page");
+      await elements.findCount("340 of 1,200");
+    });
+
+    it("updates the count without a reload", async () => {
+      expect(
+        await elements.findCount("800 of 1,200", 5000)
+      ).toBeInTheDocument();
+      expect(elements.queryCount("340 of 1,200")).toBeNull();
+    }, 8000);
   });
 });
