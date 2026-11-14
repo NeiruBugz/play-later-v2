@@ -3,7 +3,6 @@ export {
   fetchSteamGamesFn,
   dismissImportedGameFn,
 } from "./api";
-export { calculateSmartStatus } from "./lib/calculate-smart-status";
 export {
   ImportedGameCard,
   IgdbManualSearch,

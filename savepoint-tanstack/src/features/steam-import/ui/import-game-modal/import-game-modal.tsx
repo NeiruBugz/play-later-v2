@@ -2,12 +2,12 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { calculateSmartStatus } from "@/entities/imported-game";
 import {
   getStatusLabel,
   LIBRARY_STATUS_VALUES,
 } from "@/entities/library-item/model";
 import { importGameToLibraryFn } from "@/features/steam-import/api/import-game-to-library";
-import { calculateSmartStatus } from "@/features/steam-import/lib/calculate-smart-status";
 import { formatAbsoluteDate, formatHours } from "@/shared/lib/date";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui/button";

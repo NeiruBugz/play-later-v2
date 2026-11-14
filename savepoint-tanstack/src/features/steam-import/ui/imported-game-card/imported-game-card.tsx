@@ -1,5 +1,6 @@
 import { Plus, X } from "lucide-react";
 
+import { calculateSmartStatus } from "@/entities/imported-game";
 import { getStatusLabel } from "@/entities/library-item";
 import { formatHours } from "@/shared/lib/date";
 import { buildCoverImageUrl } from "@/shared/lib/igdb-image";
@@ -8,7 +9,6 @@ import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 
-import { calculateSmartStatus } from "../../lib/calculate-smart-status";
 import type { ImportedGameCardProps } from "./imported-game-card.type";
 import {
   formatLastPlayed,

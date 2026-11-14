@@ -22,7 +22,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const daysAgo = (days: number) => new Date(NOW.getTime() - days * DAY_MS);
 
 beforeEach(() => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(NOW);
 });
 
