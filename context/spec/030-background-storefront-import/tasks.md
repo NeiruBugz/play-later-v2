@@ -1,4 +1,3 @@
-<!-- not-user-reviewed -->
 # Tasks: Background Steam sync (spec 030)
 
 - **Functional spec:** [functional-spec.md](./functional-spec.md)
