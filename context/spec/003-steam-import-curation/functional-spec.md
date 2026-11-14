@@ -161,3 +161,10 @@ A streamlined curation interface that:
 - Configurable thresholds (7-day recency is fixed for MVP)
 - Infinite scroll (pagination chosen instead)
 - Restore dismissed games (future enhancement)
+
+
+---
+
+## Change Log
+
+- 2026-11-14 — spec 030 (background storefront import) — On-demand IGDB matching at single-game add (§2.7) is superseded by background matching during sync (spec 030, `context/spec/030-background-storefront-import/`): games are matched in bulk as the library syncs, and `ImportedGame` rows carry the resolved catalogue game. Manual IGDB search/match is kept as the fallback for games the sync could not match. The requirements above are unchanged.

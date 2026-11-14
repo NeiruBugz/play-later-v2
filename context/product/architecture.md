@@ -116,7 +116,11 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 - First-lookup games are upserted into the local `Game` table (durable cache)
 - **Release-date mapping (spec 029):** `mapIgdbReleaseDate` in `src/shared/api/igdb/release-date.ts` turns IGDB's `first_release_date` plus its dated `release_dates` entries (`date_format`: 0 day, 1 month, 2 year, 3–6 quarters Q1–Q4, 7 TBD) into `{ releaseDate, precision }`. It picks the most precise entry that carries the first-release timestamp, rebuilds the period start from `y`/`m` (IGDB's placeholder `date` differs by format), and treats "no first release date and every entry TBD/undated" as TBA. Unknown formats return `"unknown"` and only stamp the check. The batch refresh lives in `getGamesReleaseInfoByIgdbIds` (any transport failure → `UpstreamError`). Formats were pinned from live responses (`src/shared/api/igdb/__fixtures__/`, owner-run `inspect:igdb-release-dates`).
 
-**Steam:** account connect/disconnect + profile read are active (OpenID assertion verified against Steam before trust). Library import / sync surfaces exist but the AWS Lambda enrichment pipeline that powered deep sync was retired (spec 015); PSN/Xbox remain paused on the same dependency.
+**Steam:** account connect/disconnect + profile read are active (OpenID assertion verified against Steam before trust). Library import / sync surfaces exist; the original Lambda enrichment pipeline was retired (spec 015) and is **reinstated as a background sync (spec 030)**. PSN/Xbox are no longer blocked on a missing pipeline: they reuse the same `ImportJob` + queue transport and are separate specs.
+
+- **Background Steam sync (spec 030):** the user clicks "Sync" (never scheduled). `startSteamSyncFn` inserts an `ImportJob` row (partial unique index: one active job per user + storefront) and sends one message to SQS `gather-q`. **λ gather** fetches the Steam library, upserts `ImportedGame` rows, resolves what the shared `Game` catalogue already knows via `Game.steamAppId`, and chunks the rest (≤200) onto `enrich-q`. **λ enrich** (max concurrency 2) makes one batched IGDB `/external_games` request per chunk, upserts `Game`, links `ImportedGame.gameId`, optionally adds games to the library, and records progress once per chunk (`doneChunkIndexes`, since SQS is at-least-once). The web app polls `getSteamSyncStatusFn` only while a job is active or its notice is unseen. Handlers in `src/lambdas/` are thin adapters over `features/storefront-sync/api/*.worker.ts`, so the coverage gate covers the policy. A `SyncQueue` port has `sqs` and `inline` transports (`STOREFRONT_SYNC_QUEUE`; `inline` runs in-process for dev/tests and is rejected when `NODE_ENV=production`).
+- **IGDB matching moves to sync time (spec 030):** games are matched in bulk during the sync, superseding spec 003's on-demand matching at single-game add; the manual IGDB search stays as the fallback for unmatched rows. `ImportedGame` is the staging store (new `gameId` FK + `lookedUpAt`, independent of `igdbMatchStatus`, which remains user curation) — no S3 staging.
+- **IGDB rate limit:** IGDB allows ~4 req/s globally (8 open requests), so the queue consumer is the rate limiter (`enrich-q` max concurrency 2, ≤1 IGDB request per message, shared pacer in `shared/api/igdb`); 429/5xx/timeouts retry through the queue (`ReportBatchItemFailures`), no in-Lambda sleeping.
 
 **File Storage (avatars):** AWS S3 (LocalStack locally). Presigned PUT via `getAvatarPresignedUrlFn` (MIME allow-list + 10 MB cap, enforced server-side); key scoped `${S3_AVATAR_PATH_PREFIX}${userId}/${uuid}.<ext>`.
 
@@ -135,7 +139,15 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 
 **File Storage / Auth:** AWS S3 (avatars) + AWS Cognito (identity). Both provisioned via Terraform in `infra/` (currently Cognito + S3 modules).
 
-**Infrastructure as Code:** Terraform (`infra/`), `dev` / `prod` envs, local state per env.
+**Background sync pipeline (spec 030):** a second, AWS-side compute path next to Vercel, provisioned by the isolated stack `infra/stacks/storefront-sync/` (`modules/pipeline/`, account-level `shared/`, per-env roots).
+
+- **Resources per env:** two SQS queues (`gather-q`, `enrich-q`), each with a DLQ (retention 4 days, DLQ 14 days, SSE-SQS, `maxReceiveCount 3`); two Lambdas (`nodejs22.x`, arm64, 512 MB; gather 120 s, enrich 60 s) created from a committed stub with `ignore_source_code_hash` because code ships from CI; event source mappings with `ReportBatchItemFailures` and `scaling_config.maximum_concurrency` (gather 5, enrich 2), no reserved concurrency; four SSM SecureString parameters created with a placeholder and `ignore_changes` (real values set by the owner with `aws ssm put-parameter`). No VPC/NAT/Secrets Manager: the Lambdas reach Neon through its pooled URL (pool size 1).
+- **Identity:** no long-lived keys. Vercel assumes an OIDC role limited to `sqs:SendMessage` on `gather-q`; GitHub Actions assumes an OIDC role limited to `lambda:UpdateFunctionCode` on the two functions. Both OIDC providers live in `shared/`.
+- **State and isolation:** S3 backend with `use_lockfile = true`; the stack never reads or modifies the stateless `infra/envs/*` roots (live Cognito/S3). Terraform and provider versions are exact-pinned. Applies, `put-parameter` and the first deploy are owner steps: `infra/docs/storefront-sync-runbook.md`.
+- **Code delivery:** `deploy.yml` gains a `deploy-lambdas` job — `scripts/build-lambdas.mjs` (esbuild, ESM, deterministic zips in `dist-lambdas/`), then GitHub OIDC → `update-function-code` for both functions. The Lambda bundle is smoke-checked in CI to contain no `@tanstack`, `better-auth`, React or S3 modules.
+- **Env split:** Lambdas validate only `env.core.ts` (`coreEnv`: DB, IGDB, Steam key, log level, queue URL and tuning), never the web-only `env.ts`.
+
+**Infrastructure as Code:** Terraform (`infra/`), `dev` / `prod` envs, local state per env for the Cognito + S3 roots; the storefront-sync stack uses remote S3 state (see above).
 
 **Local Development:**
 
@@ -159,7 +171,8 @@ The TanStack rewrite deliberately replaced the prior four-layer (handler → use
 - **Application logging:** Pino (structured JSON), surfaced through Vercel's runtime/function logs. Log levels `error`/`warn`/`info`/`debug` configurable via `LOG_LEVEL`.
 - **Platform:** Vercel deployment + function logs and built-in analytics for request/latency/error signals.
 - **Database:** Neon's built-in metrics + slow-query insight.
-- **Solo-developer context:** observability stays platform-native (Vercel + Neon) to minimize operational overhead — no self-managed CloudWatch/APM stack.
+- **Background sync Lambdas (spec 030):** structured pino logs (`{jobId, userId, messageId, receiveCount}`; `steamId64` is never logged) go to explicit CloudWatch log groups, `/aws/lambda/savepoint-<env>-storefront-<stage>`, 7-day retention, managed in Terraform. Failures are inspected there plus in the two DLQs (read the message, fix, redrive from the SQS console). `ImportJob.updatedAt` doubles as a heartbeat: a job with no progress for 30 minutes is expired lazily to `FAILED(STALLED)` on the next read, so a user is never stuck on a dead job. DLQ alarms are deferred.
+- **Solo-developer context:** observability stays platform-native (Vercel + Neon) to minimize operational overhead — no self-managed APM stack; the only CloudWatch surface is the Lambda log groups above, read on demand with no dashboards or alarms.
 
 ---
 
@@ -245,15 +258,24 @@ TanStack Start's `import-protection` forbids `*.server.*` in the client bundle. 
 **ADR-008: Why refresh release dates on open instead of a cron job?** (spec 029)
 Release dates move, and the app only ever shows them to someone who has opened it, so correcting a game's date when its owner opens Home or the Library gives the same visible freshness as a scheduler with no extra infrastructure (no Vercel cron, no queue, no secrets, no cold-start budget). Work is bounded (≤100 games per visit, throttled by `releaseDateCheckedAt`), never blocks rendering, and a compare-and-set write keeps concurrent visits from double-recording a move. The trade-off is that a change shows on the *next* open and that an unopened account is not refreshed — acceptable because there are no alerts outside the app. Revisit only if notifications while the app is closed are ever added.
 
+**ADR-009: Why SQS + Lambda for the background storefront sync (over Vercel Queues or in-request work)?** (spec 030)
+A library sync is hundreds of IGDB lookups that must stay under IGDB's ~4 req/s global limit, which a serverless request cannot do within its time budget, so the work moves to a queue. The queue consumer *is* the rate limiter: `enrich-q` runs at max concurrency 2 with one batched IGDB request per message, and retries ride SQS visibility timeouts and DLQs instead of in-function sleeping. Vercel Queues is included on Hobby, but Hobby is non-commercial with a 300 s function ceiling, and the owner preferred AWS and accepted a second cloud; the Vercel runtime stays the web tier. At hobby scale the Lambda always-free tier (1M requests + 400k GB-s/month) covers the workload at about $0 (roughly $28/month only at ~10k daily syncs), and SQS is free at this volume. Two Lambdas (gather, enrich) keep one path for every storefront, so Xbox/PSN reuse it. S3 staging was dropped: `ImportedGame` already is the staging store. The stack is isolated (`infra/stacks/storefront-sync/`, own remote state) so it never risks the hand-edited Cognito/S3 roots. Trade-offs: a second cloud to operate (CloudWatch logs, deploy-time `update-function-code`, OIDC roles) and a separate Lambda bundle with its own env schema; accepted because it is owner-triggered, low-volume and cheap. Revisit if Vercel Queues/Functions fit a commercial plan or the sync moves to scheduled fan-out.
+
 ---
 
 **Document Metadata:**
 
-- **Version:** 3.1
-- **Last Updated:** 2026-11-13 (release dates — spec 029)
+- **Version:** 3.2
+- **Last Updated:** 2026-11-14 (background storefront sync — spec 030)
 - **Status:** Active
 - **Maintained By:** Solo developer with AI assistance
 - **Review Cadence:** After each major phase completion
+- **Changes in v3.2:**
+  - §4: replaced the stale "paused on dependency" Steam line; background Steam sync pipeline (SQS gather/enrich + Lambdas, `ImportJob`, bulk IGDB matching at sync time) and the IGDB rate-limit design. Spec 030 text, being implemented.
+  - §5: background sync pipeline infra (`infra/stacks/storefront-sync/`: SQS + DLQs, Lambdas from a stub, SSM, Vercel/GitHub OIDC roles, remote S3 state), `deploy-lambdas` job, `env.core.ts` split.
+  - §6: CloudWatch log groups (7-day retention) for the Lambdas, DLQ inspection, job heartbeat/stall expiry.
+  - ADR-009: SQS + Lambda over Vercel Queues.
+  - Spec 003 gains a Change Log note: background matching supersedes on-demand matching at single-game add.
 - **Changes in v3.1:**
   - §3: `Game` release precision (`ReleaseDatePrecision`), `releaseDateCheckedAt`, moved-from marker and its three `CHECK` constraints; lazy refresh-on-open (client-fired POST, compare-and-set, no cron) under caching.
   - §4: IGDB release-date mapping and the batch release-info fetch.
