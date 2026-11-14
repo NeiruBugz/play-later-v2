@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/utils";
 
 import { isSyncActive, useSteamSyncStatus } from "../steam-sync-status";
 import type { SyncProgressProps } from "./sync-progress.type";
-import { getSyncStageText } from "./sync-progress.utility";
+import { getSyncCountText, getSyncStageText } from "./sync-progress.utility";
 
 export function SyncProgress({ variant }: SyncProgressProps) {
   const { data: syncStatus } = useSteamSyncStatus();
@@ -12,6 +12,7 @@ export function SyncProgress({ variant }: SyncProgressProps) {
   if (!syncStatus || !isSyncActive(syncStatus)) return null;
 
   const stageText = getSyncStageText(syncStatus);
+  const countText = getSyncCountText(syncStatus);
 
   return (
     <div
@@ -26,7 +27,15 @@ export function SyncProgress({ variant }: SyncProgressProps) {
       )}
     >
       <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
-      <span>{stageText}</span>
+      <span>
+        {stageText}
+        {countText ? (
+          <>
+            {" — "}
+            <span aria-hidden="true">{countText}</span>
+          </>
+        ) : null}
+      </span>
     </div>
   );
 }

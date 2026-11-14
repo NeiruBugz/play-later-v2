@@ -1,4 +1,4 @@
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { ImportedGameWithGame } from "@/entities/imported-game/model/types";
 
 import type { ImportedGamesFilters } from "../imported-games-filter-bar";
 
@@ -11,7 +11,7 @@ export type ImportedGamesPagePagination = {
 
 export type ImportedGamesPageProps = {
   /** Games returned by the route loader. Already filtered server-side. */
-  games: ReadonlyArray<ImportedGame>;
+  games: ReadonlyArray<ImportedGameWithGame>;
   /**
    * Steam connection state. When `null`, the empty-state CTA links to
    * `/settings/account`; when set, it offers the Sync button.

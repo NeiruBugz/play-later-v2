@@ -46,3 +46,27 @@ export function formatLastPlayed(
   const years = Math.round(days / 365);
   return `last played ${years} year${years === 1 ? "" : "s"} ago`;
 }
+
+export type MatchState = "found" | "needs-match" | "not-yet";
+
+export function matchState({
+  gameId,
+  lookedUpAt,
+}: {
+  gameId: string | null;
+  lookedUpAt: Date | null;
+}): MatchState {
+  if (gameId !== null) {
+    return "found";
+  }
+  return lookedUpAt !== null ? "needs-match" : "not-yet";
+}
+
+export function formatReleaseYear(
+  releaseDate: Date | null | undefined
+): string | null {
+  if (!releaseDate) {
+    return null;
+  }
+  return String(new Date(releaseDate).getUTCFullYear());
+}

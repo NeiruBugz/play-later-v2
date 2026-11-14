@@ -1,5 +1,5 @@
-export { ImportedGameCard } from "./imported-game-card";
-export type { ImportedGameCardProps } from "./imported-game-card";
+export { ImportedGameCard, matchState } from "./imported-game-card";
+export type { ImportedGameCardProps, MatchState } from "./imported-game-card";
 export { IgdbManualSearch } from "./igdb-manual-search";
 export type { IgdbManualSearchProps } from "./igdb-manual-search";
 export {

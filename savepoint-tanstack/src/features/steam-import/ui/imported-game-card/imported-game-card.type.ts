@@ -1,7 +1,7 @@
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { ImportedGameWithGame } from "@/entities/imported-game/model/types";
 
 export type ImportedGameCardProps = {
-  game: ImportedGame;
+  game: ImportedGameWithGame;
   /**
    * Per-row "Import to library" handler. Widget owns the implementation
    * (typically opens the `ImportGameModal`).

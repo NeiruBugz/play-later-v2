@@ -3,13 +3,16 @@ import { ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { ImportedGameWithGame } from "@/entities/imported-game/model/types";
 // Server fns are imported from individual module paths (not the feature barrel)
 // so component tests can mock each module without dragging the rest of the
 // feature's server chain into the jsdom env.
 import { dismissImportedGameFn } from "@/features/steam-import/api/dismiss-imported-game";
 import { ImportGameModal } from "@/features/steam-import/ui/import-game-modal";
-import { ImportedGameCard } from "@/features/steam-import/ui/imported-game-card";
+import {
+  ImportedGameCard,
+  matchState,
+} from "@/features/steam-import/ui/imported-game-card";
 import {
   SyncProgress,
   SyncStartButton,
@@ -62,7 +65,7 @@ export function ImportedGamesPage({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [modalTarget, setModalTarget] = useState<{
-    game: ImportedGame;
+    game: ImportedGameWithGame;
     startOnSearch: boolean;
   } | null>(null);
 
@@ -72,7 +75,7 @@ export function ImportedGamesPage({
       ? undefined
       : syncStatus === null
         ? "no-sync"
-        : `${syncStatus.jobId}:${syncStatus.status}`;
+        : `${syncStatus.jobId}:${syncStatus.status}:${syncStatus.lookedUp}`;
   const previousSyncStageKey = useRef(syncStageKey);
   useEffect(() => {
     if (
@@ -85,7 +88,7 @@ export function ImportedGamesPage({
   }, [syncStageKey, router]);
 
   const sortedGames = useMemo(() => {
-    const matchStatusOrder = (g: ImportedGame) => {
+    const matchStatusOrder = (g: ImportedGameWithGame) => {
       if (g.igdbMatchStatus === "MATCHED") return 0;
       if (g.igdbMatchStatus === "IGNORED") return 2;
       return 1;
@@ -93,8 +96,8 @@ export function ImportedGamesPage({
     return [...games].sort((a, b) => matchStatusOrder(a) - matchStatusOrder(b));
   }, [games]);
 
-  const hasUnmatched = sortedGames.some(
-    (g) => g.igdbMatchStatus === "PENDING" || g.igdbMatchStatus === "UNMATCHED"
+  const hasNeedsMatch = sortedGames.some(
+    (g) => g.igdbMatchStatus !== "IGNORED" && matchState(g) === "needs-match"
   );
 
   const handleDismiss = async (importedGameId: string) => {
@@ -167,11 +170,12 @@ export function ImportedGamesPage({
         filters={filters}
         includeIgnored={includeIgnored}
       />
-      {hasUnmatched ? (
+      {hasNeedsMatch ? (
         <Alert variant="warning">
-          <AlertTitle>Some games need a manual match</AlertTitle>
+          <AlertTitle>Some games need a match</AlertTitle>
           <AlertDescription>
-            Click &quot;Search&quot; on a row to find the right entry.
+            Press + on a game marked &apos;Needs a match&apos; to pick the right
+            game.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -193,7 +197,10 @@ export function ImportedGamesPage({
             <ImportedGameCard
               game={game}
               onAddToLibrary={() =>
-                setModalTarget({ game, startOnSearch: false })
+                setModalTarget({
+                  game,
+                  startOnSearch: matchState(game) === "needs-match",
+                })
               }
               onDismiss={
                 game.igdbMatchStatus !== "IGNORED"

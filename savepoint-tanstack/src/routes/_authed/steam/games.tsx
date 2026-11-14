@@ -82,13 +82,12 @@ export const Route = createFileRoute("/_authed/steam/games")({
     sortBy: search.sortBy,
   }),
   loader: async ({ deps }) => {
-    const [connection, pagedGames] = await Promise.all([
-      getSteamConnectionFn(),
+    const fetchGamesPage = (page: number) =>
       fetchSteamGamesFn({
         data: {
           includeIgnored: deps.includeIgnored,
           includeMatched: deps.includeMatched,
-          page: deps.page,
+          page,
           search: deps.q,
           playtimeStatus: deps.playtimeStatus,
           playtimeRange: deps.playtimeRange,
@@ -96,8 +95,15 @@ export const Route = createFileRoute("/_authed/steam/games")({
           lastPlayed: deps.lastPlayed,
           sortBy: deps.sortBy,
         },
-      }),
+      });
+    const [connection, requestedPage] = await Promise.all([
+      getSteamConnectionFn(),
+      fetchGamesPage(deps.page),
     ]);
+    const pagedGames =
+      deps.page > requestedPage.totalPages
+        ? await fetchGamesPage(requestedPage.totalPages)
+        : requestedPage;
     return {
       steamId: connection.steamId,
       games: pagedGames.games,
