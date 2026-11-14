@@ -15,9 +15,11 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+import { coreEnv } from "./env.core";
 import { extraOriginsSchema } from "./src/shared/config/extra-origins";
 
 export const env = createEnv({
+  extends: [coreEnv],
   clientPrefix: "VITE_",
   server: {
     AUTH_COGNITO_ID: z.string({ message: "AUTH_COGNITO_ID is required" }),
@@ -40,21 +42,17 @@ export const env = createEnv({
       .or(z.literal("")),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
-    IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),
-    IGDB_CLIENT_SECRET: z.string({ message: "IGDB_CLIENT_SECRET is required" }),
     AUTH_ENABLE_CREDENTIALS: z.enum(["true", "false"]).optional(),
     DATABASE_LOGGING: z.enum(["true", "false"]).optional(),
     POSTGRES_DATABASE: z.string({ message: "POSTGRES_DATABASE is required" }),
     POSTGRES_HOST: z.string({ message: "POSTGRES_HOST is required" }),
     POSTGRES_PASSWORD: z.string({ message: "POSTGRES_PASSWORD is required" }),
-    POSTGRES_PRISMA_URL: z.url({ message: "POSTGRES_PRISMA_URL is required" }),
     POSTGRES_URL: z.url({ message: "POSTGRES_URL is required" }),
     POSTGRES_URL_NO_SSL: z.url({ message: "POSTGRES_URL_NO_SSL is required" }),
     POSTGRES_URL_NON_POOLING: z.url({
       message: "POSTGRES_URL_NON_POOLING is required",
     }),
     POSTGRES_USER: z.string({ message: "POSTGRES_USER is required" }),
-    STEAM_API_KEY: z.string({ message: "STEAM_API_KEY is required" }),
     AWS_REGION: z.string().min(1, { message: "AWS_REGION is required" }),
     AWS_ENDPOINT_URL: z.string().optional(),
     AWS_ACCESS_KEY_ID: z
@@ -76,16 +74,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     VERCEL: z.string().optional(),
     STOREFRONT_SYNC_QUEUE: z.enum(["inline", "sqs"]).optional(),
-    IGDB_MIN_INTERVAL_MS: z.coerce.number().int().min(0).optional(),
-    SYNC_MAX_RECEIVE_COUNT: z.coerce.number().int().min(1).default(3),
   },
   client: {},
-  shared: {
-    NODE_ENV: z.enum(["development", "test", "production"]),
-    LOG_LEVEL: z
-      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
-      .optional(),
-  },
   runtimeEnv: {
     AUTH_COGNITO_ID: process.env.AUTH_COGNITO_ID,
     AUTH_COGNITO_SECRET: process.env.AUTH_COGNITO_SECRET,
@@ -97,21 +87,15 @@ export const env = createEnv({
     AUTH_MIGRATION_CUTOVER_AT: process.env.AUTH_MIGRATION_CUTOVER_AT,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
-    IGDB_CLIENT_ID: process.env.IGDB_CLIENT_ID,
-    IGDB_CLIENT_SECRET: process.env.IGDB_CLIENT_SECRET,
-    LOG_LEVEL: process.env.LOG_LEVEL,
-    NODE_ENV: process.env.NODE_ENV ?? "development",
     AUTH_ENABLE_CREDENTIALS: process.env.AUTH_ENABLE_CREDENTIALS,
     DATABASE_LOGGING: process.env.DATABASE_LOGGING,
     POSTGRES_DATABASE: process.env.POSTGRES_DATABASE,
     POSTGRES_HOST: process.env.POSTGRES_HOST,
     POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
-    POSTGRES_PRISMA_URL: process.env.POSTGRES_PRISMA_URL,
     POSTGRES_URL: process.env.POSTGRES_URL,
     POSTGRES_URL_NO_SSL: process.env.POSTGRES_URL_NO_SSL,
     POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING,
     POSTGRES_USER: process.env.POSTGRES_USER,
-    STEAM_API_KEY: process.env.STEAM_API_KEY,
     AWS_REGION: process.env.AWS_REGION,
     AWS_ENDPOINT_URL: process.env.AWS_ENDPOINT_URL,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
@@ -122,8 +106,6 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     VERCEL: process.env.VERCEL,
     STOREFRONT_SYNC_QUEUE: process.env.STOREFRONT_SYNC_QUEUE,
-    IGDB_MIN_INTERVAL_MS: process.env.IGDB_MIN_INTERVAL_MS,
-    SYNC_MAX_RECEIVE_COUNT: process.env.SYNC_MAX_RECEIVE_COUNT,
   },
   createFinalSchema: (shape, isServer) =>
     z
@@ -132,7 +114,7 @@ export const env = createEnv({
         (values) =>
           !isServer ||
           !(
-            values.NODE_ENV === "production" &&
+            coreEnv.NODE_ENV === "production" &&
             values.STOREFRONT_SYNC_QUEUE === "inline"
           ),
         {

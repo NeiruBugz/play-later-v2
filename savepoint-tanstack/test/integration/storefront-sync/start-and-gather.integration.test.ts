@@ -60,7 +60,10 @@ import {
 
 import { runGatherMessage } from "@/features/storefront-sync/api/gather.worker";
 import { getSteamSyncStatusWorker } from "@/features/storefront-sync/api/get-sync-status.worker";
-import { drainInlineSyncQueue } from "@/features/storefront-sync/api/inline-queue";
+import {
+  drainInlineSyncQueue,
+  inlineSyncQueue,
+} from "@/features/storefront-sync/api/inline-queue";
 import { startSteamSyncWorker } from "@/features/storefront-sync/api/start-sync.worker";
 import { igdbFetch } from "@/shared/api/igdb/fetch";
 import { UnauthorizedError, ValidationError } from "@/shared/lib/errors";
@@ -255,7 +258,11 @@ describe("gather through the inline queue", () => {
           ...THREE_GAMES,
           { appid: 620, name: "Portal 2", playtime_forever: 30 },
         ]);
-        await runGatherMessage({ message: { v: 1, jobId }, receiveCount: 2 });
+        await runGatherMessage({
+          message: { v: 1, jobId },
+          receiveCount: 2,
+          queue: inlineSyncQueue,
+        });
       });
 
       it("drops the message without contacting Steam", () => {

@@ -80,10 +80,12 @@ describe("steam-sync-gather handler", () => {
       );
 
       expect(runGatherMessageMock).toHaveBeenCalledTimes(1);
-      expect(runGatherMessageMock).toHaveBeenCalledWith({
-        message: { v: 1, jobId: "job-1" },
-        receiveCount: 1,
-      });
+      expect(runGatherMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: { v: 1, jobId: "job-1" },
+          receiveCount: 1,
+        })
+      );
       expect(response).toEqual({ batchItemFailures: [] });
     });
 

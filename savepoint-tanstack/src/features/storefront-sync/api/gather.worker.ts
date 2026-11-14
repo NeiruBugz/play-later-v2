@@ -7,6 +7,7 @@ import { findLookupCandidates } from "@/entities/imported-game/api/find-lookup-c
 import { resolveImportedGamesFromCatalogue } from "@/entities/imported-game/api/resolve-imported-games-from-catalogue.server";
 import { upsertImportedGamesBatch } from "@/entities/imported-game/api/upsert-imported-games-batch.server";
 import type { SteamImportedGameInput } from "@/entities/imported-game/model/types";
+import type { SyncQueue } from "@/shared/api/queue";
 import {
   SteamApiUnavailableError,
   SteamProfilePrivateError,
@@ -23,15 +24,15 @@ import {
   type EnrichMessage,
   type GatherMessage,
 } from "../model/messages";
-import { getSyncQueue } from "./get-sync-queue";
 
 const logger = createLogger({ service: "storefront-sync-gather" });
 
 export async function runGatherMessage(args: {
   message: GatherMessage;
   receiveCount: number;
+  queue: SyncQueue;
 }): Promise<void> {
-  const { message, receiveCount } = args;
+  const { message, receiveCount, queue } = args;
   const job = await claimGather(message.jobId);
   if (!job) {
     logger.info(
@@ -82,7 +83,6 @@ export async function runGatherMessage(args: {
     return;
   }
 
-  const queue = getSyncQueue();
   for (const [chunkIndex, rows] of chunks.entries()) {
     await queue.send("enrich", {
       v: 1,

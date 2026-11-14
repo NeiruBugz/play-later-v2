@@ -162,7 +162,7 @@ Conventions for every slice:
     - Start a sync, close the tab before it ends, open the app again: the message shows once, and a reload doesn't show it again.
     - Delete artifacts and stop the server by PID. **[Agent: testing]**
 
-- [ ] **Slice 5: Failures are explained, stuck syncs recover, and the Steam card shows progress**
+- [x] **Slice 5: Failures are explained, stuck syncs recover, and the Steam card shows progress**
   - [x] RED tests:
     - **Integration:**
       - an empty Steam library becomes `FAILED(PROFILE_PRIVATE)` and the import page is unchanged;
@@ -183,7 +183,7 @@ Conventions for every slice:
     - a `syncSlot` prop on `SteamConnectCard`;
     - `routes/_authed/settings/account.tsx` passes `<SyncProgress variant="card"/>`;
     - the disconnected-with-games branch in the import widget. **[Agent: react-frontend]**
-  - [ ] Verify:
+  - [x] Verify:
     - Run the gate, including integration.
     - In the app, with Steam stubbed as private (or a private test account): the privacy message is shown above the list and as a toast.
     - Account settings shows live progress during a sync.
@@ -191,7 +191,7 @@ Conventions for every slice:
 
 - [ ] **Slice 6: Honest wording in "What's new"**
   - [x] RED: update the `whats-new` test to expect the new Steam entry text and the bumped `CURRENT_VERSION`. **[Agent: testing]**
-  - [ ] Replace the Steam entry description in `features/whats-new/config.ts` with the spec 2.7.1 text and bump `CURRENT_VERSION`. **[Agent: react-frontend]**
+  - [x] Replace the Steam entry description in `features/whats-new/config.ts` with the spec 2.7.1 text and bump `CURRENT_VERSION`. **[Agent: react-frontend]**
   - [ ] Verify:
     - Run the gate.
     - In the app, the "What's new" modal shows the new Steam text exactly once.
@@ -206,7 +206,7 @@ Conventions for every slice:
       - `ApproximateReceiveCount` is passed to the worker.
     - **Unit** `shared/api/queue/sqs.ts`: `SendMessageBatch` in groups of 10 with retry of `Failed[]`.
     - **ESLint regression** in `test/eslint/`: `src/lambdas` may import `features/*/api/*.worker`, entities and shared; it may not import routes, widgets, react, `@tanstack/*` or better-auth. **[Agent: testing]**
-  - [ ] Env split:
+  - [x] Env split:
     - `env.core.ts` (`coreEnv`: Postgres pooled URL, `IGDB_*`, `STEAM_API_KEY`, `NODE_ENV`, `LOG_LEVEL`, plus the optional `STEAM_SYNC_ENRICH_QUEUE_URL`, `DB_POOL_MAX`, `IGDB_MIN_INTERVAL_MS`, `SYNC_MAX_RECEIVE_COUNT`);
     - `env.ts` extends it, with web behaviour unchanged;
     - `env.lambda.ts`;

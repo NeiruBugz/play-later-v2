@@ -50,6 +50,7 @@ Browser ◄─getSteamSyncStatusFn (poll only while active)── Vercel ◄─�
 - **Transport port.** `SyncQueue` has two implementations, `sqs` and `inline`, selected by `STOREFRONT_SYNC_QUEUE`.
   - `inline` runs gather and enrich in-process via `setImmediate`, with a `drain()` for tests.
   - Use `inline` for local dev and integration tests. `env.ts` rejects `inline` when `NODE_ENV=production`.
+- **Queue is injected into gather.** `runGatherMessage({ message, receiveCount, queue })` takes the `SyncQueue` it sends enrich messages through: the inline queue passes itself, the Lambda handler passes an SQS queue built from `STEAM_SYNC_ENRICH_QUEUE_URL`. Only the web-side `startSteamSyncFn` resolves a queue from `STOREFRONT_SYNC_QUEUE` (decided 2026-11-15 after `typecheck:lambdas` caught the web-only env read in the Lambda graph).
 - **Lambda handlers are thin adapters.** Each one parses the SQS event, calls a worker and returns `batchItemFailures`. All policy lives in `features/storefront-sync/api/*.worker.ts`, so the existing coverage gate covers it.
 - **Naming.** The folder is `src/lambdas/`, not `src/workers/`, because `*.worker.ts` already means the foot-gun #8 testable server-fn body.
 

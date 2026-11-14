@@ -33,6 +33,7 @@ async function deliver(queue: SyncQueueName, body: unknown): Promise<void> {
   await runGatherMessage({
     message: parsed.data,
     receiveCount: INLINE_RECEIVE_COUNT,
+    queue: inlineSyncQueue,
   });
 }
 
