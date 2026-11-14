@@ -29,7 +29,7 @@ Conventions for every slice:
 ---
 
 - [ ] **Slice 1: Pressing Sync starts a background sync that brings in the Steam library and shows "Fetching your Steam library…"**
-  - [ ] RED tests:
+  - [x] RED tests:
     - **Integration** (`test/integration/storefront-sync/start-and-gather.integration.test.ts`):
       - `startSteamSyncWorker` creates a QUEUED job;
       - a second start while one is active returns the same job with `alreadyRunning: true`;
@@ -41,19 +41,19 @@ Conventions for every slice:
       - message zod schemas (`v:1`, unknown fields tolerated, poison message rejected);
       - `SyncStartButton`: Sync opens "Sync your Steam library" with the box unticked; Cancel starts nothing; "Start sync" closes the dialog; an active job shows a disabled "Syncing…"; `alreadyRunning` shows "A sync is already running"; not connected shows a "Connect Steam to sync" link;
       - `SyncProgress` shows "Fetching your Steam library…" while GATHERING and nothing when idle. **[Agent: testing]**
-  - [ ] Prisma:
+  - [x] Prisma:
     - `ImportJob` model plus the `ImportJobStatus` and `ImportFailureCode` enums, per tech §2.2 (with `doneChunkIndexes`, `storefrontAccountId` and the counters);
     - migration via `--create-only`, with raw SQL appended by hand: the partial unique active index and the CHECK constraints;
     - document the unmanaged index in `FOOT-GUNS.md` (next to #11). **[Agent: prisma-database]**
-  - [ ] Entity queries in `entities/import-job/api/`: `createImportJob` (`INSERT … ON CONFLICT DO NOTHING RETURNING`), `getLatestImportJob`, `claimGather`, `recordGatherPlan`, `failImportJob`, `finalizeImportJobIfComplete`. Every raw UPDATE sets `"updatedAt" = now()`. Also add the `storefront` parameter to `upsertImportedGamesBatch` and update its callers. **[Agent: prisma-database]**
-  - [ ] Server side:
+  - [x] Entity queries in `entities/import-job/api/`: `createImportJob` (`INSERT … ON CONFLICT DO NOTHING RETURNING`), `getLatestImportJob`, `claimGather`, `recordGatherPlan`, `failImportJob`, `finalizeImportJobIfComplete`. Every raw UPDATE sets `"updatedAt" = now()`. Also add the `storefront` parameter to `upsertImportedGamesBatch` and update its callers. **[Agent: prisma-database]**
+  - [x] Server side:
     - `shared/api/queue/types.ts` (the `SyncQueue` port);
     - `features/storefront-sync/model/messages.ts`;
     - `features/storefront-sync/api/inline-queue.ts` (`setImmediate` + `drain()`);
     - workers `start-sync.worker.ts`, `gather.worker.ts` (no lookup yet: gather finalizes directly) and `get-sync-status.worker.ts`;
     - server fns `start-steam-sync.ts` and `get-steam-sync-status.ts`;
     - an env var `STOREFRONT_SYNC_QUEUE` (`inline | sqs`, defaulting to inline in dev) in `env.ts`, with a refine that rejects `inline` in production. **[Agent: tanstack-fullstack]**
-  - [ ] UI:
+  - [x] UI:
     - `features/storefront-sync/ui/sync-start-button/` (dialog + checkbox; for now the checkbox value is sent but ignored);
     - `ui/sync-progress/` (stage text, `role="status"`, polls `["storefront-sync","status","STEAM"]` every 3 s while active);
     - in `widgets/imported-games-page`, replace the "Import from Steam" button and empty-state action with the Sync button, and call `router.invalidate()` when the status changes;
@@ -237,12 +237,12 @@ Conventions for every slice:
     - Delete `dist-lambdas/` and artifacts, and stop the server by PID. **[Agent: testing]**
 
 - [ ] **Slice 8: AWS stack and the owner runbook (GitHub ↔ AWS, Vercel ↔ AWS)**
-  - [ ] Terraform `infra/stacks/storefront-sync/` (tech §2.10):
+  - [x] Terraform `infra/stacks/storefront-sync/` (tech §2.10):
     - `modules/pipeline/`: 2 queues + DLQs, 2 Lambdas from a committed stub with `ignore_source_code_hash`, event source mappings (`ReportBatchItemFailures`, max concurrency gather 5 / enrich 2), 7-day log groups, 4 SSM SecureString params with `ignore_changes`, least-privilege roles, required tags;
     - `shared/`: the Vercel and GitHub OIDC providers;
     - `prod/`: S3 backend with `use_lockfile`, exact pins (Terraform `1.14.6`, AWS `6.73.0`, registry modules), the `vercel-sqs-send` and `github-lambda-deploy` roles, and the outputs;
     - never touch `infra/envs/*`. **[Agent: aws-infra]**
-  - [ ] Owner runbook `infra/docs/storefront-sync-runbook.md`, with copy-paste commands and a check after each step:
+  - [x] Owner runbook `infra/docs/storefront-sync-runbook.md`, with copy-paste commands and a check after each step:
     1. bootstrap the S3 state bucket;
     2. check for or import an existing GitHub OIDC provider;
     3. apply `shared/`, then `prod/`;
@@ -253,7 +253,7 @@ Conventions for every slice:
     8. smoke-test OIDC from a Preview deployment and from GitHub (`aws sts get-caller-identity`);
     9. roll back.
     - Link the runbook from `infra/CLAUDE.md`, and add the stack, the state-bootstrap note and a secret rotation checklist. **[Agent: aws-infra]**
-  - [ ] Update `context/product/architecture.md`:
+  - [x] Update `context/product/architecture.md`:
     - §4 Steam: replace the stale "paused on dependency" line;
     - §5 infra and §6 observability: CloudWatch logs for the Lambdas;
     - add an ADR for SQS + Lambda over Vercel Queues;
