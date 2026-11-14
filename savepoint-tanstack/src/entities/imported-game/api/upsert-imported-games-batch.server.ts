@@ -3,13 +3,14 @@ import { prisma } from "@/shared/lib/db.server";
 import { Prisma } from "../../../../shared/lib/prisma/client.ts";
 import type {
   SteamImportedGameInput,
+  Storefront,
   UpsertImportedGamesBatchResult,
 } from "../model/types";
 
 const CHUNK_SIZE = 500;
 
 /**
- * Upsert Steam-shaped payloads, one multi-row `INSERT ... ON CONFLICT` per
+ * Upsert Steam-shaped payloads for `storefront`, one multi-row `INSERT ... ON CONFLICT` per
  * chunk of {@link CHUNK_SIZE}.
  *
  * Idempotency rests on the partial unique index
@@ -28,7 +29,8 @@ const CHUNK_SIZE = 500;
  */
 export async function upsertImportedGamesBatch(
   userId: string,
-  games: SteamImportedGameInput[]
+  games: SteamImportedGameInput[],
+  storefront: Storefront
 ): Promise<UpsertImportedGamesBatchResult> {
   const unique = [
     ...new Map(games.map((g) => [g.storefrontGameId, g])).values(),
@@ -36,7 +38,11 @@ export async function upsertImportedGamesBatch(
 
   let created = 0;
   for (let i = 0; i < unique.length; i += CHUNK_SIZE) {
-    created += await upsertChunk(userId, unique.slice(i, i + CHUNK_SIZE));
+    created += await upsertChunk(
+      userId,
+      storefront,
+      unique.slice(i, i + CHUNK_SIZE)
+    );
   }
 
   return { created, updated: unique.length - created };
@@ -44,13 +50,14 @@ export async function upsertImportedGamesBatch(
 
 async function upsertChunk(
   userId: string,
+  storefront: Storefront,
   chunk: SteamImportedGameInput[]
 ): Promise<number> {
   const values = chunk.map(
     (g) => Prisma.sql`(
       gen_random_uuid()::text,
       ${userId},
-      'STEAM'::"Storefront",
+      ${storefront}::"Storefront",
       ${g.storefrontGameId},
       ${g.name},
       ${g.playtime}::int,
