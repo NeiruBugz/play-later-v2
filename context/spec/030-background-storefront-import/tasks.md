@@ -86,8 +86,8 @@ Conventions for every slice:
       - the warning appears only for needs-a-match rows, with the new copy;
       - pressing + on a found game skips "Select correct game";
       - "Looking up your games — X of Y" updates without a reload. **[Agent: testing]**
-  - [ ] Prisma: `ImportedGame.gameId` (FK SetNull, indexed) and `lookedUpAt`, plus `@@index([steamAppId])` on `Game`, in one additive migration. **[Agent: prisma-database]**
-  - [ ] Entity queries:
+  - [x] Prisma: `ImportedGame.gameId` (FK SetNull, indexed) and `lookedUpAt`, plus `@@index([steamAppId])` on `Game`, in one additive migration. **[Agent: prisma-database]**
+  - [x] Entity queries:
     - `resolveImportedGamesFromCatalogue` (`DISTINCT ON`, int-array binding);
     - `findLookupCandidates`;
     - `applyLookupResults`;
@@ -106,7 +106,7 @@ Conventions for every slice:
     - the warning alert copy and its rule;
     - `SyncProgress` "Looking up" stage with `toLocaleString("en-US")` and an `aria-hidden` count;
     - the widget calls `router.invalidate()` when `lookedUp` changes and clamps the page number in the loader. **[Agent: react-frontend]**
-  - [ ] One-off live check: add a read-only `scripts/inspect-igdb-external-game-sources.ts` (`tsx`, same shape as `inspect:igdb-release-dates`). It confirms that Steam's `external_game_source` id is 1. Record the result in `research-notes.md`. **[Agent: tanstack-fullstack]**
+  - [x] One-off live check: add a read-only `scripts/inspect-igdb-external-game-sources.ts` (`tsx`, same shape as `inspect:igdb-release-dates`). It confirms that Steam's `external_game_source` id is 1. Record the result in `research-notes.md`. **[Agent: tanstack-fullstack]**
   - [ ] Verify:
     - Run the gate, including integration.
     - Sync in the running app: the count rises, found games show covers and years, unfound games show "Needs a match", and the warning appears only when some do.

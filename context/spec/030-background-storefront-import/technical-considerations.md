@@ -165,9 +165,9 @@ All three server fns resolve the user with `requireUserId()`, validate twice, an
 ### 2.5 IGDB batch matcher (`shared/api/igdb/match-steam-games.ts`)
 
 - **Query:**
-  `fields uid, game.id, game.name, game.slug, game.first_release_date, game.cover.image_id, game.game_type, game.release_dates.{date,date_format,y,m,human}; where external_game_source = 1 & uid = ("…",…); limit 500;`
+  `fields uid, game.id, game.name, game.slug, game.first_release_date, game.cover.image_id, game.game_type, game.release_dates.date, game.release_dates.date_format, game.release_dates.y, game.release_dates.m, game.release_dates.human; where external_game_source = 1 & uid = ("…",…); limit 500;`
   - `external_games.category` was removed after IGDB's 2026-08 migration.
-  - A one-off smoke script confirms that Steam's `external_game_source` id is 1.
+  - Confirmed live 2026-11-14: Steam's `external_game_source` id is 1, and IGDB rejects the `{a,b}` brace shorthand (HTTP 400) — list expanded field names (research-notes.md).
   - `release_dates` must be in the field list to keep spec 029's precise release dates.
 - **Results.** Dedupe per `uid`, preferring the main-game `game_type`, then the lowest id. A row with no `game` counts as unfound.
 - **Pacing.** Add `shared/api/igdb/pacer.ts`, a minimum interval between calls set by the optional `IGDB_MIN_INTERVAL_MS`. It's off on the web and 750 ms in the Lambda. The 4 requests/second and 8-open-request limits are shared with web traffic. The token cache in `token.ts` survives warm invocations.
