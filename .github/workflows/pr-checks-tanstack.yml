@@ -30,7 +30,7 @@ jobs:
       - name: Wait for Postgres readiness
         run: |
           echo "Waiting for Postgres (savepoint-postgres) to be ready..."
-          for i in {1..60}; do
+          for _ in {1..60}; do
             if docker exec savepoint-postgres pg_isready -U postgres >/dev/null 2>&1; then
               echo "Postgres is ready."; break; fi; sleep 2; done
           docker exec savepoint-postgres pg_isready -U postgres
@@ -163,11 +163,11 @@ jobs:
           MIGRATION_CHANGES=$(git diff --name-only origin/main...HEAD -- savepoint-tanstack/prisma/ | grep -E "(schema\.prisma|migrations/.*\.sql)$" || true)
           if [ -z "$MIGRATION_CHANGES" ]; then
             echo "No migration or schema changes detected"
-            echo "has-changes=false" >> $GITHUB_OUTPUT
+            echo "has-changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "Migration or schema changes detected:"
             echo "$MIGRATION_CHANGES"
-            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup pnpm
