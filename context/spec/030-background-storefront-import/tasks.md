@@ -3,9 +3,7 @@
 - **Functional spec:** [functional-spec.md](./functional-spec.md)
 - **Technical spec:** [technical-considerations.md](./technical-considerations.md)
 
-## Open Questions
-
-- **Lambda runtime and esbuild bundling** (Slice 7) are assigned to `tanstack-fullstack`, the closest server/TypeScript specialist. No installed agent specialises in AWS Lambda handlers or esbuild. Run `/awos:hire cover 030-background-storefront-import: need AWS Lambda + SQS Node handlers, esbuild Lambda bundling` if you want a dedicated agent, then re-run `/awos:tasks`.
+Conventions for every slice:
 - **Owner-only steps:** nobody but the owner can run these. Agents write the runbook (Slice 8) and the owner runs it:
   - `terraform apply` against real AWS;
   - creating the S3 state bucket;
@@ -13,8 +11,6 @@
   - setting Vercel and GitHub variables;
   - switching Vercel's OIDC issuer to Team mode;
   - the first real production sync.
-
-Conventions for every slice:
 - Paths are relative to `savepoint-tanstack/` unless they start with `context/`, `infra/` or `.github/`.
 - **TDD (binding, `savepoint-tanstack/CLAUDE.md`):** in each slice the test task comes before the implementation tasks. Tests are written failing first (RED). During a RED task, `typecheck` and the test runs are expected to fail.
 - **The gate:** `pnpm --filter savepoint-tanstack format:check && lint && typecheck && test:unit && build`.
@@ -216,23 +212,23 @@ Conventions for every slice:
     - `env.lambda.ts`;
     - `tsconfig.lambdas.json` mapping `@env` → `env.lambda.ts`;
     - script `typecheck:lambdas`, added to `typecheck`;
-    - workers import leaf modules, not barrels (`shared/api/steam/steam-fetch`). **[Agent: tanstack-fullstack]**
-  - [ ] `db.server.ts`: `DB_POOL_MAX`, `connectionTimeoutMillis` ≥ 10 s, an idle timeout and a `pool.on("error")` handler. **[Agent: tanstack-fullstack]**
+    - workers import leaf modules, not barrels (`shared/api/steam/steam-fetch`). **[Agent: aws-lambda-backend]**
+  - [ ] `db.server.ts`: `DB_POOL_MAX`, `connectionTimeoutMillis` ≥ 10 s, an idle timeout and a `pool.on("error")` handler. **[Agent: aws-lambda-backend]**
   - [ ] Lambda handlers in `src/lambdas/steam-sync-gather/handler.ts` and `src/lambdas/steam-sync-enrich/handler.ts`:
     - thin adapters, about 20 lines each;
     - the entry fetches the SSM params (`SSM_PARAM_PREFIX`) once per cold start, then dynamically imports the worker graph;
-    - pino child bindings `{jobId, userId, messageId, receiveCount}`; never log `steamId64`. **[Agent: tanstack-fullstack]**
+    - pino child bindings `{jobId, userId, messageId, receiveCount}`; never log `steamId64`. **[Agent: aws-lambda-backend]**
   - [ ] SQS adapter `shared/api/queue/sqs.ts`:
     - `@aws-sdk/client-sqs` pinned exactly at `3.1024.0`, and `@vercel/oidc-aws-credentials-provider` pinned exactly;
     - credentials are created per request inside the server fn;
     - web env vars `STEAM_SYNC_GATHER_QUEUE_URL` and `AWS_SYNC_ROLE_ARN`;
     - the queue factory picks `sqs` or `inline`;
-    - Preview deployments with no queue URL show sync as unavailable. **[Agent: tanstack-fullstack]**
+    - Preview deployments with no queue URL show sync as unavailable. **[Agent: aws-lambda-backend]**
   - [ ] Bundling:
     - `scripts/build-lambdas.mjs` (esbuild, exact-pinned devDependency): ESM `.mjs`, `node22`, `createRequire` banner, `tsconfig.lambdas.json`, `define NODE_ENV=production`, `external pg-native`, sourcemap, metafile;
     - deterministic zips in `dist-lambdas/` (gitignored);
     - `scripts/smoke-lambda-bundle.mjs`: the metafile has no `@tanstack`, `better-auth`, `react` or S3 modules, and each handler imports with only the core env and acks a malformed record;
-    - package scripts `build:lambdas` (runs prisma generate first) and `smoke:lambdas`. **[Agent: tanstack-fullstack]**
+    - package scripts `build:lambdas` (runs prisma generate first) and `smoke:lambdas`. **[Agent: aws-lambda-backend]**
   - [ ] ESLint: add a `lambdas` boundaries element and a `no-restricted-imports` block for `src/lambdas/**` (tech §2.9). **[Agent: tanstack-fullstack]**
   - [ ] Verify:
     - Run the gate plus `typecheck:lambdas`, `build:lambdas` and `smoke:lambdas`.
