@@ -75,8 +75,21 @@ export type FindImportedGamesOptions = {
   sortBy?: ImportedGamesSortBy;
 };
 
+export type ImportedGameWithGame = ImportedGame & {
+  game: {
+    title: string;
+    coverImage: string | null;
+    releaseDate: Date | null;
+  } | null;
+};
+
+export type LookupCandidate = Pick<
+  ImportedGame,
+  "id" | "storefrontGameId" | "gameId" | "playtime" | "lastPlayedAt"
+>;
+
 export type PaginatedImportedGames = {
-  games: ImportedGame[];
+  games: ImportedGameWithGame[];
   total: number;
   page: number;
   limit: number;

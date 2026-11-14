@@ -4,5 +4,8 @@ export type {
   Storefront,
   SteamImportedGameInput,
   FindImportedGamesOptions,
+  ImportedGameWithGame,
+  LookupCandidate,
+  PaginatedImportedGames,
   UpsertImportedGamesBatchResult,
 } from "./types";

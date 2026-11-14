@@ -25,3 +25,11 @@ export type GatherPlan = {
   refreshedGames: number;
   totalChunks: number;
 };
+
+export type ChunkDoneCounters = { lookupCount: number; added: number };
+
+export type ChunkDoneResult = {
+  applied: boolean;
+  done: number;
+  total: number;
+};

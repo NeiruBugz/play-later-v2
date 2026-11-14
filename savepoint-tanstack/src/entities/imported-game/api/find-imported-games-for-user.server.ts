@@ -17,6 +17,11 @@ const MAX_LIMIT = 100;
  * should not appear in the imported-games surface. Pass `includeIgnored: true`
  * to opt back in (e.g., for a "show dismissed" toggle).
  *
+ * Rows linked to a catalogue game (`gameId`) carry that game's title, cover and
+ * release date as `game`; rows with no link keep `game: null`. A row whose game
+ * is already in THIS user's library is left out (other users' libraries do not
+ * matter), while rows with a null `gameId` always stay.
+ *
  * Soft-deleted rows (`deletedAt != null`) are always excluded. Soft delete
  * is canonical's gentler form of "remove" — different from dismissal, which
  * leaves the row visible-but-hidden in the user's IGDB-match flow.
@@ -62,6 +67,7 @@ export async function findImportedGamesForUser(
     userId,
     deletedAt: null,
     igdbMatchStatus: { in: allowedStatuses },
+    OR: [{ gameId: null }, { game: { libraryItems: { none: { userId } } } }],
   };
 
   if (search && search.trim().length > 0) {
@@ -163,6 +169,9 @@ export async function findImportedGamesForUser(
       orderBy,
       skip,
       take: safeLimit,
+      include: {
+        game: { select: { title: true, coverImage: true, releaseDate: true } },
+      },
     }),
     prisma.importedGame.count({ where }),
   ]);

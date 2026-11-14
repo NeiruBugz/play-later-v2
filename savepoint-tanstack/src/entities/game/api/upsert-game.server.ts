@@ -11,7 +11,7 @@ import { isUniqueViolationOn } from "@/shared/lib/prisma";
 
 import type { Game } from "../../../../shared/lib/prisma/client.ts";
 
-type GamePayload = Pick<
+export type GamePayload = Pick<
   SearchResponseItem,
   "id" | "name" | "slug" | "first_release_date" | "release_dates" | "cover"
 >;
@@ -25,7 +25,7 @@ function floorToUtcMidnight(unixSeconds: number): Date {
   );
 }
 
-function buildReleaseColumns(payload: GamePayload) {
+export function buildReleaseColumns(payload: GamePayload) {
   const mapped =
     payload.release_dates === undefined
       ? "unknown"
