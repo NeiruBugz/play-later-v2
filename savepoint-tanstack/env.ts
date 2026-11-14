@@ -76,6 +76,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     VERCEL: z.string().optional(),
     STOREFRONT_SYNC_QUEUE: z.enum(["inline", "sqs"]).optional(),
+    IGDB_MIN_INTERVAL_MS: z.coerce.number().int().min(0).optional(),
+    SYNC_MAX_RECEIVE_COUNT: z.coerce.number().int().min(1).default(3),
   },
   client: {},
   shared: {
@@ -120,6 +122,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     VERCEL: process.env.VERCEL,
     STOREFRONT_SYNC_QUEUE: process.env.STOREFRONT_SYNC_QUEUE,
+    IGDB_MIN_INTERVAL_MS: process.env.IGDB_MIN_INTERVAL_MS,
+    SYNC_MAX_RECEIVE_COUNT: process.env.SYNC_MAX_RECEIVE_COUNT,
   },
   createFinalSchema: (shape, isServer) =>
     z
