@@ -59,7 +59,8 @@ describe("upsertImportedGamesBatch at scale", () => {
     it("imports all of it in one call", async () => {
       const result = await upsertImportedGamesBatch(
         ALICE_ID,
-        makeLibrary(1200)
+        makeLibrary(1200),
+        "STEAM"
       );
 
       expect(result).toEqual({ created: 1200, updated: 0 });
@@ -69,7 +70,7 @@ describe("upsertImportedGamesBatch at scale", () => {
     }, 30_000);
 
     it("stores every field and defaults new rows to PENDING", async () => {
-      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(3, 42));
+      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(3, 42), "STEAM");
 
       const row = await db.prisma.importedGame.findFirstOrThrow({
         where: { userId: ALICE_ID, storefrontGameId: "1000" },
@@ -88,10 +89,11 @@ describe("upsertImportedGamesBatch at scale", () => {
 
   describe("given the same library is imported twice", () => {
     it("updates the second time without duplicating", async () => {
-      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(700, 10));
+      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(700, 10), "STEAM");
       const second = await upsertImportedGamesBatch(
         ALICE_ID,
-        makeLibrary(700, 99)
+        makeLibrary(700, 99),
+        "STEAM"
       );
 
       expect(second).toEqual({ created: 0, updated: 700 });
@@ -105,13 +107,13 @@ describe("upsertImportedGamesBatch at scale", () => {
     }, 30_000);
 
     it("preserves the match status of an already-triaged row", async () => {
-      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(2));
+      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(2), "STEAM");
       await db.prisma.importedGame.updateMany({
         where: { userId: ALICE_ID, storefrontGameId: "1000" },
         data: { igdbMatchStatus: "IGNORED" },
       });
 
-      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(2, 50));
+      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(2, 50), "STEAM");
 
       const row = await db.prisma.importedGame.findFirstOrThrow({
         where: { userId: ALICE_ID, storefrontGameId: "1000" },
@@ -126,8 +128,8 @@ describe("upsertImportedGamesBatch at scale", () => {
       const library = makeLibrary(600);
 
       const [a, b] = await Promise.all([
-        upsertImportedGamesBatch(ALICE_ID, library),
-        upsertImportedGamesBatch(ALICE_ID, library),
+        upsertImportedGamesBatch(ALICE_ID, library, "STEAM"),
+        upsertImportedGamesBatch(ALICE_ID, library, "STEAM"),
       ]);
 
       const live = await db.prisma.importedGame.findMany({
@@ -154,7 +156,11 @@ describe("upsertImportedGamesBatch at scale", () => {
         },
       });
 
-      const result = await upsertImportedGamesBatch(ALICE_ID, makeLibrary(2));
+      const result = await upsertImportedGamesBatch(
+        ALICE_ID,
+        makeLibrary(2),
+        "STEAM"
+      );
 
       expect(result).toEqual({ created: 2, updated: 0 });
       const rows = await db.prisma.importedGame.findMany({
@@ -170,16 +176,40 @@ describe("upsertImportedGamesBatch at scale", () => {
   describe("given the payload repeats a storefrontGameId", () => {
     it("imports it once", async () => {
       const [first] = makeLibrary(1);
-      const result = await upsertImportedGamesBatch(ALICE_ID, [
-        first,
-        { ...first, name: "Renamed" },
-      ]);
+      const result = await upsertImportedGamesBatch(
+        ALICE_ID,
+        [first, { ...first, name: "Renamed" }],
+        "STEAM"
+      );
 
       expect(result).toEqual({ created: 1, updated: 0 });
       const row = await db.prisma.importedGame.findFirstOrThrow({
         where: { userId: ALICE_ID },
       });
       expect(row.name).toBe("Renamed");
+    });
+  });
+
+  describe("given a non-Steam storefront", () => {
+    it("writes the rows under that storefront and keeps Steam rows apart", async () => {
+      await upsertImportedGamesBatch(ALICE_ID, makeLibrary(2), "STEAM");
+
+      const result = await upsertImportedGamesBatch(
+        ALICE_ID,
+        makeLibrary(2),
+        "PLAYSTATION"
+      );
+
+      expect(result).toEqual({ created: 2, updated: 0 });
+      const storefronts = await db.prisma.importedGame.findMany({
+        where: { userId: ALICE_ID, storefrontGameId: "1000" },
+        select: { storefront: true },
+        orderBy: { storefront: "asc" },
+      });
+      expect(storefronts.map((row) => row.storefront)).toEqual([
+        "STEAM",
+        "PLAYSTATION",
+      ]);
     });
   });
 });

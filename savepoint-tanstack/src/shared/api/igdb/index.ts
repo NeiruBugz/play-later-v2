@@ -2,6 +2,7 @@ export { searchGames } from "./search";
 export type { SearchGamesParams, SearchGamesResult } from "./search";
 export { searchIgdbPlatforms } from "./search-platforms";
 export { matchSteamGameByAppId } from "./match-steam-game";
+export { matchSteamGamesByAppIds } from "./match-steam-games";
 export { getGameByIgdbId } from "./get-game-by-id";
 export { getGamesReleaseInfoByIgdbIds } from "./get-games-release-info";
 export type { GameReleaseInfo } from "./get-games-release-info";

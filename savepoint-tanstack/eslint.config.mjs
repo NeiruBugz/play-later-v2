@@ -124,6 +124,7 @@ export default tseslint.config(
       "node_modules/**",
       "dist/**",
       ".output/**",
+      "dist-lambdas/**",
       "build/**",
       "coverage/**",
       ".tanstack/**",
@@ -364,6 +365,8 @@ export default tseslint.config(
           mode: "file",
         },
         { type: "shared", pattern: "src/shared/**/*", mode: "file" },
+        // lambdas: standalone AWS handler entry points. Imported by nothing.
+        { type: "lambdas", pattern: "src/lambdas/**/*", mode: "file" },
       ],
     },
     rules: {
@@ -426,6 +429,15 @@ export default tseslint.config(
                 "shared",
               ],
             },
+            // ── lambdas ────────────────────────────────────────────────────
+            // Handlers compose feature workers, entity queries and shared
+            // code, and import sibling lambdas helpers. No other layer allows
+            // `lambdas` as a target, so none may import a handler. Which feature files are reachable is
+            // narrowed by the no-restricted-imports block below.
+            {
+              from: "lambdas",
+              allow: ["lambdas", "feature", "entity", "shared"],
+            },
             // ── shared ─────────────────────────────────────────────────────
             {
               from: "shared",
@@ -436,6 +448,51 @@ export default tseslint.config(
       ],
       "boundaries/no-unknown": "off",
       "boundaries/no-unknown-files": "off",
+    },
+  },
+  // Lambda handlers run outside the TanStack Start runtime: no React, no
+  // TanStack, no Better Auth, no UI layers, and from features only the
+  // `api/*.worker` modules (feature barrels and server-fn wrappers pull in
+  // the Start runtime).
+  {
+    files: ["src/lambdas/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["react", "react/*", "react-dom", "react-dom/*"],
+              message: "Lambda handlers must not import React.",
+            },
+            {
+              group: ["@tanstack/*"],
+              message:
+                "Lambda handlers run outside TanStack Start. Import a feature worker instead.",
+            },
+            {
+              group: ["better-auth", "better-auth/*"],
+              message: "Lambda handlers must not import Better Auth.",
+            },
+            {
+              group: ["@/routes", "@/routes/**", "@/widgets", "@/widgets/**"],
+              message: "Lambda handlers must not import UI layers.",
+            },
+            {
+              group: ["@/app", "@/app/**"],
+              message: "Lambda handlers must not import the app layer.",
+            },
+            {
+              // Regex, not a negated glob: gitignore semantics cannot re-include
+              // a file whose parent directory the glob already excluded.
+              regex:
+                "^@/features(?!/[^/]+/(?:api/[^/]+\\.worker|model/[^/]+)$)",
+              message:
+                "Lambda handlers may import only `@/features/<slice>/api/*.worker` and `@/features/<slice>/model/*` from features.",
+            },
+          ],
+        },
+      ],
     },
   },
   prettier

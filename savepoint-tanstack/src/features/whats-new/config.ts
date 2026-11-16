@@ -3,7 +3,7 @@ import { Download } from "lucide-react";
 import type { FeatureAnnouncement } from "./model/types";
 
 // Bump this string whenever a new announcement should re-trigger the modal for every user.
-export const CURRENT_VERSION = "2026-05-20-v1";
+export const CURRENT_VERSION = "2026-11-15-v1";
 
 export const WHATS_NEW_STORAGE_KEY = "whatsNewLastSeenVersion";
 
@@ -12,7 +12,7 @@ export const ANNOUNCEMENTS: FeatureAnnouncement[] = [
     id: "steam-import-2025-01",
     title: "Steam Library Import",
     description:
-      "Connect your Steam account to import your game library automatically. Your games and time played will come into your library.",
+      "Connect Steam and sync your library — we look up every game for you, and can add them all to your library in one go.",
     category: "integration",
     icon: Download,
     ctaLabel: "Connect Steam",

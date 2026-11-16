@@ -5,6 +5,7 @@ model: sonnet
 skills:
   - tdd
   - verify-ui
+disallowedTools: Agent
 ---
 
 You are a specialized testing agent with deep expertise in Vitest, Playwright, MSW (Mock Service Worker), and React Testing Library.

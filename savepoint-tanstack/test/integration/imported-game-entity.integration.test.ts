@@ -15,7 +15,7 @@
  *     - Missing id throws NotFoundError.
  *     - Idempotent: re-dismissing a dismissed row is a no-op.
  *
- *   upsertImportedGamesBatch(userId, games): Promise<{ created: number; updated: number }>
+ *   upsertImportedGamesBatch(userId, games, storefront): Promise<{ created: number; updated: number }>
  *     - Upserts a batch of Steam-shaped payloads inside a single transaction.
  *     - Matches existing rows by `(userId, storefront=STEAM, storefrontGameId)`.
  *     - Creates new rows with `igdbMatchStatus: PENDING`.
@@ -469,7 +469,11 @@ describe("upsertImportedGamesBatch", () => {
 
   describe("first run — all creates", () => {
     it("creates one row per payload entry with PENDING status", async () => {
-      const result = await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD);
+      const result = await upsertImportedGamesBatch(
+        ALICE_ID,
+        STEAM_PAYLOAD,
+        "STEAM"
+      );
       expect(result).toEqual({ created: 2, updated: 0 });
       const rows = await db.prisma.importedGame.findMany({
         where: { userId: ALICE_ID },
@@ -481,7 +485,7 @@ describe("upsertImportedGamesBatch", () => {
 
   describe("second run — all updates", () => {
     beforeEach(async () => {
-      await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD);
+      await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD, "STEAM");
     });
 
     it("updates existing rows in place without inserting duplicates", async () => {
@@ -489,7 +493,11 @@ describe("upsertImportedGamesBatch", () => {
         { ...STEAM_PAYLOAD[0], playtime: 9999 },
         STEAM_PAYLOAD[1],
       ];
-      const result = await upsertImportedGamesBatch(ALICE_ID, newPayload);
+      const result = await upsertImportedGamesBatch(
+        ALICE_ID,
+        newPayload,
+        "STEAM"
+      );
       expect(result).toEqual({ created: 0, updated: 2 });
       const rows = await db.prisma.importedGame.findMany({
         where: { userId: ALICE_ID },
@@ -502,7 +510,7 @@ describe("upsertImportedGamesBatch", () => {
 
   describe("mixed run — partial create + partial update", () => {
     beforeEach(async () => {
-      await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD);
+      await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD, "STEAM");
     });
 
     it("reports counts split between create and update", async () => {
@@ -520,7 +528,7 @@ describe("upsertImportedGamesBatch", () => {
           imgLogoUrl: null,
         },
       ];
-      const result = await upsertImportedGamesBatch(ALICE_ID, mixed);
+      const result = await upsertImportedGamesBatch(ALICE_ID, mixed, "STEAM");
       expect(result).toEqual({ created: 1, updated: 1 });
     });
   });
@@ -528,7 +536,7 @@ describe("upsertImportedGamesBatch", () => {
   describe("isolation", () => {
     it("does not touch Bob's rows when upserting for Alice", async () => {
       await createRow({ userId: BOB_ID, storefrontGameId: "730" });
-      await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD);
+      await upsertImportedGamesBatch(ALICE_ID, STEAM_PAYLOAD, "STEAM");
       const bobRows = await db.prisma.importedGame.findMany({
         where: { userId: BOB_ID },
       });
@@ -538,7 +546,7 @@ describe("upsertImportedGamesBatch", () => {
 
   describe("empty payload", () => {
     it("is a no-op with counts both zero", async () => {
-      const result = await upsertImportedGamesBatch(ALICE_ID, []);
+      const result = await upsertImportedGamesBatch(ALICE_ID, [], "STEAM");
       expect(result).toEqual({ created: 0, updated: 0 });
     });
   });

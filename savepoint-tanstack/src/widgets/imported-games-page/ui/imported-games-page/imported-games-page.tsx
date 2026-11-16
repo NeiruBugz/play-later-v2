@@ -1,21 +1,24 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { ImportedGameWithGame } from "@/entities/imported-game/model/types";
 // Server fns are imported from individual module paths (not the feature barrel)
 // so component tests can mock each module without dragging the rest of the
 // feature's server chain into the jsdom env.
 import { dismissImportedGameFn } from "@/features/steam-import/api/dismiss-imported-game";
-import { importSteamLibraryFn } from "@/features/steam-import/api/import-steam-library";
-import {
-  showSyncCompletedToast,
-  showSyncFailedToast,
-  showSyncStartedToast,
-} from "@/features/steam-import/ui/error-cards/import-status-feedback";
 import { ImportGameModal } from "@/features/steam-import/ui/import-game-modal";
-import { ImportedGameCard } from "@/features/steam-import/ui/imported-game-card";
+import {
+  ImportedGameCard,
+  matchState,
+} from "@/features/steam-import/ui/imported-game-card";
+import {
+  SyncFailureAlert,
+  SyncProgress,
+  SyncStartButton,
+  useSteamSyncStatus,
+} from "@/features/storefront-sync";
 import { getErrorMessage } from "@/shared/lib/errors";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Button } from "@/shared/ui/button";
@@ -63,12 +66,30 @@ export function ImportedGamesPage({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [modalTarget, setModalTarget] = useState<{
-    game: ImportedGame;
+    game: ImportedGameWithGame;
     startOnSearch: boolean;
   } | null>(null);
 
+  const { data: syncStatus } = useSteamSyncStatus();
+  const syncStageKey =
+    syncStatus === undefined
+      ? undefined
+      : syncStatus === null
+        ? "no-sync"
+        : `${syncStatus.jobId}:${syncStatus.status}:${syncStatus.lookedUp}`;
+  const previousSyncStageKey = useRef(syncStageKey);
+  useEffect(() => {
+    if (
+      previousSyncStageKey.current !== undefined &&
+      previousSyncStageKey.current !== syncStageKey
+    ) {
+      router.invalidate();
+    }
+    previousSyncStageKey.current = syncStageKey;
+  }, [syncStageKey, router]);
+
   const sortedGames = useMemo(() => {
-    const matchStatusOrder = (g: ImportedGame) => {
+    const matchStatusOrder = (g: ImportedGameWithGame) => {
       if (g.igdbMatchStatus === "MATCHED") return 0;
       if (g.igdbMatchStatus === "IGNORED") return 2;
       return 1;
@@ -76,8 +97,8 @@ export function ImportedGamesPage({
     return [...games].sort((a, b) => matchStatusOrder(a) - matchStatusOrder(b));
   }, [games]);
 
-  const hasUnmatched = sortedGames.some(
-    (g) => g.igdbMatchStatus === "PENDING" || g.igdbMatchStatus === "UNMATCHED"
+  const hasNeedsMatch = sortedGames.some(
+    (g) => g.igdbMatchStatus !== "IGNORED" && matchState(g) === "needs-match"
   );
 
   const handleDismiss = async (importedGameId: string) => {
@@ -88,20 +109,6 @@ export function ImportedGamesPage({
       router.invalidate();
     } catch (err) {
       toast.error(getErrorMessage(err, "Could not remove game"));
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const handleSync = async () => {
-    setPending(true);
-    showSyncStartedToast();
-    try {
-      const { imported } = await importSteamLibraryFn();
-      showSyncCompletedToast(imported);
-      router.invalidate();
-    } catch (err) {
-      showSyncFailedToast(getErrorMessage(err, "Import from Steam failed"));
     } finally {
       setPending(false);
     }
@@ -145,17 +152,17 @@ export function ImportedGamesPage({
       );
     }
     return (
-      <EmptyState
-        icon={Gamepad2}
-        title="No games imported yet"
-        description="Import from Steam to see your games here."
-        action={{
-          label: pending ? "Importing…" : "Import from Steam",
-          onClick: handleSync,
-          disabled: pending,
-          variant: "default",
-        }}
-      />
+      <div className="flex flex-col items-center gap-6">
+        <EmptyState
+          icon={Gamepad2}
+          title="No games imported yet"
+          description="Sync your Steam library to see your games here."
+          spacing="comfortable"
+        />
+        <SyncFailureAlert />
+        <SyncStartButton connected />
+        <SyncProgress variant="page" />
+      </div>
     );
   }
 
@@ -165,24 +172,23 @@ export function ImportedGamesPage({
         filters={filters}
         includeIgnored={includeIgnored}
       />
-      {hasUnmatched ? (
+      {hasNeedsMatch ? (
         <Alert variant="warning">
-          <AlertTitle>Some games need a manual match</AlertTitle>
+          <AlertTitle>Some games need a match</AlertTitle>
           <AlertDescription>
-            Click &quot;Search&quot; on a row to find the right entry.
+            Press + on a game marked &apos;Needs a match&apos; to pick the right
+            game.
           </AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="flex items-center justify-end">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleSync}
-          disabled={pending}
-        >
-          {pending ? "Importing…" : "Import from Steam"}
-        </Button>
+      <SyncFailureAlert />
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-end">
+          <SyncStartButton connected={steamId !== null} />
+        </div>
+        <SyncProgress variant="page" />
       </div>
 
       <ul
@@ -196,7 +202,10 @@ export function ImportedGamesPage({
             <ImportedGameCard
               game={game}
               onAddToLibrary={() =>
-                setModalTarget({ game, startOnSearch: false })
+                setModalTarget({
+                  game,
+                  startOnSearch: matchState(game) === "needs-match",
+                })
               }
               onDismiss={
                 game.igdbMatchStatus !== "IGNORED"

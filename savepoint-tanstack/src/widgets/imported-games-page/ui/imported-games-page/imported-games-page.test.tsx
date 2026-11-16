@@ -1,10 +1,13 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ImportedGame } from "@/entities/imported-game/model/types";
+import type { ImportedGameWithGame } from "@/entities/imported-game/model/types";
 import { dismissImportedGameFn } from "@/features/steam-import";
+import { getSteamSyncStatusFn } from "@/features/storefront-sync/api/get-steam-sync-status";
+import type { SteamSyncStatus } from "@/features/storefront-sync/model/types";
 
 import { ImportedGamesPage } from "./imported-games-page";
 
@@ -22,6 +25,15 @@ vi.mock("@/features/steam-import/api/fetch-steam-games", () => ({
 }));
 vi.mock("@/features/steam-import/api/import-game-to-library", () => ({
   importGameToLibraryFn: vi.fn(),
+}));
+vi.mock("@/features/storefront-sync/api/start-steam-sync", () => ({
+  startSteamSyncFn: vi.fn(),
+}));
+vi.mock("@/features/storefront-sync/api/get-steam-sync-status", () => ({
+  getSteamSyncStatusFn: vi.fn(),
+}));
+vi.mock("@/features/storefront-sync/api/mark-sync-notice-seen", () => ({
+  markSyncNoticeSeenFn: vi.fn(),
 }));
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
   searchGamesFn: vi.fn(),
@@ -49,9 +61,37 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
+function renderPage(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+}
+
+function makeSyncStatus(overrides: Partial<SteamSyncStatus>): SteamSyncStatus {
+  return {
+    jobId: "job-1",
+    status: "GATHERING",
+    totalToLookUp: 0,
+    lookedUp: 0,
+    newGames: 0,
+    refreshedGames: 0,
+    addedToLibrary: 0,
+    needsMatch: 0,
+    addAllToLibrary: false,
+    failureCode: null,
+    finishedAt: null,
+    noticeSeen: false,
+    ...overrides,
+  };
+}
+
 function makeGame(
-  overrides: Partial<ImportedGame> & Pick<ImportedGame, "id" | "name">
-): ImportedGame {
+  overrides: Partial<ImportedGameWithGame> &
+    Pick<ImportedGameWithGame, "id" | "name">
+): ImportedGameWithGame {
   return {
     storefront: "STEAM",
     storefrontGameId: "100",
@@ -67,15 +107,44 @@ function makeGame(
     updatedAt: new Date(),
     deletedAt: null,
     userId: "u-1",
+    gameId: null,
+    lookedUpAt: null,
+    game: null,
     ...overrides,
   };
 }
+
+const STEAM_UNAVAILABLE_REASON =
+  "Steam is temporarily unavailable. Please try again later.";
+
+const LOOKED_UP_AT = new Date("2026-11-14T10:00:00.000Z");
 
 const unmatched = makeGame({
   id: "g-unmatch",
   name: "Custom Game",
   storefrontGameId: "999999",
   igdbMatchStatus: "UNMATCHED",
+});
+const needsMatch = makeGame({
+  id: "g-needs-match",
+  name: "Obscure Indie",
+  storefrontGameId: "123456",
+  igdbMatchStatus: "PENDING",
+  lookedUpAt: LOOKED_UP_AT,
+});
+const found = makeGame({
+  id: "g-found",
+  name: "Half-Life 2",
+  storefrontGameId: "220",
+  igdbMatchStatus: "PENDING",
+  gameId: "game-220",
+  lookedUpAt: LOOKED_UP_AT,
+  game: {
+    title: "Half-Life 2",
+    coverImage:
+      "https://images.igdb.com/igdb/image/upload/t_cover_big/co1nmw.jpg",
+    releaseDate: new Date("2004-11-16T00:00:00.000Z"),
+  },
 });
 const pending = makeGame({
   id: "g-pending",
@@ -87,13 +156,31 @@ const elements = {
   queryEmptyConnect: () =>
     screen.queryByText("Connect Steam to see your games"),
   queryEmptyNoGames: () => screen.queryByText("No games imported yet"),
-  querySyncButton: () =>
+  querySyncButton: () => screen.queryByRole("button", { name: "Sync" }),
+  queryLegacyImportButton: () =>
     screen.queryByRole("button", { name: /Import from Steam/ }),
+  findSyncingButton: () => screen.findByRole("button", { name: "Syncing…" }),
+  queryGamesList: () => screen.queryByRole("list", { name: "Steam games" }),
+  queryGameTitle: (title: string) => screen.queryByText(title),
+  findFailureReason: (reason: string) => screen.findByText(reason),
+  queryFailureReason: (reason: string) => screen.queryByText(reason),
+  queryConnectSyncLink: () =>
+    screen.queryByRole("link", { name: "Connect Steam to sync" }),
+  findFetchingStatus: () =>
+    screen.findByRole("status", { name: "Fetching your Steam library…" }),
   queryConnectAction: () =>
     screen.queryByRole("link", { name: "Connect Steam" }) ??
     screen.queryByRole("button", { name: "Connect Steam" }),
-  queryUnmatchedAlert: () =>
+  queryNeedsMatchAlert: () => screen.queryByText("Some games need a match"),
+  queryNeedsMatchAlertHelp: () =>
+    screen.queryByText(
+      "Press + on a game marked 'Needs a match' to pick the right game."
+    ),
+  queryOldUnmatchedAlert: () =>
     screen.queryByText("Some games need a manual match"),
+  queryLookingUpCount: (count: string) => screen.queryByText(count),
+  findLookingUpStatus: () =>
+    screen.findByRole("status", { name: "Looking up your games" }),
   queryAddButton: (name: string) =>
     screen.queryByRole("button", { name: `Add ${name}` }),
   querySearchIgdbButton: (name: string) =>
@@ -141,11 +228,13 @@ describe("ImportedGamesPage", () => {
     vi.mocked(toast.error).mockReset();
     invalidateMock.mockReset();
     navigateMock.mockReset();
+    vi.mocked(getSteamSyncStatusFn).mockReset();
+    vi.mocked(getSteamSyncStatusFn).mockResolvedValue(null);
   });
 
   describe("given zero games and no Steam connection", () => {
     beforeEach(() => {
-      render(<ImportedGamesPage games={[]} steamId={null} />);
+      renderPage(<ImportedGamesPage games={[]} steamId={null} />);
     });
 
     it("renders the Connect-Steam empty state", () => {
@@ -161,32 +250,179 @@ describe("ImportedGamesPage", () => {
 
   describe("given zero games but Steam is connected", () => {
     beforeEach(() => {
-      render(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
+      renderPage(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
     });
 
     it("renders the No-games-yet empty state", () => {
       expect(elements.queryEmptyNoGames()).not.toBeNull();
     });
 
-    it("renders a Import-from-Steam CTA", () => {
-      expect(
-        screen.queryByRole("button", { name: "Import from Steam" })
-      ).not.toBeNull();
+    it("offers the Sync button in place of the legacy Import-from-Steam button", () => {
+      expect(elements.querySyncButton()).not.toBeNull();
+      expect(elements.queryLegacyImportButton()).toBeNull();
     });
   });
 
-  describe("given a mix of UNMATCHED + PENDING games (MATCHED rows excluded by the entity query)", () => {
+  describe("given zero games, Steam connected, and a sync running", () => {
     beforeEach(() => {
-      render(
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "GATHERING" })
+      );
+      renderPage(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
+    });
+
+    it("tells the user the Steam library is being fetched", async () => {
+      expect(await elements.findFetchingStatus()).toBeInTheDocument();
+    });
+
+    it("shows a disabled 'Syncing…' button", async () => {
+      expect(await elements.findSyncingButton()).toBeDisabled();
+    });
+  });
+
+  describe("given a populated list and Steam connected", () => {
+    beforeEach(() => {
+      renderPage(
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
+      );
+    });
+
+    it("offers the Sync button above the list", () => {
+      expect(elements.querySyncButton()).not.toBeNull();
+      expect(elements.queryLegacyImportButton()).toBeNull();
+    });
+  });
+
+  describe("given a populated list and no Steam connection", () => {
+    beforeEach(() => {
+      renderPage(<ImportedGamesPage games={[pending]} steamId={null} />);
+    });
+
+    it("links to account settings instead of offering Sync", () => {
+      expect(elements.queryConnectSyncLink()).toHaveAttribute(
+        "href",
+        "/settings/account"
+      );
+      expect(elements.querySyncButton()).toBeNull();
+    });
+  });
+
+  describe("given the person disconnected Steam after an earlier sync and still has games", () => {
+    beforeEach(() => {
+      renderPage(<ImportedGamesPage games={[found, pending]} steamId={null} />);
+    });
+
+    it("keeps listing their imported games", () => {
+      expect(elements.queryGamesList()).toBeInTheDocument();
+      expect(elements.queryGameTitle("Half-Life 2")).toBeInTheDocument();
+      expect(elements.queryEmptyConnect()).toBeNull();
+    });
+
+    it("shows 'Connect Steam to sync' to account settings in place of the Sync button", () => {
+      expect(elements.queryConnectSyncLink()).toHaveAttribute(
+        "href",
+        "/settings/account"
+      );
+      expect(elements.querySyncButton()).toBeNull();
+    });
+  });
+
+  describe("given the last sync failed and the list has games", () => {
+    beforeEach(() => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({
+          status: "FAILED",
+          failureCode: "STEAM_UNAVAILABLE",
+          finishedAt: new Date(),
+        })
+      );
+      renderPage(
+        <ImportedGamesPage games={[found]} steamId="76561198012345678" />
+      );
+    });
+
+    it("shows the failure reason above the list", async () => {
+      expect(
+        await elements.findFailureReason(STEAM_UNAVAILABLE_REASON)
+      ).toBeInTheDocument();
+    });
+
+    it("keeps the games and offers Sync again", () => {
+      expect(elements.queryGameTitle("Half-Life 2")).toBeInTheDocument();
+      expect(elements.querySyncButton()).not.toBeNull();
+    });
+  });
+
+  describe("given the last sync failed and the person has no games", () => {
+    beforeEach(() => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({
+          status: "FAILED",
+          failureCode: "STEAM_UNAVAILABLE",
+          finishedAt: new Date(),
+        })
+      );
+      renderPage(<ImportedGamesPage games={[]} steamId="76561198012345678" />);
+    });
+
+    it("shows the failure reason instead of leaving the page silent", async () => {
+      expect(
+        await elements.findFailureReason(STEAM_UNAVAILABLE_REASON)
+      ).toBeInTheDocument();
+    });
+
+    it("offers Sync again", () => {
+      expect(elements.querySyncButton()).not.toBeNull();
+    });
+  });
+
+  describe("given the last sync finished", () => {
+    beforeEach(async () => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "FINISHED", finishedAt: new Date() })
+      );
+      renderPage(
+        <ImportedGamesPage games={[found]} steamId="76561198012345678" />
+      );
+      await vi.waitFor(() => expect(getSteamSyncStatusFn).toHaveBeenCalled());
+    });
+
+    it("shows no failure reason", () => {
+      expect(elements.queryFailureReason(STEAM_UNAVAILABLE_REASON)).toBeNull();
+    });
+  });
+
+  describe("given the sync moves from gathering to finished while the page is open", () => {
+    beforeEach(async () => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "GATHERING" })
+      );
+      renderPage(
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
+      );
+      await elements.findSyncingButton();
+      invalidateMock.mockClear();
+    });
+
+    it("refreshes the loader data once the stage changes", async () => {
+      vi.mocked(getSteamSyncStatusFn).mockResolvedValue(
+        makeSyncStatus({ status: "FINISHED", finishedAt: new Date() })
+      );
+
+      await waitFor(() => expect(invalidateMock).toHaveBeenCalledOnce(), {
+        timeout: 5000,
+      });
+    }, 8000);
+  });
+
+  describe("given legacy UNMATCHED and PENDING games that were never looked up", () => {
+    beforeEach(() => {
+      renderPage(
         <ImportedGamesPage
           games={[unmatched, pending]}
           steamId="76561198012345678"
         />
       );
-    });
-
-    it("renders the unmatched-rows warning Alert", () => {
-      expect(elements.queryUnmatchedAlert()).not.toBeNull();
     });
 
     it("renders the Add-to-library button for every visible row", () => {
@@ -198,11 +434,115 @@ describe("ImportedGamesPage", () => {
       expect(elements.queryDismissButton("Custom Game")).not.toBeNull();
       expect(elements.queryDismissButton("Pending Game")).not.toBeNull();
     });
+
+    it("shows no warning, because nothing was looked up and failed", () => {
+      expect(elements.queryNeedsMatchAlert()).toBeNull();
+      expect(elements.queryOldUnmatchedAlert()).toBeNull();
+    });
+  });
+
+  describe("given a game that was looked up and needs a match", () => {
+    beforeEach(() => {
+      renderPage(
+        <ImportedGamesPage
+          games={[found, needsMatch]}
+          steamId="76561198012345678"
+        />
+      );
+    });
+
+    it("warns that some games need a match", () => {
+      expect(elements.queryNeedsMatchAlert()).not.toBeNull();
+    });
+
+    it("explains how to pick the right game", () => {
+      expect(elements.queryNeedsMatchAlertHelp()).not.toBeNull();
+    });
+
+    it("no longer uses the old manual-match copy", () => {
+      expect(elements.queryOldUnmatchedAlert()).toBeNull();
+    });
+  });
+
+  describe("given only found games and games not looked up yet", () => {
+    beforeEach(() => {
+      renderPage(
+        <ImportedGamesPage
+          games={[found, pending]}
+          steamId="76561198012345678"
+        />
+      );
+    });
+
+    it("shows no warning", () => {
+      expect(elements.queryNeedsMatchAlert()).toBeNull();
+    });
+  });
+
+  describe("given the user presses Add on a found game", () => {
+    beforeEach(async () => {
+      renderPage(
+        <ImportedGamesPage games={[found]} steamId="76561198012345678" />
+      );
+      await userEvent.click(elements.queryAddButton("Half-Life 2")!);
+    });
+
+    it("opens the status choice straight away", () => {
+      expect(elements.queryImportDialogTitle()).not.toBeNull();
+    });
+
+    it("does not ask the user to select the correct game", () => {
+      expect(elements.querySearchDialogTitle()).toBeNull();
+    });
+  });
+
+  describe("given the user presses Add on a game that needs a match", () => {
+    beforeEach(async () => {
+      renderPage(
+        <ImportedGamesPage games={[needsMatch]} steamId="76561198012345678" />
+      );
+      await userEvent.click(elements.queryAddButton("Obscure Indie")!);
+    });
+
+    it("opens on selecting the correct game", () => {
+      expect(elements.querySearchDialogTitle()).not.toBeNull();
+    });
+  });
+
+  describe("given the lookup progresses while the page is open", () => {
+    beforeEach(async () => {
+      vi.mocked(getSteamSyncStatusFn)
+        .mockResolvedValueOnce(
+          makeSyncStatus({
+            status: "LOOKING_UP",
+            totalToLookUp: 1200,
+            lookedUp: 340,
+          })
+        )
+        .mockResolvedValue(
+          makeSyncStatus({
+            status: "LOOKING_UP",
+            totalToLookUp: 1200,
+            lookedUp: 800,
+          })
+        );
+      renderPage(
+        <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
+      );
+      await elements.findLookingUpStatus();
+      invalidateMock.mockClear();
+    });
+
+    it("refreshes the loader data when the count moves", async () => {
+      await waitFor(() => expect(invalidateMock).toHaveBeenCalledOnce(), {
+        timeout: 5000,
+      });
+    }, 8000);
   });
 
   describe("given the user clicks the per-row Add button on a PENDING row", () => {
     beforeEach(async () => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.queryAddButton("Pending Game")!);
@@ -216,7 +556,7 @@ describe("ImportedGamesPage", () => {
   describe("given the user clicks dismiss on a PENDING row", () => {
     beforeEach(async () => {
       vi.mocked(dismissImportedGameFn).mockResolvedValue(undefined as never);
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.queryDismissButton("Pending Game")!);
@@ -240,7 +580,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the filter bar is rendered with populated games", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
     });
@@ -260,7 +600,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the user types a search query and presses Enter", () => {
     beforeEach(async () => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.type(elements.getSearchInput(), "halo{Enter}");
@@ -274,7 +614,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given the user toggles 'Show dismissed games'", () => {
     beforeEach(async () => {
-      render(
+      renderPage(
         <ImportedGamesPage games={[pending]} steamId="76561198012345678" />
       );
       await userEvent.click(elements.getShowDismissedCheckbox());
@@ -288,7 +628,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given a search filter is active in the URL", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage
           games={[pending]}
           steamId="76561198012345678"
@@ -312,7 +652,7 @@ describe("ImportedGamesPage", () => {
 
   describe("given filters are active but the server returned zero rows", () => {
     beforeEach(() => {
-      render(
+      renderPage(
         <ImportedGamesPage
           games={[]}
           steamId="76561198012345678"

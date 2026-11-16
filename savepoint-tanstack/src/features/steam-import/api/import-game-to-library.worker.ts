@@ -9,10 +9,7 @@ import { createWantLibraryItem } from "@/entities/library-item/api/add-game-to-l
 import { setLibraryItemStatusInTx } from "@/entities/library-item/api/set-library-item-status.server";
 import { lockUserQueue } from "@/entities/library-item/api/up-next-queue.server";
 import { libraryItemStatusSchema } from "@/entities/library-item/model";
-import {
-  matchSteamGameByAppId,
-  type SearchResponseItem,
-} from "@/shared/api/igdb";
+import { matchSteamGameByAppId } from "@/shared/api/igdb";
 import { prisma } from "@/shared/lib/db.server";
 import {
   ConflictError,
@@ -43,9 +40,9 @@ export type ImportGameToLibraryResult = {
  *
  * Flow:
  *  1. Two-step ownership read on the imported-game row.
- *  2. Resolve igdbId: `manualIgdbId` if provided, otherwise throw
- *     `NeedsManualMatchError`.
- *  3. Cache-or-fetch a local `Game` row by `igdbId` via entities/game.
+ *  2. Resolve the catalogue `Game` (manual pick, the row's own `gameId`, or an
+ *     auto-match; see `resolveGame`).
+ *  3. Ensure the game's enrichment.
  *  4. In one transaction: refuse if the user already has a LibraryItem for
  *     this game (throws `ConflictError` after flipping MATCHED; the modal
  *     surfaces "already in library"); otherwise create the LibraryItem (WANT),
@@ -74,42 +71,7 @@ export async function importGameToLibraryWorker(
     throw new NotFoundError("Imported game not found", { importedGameId });
   }
 
-  // Resolve igdbId. Three sources, in order:
-  //   1. Caller-supplied manualIgdbId (user picked from search).
-  //   2. Auto-match via Steam App ID → IGDB external_games join.
-  //   3. NeedsManualMatchError so the UI falls back to manual search.
-  let igdbId: number;
-  let matchedRemote: SearchResponseItem | null = null;
-  if (manualIgdbId !== undefined) {
-    igdbId = manualIgdbId;
-  } else {
-    if (!importedGame.storefrontGameId) {
-      throw new NeedsManualMatchError(
-        "Imported game has no Steam app id — pick the IGDB entry manually.",
-        { importedGameId }
-      );
-    }
-    const match = await matchSteamGameByAppId(importedGame.storefrontGameId);
-    if (!match) {
-      // Persist UNMATCHED so the row surfaces in the filter, then signal
-      // the modal to switch to manual search.
-      await prisma.importedGame.update({
-        where: { id: importedGameId },
-        data: { igdbMatchStatus: "UNMATCHED" },
-      });
-      throw new NeedsManualMatchError(
-        "No IGDB match found for this Steam game — pick manually.",
-        { importedGameId, steamAppId: importedGame.storefrontGameId }
-      );
-    }
-    igdbId = match.id;
-    matchedRemote = match;
-  }
-
-  // Delegate caching and URL generation cleanly to entities/game
-  const game = matchedRemote
-    ? await upsertGameFromIgdbPayload(matchedRemote)
-    : await upsertGameFromIgdb(igdbId);
+  const game = await resolveGame(importedGame, manualIgdbId);
   await ensureGamesEnrichment([game]);
 
   // One transaction: library item, status change and MATCHED flip commit or
@@ -151,4 +113,54 @@ export async function importGameToLibraryWorker(
     gameId: game.id,
     gameSlug: game.slug,
   };
+}
+
+type ImportedGameRow = {
+  id: string;
+  gameId: string | null;
+  storefrontGameId: string | null;
+};
+type Game = Awaited<ReturnType<typeof upsertGameFromIgdb>>;
+
+/**
+ * Resolve the catalogue game to add. Three sources, in order:
+ *   1. Caller-supplied `manualIgdbId` (user picked from search).
+ *   2. The row's own `gameId`, set when the background sync found the game.
+ *   3. Auto-match via Steam App ID -> IGDB external_games, otherwise
+ *      `NeedsManualMatchError` so the UI falls back to manual search.
+ */
+async function resolveGame(
+  importedGame: ImportedGameRow,
+  manualIgdbId: number | undefined
+): Promise<Game> {
+  if (manualIgdbId !== undefined) return upsertGameFromIgdb(manualIgdbId);
+
+  if (importedGame.gameId) {
+    const linked = await prisma.game.findUnique({
+      where: { id: importedGame.gameId },
+    });
+    if (linked) return linked;
+  }
+
+  const importedGameId = importedGame.id;
+  if (!importedGame.storefrontGameId) {
+    throw new NeedsManualMatchError(
+      "Imported game has no Steam app id — pick the IGDB entry manually.",
+      { importedGameId }
+    );
+  }
+  const match = await matchSteamGameByAppId(importedGame.storefrontGameId);
+  if (!match) {
+    // Persist UNMATCHED so the row surfaces in the filter, then signal
+    // the modal to switch to manual search.
+    await prisma.importedGame.update({
+      where: { id: importedGameId },
+      data: { igdbMatchStatus: "UNMATCHED" },
+    });
+    throw new NeedsManualMatchError(
+      "No IGDB match found for this Steam game — pick manually.",
+      { importedGameId, steamAppId: importedGame.storefrontGameId }
+    );
+  }
+  return upsertGameFromIgdbPayload(match);
 }

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "env.lambda.ts",
+    "src/lambdas/**/*.ts",
+    "src/features/storefront-sync/api/gather.worker.ts",
+    "src/features/storefront-sync/api/enrich.worker.ts"
+  ],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"],
+  "compilerOptions": {
+    "paths": {
+      "#/*": ["./src/*"],
+      "@/*": ["./src/*"],
+      "@env": ["./env.lambda.ts"]
+    },
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.lambdas.tsbuildinfo"
+  }
+}

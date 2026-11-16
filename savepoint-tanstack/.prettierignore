@@ -4,3 +4,4 @@ coverage/**
 .tanstack/**
 src/routeTree.gen.ts
 shared/lib/prisma/**
+dist-lambdas/**

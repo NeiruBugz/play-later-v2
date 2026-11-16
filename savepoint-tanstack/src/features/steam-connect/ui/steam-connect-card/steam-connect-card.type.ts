@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export interface SteamConnectCardProps {
   /**
    * The user's currently-linked Steam64 ID, or `null` if not yet connected.
@@ -12,4 +14,10 @@ export interface SteamConnectCardProps {
    * that React refuses to patch on hydration).
    */
   connectUrl: string;
+
+  /**
+   * Rendered inside the card while connected. The route composes it (e.g. the
+   * storefront-sync progress line) so this feature never imports a sibling.
+   */
+  syncSlot?: ReactNode;
 }

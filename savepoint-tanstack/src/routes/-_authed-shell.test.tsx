@@ -59,6 +59,7 @@ vi.mock("@/widgets/done-flow", () => ({
 vi.mock("@/widgets/global-action-host", () => ({
   GlobalActionHost: () => null,
 }));
+vi.mock("@/features/storefront-sync", () => ({ SyncNoticeHost: () => null }));
 
 vi.mock("@/widgets/navigation-progress", () => ({
   NavigationProgress: () => null,

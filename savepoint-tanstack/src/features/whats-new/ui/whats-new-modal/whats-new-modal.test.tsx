@@ -30,12 +30,30 @@ const elements = {
   queryDismissButton: () => screen.queryByRole("button", { name: "Got it" }),
   getDismissButton: () => screen.getByRole("button", { name: "Got it" }),
   queryModalHeading: () => screen.queryByRole("dialog"),
+  querySteamDescription: () =>
+    screen.queryByText(
+      "Connect Steam and sync your library — we look up every game for you, and can add them all to your library in one go."
+    ),
+  queryAutomaticImportClaim: () =>
+    screen.queryByText("games and time played will come into your library", {
+      exact: false,
+    }),
 };
 
 const actions = {
   clickGotIt: () => userEvent.click(elements.getDismissButton()),
   drainTimers: () => vi.runAllTimers(),
 };
+
+describe("CURRENT_VERSION", () => {
+  it("is bumped from the previous announcement so every user sees the new Steam copy", () => {
+    expect(CURRENT_VERSION).not.toBe("2026-05-20-v1");
+  });
+
+  it("keeps the YYYY-MM-DD-vN format", () => {
+    expect(CURRENT_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}-v\d+$/);
+  });
+});
 
 describe("WhatsNewModal", () => {
   beforeEach(() => {
@@ -124,6 +142,21 @@ describe("WhatsNewModal", () => {
 
     it("renders the secondary announcement title in the list", () => {
       expect(screen.getByText("Second Announcement")).toBeDefined();
+    });
+  });
+
+  describe("given the Steam announcement is shown", () => {
+    beforeEach(() => {
+      render(<WhatsNewModal />);
+      actions.drainTimers();
+    });
+
+    it("describes Steam as sync-then-add-to-library", () => {
+      expect(elements.querySteamDescription()).not.toBeNull();
+    });
+
+    it("no longer claims games and time played come into the library automatically", () => {
+      expect(elements.queryAutomaticImportClaim()).toBeNull();
     });
   });
 

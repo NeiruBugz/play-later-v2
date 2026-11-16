@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "project_id": "d15691af-2ebf-4a3c-95d5-bcd747c024ec",
+  "skills": {
+    "aws-lambda-best-practices": {
+      "server": "https://recruitment.awos.provectus.pro",
+      "installed_at": "2026-11-14T18:49:05.448Z",
+      "hash": "25536ab90091a3778ccfc8b3ca2a25e9b6db3b8b0f60dbe3874178051423b1cd",
+      "files": {
+        "SKILL.md": "08057de2a8df69189ff7e78daddb2a4534a8e024b86cda3a73ee0130c93379b6",
+        "references/anti-patterns.md": "e8e1b5d5e44351050cf5e4940f2b606fe8a8dd2f1bd0345b448ca5a42cc36edf",
+        "references/function-configuration.md": "5ba90e5f33bd7eecb7346c102974f79f469ab70c0ce2914ea39c0508837fd073",
+        "references/function-design.md": "b672a667f98457ab1540b35e52a3d538c3573ad3c394c63448b83c9d57139a92",
+        "references/function-scalability.md": "28c15476fdc274715d911b3aa90aec329019cb0e1f00549349c6fdf1e2fcabd0",
+        "references/metrics-and-alarms.md": "aec93d66bbc0a689a9f7f1f191d60b28af5569f577edf51fe7e3bda23f2b8980",
+        "references/security.md": "12d189811e4a093ff47d1d8603938f92dab4ba3bf4c83a7a0808bfa806c48668",
+        "references/stream-events.md": "e01ee7f83d100597b4ae8d7dd77bd29fac6b954eb220f5a09da7ce32a898cec7"
+      },
+      "commit": "e887a0d",
+      "released": "2026-09-24"
+    },
+    "typescript-development": {
+      "server": "https://recruitment.awos.provectus.pro",
+      "installed_at": "2026-11-14T18:49:05.448Z",
+      "hash": "d9f12bb0b6c7f2bb3e512cf3ebf334ea45fb96ade2c8edeadb10987a740a6d89",
+      "files": {
+        "SKILL.md": "91f350715145677b25fbd36b012303102ac0361004f4092d8d76cf30d7c590c1",
+        "references/patterns.md": "a21f527eff0cc6c6db854e686cdf74fb72af7fb11165444164c8b0827f8617e0",
+        "references/project-structure.md": "c82b94ff8dcfedc0a77032e79edb564f52a3f5fec891a594b89be3a4f86dc0e3",
+        "references/type-inference.md": "4cd8a457311d70a7078b6c91296188cd7c0cfcc5b31d325d877e1da89d02c315",
+        "references/type-system.md": "a63cd1887ae3a599304cd0ade3123f6444759fcc1a454e978a9930aeb9cc50e7"
+      },
+      "commit": "660f8ad",
+      "released": "2026-10-07"
+    }
+  }
+}

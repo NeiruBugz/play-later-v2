@@ -1215,7 +1215,8 @@ resurface after re-import).
 **`calculateSmartStatus` is a derive-on-demand utility.** Ported
 verbatim from `savepoint-app/features/steam-import/lib/
 calculate-smart-status.ts` to
-`src/features/steam-import/lib/calculate-smart-status.ts`. The schema
+`src/entities/imported-game/lib/calculate-smart-status.ts` (exported from
+`@/entities/imported-game`). The schema
 has no `suggestedStatus` column, so the value is computed lazily by
 Phase D's UI when surfacing a row, not stored on `ImportedGame`. Pure
 function — argument shape is `{ playtime, lastPlayedAt }`, returns

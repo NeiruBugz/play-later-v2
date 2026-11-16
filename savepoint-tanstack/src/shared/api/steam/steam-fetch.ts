@@ -33,7 +33,7 @@ const STEAM_BASE_URL = "https://api.steampowered.com";
 const OwnedGameRawSchema = z.object({
   appid: z.number(),
   name: z.string(),
-  playtime_forever: z.number(),
+  playtime_forever: z.number().default(0),
   playtime_windows_forever: z.number().optional(),
   playtime_mac_forever: z.number().optional(),
   playtime_linux_forever: z.number().optional(),

@@ -21,6 +21,10 @@ vi.mock("@/features/steam-connect", () => ({
   getSteamConnectionFn: vi.fn(),
 }));
 
+vi.mock("@/features/storefront-sync", () => ({
+  SyncProgress: () => null,
+}));
+
 vi.mock("@tanstack/react-router", async () => {
   const actual = await vi.importActual<any>("@tanstack/react-router");
   return {

@@ -56,7 +56,11 @@ export async function importSteamLibraryWorker(
   const ownedGames = await fetchOwnedGames(user.steamId64);
 
   const payload = ownedGames.map(adaptOwnedGame);
-  const { created, updated } = await upsertImportedGamesBatch(userId, payload);
+  const { created, updated } = await upsertImportedGamesBatch(
+    userId,
+    payload,
+    "STEAM"
+  );
 
   return { imported: created + updated, total: ownedGames.length };
 }
