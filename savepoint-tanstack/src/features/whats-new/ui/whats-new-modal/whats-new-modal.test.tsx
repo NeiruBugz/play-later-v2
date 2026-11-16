@@ -32,7 +32,7 @@ const elements = {
   queryModalHeading: () => screen.queryByRole("dialog"),
   querySteamDescription: () =>
     screen.queryByText(
-      "Connect Steam and sync your library — SavePoint looks up every game for you, and can add them all to your library in one go."
+      "Connect Steam and sync your library — we look up every game for you, and can add them all to your library in one go."
     ),
   queryAutomaticImportClaim: () =>
     screen.queryByText("games and time played will come into your library", {

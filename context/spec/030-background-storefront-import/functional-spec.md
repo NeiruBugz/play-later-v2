@@ -207,9 +207,9 @@ This spec turns the import into a **background sync**:
 
 ### 2.7 Honest import wording elsewhere
 
-- **2.7.1** The "What's new" Steam entry is replaced with: "Connect Steam and sync your library — SavePoint looks up every game for you, and can add them all to your library in one go."
+- **2.7.1** The "What's new" Steam entry is replaced with: "Connect Steam and sync your library — we look up every game for you, and can add them all to your library in one go."
   - **Acceptance Criteria:**
-    - [ ] When the person opens "What's new", then the Steam entry reads "Connect Steam and sync your library — SavePoint looks up every game for you, and can add them all to your library in one go."
+    - [ ] When the person opens "What's new", then the Steam entry reads "Connect Steam and sync your library — we look up every game for you, and can add them all to your library in one go."
 
 - **2.7.2** The import no longer shows the old "Steam import started — This may take a few minutes. We'll notify you when it's complete." or "N game(s) imported successfully." messages. The sync's start (2.1) and finish (2.5) messages replace them.
   - **Acceptance Criteria:**
@@ -252,4 +252,4 @@ This spec turns the import into a **background sync**:
 
 ## Change Log
 
-_No amendments yet._
+- 2026-11-16 — implementation (brand guard test `test/brand/no-old-name.test.ts`) — the "What's new" Steam text in 2.7.1 named the product by its old name; the product is now "Continue?". Reworded to "we look up every game for you" so the copy stays brand-neutral. No behaviour change.
