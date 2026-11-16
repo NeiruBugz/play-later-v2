@@ -8,7 +8,11 @@ updates:
       prefix: "chore(deps)"
 
   - package-ecosystem: "terraform"
-    directory: "/infra"
+    directories:
+      - "/infra/envs/dev"
+      - "/infra/envs/prod"
+      - "/infra/stacks/storefront-sync/shared"
+      - "/infra/stacks/storefront-sync/prod"
     schedule:
       interval: "weekly"
     commit-message:

@@ -20,6 +20,8 @@ terraform output -json     # get values to copy into app .env.local
 terraform destroy
 ```
 
+CI: `.github/workflows/pr-checks-infra.yml` runs `terraform fmt -check -recursive`, `init -backend=false`, `validate` and `tflint` on all four roots (`envs/dev`, `envs/prod`, `stacks/storefront-sync/shared`, `stacks/storefront-sync/prod`) for PRs touching `infra/**`; no credentials, never plans or applies.
+
 ## Environment Structure
 ```
 envs/
