@@ -160,8 +160,8 @@ export function ImportedGamesPage({
           spacing="comfortable"
         />
         <SyncFailureAlert />
-        <SyncProgress variant="page" />
         <SyncStartButton connected />
+        <SyncProgress variant="page" />
       </div>
     );
   }
@@ -183,10 +183,12 @@ export function ImportedGamesPage({
       ) : null}
 
       <SyncFailureAlert />
-      <SyncProgress variant="page" />
 
-      <div className="flex items-center justify-end">
-        <SyncStartButton connected={steamId !== null} />
+      <div className="space-y-2">
+        <div className="flex items-center justify-end">
+          <SyncStartButton connected={steamId !== null} />
+        </div>
+        <SyncProgress variant="page" />
       </div>
 
       <ul
