@@ -124,6 +124,7 @@ export default tseslint.config(
       "node_modules/**",
       "dist/**",
       ".output/**",
+      "dist-lambdas/**",
       "build/**",
       "coverage/**",
       ".tanstack/**",
