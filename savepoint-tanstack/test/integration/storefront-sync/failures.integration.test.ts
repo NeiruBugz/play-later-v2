@@ -153,7 +153,8 @@ const actions = {
     });
     await db.prisma.$executeRaw`
       UPDATE "ImportJob"
-      SET "updatedAt" = now() - make_interval(mins => ${minutes})
+      SET "createdAt" = now() - make_interval(mins => ${minutes + 1}),
+          "updatedAt" = now() - make_interval(mins => ${minutes})
       WHERE "id" = ${job.id}
     `;
     return job.id;
