@@ -6,12 +6,7 @@
     "src/features/storefront-sync/api/gather.worker.ts",
     "src/features/storefront-sync/api/enrich.worker.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.test.tsx"
-  ],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"],
   "compilerOptions": {
     "paths": {
       "#/*": ["./src/*"],

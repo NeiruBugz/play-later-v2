@@ -15,7 +15,7 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
-import { coreEnv } from "./env.core";
+import { coreEnv, sharedEnvSchema } from "./env.core";
 import { extraOriginsSchema } from "./src/shared/config/extra-origins";
 
 export const env = createEnv({
@@ -78,7 +78,10 @@ export const env = createEnv({
     AWS_SYNC_ROLE_ARN: z.string().min(1).optional(),
   },
   client: {},
+  shared: sharedEnvSchema,
   runtimeEnv: {
+    NODE_ENV: process.env.NODE_ENV ?? "development",
+    LOG_LEVEL: process.env.LOG_LEVEL,
     AUTH_COGNITO_ID: process.env.AUTH_COGNITO_ID,
     AUTH_COGNITO_SECRET: process.env.AUTH_COGNITO_SECRET,
     AUTH_COGNITO_ISSUER: process.env.AUTH_COGNITO_ISSUER,

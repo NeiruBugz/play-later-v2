@@ -7,6 +7,13 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+export const sharedEnvSchema = {
+  NODE_ENV: z.enum(["development", "test", "production"]),
+  LOG_LEVEL: z
+    .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+    .optional(),
+};
+
 export const coreEnv = createEnv({
   clientPrefix: "VITE_",
   server: {
@@ -20,12 +27,7 @@ export const coreEnv = createEnv({
     SYNC_MAX_RECEIVE_COUNT: z.coerce.number().int().min(1).default(3),
   },
   client: {},
-  shared: {
-    NODE_ENV: z.enum(["development", "test", "production"]),
-    LOG_LEVEL: z
-      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
-      .optional(),
-  },
+  shared: sharedEnvSchema,
   runtimeEnv: {
     POSTGRES_PRISMA_URL: process.env.POSTGRES_PRISMA_URL,
     IGDB_CLIENT_ID: process.env.IGDB_CLIENT_ID,
