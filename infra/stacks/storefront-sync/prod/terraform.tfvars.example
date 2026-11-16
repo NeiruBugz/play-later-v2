@@ -1,3 +1,5 @@
-aws_region       = "your-aws-region"
-vercel_team_slug = "your-vercel-team-slug"
+# 12-digit AWS account the stack may be applied to; the provider refuses any other account
+aws_account_id      = "123456789012"
+aws_region          = "your-aws-region"
+vercel_team_slug    = "your-vercel-team-slug"
 vercel_project_name = "your-vercel-project-name"

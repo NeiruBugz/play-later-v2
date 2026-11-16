@@ -48,6 +48,7 @@ Both envs use identical module composition. Differences are only in variable val
 - Pins are exact: Terraform `= 1.14.6`, AWS provider `= 6.73.0`, archive `= 2.8.1`.
 - Commands run from `stacks/storefront-sync/shared/` then `prod/`: `terraform init -backend-config=backend.hcl`, `terraform plan -out=plan.tfplan`, apply the saved plan. `backend.hcl` and `terraform.tfvars` are gitignored; copy from the `.example` files.
 - Owner bootstrap wizard (runbook steps 1-7, resumable, `--dry-run`): `infra/scripts/storefront-sync-bootstrap.sh`; saves non-secret answers to the gitignored `stacks/storefront-sync/.bootstrap.env`.
+- Account guard: both roots require `aws_account_id` (12 digits, in `terraform.tfvars`) and set `allowed_account_ids` on the AWS provider, so a wrong `AWS_PROFILE` fails at plan time; the wizard persists `CONFIRMED_ACCOUNT_ID` after the preflight gate and dies on a mismatch in later runs. Use `AWS_PROFILE=savepoint-prod`.
 - Agents never run `terraform apply`, `aws ssm put-parameter` or any AWS mutation here; validate with `terraform fmt -check -recursive`, `terraform init -backend=false` and `terraform validate`. Apply, SSM values, Vercel and GitHub settings are owner steps in the runbook.
 - GitHub variable contract for `deploy.yml`: `AWS_LAMBDA_DEPLOY_ROLE_ARN`, `AWS_REGION`, `STEAM_SYNC_GATHER_FUNCTION`, `STEAM_SYNC_ENRICH_FUNCTION` (repo variables; the deploy job uses `environment: production`).
 

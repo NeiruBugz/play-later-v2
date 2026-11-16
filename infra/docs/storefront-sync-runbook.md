@@ -75,7 +75,7 @@ Tools: AWS CLI v2, Terraform `1.14.6` exactly (`tfenv install 1.14.6 && tfenv us
 Decide the region first. It must equal the `AWS_REGION` Vercel already uses for the S3 avatar bucket, because the app uses one `AWS_REGION` for every AWS client (`savepoint-tanstack/env.ts`). The default in this repo is `eu-central-1`.
 
 ```bash
-export AWS_PROFILE=your-admin-profile            # an admin profile for the account
+export AWS_PROFILE=savepoint-prod                # a dedicated named admin profile for the target account
 export AWS_REGION=eu-central-1                   # same value as Vercel AWS_REGION today
 export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 export STATE_BUCKET="savepoint-tfstate-${ACCOUNT_ID}"
@@ -83,7 +83,18 @@ export GH_REPO=NeiruBugz/play-later-v2
 echo "account=$ACCOUNT_ID region=$AWS_REGION bucket=$STATE_BUCKET"
 ```
 
-Check: the account ID printed is the account you intend to deploy to. Terraform version check:
+Check: the account ID printed is the account you intend to deploy to.
+
+**Which AWS account?** This stack must land in exactly one account. Before anything else, verify which one your shell talks to:
+
+```bash
+aws sts get-caller-identity   # Account and Arn: is this the account you mean?
+aws configure list            # shows where credentials come from (profile, env, shared-credentials-file); keys are masked
+```
+
+Use a dedicated named profile (`AWS_PROFILE=savepoint-prod`, set up with `aws configure sso --profile savepoint-prod` or `aws configure --profile savepoint-prod`) instead of the default credential chain, and make sure no `AWS_ACCESS_KEY_ID` is exported in the shell: exported keys silently win over the profile. Both roots take a required `aws_account_id` variable and set `allowed_account_ids` on the AWS provider, so Terraform refuses to plan or apply against any other account. The wizard saves the account you confirm in preflight and stops on later runs if the credentials resolve to a different one.
+
+Terraform version check:
 
 ```bash
 terraform version | head -1   # expect: Terraform v1.14.6
@@ -175,7 +186,7 @@ Order matters: `prod/` looks both OIDC providers up by URL, so `shared/` must ex
 
 ```bash
 cd infra/stacks/storefront-sync/shared
-printf 'aws_region       = "%s"\nvercel_team_slug = "%s"\n' "$AWS_REGION" "$VERCEL_TEAM_SLUG" > terraform.tfvars
+printf 'aws_account_id   = "%s"\naws_region       = "%s"\nvercel_team_slug = "%s"\n' "$ACCOUNT_ID" "$AWS_REGION" "$VERCEL_TEAM_SLUG" > terraform.tfvars
 terraform init -backend-config=backend.hcl
 ```
 
@@ -209,8 +220,8 @@ Now `prod/`:
 
 ```bash
 cd ../prod
-printf 'aws_region          = "%s"\nvercel_team_slug    = "%s"\nvercel_project_name = "%s"\n' \
-  "$AWS_REGION" "$VERCEL_TEAM_SLUG" "$VERCEL_PROJECT_NAME" > terraform.tfvars
+printf 'aws_account_id      = "%s"\naws_region          = "%s"\nvercel_team_slug    = "%s"\nvercel_project_name = "%s"\n' \
+  "$ACCOUNT_ID" "$AWS_REGION" "$VERCEL_TEAM_SLUG" "$VERCEL_PROJECT_NAME" > terraform.tfvars
 terraform init -backend-config=backend.hcl
 terraform plan -out=plan.tfplan
 terraform show plan.tfplan | less
@@ -561,6 +572,7 @@ Expect `0` for both.
 | `terraform init`: access denied or `NoSuchBucket` | Wrong `backend.hcl` bucket/region, or the profile lacks `s3:GetObject`, `PutObject`, `DeleteObject`, `ListBucket` on the state bucket (locking writes `<key>.tflock`). |
 | `Error acquiring the state lock` | A previous run died. Check nobody else is running Terraform, then `terraform force-unlock <lock-id>`. |
 | `shared/` apply: `EntityAlreadyExists` for the GitHub provider | Skipped step 2; import it, then re-plan. |
+| Plan or apply: `provider ... allowed_account_ids` / `Provider produced invalid ...: account ... not allowed` | The credentials resolve to an AWS account other than `aws_account_id` in `terraform.tfvars`. Check `aws sts get-caller-identity`, `AWS_PROFILE` and any exported `AWS_ACCESS_KEY_ID` (`aws configure list`). Do not edit `aws_account_id` to match unless the account really is the intended one. |
 | `prod/` plan: `no matching IAM OIDC Provider found` | `shared/` not applied, or `vercel_team_slug` differs between `shared/` and `prod/`. |
 | Lambda invocation shows stub output after deploy | `deploy-lambdas` has not run yet (needs the merge to `main`), or its variables from step 7 are unset so it skipped. |
 | `deploy-lambdas`: `Not authorized to perform sts:AssumeRoleWithWebIdentity` | The job lacks `environment: production` or `id-token: write`, or the repo or environment was renamed. |

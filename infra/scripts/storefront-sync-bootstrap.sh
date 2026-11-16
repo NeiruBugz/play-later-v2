@@ -226,6 +226,11 @@ DRY_RUN=0
 FROM_STEP=""
 CURRENT_STEP=0
 ACCOUNT_ID=""
+CONFIRMED_ACCOUNT_ID=""
+ACCOUNT_ID_PATTERN='^[0-9]{12}$'
+IDENTITY_ACCOUNT=""
+IDENTITY_ARN=""
+IDENTITY_ERROR=""
 TMP_DIR=""
 REPLY_OUT=""
 REPLY_ERR=""
@@ -384,16 +389,61 @@ load_inputs() {
   export AWS_REGION
 }
 
-ensure_account_id() {
-  [[ -n "$ACCOUNT_ID" ]] && return 0
-  if (( DRY_RUN )); then
-    ACCOUNT_ID="${ACCOUNT_ID_PRESET:-123456789012}"
-    show_cmd aws sts get-caller-identity --query Account --output text
+# read_identity: sets IDENTITY_ACCOUNT and IDENTITY_ARN from aws sts get-caller-identity.
+# Read-only, so it also runs in a dry run (ACCOUNT_ID_PRESET skips the call). On
+# failure it sets IDENTITY_ERROR and returns 1.
+read_identity() {
+  IDENTITY_ACCOUNT=""; IDENTITY_ARN=""; IDENTITY_ERROR=""
+  if (( DRY_RUN )) && [[ -n "${ACCOUNT_ID_PRESET:-}" ]]; then
+    note "[dry-run] using ACCOUNT_ID_PRESET instead of aws sts get-caller-identity"
+    IDENTITY_ACCOUNT="$ACCOUNT_ID_PRESET"; IDENTITY_ARN="(ACCOUNT_ID_PRESET)"
     return 0
   fi
-  read_cmd aws sts get-caller-identity --query Account --output text \
-    || die "aws sts get-caller-identity failed: $REPLY_ERR"
-  ACCOUNT_ID="$REPLY_OUT"
+  (( DRY_RUN )) && show_cmd aws sts get-caller-identity --output json
+  if ! command -v aws >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
+    IDENTITY_ERROR="aws and jq must both be installed"
+    return 1
+  fi
+  local out
+  out=$(aws sts get-caller-identity --output json 2>&1) || { IDENTITY_ERROR="$out"; return 1; }
+  IDENTITY_ACCOUNT=$(printf '%s' "$out" | jq -r .Account 2>/dev/null) || { IDENTITY_ERROR="unreadable identity: $out"; return 1; }
+  IDENTITY_ARN=$(printf '%s' "$out" | jq -r .Arn 2>/dev/null) || IDENTITY_ARN="<unknown>"
+  [[ "$IDENTITY_ACCOUNT" =~ $ACCOUNT_ID_PATTERN ]] || { IDENTITY_ERROR="unexpected account id '$IDENTITY_ACCOUNT'"; return 1; }
+}
+
+# ensure_account_id: on any run that skips the preflight gate, require the current
+# credentials to resolve to the account the human confirmed there (saved as
+# CONFIRMED_ACCOUNT_ID). Wrong profile or exported keys stop here, before any change.
+ensure_account_id() {
+  [[ -n "$ACCOUNT_ID" ]] && return 0
+  local saved
+  saved=$(_existing CONFIRMED_ACCOUNT_ID || true)
+
+  if ! read_identity; then
+    (( DRY_RUN )) || die "aws sts get-caller-identity failed: $IDENTITY_ERROR"
+    IDENTITY_ACCOUNT="${saved:-123456789012}"; IDENTITY_ARN="<unknown>"
+    warn "could not read the AWS identity (dry-run: using $IDENTITY_ACCOUNT)"
+  fi
+
+  if [[ -z "$saved" ]]; then
+    (( DRY_RUN )) || die "No confirmed AWS account is saved yet. Run the preflight stage first, it asks you to confirm the account: $(rel "${BASH_SOURCE[0]}") --from-step 1"
+    warn "no CONFIRMED_ACCOUNT_ID saved (dry-run: continuing; a real run requires stage 1 first)"
+    saved="$IDENTITY_ACCOUNT"
+  fi
+  [[ "$saved" =~ $ACCOUNT_ID_PATTERN ]] \
+    || die "Saved CONFIRMED_ACCOUNT_ID '$saved' is not a 12-digit account id. Fix it in $(rel "$ENV_FILE") or rerun: $(rel "${BASH_SOURCE[0]}") --from-step 1"
+
+  if [[ "$saved" != "$IDENTITY_ACCOUNT" ]]; then
+    die "AWS account mismatch: refusing to continue.
+      confirmed in stage 1 (saved): $saved
+      current credentials:          $IDENTITY_ACCOUNT ($IDENTITY_ARN)
+  The current credentials point at a different account. Check AWS_PROFILE and any exported
+  AWS_ACCESS_KEY_ID, run 'aws configure list' to see where they come from, then rerun.
+  If the saved account is the wrong one, rerun $(rel "${BASH_SOURCE[0]}") --from-step 1 to confirm again."
+  fi
+  ACCOUNT_ID="$IDENTITY_ACCOUNT"
+  CONFIRMED_ACCOUNT_ID="$saved"
+  ok "AWS account $ACCOUNT_ID matches the account confirmed in stage 1"
 }
 
 # tf_out ROOT_DIR OUTPUT_NAME: terraform output -raw, placeholder in a dry run.
@@ -483,17 +533,27 @@ step_1_preflight() {
   fi
 
   printf '\n'
+  if [[ -n "${AWS_ACCESS_KEY_ID:-}" ]]; then
+    warn "AWS_ACCESS_KEY_ID is exported: it overrides AWS_PROFILE. Unset it unless that is intended."
+  fi
   if (( DRY_RUN )); then
-    show_cmd aws sts get-caller-identity
+    show_cmd aws configure list
     show_cmd gh auth status
     show_cmd vercel whoami
-    ACCOUNT_ID="${ACCOUNT_ID_PRESET:-123456789012}"
+    if read_identity; then
+      ACCOUNT_ID="$IDENTITY_ACCOUNT"
+      ok "AWS account $ACCOUNT_ID as $IDENTITY_ARN"
+    else
+      ACCOUNT_ID="123456789012"
+      warn "could not read the AWS identity (dry-run: using placeholder $ACCOUNT_ID)"
+    fi
   else
-    local identity
-    identity=$(aws sts get-caller-identity --output json 2>&1) \
-      || die "aws sts get-caller-identity failed. Set AWS_PROFILE or run aws sso login. Output: $identity"
-    ACCOUNT_ID=$(printf '%s' "$identity" | jq -r .Account)
-    ok "AWS account $ACCOUNT_ID as $(printf '%s' "$identity" | jq -r .Arn)"
+    note "Where the AWS credentials come from (aws configure list, keys are masked):"
+    aws configure list 2>&1 | sed 's/^/      /' || true
+    read_identity \
+      || die "aws sts get-caller-identity failed. Set AWS_PROFILE or run aws sso login. Output: $IDENTITY_ERROR"
+    ACCOUNT_ID="$IDENTITY_ACCOUNT"
+    ok "AWS account $ACCOUNT_ID as $IDENTITY_ARN"
     gh auth status >/dev/null 2>&1 || die "gh is not authenticated. Run: gh auth login (needs admin on $GH_REPO)."
     ok "gh authenticated"
     local vercel_user
@@ -502,8 +562,16 @@ step_1_preflight() {
   fi
 
   printf '\n'
+  local saved
+  saved=$(_existing CONFIRMED_ACCOUNT_ID || true)
+  if [[ -n "$saved" && "$saved" != "$ACCOUNT_ID" ]]; then
+    warn "An earlier run confirmed account $saved, but these credentials are for $ACCOUNT_ID. Confirming below replaces the saved account."
+  fi
   warn "Confirm $ACCOUNT_ID is the AWS account you intend to deploy to."
   gate "Continue with this account?"
+  note "The confirmed account is saved; later runs stop if the credentials resolve to another account, and both Terraform roots refuse it (allowed_account_ids)."
+  persist CONFIRMED_ACCOUNT_ID "$ACCOUNT_ID"
+  CONFIRMED_ACCOUNT_ID="$ACCOUNT_ID"
 }
 
 # ── Stage 2: inputs ──────────────────────────────────────────────────────
@@ -733,11 +801,12 @@ tf_plan_and_apply() {
 step_5_terraform_apply() {
   stage "terraform apply: shared/ then prod/"
   say "Order matters: prod/ looks both OIDC providers up by URL, so shared/ goes first."
-  say "Each root: write terraform.tfvars, init, plan -out, you read the plan, you type yes, apply the saved plan."
+  say "Each root: write terraform.tfvars (incl. the confirmed aws_account_id), init, plan -out, you read the plan, you type yes, apply the saved plan."
   printf '\n'
 
   step "shared/"
-  render_file "$SHARED_DIR/terraform.tfvars" "$(printf 'aws_region       = "%s"\nvercel_team_slug = "%s"' "$AWS_REGION" "$VERCEL_TEAM_SLUG")"
+  [[ "$CONFIRMED_ACCOUNT_ID" =~ $ACCOUNT_ID_PATTERN ]] || die "No confirmed AWS account to write into terraform.tfvars. Run stage 1 first: $(rel "${BASH_SOURCE[0]}") --from-step 1"
+  render_file "$SHARED_DIR/terraform.tfvars" "$(printf 'aws_account_id   = "%s"\naws_region       = "%s"\nvercel_team_slug = "%s"' "$CONFIRMED_ACCOUNT_ID" "$AWS_REGION" "$VERCEL_TEAM_SLUG")"
   tf_plan_and_apply "$SHARED_DIR"
   printf '\n'
   if (( DRY_RUN )); then
@@ -750,7 +819,7 @@ step_5_terraform_apply() {
 
   printf '\n'
   step "prod/"
-  render_file "$PROD_DIR/terraform.tfvars" "$(printf 'aws_region          = "%s"\nvercel_team_slug    = "%s"\nvercel_project_name = "%s"' "$AWS_REGION" "$VERCEL_TEAM_SLUG" "$VERCEL_PROJECT_NAME")"
+  render_file "$PROD_DIR/terraform.tfvars" "$(printf 'aws_account_id      = "%s"\naws_region          = "%s"\nvercel_team_slug    = "%s"\nvercel_project_name = "%s"' "$CONFIRMED_ACCOUNT_ID" "$AWS_REGION" "$VERCEL_TEAM_SLUG" "$VERCEL_PROJECT_NAME")"
   tf_plan_and_apply "$PROD_DIR"
 
   printf '\n'
@@ -1050,11 +1119,15 @@ Guided one-time bootstrap of the spec-030 storefront-sync infrastructure
 (follows infra/docs/storefront-sync-runbook.md).
 
   --dry-run      Print every command without executing it. No AWS, Vercel or
-                 GitHub call is made and no file is written. Inputs come from
-                 the environment (AWS_REGION, STATE_BUCKET, VERCEL_TEAM_SLUG,
-                 VERCEL_PROJECT_NAME, ACCOUNT_ID_PRESET) or defaults.
+                 GitHub call is made and no file is written; the only AWS call is
+                 the read-only sts get-caller-identity (skipped when ACCOUNT_ID_PRESET
+                 is set). Inputs come from the environment (AWS_REGION, STATE_BUCKET,
+                 VERCEL_TEAM_SLUG, VERCEL_PROJECT_NAME, ACCOUNT_ID_PRESET) or defaults.
   --from-step N  Start at stage N (1-$TOTAL_STAGES). Default: resume after the last
                  completed stage recorded in $(rel "$ENV_FILE").
+
+The account confirmed in stage 1 is saved as CONFIRMED_ACCOUNT_ID; later runs and
+--from-step N stop if the current AWS credentials resolve to a different account.
 
 Stages: 1 preflight, 2 inputs, 3 state bucket, 4 OIDC check, 5 terraform apply,
         6 SSM secrets, 7 Vercel, 8 GitHub, 9 summary.
