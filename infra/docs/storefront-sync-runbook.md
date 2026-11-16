@@ -94,6 +94,25 @@ aws configure list            # shows where credentials come from (profile, env,
 
 Use a dedicated named profile (`AWS_PROFILE=savepoint-prod`, set up with `aws configure sso --profile savepoint-prod` or `aws configure --profile savepoint-prod`) instead of the default credential chain, and make sure no `AWS_ACCESS_KEY_ID` is exported in the shell: exported keys silently win over the profile. Both roots take a required `aws_account_id` variable and set `allowed_account_ids` on the AWS provider, so Terraform refuses to plan or apply against any other account. The wizard saves the account you confirm in preflight and stops on later runs if the credentials resolve to a different one.
 
+**Using `aws login` or SSO.** The AWS CLI understands `aws login` and SSO sessions; Terraform may not (`No valid credential sources found`, then a fall back to the EC2 metadata endpoint at `169.254.169.254`). The usual workaround, `eval "$(aws configure export-credentials --format env)"`, exports a static snapshot: it works until the session token expires and then fails mid-apply with `ExpiredToken`. Instead add a profile that asks the CLI for fresh credentials every time Terraform needs them:
+
+```ini
+# ~/.aws/config
+[profile savepoint]
+credential_process = aws configure export-credentials --profile <source-profile> --format process
+region = eu-central-1
+```
+
+`<source-profile>` is the profile you sign in with (`default` after a plain `aws login`). Then:
+
+```bash
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+export AWS_PROFILE=savepoint
+aws sts get-caller-identity
+```
+
+The wizard's preflight detects a login/SSO profile or an exported `AWS_SESSION_TOKEN`, prints this block with your profile and region filled in, and by default stops so you can add it (it never edits `~/.aws/config`). Before every stage that runs Terraform it also re-checks `aws sts get-caller-identity` and stops with `--from-step N` guidance if the session expired. The profile only refreshes credentials while the underlying login is valid: when it lapses, run `aws login` (or `aws sso login --profile <source-profile>`) again and resume.
+
 Terraform version check:
 
 ```bash
@@ -301,12 +320,16 @@ Switching the mode changes the issuer for this project everywhere. This repo has
 
 Check (after the redeploy, from your machine):
 
+Run the Vercel CLI from a throwaway directory, never from the repo: current CLIs write `.vercel/` and pull development variables into `.env.local` of the linked directory, and append `.env*` to `.gitignore`.
+
 ```bash
-vercel link --yes                                          # once; run from the repo root, Root Directory = savepoint-tanstack/
+VERCEL_DIR=$(mktemp -d)                                    # Root Directory = savepoint-tanstack/ stays a project setting
+cd "$VERCEL_DIR"
+vercel link --yes --project "$VERCEL_PROJECT_NAME" --scope "$VERCEL_TEAM_SLUG"
 vercel env pull .env.oidc-check --environment=development --yes
 TOKEN=$(rg -r '$1' '^VERCEL_OIDC_TOKEN="?([^"]+)"?$' .env.oidc-check)
 echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null | jq '{iss, aud, sub}'
-rm -f .env.oidc-check
+cd - >/dev/null; rm -rf "$VERCEL_DIR"
 ```
 
 Expect `iss = https://oidc.vercel.com/<team-slug>` and `aud = https://vercel.com/<team-slug>`. `iss = https://oidc.vercel.com` means Global mode is still on. (The decode may print a trailing base64 padding warning; the JSON is still valid.)
@@ -322,26 +345,30 @@ Production environment only. Preview and Development must not get `STOREFRONT_SY
 | `AWS_SYNC_ROLE_ARN` | Vercel SQS role ARN | `terraform output -raw vercel_sqs_role_arn` |
 | `AWS_REGION` | the stack region | `terraform output -raw aws_region` (must equal the existing value) |
 
+Run every `vercel` command below from a throwaway directory, linked once (as in step 5); `terraform -chdir` takes an absolute stack path, so it works from anywhere:
+
 ```bash
-cd infra/stacks/storefront-sync/prod
-vercel env ls production | rg 'AWS_REGION|STOREFRONT_SYNC|STEAM_SYNC|AWS_SYNC'
+STACK="$PWD/infra/stacks/storefront-sync/prod"             # from the repo root
+VERCEL_DIR=$(mktemp -d)
+(cd "$VERCEL_DIR" && vercel link --yes --project "$VERCEL_PROJECT_NAME" --scope "$VERCEL_TEAM_SLUG")
+(cd "$VERCEL_DIR" && vercel env ls production) | rg 'AWS_REGION|STOREFRONT_SYNC|STEAM_SYNC|AWS_SYNC'
 ```
 
 If `AWS_REGION` already exists on Production, leave it as is and compare it to `terraform output -raw aws_region`; they must match. `vercel env add` fails on an existing name; replace it with `vercel env rm NAME production --yes` first.
 
 ```bash
-cd ../../../..                                    # repo root, where `vercel link` ran
-STACK=infra/stacks/storefront-sync/prod
-printf '%s' sqs | vercel env add STOREFRONT_SYNC_QUEUE production
-terraform -chdir="$STACK" output -raw gather_queue_url     | vercel env add STEAM_SYNC_GATHER_QUEUE_URL production
-terraform -chdir="$STACK" output -raw vercel_sqs_role_arn  | vercel env add AWS_SYNC_ROLE_ARN production
+vc() { (cd "$VERCEL_DIR" && vercel "$@"); }
+printf '%s' sqs | vc env add STOREFRONT_SYNC_QUEUE production
+terraform -chdir="$STACK" output -raw gather_queue_url     | vc env add STEAM_SYNC_GATHER_QUEUE_URL production
+terraform -chdir="$STACK" output -raw vercel_sqs_role_arn  | vc env add AWS_SYNC_ROLE_ARN production
 # only if AWS_REGION is not set on Production yet:
-terraform -chdir="$STACK" output -raw aws_region           | vercel env add AWS_REGION production
+terraform -chdir="$STACK" output -raw aws_region           | vc env add AWS_REGION production
+rm -rf "$VERCEL_DIR"
 ```
 
 Then redeploy Production (dashboard: Deployments, latest, Redeploy; or `vercel deploy --prod`). Environment variables apply only to new deployments.
 
-Check: `vercel env ls production` lists all four names. Do not paste values into chat or PRs; the queue URL and role ARN are not secret but there is no reason to spread them.
+Check: `vercel env ls production` (from the throwaway directory) lists all four names. Do not paste values into chat or PRs; the queue URL and role ARN are not secret but there is no reason to spread them.
 
 The app reads these through `savepoint-tanstack/env.ts` (added by spec 030, Slices 3 and 6). If a variable named here is missing from `env.ts`, the app is out of date with this runbook; do not deploy until it matches.
 
@@ -570,6 +597,8 @@ Expect `0` for both.
 |---|---|
 | `terraform init`: `Error: Unsupported Terraform Core version` | Not `1.14.6`; install exactly that version. |
 | `terraform init`: access denied or `NoSuchBucket` | Wrong `backend.hcl` bucket/region, or the profile lacks `s3:GetObject`, `PutObject`, `DeleteObject`, `ListBucket` on the state bucket (locking writes `<key>.tflock`). |
+| `terraform init`/`plan`: `No valid credential sources found`, or a timeout against `169.254.169.254` | Terraform cannot read your `aws login`/SSO profile and fell back to the EC2 metadata endpoint. Add the `credential_process` profile from "Using `aws login` or SSO" (step "Before you start"), `unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN`, `export AWS_PROFILE=savepoint`, rerun with `--from-step N`. |
+| Plan or apply: `ExpiredToken` / `The security token included in the request is expired` | The credentials were a static snapshot (`export-credentials --format env`, or an exported `AWS_SESSION_TOKEN`) that outlived its session. Use the `credential_process` profile instead so Terraform refreshes them; if the login itself lapsed, run `aws login` (or `aws sso login --profile <source-profile>`) and rerun with `--from-step N`. After a mid-apply expiry, `terraform plan` again before applying: the saved plan may be partly applied. |
 | `Error acquiring the state lock` | A previous run died. Check nobody else is running Terraform, then `terraform force-unlock <lock-id>`. |
 | `shared/` apply: `EntityAlreadyExists` for the GitHub provider | Skipped step 2; import it, then re-plan. |
 | Plan or apply: `provider ... allowed_account_ids` / `Provider produced invalid ...: account ... not allowed` | The credentials resolve to an AWS account other than `aws_account_id` in `terraform.tfvars`. Check `aws sts get-caller-identity`, `AWS_PROFILE` and any exported `AWS_ACCESS_KEY_ID` (`aws configure list`). Do not edit `aws_account_id` to match unless the account really is the intended one. |

@@ -236,6 +236,10 @@ REPLY_OUT=""
 REPLY_ERR=""
 PREVIEW=0
 VERCEL_ENV_LISTING=""
+VERCEL_WORK_DIR=""
+CREDS_CHECKED=0
+CRED_RISK=""
+TERRAFORM_PROFILE_NAME="savepoint"
 
 # ── Dry-run aware helpers ────────────────────────────────────────────────
 
@@ -483,6 +487,111 @@ render_file() {
   ok "wrote $(rel "$path")"
 }
 
+# ── AWS credentials Terraform can actually use ───────────────────────────
+# The AWS CLI understands `aws login` and SSO profiles; Terraform may not, and an
+# exported AWS_SESSION_TOKEN is a snapshot that expires mid-apply. A profile with
+# credential_process makes Terraform ask the CLI for fresh credentials every time.
+
+aws_profile_setting() {
+  # aws_profile_setting KEY PROFILE: read-only CLI query, empty when unset
+  aws configure get "$1" --profile "$2" 2>/dev/null || true
+}
+
+# detect_credential_risk PROFILE: sets CRED_RISK to the reason Terraform may not
+# keep working with the current credentials; empty when they are fine.
+detect_credential_risk() {
+  local profile="$1" key
+  CRED_RISK=""
+  if [[ -n "${AWS_SESSION_TOKEN:-}" ]]; then
+    CRED_RISK="AWS_SESSION_TOKEN is exported: a static snapshot of temporary credentials that expires partway through (ExpiredToken)."
+    return 0
+  fi
+  [[ -n "${AWS_ACCESS_KEY_ID:-}" ]] && return 0
+  [[ -n "$(aws_profile_setting credential_process "$profile")" ]] && return 0
+  for key in login_session sso_session sso_start_url; do
+    if [[ -n "$(aws_profile_setting "$key" "$profile")" ]]; then
+      CRED_RISK="Profile '$profile' signs in with 'aws login' or SSO ($key). The AWS CLI reads it, Terraform $TF_VERSION may not (\"No valid credential sources found\")."
+      return 0
+    fi
+  done
+}
+
+# print_credential_guidance PROFILE: explains CRED_RISK and prints the profile to add.
+print_credential_guidance() {
+  local profile="$1" region new_profile="$TERRAFORM_PROFILE_NAME"
+  [[ "$profile" == "$new_profile" ]] && new_profile="${new_profile}-tf"
+  region=$(_existing AWS_REGION || true)
+  [[ -z "$region" ]] && region="${AWS_REGION:-}"
+  [[ -z "$region" ]] && region=$(aws_profile_setting region "$profile")
+  [[ -z "$region" ]] && region="$DEFAULT_REGION"
+
+  printf '\n'
+  warn "$CRED_RISK"
+  if [[ -n "$(aws_profile_setting credential_process "$profile")" ]]; then
+    say "Profile '$profile' already refreshes itself; the exported variables override it."
+    say "In this shell:"
+    printf '      unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN\n'
+    return 0
+  fi
+  say "Terraform refreshes credentials by itself only through a profile with credential_process;"
+  say "a pasted snapshot expires partway through apply. Add this to ~/.aws/config (the wizard never edits it):"
+  printf '\n      [profile %s]\n' "$new_profile"
+  printf '      credential_process = aws configure export-credentials --profile %s --format process\n' "$profile"
+  printf '      region = %s\n\n' "$region"
+  say "Then, in this shell:"
+  printf '      unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN\n'
+  printf '      export AWS_PROFILE=%s\n' "$new_profile"
+  printf '      %s\n' "$(rel "${BASH_SOURCE[0]}")"
+}
+
+# credential_preflight: once per run, before any terraform stage. Silent when the
+# credentials are fine; otherwise explains and lets the human stop (default) or go on.
+credential_preflight() {
+  (( CREDS_CHECKED )) && return 0
+  CREDS_CHECKED=1
+  command -v aws >/dev/null 2>&1 || return 0
+  local profile choice=""
+  profile="${AWS_PROFILE:-default}"
+  (( DRY_RUN )) && note "[dry-run] read-only: aws configure get credential_process|login_session|sso_session|sso_start_url|region --profile $profile"
+  detect_credential_risk "$profile"
+  [[ -z "$CRED_RISK" ]] && return 0
+
+  print_credential_guidance "$profile"
+  printf '\n'
+  say "1) Stop now so you can set that up  [default]"
+  say "2) Continue anyway (Terraform may fail or the credentials may expire mid-apply)"
+  if (( DRY_RUN )); then
+    note "[dry-run] would ask: 1 or 2 (default 1); continuing"
+    return 0
+  fi
+  printf '  %s? Choose 1 or 2 [1] %s' "$YELLOW" "$RESET"
+  read -r choice || true
+  if [[ "$choice" == "2" ]]; then
+    warn "Continuing with credentials Terraform may not accept."
+    return 0
+  fi
+  abort_clean "Stopped so you can set up the profile. Nothing was changed. Rerun after exporting AWS_PROFILE."
+}
+
+# recheck_aws_credentials: cheap check before a stage that runs terraform. An
+# expired session dies here with guidance instead of failing mid-apply.
+recheck_aws_credentials() {
+  credential_preflight
+  if (( DRY_RUN )); then
+    note "[dry-run] would re-check credentials: aws sts get-caller-identity"
+    return 0
+  fi
+  local out rc=0 profile="${AWS_PROFILE:-default}"
+  out=$(aws sts get-caller-identity --output json 2>&1) || rc=$?
+  (( rc == 0 )) && return 0
+  if grep -Eqi 'expired' <<<"$out"; then
+    detect_credential_risk "$profile"
+    [[ -n "$CRED_RISK" ]] && print_credential_guidance "$profile"
+    die "AWS credentials expired (${out%%$'\n'*}). Refresh the login behind profile '$profile' (aws login, or aws sso login --profile <name>), then rerun: $(rel "${BASH_SOURCE[0]}") --from-step $CURRENT_STEP"
+  fi
+  die "aws sts get-caller-identity failed before stage $CURRENT_STEP: $out"
+}
+
 oidc_provider_arn() {
   # prints the ARN of the IAM OIDC provider whose URL path ends with $1, or nothing
   local suffix="$1"
@@ -497,6 +606,7 @@ step_1_preflight() {
   say "Checks the CLIs and logins the later stages rely on. Nothing is changed."
   say "AWS credentials come from your environment: AWS_PROFILE=${AWS_PROFILE:-<default credential chain>}"
   note "Use an admin profile for the target account (export AWS_PROFILE=... before running this wizard)."
+  note "Signed in with 'aws login' or SSO? Terraform needs a credential_process profile; this stage checks and tells you."
   printf '\n'
 
   local tool hint missing=0
@@ -536,6 +646,7 @@ step_1_preflight() {
   if [[ -n "${AWS_ACCESS_KEY_ID:-}" ]]; then
     warn "AWS_ACCESS_KEY_ID is exported: it overrides AWS_PROFILE. Unset it unless that is intended."
   fi
+  credential_preflight
   if (( DRY_RUN )); then
     show_cmd aws configure list
     show_cmd gh auth status
@@ -551,7 +662,7 @@ step_1_preflight() {
     note "Where the AWS credentials come from (aws configure list, keys are masked):"
     aws configure list 2>&1 | sed 's/^/      /' || true
     read_identity \
-      || die "aws sts get-caller-identity failed. Set AWS_PROFILE or run aws sso login. Output: $IDENTITY_ERROR"
+      || die "aws sts get-caller-identity failed. Set AWS_PROFILE, or sign in again with 'aws login' / 'aws sso login --profile <name>'. Output: $IDENTITY_ERROR"
     ACCOUNT_ID="$IDENTITY_ACCOUNT"
     ok "AWS account $ACCOUNT_ID as $IDENTITY_ARN"
     gh auth status >/dev/null 2>&1 || die "gh is not authenticated. Run: gh auth login (needs admin on $GH_REPO)."
@@ -756,6 +867,7 @@ tf_plan_and_apply() {
   # tf_plan_and_apply DIR: plan -out, show, require "yes", apply the saved plan
   local dir="$1" rc=0 shown
   shown=$(rel "$dir")
+  recheck_aws_credentials
   run terraform "-chdir=$dir" init -backend-config=backend.hcl
 
   if [[ "$dir" == "$SHARED_DIR" ]]; then
@@ -861,6 +973,7 @@ secret_source_hint() {
 
 step_6_ssm_secrets() {
   stage "SSM SecureString secrets"
+  recheck_aws_credentials
   say "Terraform created four parameters with a placeholder and ignore_changes on the value."
   say "Real values go in out of band: hidden prompts, passed to the AWS CLI from a 0600 temp file (never on the command line), never saved."
   printf '\n'
@@ -989,14 +1102,14 @@ step_7_vercel() {
 
   printf '\n'
   say "Part B: Production env vars (Production only, so Preview shows sync as unavailable)."
-  cd "$REPO_ROOT"
-  if [[ ! -f "$REPO_ROOT/.vercel/project.json" ]]; then
-    note "Repo is not linked to a Vercel project yet (Root Directory must be savepoint-tanstack/ in the project settings)."
-    gate "Link this repo to Vercel project $VERCEL_PROJECT_NAME?"
-    run vercel link --yes --project "$VERCEL_PROJECT_NAME" --scope "$VERCEL_TEAM_SLUG"
-  else
-    ok ".vercel/project.json present (already linked)"
-  fi
+  recheck_aws_credentials
+  VERCEL_WORK_DIR="$TMP_DIR/vercel-work"
+  mkdir -p "$VERCEL_WORK_DIR"
+  note "Vercel commands run in a throwaway directory, removed on exit: current Vercel CLIs write .vercel/ and pull .env.local into the linked directory, and none of that belongs in the repo."
+  show_cmd cd "$VERCEL_WORK_DIR"
+  cd "$VERCEL_WORK_DIR"
+  gate "Link that directory to Vercel project $VERCEL_PROJECT_NAME (the project's own Root Directory setting is untouched)?"
+  run vercel link --yes --project "$VERCEL_PROJECT_NAME" --scope "$VERCEL_TEAM_SLUG"
 
   local queue_url role_arn
   queue_url=$(tf_out "$PROD_DIR" gather_queue_url)
@@ -1033,6 +1146,7 @@ step_7_vercel() {
 
 step_8_github() {
   stage "GitHub: production environment and repo variables"
+  recheck_aws_credentials
   say "deploy-lambdas assumes the deploy role over OIDC: no AWS keys are stored in GitHub."
   say "Variables are repo-level (not environment) on purpose: a job-level if: cannot read environment variables."
   printf '\n'
@@ -1119,9 +1233,9 @@ Guided one-time bootstrap of the spec-030 storefront-sync infrastructure
 (follows infra/docs/storefront-sync-runbook.md).
 
   --dry-run      Print every command without executing it. No AWS, Vercel or
-                 GitHub call is made and no file is written; the only AWS call is
-                 the read-only sts get-caller-identity (skipped when ACCOUNT_ID_PRESET
-                 is set). Inputs come from the environment (AWS_REGION, STATE_BUCKET,
+                 GitHub call is made and no file is written; the only AWS calls
+                 are read-only: sts get-caller-identity (skipped when ACCOUNT_ID_PRESET
+                 is set) and aws configure get (profile credential settings). Inputs come from the environment (AWS_REGION, STATE_BUCKET,
                  VERCEL_TEAM_SLUG, VERCEL_PROJECT_NAME, ACCOUNT_ID_PRESET) or defaults.
   --from-step N  Start at stage N (1-$TOTAL_STAGES). Default: resume after the last
                  completed stage recorded in $(rel "$ENV_FILE").
@@ -1168,7 +1282,7 @@ run_wizard() {
   (( DRY_RUN )) && warn "Dry run: commands are printed, nothing is executed or written."
   printf '\n'
 
-  if (( start > 2 )); then load_inputs; ensure_account_id; fi
+  if (( start > 2 )); then credential_preflight; load_inputs; ensure_account_id; fi
 
   local n
   for (( n = start; n <= TOTAL_STAGES; n++ )); do
