@@ -2,6 +2,8 @@
 
 Owner-only steps for the background Steam sync (spec 030): AWS stack, Vercel and GitHub wiring, smoke tests, rollback. Nothing here is run by an agent. Every step ends with a check; do not continue until the check passes.
 
+Prefer the guided wizard: `infra/scripts/storefront-sync-bootstrap.sh` (steps 1-7 below, with checks, resume via `--from-step N`, and `--dry-run` to preview every command). This runbook stays the reference for what each step does.
+
 Stack code: `infra/stacks/storefront-sync/` (`shared/`, `prod/`, `modules/pipeline/`). Spec: `context/spec/030-background-storefront-import/`.
 
 ## Contents

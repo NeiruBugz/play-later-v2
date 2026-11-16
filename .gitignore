@@ -80,6 +80,10 @@ override.tf.json
 *_override.tf.json
 *.tfplan
 *.plan
+# storefront-sync bootstrap wizard (infra/scripts/storefront-sync-bootstrap.sh): saved non-secret answers, backend config, Vercel link
+.bootstrap.env
+**/backend.hcl
+.vercel
 
 # Note: keep .terraform.lock.hcl committed (provider version lock)
 *.bak
